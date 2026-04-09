@@ -463,39 +463,88 @@ function ProjectsTab({ user }: { user: SupaUser }) {
           <p className="text-sm text-muted-foreground/60 mt-1">Soumettez votre premier projet ci-dessus.</p>
         </div>
       ) : (
-        <div className="grid gap-4">
+        <div className="grid gap-5 md:grid-cols-2">
           {projects.map((p) => {
             const sc = statusConfig[p.status] || statusConfig.en_cours;
+            const priorityConfig: Record<string, { label: string; color: string; bg: string }> = {
+              urgent: { label: "Urgent", color: "text-destructive", bg: "bg-destructive/10 border-destructive/20" },
+              haute: { label: "Haute", color: "text-orange-500", bg: "bg-orange-500/10 border-orange-500/20" },
+              normal: { label: "Normal", color: "text-muted-foreground", bg: "bg-muted border-border" },
+            };
+            const pc = priorityConfig[p.priority] || priorityConfig.normal;
             return (
-              <div key={p.id} className="bg-card rounded-xl p-6 shadow-card border border-border/50 hover:shadow-card-hover transition-shadow">
-                <div className="flex items-start justify-between mb-4">
-                  <div>
-                    <h3 className="font-semibold text-card-foreground">{p.name}</h3>
-                    <p className="text-sm text-muted-foreground mt-1">{p.description}</p>
-                    {(p.budget || p.deadline || p.technologies) && (
-                      <div className="flex flex-wrap gap-2 mt-2">
-                        {p.budget && <span className="text-xs bg-muted px-2 py-0.5 rounded-full text-muted-foreground">💰 {p.budget}</span>}
-                        {p.deadline && <span className="text-xs bg-muted px-2 py-0.5 rounded-full text-muted-foreground">📅 {p.deadline}</span>}
-                        {p.technologies && <span className="text-xs bg-muted px-2 py-0.5 rounded-full text-muted-foreground">⚙️ {p.technologies}</span>}
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <button onClick={() => openEditForm(p)} className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors" title="Modifier">
-                      <Pencil size={16} />
-                    </button>
-                    <div className="flex flex-col items-end gap-1.5">
-                      <span className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${sc.color} ${sc.bg}`}>
-                        <sc.icon size={12} /> {sc.label}
-                      </span>
+              <div key={p.id} className="group relative bg-card rounded-2xl shadow-card border border-border/50 hover:shadow-card-hover hover:border-primary/30 transition-all duration-300 overflow-hidden">
+                {/* Top accent bar */}
+                <div className={`h-1 w-full ${p.status === "termine" ? "bg-teal-500" : p.status === "en_attente" ? "bg-muted-foreground/30" : "bg-gradient-to-r from-primary to-accent"}`} />
+
+                <div className="p-5">
+                  {/* Header: status + priority + edit */}
+                  <div className="flex items-center justify-between mb-3">
+                    <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ${sc.color} ${sc.bg}`}>
+                      <sc.icon size={12} /> {sc.label}
+                    </span>
+                    <div className="flex items-center gap-1.5">
                       {p.priority && p.priority !== "normal" && (
-                        <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${p.priority === "urgent" ? "bg-destructive/10 text-destructive" : "bg-orange-100 text-orange-600"}`}>{p.priority}</span>
+                        <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${pc.color} ${pc.bg}`}>
+                          <Flag size={10} className="inline mr-1" />{pc.label}
+                        </span>
                       )}
+                      <button onClick={() => openEditForm(p)} className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all" title="Modifier">
+                        <Pencil size={14} />
+                      </button>
                     </div>
                   </div>
+
+                  {/* Title & description */}
+                  <h3 className="font-bold text-card-foreground text-lg leading-tight mb-1">{p.name}</h3>
+                  {p.description && (
+                    <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{p.description}</p>
+                  )}
+
+                  {/* Meta tags */}
+                  {(p.budget || p.deadline || p.technologies) && (
+                    <div className="flex flex-wrap gap-1.5 mb-4">
+                      {p.budget && (
+                        <span className="inline-flex items-center gap-1 text-xs bg-primary/5 text-primary border border-primary/15 px-2.5 py-1 rounded-lg">
+                          <DollarSign size={11} /> {p.budget}
+                        </span>
+                      )}
+                      {p.deadline && (
+                        <span className="inline-flex items-center gap-1 text-xs bg-accent/10 text-accent-foreground border border-accent/20 px-2.5 py-1 rounded-lg">
+                          <Calendar size={11} /> {p.deadline}
+                        </span>
+                      )}
+                    </div>
+                  )}
+                  {p.technologies && (
+                    <div className="flex flex-wrap gap-1 mb-4">
+                      {p.technologies.split(", ").map((tech: string) => (
+                        <span key={tech} className="text-[11px] bg-secondary/50 text-secondary-foreground/70 px-2 py-0.5 rounded-md">
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {/* Progress */}
+                  <div className="mt-auto">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-xs font-medium text-muted-foreground">Progression</span>
+                      <span className="text-xs font-bold text-card-foreground">{p.progress}%</span>
+                    </div>
+                    <div className="relative h-2 bg-muted rounded-full overflow-hidden">
+                      <div
+                        className={`absolute inset-y-0 left-0 rounded-full transition-all duration-500 ${p.progress === 100 ? "bg-teal-500" : "bg-gradient-to-r from-primary to-accent"}`}
+                        style={{ width: `${p.progress}%` }}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Date */}
+                  <p className="text-[11px] text-muted-foreground/50 mt-3">
+                    Soumis le {new Date(p.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+                  </p>
                 </div>
-                <Progress value={p.progress} className="h-2" />
-                <p className="text-xs text-muted-foreground text-right mt-1.5">{p.progress}% complété</p>
               </div>
             );
           })}
