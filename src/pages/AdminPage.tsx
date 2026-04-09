@@ -200,6 +200,8 @@ function AdminProjects() {
   const [projects, setProjects] = useState<any[]>([]);
   const [profiles, setProfiles] = useState<Record<string, any>>({});
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [priorityFilter, setPriorityFilter] = useState("all");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editStatus, setEditStatus] = useState("");
   const [editProgress, setEditProgress] = useState(0);
@@ -222,10 +224,14 @@ function AdminProjects() {
     else { toast({ title: "Projet mis à jour!" }); setEditingId(null); load(); }
   };
 
-  const filtered = projects.filter(p =>
-    p.name.toLowerCase().includes(search.toLowerCase()) ||
-    (profiles[p.user_id]?.full_name || "").toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = projects.filter(p => {
+    const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
+      (profiles[p.user_id]?.full_name || "").toLowerCase().includes(search.toLowerCase()) ||
+      (profiles[p.user_id]?.company || "").toLowerCase().includes(search.toLowerCase());
+    const matchesStatus = statusFilter === "all" || p.status === statusFilter;
+    const matchesPriority = priorityFilter === "all" || p.priority === priorityFilter;
+    return matchesSearch && matchesStatus && matchesPriority;
+  });
 
   const statusOptions = [
     { value: "en_attente", label: "En attente" },
@@ -233,90 +239,156 @@ function AdminProjects() {
     { value: "termine", label: "Terminé" },
   ];
 
-  const statusConfig: Record<string, { label: string; color: string; bg: string }> = {
-    en_cours: { label: "En cours", color: "text-primary", bg: "bg-primary/10" },
-    termine: { label: "Terminé", color: "text-teal-600", bg: "bg-teal-600/10" },
-    en_attente: { label: "En attente", color: "text-muted-foreground", bg: "bg-muted" },
+  const statusConfig: Record<string, { label: string; icon: typeof Clock; color: string; bg: string }> = {
+    en_cours: { label: "En cours", icon: Clock, color: "text-primary", bg: "bg-primary/10" },
+    termine: { label: "Terminé", icon: CheckCircle2, color: "text-teal-600", bg: "bg-teal-600/10" },
+    en_attente: { label: "En attente", icon: AlertCircle, color: "text-muted-foreground", bg: "bg-muted" },
+  };
+
+  const priorityConfig: Record<string, { label: string; color: string; bg: string }> = {
+    urgent: { label: "Urgent", color: "text-destructive", bg: "bg-destructive/10 border-destructive/20" },
+    haute: { label: "Haute", color: "text-orange-500", bg: "bg-orange-500/10 border-orange-500/20" },
+    normal: { label: "Normal", color: "text-muted-foreground", bg: "bg-muted border-border" },
   };
 
   return (
     <div className="space-y-6 animate-fade-up">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">Gestion des projets</h1>
-        <span className="text-sm text-muted-foreground">{projects.length} projet(s)</span>
+        <span className="text-sm text-muted-foreground">{filtered.length}/{projects.length} projet(s)</span>
       </div>
 
-      <div className="relative">
-        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-        <Input placeholder="Rechercher par projet ou client..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+      {/* Filter bar */}
+      <div className="bg-card rounded-xl p-4 shadow-card border border-border/50 space-y-3">
+        <div className="relative">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input placeholder="Rechercher par projet, client ou entreprise..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+        </div>
+        <div className="flex flex-wrap gap-2 items-center">
+          <span className="text-xs font-medium text-muted-foreground flex items-center gap-1"><Filter size={12} /> Statut :</span>
+          {[{ value: "all", label: "Tous" }, ...statusOptions].map((opt) => (
+            <button key={opt.value} onClick={() => setStatusFilter(opt.value)}
+              className={`text-xs px-3 py-1.5 rounded-full transition-colors ${statusFilter === opt.value ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
+            >{opt.label}</button>
+          ))}
+          <span className="text-xs font-medium text-muted-foreground flex items-center gap-1 ml-2"><Flag size={12} /> Priorité :</span>
+          {[{ value: "all", label: "Toutes" }, { value: "normal", label: "Normal" }, { value: "haute", label: "Haute" }, { value: "urgent", label: "Urgent" }].map((opt) => (
+            <button key={opt.value} onClick={() => setPriorityFilter(opt.value)}
+              className={`text-xs px-3 py-1.5 rounded-full transition-colors ${priorityFilter === opt.value ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
+            >{opt.label}</button>
+          ))}
+        </div>
       </div>
 
-      <div className="space-y-4">
+      <div className="grid gap-5 md:grid-cols-2">
         {filtered.map((p) => {
           const sc = statusConfig[p.status] || statusConfig.en_cours;
+          const pc = priorityConfig[p.priority] || priorityConfig.normal;
           const profile = profiles[p.user_id];
           const isEditing = editingId === p.id;
 
           return (
-            <div key={p.id} className="bg-card rounded-xl p-6 shadow-card border border-border/50">
-              <div className="flex items-start justify-between mb-3">
-                <div>
-                  <h3 className="font-semibold text-card-foreground">{p.name}</h3>
-                  <p className="text-sm text-muted-foreground mt-0.5">{p.description}</p>
-                  <p className="text-xs text-primary mt-1">👤 {profile?.full_name || "Non renseigné"} — {profile?.company || "N/A"}</p>
-                  {(p.budget || p.deadline || p.technologies) && (
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {p.budget && <span className="text-xs bg-muted px-2 py-0.5 rounded-full text-muted-foreground">💰 {p.budget}</span>}
-                      {p.deadline && <span className="text-xs bg-muted px-2 py-0.5 rounded-full text-muted-foreground">📅 {p.deadline}</span>}
-                      {p.technologies && <span className="text-xs bg-muted px-2 py-0.5 rounded-full text-muted-foreground">⚙️ {p.technologies}</span>}
-                    </div>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  {!isEditing && (
-                    <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${sc.color} ${sc.bg}`}>{sc.label}</span>
-                  )}
-                  <Button variant="outline" size="sm" onClick={() => {
-                    if (isEditing) { saveProject(p.id); }
-                    else { setEditingId(p.id); setEditStatus(p.status); setEditProgress(p.progress); }
-                  }}>
-                    {isEditing ? "Sauvegarder" : "Modifier"}
-                  </Button>
-                  {isEditing && (
-                    <Button variant="ghost" size="sm" onClick={() => setEditingId(null)}>Annuler</Button>
-                  )}
-                </div>
-              </div>
+            <div key={p.id} className="group relative bg-card rounded-2xl shadow-card border border-border/50 hover:shadow-card-hover hover:border-primary/30 transition-all duration-300 overflow-hidden">
+              <div className={`h-1 w-full ${p.status === "termine" ? "bg-teal-500" : p.status === "en_attente" ? "bg-muted-foreground/30" : "bg-gradient-to-r from-primary to-accent"}`} />
 
-              {isEditing ? (
-                <div className="mt-4 p-4 bg-muted/30 rounded-lg space-y-3">
-                  <div>
-                    <label className="text-sm font-medium text-card-foreground">Statut</label>
-                    <div className="flex gap-2 mt-1">
-                      {statusOptions.map((opt) => (
-                        <button key={opt.value} onClick={() => setEditStatus(opt.value)}
-                          className={`text-sm px-3 py-1.5 rounded-lg border transition-colors ${editStatus === opt.value ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground border-border"}`}
-                        >{opt.label}</button>
-                      ))}
-                    </div>
-                  </div>
-                  <div>
-                    <label className="text-sm font-medium text-card-foreground">Progression : {editProgress}%</label>
-                    <input type="range" min="0" max="100" value={editProgress} onChange={(e) => setEditProgress(Number(e.target.value))}
-                      className="w-full mt-1 accent-[hsl(var(--primary))]" />
+              <div className="p-5">
+                {/* Header */}
+                <div className="flex items-center justify-between mb-3">
+                  <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ${sc.color} ${sc.bg}`}>
+                    <sc.icon size={12} /> {sc.label}
+                  </span>
+                  <div className="flex items-center gap-1.5">
+                    {p.priority && p.priority !== "normal" && (
+                      <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${pc.color} ${pc.bg}`}>
+                        <Flag size={10} className="inline mr-1" />{pc.label}
+                      </span>
+                    )}
+                    <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => {
+                      if (isEditing) saveProject(p.id);
+                      else { setEditingId(p.id); setEditStatus(p.status); setEditProgress(p.progress); }
+                    }}>
+                      {isEditing ? "Sauvegarder" : "Modifier"}
+                    </Button>
+                    {isEditing && <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setEditingId(null)}>Annuler</Button>}
                   </div>
                 </div>
-              ) : (
-                <>
-                  <Progress value={p.progress} className="h-2 mt-2" />
-                  <p className="text-xs text-muted-foreground text-right mt-1">{p.progress}%</p>
-                </>
-              )}
+
+                {/* Title & client */}
+                <h3 className="font-bold text-card-foreground text-lg leading-tight mb-1">{p.name}</h3>
+                {p.description && <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{p.description}</p>}
+                
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-6 h-6 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-[10px] font-bold flex-shrink-0">
+                    {(profile?.full_name || "?").charAt(0).toUpperCase()}
+                  </div>
+                  <span className="text-xs text-primary font-medium">{profile?.full_name || "Non renseigné"}</span>
+                  {profile?.company && <span className="text-xs text-muted-foreground">· {profile.company}</span>}
+                </div>
+
+                {/* Meta */}
+                {(p.budget || p.deadline) && (
+                  <div className="flex flex-wrap gap-1.5 mb-3">
+                    {p.budget && (
+                      <span className="inline-flex items-center gap-1 text-xs bg-primary/5 text-primary border border-primary/15 px-2.5 py-1 rounded-lg">
+                        <DollarSign size={11} /> {p.budget}
+                      </span>
+                    )}
+                    {p.deadline && (
+                      <span className="inline-flex items-center gap-1 text-xs bg-accent/10 text-accent-foreground border border-accent/20 px-2.5 py-1 rounded-lg">
+                        <Calendar size={11} /> {p.deadline}
+                      </span>
+                    )}
+                  </div>
+                )}
+                {p.technologies && (
+                  <div className="flex flex-wrap gap-1 mb-3">
+                    {p.technologies.split(", ").map((tech: string) => (
+                      <span key={tech} className="text-[11px] bg-secondary/50 text-secondary-foreground/70 px-2 py-0.5 rounded-md">{tech}</span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Edit panel or progress */}
+                {isEditing ? (
+                  <div className="mt-2 p-4 bg-muted/30 rounded-xl space-y-3">
+                    <div>
+                      <label className="text-sm font-medium text-card-foreground">Statut</label>
+                      <div className="flex gap-2 mt-1">
+                        {statusOptions.map((opt) => (
+                          <button key={opt.value} onClick={() => setEditStatus(opt.value)}
+                            className={`text-sm px-3 py-1.5 rounded-lg border transition-colors ${editStatus === opt.value ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground border-border"}`}
+                          >{opt.label}</button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-card-foreground">Progression : {editProgress}%</label>
+                      <input type="range" min="0" max="100" value={editProgress} onChange={(e) => setEditProgress(Number(e.target.value))}
+                        className="w-full mt-1 accent-[hsl(var(--primary))]" />
+                    </div>
+                  </div>
+                ) : (
+                  <div className="mt-auto">
+                    <div className="flex items-center justify-between mb-1.5">
+                      <span className="text-xs font-medium text-muted-foreground">Progression</span>
+                      <span className="text-xs font-bold text-card-foreground">{p.progress}%</span>
+                    </div>
+                    <div className="relative h-2 bg-muted rounded-full overflow-hidden">
+                      <div className={`absolute inset-y-0 left-0 rounded-full transition-all duration-500 ${p.progress === 100 ? "bg-teal-500" : "bg-gradient-to-r from-primary to-accent"}`}
+                        style={{ width: `${p.progress}%` }} />
+                    </div>
+                  </div>
+                )}
+
+                <p className="text-[11px] text-muted-foreground/50 mt-3">
+                  Soumis le {new Date(p.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+                </p>
+              </div>
             </div>
           );
         })}
-        {filtered.length === 0 && <p className="text-center text-muted-foreground py-8">Aucun projet trouvé.</p>}
       </div>
+      {filtered.length === 0 && <p className="text-center text-muted-foreground py-8">Aucun projet trouvé.</p>}
     </div>
   );
 }
