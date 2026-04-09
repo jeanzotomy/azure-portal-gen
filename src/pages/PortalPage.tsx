@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { useIsAdmin } from "@/hooks/use-admin";
+import { useUserRoles } from "@/hooks/use-admin";
 import { Progress } from "@/components/ui/progress";
 import {
   SidebarProvider,
@@ -33,7 +33,7 @@ function PortalContent() {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<Tab>("dashboard");
   const navigate = useNavigate();
-  const { isAdmin } = useIsAdmin();
+  const { isAdmin, isAgent } = useUserRoles();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
 
@@ -98,10 +98,10 @@ function PortalContent() {
           </SidebarGroup>
 
           <div className="mt-auto p-3 border-t border-sidebar-border space-y-1">
-            {isAdmin && (
-              <SidebarMenuButton onClick={() => navigate("/admin")} tooltip="Administration" className="gap-3 text-primary">
+            {(isAdmin || isAgent) && (
+              <SidebarMenuButton onClick={() => navigate("/admin")} tooltip={isAdmin ? "Administration" : "Espace Agent"} className="gap-3 text-primary">
                 <Shield size={18} />
-                <span>Administration</span>
+                <span>{isAdmin ? "Administration" : "Espace Agent"}</span>
               </SidebarMenuButton>
             )}
             <SidebarMenuButton onClick={handleLogout} tooltip="Déconnexion" className="text-destructive hover:text-destructive gap-3">
@@ -121,9 +121,9 @@ function PortalContent() {
             </h2>
           </div>
           <div className="flex items-center gap-2">
-            {isAdmin && (
+            {(isAdmin || isAgent) && (
               <span className="text-xs bg-primary/10 text-primary px-2.5 py-1 rounded-full font-medium flex items-center gap-1 cursor-pointer hover:bg-primary/20 transition-colors" onClick={() => navigate("/admin")}>
-                <Shield size={12} /> Admin
+                <Shield size={12} /> {isAdmin ? "Admin" : "Agent"}
               </span>
             )}
             <Button variant="ghost" size="icon" className="text-muted-foreground">
