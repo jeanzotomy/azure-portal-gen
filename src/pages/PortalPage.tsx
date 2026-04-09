@@ -41,6 +41,8 @@ function PortalContent() {
   const [user, setUser] = useState<SupaUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<Tab>("dashboard");
+  const [profileIncomplete, setProfileIncomplete] = useState(false);
+  const [daysLeft, setDaysLeft] = useState<number | null>(null);
   const navigate = useNavigate();
   const { isAdmin, isAgent } = useUserRoles();
   const mfaVerified = useMfaCheck();
