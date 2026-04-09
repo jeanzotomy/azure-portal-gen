@@ -498,7 +498,7 @@ function ProjectsTab({ user }: { user: SupaUser }) {
         </div>
       ) : (
         <div className="grid gap-5 md:grid-cols-2">
-          {projects.map((p) => {
+          {filteredProjects.map((p) => {
             const sc = statusConfig[p.status] || statusConfig.en_cours;
             const priorityConfig: Record<string, { label: string; color: string; bg: string }> = {
               urgent: { label: "Urgent", color: "text-destructive", bg: "bg-destructive/10 border-destructive/20" },
