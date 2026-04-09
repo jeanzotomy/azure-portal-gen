@@ -54,15 +54,17 @@ function ServiceCard({ s, index }: { s: typeof services[number]; index?: number 
       <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-primary/0 group-hover:bg-primary/10 blur-2xl transition-all duration-500" />
       
       <div className="relative z-10">
-        {/* Refined icon container - centered */}
-        <div className="relative w-14 h-14 mb-6 mx-auto">
-          <div className="absolute inset-0 rounded-2xl gradient-primary opacity-15 blur-md scale-110 group-hover:opacity-30 transition-opacity duration-500" />
-          <div className="relative w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center shadow-md shadow-primary/20 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-primary/30 transition-all duration-300">
-            <s.icon size={26} className="text-primary-foreground" strokeWidth={1.8} />
+        {/* Icon + Title on same line */}
+        <div className="flex items-center gap-3 mb-3">
+          <div className="relative shrink-0">
+            <div className="absolute inset-0 rounded-xl gradient-primary opacity-15 blur-md scale-110 group-hover:opacity-30 transition-opacity duration-500" />
+            <div className="relative w-11 h-11 rounded-xl gradient-primary flex items-center justify-center shadow-md shadow-primary/20 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-primary/30 transition-all duration-300">
+              <s.icon size={22} className="text-primary-foreground" strokeWidth={1.8} />
+            </div>
           </div>
+          <h3 className="text-[17px] font-bold text-card-foreground group-hover:text-primary transition-colors duration-300">{s.title}</h3>
         </div>
 
-        <h3 className="text-[17px] font-bold text-card-foreground mb-2.5 group-hover:text-primary transition-colors duration-300">{s.title}</h3>
         <p className="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
         
         {/* Bottom accent line */}
