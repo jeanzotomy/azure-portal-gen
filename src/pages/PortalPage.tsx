@@ -193,6 +193,19 @@ function PortalContent() {
         </header>
 
         <main className="flex-1 p-6 overflow-auto">
+          {profileIncomplete && (
+            <Alert className="mb-4 border-warning bg-warning/10">
+              <Info className="h-4 w-4 text-warning" />
+              <AlertDescription className="text-warning-foreground">
+                {daysLeft !== null && daysLeft > 0
+                  ? `Veuillez compléter votre profil (nom, entreprise, téléphone) dans les ${daysLeft} jour${daysLeft > 1 ? "s" : ""} restants.`
+                  : "Le délai de 30 jours pour compléter votre profil est dépassé. Veuillez le remplir immédiatement."}
+                <Button variant="link" className="ml-2 p-0 h-auto text-primary" onClick={() => setTab("profile")}>
+                  Compléter mon profil
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
           {tab === "dashboard" && <DashboardTab user={user} />}
           {tab === "projects" && <ProjectsTab user={user} />}
           {tab === "tickets" && <TicketsTab user={user} />}
