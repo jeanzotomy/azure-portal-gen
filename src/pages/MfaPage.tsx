@@ -17,6 +17,16 @@ export default function MfaPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  const redirectByRole = async (userId: string) => {
+    const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", userId);
+    const roleList = (roles || []).map(r => r.role);
+    if (roleList.includes("admin") || roleList.includes("agent")) {
+      navigate("/admin");
+    } else {
+      navigate("/portal");
+    }
+  };
+
   useEffect(() => {
     checkMfaStatus();
   }, []);
@@ -31,27 +41,23 @@ export default function MfaPage() {
     const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
     
     if (aal?.currentLevel === "aal2") {
-      navigate("/portal");
+      await redirectByRole(user.id);
       return;
     }
 
-    // Check if user has any enrolled factors
     const { data: factors } = await supabase.auth.mfa.listFactors();
     const totpFactors = factors?.totp || [];
     const verifiedFactors = totpFactors.filter(f => f.status === "verified");
 
     if (verifiedFactors.length > 0) {
-      // Has verified factor, needs to verify
       setFactorId(verifiedFactors[0].id);
       setStep("verify");
     } else {
-      // No factor enrolled, start enrollment
       await startEnrollment();
     }
   };
 
   const startEnrollment = async () => {
-    // Unenroll any unverified factors first
     const { data: factors } = await supabase.auth.mfa.listFactors();
     const unverifiedFactors = (factors?.totp || []).filter(f => (f.status as string) === "unverified");
     for (const f of unverifiedFactors) {
@@ -89,7 +95,12 @@ export default function MfaPage() {
       if (verifyError) throw verifyError;
 
       toast({ title: "Vérification réussie!", description: "Accès au portail autorisé." });
-      navigate("/portal");
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await redirectByRole(user.id);
+      } else {
+        navigate("/portal");
+      }
     } catch (err: any) {
       toast({ title: "Code invalide", description: err.message, variant: "destructive" });
       setOtp("");
