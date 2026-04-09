@@ -102,6 +102,7 @@ export default function AuthPage() {
             </div>
           )}
 
+          {mode !== "forgot" && (
             <>
               <Button
                 type="button"
