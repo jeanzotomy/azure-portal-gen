@@ -121,9 +121,9 @@ function PortalContent() {
             </h2>
           </div>
           <div className="flex items-center gap-2">
-            {isAdmin && (
+            {(isAdmin || isAgent) && (
               <span className="text-xs bg-primary/10 text-primary px-2.5 py-1 rounded-full font-medium flex items-center gap-1 cursor-pointer hover:bg-primary/20 transition-colors" onClick={() => navigate("/admin")}>
-                <Shield size={12} /> Admin
+                <Shield size={12} /> {isAdmin ? "Admin" : "Agent"}
               </span>
             )}
             <Button variant="ghost" size="icon" className="text-muted-foreground">
