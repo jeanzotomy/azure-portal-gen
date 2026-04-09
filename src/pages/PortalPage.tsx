@@ -799,6 +799,7 @@ function TicketsTab({ user }: { user: SupaUser }) {
   const [replies, setReplies] = useState<Record<string, any[]>>({});
   const [replyText, setReplyText] = useState("");
   const [sendingReply, setSendingReply] = useState(false);
+  const [showForm, setShowForm] = useState(false);
   const { toast } = useToast();
 
   const loadTickets = () => {
@@ -850,27 +851,65 @@ function TicketsTab({ user }: { user: SupaUser }) {
     } else {
       toast({ title: "Ticket créé!", description: "Notre équipe vous répondra rapidement." });
       setSubject(""); setMessage("");
+      setShowForm(false);
       loadTickets();
     }
     setSending(false);
   };
 
   const filtered = filter === "all" ? tickets : tickets.filter(t => t.status === filter);
+  const openCount = tickets.filter(t => t.status === "ouvert").length;
+  const inProgressCount = tickets.filter(t => t.status === "en_cours").length;
+  const resolvedCount = tickets.filter(t => t.status === "résolu").length;
 
   return (
     <div className="space-y-6 animate-fade-up">
-      <h1 className="text-2xl font-bold text-foreground">Support</h1>
-
-      <div className="bg-card rounded-xl p-6 shadow-card border border-border/50">
-        <h3 className="font-semibold text-card-foreground mb-4">Nouveau ticket</h3>
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <Input placeholder="Sujet" required value={subject} onChange={(e) => setSubject(e.target.value)} />
-          <Textarea placeholder="Décrivez votre problème..." required rows={3} value={message} onChange={(e) => setMessage(e.target.value)} />
-          <Button type="submit" className="gradient-primary text-primary-foreground border-0" disabled={sending}>
-            <Send size={16} className="mr-2" /> {sending ? "Envoi..." : "Envoyer"}
-          </Button>
-        </form>
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-foreground">Support</h1>
+          <p className="text-sm text-muted-foreground mt-1">Gérez vos demandes d'assistance</p>
+        </div>
+        <Button
+          onClick={() => setShowForm(!showForm)}
+          className="gradient-primary text-primary-foreground border-0"
+        >
+          {showForm ? <X size={16} className="mr-2" /> : <Plus size={16} className="mr-2" />}
+          {showForm ? "Annuler" : "Nouveau ticket"}
+        </Button>
       </div>
+
+      {/* Stats */}
+      <div className="grid grid-cols-3 gap-4">
+        {[
+          { label: "Ouverts", value: openCount, color: "text-primary", bg: "bg-primary/10" },
+          { label: "En cours", value: inProgressCount, color: "text-accent", bg: "bg-accent/10" },
+          { label: "Résolus", value: resolvedCount, color: "text-muted-foreground", bg: "bg-muted" },
+        ].map(s => (
+          <div key={s.label} className="bg-card rounded-xl p-4 border border-border/50 shadow-card text-center">
+            <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
+            <p className="text-xs text-muted-foreground mt-1">{s.label}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* New ticket form */}
+      {showForm && (
+        <div className="bg-card rounded-xl p-6 shadow-card border border-border/50 animate-fade-up">
+          <h3 className="font-semibold text-card-foreground mb-4 flex items-center gap-2">
+            <LifeBuoy size={18} className="text-primary" /> Nouveau ticket
+          </h3>
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <Input placeholder="Sujet" required value={subject} onChange={(e) => setSubject(e.target.value)} />
+            <Textarea placeholder="Décrivez votre problème..." required rows={4} value={message} onChange={(e) => setMessage(e.target.value)} />
+            <div className="flex justify-end">
+              <Button type="submit" className="gradient-primary text-primary-foreground border-0" disabled={sending}>
+                <Send size={16} className="mr-2" /> {sending ? "Envoi..." : "Envoyer"}
+              </Button>
+            </div>
+          </form>
+        </div>
+      )}
 
       <div className="flex items-center gap-2">
         <Filter size={16} className="text-muted-foreground" />
