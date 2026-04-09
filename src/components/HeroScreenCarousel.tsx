@@ -43,11 +43,6 @@ export function HeroScreenCarousel() {
             <span className="w-3 h-3 rounded-full bg-yellow-500/80" />
             <span className="w-3 h-3 rounded-full bg-green-500/80" />
           </div>
-          <div className="flex-1 flex justify-center">
-            <div className="bg-secondary-foreground/10 rounded-md px-4 py-1 text-xs text-secondary-foreground/50 font-mono">
-              cloudmature.io/dashboard
-            </div>
-          </div>
         </div>
 
         {/* Screen area */}
