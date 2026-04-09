@@ -1,4 +1,4 @@
-import { Cloud, DollarSign, Shield, Server, ArrowUpRight, GraduationCap, Headphones } from "lucide-react";
+import { Cloud, DollarSign, Shield, Server, ArrowUpRight, GraduationCap, Headphones, BrainCircuit } from "lucide-react";
 
 const services = [
   {
@@ -36,6 +36,11 @@ const services = [
     title: "Infogérance & Support",
     desc: "Surveillance 24/7, support N1-N3, gestion des incidents et suivi SLA.",
   },
+  {
+    icon: BrainCircuit,
+    title: "Adoption & Maturité IA",
+    desc: "Évaluation de maturité IA, stratégie d'adoption, intégration de solutions d'intelligence artificielle et accompagnement vers l'IA responsable.",
+  },
 ];
 
 export function ServicesSection() {
@@ -52,7 +57,7 @@ export function ServicesSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           {services.map((s, i) => (
             <div key={s.title}
               className={`group bg-card rounded-xl p-6 shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1 ${i === services.length - 1 ? "md:col-span-2 lg:col-span-1" : ""}`}
