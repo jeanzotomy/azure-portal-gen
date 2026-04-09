@@ -14,8 +14,16 @@ export default function AuthPage() {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [searchParams] = useSearchParams();
+  const isBlocked = searchParams.get("blocked") === "1";
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (isBlocked) {
+      toast({ title: "Compte bloqué", description: "Votre compte a été suspendu. Veuillez contacter l'administrateur à info@cloudmature.com.", variant: "destructive" });
+    }
+  }, [isBlocked]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
