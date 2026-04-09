@@ -241,6 +241,7 @@ function AdminContent() {
           {tab === "dashboard" && <AdminDashboard />}
           {tab === "projects" && <AdminProjects />}
           {tab === "tickets" && <AdminTickets />}
+          {tab === "contacts" && <AdminContacts />}
           {tab === "users" && <AdminUsers />}
         </main>
       </div>
