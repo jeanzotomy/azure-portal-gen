@@ -29,7 +29,9 @@ const logo = "/favicon.png";
 import {
   LayoutDashboard, FolderOpen, LifeBuoy, User, LogOut, Send, Clock, CheckCircle2, AlertCircle,
   Menu, Bell, Search, Filter, Upload, X, FileText, DollarSign, Calendar, Cpu, Flag, Pencil, Shield,
+  Activity, TrendingUp,
 } from "lucide-react";
+import { PieChart as RePieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip } from "recharts";
 import type { User as SupaUser } from "@supabase/supabase-js";
 
 type Tab = "dashboard" | "projects" | "tickets" | "profile";
@@ -186,8 +188,10 @@ function DashboardTab({ user }: { user: SupaUser }) {
 
   useEffect(() => {
     supabase.from("projects").select("*").order("created_at", { ascending: false }).then(({ data }) => setProjects(data || []));
-    supabase.from("support_tickets").select("*").order("created_at", { ascending: false }).limit(5).then(({ data }) => setTickets(data || []));
+    supabase.from("support_tickets").select("*").order("created_at", { ascending: false }).then(({ data }) => setTickets(data || []));
   }, []);
+
+  const CHART_COLORS = ["hsl(var(--primary))", "hsl(var(--accent))", "hsl(199, 89%, 48%)", "hsl(160, 60%, 45%)"];
 
   const statusConfig: Record<string, { label: string; icon: typeof Clock; color: string; bg: string }> = {
     en_cours: { label: "En cours", icon: Clock, color: "text-primary", bg: "bg-primary/10" },
@@ -206,14 +210,45 @@ function DashboardTab({ user }: { user: SupaUser }) {
     ? Math.round(projects.reduce((sum, p) => sum + (p.progress || 0), 0) / projects.length)
     : 0;
 
+  // Pie chart data
+  const projectStatusData = [
+    { name: "En cours", value: projects.filter(p => p.status === "en_cours").length },
+    { name: "En attente", value: projects.filter(p => p.status === "en_attente").length },
+    { name: "Terminé", value: projects.filter(p => p.status === "termine").length },
+  ].filter(d => d.value > 0);
+
+  // Monthly activity (last 6 months)
+  const monthlyData = (() => {
+    const months: { name: string; projets: number; tickets: number }[] = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      const monthName = d.toLocaleDateString("fr-FR", { month: "short" });
+      const year = d.getFullYear();
+      const month = d.getMonth();
+      months.push({
+        name: monthName,
+        projets: projects.filter(p => { const cd = new Date(p.created_at); return cd.getFullYear() === year && cd.getMonth() === month; }).length,
+        tickets: tickets.filter(t => { const cd = new Date(t.created_at); return cd.getFullYear() === year && cd.getMonth() === month; }).length,
+      });
+    }
+    return months;
+  })();
+
   return (
     <div className="space-y-6 animate-fade-up">
       {/* Welcome banner */}
       <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-accent/5 to-primary/10 rounded-2xl p-6 border border-primary/10">
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
-        <div className="relative">
-          <h1 className="text-2xl font-bold text-foreground">Bienvenue, {user.user_metadata?.full_name || user.email?.split("@")[0]} 👋</h1>
-          <p className="text-muted-foreground mt-1">Voici un aperçu de votre espace client.</p>
+        <div className="relative flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Bienvenue, {user.user_metadata?.full_name || user.email?.split("@")[0]} 👋</h1>
+            <p className="text-muted-foreground mt-1">Voici un aperçu de votre espace client.</p>
+          </div>
+          <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
+            <Activity size={16} className="text-primary" />
+            {new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+          </div>
         </div>
       </div>
 
@@ -222,7 +257,76 @@ function DashboardTab({ user }: { user: SupaUser }) {
         <StatCard icon={FolderOpen} label="Projets actifs" value={projects.filter(p => p.status === "en_cours").length} color="gradient-primary" subtitle={`${projects.length} total`} />
         <StatCard icon={LifeBuoy} label="Tickets ouverts" value={tickets.filter(t => t.status === "ouvert").length} color="bg-accent" subtitle={`${tickets.length} total`} />
         <StatCard icon={CheckCircle2} label="Complétés" value={projects.filter(p => p.status === "termine").length} color="bg-teal-600" />
-        <StatCard icon={DollarSign} label="Progression moy." value={avgProgress} color="bg-primary" subtitle={`${avgProgress}% en moyenne`} />
+        <StatCard icon={TrendingUp} label="Progression moy." value={avgProgress} color="bg-primary" subtitle={`${avgProgress}% en moyenne`} />
+      </div>
+
+      {/* Charts row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        {/* Activity chart */}
+        <div className="lg:col-span-2 bg-card rounded-xl shadow-card border border-border/50 p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <Activity size={16} className="text-primary" />
+            <h3 className="font-semibold text-card-foreground">Mon activité</h3>
+          </div>
+          <div className="h-56">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={monthlyData}>
+                <defs>
+                  <linearGradient id="clientGradProjects" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="clientGradTickets" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(var(--accent))" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="hsl(var(--accent))" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="name" tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
+                <YAxis tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" allowDecimals={false} />
+                <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "0.75rem", fontSize: 12 }} />
+                <Area type="monotone" dataKey="projets" stroke="hsl(var(--primary))" fill="url(#clientGradProjects)" strokeWidth={2} name="Projets" />
+                <Area type="monotone" dataKey="tickets" stroke="hsl(var(--accent))" fill="url(#clientGradTickets)" strokeWidth={2} name="Tickets" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Pie chart */}
+        <div className="bg-card rounded-xl shadow-card border border-border/50 p-5">
+          <div className="flex items-center gap-2 mb-2">
+            <FolderOpen size={14} className="text-primary" />
+            <h4 className="text-sm font-semibold text-card-foreground">Projets par statut</h4>
+          </div>
+          {projectStatusData.length > 0 ? (
+            <>
+              <div className="h-40">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RePieChart>
+                    <Pie data={projectStatusData} cx="50%" cy="50%" innerRadius={35} outerRadius={60} paddingAngle={4} dataKey="value">
+                      {projectStatusData.map((_, i) => (
+                        <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "0.5rem", fontSize: 11 }} />
+                  </RePieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="flex flex-wrap gap-2 justify-center mt-2">
+                {projectStatusData.map((d, i) => (
+                  <span key={d.name} className="text-[10px] text-muted-foreground flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full" style={{ background: CHART_COLORS[i % CHART_COLORS.length] }} />
+                    {d.name} ({d.value})
+                  </span>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="h-40 flex items-center justify-center">
+              <p className="text-xs text-muted-foreground">Aucune donnée</p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Two-column layout */}
