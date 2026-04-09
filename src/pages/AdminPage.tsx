@@ -205,7 +205,19 @@ function AdminProjects() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editStatus, setEditStatus] = useState("");
   const [editProgress, setEditProgress] = useState(0);
+  const [editName, setEditName] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editBudget, setEditBudget] = useState("");
+  const [editDeadline, setEditDeadline] = useState("");
+  const [editPriority, setEditPriority] = useState("normal");
+  const [editServices, setEditServices] = useState<string[]>([]);
   const { toast } = useToast();
+
+  const serviceOptions = [
+    "Stratégie & Adoption Cloud", "Optimisation FinOps", "Gouvernance & Sécurité",
+    "Architecture & Ingénierie", "Migration Cloud", "Formation & Coaching",
+    "Infogérance & Support", "Adoption & Maturité IA",
+  ];
 
   const load = async () => {
     const { data: p } = await supabase.from("projects").select("*").order("created_at", { ascending: false });
@@ -219,7 +231,11 @@ function AdminProjects() {
   useEffect(() => { load(); }, []);
 
   const saveProject = async (id: string) => {
-    const { error } = await supabase.from("projects").update({ status: editStatus, progress: editProgress }).eq("id", id);
+    const { error } = await supabase.from("projects").update({
+      name: editName, description: editDescription || null, budget: editBudget || null,
+      deadline: editDeadline || null, priority: editPriority, status: editStatus, progress: editProgress,
+      technologies: editServices.length > 0 ? editServices.join(", ") : null,
+    }).eq("id", id);
     if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
     else { toast({ title: "Projet mis à jour!" }); setEditingId(null); load(); }
   };
@@ -305,7 +321,13 @@ function AdminProjects() {
                     )}
                     <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => {
                       if (isEditing) saveProject(p.id);
-                      else { setEditingId(p.id); setEditStatus(p.status); setEditProgress(p.progress); }
+                      else {
+                        setEditingId(p.id); setEditStatus(p.status); setEditProgress(p.progress);
+                        setEditName(p.name); setEditDescription(p.description || "");
+                        setEditBudget(p.budget || ""); setEditDeadline(p.deadline || "");
+                        setEditPriority(p.priority || "normal");
+                        setEditServices(p.technologies ? p.technologies.split(", ") : []);
+                      }
                     }}>
                       {isEditing ? "Sauvegarder" : "Modifier"}
                     </Button>
@@ -334,7 +356,7 @@ function AdminProjects() {
                       </span>
                     )}
                     {p.deadline && (
-                      <span className="inline-flex items-center gap-1 text-xs bg-accent/10 text-accent-foreground border border-accent/20 px-2.5 py-1 rounded-lg">
+                      <span className="inline-flex items-center gap-1 text-xs bg-orange-50 text-orange-600 border border-orange-200 px-2.5 py-1 rounded-lg dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/20">
                         <Calendar size={11} /> {p.deadline}
                       </span>
                     )}
@@ -352,6 +374,34 @@ function AdminProjects() {
                 {isEditing ? (
                   <div className="mt-2 p-4 bg-muted/30 rounded-xl space-y-3">
                     <div>
+                      <label className="text-sm font-medium text-card-foreground">Nom du projet</label>
+                      <Input value={editName} onChange={(e) => setEditName(e.target.value)} className="mt-1" />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-card-foreground">Description</label>
+                      <Textarea value={editDescription} onChange={(e) => setEditDescription(e.target.value)} rows={3} className="mt-1" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-sm font-medium text-card-foreground">Budget</label>
+                        <Input value={editBudget} onChange={(e) => setEditBudget(e.target.value)} placeholder="Ex: 5000" className="mt-1" />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-card-foreground">Délai</label>
+                        <Input value={editDeadline} onChange={(e) => setEditDeadline(e.target.value)} placeholder="Ex: 3 mois" className="mt-1" />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-card-foreground">Priorité</label>
+                      <div className="flex gap-2 mt-1">
+                        {[{ value: "normal", label: "Normal" }, { value: "haute", label: "Haute" }, { value: "urgent", label: "Urgent" }].map((opt) => (
+                          <button key={opt.value} onClick={() => setEditPriority(opt.value)}
+                            className={`text-sm px-3 py-1.5 rounded-lg border transition-colors ${editPriority === opt.value ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground border-border"}`}
+                          >{opt.label}</button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
                       <label className="text-sm font-medium text-card-foreground">Statut</label>
                       <div className="flex gap-2 mt-1">
                         {statusOptions.map((opt) => (
@@ -365,6 +415,16 @@ function AdminProjects() {
                       <label className="text-sm font-medium text-card-foreground">Progression : {editProgress}%</label>
                       <input type="range" min="0" max="100" value={editProgress} onChange={(e) => setEditProgress(Number(e.target.value))}
                         className="w-full mt-1 accent-[hsl(var(--primary))]" />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-card-foreground">Services</label>
+                      <div className="flex flex-wrap gap-1.5 mt-1">
+                        {serviceOptions.map((s) => (
+                          <button key={s} onClick={() => setEditServices(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s])}
+                            className={`text-xs px-2.5 py-1 rounded-lg border transition-colors ${editServices.includes(s) ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground border-border"}`}
+                          >{s}</button>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 ) : (
