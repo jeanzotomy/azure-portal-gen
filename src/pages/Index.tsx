@@ -5,6 +5,7 @@ import { IndustriesSection } from "@/components/IndustriesSection";
 import { WhyUsSection } from "@/components/WhyUsSection";
 import { ContactSection } from "@/components/ContactSection";
 import { Footer } from "@/components/Footer";
+import { ScrollToTop } from "@/components/ScrollToTop";
 
 const Index = () => (
   <div className="min-h-screen">
@@ -15,6 +16,7 @@ const Index = () => (
     <WhyUsSection />
     <ContactSection />
     <Footer />
+    <ScrollToTop />
   </div>
 );
 
