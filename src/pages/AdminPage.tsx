@@ -15,6 +15,7 @@ import {
 import {
   LayoutDashboard, FolderOpen, LifeBuoy, Users, LogOut, Shield, Clock, CheckCircle2,
   AlertCircle, Bell, ChevronDown, ChevronUp, MessageSquare, Search, Send, UserCog,
+  Flag, DollarSign, Calendar, Filter,
 } from "lucide-react";
 import type { User as SupaUser } from "@supabase/supabase-js";
 
