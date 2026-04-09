@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import adminLogo from "@/assets/cloudmature-logo.png";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRoles } from "@/hooks/use-admin";
