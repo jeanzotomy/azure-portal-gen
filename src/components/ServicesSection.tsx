@@ -58,9 +58,9 @@ export function ServicesSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
           {/* Image card */}
-          <div className="lg:col-span-4 relative group overflow-hidden rounded-2xl">
+          <div className="lg:col-span-4 relative group overflow-hidden rounded-2xl h-full">
             <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-primary/30 via-accent/20 to-primary/10 blur-lg opacity-60 group-hover:opacity-80 transition-opacity" />
             <div className="relative overflow-hidden rounded-2xl">
               <img
