@@ -68,14 +68,14 @@ export function ContactSection() {
                 alt="Consultante Cloud Mature au téléphone"
                 className="relative w-full h-56 object-cover object-top rounded-2xl ring-1 ring-white/10"
               />
-              <div className="absolute bottom-3 left-3 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-background/80 backdrop-blur-md text-xs font-medium tracking-wide border border-cyan-glow/40 shadow-[0_0_20px_hsl(195_100%_40%/0.25)]">
-                <span className="text-cyan-glow">Consultation TI</span>
-                <span className="text-secondary-foreground/40">·</span>
-                <span className="text-cyan-glow">Cloud</span>
-                <span className="text-secondary-foreground/40">·</span>
-                <span className="text-cyan-glow">DevOps</span>
-                <span className="text-secondary-foreground/40">·</span>
-                <span className="gradient-text font-semibold">IA</span>
+              <div className="absolute bottom-3 left-3 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-background/80 backdrop-blur-md text-xs font-medium tracking-wide border border-border/40 shadow-sm">
+                <span className="text-foreground">Consultation TI</span>
+                <span className="text-foreground/40">·</span>
+                <span className="text-foreground">Cloud</span>
+                <span className="text-foreground/40">·</span>
+                <span className="text-foreground">DevOps</span>
+                <span className="text-foreground/40">·</span>
+                <span className="text-foreground font-semibold">IA</span>
               </div>
             </div>
           </div>
