@@ -59,7 +59,8 @@ function ServiceCard({ s }: { s: typeof services[number] }) {
 export function ServicesSection() {
   // Split services: first 3 top-left, last 3 bottom-right, middle 2 beside image
   const topRow = services.slice(0, 3);
-  const leftCol = services.slice(3, 5);
+  const middleLeft = [services[3]];
+  const middleRight = [services[4]];
   const bottomRow = services.slice(5, 8);
 
   return (
@@ -101,17 +102,13 @@ export function ServicesSection() {
 
           {/* Middle row: 2 cards + image + text overlay */}
           <div className="grid grid-cols-3 gap-5">
-            {leftCol.map((s) => (
+            {middleLeft.map((s) => (
               <ServiceCard key={s.title} s={s} />
             ))}
-            <div className="relative group overflow-hidden rounded-2xl row-span-1">
+            <div className="relative group overflow-hidden rounded-2xl">
               <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-primary/30 via-accent/20 to-primary/10 blur-lg opacity-60 group-hover:opacity-80 transition-opacity" />
               <div className="relative overflow-hidden rounded-2xl h-full">
-                <img
-                  src={servicesImage}
-                  alt="Équipe Cloud Mature en consultation"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                />
+                <img src={servicesImage} alt="Équipe Cloud Mature en consultation" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
                 <div className="absolute inset-0 bg-gradient-to-t from-secondary/80 via-secondary/20 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-6">
                   <p className="text-sm font-semibold uppercase tracking-wider text-primary">Cloud Mature</p>
@@ -119,6 +116,9 @@ export function ServicesSection() {
                 </div>
               </div>
             </div>
+            {middleRight.map((s) => (
+              <ServiceCard key={s.title} s={s} />
+            ))}
           </div>
 
           {/* Bottom row: 3 cards */}
