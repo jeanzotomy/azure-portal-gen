@@ -27,7 +27,7 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import type { User as SupaUser } from "@supabase/supabase-js";
 
 type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts";
-type AgentTab = "dashboard" | "tickets";
+type AgentTab = "dashboard" | "tickets" | "contacts";
 
 function AdminContent() {
   const [user, setUser] = useState<SupaUser | null>(null);
@@ -45,7 +45,7 @@ function AdminContent() {
     const fetchUnreplied = async () => {
       const { data: tickets } = await supabase.from("support_tickets").select("id, status");
       if (!tickets) return;
-      const openTickets = tickets.filter(t => t.status !== "résolu");
+      const openTickets = tickets.filter((t) => t.status !== "résolu");
       let count = 0;
       for (const t of openTickets) {
         const { data: replies } = await supabase.from("ticket_replies").select("id").eq("ticket_id", t.id).eq("is_admin", true).limit(1);
@@ -77,13 +77,16 @@ function AdminContent() {
   if (loading || rolesLoading || mfaVerified === null) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">Chargement...</div>;
   if (!user || (!isAdmin && !isAgent)) return null;
 
-  const handleLogout = async () => { await supabase.auth.signOut(); navigate("/"); };
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/");
+  };
 
-  // Agent-only view
   if (isAgent && !isAdmin) {
     const agentNavItems: { id: AgentTab; icon: typeof LayoutDashboard; label: string }[] = [
       { id: "dashboard", icon: LayoutDashboard, label: "Tableau de bord" },
       { id: "tickets", icon: LifeBuoy, label: "Tickets" },
+      { id: "contacts", icon: MessageSquare, label: "Contacts" },
     ];
 
     return (
@@ -140,7 +143,7 @@ function AdminContent() {
             <div className="flex items-center gap-3">
               <SidebarTrigger />
               <h2 className="text-sm font-semibold text-card-foreground hidden sm:block">
-                {agentNavItems.find(n => n.id === agentTab)?.label}
+                {agentNavItems.find((n) => n.id === agentTab)?.label}
               </h2>
             </div>
             <div className="flex items-center gap-2">
@@ -155,13 +158,13 @@ function AdminContent() {
           <main className="flex-1 p-6 overflow-auto">
             {agentTab === "dashboard" && <AgentDashboard user={user} />}
             {agentTab === "tickets" && <AdminTickets />}
+            {agentTab === "contacts" && <AdminContacts />}
           </main>
         </div>
       </div>
     );
   }
 
-  // Admin view
   const allNavItems: { id: AdminTab; icon: typeof LayoutDashboard; label: string }[] = [
     { id: "dashboard", icon: LayoutDashboard, label: "Vue d'ensemble" },
     { id: "projects", icon: FolderOpen, label: "Projets" },
@@ -224,7 +227,7 @@ function AdminContent() {
           <div className="flex items-center gap-3">
             <SidebarTrigger />
             <h2 className="text-sm font-semibold text-card-foreground hidden sm:block">
-              {allNavItems.find(n => n.id === tab)?.label}
+              {allNavItems.find((n) => n.id === tab)?.label}
             </h2>
           </div>
           <div className="flex items-center gap-2">
