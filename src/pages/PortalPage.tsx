@@ -21,7 +21,7 @@ import {
 const logo = "/favicon.png";
 import {
   LayoutDashboard, FolderOpen, LifeBuoy, User, LogOut, Send, Clock, CheckCircle2, AlertCircle,
-  Menu, Bell, Search, Filter, Upload, X, FileText, DollarSign, Calendar, Cpu, Flag,
+  Menu, Bell, Search, Filter, Upload, X, FileText, DollarSign, Calendar, Cpu, Flag, Pencil,
 } from "lucide-react";
 import type { User as SupaUser } from "@supabase/supabase-js";
 
@@ -230,6 +230,7 @@ function DashboardTab({ user }: { user: SupaUser }) {
 function ProjectsTab({ user }: { user: SupaUser }) {
   const [projects, setProjects] = useState<any[]>([]);
   const [showForm, setShowForm] = useState(false);
+  const [editingProject, setEditingProject] = useState<any>(null);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [budget, setBudget] = useState("");
@@ -247,17 +248,34 @@ function ProjectsTab({ user }: { user: SupaUser }) {
 
   useEffect(() => { loadProjects(); }, []);
 
+  const resetForm = () => {
+    setName(""); setDescription(""); setBudget(""); setDeadline(""); setTechnologies(""); setPriority("normal"); setFiles([]);
+    setEditingProject(null);
+  };
+
+  const openNewForm = () => { resetForm(); setShowForm(true); };
+
+  const openEditForm = (p: any) => {
+    setEditingProject(p);
+    setName(p.name || "");
+    setDescription(p.description || "");
+    setBudget(p.budget || "");
+    setDeadline(p.deadline || "");
+    setTechnologies(p.technologies || "");
+    setPriority(p.priority || "normal");
+    setFiles([]);
+    setShowForm(true);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  const closeForm = () => { setShowForm(false); resetForm(); };
+
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const newFiles = Array.from(e.target.files);
-      setFiles(prev => [...prev, ...newFiles]);
-    }
+    if (e.target.files) setFiles(prev => [...prev, ...Array.from(e.target.files!)]);
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const removeFile = (index: number) => {
-    setFiles(prev => prev.filter((_, i) => i !== index));
-  };
+  const removeFile = (index: number) => setFiles(prev => prev.filter((_, i) => i !== index));
 
   const formatFileSize = (bytes: number) => {
     if (bytes < 1024) return `${bytes} B`;
@@ -265,48 +283,46 @@ function ProjectsTab({ user }: { user: SupaUser }) {
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
   };
 
+  const uploadFiles = async (projectId: string) => {
+    for (const file of files) {
+      const filePath = `${user.id}/${projectId}/${Date.now()}_${file.name}`;
+      const { error: uploadError } = await supabase.storage.from("project-files").upload(filePath, file);
+      if (!uploadError) {
+        await supabase.from("project_files").insert({
+          project_id: projectId, user_id: user.id, file_name: file.name,
+          file_path: filePath, file_size: file.size, file_type: file.type,
+        });
+      }
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
     setSubmitting(true);
 
-    const { data: project, error } = await supabase.from("projects").insert({
-      user_id: user.id,
+    const payload = {
       name: name.trim(),
       description: description.trim() || null,
       budget: budget.trim() || null,
       deadline: deadline.trim() || null,
       technologies: technologies.trim() || null,
       priority,
-    }).select().single();
+    };
 
-    if (error) {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
-      setSubmitting(false);
-      return;
+    if (editingProject) {
+      const { error } = await supabase.from("projects").update(payload).eq("id", editingProject.id);
+      if (error) { toast({ title: "Erreur", description: error.message, variant: "destructive" }); setSubmitting(false); return; }
+      if (files.length > 0) await uploadFiles(editingProject.id);
+      toast({ title: "Projet modifié!", description: "Les modifications ont été enregistrées." });
+    } else {
+      const { data: project, error } = await supabase.from("projects").insert({ user_id: user.id, ...payload }).select().single();
+      if (error) { toast({ title: "Erreur", description: error.message, variant: "destructive" }); setSubmitting(false); return; }
+      if (files.length > 0 && project) await uploadFiles(project.id);
+      toast({ title: "Projet soumis!", description: "Votre projet a été envoyé avec succès." });
     }
 
-    // Upload files
-    if (files.length > 0 && project) {
-      for (const file of files) {
-        const filePath = `${user.id}/${project.id}/${Date.now()}_${file.name}`;
-        const { error: uploadError } = await supabase.storage.from("project-files").upload(filePath, file);
-        if (!uploadError) {
-          await supabase.from("project_files").insert({
-            project_id: project.id,
-            user_id: user.id,
-            file_name: file.name,
-            file_path: filePath,
-            file_size: file.size,
-            file_type: file.type,
-          });
-        }
-      }
-    }
-
-    toast({ title: "Projet soumis!", description: "Votre projet a été envoyé avec succès." });
-    setName(""); setDescription(""); setBudget(""); setDeadline(""); setTechnologies(""); setPriority("normal"); setFiles([]);
-    setShowForm(false);
+    closeForm();
     loadProjects();
     setSubmitting(false);
   };
@@ -327,92 +343,55 @@ function ProjectsTab({ user }: { user: SupaUser }) {
     <div className="space-y-6 animate-fade-up">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">Mes Projets</h1>
-        <Button onClick={() => setShowForm(!showForm)} className="gradient-primary text-primary-foreground border-0">
+        <Button onClick={() => showForm ? closeForm() : openNewForm()} className="gradient-primary text-primary-foreground border-0">
           {showForm ? "Annuler" : <><Send size={16} className="mr-2" /> Soumettre un projet</>}
         </Button>
       </div>
 
       {showForm && (
         <div className="bg-card rounded-xl p-6 shadow-card border border-border/50">
-          <h3 className="font-semibold text-card-foreground mb-4">Nouveau projet</h3>
+          <h3 className="font-semibold text-card-foreground mb-4">{editingProject ? "Modifier le projet" : "Nouveau projet"}</h3>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5">
-                <FileText size={14} /> Nom du projet *
-              </label>
+              <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5"><FileText size={14} /> Nom du projet *</label>
               <Input placeholder="Ex: Refonte du site web" required value={name} onChange={(e) => setName(e.target.value)} />
             </div>
-
             <div>
-              <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5">
-                <FileText size={14} /> Description
-              </label>
+              <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5"><FileText size={14} /> Description</label>
               <Textarea placeholder="Décrivez votre projet, vos besoins et objectifs..." rows={4} value={description} onChange={(e) => setDescription(e.target.value)} />
             </div>
-
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5">
-                  <DollarSign size={14} /> Budget estimé
-                </label>
+                <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5"><DollarSign size={14} /> Budget estimé</label>
                 <Input placeholder="Ex: 5000 - 10000 $" value={budget} onChange={(e) => setBudget(e.target.value)} />
               </div>
               <div>
-                <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5">
-                  <Calendar size={14} /> Délai souhaité
-                </label>
+                <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5"><Calendar size={14} /> Délai souhaité</label>
                 <Input placeholder="Ex: 3 mois, Janvier 2025" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
               </div>
             </div>
-
             <div>
-              <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5">
-                <Cpu size={14} /> Technologies / Stack préféré
-              </label>
+              <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5"><Cpu size={14} /> Technologies / Stack préféré</label>
               <Input placeholder="Ex: AWS, React, Python, Kubernetes..." value={technologies} onChange={(e) => setTechnologies(e.target.value)} />
             </div>
-
             <div>
-              <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5">
-                <Flag size={14} /> Priorité
-              </label>
+              <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5"><Flag size={14} /> Priorité</label>
               <div className="flex gap-2">
                 {priorityOptions.map((opt) => (
-                  <button
-                    type="button"
-                    key={opt.value}
-                    onClick={() => setPriority(opt.value)}
-                    className={`text-sm px-4 py-2 rounded-lg transition-colors border ${
-                      priority === opt.value
-                        ? "bg-primary text-primary-foreground border-primary"
-                        : "bg-muted text-muted-foreground border-border hover:bg-muted/80"
-                    }`}
-                  >
-                    {opt.label}
-                  </button>
+                  <button type="button" key={opt.value} onClick={() => setPriority(opt.value)}
+                    className={`text-sm px-4 py-2 rounded-lg transition-colors border ${priority === opt.value ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-muted-foreground border-border hover:bg-muted/80"}`}
+                  >{opt.label}</button>
                 ))}
               </div>
             </div>
-
             <div>
-              <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5">
-                <Upload size={14} /> Fichiers joints
-              </label>
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                className="border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 hover:bg-muted/30 transition-colors"
-              >
+              <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5"><Upload size={14} /> Fichiers joints</label>
+              <div onClick={() => fileInputRef.current?.click()} className="border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 hover:bg-muted/30 transition-colors">
                 <Upload size={24} className="mx-auto text-muted-foreground mb-2" />
                 <p className="text-sm text-muted-foreground">Cliquez pour ajouter des fichiers</p>
                 <p className="text-xs text-muted-foreground/60 mt-1">PDF, images, documents — max 20 Mo par fichier</p>
               </div>
-              <input
-                ref={fileInputRef}
-                type="file"
-                multiple
-                className="hidden"
-                onChange={handleFileChange}
-              />
+              <input ref={fileInputRef} type="file" multiple className="hidden" onChange={handleFileChange} />
               {files.length > 0 && (
                 <div className="mt-3 space-y-2">
                   {files.map((file, i) => (
@@ -422,17 +401,14 @@ function ProjectsTab({ user }: { user: SupaUser }) {
                         <span className="text-sm text-card-foreground truncate">{file.name}</span>
                         <span className="text-xs text-muted-foreground flex-shrink-0">{formatFileSize(file.size)}</span>
                       </div>
-                      <button type="button" onClick={() => removeFile(i)} className="text-muted-foreground hover:text-destructive ml-2">
-                        <X size={16} />
-                      </button>
+                      <button type="button" onClick={() => removeFile(i)} className="text-muted-foreground hover:text-destructive ml-2"><X size={16} /></button>
                     </div>
                   ))}
                 </div>
               )}
             </div>
-
             <Button type="submit" className="gradient-primary text-primary-foreground border-0" disabled={submitting}>
-              <Send size={16} className="mr-2" /> {submitting ? "Envoi en cours..." : "Soumettre le projet"}
+              <Send size={16} className="mr-2" /> {submitting ? "Envoi en cours..." : editingProject ? "Enregistrer les modifications" : "Soumettre le projet"}
             </Button>
           </form>
         </div>
@@ -462,15 +438,18 @@ function ProjectsTab({ user }: { user: SupaUser }) {
                       </div>
                     )}
                   </div>
-                  <div className="flex flex-col items-end gap-1.5">
-                    <span className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${sc.color} ${sc.bg}`}>
-                      <sc.icon size={12} /> {sc.label}
-                    </span>
-                    {p.priority && p.priority !== "normal" && (
-                      <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                        p.priority === "urgent" ? "bg-destructive/10 text-destructive" : "bg-orange-100 text-orange-600"
-                      }`}>{p.priority}</span>
-                    )}
+                  <div className="flex items-start gap-2">
+                    <button onClick={() => openEditForm(p)} className="p-2 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-colors" title="Modifier">
+                      <Pencil size={16} />
+                    </button>
+                    <div className="flex flex-col items-end gap-1.5">
+                      <span className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${sc.color} ${sc.bg}`}>
+                        <sc.icon size={12} /> {sc.label}
+                      </span>
+                      {p.priority && p.priority !== "normal" && (
+                        <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${p.priority === "urgent" ? "bg-destructive/10 text-destructive" : "bg-orange-100 text-orange-600"}`}>{p.priority}</span>
+                      )}
+                    </div>
                   </div>
                 </div>
                 <Progress value={p.progress} className="h-2" />
