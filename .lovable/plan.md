@@ -1,40 +1,22 @@
 
 
-## Plan: Admin MFA Toggle Per User
+## Problème
 
-### Goal
-Allow the admin to disable (reset) or see MFA status for each user from the Users management panel. When disabled, the user will need to re-enroll MFA on their next login.
+Le nom affiché dans l'app Authenticator (Google Authenticator, Authy, etc.) est figé au moment où le QR code est scanné. Même si le code a été mis à jour avec `issuer: "Portail Cloudmature"`, les utilisateurs qui ont scanné le QR **avant** cette modification voient toujours l'ancien nom `azure-portal-gen.lovable.app`.
 
-### Approach
+## Solution
 
-**1. New Edge Function: `manage-user-mfa`**
-- Create `supabase/functions/manage-user-mfa/index.ts`
-- Accepts `{ user_id, action: "list" | "unenroll" }` 
-- Verifies the caller is an admin (same pattern as `delete-user`)
-- Uses the Supabase Admin API (`adminClient.auth.admin.mfa.listFactors` / `deleteFactor`) to list or remove MFA factors for a given user
-- Returns MFA status (enrolled or not) for "list", confirms removal for "unenroll"
+Il faut réinitialiser le MFA pour chaque utilisateur concerné, puis les faire se réenregistrer. Le nouveau QR code affichera bien "Portail Cloudmature".
 
-**2. Update AdminUsers component in `src/pages/AdminPage.tsx`**
-- Add state to track MFA status per user (`Record<string, boolean>`)
-- On load, call the edge function with `action: "list"` for all users (or batch)
-- Display a shield/lock icon or switch on each user card showing MFA status (Activé / Désactivé)
-- Add a button to reset/disable MFA for a user (with confirmation dialog)
-- After reset, refresh MFA status
+### Étapes
 
-### Technical Details
+1. **Depuis le panneau Admin** : utiliser la fonction existante "Désactiver MFA" pour supprimer le facteur TOTP de l'utilisateur (via l'edge function `manage-user-mfa` avec l'action `unenroll`).
 
-**Edge Function (`manage-user-mfa/index.ts`)**:
-- CORS headers, OPTIONS handling
-- Auth check: extract caller from JWT, verify admin role via `has_role`
-- For `action: "list"`: call `adminClient.auth.admin.mfa.listFactors({ userId })`, return `{ enrolled: boolean, factors: [...] }`
-- For `action: "unenroll"`: call `adminClient.auth.admin.mfa.deleteFactor({ userId, factorId })` for each verified factor, return success
+2. **L'utilisateur se reconnecte** : à la prochaine connexion, la page MFA détectera qu'il n'a plus de facteur vérifié et lancera automatiquement un nouvel enregistrement avec `issuer: "Portail Cloudmature"`.
 
-**UI changes**:
-- Add a small MFA indicator (shield icon green/gray) on each user card
-- Add a "Désactiver MFA" button that calls the edge function with `action: "unenroll"` after confirmation
-- Toast feedback on success/error
+3. **L'utilisateur scanne le nouveau QR code** : cette fois, l'app Authenticator affichera bien **"Portail Cloudmature"** comme nom.
 
-### Files Changed
-- **New**: `supabase/functions/manage-user-mfa/index.ts`
-- **Edit**: `src/pages/AdminPage.tsx` (AdminUsers component)
+### Détail technique
+
+Aucune modification de code n'est nécessaire — le `issuer` est déjà configuré correctement. C'est uniquement une action administrative de réinitialisation du MFA pour les utilisateurs existants.
 
