@@ -36,27 +36,38 @@ export function ContactSection() {
     <section id="contact" className="py-24 gradient-hero">
       <div className="container">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-          <div>
-            <span className="text-sm font-semibold uppercase tracking-wider text-primary">Contact</span>
-            <h2 className="text-3xl md:text-4xl font-bold mt-3 text-primary-foreground mb-6">
-              Parlons de votre <span className="gradient-text">projet Cloud</span>
-            </h2>
-            <p className="text-secondary-foreground/70 mb-8">
-              Contactez-nous pour une consultation gratuite et découvrez comment Cloud Mature peut transformer votre infrastructure.
-            </p>
-            <div className="space-y-4">
-              {[
-                { icon: Mail, text: "info@cloudmature.com" },
-                { icon: Phone, text: "+224 621 00 00 00" },
-                { icon: MapPin, text: "Conakry, Guinée" },
-              ].map((item) => (
-                <div key={item.text} className="flex items-center gap-3 text-secondary-foreground/80">
-                  <div className="p-2 rounded-lg gradient-primary">
-                    <item.icon size={18} className="text-primary-foreground" />
+          <div className="space-y-8">
+            <div>
+              <span className="text-sm font-semibold uppercase tracking-wider text-primary">Contact</span>
+              <h2 className="text-3xl md:text-4xl font-bold mt-3 text-primary-foreground mb-6">
+                Parlons de votre <span className="gradient-text">projet Cloud</span>
+              </h2>
+              <p className="text-secondary-foreground/70 mb-8">
+                Contactez-nous pour une consultation gratuite et découvrez comment Cloud Mature peut transformer votre infrastructure.
+              </p>
+              <div className="space-y-4">
+                {[
+                  { icon: Mail, text: "info@cloudmature.com" },
+                  { icon: Phone, text: "+224 621 00 00 00" },
+                  { icon: MapPin, text: "Conakry, Guinée" },
+                ].map((item) => (
+                  <div key={item.text} className="flex items-center gap-3 text-secondary-foreground/80">
+                    <div className="p-2 rounded-lg gradient-primary">
+                      <item.icon size={18} className="text-primary-foreground" />
+                    </div>
+                    {item.text}
                   </div>
-                  {item.text}
-                </div>
-              ))}
+                ))}
+              </div>
+            </div>
+
+            <div className="relative group overflow-hidden rounded-2xl">
+              <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-primary/30 via-accent/20 to-primary/10 blur-lg opacity-60" />
+              <img
+                src={contactImage}
+                alt="Consultante Cloud Mature au téléphone"
+                className="relative w-full h-56 object-cover object-top rounded-2xl ring-1 ring-white/10"
+              />
             </div>
           </div>
 
