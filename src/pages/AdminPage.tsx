@@ -1433,6 +1433,13 @@ function AdminUsers() {
     load();
   };
 
+  const restoreProfile = async (userId: string) => {
+    const { error } = await supabase.from("profiles").update({ deleted_at: null } as any).eq("user_id", userId);
+    if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    else toast({ title: "Profil restauré", description: "Le compte a été réactivé avec succès." });
+    load();
+  };
+
   const deleteUser = async (userId: string, userName: string) => {
     if (!window.confirm(`Êtes-vous sûr de vouloir supprimer définitivement le compte de "${userName}" ? Cette action est irréversible.`)) return;
     const { data, error } = await supabase.functions.invoke("delete-user", { body: { user_id: userId } });
