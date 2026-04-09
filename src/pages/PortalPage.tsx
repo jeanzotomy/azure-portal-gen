@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useUserRoles } from "@/hooks/use-admin";
+import { useMfaCheck } from "@/hooks/use-mfa";
 import { Progress } from "@/components/ui/progress";
 import {
   SidebarProvider,
@@ -34,6 +35,7 @@ function PortalContent() {
   const [tab, setTab] = useState<Tab>("dashboard");
   const navigate = useNavigate();
   const { isAdmin, isAgent } = useUserRoles();
+  const mfaVerified = useMfaCheck();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
 
