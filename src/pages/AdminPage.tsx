@@ -1420,6 +1420,8 @@ function AdminUsers() {
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [changingRole, setChangingRole] = useState<string | null>(null);
+  const [mfaStatus, setMfaStatus] = useState<Record<string, boolean>>({});
+  const [mfaLoading, setMfaLoading] = useState<string | null>(null);
   const { toast } = useToast();
 
   const load = async () => {
@@ -1432,9 +1434,32 @@ function AdminUsers() {
       map[r.user_id].push(r.role);
     });
     setUserRoles(map);
+
+    // Load MFA status for all users
+    const mfaMap: Record<string, boolean> = {};
+    for (const prof of (profs || [])) {
+      try {
+        const { data } = await supabase.functions.invoke("manage-user-mfa", { body: { user_id: prof.user_id, action: "list" } });
+        mfaMap[prof.user_id] = !!data?.enrolled;
+      } catch { mfaMap[prof.user_id] = false; }
+    }
+    setMfaStatus(mfaMap);
   };
 
   useEffect(() => { load(); }, []);
+
+  const disableMfa = async (userId: string, userName: string) => {
+    if (!window.confirm(`Désactiver le MFA pour "${userName}" ? L'utilisateur devra le reconfigurer.`)) return;
+    setMfaLoading(userId);
+    const { data, error } = await supabase.functions.invoke("manage-user-mfa", { body: { user_id: userId, action: "unenroll" } });
+    if (error || data?.error) {
+      toast({ title: "Erreur", description: data?.error || error?.message || "Impossible de désactiver le MFA.", variant: "destructive" });
+    } else {
+      toast({ title: "MFA désactivé", description: `Le MFA de "${userName}" a été réinitialisé.` });
+      setMfaStatus(prev => ({ ...prev, [userId]: false }));
+    }
+    setMfaLoading(null);
+  };
 
   const assignRole = async (userId: string, role: string) => {
     setChangingRole(userId);
@@ -1562,6 +1587,21 @@ function AdminUsers() {
                     >
                       <Trash2 size={16} />
                     </button>
+                    {mfaStatus[p.user_id] && (
+                      <button
+                        onClick={() => disableMfa(p.user_id, p.full_name || "cet utilisateur")}
+                        disabled={mfaLoading === p.user_id}
+                        title="Désactiver MFA"
+                        className="p-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                      >
+                        <Shield size={16} />
+                      </button>
+                    )}
+                    {!mfaStatus[p.user_id] && (
+                      <span title="MFA non activé" className="p-1.5 rounded-lg bg-muted text-muted-foreground/40">
+                        <Shield size={16} />
+                      </span>
+                    )}
                   <div className="flex items-center gap-1.5">
                     <UserCog size={14} className="text-muted-foreground" />
                     <select value={currentRole} onChange={(e) => assignRole(p.user_id, e.target.value)}
