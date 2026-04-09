@@ -29,8 +29,16 @@ export default function AuthPage() {
         toast({ title: "Email envoyé!", description: "Vérifiez votre boîte de réception pour réinitialiser votre mot de passe." });
         setMode("login");
       } else if (mode === "login") {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+        // Check if user is blocked
+        const { data: profile } = await supabase.from("profiles").select("blocked").eq("user_id", data.user.id).maybeSingle();
+        if (profile?.blocked) {
+          await supabase.auth.signOut();
+          toast({ title: "Compte bloqué", description: "Votre compte a été suspendu. Veuillez contacter l'administrateur à info@cloudmature.com.", variant: "destructive" });
+          setLoading(false);
+          return;
+        }
         navigate("/mfa");
       } else {
         const { error } = await supabase.auth.signUp({
