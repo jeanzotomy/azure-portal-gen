@@ -48,10 +48,10 @@ function PortalContent() {
 
   useEffect(() => {
     const checkBlocked = async (userId: string) => {
-      const { data } = await supabase.from("profiles").select("blocked").eq("user_id", userId).maybeSingle();
-      if (data?.blocked) {
+      const { data } = await supabase.from("profiles").select("blocked, deleted_at").eq("user_id", userId).maybeSingle();
+      if (data?.blocked || (data as any)?.deleted_at) {
         await supabase.auth.signOut();
-        navigate("/auth?blocked=1");
+        navigate(data?.blocked ? "/auth?blocked=1" : "/auth?deleted=1");
         return true;
       }
       return false;
