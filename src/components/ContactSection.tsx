@@ -12,19 +12,36 @@ export function ContactSection() {
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", company: "", message: "" });
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  const validate = () => {
+    const errs: Record<string, string> = {};
+    if (!form.name.trim()) errs.name = "Le nom est requis.";
+    if (!form.email.trim()) errs.email = "L'email est requis.";
+    else if (!validateEmail(form.email.trim())) errs.email = "Veuillez entrer un email valide.";
+    if (!form.company.trim()) errs.company = "L'entreprise est requise.";
+    if (!form.message.trim()) errs.message = "Le message est requis.";
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validate()) return;
     setLoading(true);
     try {
       const { error } = await supabase.from("contact_requests").insert({
-        name: form.name,
-        email: form.email,
-        company: form.company,
-        message: form.message,
+        name: form.name.trim(),
+        email: form.email.trim(),
+        company: form.company.trim(),
+        message: form.message.trim(),
       });
       if (error) throw error;
       toast({ title: "Message envoyé!", description: "Nous vous répondrons dans les meilleurs délais." });
       setForm({ name: "", email: "", company: "", message: "" });
+      setErrors({});
     } catch {
       toast({ title: "Erreur", description: "Veuillez réessayer.", variant: "destructive" });
     } finally {
@@ -81,18 +98,30 @@ export function ContactSection() {
           </div>
 
           <form onSubmit={handleSubmit} className="glass rounded-2xl p-8 space-y-4">
-            <Input placeholder="Votre nom" required value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="bg-secondary/30 border-border/30 text-primary-foreground placeholder:text-secondary-foreground/40" />
-            <Input type="email" placeholder="Email" required value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className="bg-secondary/30 border-border/30 text-primary-foreground placeholder:text-secondary-foreground/40" />
-            <Input placeholder="Entreprise" value={form.company}
-              onChange={(e) => setForm({ ...form, company: e.target.value })}
-              className="bg-secondary/30 border-border/30 text-primary-foreground placeholder:text-secondary-foreground/40" />
-            <Textarea placeholder="Votre message" required rows={4} value={form.message}
-              onChange={(e) => setForm({ ...form, message: e.target.value })}
-              className="bg-secondary/30 border-border/30 text-primary-foreground placeholder:text-secondary-foreground/40" />
+            <div>
+              <Input placeholder="Votre nom *" required value={form.name}
+                onChange={(e) => { setForm({ ...form, name: e.target.value }); setErrors(prev => ({ ...prev, name: "" })); }}
+                className={`bg-secondary/30 border-border/30 text-primary-foreground placeholder:text-secondary-foreground/40 ${errors.name ? "border-destructive" : ""}`} />
+              {errors.name && <p className="text-xs text-destructive mt-1">{errors.name}</p>}
+            </div>
+            <div>
+              <Input type="email" placeholder="Email *" required value={form.email}
+                onChange={(e) => { setForm({ ...form, email: e.target.value }); setErrors(prev => ({ ...prev, email: "" })); }}
+                className={`bg-secondary/30 border-border/30 text-primary-foreground placeholder:text-secondary-foreground/40 ${errors.email ? "border-destructive" : ""}`} />
+              {errors.email && <p className="text-xs text-destructive mt-1">{errors.email}</p>}
+            </div>
+            <div>
+              <Input placeholder="Entreprise *" required value={form.company}
+                onChange={(e) => { setForm({ ...form, company: e.target.value }); setErrors(prev => ({ ...prev, company: "" })); }}
+                className={`bg-secondary/30 border-border/30 text-primary-foreground placeholder:text-secondary-foreground/40 ${errors.company ? "border-destructive" : ""}`} />
+              {errors.company && <p className="text-xs text-destructive mt-1">{errors.company}</p>}
+            </div>
+            <div>
+              <Textarea placeholder="Votre message *" required rows={4} value={form.message}
+                onChange={(e) => { setForm({ ...form, message: e.target.value }); setErrors(prev => ({ ...prev, message: "" })); }}
+                className={`bg-secondary/30 border-border/30 text-primary-foreground placeholder:text-secondary-foreground/40 ${errors.message ? "border-destructive" : ""}`} />
+              {errors.message && <p className="text-xs text-destructive mt-1">{errors.message}</p>}
+            </div>
             <Button type="submit" className="w-full gradient-primary text-primary-foreground border-0" disabled={loading}>
               <Send size={16} className="mr-2" /> {loading ? "Envoi..." : "Envoyer"}
             </Button>
