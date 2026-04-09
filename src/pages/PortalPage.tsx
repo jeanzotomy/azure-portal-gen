@@ -85,6 +85,29 @@ function PortalContent() {
     if (mfaVerified === false && !loading) navigate("/mfa");
   }, [mfaVerified, loading, navigate]);
 
+  useEffect(() => {
+    if (!user) return;
+    const checkProfile = async () => {
+      const { data } = await supabase.from("profiles").select("full_name, company, phone, created_at").eq("user_id", user.id).maybeSingle();
+      if (!data) return;
+      const createdAt = new Date(data.created_at);
+      const deadline = new Date(createdAt.getTime() + 30 * 24 * 60 * 60 * 1000);
+      const now = new Date();
+      const remaining = Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      const incomplete = !data.full_name || !data.company || !data.phone;
+      if (incomplete && remaining > 0) {
+        setProfileIncomplete(true);
+        setDaysLeft(remaining);
+      } else if (incomplete && remaining <= 0) {
+        setProfileIncomplete(true);
+        setDaysLeft(0);
+      } else {
+        setProfileIncomplete(false);
+      }
+    };
+    checkProfile();
+  }, [user]);
+
   if (loading || mfaVerified === null) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">Chargement...</div>;
   if (!user) return null;
 
