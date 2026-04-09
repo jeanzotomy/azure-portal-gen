@@ -1,5 +1,6 @@
 import { Navbar } from "@/components/Navbar";
 import { HeroSection } from "@/components/HeroSection";
+import { HeroScreenCarousel } from "@/components/HeroScreenCarousel";
 import { ServicesSection } from "@/components/ServicesSection";
 import { IndustriesSection } from "@/components/IndustriesSection";
 import { WhyUsSection } from "@/components/WhyUsSection";
@@ -10,7 +11,12 @@ import { ScrollToTop } from "@/components/ScrollToTop";
 const Index = () => (
   <div className="min-h-screen">
     <Navbar />
-    <HeroSection />
+    <div className="relative">
+      <HeroSection />
+      <div className="relative z-20 -mt-32 pb-20">
+        <HeroScreenCarousel />
+      </div>
+    </div>
     <ServicesSection />
     <IndustriesSection />
     <WhyUsSection />

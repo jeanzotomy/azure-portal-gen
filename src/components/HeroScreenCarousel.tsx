@@ -22,7 +22,7 @@ export function HeroScreenCarousel() {
   }, []);
 
   return (
-    <div className="relative mx-auto max-w-5xl mt-20 animate-fade-up delay-500">
+    <div className="relative mx-auto max-w-5xl animate-fade-up delay-500">
       {/* Glow behind monitor */}
       <div className="absolute -inset-8 bg-gradient-to-t from-primary/20 via-accent/10 to-transparent blur-3xl rounded-3xl opacity-60" />
 
