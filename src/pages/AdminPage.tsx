@@ -1414,6 +1414,17 @@ function AdminUsers() {
     load();
   };
 
+  const deleteUser = async (userId: string, userName: string) => {
+    if (!window.confirm(`Êtes-vous sûr de vouloir supprimer définitivement le compte de "${userName}" ? Cette action est irréversible.`)) return;
+    const { data, error } = await supabase.functions.invoke("delete-user", { body: { user_id: userId } });
+    if (error || data?.error) {
+      toast({ title: "Erreur", description: data?.error || error?.message || "Impossible de supprimer l'utilisateur.", variant: "destructive" });
+    } else {
+      toast({ title: "Compte supprimé", description: `Le compte de "${userName}" a été supprimé définitivement.` });
+      load();
+    }
+  };
+
   const getRoleBadge = (roles: string[]) => {
     if (roles.includes("admin")) return { label: "Admin", color: "bg-primary/10 text-primary border-primary/20" };
     if (roles.includes("agent")) return { label: "Agent", color: "bg-orange-500/10 text-orange-500 border-orange-500/20" };
