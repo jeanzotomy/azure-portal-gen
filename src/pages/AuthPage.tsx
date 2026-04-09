@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Cloud, ArrowLeft } from "lucide-react";
-import logo from "@/assets/logo.png";
+import favicon from "@/assets/favicon.png";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
