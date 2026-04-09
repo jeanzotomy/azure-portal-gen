@@ -19,7 +19,7 @@ export function HeroSection() {
     <section id="hero" className="relative min-h-screen flex items-center overflow-hidden">
       <div className="absolute inset-0 gradient-hero" />
 
-      <div className="container relative z-10 py-32">
+      <div className="container relative z-10 py-24">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="animate-fade-up">
             <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass mb-6 text-sm font-medium tracking-wide border border-cyan-glow/30 shadow-[0_0_15px_hsl(195_100%_40%/0.15)] animate-pulse-glow">
