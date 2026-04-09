@@ -56,9 +56,9 @@ export function HeroSection() {
                 onClick={() => document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" })}>
                 Demander une consultation <ArrowRight size={18} className="ml-2" />
               </Button>
-              <Button size="lg" variant="outline" className="border-cyan-glow/50 text-cyan-glow hover:bg-cyan-glow/10"
+              <Button size="lg" className="gradient-primary text-primary-foreground border-0 hover:opacity-90 animate-pulse-glow"
                 onClick={() => window.location.href = "/auth"}>
-                Devenir client
+                <UserPlus size={18} className="mr-2" /> Devenir client
               </Button>
             </div>
           </div>
