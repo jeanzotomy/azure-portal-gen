@@ -26,7 +26,7 @@ import {
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RePieChart, Pie, Cell, AreaChart, Area } from "recharts";
 import type { User as SupaUser } from "@supabase/supabase-js";
 
-type AdminTab = "dashboard" | "projects" | "tickets" | "users";
+type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts";
 type AgentTab = "dashboard" | "tickets";
 
 function AdminContent() {
