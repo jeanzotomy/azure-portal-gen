@@ -1,11 +1,12 @@
-import { Landmark, ShieldCheck, Mountain, Building2, Rocket } from "lucide-react";
+import { Landmark, ShieldCheck, Mountain, Building2, Rocket, MonitorSmartphone } from "lucide-react";
 
 const industries = [
   { icon: Landmark, title: "Banques & Finance", desc: "Sécurité et conformité accrues pour les institutions financières." },
   { icon: ShieldCheck, title: "Assurances", desc: "Gestion efficace des charges de travail critiques." },
   { icon: Mountain, title: "Compagnies Minières", desc: "Connectivité hybride, Edge computing, IoT." },
   { icon: Building2, title: "Gouvernements", desc: "Souveraineté des données et résilience." },
-  { icon: Rocket, title: "Startups & IT", desc: "Accélération du go-to-market et innovation continue." },
+  { icon: Rocket, title: "Startups", desc: "Accélération du go-to-market et innovation continue." },
+  { icon: MonitorSmartphone, title: "IT", desc: "Modernisation des infrastructures et transformation digitale." },
 ];
 
 export function IndustriesSection() {
@@ -22,7 +23,7 @@ export function IndustriesSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {industries.map((ind) => (
             <div
               key={ind.title}
