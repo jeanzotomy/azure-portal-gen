@@ -57,8 +57,8 @@ export function HeroSection() {
                 Demander une consultation <ArrowRight size={18} className="ml-2" />
               </Button>
               <Button size="lg" variant="outline" className="border-cyan-glow/50 text-cyan-glow hover:bg-cyan-glow/10"
-                onClick={() => document.querySelector("#services")?.scrollIntoView({ behavior: "smooth" })}>
-                Nos services
+                onClick={() => window.location.href = "/auth"}>
+                Devenir client
               </Button>
             </div>
           </div>
