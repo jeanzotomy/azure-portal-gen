@@ -47,12 +47,30 @@ function PortalContent() {
   const collapsed = state === "collapsed";
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const checkBlocked = async (userId: string) => {
+      const { data } = await supabase.from("profiles").select("blocked").eq("user_id", userId).maybeSingle();
+      if (data?.blocked) {
+        await supabase.auth.signOut();
+        navigate("/auth");
+        return true;
+      }
+      return false;
+    };
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
+      if (session?.user) {
+        const blocked = await checkBlocked(session.user.id);
+        if (blocked) return;
+      }
       setUser(session?.user ?? null);
       setLoading(false);
       if (!session?.user) navigate("/auth");
     });
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (session?.user) {
+        const blocked = await checkBlocked(session.user.id);
+        if (blocked) return;
+      }
       setUser(session?.user ?? null);
       setLoading(false);
       if (!session?.user) navigate("/auth");

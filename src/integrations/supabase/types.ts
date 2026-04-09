@@ -46,6 +46,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          blocked: boolean
           company: string | null
           created_at: string
           full_name: string | null
@@ -55,6 +56,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          blocked?: boolean
           company?: string | null
           created_at?: string
           full_name?: string | null
@@ -64,6 +66,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          blocked?: boolean
           company?: string | null
           created_at?: string
           full_name?: string | null

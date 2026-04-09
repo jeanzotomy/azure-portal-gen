@@ -20,7 +20,7 @@ import {
 import {
   LayoutDashboard, FolderOpen, LifeBuoy, Users, LogOut, Shield, Clock, CheckCircle2,
   AlertCircle, Bell, ChevronDown, ChevronUp, MessageSquare, Search, Send, UserCog,
-  Flag, DollarSign, Calendar, Filter, TrendingUp, Activity, BarChart3, PieChart,
+  Flag, DollarSign, Calendar, Filter, TrendingUp, Activity, BarChart3, PieChart, ShieldBan, ShieldCheck,
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RePieChart, Pie, Cell, AreaChart, Area } from "recharts";
 import type { User as SupaUser } from "@supabase/supabase-js";
@@ -1246,6 +1246,13 @@ function AdminUsers() {
     load();
   };
 
+  const toggleBlock = async (userId: string, currentlyBlocked: boolean) => {
+    const { error } = await supabase.from("profiles").update({ blocked: !currentlyBlocked }).eq("user_id", userId);
+    if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    else toast({ title: currentlyBlocked ? "Utilisateur débloqué" : "Utilisateur bloqué", description: currentlyBlocked ? "L'utilisateur peut maintenant se connecter." : "L'utilisateur ne pourra plus accéder à son espace." });
+    load();
+  };
+
   const getRoleBadge = (roles: string[]) => {
     if (roles.includes("admin")) return { label: "Admin", color: "bg-primary/10 text-primary border-primary/20" };
     if (roles.includes("agent")) return { label: "Agent", color: "bg-orange-500/10 text-orange-500 border-orange-500/20" };
@@ -1318,15 +1325,29 @@ function AdminUsers() {
                 <p className="text-[11px] text-muted-foreground/50">
                   Inscrit le {new Date(p.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
                 </p>
-                <div className="flex items-center gap-1.5">
-                  <UserCog size={14} className="text-muted-foreground" />
-                  <select value={currentRole} onChange={(e) => assignRole(p.user_id, e.target.value)}
-                    disabled={changingRole === p.user_id}
-                    className="text-xs border border-border rounded-lg px-2 py-1.5 bg-card text-card-foreground focus:outline-none focus:ring-2 focus:ring-primary/50">
-                    {roleOptions.map((opt) => (<option key={opt.value} value={opt.value}>{opt.label}</option>))}
-                  </select>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => toggleBlock(p.user_id, !!p.blocked)}
+                    title={p.blocked ? "Débloquer" : "Bloquer"}
+                    className={`p-1.5 rounded-lg transition-colors ${p.blocked ? "bg-destructive/10 text-destructive hover:bg-destructive/20" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
+                  >
+                    {p.blocked ? <ShieldBan size={16} /> : <ShieldCheck size={16} />}
+                  </button>
+                  <div className="flex items-center gap-1.5">
+                    <UserCog size={14} className="text-muted-foreground" />
+                    <select value={currentRole} onChange={(e) => assignRole(p.user_id, e.target.value)}
+                      disabled={changingRole === p.user_id}
+                      className="text-xs border border-border rounded-lg px-2 py-1.5 bg-card text-card-foreground focus:outline-none focus:ring-2 focus:ring-primary/50">
+                      {roleOptions.map((opt) => (<option key={opt.value} value={opt.value}>{opt.label}</option>))}
+                    </select>
+                  </div>
                 </div>
               </div>
+              {p.blocked && (
+                <div className="mt-2 flex items-center gap-1.5 text-xs text-destructive font-medium">
+                  <ShieldBan size={12} /> Compte bloqué
+                </div>
+              )}
             </div>
           );
         })}
