@@ -1348,23 +1348,10 @@ function AdminContacts() {
 
       {/* List */}
       <div className="space-y-3">
-        {filtered.map((c) => {
+      {filtered.map((c) => {
           const st = statusConfig[c.status] || statusConfig.new;
-          return (
-            <div key={c.id} className="bg-card rounded-xl p-5 border border-border/50 shadow-card hover:shadow-card-hover transition-all duration-300">
-              <div className="flex flex-col lg:flex-row lg:items-start gap-4">
-                <div className="flex-1 min-w-0 space-y-2">
-                  <div className="flex items-center gap-3 flex-wrap">
-                    <h3 className="font-semibold text-card-foreground">{c.name}</h3>
-                    <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${st.color}`}>{st.label}</span>
-                  </div>
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                    <span>{c.email}</span>
-                    {c.company && <span>• {c.company}</span>}
-                    <span>• {new Date(c.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
-                  </div>
-                  <p className="text-sm text-foreground/80 bg-muted/50 rounded-lg p-3 mt-2">{c.message}</p>
-                </div>
+          return <ContactCard key={c.id} contact={c} statusConfig={st} updateStatus={updateStatus} deleteContact={deleteContact} />;
+        })}
                 <div className="flex items-center gap-2 shrink-0">
                   {c.status === "new" && (
                     <Button size="sm" variant="outline" onClick={() => updateStatus(c.id, "read")}>Marquer lu</Button>
