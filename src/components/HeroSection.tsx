@@ -21,9 +21,15 @@ export function HeroSection() {
       <div className="container relative z-10 py-32">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="animate-fade-up">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-6 text-sm text-cyan-glow">
-              <Cloud size={16} />
-              Consultation TI · Cloud · DevOps
+            <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass mb-6 text-sm font-medium tracking-wide border border-cyan-glow/30 shadow-[0_0_15px_hsl(195_100%_40%/0.15)] animate-pulse-glow">
+              <Cloud size={16} className="text-cyan-glow" />
+              <span className="text-cyan-glow">Consultation TI</span>
+              <span className="text-secondary-foreground/40">·</span>
+              <span className="text-cyan-glow">Cloud</span>
+              <span className="text-secondary-foreground/40">·</span>
+              <span className="text-cyan-glow">DevOps</span>
+              <span className="text-secondary-foreground/40">·</span>
+              <span className="gradient-text font-semibold">IA</span>
             </div>
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-tight text-primary-foreground mb-6">
               {words.map((word, i) => (
