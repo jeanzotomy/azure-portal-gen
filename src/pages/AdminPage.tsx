@@ -1420,6 +1420,8 @@ function AdminUsers() {
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [changingRole, setChangingRole] = useState<string | null>(null);
+  const [mfaStatus, setMfaStatus] = useState<Record<string, boolean>>({});
+  const [mfaLoading, setMfaLoading] = useState<string | null>(null);
   const { toast } = useToast();
 
   const load = async () => {
