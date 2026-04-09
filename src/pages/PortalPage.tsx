@@ -51,7 +51,7 @@ function PortalContent() {
       const { data } = await supabase.from("profiles").select("blocked").eq("user_id", userId).maybeSingle();
       if (data?.blocked) {
         await supabase.auth.signOut();
-        navigate("/auth");
+        navigate("/auth?blocked=1");
         return true;
       }
       return false;

@@ -1,11 +1,11 @@
-import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Cloud, ArrowLeft, Mail } from "lucide-react";
+import { Cloud, ArrowLeft, Mail, ShieldBan } from "lucide-react";
 import favicon from "@/assets/favicon.png";
 
 export default function AuthPage() {
@@ -14,8 +14,16 @@ export default function AuthPage() {
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
   const [loading, setLoading] = useState(false);
+  const [searchParams] = useSearchParams();
+  const isBlocked = searchParams.get("blocked") === "1";
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  useEffect(() => {
+    if (isBlocked) {
+      toast({ title: "Compte bloqué", description: "Votre compte a été suspendu. Veuillez contacter l'administrateur à info@cloudmature.com.", variant: "destructive" });
+    }
+  }, [isBlocked]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -29,8 +37,16 @@ export default function AuthPage() {
         toast({ title: "Email envoyé!", description: "Vérifiez votre boîte de réception pour réinitialiser votre mot de passe." });
         setMode("login");
       } else if (mode === "login") {
-        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
+        // Check if user is blocked
+        const { data: profile } = await supabase.from("profiles").select("blocked").eq("user_id", data.user.id).maybeSingle();
+        if (profile?.blocked) {
+          await supabase.auth.signOut();
+          toast({ title: "Compte bloqué", description: "Votre compte a été suspendu. Veuillez contacter l'administrateur à info@cloudmature.com.", variant: "destructive" });
+          setLoading(false);
+          return;
+        }
         navigate("/mfa");
       } else {
         const { error } = await supabase.auth.signUp({
@@ -75,6 +91,16 @@ export default function AuthPage() {
               <p className="text-sm text-secondary-foreground/60">Cloud Mature</p>
             </div>
           </div>
+
+          {isBlocked && (
+            <div className="mb-4 flex items-center gap-3 rounded-xl bg-destructive/10 border border-destructive/30 p-4 text-sm text-destructive">
+              <ShieldBan size={20} className="flex-shrink-0" />
+              <div>
+                <p className="font-semibold">Compte suspendu</p>
+                <p className="text-xs mt-0.5 text-destructive/80">Votre accès a été restreint. Contactez info@cloudmature.com pour plus d'informations.</p>
+              </div>
+            </div>
+          )}
 
           {mode !== "forgot" && (
             <>
