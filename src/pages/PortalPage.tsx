@@ -235,7 +235,24 @@ function ProjectsTab({ user }: { user: SupaUser }) {
   const [description, setDescription] = useState("");
   const [budget, setBudget] = useState("");
   const [deadline, setDeadline] = useState("");
-  const [technologies, setTechnologies] = useState("");
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
+
+  const serviceOptions = [
+    "Stratégie & Adoption Cloud",
+    "Optimisation FinOps",
+    "Gouvernance & Sécurité",
+    "Architecture & Ingénierie",
+    "Migration Cloud",
+    "Formation & Coaching",
+    "Infogérance & Support",
+    "Adoption & Maturité IA",
+  ];
+
+  const toggleService = (service: string) => {
+    setSelectedServices(prev =>
+      prev.includes(service) ? prev.filter(s => s !== service) : [...prev, service]
+    );
+  };
   const [priority, setPriority] = useState("normal");
   const [files, setFiles] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
@@ -249,7 +266,7 @@ function ProjectsTab({ user }: { user: SupaUser }) {
   useEffect(() => { loadProjects(); }, []);
 
   const resetForm = () => {
-    setName(""); setDescription(""); setBudget(""); setDeadline(""); setTechnologies(""); setPriority("normal"); setFiles([]);
+    setName(""); setDescription(""); setBudget(""); setDeadline(""); setSelectedServices([]); setPriority("normal"); setFiles([]);
     setEditingProject(null);
   };
 
@@ -261,7 +278,7 @@ function ProjectsTab({ user }: { user: SupaUser }) {
     setDescription(p.description || "");
     setBudget(p.budget || "");
     setDeadline(p.deadline || "");
-    setTechnologies(p.technologies || "");
+    setSelectedServices(p.technologies ? p.technologies.split(", ") : []);
     setPriority(p.priority || "normal");
     setFiles([]);
     setShowForm(true);
@@ -306,7 +323,7 @@ function ProjectsTab({ user }: { user: SupaUser }) {
       description: description.trim() || null,
       budget: budget.trim() || null,
       deadline: deadline.trim() || null,
-      technologies: technologies.trim() || null,
+      technologies: selectedServices.length > 0 ? selectedServices.join(", ") : null,
       priority,
     };
 
@@ -371,8 +388,14 @@ function ProjectsTab({ user }: { user: SupaUser }) {
               </div>
             </div>
             <div>
-              <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5"><Cpu size={14} /> Technologies / Stack préféré</label>
-              <Input placeholder="Ex: AWS, React, Python, Kubernetes..." value={technologies} onChange={(e) => setTechnologies(e.target.value)} />
+              <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5"><Cpu size={14} /> Services souhaités</label>
+              <div className="flex flex-wrap gap-2">
+                {serviceOptions.map((service) => (
+                  <button type="button" key={service} onClick={() => toggleService(service)}
+                    className={`text-sm px-3 py-1.5 rounded-lg transition-colors border ${selectedServices.includes(service) ? "bg-primary text-primary-foreground border-primary" : "bg-muted text-muted-foreground border-border hover:bg-muted/80"}`}
+                  >{service}</button>
+                ))}
+              </div>
             </div>
             <div>
               <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5"><Flag size={14} /> Priorité</label>
