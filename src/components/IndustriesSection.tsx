@@ -11,14 +11,12 @@ const industries = [
 
 export function IndustriesSection() {
   return (
-    <section id="industries" className="py-24 bg-gradient-to-b from-white via-white to-background relative overflow-hidden">
-      {/* Decorative blobs */}
+    <section id="industries" className="py-24 bg-gradient-to-b from-white to-background relative overflow-hidden">
       <div className="absolute top-0 left-0 w-72 h-72 bg-primary/5 rounded-full blur-3xl -translate-x-1/2 -translate-y-1/2" />
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-accent/5 rounded-full blur-3xl translate-x-1/3 translate-y-1/3" />
 
       <div className="container relative z-10">
-        {/* Header */}
-        <div className="text-center mb-14">
+        <div className="text-center mb-16">
           <span className="inline-block text-sm font-semibold uppercase tracking-wider text-primary bg-primary/10 px-4 py-1.5 rounded-full mb-4">
             Industries
           </span>
@@ -30,30 +28,27 @@ export function IndustriesSection() {
           </p>
         </div>
 
-        {/* Cards grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-10">
-          {industries.map((ind, i) => (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {industries.map((ind) => (
             <div
               key={ind.title}
-              className="relative group"
+              className="relative bg-white rounded-2xl p-8 text-center border border-muted hover:border-transparent shadow-sm hover:shadow-xl transition-all duration-500 group overflow-hidden"
             >
-              {/* Card */}
-              <div className="relative bg-white rounded-2xl pt-12 pb-8 px-8 text-center border border-muted/50 shadow-[0_4px_24px_-4px_rgba(0,0,0,0.06)] hover:shadow-[0_12px_40px_-8px_rgba(0,0,0,0.12)] transition-all duration-500 hover:-translate-y-1">
-                {/* Floating icon — positioned above the card */}
-                <div className={`absolute -top-7 left-1/2 -translate-x-1/2 w-14 h-14 rounded-xl bg-gradient-to-br ${ind.color} flex items-center justify-center shadow-lg group-hover:scale-110 group-hover:rotate-3 transition-all duration-500`}>
-                  <ind.icon size={26} className="text-white" />
-                </div>
+              {/* Hover gradient border */}
+              <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${ind.color} opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10 scale-[1.02]`} />
+              <div className="absolute inset-[2px] rounded-2xl bg-white -z-[5]" />
 
-                {/* Top accent bar */}
-                <div className={`absolute top-0 left-1/2 -translate-x-1/2 h-[3px] w-0 group-hover:w-2/3 bg-gradient-to-r ${ind.color} transition-all duration-500 rounded-b-full`} />
+              {/* Top accent line */}
+              <div className={`absolute top-0 left-1/2 -translate-x-1/2 h-1 w-0 group-hover:w-full bg-gradient-to-r ${ind.color} transition-all duration-500 rounded-t-2xl`} />
 
-                <h3 className="font-bold text-secondary text-lg mb-2 mt-1">{ind.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{ind.desc}</p>
+              <div className={`mx-auto w-16 h-16 rounded-2xl bg-gradient-to-br ${ind.color} flex items-center justify-center mb-5 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-lg`}>
+                <ind.icon size={28} className="text-white" />
+              </div>
+              <h3 className="font-bold text-secondary text-lg mb-2">{ind.title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{ind.desc}</p>
 
-                {/* Hover CTA */}
-                <div className="mt-4 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
-                  <span className="text-primary text-sm font-medium">En savoir plus →</span>
-                </div>
+              <div className="mt-4 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+                <span className="text-primary text-sm font-medium">En savoir plus →</span>
               </div>
             </div>
           ))}
