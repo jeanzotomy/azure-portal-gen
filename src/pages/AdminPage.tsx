@@ -21,7 +21,7 @@ import {
 import {
   LayoutDashboard, FolderOpen, LifeBuoy, Users, LogOut, Shield, Clock, CheckCircle2,
   AlertCircle, Bell, ChevronDown, ChevronUp, MessageSquare, Search, Send, UserCog,
-  Flag, DollarSign, Calendar, Filter, TrendingUp, Activity, BarChart3, PieChart, ShieldBan, ShieldCheck,
+  Flag, DollarSign, Calendar, Filter, TrendingUp, Activity, BarChart3, PieChart, ShieldBan, ShieldCheck, Trash2,
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RePieChart, Pie, Cell, AreaChart, Area } from "recharts";
 import type { User as SupaUser } from "@supabase/supabase-js";
@@ -1414,6 +1414,17 @@ function AdminUsers() {
     load();
   };
 
+  const deleteUser = async (userId: string, userName: string) => {
+    if (!window.confirm(`Êtes-vous sûr de vouloir supprimer définitivement le compte de "${userName}" ? Cette action est irréversible.`)) return;
+    const { data, error } = await supabase.functions.invoke("delete-user", { body: { user_id: userId } });
+    if (error || data?.error) {
+      toast({ title: "Erreur", description: data?.error || error?.message || "Impossible de supprimer l'utilisateur.", variant: "destructive" });
+    } else {
+      toast({ title: "Compte supprimé", description: `Le compte de "${userName}" a été supprimé définitivement.` });
+      load();
+    }
+  };
+
   const getRoleBadge = (roles: string[]) => {
     if (roles.includes("admin")) return { label: "Admin", color: "bg-primary/10 text-primary border-primary/20" };
     if (roles.includes("agent")) return { label: "Agent", color: "bg-orange-500/10 text-orange-500 border-orange-500/20" };
@@ -1486,14 +1497,21 @@ function AdminUsers() {
                 <p className="text-[11px] text-muted-foreground/50">
                   Inscrit le {new Date(p.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
                 </p>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={() => toggleBlock(p.user_id, !!p.blocked)}
-                    title={p.blocked ? "Débloquer" : "Bloquer"}
-                    className={`p-1.5 rounded-lg transition-colors ${p.blocked ? "bg-destructive/10 text-destructive hover:bg-destructive/20" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
-                  >
-                    {p.blocked ? <ShieldBan size={16} /> : <ShieldCheck size={16} />}
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => toggleBlock(p.user_id, !!p.blocked)}
+                      title={p.blocked ? "Débloquer" : "Bloquer"}
+                      className={`p-1.5 rounded-lg transition-colors ${p.blocked ? "bg-destructive/10 text-destructive hover:bg-destructive/20" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
+                    >
+                      {p.blocked ? <ShieldBan size={16} /> : <ShieldCheck size={16} />}
+                    </button>
+                    <button
+                      onClick={() => deleteUser(p.user_id, p.full_name || "cet utilisateur")}
+                      title="Supprimer le compte"
+                      className="p-1.5 rounded-lg bg-muted text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
+                    >
+                      <Trash2 size={16} />
+                    </button>
                   <div className="flex items-center gap-1.5">
                     <UserCog size={14} className="text-muted-foreground" />
                     <select value={currentRole} onChange={(e) => assignRole(p.user_id, e.target.value)}
