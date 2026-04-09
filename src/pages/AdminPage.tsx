@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/sidebar";
 import {
   LayoutDashboard, FolderOpen, LifeBuoy, Users, LogOut, Shield, Clock, CheckCircle2,
-  AlertCircle, Bell, ChevronDown, ChevronUp, MessageSquare, Search,
+  AlertCircle, Bell, ChevronDown, ChevronUp, MessageSquare, Search, Send,
 } from "lucide-react";
 import type { User as SupaUser } from "@supabase/supabase-js";
 
