@@ -38,6 +38,24 @@ function AdminContent() {
   const navigate = useNavigate();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
+  const [unrepliedCount, setUnrepliedCount] = useState(0);
+
+  useEffect(() => {
+    const fetchUnreplied = async () => {
+      const { data: tickets } = await supabase.from("support_tickets").select("id, status");
+      if (!tickets) return;
+      const openTickets = tickets.filter(t => t.status !== "résolu");
+      let count = 0;
+      for (const t of openTickets) {
+        const { data: replies } = await supabase.from("ticket_replies").select("id").eq("ticket_id", t.id).eq("is_admin", true).limit(1);
+        if (!replies || replies.length === 0) count++;
+      }
+      setUnrepliedCount(count);
+    };
+    fetchUnreplied();
+    const interval = setInterval(fetchUnreplied, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
@@ -88,7 +106,14 @@ function AdminContent() {
                   {agentNavItems.map((item) => (
                     <SidebarMenuItem key={item.id}>
                       <SidebarMenuButton onClick={() => setAgentTab(item.id)} isActive={agentTab === item.id} tooltip={item.label} className="gap-3">
-                        <item.icon size={18} />
+                        <div className="relative">
+                          <item.icon size={18} />
+                          {item.id === "tickets" && unrepliedCount > 0 && (
+                            <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold px-1">
+                              {unrepliedCount}
+                            </span>
+                          )}
+                        </div>
                         <span>{item.label}</span>
                       </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -164,7 +189,14 @@ function AdminContent() {
                 {allNavItems.map((item) => (
                   <SidebarMenuItem key={item.id}>
                     <SidebarMenuButton onClick={() => setTab(item.id)} isActive={tab === item.id} tooltip={item.label} className="gap-3">
-                      <item.icon size={18} />
+                      <div className="relative">
+                        <item.icon size={18} />
+                        {item.id === "tickets" && unrepliedCount > 0 && (
+                          <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold px-1">
+                            {unrepliedCount}
+                          </span>
+                        )}
+                      </div>
                       <span>{item.label}</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
