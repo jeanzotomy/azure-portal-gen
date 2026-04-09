@@ -21,7 +21,7 @@ import {
 const logo = "/favicon.png";
 import {
   LayoutDashboard, FolderOpen, LifeBuoy, User, LogOut, Send, Clock, CheckCircle2, AlertCircle,
-  Menu, Bell, Search, Filter, Upload, X, FileText, DollarSign, Calendar, Cpu, Flag,
+  Menu, Bell, Search, Filter, Upload, X, FileText, DollarSign, Calendar, Cpu, Flag, Pencil,
 } from "lucide-react";
 import type { User as SupaUser } from "@supabase/supabase-js";
 
