@@ -165,16 +165,17 @@ export default function PortalPage() {
   );
 }
 
-function StatCard({ icon: Icon, label, value, color }: { icon: typeof FolderOpen; label: string; value: number; color: string }) {
+function StatCard({ icon: Icon, label, value, color, subtitle }: { icon: typeof FolderOpen; label: string; value: number; color: string; subtitle?: string }) {
   return (
-    <div className="bg-card rounded-xl p-5 shadow-card border border-border/50 hover:shadow-card-hover transition-shadow">
+    <div className="bg-card rounded-xl p-5 shadow-card border border-border/50 hover:shadow-card-hover hover:border-primary/20 transition-all duration-300 group">
       <div className="flex items-center justify-between mb-3">
-        <span className="text-sm text-muted-foreground">{label}</span>
-        <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${color}`}>
+        <span className="text-sm text-muted-foreground font-medium">{label}</span>
+        <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color} group-hover:scale-110 transition-transform duration-300`}>
           <Icon size={18} className="text-primary-foreground" />
         </div>
       </div>
       <p className="text-3xl font-bold text-card-foreground">{value}</p>
+      {subtitle && <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>}
     </div>
   );
 }
@@ -184,61 +185,135 @@ function DashboardTab({ user }: { user: SupaUser }) {
   const [tickets, setTickets] = useState<any[]>([]);
 
   useEffect(() => {
-    supabase.from("projects").select("*").then(({ data }) => setProjects(data || []));
+    supabase.from("projects").select("*").order("created_at", { ascending: false }).then(({ data }) => setProjects(data || []));
     supabase.from("support_tickets").select("*").order("created_at", { ascending: false }).limit(5).then(({ data }) => setTickets(data || []));
   }, []);
 
+  const statusConfig: Record<string, { label: string; icon: typeof Clock; color: string; bg: string }> = {
+    en_cours: { label: "En cours", icon: Clock, color: "text-primary", bg: "bg-primary/10" },
+    termine: { label: "Terminé", icon: CheckCircle2, color: "text-teal-600", bg: "bg-teal-600/10" },
+    en_attente: { label: "En attente", icon: AlertCircle, color: "text-muted-foreground", bg: "bg-muted" },
+  };
+
+  const ticketStatusConfig: Record<string, { label: string; color: string; bg: string }> = {
+    ouvert: { label: "Ouvert", color: "text-primary", bg: "bg-primary/10" },
+    en_cours: { label: "En cours", color: "text-accent", bg: "bg-accent/10" },
+    resolu: { label: "Résolu", color: "text-teal-600", bg: "bg-teal-600/10" },
+    ferme: { label: "Fermé", color: "text-muted-foreground", bg: "bg-muted" },
+  };
+
+  const avgProgress = projects.length > 0
+    ? Math.round(projects.reduce((sum, p) => sum + (p.progress || 0), 0) / projects.length)
+    : 0;
+
   return (
     <div className="space-y-6 animate-fade-up">
-      <div>
-        <h1 className="text-2xl font-bold text-foreground">Bienvenue, {user.user_metadata?.full_name || user.email?.split("@")[0]} 👋</h1>
-        <p className="text-muted-foreground mt-1">Voici un aperçu de votre espace client.</p>
+      {/* Welcome banner */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-accent/5 to-primary/10 rounded-2xl p-6 border border-primary/10">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
+        <div className="relative">
+          <h1 className="text-2xl font-bold text-foreground">Bienvenue, {user.user_metadata?.full_name || user.email?.split("@")[0]} 👋</h1>
+          <p className="text-muted-foreground mt-1">Voici un aperçu de votre espace client.</p>
+        </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <StatCard icon={FolderOpen} label="Projets actifs" value={projects.filter(p => p.status === "en_cours").length} color="gradient-primary" />
-        <StatCard icon={LifeBuoy} label="Tickets ouverts" value={tickets.filter(t => t.status === "ouvert").length} color="bg-accent" />
-        <StatCard icon={CheckCircle2} label="Projets complétés" value={projects.filter(p => p.status === "termine").length} color="bg-teal-600" />
+      {/* Stats grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <StatCard icon={FolderOpen} label="Projets actifs" value={projects.filter(p => p.status === "en_cours").length} color="gradient-primary" subtitle={`${projects.length} total`} />
+        <StatCard icon={LifeBuoy} label="Tickets ouverts" value={tickets.filter(t => t.status === "ouvert").length} color="bg-accent" subtitle={`${tickets.length} total`} />
+        <StatCard icon={CheckCircle2} label="Complétés" value={projects.filter(p => p.status === "termine").length} color="bg-teal-600" />
+        <StatCard icon={DollarSign} label="Progression moy." value={avgProgress} color="bg-primary" subtitle={`${avgProgress}% en moyenne`} />
       </div>
 
-      {projects.length > 0 && (
-        <div className="bg-card rounded-xl p-6 shadow-card border border-border/50">
-          <h3 className="font-semibold text-card-foreground mb-4">Projets récents</h3>
-          <div className="space-y-4">
-            {projects.slice(0, 3).map((p) => (
-              <div key={p.id} className="flex items-center justify-between gap-4">
-                <div className="min-w-0 flex-1">
-                  <p className="font-medium text-card-foreground truncate">{p.name}</p>
-                  <p className="text-sm text-muted-foreground truncate">{p.description}</p>
-                </div>
-                <div className="w-32 flex-shrink-0">
-                  <Progress value={p.progress} className="h-2" />
-                  <p className="text-xs text-muted-foreground text-right mt-1">{p.progress}%</p>
-                </div>
-              </div>
-            ))}
+      {/* Two-column layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        {/* Recent projects */}
+        <div className="bg-card rounded-xl shadow-card border border-border/50 overflow-hidden">
+          <div className="p-5 border-b border-border/50 flex items-center justify-between">
+            <h3 className="font-semibold text-card-foreground flex items-center gap-2">
+              <FolderOpen size={16} className="text-primary" /> Projets récents
+            </h3>
+            <span className="text-xs text-muted-foreground">{projects.length} projet(s)</span>
           </div>
+          {projects.length > 0 ? (
+            <div className="divide-y divide-border/50">
+              {projects.slice(0, 4).map((p) => {
+                const sc = statusConfig[p.status] || statusConfig.en_cours;
+                return (
+                  <div key={p.id} className="p-4 hover:bg-muted/30 transition-colors">
+                    <div className="flex items-start justify-between gap-3 mb-2">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-card-foreground text-sm truncate">{p.name}</p>
+                        {p.description && <p className="text-xs text-muted-foreground truncate mt-0.5">{p.description}</p>}
+                      </div>
+                      <span className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${sc.color} ${sc.bg}`}>
+                        <sc.icon size={10} /> {sc.label}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <div className="flex-1 relative h-1.5 bg-muted rounded-full overflow-hidden">
+                        <div className={`absolute inset-y-0 left-0 rounded-full transition-all duration-500 ${p.progress === 100 ? "bg-teal-500" : "bg-gradient-to-r from-primary to-accent"}`}
+                          style={{ width: `${p.progress}%` }} />
+                      </div>
+                      <span className="text-[11px] font-bold text-card-foreground w-8 text-right">{p.progress}%</span>
+                    </div>
+                    {p.deadline && (
+                      <p className="text-[11px] text-muted-foreground mt-1.5 flex items-center gap-1">
+                        <Calendar size={10} /> Échéance : {(() => { try { return format(new Date(p.deadline), "d MMM yyyy", { locale: fr }); } catch { return p.deadline; } })()}
+                      </p>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="p-8 text-center">
+              <FolderOpen size={32} className="mx-auto text-muted-foreground/20 mb-2" />
+              <p className="text-sm text-muted-foreground">Aucun projet pour le moment</p>
+            </div>
+          )}
         </div>
-      )}
 
-      {tickets.length > 0 && (
-        <div className="bg-card rounded-xl p-6 shadow-card border border-border/50">
-          <h3 className="font-semibold text-card-foreground mb-4">Derniers tickets</h3>
-          <div className="space-y-3">
-            {tickets.slice(0, 3).map((t) => (
-              <div key={t.id} className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium text-card-foreground text-sm">{t.subject}</p>
-                  <p className="text-xs text-muted-foreground">{new Date(t.created_at).toLocaleDateString("fr-CA")}</p>
-                </div>
-                <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                  t.status === "ouvert" ? "bg-primary/10 text-primary" : t.status === "en_cours" ? "bg-accent/10 text-accent" : "bg-muted text-muted-foreground"
-                }`}>{t.status}</span>
-              </div>
-            ))}
+        {/* Recent tickets */}
+        <div className="bg-card rounded-xl shadow-card border border-border/50 overflow-hidden">
+          <div className="p-5 border-b border-border/50 flex items-center justify-between">
+            <h3 className="font-semibold text-card-foreground flex items-center gap-2">
+              <LifeBuoy size={16} className="text-accent" /> Derniers tickets
+            </h3>
+            <span className="text-xs text-muted-foreground">{tickets.length} ticket(s)</span>
           </div>
+          {tickets.length > 0 ? (
+            <div className="divide-y divide-border/50">
+              {tickets.slice(0, 4).map((t) => {
+                const tc = ticketStatusConfig[t.status] || ticketStatusConfig.ouvert;
+                return (
+                  <div key={t.id} className="p-4 hover:bg-muted/30 transition-colors">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-card-foreground text-sm truncate">{t.subject}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{t.message}</p>
+                      </div>
+                      <span className={`inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${tc.color} ${tc.bg}`}>
+                        {tc.label}
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className="text-[11px] text-muted-foreground/60">{new Date(t.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" })}</span>
+                      {t.priority === "urgent" && <span className="text-[10px] bg-destructive/10 text-destructive px-1.5 py-0.5 rounded font-medium">Urgent</span>}
+                      {t.priority === "haute" && <span className="text-[10px] bg-orange-500/10 text-orange-500 px-1.5 py-0.5 rounded font-medium">Haute</span>}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="p-8 text-center">
+              <LifeBuoy size={32} className="mx-auto text-muted-foreground/20 mb-2" />
+              <p className="text-sm text-muted-foreground">Aucun ticket pour le moment</p>
+            </div>
+          )}
         </div>
-      )}
+      </div>
 
       {projects.length === 0 && tickets.length === 0 && (
         <div className="bg-card rounded-xl p-12 shadow-card border border-border/50 text-center">
