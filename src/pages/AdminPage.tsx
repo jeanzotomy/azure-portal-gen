@@ -1294,14 +1294,7 @@ function ContactCard({ contact: c, statusConfig: st, updateStatus, deleteContact
             {c.company && <span>• {c.company}</span>}
             <span>• {new Date(c.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
           </div>
-          <div className="text-sm text-foreground/80 bg-muted/50 rounded-lg p-3 mt-2">
-            <p className={!expanded && isLong ? "line-clamp-2" : ""}>{c.message}</p>
-            {isLong && (
-              <button onClick={() => setExpanded(!expanded)} className="text-primary text-xs font-medium mt-1 hover:underline">
-                {expanded ? "Réduire" : "Lire tout"}
-              </button>
-            )}
-          </div>
+          <ExpandableText text={c.message} className="text-sm text-foreground/80 bg-muted/50 rounded-lg p-3 mt-2" />
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {c.status === "new" && (
