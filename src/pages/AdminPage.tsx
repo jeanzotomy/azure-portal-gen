@@ -1244,6 +1244,132 @@ function AdminTickets() {
   );
 }
 
+/* ─── Contact Requests Management ─── */
+function AdminContacts() {
+  const [contacts, setContacts] = useState<any[]>([]);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  const load = async () => {
+    setLoading(true);
+    const { data } = await supabase.from("contact_requests").select("*").order("created_at", { ascending: false });
+    setContacts(data || []);
+    setLoading(false);
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const updateStatus = async (id: string, status: string) => {
+    const { error } = await supabase.from("contact_requests").update({ status }).eq("id", id);
+    if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    else { toast({ title: "Statut mis à jour" }); load(); }
+  };
+
+  const deleteContact = async (id: string) => {
+    const { error } = await supabase.from("contact_requests").delete().eq("id", id);
+    if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    else { toast({ title: "Demande supprimée" }); load(); }
+  };
+
+  const statusConfig: Record<string, { label: string; color: string }> = {
+    new: { label: "Nouveau", color: "bg-primary/10 text-primary border-primary/20" },
+    read: { label: "Lu", color: "bg-accent/10 text-accent border-accent/20" },
+    replied: { label: "Répondu", color: "bg-teal-600/10 text-teal-600 border-teal-600/20" },
+    archived: { label: "Archivé", color: "bg-muted text-muted-foreground border-border" },
+  };
+
+  const filtered = contacts.filter(c => {
+    const matchSearch = !search || c.name.toLowerCase().includes(search.toLowerCase()) || c.email.toLowerCase().includes(search.toLowerCase()) || (c.company || "").toLowerCase().includes(search.toLowerCase());
+    const matchStatus = statusFilter === "all" || c.status === statusFilter;
+    return matchSearch && matchStatus;
+  });
+
+  const counts = { total: contacts.length, new: contacts.filter(c => c.status === "new").length, read: contacts.filter(c => c.status === "read").length, replied: contacts.filter(c => c.status === "replied").length };
+
+  if (loading) return <div className="text-center text-muted-foreground py-12">Chargement...</div>;
+
+  return (
+    <div className="space-y-6 animate-fade-up">
+      {/* Stats */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { label: "Total", value: counts.total, icon: MessageSquare, color: "bg-primary" },
+          { label: "Nouveaux", value: counts.new, icon: Bell, color: "bg-destructive" },
+          { label: "Lus", value: counts.read, icon: CheckCircle2, color: "bg-accent" },
+          { label: "Répondus", value: counts.replied, icon: Send, color: "bg-teal-600" },
+        ].map((c) => (
+          <div key={c.label} className="bg-card rounded-xl p-5 shadow-card border border-border/50 hover:shadow-card-hover transition-all duration-300 group">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm text-muted-foreground font-medium">{c.label}</span>
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${c.color} group-hover:scale-110 transition-transform`}>
+                <c.icon size={18} className="text-primary-foreground" />
+              </div>
+            </div>
+            <p className="text-3xl font-bold text-card-foreground">{c.value}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Filters */}
+      <div className="flex flex-col sm:flex-row gap-3">
+        <div className="relative flex-1">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input placeholder="Rechercher par nom, email ou entreprise..." value={search} onChange={e => setSearch(e.target.value)} className="pl-9" />
+        </div>
+        <div className="flex gap-2 flex-wrap">
+          {[{ val: "all", label: "Tous" }, { val: "new", label: "Nouveaux" }, { val: "read", label: "Lus" }, { val: "replied", label: "Répondus" }, { val: "archived", label: "Archivés" }].map(f => (
+            <Button key={f.val} size="sm" variant={statusFilter === f.val ? "default" : "outline"} onClick={() => setStatusFilter(f.val)}>
+              {f.label}
+            </Button>
+          ))}
+        </div>
+      </div>
+
+      {/* List */}
+      <div className="space-y-3">
+        {filtered.map((c) => {
+          const st = statusConfig[c.status] || statusConfig.new;
+          return (
+            <div key={c.id} className="bg-card rounded-xl p-5 border border-border/50 shadow-card hover:shadow-card-hover transition-all duration-300">
+              <div className="flex flex-col lg:flex-row lg:items-start gap-4">
+                <div className="flex-1 min-w-0 space-y-2">
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <h3 className="font-semibold text-card-foreground">{c.name}</h3>
+                    <span className={`text-xs px-2 py-0.5 rounded-full border font-medium ${st.color}`}>{st.label}</span>
+                  </div>
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                    <span>{c.email}</span>
+                    {c.company && <span>• {c.company}</span>}
+                    <span>• {new Date(c.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
+                  </div>
+                  <p className="text-sm text-foreground/80 bg-muted/50 rounded-lg p-3 mt-2">{c.message}</p>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  {c.status === "new" && (
+                    <Button size="sm" variant="outline" onClick={() => updateStatus(c.id, "read")}>Marquer lu</Button>
+                  )}
+                  {(c.status === "new" || c.status === "read") && (
+                    <Button size="sm" variant="outline" onClick={() => updateStatus(c.id, "replied")}>
+                      <Send size={14} className="mr-1" /> Répondu
+                    </Button>
+                  )}
+                  {c.status !== "archived" && (
+                    <Button size="sm" variant="ghost" onClick={() => updateStatus(c.id, "archived")}>Archiver</Button>
+                  )}
+                  <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => deleteContact(c.id)}>Supprimer</Button>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+      {filtered.length === 0 && <p className="text-center text-muted-foreground py-8">Aucune demande de contact trouvée.</p>}
+    </div>
+  );
+}
+
 /* ─── Users Management ─── */
 function AdminUsers() {
   const [profilesList, setProfilesList] = useState<any[]>([]);
