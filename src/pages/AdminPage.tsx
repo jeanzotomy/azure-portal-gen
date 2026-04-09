@@ -1263,11 +1263,24 @@ function AdminTickets() {
   );
 }
 
+/* ─── Expandable Text Component ─── */
+function ExpandableText({ text, className }: { text: string; className?: string }) {
+  const [expanded, setExpanded] = useState(false);
+  const isLong = text && text.length > 120;
+  return (
+    <div className={className || "text-sm text-muted-foreground mb-2"}>
+      <p className={!expanded && isLong ? "line-clamp-2" : ""}>{text}</p>
+      {isLong && (
+        <button onClick={() => setExpanded(!expanded)} className="text-primary text-xs font-medium mt-1 hover:underline">
+          {expanded ? "Réduire" : "Lire tout"}
+        </button>
+      )}
+    </div>
+  );
+}
+
 /* ─── Contact Card Component ─── */
 function ContactCard({ contact: c, statusConfig: st, updateStatus, deleteContact }: { contact: any; statusConfig: { label: string; color: string }; updateStatus: (id: string, status: string) => void; deleteContact: (id: string) => void }) {
-  const [expanded, setExpanded] = useState(false);
-  const isLong = c.message && c.message.length > 120;
-
   return (
     <div className="bg-card rounded-xl p-5 border border-border/50 shadow-card hover:shadow-card-hover transition-all duration-300">
       <div className="flex flex-col lg:flex-row lg:items-start gap-4">
