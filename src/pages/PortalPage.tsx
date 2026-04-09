@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,7 @@ import {
 const logo = "/favicon.png";
 import {
   LayoutDashboard, FolderOpen, LifeBuoy, User, LogOut, Send, Clock, CheckCircle2, AlertCircle,
-  Menu, Bell, Search, Filter,
+  Menu, Bell, Search, Filter, Upload, X, FileText, DollarSign, Calendar, Cpu, Flag,
 } from "lucide-react";
 import type { User as SupaUser } from "@supabase/supabase-js";
 
@@ -232,7 +232,13 @@ function ProjectsTab({ user }: { user: SupaUser }) {
   const [showForm, setShowForm] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
+  const [budget, setBudget] = useState("");
+  const [deadline, setDeadline] = useState("");
+  const [technologies, setTechnologies] = useState("");
+  const [priority, setPriority] = useState("normal");
+  const [files, setFiles] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
   const loadProjects = () => {
@@ -241,18 +247,67 @@ function ProjectsTab({ user }: { user: SupaUser }) {
 
   useEffect(() => { loadProjects(); }, []);
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      const newFiles = Array.from(e.target.files);
+      setFiles(prev => [...prev, ...newFiles]);
+    }
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const removeFile = (index: number) => {
+    setFiles(prev => prev.filter((_, i) => i !== index));
+  };
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!name.trim()) return;
     setSubmitting(true);
-    const { error } = await supabase.from("projects").insert({ user_id: user.id, name: name.trim(), description: description.trim() || null });
+
+    const { data: project, error } = await supabase.from("projects").insert({
+      user_id: user.id,
+      name: name.trim(),
+      description: description.trim() || null,
+      budget: budget.trim() || null,
+      deadline: deadline.trim() || null,
+      technologies: technologies.trim() || null,
+      priority,
+    }).select().single();
+
     if (error) {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Projet soumis!", description: "Votre projet a été envoyé avec succès." });
-      setName(""); setDescription(""); setShowForm(false);
-      loadProjects();
+      setSubmitting(false);
+      return;
     }
+
+    // Upload files
+    if (files.length > 0 && project) {
+      for (const file of files) {
+        const filePath = `${user.id}/${project.id}/${Date.now()}_${file.name}`;
+        const { error: uploadError } = await supabase.storage.from("project-files").upload(filePath, file);
+        if (!uploadError) {
+          await supabase.from("project_files").insert({
+            project_id: project.id,
+            user_id: user.id,
+            file_name: file.name,
+            file_path: filePath,
+            file_size: file.size,
+            file_type: file.type,
+          });
+        }
+      }
+    }
+
+    toast({ title: "Projet soumis!", description: "Votre projet a été envoyé avec succès." });
+    setName(""); setDescription(""); setBudget(""); setDeadline(""); setTechnologies(""); setPriority("normal"); setFiles([]);
+    setShowForm(false);
+    loadProjects();
     setSubmitting(false);
   };
 
@@ -261,6 +316,12 @@ function ProjectsTab({ user }: { user: SupaUser }) {
     termine: { label: "Terminé", icon: CheckCircle2, color: "text-teal-600", bg: "bg-teal-600/10" },
     en_attente: { label: "En attente", icon: AlertCircle, color: "text-muted-foreground", bg: "bg-muted" },
   };
+
+  const priorityOptions = [
+    { value: "normal", label: "Normal" },
+    { value: "haute", label: "Haute" },
+    { value: "urgent", label: "Urgent" },
+  ];
 
   return (
     <div className="space-y-6 animate-fade-up">
@@ -274,11 +335,104 @@ function ProjectsTab({ user }: { user: SupaUser }) {
       {showForm && (
         <div className="bg-card rounded-xl p-6 shadow-card border border-border/50">
           <h3 className="font-semibold text-card-foreground mb-4">Nouveau projet</h3>
-          <form onSubmit={handleSubmit} className="space-y-3">
-            <Input placeholder="Nom du projet" required value={name} onChange={(e) => setName(e.target.value)} />
-            <Textarea placeholder="Décrivez votre projet, vos besoins et objectifs..." rows={4} value={description} onChange={(e) => setDescription(e.target.value)} />
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5">
+                <FileText size={14} /> Nom du projet *
+              </label>
+              <Input placeholder="Ex: Refonte du site web" required value={name} onChange={(e) => setName(e.target.value)} />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5">
+                <FileText size={14} /> Description
+              </label>
+              <Textarea placeholder="Décrivez votre projet, vos besoins et objectifs..." rows={4} value={description} onChange={(e) => setDescription(e.target.value)} />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5">
+                  <DollarSign size={14} /> Budget estimé
+                </label>
+                <Input placeholder="Ex: 5000 - 10000 $" value={budget} onChange={(e) => setBudget(e.target.value)} />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5">
+                  <Calendar size={14} /> Délai souhaité
+                </label>
+                <Input placeholder="Ex: 3 mois, Janvier 2025" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5">
+                <Cpu size={14} /> Technologies / Stack préféré
+              </label>
+              <Input placeholder="Ex: AWS, React, Python, Kubernetes..." value={technologies} onChange={(e) => setTechnologies(e.target.value)} />
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5">
+                <Flag size={14} /> Priorité
+              </label>
+              <div className="flex gap-2">
+                {priorityOptions.map((opt) => (
+                  <button
+                    type="button"
+                    key={opt.value}
+                    onClick={() => setPriority(opt.value)}
+                    className={`text-sm px-4 py-2 rounded-lg transition-colors border ${
+                      priority === opt.value
+                        ? "bg-primary text-primary-foreground border-primary"
+                        : "bg-muted text-muted-foreground border-border hover:bg-muted/80"
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5">
+                <Upload size={14} /> Fichiers joints
+              </label>
+              <div
+                onClick={() => fileInputRef.current?.click()}
+                className="border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 hover:bg-muted/30 transition-colors"
+              >
+                <Upload size={24} className="mx-auto text-muted-foreground mb-2" />
+                <p className="text-sm text-muted-foreground">Cliquez pour ajouter des fichiers</p>
+                <p className="text-xs text-muted-foreground/60 mt-1">PDF, images, documents — max 20 Mo par fichier</p>
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                className="hidden"
+                onChange={handleFileChange}
+              />
+              {files.length > 0 && (
+                <div className="mt-3 space-y-2">
+                  {files.map((file, i) => (
+                    <div key={i} className="flex items-center justify-between bg-muted/50 rounded-lg px-3 py-2">
+                      <div className="flex items-center gap-2 min-w-0">
+                        <FileText size={16} className="text-muted-foreground flex-shrink-0" />
+                        <span className="text-sm text-card-foreground truncate">{file.name}</span>
+                        <span className="text-xs text-muted-foreground flex-shrink-0">{formatFileSize(file.size)}</span>
+                      </div>
+                      <button type="button" onClick={() => removeFile(i)} className="text-muted-foreground hover:text-destructive ml-2">
+                        <X size={16} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
             <Button type="submit" className="gradient-primary text-primary-foreground border-0" disabled={submitting}>
-              <Send size={16} className="mr-2" /> {submitting ? "Envoi..." : "Soumettre"}
+              <Send size={16} className="mr-2" /> {submitting ? "Envoi en cours..." : "Soumettre le projet"}
             </Button>
           </form>
         </div>
@@ -300,10 +454,24 @@ function ProjectsTab({ user }: { user: SupaUser }) {
                   <div>
                     <h3 className="font-semibold text-card-foreground">{p.name}</h3>
                     <p className="text-sm text-muted-foreground mt-1">{p.description}</p>
+                    {(p.budget || p.deadline || p.technologies) && (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {p.budget && <span className="text-xs bg-muted px-2 py-0.5 rounded-full text-muted-foreground">💰 {p.budget}</span>}
+                        {p.deadline && <span className="text-xs bg-muted px-2 py-0.5 rounded-full text-muted-foreground">📅 {p.deadline}</span>}
+                        {p.technologies && <span className="text-xs bg-muted px-2 py-0.5 rounded-full text-muted-foreground">⚙️ {p.technologies}</span>}
+                      </div>
+                    )}
                   </div>
-                  <span className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${sc.color} ${sc.bg}`}>
-                    <sc.icon size={12} /> {sc.label}
-                  </span>
+                  <div className="flex flex-col items-end gap-1.5">
+                    <span className={`flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full ${sc.color} ${sc.bg}`}>
+                      <sc.icon size={12} /> {sc.label}
+                    </span>
+                    {p.priority && p.priority !== "normal" && (
+                      <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                        p.priority === "urgent" ? "bg-destructive/10 text-destructive" : "bg-orange-100 text-orange-600"
+                      }`}>{p.priority}</span>
+                    )}
+                  </div>
                 </div>
                 <Progress value={p.progress} className="h-2" />
                 <p className="text-xs text-muted-foreground text-right mt-1.5">{p.progress}% complété</p>
