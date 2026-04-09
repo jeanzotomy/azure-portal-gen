@@ -1042,6 +1042,8 @@ function AdminTickets() {
   const [sendingReply, setSendingReply] = useState(false);
   const { toast } = useToast();
 
+  const [unrepliedIds, setUnrepliedIds] = useState<Set<string>>(new Set());
+
   const load = async () => {
     const { data: t } = await supabase.from("support_tickets").select("*").order("created_at", { ascending: false });
     setTickets(t || []);
@@ -1049,6 +1051,16 @@ function AdminTickets() {
     const map: Record<string, any> = {};
     (prof || []).forEach((pr: any) => { map[pr.user_id] = pr; });
     setProfiles(map);
+
+    // Check unreplied tickets
+    if (t) {
+      const unreplied = new Set<string>();
+      for (const ticket of t.filter(tk => tk.status !== "résolu")) {
+        const { data: adminReplies } = await supabase.from("ticket_replies").select("id").eq("ticket_id", ticket.id).eq("is_admin", true).limit(1);
+        if (!adminReplies || adminReplies.length === 0) unreplied.add(ticket.id);
+      }
+      setUnrepliedIds(unreplied);
+    }
   };
 
   const loadReplies = async (ticketId: string) => {
