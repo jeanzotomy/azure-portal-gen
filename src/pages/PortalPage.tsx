@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
-import { useIsAdmin } from "@/hooks/use-admin";
+import { useUserRoles } from "@/hooks/use-admin";
 import { Progress } from "@/components/ui/progress";
 import {
   SidebarProvider,
