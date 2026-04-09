@@ -25,6 +25,7 @@ function AdminContent() {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<AdminTab>("dashboard");
   const { isAdmin, isAgent, loading: rolesLoading } = useUserRoles();
+  const mfaVerified = useMfaCheck();
   const navigate = useNavigate();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
@@ -36,6 +37,10 @@ function AdminContent() {
       if (!session?.user) navigate("/auth");
     });
   }, [navigate]);
+
+  useEffect(() => {
+    if (mfaVerified === false && !loading) navigate("/mfa");
+  }, [mfaVerified, loading, navigate]);
 
   useEffect(() => {
     if (!rolesLoading && !isAdmin && !isAgent && !loading) navigate("/portal");
