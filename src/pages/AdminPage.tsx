@@ -1150,10 +1150,17 @@ function AdminTickets() {
             <div key={t.id} className="group bg-card rounded-2xl shadow-card border border-border/50 hover:shadow-card-hover hover:border-primary/30 transition-all duration-300 overflow-hidden">
               <div className={`h-1 w-full ${t.status === "résolu" ? "bg-teal-500" : t.status === "en_cours" ? "bg-orange-500" : "bg-gradient-to-r from-primary to-accent"}`} />
               <div className="p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ${sc.color} ${sc.bg}`}>
-                    <sc.icon size={12} /> {sc.label}
-                  </span>
+              <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ${sc.color} ${sc.bg}`}>
+                      <sc.icon size={12} /> {sc.label}
+                    </span>
+                    {unrepliedIds.has(t.id) && (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-destructive text-destructive-foreground animate-pulse">
+                        <Bell size={10} /> Non répondu
+                      </span>
+                    )}
+                  </div>
                   <div className="flex items-center gap-1.5">
                     {t.priority !== "normal" && (
                       <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${
