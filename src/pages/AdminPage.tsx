@@ -1553,6 +1553,16 @@ function AdminUsers() {
                   <ShieldBan size={12} /> Compte bloqué
                 </div>
               )}
+              {(p as any).deleted_at && (
+                <div className="mt-2 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5 text-xs text-destructive font-medium">
+                    <Trash2 size={12} /> Compte supprimé le {new Date((p as any).deleted_at).toLocaleDateString("fr-FR")}
+                  </span>
+                  <Button size="sm" variant="outline" className="h-6 text-xs" onClick={() => restoreProfile(p.user_id)}>
+                    Restaurer
+                  </Button>
+                </div>
+              )}
             </div>
           );
         })}
