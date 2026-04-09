@@ -27,7 +27,7 @@ export function HeroSection() {
                 onClick={() => document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" })}>
                 Demander une consultation <ArrowRight size={18} className="ml-2" />
               </Button>
-              <Button size="lg" variant="outline" className="border-primary/40 text-primary-foreground hover:bg-primary/10"
+              <Button size="lg" variant="outline" className="border-cyan-glow/50 text-cyan-glow hover:bg-cyan-glow/10"
                 onClick={() => document.querySelector("#services")?.scrollIntoView({ behavior: "smooth" })}>
                 Nos services
               </Button>
