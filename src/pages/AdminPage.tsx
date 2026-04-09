@@ -334,7 +334,7 @@ function AdminProjects() {
                       </span>
                     )}
                     {p.deadline && (
-                      <span className="inline-flex items-center gap-1 text-xs bg-accent/10 text-accent-foreground border border-accent/20 px-2.5 py-1 rounded-lg">
+                      <span className="inline-flex items-center gap-1 text-xs bg-orange-50 text-orange-600 border border-orange-200 px-2.5 py-1 rounded-lg dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/20">
                         <Calendar size={11} /> {p.deadline}
                       </span>
                     )}
