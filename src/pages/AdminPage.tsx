@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { useIsAdmin } from "@/hooks/use-admin";
+import { useUserRoles } from "@/hooks/use-admin";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/sidebar";
 import {
   LayoutDashboard, FolderOpen, LifeBuoy, Users, LogOut, Shield, Clock, CheckCircle2,
-  AlertCircle, Bell, ChevronDown, ChevronUp, MessageSquare, Search, Send,
+  AlertCircle, Bell, ChevronDown, ChevronUp, MessageSquare, Search, Send, UserCog,
 } from "lucide-react";
 import type { User as SupaUser } from "@supabase/supabase-js";
 
@@ -23,7 +23,7 @@ function AdminContent() {
   const [user, setUser] = useState<SupaUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<AdminTab>("dashboard");
-  const { isAdmin, loading: adminLoading } = useIsAdmin();
+  const { isAdmin, isAgent, loading: rolesLoading } = useUserRoles();
   const navigate = useNavigate();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
@@ -37,20 +37,30 @@ function AdminContent() {
   }, [navigate]);
 
   useEffect(() => {
-    if (!adminLoading && !isAdmin && !loading) navigate("/portal");
-  }, [isAdmin, adminLoading, loading, navigate]);
+    if (!rolesLoading && !isAdmin && !isAgent && !loading) navigate("/portal");
+  }, [isAdmin, isAgent, rolesLoading, loading, navigate]);
 
-  if (loading || adminLoading) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">Chargement...</div>;
-  if (!user || !isAdmin) return null;
+  // Agent can only see tickets
+  useEffect(() => {
+    if (!rolesLoading && isAgent && !isAdmin) {
+      if (tab !== "tickets") setTab("tickets");
+    }
+  }, [rolesLoading, isAgent, isAdmin, tab]);
+
+  if (loading || rolesLoading) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">Chargement...</div>;
+  if (!user || (!isAdmin && !isAgent)) return null;
 
   const handleLogout = async () => { await supabase.auth.signOut(); navigate("/"); };
 
-  const navItems: { id: AdminTab; icon: typeof LayoutDashboard; label: string }[] = [
-    { id: "dashboard", icon: LayoutDashboard, label: "Vue d'ensemble" },
-    { id: "projects", icon: FolderOpen, label: "Projets" },
-    { id: "tickets", icon: LifeBuoy, label: "Tickets" },
-    { id: "users", icon: Users, label: "Utilisateurs" },
+  const allNavItems: { id: AdminTab; icon: typeof LayoutDashboard; label: string; adminOnly: boolean }[] = [
+    { id: "dashboard", icon: LayoutDashboard, label: "Vue d'ensemble", adminOnly: true },
+    { id: "projects", icon: FolderOpen, label: "Projets", adminOnly: true },
+    { id: "tickets", icon: LifeBuoy, label: "Tickets", adminOnly: false },
+    { id: "users", icon: Users, label: "Utilisateurs", adminOnly: true },
   ];
+
+  const navItems = isAdmin ? allNavItems : allNavItems.filter(n => !n.adminOnly);
+  const roleBadge = isAdmin ? "Admin" : "Agent";
 
   return (
     <div className="min-h-screen flex w-full bg-background">
@@ -62,7 +72,7 @@ function AdminContent() {
               {!collapsed && (
                 <div>
                   <span className="font-bold text-sidebar-foreground">CloudMature</span>
-                  <span className="block text-xs text-primary font-medium">Administration</span>
+                  <span className="block text-xs text-primary font-medium">{roleBadge}</span>
                 </div>
               )}
             </Link>
@@ -104,7 +114,7 @@ function AdminContent() {
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs bg-primary/10 text-primary px-2.5 py-1 rounded-full font-medium flex items-center gap-1">
-              <Shield size={12} /> Admin
+              <Shield size={12} /> {roleBadge}
             </span>
             <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
               {(user.user_metadata?.full_name || user.email || "A").charAt(0).toUpperCase()}
@@ -113,10 +123,10 @@ function AdminContent() {
         </header>
 
         <main className="flex-1 p-6 overflow-auto">
-          {tab === "dashboard" && <AdminDashboard />}
-          {tab === "projects" && <AdminProjects />}
+          {tab === "dashboard" && isAdmin && <AdminDashboard />}
+          {tab === "projects" && isAdmin && <AdminProjects />}
           {tab === "tickets" && <AdminTickets />}
-          {tab === "users" && <AdminUsers />}
+          {tab === "users" && isAdmin && <AdminUsers />}
         </main>
       </div>
     </div>
@@ -476,7 +486,7 @@ function AdminTickets() {
                           }`}>
                             <p className="text-sm">{r.message}</p>
                             <p className={`text-[10px] mt-1 ${r.is_admin ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
-                              {r.is_admin ? "Admin" : (profiles[r.user_id]?.full_name || "Client")} · {new Date(r.created_at).toLocaleString("fr-CA")}
+                              {r.is_admin ? "Équipe" : (profiles[r.user_id]?.full_name || "Client")} · {new Date(r.created_at).toLocaleString("fr-CA")}
                             </p>
                           </div>
                         </div>
@@ -517,47 +527,130 @@ function AdminTickets() {
 /* ─── Users Management ─── */
 function AdminUsers() {
   const [profilesList, setProfilesList] = useState<any[]>([]);
+  const [userRoles, setUserRoles] = useState<Record<string, string[]>>({});
   const [search, setSearch] = useState("");
+  const [changingRole, setChangingRole] = useState<string | null>(null);
+  const { toast } = useToast();
 
-  useEffect(() => {
-    supabase.from("profiles").select("*").order("created_at", { ascending: false }).then(({ data }) => setProfilesList(data || []));
-  }, []);
+  const load = async () => {
+    const { data: profs } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
+    setProfilesList(profs || []);
+    const { data: roles } = await supabase.from("user_roles").select("*");
+    const map: Record<string, string[]> = {};
+    (roles || []).forEach((r: any) => {
+      if (!map[r.user_id]) map[r.user_id] = [];
+      map[r.user_id].push(r.role);
+    });
+    setUserRoles(map);
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const assignRole = async (userId: string, role: string) => {
+    setChangingRole(userId);
+    // Remove existing non-client roles, then add the new one
+    // First remove all roles for user
+    const { error: delError } = await supabase.from("user_roles").delete().eq("user_id", userId);
+    if (delError) {
+      toast({ title: "Erreur", description: delError.message, variant: "destructive" });
+      setChangingRole(null);
+      return;
+    }
+
+    // Always keep client role
+    const rolesToInsert: { user_id: string; role: "admin" | "agent" | "client" }[] = [
+      { user_id: userId, role: "client" },
+    ];
+    if (role === "admin") {
+      rolesToInsert.push({ user_id: userId, role: "admin" });
+    } else if (role === "agent") {
+      rolesToInsert.push({ user_id: userId, role: "agent" });
+    }
+    // "client" only = just the client role above
+
+    const { error } = await supabase.from("user_roles").insert(rolesToInsert);
+    if (error) {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Rôle mis à jour!", description: `Rôle changé en ${role}.` });
+    }
+    setChangingRole(null);
+    load();
+  };
 
   const filtered = profilesList.filter(p =>
     (p.full_name || "").toLowerCase().includes(search.toLowerCase()) ||
     (p.company || "").toLowerCase().includes(search.toLowerCase())
   );
 
+  const getRoleBadge = (roles: string[]) => {
+    if (roles.includes("admin")) return { label: "Admin", color: "bg-primary/10 text-primary" };
+    if (roles.includes("agent")) return { label: "Agent", color: "bg-accent/10 text-accent" };
+    return { label: "Client", color: "bg-muted text-muted-foreground" };
+  };
+
+  const roleOptions = [
+    { value: "client", label: "Client" },
+    { value: "agent", label: "Agent" },
+    { value: "admin", label: "Admin" },
+  ];
+
   return (
     <div className="space-y-6 animate-fade-up">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">Utilisateurs</h1>
-        <span className="text-sm text-muted-foreground">{profilesList.length} client(s)</span>
+        <span className="text-sm text-muted-foreground">{profilesList.length} utilisateur(s)</span>
       </div>
 
       <div className="relative">
         <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-        <Input placeholder="Rechercher un client..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+        <Input placeholder="Rechercher un utilisateur..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
       </div>
 
       <div className="grid gap-4">
-        {filtered.map((p) => (
-          <div key={p.id} className="bg-card rounded-xl p-5 shadow-card border border-border/50 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-lg font-bold flex-shrink-0">
-              {(p.full_name || "?").charAt(0).toUpperCase()}
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="font-semibold text-card-foreground">{p.full_name || "Non renseigné"}</p>
-              <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
-                {p.company && <span className="text-sm text-muted-foreground">🏢 {p.company}</span>}
-                {p.phone && <span className="text-sm text-muted-foreground">📱 {p.phone}</span>}
+        {filtered.map((p) => {
+          const roles = userRoles[p.user_id] || ["client"];
+          const badge = getRoleBadge(roles);
+          const currentRole = roles.includes("admin") ? "admin" : roles.includes("agent") ? "agent" : "client";
+
+          return (
+            <div key={p.id} className="bg-card rounded-xl p-5 shadow-card border border-border/50">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-lg font-bold flex-shrink-0">
+                  {(p.full_name || "?").charAt(0).toUpperCase()}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2">
+                    <p className="font-semibold text-card-foreground">{p.full_name || "Non renseigné"}</p>
+                    <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${badge.color}`}>{badge.label}</span>
+                  </div>
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
+                    {p.company && <span className="text-sm text-muted-foreground">🏢 {p.company}</span>}
+                    {p.phone && <span className="text-sm text-muted-foreground">📱 {p.phone}</span>}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <div className="flex items-center gap-1">
+                    <UserCog size={14} className="text-muted-foreground" />
+                    <select
+                      value={currentRole}
+                      onChange={(e) => assignRole(p.user_id, e.target.value)}
+                      disabled={changingRole === p.user_id}
+                      className="text-sm border border-border rounded-lg px-2 py-1.5 bg-card text-card-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+                    >
+                      {roleOptions.map((opt) => (
+                        <option key={opt.value} value={opt.value}>{opt.label}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <p className="text-xs text-muted-foreground hidden sm:block">
+                    {new Date(p.created_at).toLocaleDateString("fr-CA")}
+                  </p>
+                </div>
               </div>
             </div>
-            <p className="text-xs text-muted-foreground flex-shrink-0">
-              Inscrit le {new Date(p.created_at).toLocaleDateString("fr-CA")}
-            </p>
-          </div>
-        ))}
+          );
+        })}
         {filtered.length === 0 && <p className="text-center text-muted-foreground py-8">Aucun utilisateur trouvé.</p>}
       </div>
     </div>
