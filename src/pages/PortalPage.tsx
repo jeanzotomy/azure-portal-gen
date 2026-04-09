@@ -29,8 +29,9 @@ import logo from "@/assets/cloudmature-logo.png";
 import {
   LayoutDashboard, FolderOpen, LifeBuoy, User, LogOut, Send, Clock, CheckCircle2, AlertCircle,
   Menu, Bell, Search, Filter, Upload, X, FileText, DollarSign, Calendar, Cpu, Flag, Pencil, Shield,
-  Activity, TrendingUp, Plus, Trash2,
+  Activity, TrendingUp, Plus, Trash2, Info,
 } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { PieChart as RePieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip } from "recharts";
 import type { User as SupaUser } from "@supabase/supabase-js";
 
