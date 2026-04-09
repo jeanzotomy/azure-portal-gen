@@ -1180,7 +1180,7 @@ function AdminTickets() {
                 </div>
 
                 <h3 className="font-bold text-card-foreground text-lg leading-tight mb-1">{t.subject}</h3>
-                <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{t.message}</p>
+                <ExpandableText text={t.message} />
 
                 <div className="flex items-center gap-2 mb-3">
                   <div className="w-6 h-6 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-[10px] font-bold flex-shrink-0">
