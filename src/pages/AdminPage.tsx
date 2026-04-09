@@ -1246,6 +1246,13 @@ function AdminUsers() {
     load();
   };
 
+  const toggleBlock = async (userId: string, currentlyBlocked: boolean) => {
+    const { error } = await supabase.from("profiles").update({ blocked: !currentlyBlocked }).eq("user_id", userId);
+    if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    else toast({ title: currentlyBlocked ? "Utilisateur débloqué" : "Utilisateur bloqué", description: currentlyBlocked ? "L'utilisateur peut maintenant se connecter." : "L'utilisateur ne pourra plus accéder à son espace." });
+    load();
+  };
+
   const getRoleBadge = (roles: string[]) => {
     if (roles.includes("admin")) return { label: "Admin", color: "bg-primary/10 text-primary border-primary/20" };
     if (roles.includes("agent")) return { label: "Agent", color: "bg-orange-500/10 text-orange-500 border-orange-500/20" };
