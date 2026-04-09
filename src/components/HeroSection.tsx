@@ -1,8 +1,19 @@
 import { ArrowRight, Cloud, Shield, TrendingUp } from "lucide-react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import heroPerson from "@/assets/hero-person.png";
 
 export function HeroSection() {
+  const words = ["Innover.", "Optimiser.", "Automatiser."];
+  const [visibleCount, setVisibleCount] = useState(0);
+
+  useEffect(() => {
+    const timers = words.map((_, i) =>
+      setTimeout(() => setVisibleCount(i + 1), 400 + i * 500)
+    );
+    return () => timers.forEach(clearTimeout);
+  }, []);
+
   return (
     <section id="hero" className="relative min-h-screen flex items-center overflow-hidden">
       <div className="absolute inset-0 gradient-hero" />
@@ -15,9 +26,20 @@ export function HeroSection() {
               Consultation TI · Cloud · DevOps
             </div>
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-tight text-primary-foreground mb-6">
-              Innover.{" "}
-              <span className="gradient-text">Optimiser.</span>{" "}
-              Automatiser.
+              {words.map((word, i) => (
+                <span
+                  key={word}
+                  className={`inline-block transition-all duration-700 ${
+                    i === 1 ? "gradient-text" : ""
+                  } ${
+                    i < visibleCount
+                      ? "opacity-100 translate-y-0"
+                      : "opacity-0 translate-y-4"
+                  }`}
+                >
+                  {word}{" "}
+                </span>
+              ))}
             </h1>
             <p className="text-lg md:text-xl text-secondary-foreground/70 max-w-2xl mb-8">
               Cloud Mature accompagne les organisations dans leur transformation vers le Cloud avec une approche sécurisée, performante et conforme aux standards les plus élevés.
