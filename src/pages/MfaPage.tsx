@@ -53,7 +53,7 @@ export default function MfaPage() {
   const startEnrollment = async () => {
     // Unenroll any unverified factors first
     const { data: factors } = await supabase.auth.mfa.listFactors();
-    const unverifiedFactors = (factors?.totp || []).filter(f => f.status === "unverified");
+    const unverifiedFactors = (factors?.totp || []).filter(f => (f.status as string) === "unverified");
     for (const f of unverifiedFactors) {
       await supabase.auth.mfa.unenroll({ factorId: f.id });
     }
