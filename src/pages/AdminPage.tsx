@@ -1352,24 +1352,6 @@ function AdminContacts() {
           const st = statusConfig[c.status] || statusConfig.new;
           return <ContactCard key={c.id} contact={c} statusConfig={st} updateStatus={updateStatus} deleteContact={deleteContact} />;
         })}
-                <div className="flex items-center gap-2 shrink-0">
-                  {c.status === "new" && (
-                    <Button size="sm" variant="outline" onClick={() => updateStatus(c.id, "read")}>Marquer lu</Button>
-                  )}
-                  {(c.status === "new" || c.status === "read") && (
-                    <Button size="sm" variant="outline" onClick={() => updateStatus(c.id, "replied")}>
-                      <Send size={14} className="mr-1" /> Répondu
-                    </Button>
-                  )}
-                  {c.status !== "archived" && (
-                    <Button size="sm" variant="ghost" onClick={() => updateStatus(c.id, "archived")}>Archiver</Button>
-                  )}
-                  <Button size="sm" variant="ghost" className="text-destructive hover:text-destructive" onClick={() => deleteContact(c.id)}>Supprimer</Button>
-                </div>
-              </div>
-            </div>
-          );
-        })}
       </div>
       {filtered.length === 0 && <p className="text-center text-muted-foreground py-8">Aucune demande de contact trouvée.</p>}
     </div>
