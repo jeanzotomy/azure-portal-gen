@@ -74,34 +74,87 @@ export type Database = {
         }
         Relationships: []
       }
-      projects: {
+      project_files: {
         Row: {
           created_at: string
-          description: string | null
+          file_name: string
+          file_path: string
+          file_size: number | null
+          file_type: string | null
           id: string
-          name: string
-          progress: number
-          status: string
-          updated_at: string
+          project_id: string
           user_id: string
         }
         Insert: {
           created_at?: string
-          description?: string | null
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          file_type?: string | null
           id?: string
-          name: string
-          progress?: number
-          status?: string
-          updated_at?: string
+          project_id: string
           user_id: string
         }
         Update: {
           created_at?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          file_type?: string | null
+          id?: string
+          project_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "project_files_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      projects: {
+        Row: {
+          budget: string | null
+          created_at: string
+          deadline: string | null
+          description: string | null
+          id: string
+          name: string
+          priority: string
+          progress: number
+          status: string
+          technologies: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          budget?: string | null
+          created_at?: string
+          deadline?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          priority?: string
+          progress?: number
+          status?: string
+          technologies?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          budget?: string | null
+          created_at?: string
+          deadline?: string | null
           description?: string | null
           id?: string
           name?: string
+          priority?: string
           progress?: number
           status?: string
+          technologies?: string | null
           updated_at?: string
           user_id?: string
         }
