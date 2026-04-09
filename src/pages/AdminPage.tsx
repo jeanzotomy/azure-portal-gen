@@ -374,6 +374,34 @@ function AdminProjects() {
                 {isEditing ? (
                   <div className="mt-2 p-4 bg-muted/30 rounded-xl space-y-3">
                     <div>
+                      <label className="text-sm font-medium text-card-foreground">Nom du projet</label>
+                      <Input value={editName} onChange={(e) => setEditName(e.target.value)} className="mt-1" />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-card-foreground">Description</label>
+                      <Textarea value={editDescription} onChange={(e) => setEditDescription(e.target.value)} rows={3} className="mt-1" />
+                    </div>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div>
+                        <label className="text-sm font-medium text-card-foreground">Budget</label>
+                        <Input value={editBudget} onChange={(e) => setEditBudget(e.target.value)} placeholder="Ex: 5000" className="mt-1" />
+                      </div>
+                      <div>
+                        <label className="text-sm font-medium text-card-foreground">Délai</label>
+                        <Input value={editDeadline} onChange={(e) => setEditDeadline(e.target.value)} placeholder="Ex: 3 mois" className="mt-1" />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-card-foreground">Priorité</label>
+                      <div className="flex gap-2 mt-1">
+                        {[{ value: "normal", label: "Normal" }, { value: "haute", label: "Haute" }, { value: "urgent", label: "Urgent" }].map((opt) => (
+                          <button key={opt.value} onClick={() => setEditPriority(opt.value)}
+                            className={`text-sm px-3 py-1.5 rounded-lg border transition-colors ${editPriority === opt.value ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground border-border"}`}
+                          >{opt.label}</button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
                       <label className="text-sm font-medium text-card-foreground">Statut</label>
                       <div className="flex gap-2 mt-1">
                         {statusOptions.map((opt) => (
@@ -387,6 +415,16 @@ function AdminProjects() {
                       <label className="text-sm font-medium text-card-foreground">Progression : {editProgress}%</label>
                       <input type="range" min="0" max="100" value={editProgress} onChange={(e) => setEditProgress(Number(e.target.value))}
                         className="w-full mt-1 accent-[hsl(var(--primary))]" />
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-card-foreground">Services</label>
+                      <div className="flex flex-wrap gap-1.5 mt-1">
+                        {serviceOptions.map((s) => (
+                          <button key={s} onClick={() => setEditServices(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s])}
+                            className={`text-xs px-2.5 py-1 rounded-lg border transition-colors ${editServices.includes(s) ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground border-border"}`}
+                          >{s}</button>
+                        ))}
+                      </div>
                     </div>
                   </div>
                 ) : (
