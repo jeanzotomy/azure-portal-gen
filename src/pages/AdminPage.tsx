@@ -226,10 +226,16 @@ export default function AdminPage() {
 function AgentDashboard({ user }: { user: SupaUser }) {
   const [tickets, setTickets] = useState<any[]>([]);
   const [replies, setReplies] = useState<any[]>([]);
+  const [profiles, setProfiles] = useState<Record<string, any>>({});
 
   useEffect(() => {
     supabase.from("support_tickets").select("*").order("created_at", { ascending: false }).then(({ data }) => setTickets(data || []));
     supabase.from("ticket_replies").select("*").order("created_at", { ascending: false }).then(({ data }) => setReplies(data || []));
+    supabase.from("profiles").select("*").then(({ data }) => {
+      const map: Record<string, any> = {};
+      (data || []).forEach((p: any) => { map[p.user_id] = p; });
+      setProfiles(map);
+    });
   }, []);
 
   const openTickets = tickets.filter(t => t.status === "ouvert").length;
@@ -238,6 +244,30 @@ function AgentDashboard({ user }: { user: SupaUser }) {
   const myReplies = replies.filter(r => r.user_id === user.id).length;
 
   const recentTickets = tickets.slice(0, 5);
+
+  const ticketStatusData = [
+    { name: "Ouvert", value: openTickets },
+    { name: "En cours", value: inProgressTickets },
+    { name: "Résolu", value: resolvedTickets },
+  ].filter(d => d.value > 0);
+
+  // Monthly tickets (last 6 months)
+  const monthlyData = (() => {
+    const months: { name: string; tickets: number; réponses: number }[] = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      const monthName = d.toLocaleDateString("fr-FR", { month: "short" });
+      const year = d.getFullYear();
+      const month = d.getMonth();
+      months.push({
+        name: monthName,
+        tickets: tickets.filter(t => { const cd = new Date(t.created_at); return cd.getFullYear() === year && cd.getMonth() === month; }).length,
+        réponses: replies.filter(r => r.user_id === user.id).filter(r => { const cd = new Date(r.created_at); return cd.getFullYear() === year && cd.getMonth() === month; }).length,
+      });
+    }
+    return months;
+  })();
 
   const statusConfig: Record<string, { label: string; color: string; bg: string }> = {
     ouvert: { label: "Ouvert", color: "text-primary", bg: "bg-primary/10" },
@@ -249,9 +279,15 @@ function AgentDashboard({ user }: { user: SupaUser }) {
     <div className="space-y-6 animate-fade-up">
       <div className="relative overflow-hidden bg-gradient-to-br from-accent/5 via-primary/5 to-accent/10 rounded-2xl p-6 border border-accent/10">
         <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
-        <div className="relative">
-          <h1 className="text-2xl font-bold text-foreground">Bonjour, {user.user_metadata?.full_name || user.email?.split("@")[0]} 👋</h1>
-          <p className="text-muted-foreground mt-1">Voici votre espace agent — gérez les tickets clients.</p>
+        <div className="relative flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Bonjour, {user.user_metadata?.full_name || user.email?.split("@")[0]} 👋</h1>
+            <p className="text-muted-foreground mt-1">Voici votre espace agent — gérez les tickets clients.</p>
+          </div>
+          <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
+            <Activity size={16} className="text-accent" />
+            {new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+          </div>
         </div>
       </div>
 
@@ -274,6 +310,74 @@ function AgentDashboard({ user }: { user: SupaUser }) {
         ))}
       </div>
 
+      {/* Charts row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="lg:col-span-2 bg-card rounded-xl shadow-card border border-border/50 p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <Activity size={16} className="text-accent" />
+            <h3 className="font-semibold text-card-foreground">Mon activité mensuelle</h3>
+          </div>
+          <div className="h-56">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={monthlyData}>
+                <defs>
+                  <linearGradient id="agentGradTickets" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="agentGradReplies" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(var(--accent))" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="hsl(var(--accent))" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="name" tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
+                <YAxis tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" allowDecimals={false} />
+                <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "0.75rem", fontSize: 12 }} />
+                <Area type="monotone" dataKey="tickets" stroke="hsl(var(--primary))" fill="url(#agentGradTickets)" strokeWidth={2} name="Tickets" />
+                <Area type="monotone" dataKey="réponses" stroke="hsl(var(--accent))" fill="url(#agentGradReplies)" strokeWidth={2} name="Mes réponses" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="bg-card rounded-xl shadow-card border border-border/50 p-5">
+          <div className="flex items-center gap-2 mb-2">
+            <PieChart size={14} className="text-accent" />
+            <h4 className="text-sm font-semibold text-card-foreground">Tickets par statut</h4>
+          </div>
+          {ticketStatusData.length > 0 ? (
+            <>
+              <div className="h-40">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RePieChart>
+                    <Pie data={ticketStatusData} cx="50%" cy="50%" innerRadius={35} outerRadius={60} paddingAngle={4} dataKey="value">
+                      {ticketStatusData.map((_, i) => (
+                        <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "0.5rem", fontSize: 11 }} />
+                  </RePieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="flex flex-wrap gap-2 justify-center mt-2">
+                {ticketStatusData.map((d, i) => (
+                  <span key={d.name} className="text-[10px] text-muted-foreground flex items-center gap-1">
+                    <span className="w-2 h-2 rounded-full" style={{ background: CHART_COLORS[i % CHART_COLORS.length] }} />
+                    {d.name} ({d.value})
+                  </span>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="h-40 flex items-center justify-center">
+              <p className="text-xs text-muted-foreground">Aucune donnée</p>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Recent tickets */}
       <div className="bg-card rounded-xl shadow-card border border-border/50 overflow-hidden">
         <div className="p-5 border-b border-border/50 flex items-center justify-between">
           <h3 className="font-semibold text-card-foreground flex items-center gap-2">
@@ -285,18 +389,26 @@ function AgentDashboard({ user }: { user: SupaUser }) {
           <div className="divide-y divide-border/50">
             {recentTickets.map((t) => {
               const sc = statusConfig[t.status] || statusConfig.ouvert;
+              const profile = profiles[t.user_id];
               return (
                 <div key={t.id} className="p-4 hover:bg-muted/30 transition-colors">
                   <div className="flex items-start justify-between gap-3">
-                    <div className="min-w-0 flex-1">
-                      <p className="font-medium text-card-foreground text-sm truncate">{t.subject}</p>
-                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{t.message}</p>
+                    <div className="flex items-center gap-3 min-w-0 flex-1">
+                      <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold flex-shrink-0">
+                        {(profile?.full_name || "?").charAt(0).toUpperCase()}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="font-medium text-card-foreground text-sm truncate">{t.subject}</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">
+                          {profile?.full_name || "Client"} {profile?.company ? `· ${profile.company}` : ""}
+                        </p>
+                      </div>
                     </div>
                     <span className={`inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${sc.color} ${sc.bg}`}>
                       {sc.label}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 mt-2">
+                  <div className="flex items-center gap-2 mt-2 ml-11">
                     <span className="text-[11px] text-muted-foreground/60">{new Date(t.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" })}</span>
                     {t.priority === "urgent" && <span className="text-[10px] bg-destructive/10 text-destructive px-1.5 py-0.5 rounded font-medium">Urgent</span>}
                     {t.priority === "haute" && <span className="text-[10px] bg-orange-500/10 text-orange-500 px-1.5 py-0.5 rounded font-medium">Haute</span>}
