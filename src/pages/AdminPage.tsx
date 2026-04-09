@@ -166,6 +166,7 @@ function AdminContent() {
     { id: "dashboard", icon: LayoutDashboard, label: "Vue d'ensemble" },
     { id: "projects", icon: FolderOpen, label: "Projets" },
     { id: "tickets", icon: LifeBuoy, label: "Tickets" },
+    { id: "contacts", icon: MessageSquare, label: "Contacts" },
     { id: "users", icon: Users, label: "Utilisateurs" },
   ];
 
