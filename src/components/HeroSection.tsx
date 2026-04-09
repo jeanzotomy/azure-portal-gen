@@ -2,6 +2,7 @@ import { ArrowRight, Cloud, Shield, TrendingUp } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import heroPerson from "@/assets/hero-person.png";
+import { HeroScreenCarousel } from "@/components/HeroScreenCarousel";
 
 export function HeroSection() {
   const words = ["Innover.", "Optimiser.", "Automatiser."];
@@ -87,6 +88,9 @@ export function HeroSection() {
             </div>
           ))}
         </div>
+
+        {/* Scrolling screen mockup */}
+        <HeroScreenCarousel />
       </div>
     </section>
   );
