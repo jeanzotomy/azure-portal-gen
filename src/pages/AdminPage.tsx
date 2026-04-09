@@ -1434,9 +1434,32 @@ function AdminUsers() {
       map[r.user_id].push(r.role);
     });
     setUserRoles(map);
+
+    // Load MFA status for all users
+    const mfaMap: Record<string, boolean> = {};
+    for (const prof of (profs || [])) {
+      try {
+        const { data } = await supabase.functions.invoke("manage-user-mfa", { body: { user_id: prof.user_id, action: "list" } });
+        mfaMap[prof.user_id] = !!data?.enrolled;
+      } catch { mfaMap[prof.user_id] = false; }
+    }
+    setMfaStatus(mfaMap);
   };
 
   useEffect(() => { load(); }, []);
+
+  const disableMfa = async (userId: string, userName: string) => {
+    if (!window.confirm(`Désactiver le MFA pour "${userName}" ? L'utilisateur devra le reconfigurer.`)) return;
+    setMfaLoading(userId);
+    const { data, error } = await supabase.functions.invoke("manage-user-mfa", { body: { user_id: userId, action: "unenroll" } });
+    if (error || data?.error) {
+      toast({ title: "Erreur", description: data?.error || error?.message || "Impossible de désactiver le MFA.", variant: "destructive" });
+    } else {
+      toast({ title: "MFA désactivé", description: `Le MFA de "${userName}" a été réinitialisé.` });
+      setMfaStatus(prev => ({ ...prev, [userId]: false }));
+    }
+    setMfaLoading(null);
+  };
 
   const assignRole = async (userId: string, role: string) => {
     setChangingRole(userId);
