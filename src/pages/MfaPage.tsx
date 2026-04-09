@@ -66,7 +66,8 @@ export default function MfaPage() {
 
     const { data, error } = await supabase.auth.mfa.enroll({
       factorType: "totp",
-      friendlyName: "CloudMature Auth",
+      issuer: "Portail Cloudmature",
+      friendlyName: "Portail Cloudmature",
     });
 
     if (error) {
