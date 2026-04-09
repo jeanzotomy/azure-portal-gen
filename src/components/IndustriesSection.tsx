@@ -2,7 +2,7 @@ import { Landmark, ShieldCheck, Mountain, Building2, Rocket, MonitorSmartphone }
 
 const industries = [
   { icon: Landmark, title: "Banques & Finance", desc: "Sécurité et conformité accrues pour les institutions financières.", color: "from-primary to-cyan-500" },
-  { icon: ShieldCheck, title: "Assurances", desc: "Gestion efficace des charges de travail critiques.", color: "from-teal-500 to-primary" },
+  { icon: ShieldCheck, title: "Assurances", desc: "Gestion efficace des charges de travail critiques.", color: "from-primary to-teal-500" },
   { icon: Mountain, title: "Compagnies Minières", desc: "Connectivité hybride, Edge computing, IoT.", color: "from-secondary to-slate-700" },
   { icon: Building2, title: "Gouvernements", desc: "Souveraineté des données et résilience.", color: "from-secondary to-primary" },
   { icon: Rocket, title: "Startups", desc: "Accélération du go-to-market et innovation continue.", color: "from-primary to-accent" },
@@ -32,7 +32,7 @@ export function IndustriesSection() {
           {industries.map((ind) => (
             <div
               key={ind.title}
-              className="relative bg-white rounded-2xl p-8 text-center border border-muted hover:border-transparent shadow-sm hover:shadow-xl transition-all duration-500 group overflow-hidden"
+              className="relative bg-white rounded-2xl p-8 text-center border border-border/60 hover:border-transparent shadow-[0_2px_16px_0_hsl(var(--primary)/0.07)] hover:shadow-[0_8px_32px_0_hsl(var(--primary)/0.13)] transition-all duration-500 group overflow-hidden"
             >
               {/* Hover gradient border */}
               <div className={`absolute inset-0 rounded-2xl bg-gradient-to-br ${ind.color} opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10 scale-[1.02]`} />
