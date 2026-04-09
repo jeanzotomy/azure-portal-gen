@@ -20,16 +20,19 @@ import {
 import {
   LayoutDashboard, FolderOpen, LifeBuoy, Users, LogOut, Shield, Clock, CheckCircle2,
   AlertCircle, Bell, ChevronDown, ChevronUp, MessageSquare, Search, Send, UserCog,
-  Flag, DollarSign, Calendar, Filter,
+  Flag, DollarSign, Calendar, Filter, TrendingUp, Activity, BarChart3, PieChart,
 } from "lucide-react";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RePieChart, Pie, Cell, AreaChart, Area } from "recharts";
 import type { User as SupaUser } from "@supabase/supabase-js";
 
 type AdminTab = "dashboard" | "projects" | "tickets" | "users";
+type AgentTab = "dashboard" | "tickets";
 
 function AdminContent() {
   const [user, setUser] = useState<SupaUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<AdminTab>("dashboard");
+  const [agentTab, setAgentTab] = useState<AgentTab>("dashboard");
   const { isAdmin, isAgent, loading: rolesLoading } = useUserRoles();
   const mfaVerified = useMfaCheck();
   const navigate = useNavigate();
@@ -52,27 +55,93 @@ function AdminContent() {
     if (!rolesLoading && !isAdmin && !isAgent && !loading) navigate("/portal");
   }, [isAdmin, isAgent, rolesLoading, loading, navigate]);
 
-  // Agent can only see tickets
-  useEffect(() => {
-    if (!rolesLoading && isAgent && !isAdmin) {
-      if (tab !== "tickets") setTab("tickets");
-    }
-  }, [rolesLoading, isAgent, isAdmin, tab]);
-
   if (loading || rolesLoading || mfaVerified === null) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">Chargement...</div>;
   if (!user || (!isAdmin && !isAgent)) return null;
 
   const handleLogout = async () => { await supabase.auth.signOut(); navigate("/"); };
 
-  const allNavItems: { id: AdminTab; icon: typeof LayoutDashboard; label: string; adminOnly: boolean }[] = [
-    { id: "dashboard", icon: LayoutDashboard, label: "Vue d'ensemble", adminOnly: true },
-    { id: "projects", icon: FolderOpen, label: "Projets", adminOnly: true },
-    { id: "tickets", icon: LifeBuoy, label: "Tickets", adminOnly: false },
-    { id: "users", icon: Users, label: "Utilisateurs", adminOnly: true },
-  ];
+  // Agent-only view
+  if (isAgent && !isAdmin) {
+    const agentNavItems: { id: AgentTab; icon: typeof LayoutDashboard; label: string }[] = [
+      { id: "dashboard", icon: LayoutDashboard, label: "Tableau de bord" },
+      { id: "tickets", icon: LifeBuoy, label: "Tickets" },
+    ];
 
-  const navItems = isAdmin ? allNavItems : allNavItems.filter(n => !n.adminOnly);
-  const roleBadge = isAdmin ? "Admin" : "Agent";
+    return (
+      <div className="min-h-screen flex w-full bg-background">
+        <Sidebar collapsible="icon" className="border-r border-sidebar-border">
+          <SidebarContent className="bg-sidebar">
+            <div className="px-4 py-5 border-b border-sidebar-border">
+              <Link to="/" className="flex items-center gap-2">
+                <img src="/favicon.png" alt="CloudMature" className="h-8 w-8" />
+                {!collapsed && (
+                  <div>
+                    <span className="font-bold text-sidebar-foreground">CloudMature</span>
+                    <span className="block text-xs text-accent font-medium">Agent</span>
+                  </div>
+                )}
+              </Link>
+            </div>
+            <SidebarGroup>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {agentNavItems.map((item) => (
+                    <SidebarMenuItem key={item.id}>
+                      <SidebarMenuButton onClick={() => setAgentTab(item.id)} isActive={agentTab === item.id} tooltip={item.label} className="gap-3">
+                        <item.icon size={18} />
+                        <span>{item.label}</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+            <div className="mt-auto p-3 border-t border-sidebar-border space-y-1">
+              <SidebarMenuButton onClick={() => navigate("/portal")} tooltip="Portail client" className="gap-3 text-muted-foreground">
+                <Shield size={18} />
+                <span>Portail client</span>
+              </SidebarMenuButton>
+              <SidebarMenuButton onClick={handleLogout} tooltip="Déconnexion" className="text-destructive hover:text-destructive gap-3">
+                <LogOut size={18} />
+                <span>Déconnexion</span>
+              </SidebarMenuButton>
+            </div>
+          </SidebarContent>
+        </Sidebar>
+
+        <div className="flex-1 flex flex-col min-h-screen">
+          <header className="h-14 flex items-center justify-between border-b border-border bg-card px-4">
+            <div className="flex items-center gap-3">
+              <SidebarTrigger />
+              <h2 className="text-sm font-semibold text-card-foreground hidden sm:block">
+                {agentNavItems.find(n => n.id === agentTab)?.label}
+              </h2>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs bg-accent/10 text-accent px-2.5 py-1 rounded-full font-medium flex items-center gap-1">
+                <Shield size={12} /> Agent
+              </span>
+              <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
+                {(user.user_metadata?.full_name || user.email || "A").charAt(0).toUpperCase()}
+              </div>
+            </div>
+          </header>
+          <main className="flex-1 p-6 overflow-auto">
+            {agentTab === "dashboard" && <AgentDashboard user={user} />}
+            {agentTab === "tickets" && <AdminTickets />}
+          </main>
+        </div>
+      </div>
+    );
+  }
+
+  // Admin view
+  const allNavItems: { id: AdminTab; icon: typeof LayoutDashboard; label: string }[] = [
+    { id: "dashboard", icon: LayoutDashboard, label: "Vue d'ensemble" },
+    { id: "projects", icon: FolderOpen, label: "Projets" },
+    { id: "tickets", icon: LifeBuoy, label: "Tickets" },
+    { id: "users", icon: Users, label: "Utilisateurs" },
+  ];
 
   return (
     <div className="min-h-screen flex w-full bg-background">
@@ -84,7 +153,7 @@ function AdminContent() {
               {!collapsed && (
                 <div>
                   <span className="font-bold text-sidebar-foreground">CloudMature</span>
-                  <span className="block text-xs text-primary font-medium">{roleBadge}</span>
+                  <span className="block text-xs text-primary font-medium">Admin</span>
                 </div>
               )}
             </Link>
@@ -92,7 +161,7 @@ function AdminContent() {
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu>
-                {navItems.map((item) => (
+                {allNavItems.map((item) => (
                   <SidebarMenuItem key={item.id}>
                     <SidebarMenuButton onClick={() => setTab(item.id)} isActive={tab === item.id} tooltip={item.label} className="gap-3">
                       <item.icon size={18} />
@@ -121,12 +190,12 @@ function AdminContent() {
           <div className="flex items-center gap-3">
             <SidebarTrigger />
             <h2 className="text-sm font-semibold text-card-foreground hidden sm:block">
-              {navItems.find(n => n.id === tab)?.label}
+              {allNavItems.find(n => n.id === tab)?.label}
             </h2>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-xs bg-primary/10 text-primary px-2.5 py-1 rounded-full font-medium flex items-center gap-1">
-              <Shield size={12} /> {roleBadge}
+              <Shield size={12} /> Admin
             </span>
             <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
               {(user.user_metadata?.full_name || user.email || "A").charAt(0).toUpperCase()}
@@ -135,10 +204,10 @@ function AdminContent() {
         </header>
 
         <main className="flex-1 p-6 overflow-auto">
-          {tab === "dashboard" && isAdmin && <AdminDashboard />}
-          {tab === "projects" && isAdmin && <AdminProjects />}
+          {tab === "dashboard" && <AdminDashboard />}
+          {tab === "projects" && <AdminProjects />}
           {tab === "tickets" && <AdminTickets />}
-          {tab === "users" && isAdmin && <AdminUsers />}
+          {tab === "users" && <AdminUsers />}
         </main>
       </div>
     </div>
@@ -153,48 +222,387 @@ export default function AdminPage() {
   );
 }
 
-/* ─── Dashboard ─── */
-function AdminDashboard() {
-  const [stats, setStats] = useState({ users: 0, projects: 0, activeProjects: 0, openTickets: 0 });
+/* ─── Agent Dashboard ─── */
+function AgentDashboard({ user }: { user: SupaUser }) {
+  const [tickets, setTickets] = useState<any[]>([]);
+  const [replies, setReplies] = useState<any[]>([]);
 
   useEffect(() => {
-    Promise.all([
-      supabase.from("profiles").select("id", { count: "exact", head: true }),
-      supabase.from("projects").select("id", { count: "exact", head: true }),
-      supabase.from("projects").select("id", { count: "exact", head: true }).eq("status", "en_cours"),
-      supabase.from("support_tickets").select("id", { count: "exact", head: true }).eq("status", "ouvert"),
-    ]).then(([u, p, ap, t]) => {
-      setStats({
-        users: u.count || 0,
-        projects: p.count || 0,
-        activeProjects: ap.count || 0,
-        openTickets: t.count || 0,
-      });
-    });
+    supabase.from("support_tickets").select("*").order("created_at", { ascending: false }).then(({ data }) => setTickets(data || []));
+    supabase.from("ticket_replies").select("*").order("created_at", { ascending: false }).then(({ data }) => setReplies(data || []));
   }, []);
 
-  const cards = [
-    { label: "Clients inscrits", value: stats.users, icon: Users, color: "gradient-primary" },
-    { label: "Projets total", value: stats.projects, icon: FolderOpen, color: "bg-accent" },
-    { label: "Projets actifs", value: stats.activeProjects, icon: Clock, color: "bg-primary" },
-    { label: "Tickets ouverts", value: stats.openTickets, icon: LifeBuoy, color: "bg-destructive" },
-  ];
+  const openTickets = tickets.filter(t => t.status === "ouvert").length;
+  const inProgressTickets = tickets.filter(t => t.status === "en_cours").length;
+  const resolvedTickets = tickets.filter(t => t.status === "résolu").length;
+  const myReplies = replies.filter(r => r.user_id === user.id).length;
+
+  const recentTickets = tickets.slice(0, 5);
+
+  const statusConfig: Record<string, { label: string; color: string; bg: string }> = {
+    ouvert: { label: "Ouvert", color: "text-primary", bg: "bg-primary/10" },
+    en_cours: { label: "En cours", color: "text-accent", bg: "bg-accent/10" },
+    résolu: { label: "Résolu", color: "text-teal-600", bg: "bg-teal-600/10" },
+  };
 
   return (
     <div className="space-y-6 animate-fade-up">
-      <h1 className="text-2xl font-bold text-foreground">Vue d'ensemble</h1>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {cards.map((c) => (
-          <div key={c.label} className="bg-card rounded-xl p-5 shadow-card border border-border/50">
+      <div className="relative overflow-hidden bg-gradient-to-br from-accent/5 via-primary/5 to-accent/10 rounded-2xl p-6 border border-accent/10">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
+        <div className="relative">
+          <h1 className="text-2xl font-bold text-foreground">Bonjour, {user.user_metadata?.full_name || user.email?.split("@")[0]} 👋</h1>
+          <p className="text-muted-foreground mt-1">Voici votre espace agent — gérez les tickets clients.</p>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { label: "Tickets ouverts", value: openTickets, icon: AlertCircle, color: "bg-primary" },
+          { label: "En cours", value: inProgressTickets, icon: Clock, color: "bg-accent" },
+          { label: "Résolus", value: resolvedTickets, icon: CheckCircle2, color: "bg-teal-600" },
+          { label: "Mes réponses", value: myReplies, icon: MessageSquare, color: "gradient-primary" },
+        ].map((c) => (
+          <div key={c.label} className="bg-card rounded-xl p-5 shadow-card border border-border/50 hover:shadow-card-hover hover:border-accent/20 transition-all duration-300 group">
             <div className="flex items-center justify-between mb-3">
-              <span className="text-sm text-muted-foreground">{c.label}</span>
-              <div className={`w-9 h-9 rounded-lg flex items-center justify-center ${c.color}`}>
+              <span className="text-sm text-muted-foreground font-medium">{c.label}</span>
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${c.color} group-hover:scale-110 transition-transform duration-300`}>
                 <c.icon size={18} className="text-primary-foreground" />
               </div>
             </div>
             <p className="text-3xl font-bold text-card-foreground">{c.value}</p>
           </div>
         ))}
+      </div>
+
+      <div className="bg-card rounded-xl shadow-card border border-border/50 overflow-hidden">
+        <div className="p-5 border-b border-border/50 flex items-center justify-between">
+          <h3 className="font-semibold text-card-foreground flex items-center gap-2">
+            <LifeBuoy size={16} className="text-accent" /> Tickets récents à traiter
+          </h3>
+          <span className="text-xs text-muted-foreground">{openTickets + inProgressTickets} en attente</span>
+        </div>
+        {recentTickets.length > 0 ? (
+          <div className="divide-y divide-border/50">
+            {recentTickets.map((t) => {
+              const sc = statusConfig[t.status] || statusConfig.ouvert;
+              return (
+                <div key={t.id} className="p-4 hover:bg-muted/30 transition-colors">
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="font-medium text-card-foreground text-sm truncate">{t.subject}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{t.message}</p>
+                    </div>
+                    <span className={`inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${sc.color} ${sc.bg}`}>
+                      {sc.label}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className="text-[11px] text-muted-foreground/60">{new Date(t.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric" })}</span>
+                    {t.priority === "urgent" && <span className="text-[10px] bg-destructive/10 text-destructive px-1.5 py-0.5 rounded font-medium">Urgent</span>}
+                    {t.priority === "haute" && <span className="text-[10px] bg-orange-500/10 text-orange-500 px-1.5 py-0.5 rounded font-medium">Haute</span>}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div className="p-8 text-center">
+            <CheckCircle2 size={32} className="mx-auto text-teal-500/30 mb-2" />
+            <p className="text-sm text-muted-foreground">Aucun ticket à traiter 🎉</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* ─── Admin Dashboard ─── */
+const CHART_COLORS = ["hsl(var(--primary))", "hsl(var(--accent))", "hsl(199, 89%, 48%)", "hsl(160, 60%, 45%)"];
+
+function AdminDashboard() {
+  const [stats, setStats] = useState({ users: 0, projects: 0, activeProjects: 0, openTickets: 0 });
+  const [projects, setProjects] = useState<any[]>([]);
+  const [tickets, setTickets] = useState<any[]>([]);
+  const [recentProfiles, setRecentProfiles] = useState<any[]>([]);
+
+  useEffect(() => {
+    Promise.all([
+      supabase.from("profiles").select("*").order("created_at", { ascending: false }),
+      supabase.from("projects").select("*").order("created_at", { ascending: false }),
+      supabase.from("support_tickets").select("*").order("created_at", { ascending: false }),
+    ]).then(([profRes, projRes, tickRes]) => {
+      const profs = profRes.data || [];
+      const projs = projRes.data || [];
+      const ticks = tickRes.data || [];
+      setRecentProfiles(profs.slice(0, 5));
+      setProjects(projs);
+      setTickets(ticks);
+      setStats({
+        users: profs.length,
+        projects: projs.length,
+        activeProjects: projs.filter(p => p.status === "en_cours").length,
+        openTickets: ticks.filter(t => t.status === "ouvert").length,
+      });
+    });
+  }, []);
+
+  // Project status pie data
+  const projectStatusData = [
+    { name: "En cours", value: projects.filter(p => p.status === "en_cours").length },
+    { name: "En attente", value: projects.filter(p => p.status === "en_attente").length },
+    { name: "Terminé", value: projects.filter(p => p.status === "termine").length },
+  ].filter(d => d.value > 0);
+
+  // Ticket status pie data
+  const ticketStatusData = [
+    { name: "Ouvert", value: tickets.filter(t => t.status === "ouvert").length },
+    { name: "En cours", value: tickets.filter(t => t.status === "en_cours").length },
+    { name: "Résolu", value: tickets.filter(t => t.status === "résolu").length },
+  ].filter(d => d.value > 0);
+
+  // Monthly activity (last 6 months)
+  const monthlyData = (() => {
+    const months: { name: string; projets: number; tickets: number }[] = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      const monthName = d.toLocaleDateString("fr-FR", { month: "short" });
+      const year = d.getFullYear();
+      const month = d.getMonth();
+      months.push({
+        name: monthName,
+        projets: projects.filter(p => {
+          const cd = new Date(p.created_at);
+          return cd.getFullYear() === year && cd.getMonth() === month;
+        }).length,
+        tickets: tickets.filter(t => {
+          const cd = new Date(t.created_at);
+          return cd.getFullYear() === year && cd.getMonth() === month;
+        }).length,
+      });
+    }
+    return months;
+  })();
+
+  // Total budget
+  const totalBudget = projects.reduce((sum, p) => {
+    const num = parseFloat((p.budget || "0").replace(/[^\d.]/g, ""));
+    return sum + (isNaN(num) ? 0 : num);
+  }, 0);
+
+  // Avg progress
+  const avgProgress = projects.length > 0
+    ? Math.round(projects.reduce((sum, p) => sum + (p.progress || 0), 0) / projects.length)
+    : 0;
+
+  const cards = [
+    { label: "Clients inscrits", value: stats.users, icon: Users, color: "gradient-primary", subtitle: "Total" },
+    { label: "Projets total", value: stats.projects, icon: FolderOpen, color: "bg-accent", subtitle: `${stats.activeProjects} actifs` },
+    { label: "Tickets ouverts", value: stats.openTickets, icon: LifeBuoy, color: "bg-destructive", subtitle: `${tickets.length} total` },
+    { label: "Budget total", value: totalBudget, icon: DollarSign, color: "bg-primary", subtitle: `Moy. ${avgProgress}% progression`, isCurrency: true },
+  ];
+
+  return (
+    <div className="space-y-6 animate-fade-up">
+      {/* Welcome banner */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-accent/5 to-primary/10 rounded-2xl p-6 border border-primary/10">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
+        <div className="relative flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Vue d'ensemble</h1>
+            <p className="text-muted-foreground mt-1">Suivez l'activité de votre plateforme en temps réel.</p>
+          </div>
+          <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
+            <Activity size={16} className="text-primary" />
+            {new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+          </div>
+        </div>
+      </div>
+
+      {/* Stats grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {cards.map((c) => (
+          <div key={c.label} className="bg-card rounded-xl p-5 shadow-card border border-border/50 hover:shadow-card-hover hover:border-primary/20 transition-all duration-300 group">
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm text-muted-foreground font-medium">{c.label}</span>
+              <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${c.color} group-hover:scale-110 transition-transform duration-300`}>
+                <c.icon size={18} className="text-primary-foreground" />
+              </div>
+            </div>
+            <p className="text-3xl font-bold text-card-foreground">
+              {(c as any).isCurrency ? `$${c.value.toLocaleString()}` : c.value}
+            </p>
+            {(c as any).subtitle && <p className="text-xs text-muted-foreground mt-1">{(c as any).subtitle}</p>}
+          </div>
+        ))}
+      </div>
+
+      {/* Charts row */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        {/* Activity chart */}
+        <div className="lg:col-span-2 bg-card rounded-xl shadow-card border border-border/50 p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <BarChart3 size={16} className="text-primary" />
+            <h3 className="font-semibold text-card-foreground">Activité mensuelle</h3>
+          </div>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={monthlyData}>
+                <defs>
+                  <linearGradient id="gradProjects" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(var(--primary))" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="hsl(var(--primary))" stopOpacity={0} />
+                  </linearGradient>
+                  <linearGradient id="gradTickets" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="hsl(var(--accent))" stopOpacity={0.3} />
+                    <stop offset="95%" stopColor="hsl(var(--accent))" stopOpacity={0} />
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="name" tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
+                <YAxis tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" allowDecimals={false} />
+                <Tooltip
+                  contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "0.75rem", fontSize: 12 }}
+                  labelStyle={{ color: "hsl(var(--card-foreground))" }}
+                />
+                <Area type="monotone" dataKey="projets" stroke="hsl(var(--primary))" fill="url(#gradProjects)" strokeWidth={2} name="Projets" />
+                <Area type="monotone" dataKey="tickets" stroke="hsl(var(--accent))" fill="url(#gradTickets)" strokeWidth={2} name="Tickets" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Pie charts */}
+        <div className="bg-card rounded-xl shadow-card border border-border/50 p-5 space-y-6">
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <PieChart size={14} className="text-primary" />
+              <h4 className="text-sm font-semibold text-card-foreground">Projets par statut</h4>
+            </div>
+            {projectStatusData.length > 0 ? (
+              <div className="h-32">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RePieChart>
+                    <Pie data={projectStatusData} cx="50%" cy="50%" innerRadius={30} outerRadius={50} paddingAngle={4} dataKey="value">
+                      {projectStatusData.map((_, i) => (
+                        <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "0.5rem", fontSize: 11 }} />
+                  </RePieChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground text-center py-4">Aucune donnée</p>
+            )}
+            <div className="flex flex-wrap gap-2 justify-center">
+              {projectStatusData.map((d, i) => (
+                <span key={d.name} className="text-[10px] text-muted-foreground flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full" style={{ background: CHART_COLORS[i % CHART_COLORS.length] }} />
+                  {d.name} ({d.value})
+                </span>
+              ))}
+            </div>
+          </div>
+
+          <div className="border-t border-border/50 pt-4">
+            <div className="flex items-center gap-2 mb-2">
+              <PieChart size={14} className="text-accent" />
+              <h4 className="text-sm font-semibold text-card-foreground">Tickets par statut</h4>
+            </div>
+            {ticketStatusData.length > 0 ? (
+              <div className="h-32">
+                <ResponsiveContainer width="100%" height="100%">
+                  <RePieChart>
+                    <Pie data={ticketStatusData} cx="50%" cy="50%" innerRadius={30} outerRadius={50} paddingAngle={4} dataKey="value">
+                      {ticketStatusData.map((_, i) => (
+                        <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "0.5rem", fontSize: 11 }} />
+                  </RePieChart>
+                </ResponsiveContainer>
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground text-center py-4">Aucune donnée</p>
+            )}
+            <div className="flex flex-wrap gap-2 justify-center">
+              {ticketStatusData.map((d, i) => (
+                <span key={d.name} className="text-[10px] text-muted-foreground flex items-center gap-1">
+                  <span className="w-2 h-2 rounded-full" style={{ background: CHART_COLORS[i % CHART_COLORS.length] }} />
+                  {d.name} ({d.value})
+                </span>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom row: recent users + recent activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
+        <div className="bg-card rounded-xl shadow-card border border-border/50 overflow-hidden">
+          <div className="p-5 border-b border-border/50 flex items-center justify-between">
+            <h3 className="font-semibold text-card-foreground flex items-center gap-2">
+              <Users size={16} className="text-primary" /> Derniers inscrits
+            </h3>
+          </div>
+          <div className="divide-y divide-border/50">
+            {recentProfiles.map((p) => (
+              <div key={p.id} className="p-4 hover:bg-muted/30 transition-colors flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-sm font-bold flex-shrink-0">
+                  {(p.full_name || "?").charAt(0).toUpperCase()}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium text-card-foreground truncate">{p.full_name || "Non renseigné"}</p>
+                  {p.company && <p className="text-xs text-muted-foreground truncate">{p.company}</p>}
+                </div>
+                <span className="text-[11px] text-muted-foreground/60 flex-shrink-0">
+                  {new Date(p.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short" })}
+                </span>
+              </div>
+            ))}
+            {recentProfiles.length === 0 && (
+              <div className="p-8 text-center">
+                <p className="text-sm text-muted-foreground">Aucun utilisateur</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="bg-card rounded-xl shadow-card border border-border/50 overflow-hidden">
+          <div className="p-5 border-b border-border/50 flex items-center justify-between">
+            <h3 className="font-semibold text-card-foreground flex items-center gap-2">
+              <TrendingUp size={16} className="text-accent" /> Projets récents
+            </h3>
+          </div>
+          <div className="divide-y divide-border/50">
+            {projects.slice(0, 5).map((p) => (
+              <div key={p.id} className="p-4 hover:bg-muted/30 transition-colors">
+                <div className="flex items-center justify-between mb-1.5">
+                  <p className="text-sm font-medium text-card-foreground truncate flex-1">{p.name}</p>
+                  <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${
+                    p.status === "en_cours" ? "text-primary bg-primary/10" :
+                    p.status === "termine" ? "text-teal-600 bg-teal-600/10" : "text-muted-foreground bg-muted"
+                  }`}>
+                    {p.status === "en_cours" ? "En cours" : p.status === "termine" ? "Terminé" : "En attente"}
+                  </span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 relative h-1.5 bg-muted rounded-full overflow-hidden">
+                    <div className={`absolute inset-y-0 left-0 rounded-full transition-all duration-500 ${p.progress === 100 ? "bg-teal-500" : "bg-gradient-to-r from-primary to-accent"}`}
+                      style={{ width: `${p.progress}%` }} />
+                  </div>
+                  <span className="text-[11px] font-bold text-card-foreground w-8 text-right">{p.progress}%</span>
+                </div>
+              </div>
+            ))}
+            {projects.length === 0 && (
+              <div className="p-8 text-center">
+                <p className="text-sm text-muted-foreground">Aucun projet</p>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -313,7 +721,6 @@ function AdminProjects() {
               <div className={`h-1 w-full ${p.status === "termine" ? "bg-teal-500" : p.status === "en_attente" ? "bg-muted-foreground/30" : "bg-gradient-to-r from-primary to-accent"}`} />
 
               <div className="p-5">
-                {/* Header */}
                 <div className="flex items-center justify-between mb-3">
                   <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ${sc.color} ${sc.bg}`}>
                     <sc.icon size={12} /> {sc.label}
@@ -340,7 +747,6 @@ function AdminProjects() {
                   </div>
                 </div>
 
-                {/* Title & client */}
                 <h3 className="font-bold text-card-foreground text-lg leading-tight mb-1">{p.name}</h3>
                 {p.description && <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{p.description}</p>}
                 
@@ -352,7 +758,6 @@ function AdminProjects() {
                   {profile?.company && <span className="text-xs text-muted-foreground">· {profile.company}</span>}
                 </div>
 
-                {/* Meta */}
                 {(p.budget || p.deadline) && (
                   <div className="flex flex-wrap gap-1.5 mb-3">
                     {p.budget && (
@@ -375,7 +780,6 @@ function AdminProjects() {
                   </div>
                 )}
 
-                {/* Edit panel or progress */}
                 {isEditing ? (
                   <div className="mt-2 p-4 bg-muted/30 rounded-xl space-y-3">
                     <div>
@@ -554,7 +958,6 @@ function AdminTickets() {
         <span className="text-sm text-muted-foreground">{filtered.length}/{tickets.length} ticket(s)</span>
       </div>
 
-      {/* Filter bar */}
       <div className="bg-card rounded-xl p-4 shadow-card border border-border/50 space-y-3">
         <div className="relative">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
@@ -761,7 +1164,6 @@ function AdminUsers() {
         <span className="text-sm text-muted-foreground">{filtered.length}/{profilesList.length} utilisateur(s)</span>
       </div>
 
-      {/* Filter bar */}
       <div className="bg-card rounded-xl p-4 shadow-card border border-border/50 space-y-3">
         <div className="relative">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
