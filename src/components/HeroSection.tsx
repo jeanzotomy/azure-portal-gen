@@ -1,4 +1,4 @@
-import { ArrowRight, Cloud, Shield, TrendingUp } from "lucide-react";
+import { ArrowRight, Cloud, Shield, TrendingUp, UserPlus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import heroPerson from "@/assets/hero-person.png";
