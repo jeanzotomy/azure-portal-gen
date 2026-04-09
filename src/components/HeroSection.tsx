@@ -35,7 +35,10 @@ export function HeroSection() {
           </div>
 
           <div className="hidden lg:flex justify-center animate-fade-up">
-            <img src={heroPerson} alt="Consultante Cloud Mature" className="max-h-[600px] w-auto drop-shadow-2xl" />
+            <div className="relative">
+              <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-primary/40 via-accent/30 to-primary/20 blur-xl opacity-60" />
+              <img src={heroPerson} alt="Consultante Cloud Mature" className="relative max-h-[600px] w-auto rounded-2xl shadow-[0_20px_60px_-15px_hsl(195_100%_40%/0.3)] ring-1 ring-white/10" />
+            </div>
           </div>
         </div>
 
