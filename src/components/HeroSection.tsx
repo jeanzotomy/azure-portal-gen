@@ -1,36 +1,41 @@
 import { ArrowRight, Cloud, Shield, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import heroBg from "@/assets/hero-bg.jpg";
+import heroPerson from "@/assets/hero-person.png";
 
 export function HeroSection() {
   return (
     <section id="hero" className="relative min-h-screen flex items-center overflow-hidden">
-      <img src={heroBg} alt="" className="absolute inset-0 w-full h-full object-cover" />
-      <div className="absolute inset-0 bg-gradient-to-b from-secondary/90 via-secondary/80 to-secondary/95" />
+      <div className="absolute inset-0 gradient-hero" />
 
       <div className="container relative z-10 py-32">
-        <div className="max-w-3xl animate-fade-up">
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-6 text-sm text-cyan-glow">
-            <Cloud size={16} />
-            Consultation TI · Cloud · DevOps
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+          <div className="animate-fade-up">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full glass mb-6 text-sm text-cyan-glow">
+              <Cloud size={16} />
+              Consultation TI · Cloud · DevOps
+            </div>
+            <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-tight text-primary-foreground mb-6">
+              Innover.{" "}
+              <span className="gradient-text">Optimiser.</span>{" "}
+              Automatiser.
+            </h1>
+            <p className="text-lg md:text-xl text-secondary-foreground/70 max-w-2xl mb-8">
+              Cloud Mature accompagne les organisations dans leur transformation vers le Cloud avec une approche sécurisée, performante et conforme aux standards les plus élevés.
+            </p>
+            <div className="flex flex-wrap gap-4">
+              <Button size="lg" className="gradient-primary text-primary-foreground border-0 hover:opacity-90 animate-pulse-glow"
+                onClick={() => document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" })}>
+                Demander une consultation <ArrowRight size={18} className="ml-2" />
+              </Button>
+              <Button size="lg" variant="outline" className="border-primary/40 text-primary-foreground hover:bg-primary/10"
+                onClick={() => document.querySelector("#services")?.scrollIntoView({ behavior: "smooth" })}>
+                Nos services
+              </Button>
+            </div>
           </div>
-          <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-tight text-primary-foreground mb-6">
-            Innover.{" "}
-            <span className="gradient-text">Optimiser.</span>{" "}
-            Automatiser.
-          </h1>
-          <p className="text-lg md:text-xl text-secondary-foreground/70 max-w-2xl mb-8">
-            Cloud Mature accompagne les organisations dans leur transformation vers le Cloud avec une approche sécurisée, performante et conforme aux standards les plus élevés.
-          </p>
-          <div className="flex flex-wrap gap-4">
-            <Button size="lg" className="gradient-primary text-primary-foreground border-0 hover:opacity-90 animate-pulse-glow"
-              onClick={() => document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" })}>
-              Demander une consultation <ArrowRight size={18} className="ml-2" />
-            </Button>
-            <Button size="lg" variant="outline" className="border-primary/40 text-primary-foreground hover:bg-primary/10"
-              onClick={() => document.querySelector("#services")?.scrollIntoView({ behavior: "smooth" })}>
-              Nos services
-            </Button>
+
+          <div className="hidden lg:flex justify-center animate-fade-up">
+            <img src={heroPerson} alt="Consultante Cloud Mature" className="max-h-[600px] w-auto drop-shadow-2xl" />
           </div>
         </div>
 
