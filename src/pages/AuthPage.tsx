@@ -49,7 +49,7 @@ export default function AuthPage() {
 
         <div className="glass rounded-2xl p-8">
           <div className="flex items-center gap-3 mb-8">
-            <img src={logo} alt="CloudMature" className="h-10 w-10" />
+            <img src={favicon} alt="CloudMature" className="h-10 w-10" />
             <div>
               <h1 className="text-xl font-bold text-primary-foreground">Portail Client</h1>
               <p className="text-sm text-secondary-foreground/60">Cloud Mature</p>
