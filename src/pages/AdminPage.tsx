@@ -189,7 +189,14 @@ function AdminContent() {
                 {allNavItems.map((item) => (
                   <SidebarMenuItem key={item.id}>
                     <SidebarMenuButton onClick={() => setTab(item.id)} isActive={tab === item.id} tooltip={item.label} className="gap-3">
-                      <item.icon size={18} />
+                      <div className="relative">
+                        <item.icon size={18} />
+                        {item.id === "tickets" && unrepliedCount > 0 && (
+                          <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold px-1">
+                            {unrepliedCount}
+                          </span>
+                        )}
+                      </div>
                       <span>{item.label}</span>
                     </SidebarMenuButton>
                   </SidebarMenuItem>
