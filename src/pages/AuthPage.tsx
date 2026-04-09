@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Cloud, ArrowLeft, Mail, ShieldBan } from "lucide-react";
-import favicon from "@/assets/favicon.png";
+import favicon from "@/assets/cloudmature-logo.png";
 
 export default function AuthPage() {
   const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");

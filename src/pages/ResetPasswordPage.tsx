@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Lock } from "lucide-react";
-import favicon from "@/assets/favicon.png";
+import favicon from "@/assets/cloudmature-logo.png";
 
 export default function ResetPasswordPage() {
   const [password, setPassword] = useState("");
