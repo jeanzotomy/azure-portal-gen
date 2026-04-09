@@ -98,18 +98,30 @@ export function ContactSection() {
           </div>
 
           <form onSubmit={handleSubmit} className="glass rounded-2xl p-8 space-y-4">
-            <Input placeholder="Votre nom" required value={form.name}
-              onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="bg-secondary/30 border-border/30 text-primary-foreground placeholder:text-secondary-foreground/40" />
-            <Input type="email" placeholder="Email" required value={form.email}
-              onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className="bg-secondary/30 border-border/30 text-primary-foreground placeholder:text-secondary-foreground/40" />
-            <Input placeholder="Entreprise" value={form.company}
-              onChange={(e) => setForm({ ...form, company: e.target.value })}
-              className="bg-secondary/30 border-border/30 text-primary-foreground placeholder:text-secondary-foreground/40" />
-            <Textarea placeholder="Votre message" required rows={4} value={form.message}
-              onChange={(e) => setForm({ ...form, message: e.target.value })}
-              className="bg-secondary/30 border-border/30 text-primary-foreground placeholder:text-secondary-foreground/40" />
+            <div>
+              <Input placeholder="Votre nom *" required value={form.name}
+                onChange={(e) => { setForm({ ...form, name: e.target.value }); setErrors(prev => ({ ...prev, name: "" })); }}
+                className={`bg-secondary/30 border-border/30 text-primary-foreground placeholder:text-secondary-foreground/40 ${errors.name ? "border-destructive" : ""}`} />
+              {errors.name && <p className="text-xs text-destructive mt-1">{errors.name}</p>}
+            </div>
+            <div>
+              <Input type="email" placeholder="Email *" required value={form.email}
+                onChange={(e) => { setForm({ ...form, email: e.target.value }); setErrors(prev => ({ ...prev, email: "" })); }}
+                className={`bg-secondary/30 border-border/30 text-primary-foreground placeholder:text-secondary-foreground/40 ${errors.email ? "border-destructive" : ""}`} />
+              {errors.email && <p className="text-xs text-destructive mt-1">{errors.email}</p>}
+            </div>
+            <div>
+              <Input placeholder="Entreprise *" required value={form.company}
+                onChange={(e) => { setForm({ ...form, company: e.target.value }); setErrors(prev => ({ ...prev, company: "" })); }}
+                className={`bg-secondary/30 border-border/30 text-primary-foreground placeholder:text-secondary-foreground/40 ${errors.company ? "border-destructive" : ""}`} />
+              {errors.company && <p className="text-xs text-destructive mt-1">{errors.company}</p>}
+            </div>
+            <div>
+              <Textarea placeholder="Votre message *" required rows={4} value={form.message}
+                onChange={(e) => { setForm({ ...form, message: e.target.value }); setErrors(prev => ({ ...prev, message: "" })); }}
+                className={`bg-secondary/30 border-border/30 text-primary-foreground placeholder:text-secondary-foreground/40 ${errors.message ? "border-destructive" : ""}`} />
+              {errors.message && <p className="text-xs text-destructive mt-1">{errors.message}</p>}
+            </div>
             <Button type="submit" className="w-full gradient-primary text-primary-foreground border-0" disabled={loading}>
               <Send size={16} className="mr-2" /> {loading ? "Envoi..." : "Envoyer"}
             </Button>
