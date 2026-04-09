@@ -53,7 +53,7 @@ function AdminContent() {
     }
   }, [rolesLoading, isAgent, isAdmin, tab]);
 
-  if (loading || rolesLoading) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">Chargement...</div>;
+  if (loading || rolesLoading || mfaVerified === null) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">Chargement...</div>;
   if (!user || (!isAdmin && !isAgent)) return null;
 
   const handleLogout = async () => { await supabase.auth.signOut(); navigate("/"); };
