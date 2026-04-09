@@ -39,7 +39,7 @@ const services = [
   {
     icon: BrainCircuit,
     title: "Adoption & Maturité IA",
-    desc: "Évaluation de maturité IA, stratégie d'adoption et intégration de solutions intelligentes.",
+    desc: "Évaluation de maturité IA, stratégie d'adoption et intégration de solutions IA responsables dans les processus métiers.",
   },
 ];
 
