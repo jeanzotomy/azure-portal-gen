@@ -71,7 +71,7 @@ export function HeroSection() {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-3 mt-3 animate-fade-up delay-300">
+        <div className="flex flex-wrap gap-3 -mt-1 animate-fade-up delay-300">
           {[
             { icon: Cloud, title: "Multi-Cloud", desc: "AWS, Azure, GCP" },
             { icon: Shield, title: "Sécurité", desc: "ISO 27001, SOC 2" },
