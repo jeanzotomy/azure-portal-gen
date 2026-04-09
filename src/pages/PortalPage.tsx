@@ -29,8 +29,9 @@ import logo from "@/assets/cloudmature-logo.png";
 import {
   LayoutDashboard, FolderOpen, LifeBuoy, User, LogOut, Send, Clock, CheckCircle2, AlertCircle,
   Menu, Bell, Search, Filter, Upload, X, FileText, DollarSign, Calendar, Cpu, Flag, Pencil, Shield,
-  Activity, TrendingUp, Plus, Trash2,
+  Activity, TrendingUp, Plus, Trash2, Info,
 } from "lucide-react";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 import { PieChart as RePieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip } from "recharts";
 import type { User as SupaUser } from "@supabase/supabase-js";
 
@@ -40,6 +41,8 @@ function PortalContent() {
   const [user, setUser] = useState<SupaUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<Tab>("dashboard");
+  const [profileIncomplete, setProfileIncomplete] = useState(false);
+  const [daysLeft, setDaysLeft] = useState<number | null>(null);
   const navigate = useNavigate();
   const { isAdmin, isAgent } = useUserRoles();
   const mfaVerified = useMfaCheck();
@@ -81,6 +84,29 @@ function PortalContent() {
   useEffect(() => {
     if (mfaVerified === false && !loading) navigate("/mfa");
   }, [mfaVerified, loading, navigate]);
+
+  useEffect(() => {
+    if (!user) return;
+    const checkProfile = async () => {
+      const { data } = await supabase.from("profiles").select("full_name, company, phone, created_at").eq("user_id", user.id).maybeSingle();
+      if (!data) return;
+      const createdAt = new Date(data.created_at);
+      const deadline = new Date(createdAt.getTime() + 30 * 24 * 60 * 60 * 1000);
+      const now = new Date();
+      const remaining = Math.ceil((deadline.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+      const incomplete = !data.full_name || !data.company || !data.phone;
+      if (incomplete && remaining > 0) {
+        setProfileIncomplete(true);
+        setDaysLeft(remaining);
+      } else if (incomplete && remaining <= 0) {
+        setProfileIncomplete(true);
+        setDaysLeft(0);
+      } else {
+        setProfileIncomplete(false);
+      }
+    };
+    checkProfile();
+  }, [user]);
 
   if (loading || mfaVerified === null) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">Chargement...</div>;
   if (!user) return null;
@@ -167,6 +193,19 @@ function PortalContent() {
         </header>
 
         <main className="flex-1 p-6 overflow-auto">
+          {profileIncomplete && (
+            <Alert className="mb-4 border-warning bg-warning/10">
+              <Info className="h-4 w-4 text-warning" />
+              <AlertDescription className="text-warning-foreground">
+                {daysLeft !== null && daysLeft > 0
+                  ? `Veuillez compléter votre profil (nom, entreprise, téléphone) dans les ${daysLeft} jour${daysLeft > 1 ? "s" : ""} restants.`
+                  : "Le délai de 30 jours pour compléter votre profil est dépassé. Veuillez le remplir immédiatement."}
+                <Button variant="link" className="ml-2 p-0 h-auto text-primary" onClick={() => setTab("profile")}>
+                  Compléter mon profil
+                </Button>
+              </AlertDescription>
+            </Alert>
+          )}
           {tab === "dashboard" && <DashboardTab user={user} />}
           {tab === "projects" && <ProjectsTab user={user} />}
           {tab === "tickets" && <TicketsTab user={user} />}
