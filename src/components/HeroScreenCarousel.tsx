@@ -3,12 +3,20 @@ import dashboard1 from "@/assets/dashboard-1.jpg";
 import dashboard2 from "@/assets/dashboard-2.jpg";
 import dashboard3 from "@/assets/dashboard-3.jpg";
 import dashboard4 from "@/assets/dashboard-4.jpg";
+import dashboardAutomation from "@/assets/dashboard-automation.jpg";
+import dashboardMs365 from "@/assets/dashboard-ms365.jpg";
+import dashboardIa from "@/assets/dashboard-ia.jpg";
+import dashboardBi from "@/assets/dashboard-bi.jpg";
 
 const slides = [
   { src: dashboard1, label: "Cloud Infrastructure" },
   { src: dashboard2, label: "Cybersécurité" },
   { src: dashboard3, label: "DevOps & CI/CD" },
   { src: dashboard4, label: "FinOps" },
+  { src: dashboardAutomation, label: "Automation" },
+  { src: dashboardMs365, label: "Microsoft 365" },
+  { src: dashboardIa, label: "Intelligence Artificielle" },
+  { src: dashboardBi, label: "Business Intelligence" },
 ];
 
 export function HeroScreenCarousel() {
