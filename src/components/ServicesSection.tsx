@@ -59,7 +59,8 @@ function ServiceCard({ s }: { s: typeof services[number] }) {
 export function ServicesSection() {
   // Split services: first 3 top-left, last 3 bottom-right, middle 2 beside image
   const topRow = services.slice(0, 3);
-  const leftCol = services.slice(3, 5);
+  const middleLeft = [services[3]];
+  const middleRight = [services[4]];
   const bottomRow = services.slice(5, 8);
 
   return (
