@@ -377,6 +377,20 @@ function ProjectsTab({ user }: { user: SupaUser }) {
     { value: "urgent", label: "Urgent" },
   ];
 
+  const statusFilterOptions = [
+    { value: "all", label: "Tous" },
+    { value: "en_attente", label: "En attente" },
+    { value: "en_cours", label: "En cours" },
+    { value: "termine", label: "Terminé" },
+  ];
+
+  const filteredProjects = projects.filter(p => {
+    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (p.description || "").toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesStatus = statusFilter === "all" || p.status === statusFilter;
+    return matchesSearch && matchesStatus;
+  });
+
   return (
     <div className="space-y-6 animate-fade-up">
       <div className="flex items-center justify-between">
@@ -385,6 +399,24 @@ function ProjectsTab({ user }: { user: SupaUser }) {
           {showForm ? "Annuler" : <><Send size={16} className="mr-2" /> Soumettre un projet</>}
         </Button>
       </div>
+
+      {/* Filter bar */}
+      {!showForm && projects.length > 0 && (
+        <div className="bg-card rounded-xl p-4 shadow-card border border-border/50 space-y-3">
+          <div className="relative">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input placeholder="Rechercher un projet..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9" />
+          </div>
+          <div className="flex flex-wrap gap-2 items-center">
+            <span className="text-xs font-medium text-muted-foreground flex items-center gap-1"><Filter size={12} /> Statut :</span>
+            {statusFilterOptions.map((opt) => (
+              <button key={opt.value} onClick={() => setStatusFilter(opt.value)}
+                className={`text-xs px-3 py-1.5 rounded-full transition-colors ${statusFilter === opt.value ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
+              >{opt.label}</button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {showForm && (
         <div className="bg-card rounded-xl p-6 shadow-card border border-border/50">
