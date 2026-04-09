@@ -71,19 +71,19 @@ export function HeroSection() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 animate-fade-up delay-300">
+        <div className="flex flex-wrap gap-3 mt-10 animate-fade-up delay-300">
           {[
-            { icon: Cloud, title: "Multi-Cloud", desc: "AWS, Azure, GCP, MS 365" },
-            { icon: Shield, title: "Sécurité", desc: "ISO 27001, SOC 2, RGPD" },
-            { icon: TrendingUp, title: "FinOps", desc: "Optimisation des coûts" },
+            { icon: Cloud, title: "Multi-Cloud", desc: "AWS, Azure, GCP" },
+            { icon: Shield, title: "Sécurité", desc: "ISO 27001, SOC 2" },
+            { icon: TrendingUp, title: "FinOps", desc: "Optimisation coûts" },
           ].map((item) => (
-            <div key={item.title} className="glass rounded-xl p-6 flex items-center gap-4 hover:scale-[1.02] transition-transform">
-              <div className="p-3 rounded-lg gradient-primary">
-                <item.icon size={24} className="text-primary-foreground" />
+            <div key={item.title} className="glass rounded-lg px-4 py-2.5 flex items-center gap-3 hover:scale-[1.02] transition-transform">
+              <div className="p-2 rounded-md gradient-primary">
+                <item.icon size={16} className="text-primary-foreground" />
               </div>
               <div>
-                <h3 className="font-semibold text-primary-foreground">{item.title}</h3>
-                <p className="text-sm text-secondary-foreground/60">{item.desc}</p>
+                <h3 className="font-semibold text-sm text-primary-foreground">{item.title}</h3>
+                <p className="text-xs text-secondary-foreground/60">{item.desc}</p>
               </div>
             </div>
           ))}
