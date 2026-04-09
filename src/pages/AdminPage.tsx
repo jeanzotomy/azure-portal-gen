@@ -38,6 +38,24 @@ function AdminContent() {
   const navigate = useNavigate();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
+  const [unrepliedCount, setUnrepliedCount] = useState(0);
+
+  useEffect(() => {
+    const fetchUnreplied = async () => {
+      const { data: tickets } = await supabase.from("support_tickets").select("id, status");
+      if (!tickets) return;
+      const openTickets = tickets.filter(t => t.status !== "résolu");
+      let count = 0;
+      for (const t of openTickets) {
+        const { data: replies } = await supabase.from("ticket_replies").select("id").eq("ticket_id", t.id).eq("is_admin", true).limit(1);
+        if (!replies || replies.length === 0) count++;
+      }
+      setUnrepliedCount(count);
+    };
+    fetchUnreplied();
+    const interval = setInterval(fetchUnreplied, 30000);
+    return () => clearInterval(interval);
+  }, []);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
