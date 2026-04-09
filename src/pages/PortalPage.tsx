@@ -97,7 +97,13 @@ function PortalContent() {
             </SidebarGroupContent>
           </SidebarGroup>
 
-          <div className="mt-auto p-3 border-t border-sidebar-border">
+          <div className="mt-auto p-3 border-t border-sidebar-border space-y-1">
+            {isAdmin && (
+              <SidebarMenuButton onClick={() => navigate("/admin")} tooltip="Administration" className="gap-3 text-primary">
+                <Shield size={18} />
+                <span>Administration</span>
+              </SidebarMenuButton>
+            )}
             <SidebarMenuButton onClick={handleLogout} tooltip="Déconnexion" className="text-destructive hover:text-destructive gap-3">
               <LogOut size={18} />
               <span>Déconnexion</span>
