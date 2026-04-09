@@ -12,19 +12,36 @@ export function ContactSection() {
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", company: "", message: "" });
 
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  const validateEmail = (email: string) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+
+  const validate = () => {
+    const errs: Record<string, string> = {};
+    if (!form.name.trim()) errs.name = "Le nom est requis.";
+    if (!form.email.trim()) errs.email = "L'email est requis.";
+    else if (!validateEmail(form.email.trim())) errs.email = "Veuillez entrer un email valide.";
+    if (!form.company.trim()) errs.company = "L'entreprise est requise.";
+    if (!form.message.trim()) errs.message = "Le message est requis.";
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!validate()) return;
     setLoading(true);
     try {
       const { error } = await supabase.from("contact_requests").insert({
-        name: form.name,
-        email: form.email,
-        company: form.company,
-        message: form.message,
+        name: form.name.trim(),
+        email: form.email.trim(),
+        company: form.company.trim(),
+        message: form.message.trim(),
       });
       if (error) throw error;
       toast({ title: "Message envoyé!", description: "Nous vous répondrons dans les meilleurs délais." });
       setForm({ name: "", email: "", company: "", message: "" });
+      setErrors({});
     } catch {
       toast({ title: "Erreur", description: "Veuillez réessayer.", variant: "destructive" });
     } finally {
