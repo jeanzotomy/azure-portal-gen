@@ -1587,6 +1587,21 @@ function AdminUsers() {
                     >
                       <Trash2 size={16} />
                     </button>
+                    {mfaStatus[p.user_id] && (
+                      <button
+                        onClick={() => disableMfa(p.user_id, p.full_name || "cet utilisateur")}
+                        disabled={mfaLoading === p.user_id}
+                        title="Désactiver MFA"
+                        className="p-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
+                      >
+                        <Shield size={16} />
+                      </button>
+                    )}
+                    {!mfaStatus[p.user_id] && (
+                      <span title="MFA non activé" className="p-1.5 rounded-lg bg-muted text-muted-foreground/40">
+                        <Shield size={16} />
+                      </span>
+                    )}
                   <div className="flex items-center gap-1.5">
                     <UserCog size={14} className="text-muted-foreground" />
                     <select value={currentRole} onChange={(e) => assignRole(p.user_id, e.target.value)}
