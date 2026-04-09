@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Cloud, ArrowLeft } from "lucide-react";
-import logo from "@/assets/logo.png";
+import favicon from "@/assets/favicon.png";
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
@@ -49,7 +49,7 @@ export default function AuthPage() {
 
         <div className="glass rounded-2xl p-8">
           <div className="flex items-center gap-3 mb-8">
-            <img src={logo} alt="CloudMature" className="h-10 w-10" />
+            <img src={favicon} alt="CloudMature" className="h-10 w-10" />
             <div>
               <h1 className="text-xl font-bold text-primary-foreground">Portail Client</h1>
               <p className="text-sm text-secondary-foreground/60">Cloud Mature</p>
