@@ -235,7 +235,24 @@ function ProjectsTab({ user }: { user: SupaUser }) {
   const [description, setDescription] = useState("");
   const [budget, setBudget] = useState("");
   const [deadline, setDeadline] = useState("");
-  const [technologies, setTechnologies] = useState("");
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
+
+  const serviceOptions = [
+    "Stratégie & Adoption Cloud",
+    "Optimisation FinOps",
+    "Gouvernance & Sécurité",
+    "Architecture & Ingénierie",
+    "Migration Cloud",
+    "Formation & Coaching",
+    "Infogérance & Support",
+    "Adoption & Maturité IA",
+  ];
+
+  const toggleService = (service: string) => {
+    setSelectedServices(prev =>
+      prev.includes(service) ? prev.filter(s => s !== service) : [...prev, service]
+    );
+  };
   const [priority, setPriority] = useState("normal");
   const [files, setFiles] = useState<File[]>([]);
   const [submitting, setSubmitting] = useState(false);
