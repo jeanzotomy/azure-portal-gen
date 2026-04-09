@@ -8,6 +8,11 @@ import { useToast } from "@/hooks/use-toast";
 import { useUserRoles } from "@/hooks/use-admin";
 import { useMfaCheck } from "@/hooks/use-mfa";
 import { Progress } from "@/components/ui/progress";
+import { Calendar as CalendarWidget } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
+import { fr } from "date-fns/locale";
+import { cn } from "@/lib/utils";
 import {
   SidebarProvider,
   Sidebar,
@@ -437,7 +442,24 @@ function ProjectsTab({ user }: { user: SupaUser }) {
               </div>
               <div>
                 <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5"><Calendar size={14} /> Délai souhaité</label>
-                <Input placeholder="Ex: 3 mois, Janvier 2025" value={deadline} onChange={(e) => setDeadline(e.target.value)} />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !deadline && "text-muted-foreground")}>
+                      <Calendar size={14} className="mr-2" />
+                      {deadline ? format(new Date(deadline), "PPP", { locale: fr }) : "Sélectionner une date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <CalendarWidget
+                      mode="single"
+                      selected={deadline ? new Date(deadline) : undefined}
+                      onSelect={(date) => setDeadline(date ? date.toISOString().split("T")[0] : "")}
+                      disabled={(date) => date <= new Date()}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
             <div>
@@ -545,7 +567,7 @@ function ProjectsTab({ user }: { user: SupaUser }) {
                       )}
                       {p.deadline && (
                         <span className="inline-flex items-center gap-1 text-xs bg-orange-50 text-orange-600 border border-orange-200 px-2.5 py-1 rounded-lg dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/20">
-                          <Calendar size={11} /> {p.deadline}
+                          <Calendar size={11} /> {(() => { try { return format(new Date(p.deadline), "d MMM yyyy", { locale: fr }); } catch { return p.deadline; } })()}
                         </span>
                       )}
                     </div>
