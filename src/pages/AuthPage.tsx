@@ -92,7 +92,16 @@ export default function AuthPage() {
             </div>
           </div>
 
-          {mode !== "forgot" && (
+          {isBlocked && (
+            <div className="mb-4 flex items-center gap-3 rounded-xl bg-destructive/10 border border-destructive/30 p-4 text-sm text-destructive">
+              <ShieldBan size={20} className="flex-shrink-0" />
+              <div>
+                <p className="font-semibold">Compte suspendu</p>
+                <p className="text-xs mt-0.5 text-destructive/80">Votre accès a été restreint. Contactez info@cloudmature.com pour plus d'informations.</p>
+              </div>
+            </div>
+          )}
+
             <>
               <Button
                 type="button"
