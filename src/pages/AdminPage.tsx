@@ -1180,7 +1180,7 @@ function AdminTickets() {
                 </div>
 
                 <h3 className="font-bold text-card-foreground text-lg leading-tight mb-1">{t.subject}</h3>
-                <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{t.message}</p>
+                <ExpandableText text={t.message} />
 
                 <div className="flex items-center gap-2 mb-3">
                   <div className="w-6 h-6 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-[10px] font-bold flex-shrink-0">
@@ -1263,11 +1263,24 @@ function AdminTickets() {
   );
 }
 
+/* ─── Expandable Text Component ─── */
+function ExpandableText({ text, className }: { text: string; className?: string }) {
+  const [expanded, setExpanded] = useState(false);
+  const isLong = text && text.length > 120;
+  return (
+    <div className={className || "text-sm text-muted-foreground mb-2"}>
+      <p className={!expanded && isLong ? "line-clamp-2" : ""}>{text}</p>
+      {isLong && (
+        <button onClick={() => setExpanded(!expanded)} className="text-primary text-xs font-medium mt-1 hover:underline">
+          {expanded ? "Réduire" : "Lire tout"}
+        </button>
+      )}
+    </div>
+  );
+}
+
 /* ─── Contact Card Component ─── */
 function ContactCard({ contact: c, statusConfig: st, updateStatus, deleteContact }: { contact: any; statusConfig: { label: string; color: string }; updateStatus: (id: string, status: string) => void; deleteContact: (id: string) => void }) {
-  const [expanded, setExpanded] = useState(false);
-  const isLong = c.message && c.message.length > 120;
-
   return (
     <div className="bg-card rounded-xl p-5 border border-border/50 shadow-card hover:shadow-card-hover transition-all duration-300">
       <div className="flex flex-col lg:flex-row lg:items-start gap-4">
@@ -1281,14 +1294,7 @@ function ContactCard({ contact: c, statusConfig: st, updateStatus, deleteContact
             {c.company && <span>• {c.company}</span>}
             <span>• {new Date(c.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" })}</span>
           </div>
-          <div className="text-sm text-foreground/80 bg-muted/50 rounded-lg p-3 mt-2">
-            <p className={!expanded && isLong ? "line-clamp-2" : ""}>{c.message}</p>
-            {isLong && (
-              <button onClick={() => setExpanded(!expanded)} className="text-primary text-xs font-medium mt-1 hover:underline">
-                {expanded ? "Réduire" : "Lire tout"}
-              </button>
-            )}
-          </div>
+          <ExpandableText text={c.message} className="text-sm text-foreground/80 bg-muted/50 rounded-lg p-3 mt-2" />
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {c.status === "new" && (
