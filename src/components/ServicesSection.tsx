@@ -54,8 +54,8 @@ function ServiceCard({ s, index }: { s: typeof services[number]; index?: number 
       <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-primary/0 group-hover:bg-primary/10 blur-2xl transition-all duration-500" />
       
       <div className="relative z-10">
-        {/* Refined icon container */}
-        <div className="relative w-14 h-14 mb-6">
+        {/* Refined icon container - centered */}
+        <div className="relative w-14 h-14 mb-6 mx-auto">
           <div className="absolute inset-0 rounded-2xl gradient-primary opacity-15 blur-md scale-110 group-hover:opacity-30 transition-opacity duration-500" />
           <div className="relative w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center shadow-md shadow-primary/20 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-primary/30 transition-all duration-300">
             <s.icon size={26} className="text-primary-foreground" strokeWidth={1.8} />
