@@ -205,7 +205,19 @@ function AdminProjects() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editStatus, setEditStatus] = useState("");
   const [editProgress, setEditProgress] = useState(0);
+  const [editName, setEditName] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editBudget, setEditBudget] = useState("");
+  const [editDeadline, setEditDeadline] = useState("");
+  const [editPriority, setEditPriority] = useState("normal");
+  const [editServices, setEditServices] = useState<string[]>([]);
   const { toast } = useToast();
+
+  const serviceOptions = [
+    "Stratégie & Adoption Cloud", "Optimisation FinOps", "Gouvernance & Sécurité",
+    "Architecture & Ingénierie", "Migration Cloud", "Formation & Coaching",
+    "Infogérance & Support", "Adoption & Maturité IA",
+  ];
 
   const load = async () => {
     const { data: p } = await supabase.from("projects").select("*").order("created_at", { ascending: false });
