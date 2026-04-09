@@ -48,8 +48,8 @@ export function ContactSection() {
               <div className="space-y-4">
                 {[
                   { icon: Mail, text: "info@cloudmature.com" },
-                  { icon: Phone, text: "+224 621 00 00 00" },
-                  { icon: MapPin, text: "Conakry, Guinée" },
+                  { icon: Phone, text: "+224 626 441 150" },
+                  { icon: MapPin, text: "Kipé Centre Émetteur, C/Ratoma, Conakry, Guinée" },
                 ].map((item) => (
                   <div key={item.text} className="flex items-center gap-3 text-secondary-foreground/80">
                     <div className="p-2 rounded-lg gradient-primary">
