@@ -28,14 +28,133 @@ import type { User as SupaUser } from "@supabase/supabase-js";
 
 type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts";
 type AgentTab = "dashboard" | "tickets" | "contacts";
-...
+
+function AdminContent() {
+  const [user, setUser] = useState<SupaUser | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [tab, setTab] = useState<AdminTab>("dashboard");
+  const [agentTab, setAgentTab] = useState<AgentTab>("dashboard");
+  const { isAdmin, isAgent, loading: rolesLoading } = useUserRoles();
+  const mfaVerified = useMfaCheck();
+  const navigate = useNavigate();
+  const { state } = useSidebar();
+  const collapsed = state === "collapsed";
+  const [unrepliedCount, setUnrepliedCount] = useState(0);
+
+  useEffect(() => {
+    const fetchUnreplied = async () => {
+      const { data: tickets } = await supabase.from("support_tickets").select("id, status");
+      if (!tickets) return;
+      const openTickets = tickets.filter((t) => t.status !== "résolu");
+      let count = 0;
+      for (const t of openTickets) {
+        const { data: replies } = await supabase.from("ticket_replies").select("id").eq("ticket_id", t.id).eq("is_admin", true).limit(1);
+        if (!replies || replies.length === 0) count++;
+      }
+      setUnrepliedCount(count);
+    };
+    fetchUnreplied();
+    const interval = setInterval(fetchUnreplied, 30000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      setLoading(false);
+      if (!session?.user) navigate("/auth");
+    });
+  }, [navigate]);
+
+  useEffect(() => {
+    if (mfaVerified === false && !loading) navigate("/mfa");
+  }, [mfaVerified, loading, navigate]);
+
+  useEffect(() => {
+    if (!rolesLoading && !isAdmin && !isAgent && !loading) navigate("/portal");
+  }, [isAdmin, isAgent, rolesLoading, loading, navigate]);
+
+  if (loading || rolesLoading || mfaVerified === null) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">Chargement...</div>;
+  if (!user || (!isAdmin && !isAgent)) return null;
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    navigate("/");
+  };
+
   if (isAgent && !isAdmin) {
     const agentNavItems: { id: AgentTab; icon: typeof LayoutDashboard; label: string }[] = [
       { id: "dashboard", icon: LayoutDashboard, label: "Tableau de bord" },
       { id: "tickets", icon: LifeBuoy, label: "Tickets" },
       { id: "contacts", icon: MessageSquare, label: "Contacts" },
     ];
-...
+
+    return (
+      <div className="min-h-screen flex w-full bg-background">
+        <Sidebar collapsible="icon" className="border-r border-sidebar-border">
+          <SidebarContent className="bg-sidebar">
+            <div className="px-4 py-5 border-b border-sidebar-border">
+              <Link to="/" className="flex items-center gap-2">
+                <img src={adminLogo} alt="CloudMature" className="h-8 w-8" />
+                {!collapsed && (
+                  <div>
+                    <span className="font-bold text-sidebar-foreground">CloudMature</span>
+                    <span className="block text-xs text-accent font-medium">Agent</span>
+                  </div>
+                )}
+              </Link>
+            </div>
+            <SidebarGroup>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {agentNavItems.map((item) => (
+                    <SidebarMenuItem key={item.id}>
+                      <SidebarMenuButton onClick={() => setAgentTab(item.id)} isActive={agentTab === item.id} tooltip={item.label} className="gap-3">
+                        <div className="relative">
+                          <item.icon size={18} />
+                          {item.id === "tickets" && unrepliedCount > 0 && (
+                            <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold px-1">
+                              {unrepliedCount}
+                            </span>
+                          )}
+                        </div>
+                        <span>{item.label}</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+            <div className="mt-auto p-3 border-t border-sidebar-border space-y-1">
+              <SidebarMenuButton onClick={() => navigate("/portal")} tooltip="Portail client" className="gap-3 text-muted-foreground">
+                <Shield size={18} />
+                <span>Portail client</span>
+              </SidebarMenuButton>
+              <SidebarMenuButton onClick={handleLogout} tooltip="Déconnexion" className="text-destructive hover:text-destructive gap-3">
+                <LogOut size={18} />
+                <span>Déconnexion</span>
+              </SidebarMenuButton>
+            </div>
+          </SidebarContent>
+        </Sidebar>
+
+        <div className="flex-1 flex flex-col min-h-screen">
+          <header className="h-14 flex items-center justify-between border-b border-border bg-card px-4">
+            <div className="flex items-center gap-3">
+              <SidebarTrigger />
+              <h2 className="text-sm font-semibold text-card-foreground hidden sm:block">
+                {agentNavItems.find((n) => n.id === agentTab)?.label}
+              </h2>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs bg-accent/10 text-accent px-2.5 py-1 rounded-full font-medium flex items-center gap-1">
+                <Shield size={12} /> Agent
+              </span>
+              <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
+                {(user.user_metadata?.full_name || user.email || "A").charAt(0).toUpperCase()}
+              </div>
+            </div>
+          </header>
           <main className="flex-1 p-6 overflow-auto">
             {agentTab === "dashboard" && <AgentDashboard user={user} />}
             {agentTab === "tickets" && <AdminTickets />}
@@ -46,7 +165,6 @@ type AgentTab = "dashboard" | "tickets" | "contacts";
     );
   }
 
-  // Admin view
   const allNavItems: { id: AdminTab; icon: typeof LayoutDashboard; label: string }[] = [
     { id: "dashboard", icon: LayoutDashboard, label: "Vue d'ensemble" },
     { id: "projects", icon: FolderOpen, label: "Projets" },
@@ -109,7 +227,7 @@ type AgentTab = "dashboard" | "tickets" | "contacts";
           <div className="flex items-center gap-3">
             <SidebarTrigger />
             <h2 className="text-sm font-semibold text-card-foreground hidden sm:block">
-              {allNavItems.find(n => n.id === tab)?.label}
+              {allNavItems.find((n) => n.id === tab)?.label}
             </h2>
           </div>
           <div className="flex items-center gap-2">
