@@ -1,4 +1,4 @@
-import { Cloud, DollarSign, Shield, Server, ArrowUpRight, GraduationCap, Headphones } from "lucide-react";
+import { Cloud, DollarSign, Shield, Server, ArrowUpRight, GraduationCap, Headphones, BrainCircuit } from "lucide-react";
 
 const services = [
   {
@@ -35,6 +35,11 @@ const services = [
     icon: Headphones,
     title: "Infogérance & Support",
     desc: "Surveillance 24/7, support N1-N3, gestion des incidents et suivi SLA.",
+  },
+  {
+    icon: BrainCircuit,
+    title: "Adoption & Maturité IA",
+    desc: "Évaluation de maturité IA, stratégie d'adoption, intégration de solutions d'intelligence artificielle et accompagnement vers l'IA responsable.",
   },
 ];
 
