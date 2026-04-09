@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import adminLogo from "@/assets/cloudmature-logo.png";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRoles } from "@/hooks/use-admin";
@@ -91,7 +92,7 @@ function AdminContent() {
           <SidebarContent className="bg-sidebar">
             <div className="px-4 py-5 border-b border-sidebar-border">
               <Link to="/" className="flex items-center gap-2">
-                <img src="/favicon.png" alt="CloudMature" className="h-8 w-8" />
+                <img src={adminLogo} alt="CloudMature" className="h-8 w-8" />
                 {!collapsed && (
                   <div>
                     <span className="font-bold text-sidebar-foreground">CloudMature</span>
@@ -174,7 +175,7 @@ function AdminContent() {
         <SidebarContent className="bg-sidebar">
           <div className="px-4 py-5 border-b border-sidebar-border">
             <Link to="/" className="flex items-center gap-2">
-              <img src="/favicon.png" alt="CloudMature" className="h-8 w-8" />
+              <img src={adminLogo} alt="CloudMature" className="h-8 w-8" />
               {!collapsed && (
                 <div>
                   <span className="font-bold text-sidebar-foreground">CloudMature</span>
