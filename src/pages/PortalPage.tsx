@@ -229,10 +229,32 @@ function DashboardTab({ user }: { user: SupaUser }) {
 
 function ProjectsTab({ user }: { user: SupaUser }) {
   const [projects, setProjects] = useState<any[]>([]);
+  const [showForm, setShowForm] = useState(false);
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const { toast } = useToast();
 
-  useEffect(() => {
+  const loadProjects = () => {
     supabase.from("projects").select("*").order("created_at", { ascending: false }).then(({ data }) => setProjects(data || []));
-  }, []);
+  };
+
+  useEffect(() => { loadProjects(); }, []);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!name.trim()) return;
+    setSubmitting(true);
+    const { error } = await supabase.from("projects").insert({ user_id: user.id, name: name.trim(), description: description.trim() || null });
+    if (error) {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Projet soumis!", description: "Votre projet a été envoyé avec succès." });
+      setName(""); setDescription(""); setShowForm(false);
+      loadProjects();
+    }
+    setSubmitting(false);
+  };
 
   const statusConfig: Record<string, { label: string; icon: typeof Clock; color: string; bg: string }> = {
     en_cours: { label: "En cours", icon: Clock, color: "text-primary", bg: "bg-primary/10" },
@@ -242,11 +264,31 @@ function ProjectsTab({ user }: { user: SupaUser }) {
 
   return (
     <div className="space-y-6 animate-fade-up">
-      <h1 className="text-2xl font-bold text-foreground">Mes Projets</h1>
-      {projects.length === 0 ? (
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-foreground">Mes Projets</h1>
+        <Button onClick={() => setShowForm(!showForm)} className="gradient-primary text-primary-foreground border-0">
+          {showForm ? "Annuler" : <><Send size={16} className="mr-2" /> Soumettre un projet</>}
+        </Button>
+      </div>
+
+      {showForm && (
+        <div className="bg-card rounded-xl p-6 shadow-card border border-border/50">
+          <h3 className="font-semibold text-card-foreground mb-4">Nouveau projet</h3>
+          <form onSubmit={handleSubmit} className="space-y-3">
+            <Input placeholder="Nom du projet" required value={name} onChange={(e) => setName(e.target.value)} />
+            <Textarea placeholder="Décrivez votre projet, vos besoins et objectifs..." rows={4} value={description} onChange={(e) => setDescription(e.target.value)} />
+            <Button type="submit" className="gradient-primary text-primary-foreground border-0" disabled={submitting}>
+              <Send size={16} className="mr-2" /> {submitting ? "Envoi..." : "Soumettre"}
+            </Button>
+          </form>
+        </div>
+      )}
+
+      {projects.length === 0 && !showForm ? (
         <div className="bg-card rounded-xl p-12 shadow-card border border-border/50 text-center">
           <FolderOpen size={48} className="mx-auto text-muted-foreground/30 mb-4" />
           <p className="text-muted-foreground">Aucun projet pour le moment.</p>
+          <p className="text-sm text-muted-foreground/60 mt-1">Soumettez votre premier projet ci-dessus.</p>
         </div>
       ) : (
         <div className="grid gap-4">
