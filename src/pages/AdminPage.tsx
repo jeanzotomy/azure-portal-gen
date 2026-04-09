@@ -231,7 +231,11 @@ function AdminProjects() {
   useEffect(() => { load(); }, []);
 
   const saveProject = async (id: string) => {
-    const { error } = await supabase.from("projects").update({ status: editStatus, progress: editProgress }).eq("id", id);
+    const { error } = await supabase.from("projects").update({
+      name: editName, description: editDescription || null, budget: editBudget || null,
+      deadline: editDeadline || null, priority: editPriority, status: editStatus, progress: editProgress,
+      technologies: editServices.length > 0 ? editServices.join(", ") : null,
+    }).eq("id", id);
     if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
     else { toast({ title: "Projet mis à jour!" }); setEditingId(null); load(); }
   };
