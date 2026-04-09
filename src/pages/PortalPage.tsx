@@ -53,7 +53,11 @@ function PortalContent() {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  if (loading) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">Chargement...</div>;
+  useEffect(() => {
+    if (mfaVerified === false && !loading) navigate("/mfa");
+  }, [mfaVerified, loading, navigate]);
+
+  if (loading || mfaVerified === null) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">Chargement...</div>;
   if (!user) return null;
 
   const handleLogout = async () => {
