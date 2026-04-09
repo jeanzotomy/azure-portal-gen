@@ -1264,12 +1264,12 @@ function AdminTickets() {
 }
 
 /* ─── Expandable Text Component ─── */
-function ExpandableText({ text, className }: { text: string; className?: string }) {
+function ExpandableText({ text, className, maxLines = "line-clamp-2" }: { text: string; className?: string; maxLines?: string }) {
   const [expanded, setExpanded] = useState(false);
   const isLong = text && text.length > 120;
   return (
     <div className={className || "text-sm text-muted-foreground mb-2"}>
-      <p className={!expanded && isLong ? "line-clamp-2" : ""}>{text}</p>
+      <p className={!expanded && isLong ? maxLines : ""}>{text}</p>
       {isLong && (
         <button onClick={() => setExpanded(!expanded)} className="text-primary text-xs font-medium mt-1 hover:underline">
           {expanded ? "Réduire" : "Lire tout"}
