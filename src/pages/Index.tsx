@@ -13,7 +13,7 @@ const Index = () => (
     <Navbar />
     <div className="relative">
       <HeroSection />
-      <div className="relative z-20 -mt-20 pb-16">
+      <div className="relative z-20 -mt-28 pb-16">
         <HeroScreenCarousel />
       </div>
     </div>
