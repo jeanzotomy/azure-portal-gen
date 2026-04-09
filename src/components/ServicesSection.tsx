@@ -44,7 +44,24 @@ const services = [
   },
 ];
 
+function ServiceCard({ s }: { s: typeof services[number] }) {
+  return (
+    <div className="group bg-card rounded-xl p-6 shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1">
+      <div className="w-12 h-12 rounded-lg gradient-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+        <s.icon size={22} className="text-primary-foreground" />
+      </div>
+      <h3 className="text-lg font-semibold text-card-foreground mb-2">{s.title}</h3>
+      <p className="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
+    </div>
+  );
+}
+
 export function ServicesSection() {
+  // Split services: first 3 top-left, last 3 bottom-right, middle 2 beside image
+  const topRow = services.slice(0, 3);
+  const leftCol = services.slice(3, 5);
+  const bottomRow = services.slice(5, 8);
+
   return (
     <section id="services" className="py-24 bg-background">
       <div className="container">
@@ -58,37 +75,56 @@ export function ServicesSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-stretch">
-          {/* Image card */}
-          <div className="lg:col-span-4 relative group overflow-hidden rounded-2xl h-full">
-            <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-primary/30 via-accent/20 to-primary/10 blur-lg opacity-60 group-hover:opacity-80 transition-opacity" />
-            <div className="relative overflow-hidden rounded-2xl h-full">
-              <img
-                src={servicesImage}
-                alt="Équipe Cloud Mature en consultation"
-                className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-secondary/80 via-secondary/20 to-transparent" />
-              <div className="absolute bottom-0 left-0 right-0 p-6">
-                <p className="text-sm font-semibold uppercase tracking-wider text-primary">Cloud Mature</p>
-                <p className="text-xl font-bold text-primary-foreground mt-1">L'expertise au service de votre transformation</p>
+        {/* Mobile: simple stack */}
+        <div className="flex flex-col gap-5 lg:hidden">
+          {services.map((s) => (
+            <ServiceCard key={s.title} s={s} />
+          ))}
+          <div className="relative group overflow-hidden rounded-2xl">
+            <img src={servicesImage} alt="Équipe Cloud Mature en consultation" className="w-full h-64 object-cover rounded-2xl" />
+            <div className="absolute inset-0 bg-gradient-to-t from-secondary/80 via-secondary/20 to-transparent rounded-2xl" />
+            <div className="absolute bottom-0 left-0 right-0 p-6">
+              <p className="text-sm font-semibold uppercase tracking-wider text-primary">Cloud Mature</p>
+              <p className="text-lg font-bold text-primary-foreground mt-1">L'expertise au service de votre transformation</p>
+            </div>
+          </div>
+        </div>
+
+        {/* Desktop: wrapped layout */}
+        <div className="hidden lg:flex flex-col gap-5">
+          {/* Top row: 3 cards */}
+          <div className="grid grid-cols-3 gap-5">
+            {topRow.map((s) => (
+              <ServiceCard key={s.title} s={s} />
+            ))}
+          </div>
+
+          {/* Middle row: 2 cards + image + text overlay */}
+          <div className="grid grid-cols-3 gap-5">
+            {leftCol.map((s) => (
+              <ServiceCard key={s.title} s={s} />
+            ))}
+            <div className="relative group overflow-hidden rounded-2xl row-span-1">
+              <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-primary/30 via-accent/20 to-primary/10 blur-lg opacity-60 group-hover:opacity-80 transition-opacity" />
+              <div className="relative overflow-hidden rounded-2xl h-full">
+                <img
+                  src={servicesImage}
+                  alt="Équipe Cloud Mature en consultation"
+                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                />
+                <div className="absolute inset-0 bg-gradient-to-t from-secondary/80 via-secondary/20 to-transparent" />
+                <div className="absolute bottom-0 left-0 right-0 p-6">
+                  <p className="text-sm font-semibold uppercase tracking-wider text-primary">Cloud Mature</p>
+                  <p className="text-lg font-bold text-primary-foreground mt-1">L'expertise au service de votre transformation</p>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Services grid */}
-          <div className="lg:col-span-8 grid grid-cols-1 md:grid-cols-2 gap-5">
-            {services.map((s) => (
-              <div
-                key={s.title}
-                className="group bg-card rounded-xl p-6 shadow-card hover:shadow-card-hover transition-all duration-300 hover:-translate-y-1"
-              >
-                <div className="w-12 h-12 rounded-lg gradient-primary flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                  <s.icon size={22} className="text-primary-foreground" />
-                </div>
-                <h3 className="text-lg font-semibold text-card-foreground mb-2">{s.title}</h3>
-                <p className="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
-              </div>
+          {/* Bottom row: 3 cards */}
+          <div className="grid grid-cols-3 gap-5">
+            {bottomRow.map((s) => (
+              <ServiceCard key={s.title} s={s} />
             ))}
           </div>
         </div>
