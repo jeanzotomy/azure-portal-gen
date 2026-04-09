@@ -1,7 +1,7 @@
 import { Award, Users, BarChart3, Lock, MapPin } from "lucide-react";
 
 const reasons = [
-  { icon: Award, title: "Expertise certifiée", desc: "Multi-cloud : AWS, Azure, GCP." },
+  { icon: Award, title: "Expertise certifiée", desc: "Multi-cloud : AWS, Azure, GCP, MS 365." },
   { icon: Users, title: "Approche personnalisée", desc: "Solutions adaptées à votre industrie." },
   { icon: BarChart3, title: "Résultats garantis", desc: "KPIs et SLA mesurables." },
   { icon: Lock, title: "Conformité & Innovation", desc: "Confidentialité et standards élevés." },

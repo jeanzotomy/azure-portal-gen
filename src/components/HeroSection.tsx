@@ -66,7 +66,7 @@ export function HeroSection() {
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16 animate-fade-up delay-300">
           {[
-            { icon: Cloud, title: "Multi-Cloud", desc: "AWS, Azure, GCP" },
+            { icon: Cloud, title: "Multi-Cloud", desc: "AWS, Azure, GCP, MS 365" },
             { icon: Shield, title: "Sécurité", desc: "ISO 27001, SOC 2, RGPD" },
             { icon: TrendingUp, title: "FinOps", desc: "Optimisation des coûts" },
           ].map((item) => (
