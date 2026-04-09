@@ -33,7 +33,7 @@ function PortalContent() {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<Tab>("dashboard");
   const navigate = useNavigate();
-  const { isAdmin } = useIsAdmin();
+  const { isAdmin, isAgent } = useUserRoles();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
 
