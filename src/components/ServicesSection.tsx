@@ -46,7 +46,7 @@ const services = [
 
 function ServiceCard({ s, index }: { s: typeof services[number]; index?: number }) {
   return (
-    <div className="group relative bg-card rounded-2xl p-6 shadow-card hover:shadow-card-hover transition-all duration-500 hover:-translate-y-2 border border-border/50 hover:border-primary/30 overflow-hidden">
+    <div className="group relative bg-card rounded-2xl p-7 shadow-card hover:shadow-card-hover transition-all duration-500 hover:-translate-y-2 border border-border hover:border-primary/30 overflow-hidden">
       {/* Subtle gradient overlay on hover */}
       <div className="absolute inset-0 bg-gradient-to-br from-primary/0 via-transparent to-accent/0 group-hover:from-primary/5 group-hover:to-accent/5 transition-all duration-500 rounded-2xl" />
       
@@ -54,14 +54,19 @@ function ServiceCard({ s, index }: { s: typeof services[number]; index?: number 
       <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-primary/0 group-hover:bg-primary/10 blur-2xl transition-all duration-500" />
       
       <div className="relative z-10">
-        <div className="w-13 h-13 rounded-xl gradient-primary flex items-center justify-center mb-5 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-primary/25 transition-all duration-300">
-          <s.icon size={24} className="text-primary-foreground" />
+        {/* Refined icon container */}
+        <div className="relative w-14 h-14 mb-6">
+          <div className="absolute inset-0 rounded-2xl gradient-primary opacity-15 blur-md scale-110 group-hover:opacity-30 transition-opacity duration-500" />
+          <div className="relative w-14 h-14 rounded-2xl gradient-primary flex items-center justify-center shadow-md shadow-primary/20 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-primary/30 transition-all duration-300">
+            <s.icon size={26} className="text-primary-foreground" strokeWidth={1.8} />
+          </div>
         </div>
-        <h3 className="text-lg font-bold text-card-foreground mb-2 group-hover:text-primary transition-colors duration-300">{s.title}</h3>
+
+        <h3 className="text-[17px] font-bold text-card-foreground mb-2.5 group-hover:text-primary transition-colors duration-300">{s.title}</h3>
         <p className="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
         
         {/* Bottom accent line */}
-        <div className="mt-5 h-0.5 w-0 group-hover:w-12 bg-gradient-to-r from-primary to-accent transition-all duration-500 rounded-full" />
+        <div className="mt-5 h-0.5 w-8 bg-border group-hover:w-14 group-hover:bg-gradient-to-r group-hover:from-primary group-hover:to-accent transition-all duration-500 rounded-full" />
       </div>
     </div>
   );
