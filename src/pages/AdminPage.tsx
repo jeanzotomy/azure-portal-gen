@@ -895,7 +895,7 @@ function AdminProjects() {
                 </div>
 
                 <h3 className="font-bold text-card-foreground text-lg leading-tight mb-1">{p.name}</h3>
-                {p.description && <p className="text-sm text-muted-foreground line-clamp-2 mb-2">{p.description}</p>}
+                {p.description && <ExpandableText text={p.description} className="text-sm text-muted-foreground mb-2" maxLines="line-clamp-1" />}
                 
                 <div className="flex items-center gap-2 mb-3">
                   <div className="w-6 h-6 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-[10px] font-bold flex-shrink-0">
@@ -1264,12 +1264,12 @@ function AdminTickets() {
 }
 
 /* ─── Expandable Text Component ─── */
-function ExpandableText({ text, className }: { text: string; className?: string }) {
+function ExpandableText({ text, className, maxLines = "line-clamp-2" }: { text: string; className?: string; maxLines?: string }) {
   const [expanded, setExpanded] = useState(false);
   const isLong = text && text.length > 120;
   return (
     <div className={className || "text-sm text-muted-foreground mb-2"}>
-      <p className={!expanded && isLong ? "line-clamp-2" : ""}>{text}</p>
+      <p className={!expanded && isLong ? maxLines : ""}>{text}</p>
       {isLong && (
         <button onClick={() => setExpanded(!expanded)} className="text-primary text-xs font-medium mt-1 hover:underline">
           {expanded ? "Réduire" : "Lire tout"}
