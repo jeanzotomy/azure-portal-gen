@@ -35,7 +35,7 @@ export function HeroScreenCarousel() {
       <div className="absolute -inset-8 bg-gradient-to-t from-primary/20 via-accent/10 to-transparent blur-3xl rounded-3xl opacity-60" />
 
       {/* Monitor frame */}
-      <div className="relative">
+      <div className="relative rounded-2xl border-2 border-white/20">
         {/* Top bezel */}
         <div className="bg-secondary rounded-t-2xl px-6 py-3 flex items-center gap-2 relative z-10">
           <div className="flex gap-1.5">
