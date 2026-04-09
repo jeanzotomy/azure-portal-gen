@@ -29,7 +29,7 @@ import logo from "@/assets/cloudmature-logo.png";
 import {
   LayoutDashboard, FolderOpen, LifeBuoy, User, LogOut, Send, Clock, CheckCircle2, AlertCircle,
   Menu, Bell, Search, Filter, Upload, X, FileText, DollarSign, Calendar, Cpu, Flag, Pencil, Shield,
-  Activity, TrendingUp, Plus,
+  Activity, TrendingUp, Plus, Trash2,
 } from "lucide-react";
 import { PieChart as RePieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip } from "recharts";
 import type { User as SupaUser } from "@supabase/supabase-js";
@@ -48,10 +48,10 @@ function PortalContent() {
 
   useEffect(() => {
     const checkBlocked = async (userId: string) => {
-      const { data } = await supabase.from("profiles").select("blocked").eq("user_id", userId).maybeSingle();
-      if (data?.blocked) {
+      const { data } = await supabase.from("profiles").select("blocked, deleted_at").eq("user_id", userId).maybeSingle();
+      if (data?.blocked || (data as any)?.deleted_at) {
         await supabase.auth.signOut();
-        navigate("/auth?blocked=1");
+        navigate(data?.blocked ? "/auth?blocked=1" : "/auth?deleted=1");
         return true;
       }
       return false;
@@ -1085,6 +1085,29 @@ function ProfileTab({ user }: { user: SupaUser }) {
           {saving ? "Sauvegarde..." : "Sauvegarder"}
         </Button>
       </form>
+
+      {/* Delete account section */}
+      <div className="bg-card rounded-xl p-6 shadow-card border border-destructive/20 max-w-lg space-y-4">
+        <h3 className="font-semibold text-destructive flex items-center gap-2">
+          <Trash2 size={18} /> Supprimer mon compte
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          Cette action désactivera votre compte. Seul un administrateur pourra le restaurer. Vos données seront conservées mais votre accès sera révoqué.
+        </p>
+        <Button
+          variant="destructive"
+          onClick={async () => {
+            if (!window.confirm("Êtes-vous sûr de vouloir supprimer votre compte ? Cette action désactivera votre accès.")) return;
+            const { error } = await supabase.from("profiles").update({ deleted_at: new Date().toISOString() } as any).eq("user_id", user.id);
+            if (error) { toast({ title: "Erreur", description: error.message, variant: "destructive" }); return; }
+            toast({ title: "Compte supprimé", description: "Votre compte a été désactivé." });
+            await supabase.auth.signOut();
+            window.location.href = "/";
+          }}
+        >
+          <Trash2 size={14} className="mr-2" /> Supprimer mon compte
+        </Button>
+      </div>
     </div>
   );
 }

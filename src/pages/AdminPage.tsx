@@ -1042,6 +1042,8 @@ function AdminTickets() {
   const [sendingReply, setSendingReply] = useState(false);
   const { toast } = useToast();
 
+  const [unrepliedIds, setUnrepliedIds] = useState<Set<string>>(new Set());
+
   const load = async () => {
     const { data: t } = await supabase.from("support_tickets").select("*").order("created_at", { ascending: false });
     setTickets(t || []);
@@ -1049,6 +1051,16 @@ function AdminTickets() {
     const map: Record<string, any> = {};
     (prof || []).forEach((pr: any) => { map[pr.user_id] = pr; });
     setProfiles(map);
+
+    // Check unreplied tickets
+    if (t) {
+      const unreplied = new Set<string>();
+      for (const ticket of t.filter(tk => tk.status !== "résolu")) {
+        const { data: adminReplies } = await supabase.from("ticket_replies").select("id").eq("ticket_id", ticket.id).eq("is_admin", true).limit(1);
+        if (!adminReplies || adminReplies.length === 0) unreplied.add(ticket.id);
+      }
+      setUnrepliedIds(unreplied);
+    }
   };
 
   const loadReplies = async (ticketId: string) => {
@@ -1138,10 +1150,17 @@ function AdminTickets() {
             <div key={t.id} className="group bg-card rounded-2xl shadow-card border border-border/50 hover:shadow-card-hover hover:border-primary/30 transition-all duration-300 overflow-hidden">
               <div className={`h-1 w-full ${t.status === "résolu" ? "bg-teal-500" : t.status === "en_cours" ? "bg-orange-500" : "bg-gradient-to-r from-primary to-accent"}`} />
               <div className="p-5">
-                <div className="flex items-center justify-between mb-3">
-                  <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ${sc.color} ${sc.bg}`}>
-                    <sc.icon size={12} /> {sc.label}
-                  </span>
+              <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-2">
+                    <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ${sc.color} ${sc.bg}`}>
+                      <sc.icon size={12} /> {sc.label}
+                    </span>
+                    {unrepliedIds.has(t.id) && (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full bg-destructive text-destructive-foreground animate-pulse">
+                        <Bell size={10} /> Non répondu
+                      </span>
+                    )}
+                  </div>
                   <div className="flex items-center gap-1.5">
                     {t.priority !== "normal" && (
                       <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${
@@ -1414,6 +1433,13 @@ function AdminUsers() {
     load();
   };
 
+  const restoreProfile = async (userId: string) => {
+    const { error } = await supabase.from("profiles").update({ deleted_at: null } as any).eq("user_id", userId);
+    if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    else toast({ title: "Profil restauré", description: "Le compte a été réactivé avec succès." });
+    load();
+  };
+
   const deleteUser = async (userId: string, userName: string) => {
     if (!window.confirm(`Êtes-vous sûr de vouloir supprimer définitivement le compte de "${userName}" ? Cette action est irréversible.`)) return;
     const { data, error } = await supabase.functions.invoke("delete-user", { body: { user_id: userId } });
@@ -1525,6 +1551,16 @@ function AdminUsers() {
               {p.blocked && (
                 <div className="mt-2 flex items-center gap-1.5 text-xs text-destructive font-medium">
                   <ShieldBan size={12} /> Compte bloqué
+                </div>
+              )}
+              {(p as any).deleted_at && (
+                <div className="mt-2 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5 text-xs text-destructive font-medium">
+                    <Trash2 size={12} /> Compte supprimé le {new Date((p as any).deleted_at).toLocaleDateString("fr-FR")}
+                  </span>
+                  <Button size="sm" variant="outline" className="h-6 text-xs" onClick={() => restoreProfile(p.user_id)}>
+                    Restaurer
+                  </Button>
                 </div>
               )}
             </div>

@@ -136,6 +136,7 @@ export type Database = {
           blocked: boolean
           company: string | null
           created_at: string
+          deleted_at: string | null
           full_name: string | null
           id: string
           phone: string | null
@@ -146,6 +147,7 @@ export type Database = {
           blocked?: boolean
           company?: string | null
           created_at?: string
+          deleted_at?: string | null
           full_name?: string | null
           id?: string
           phone?: string | null
@@ -156,6 +158,7 @@ export type Database = {
           blocked?: boolean
           company?: string | null
           created_at?: string
+          deleted_at?: string | null
           full_name?: string | null
           id?: string
           phone?: string | null
