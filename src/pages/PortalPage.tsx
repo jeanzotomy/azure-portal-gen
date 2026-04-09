@@ -505,13 +505,51 @@ function TicketsTab({ user }: { user: SupaUser }) {
   const [message, setMessage] = useState("");
   const [sending, setSending] = useState(false);
   const [filter, setFilter] = useState<string>("all");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [replies, setReplies] = useState<Record<string, any[]>>({});
+  const [replyText, setReplyText] = useState("");
+  const [sendingReply, setSendingReply] = useState(false);
   const { toast } = useToast();
 
   const loadTickets = () => {
     supabase.from("support_tickets").select("*").order("created_at", { ascending: false }).then(({ data }) => setTickets(data || []));
   };
 
+  const loadReplies = async (ticketId: string) => {
+    const { data } = await supabase.from("ticket_replies").select("*").eq("ticket_id", ticketId).order("created_at", { ascending: true });
+    setReplies(prev => ({ ...prev, [ticketId]: data || [] }));
+  };
+
   useEffect(() => { loadTickets(); }, []);
+
+  const toggleExpand = (ticketId: string) => {
+    if (expandedId === ticketId) {
+      setExpandedId(null);
+    } else {
+      setExpandedId(ticketId);
+      loadReplies(ticketId);
+    }
+    setReplyText("");
+  };
+
+  const sendReply = async (ticketId: string) => {
+    if (!replyText.trim()) return;
+    setSendingReply(true);
+    const { error } = await supabase.from("ticket_replies").insert({
+      ticket_id: ticketId,
+      user_id: user.id,
+      message: replyText.trim(),
+      is_admin: false,
+    });
+    if (error) {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Réponse envoyée!" });
+      setReplyText("");
+      loadReplies(ticketId);
+    }
+    setSendingReply(false);
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -560,23 +598,81 @@ function TicketsTab({ user }: { user: SupaUser }) {
       </div>
 
       <div className="space-y-3">
-        {filtered.map((t) => (
-          <div key={t.id} className="bg-card rounded-xl p-5 shadow-card border border-border/50 hover:shadow-card-hover transition-shadow">
-            <div className="flex items-center justify-between mb-2">
-              <h4 className="font-medium text-card-foreground">{t.subject}</h4>
-              <div className="flex items-center gap-2">
-                <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                  t.priority === "urgent" ? "bg-destructive/10 text-destructive" : t.priority === "haute" ? "bg-orange-100 text-orange-600" : "bg-muted text-muted-foreground"
-                }`}>{t.priority}</span>
-                <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                  t.status === "ouvert" ? "bg-primary/10 text-primary" : t.status === "en_cours" ? "bg-accent/10 text-accent" : "bg-muted text-muted-foreground"
-                }`}>{t.status}</span>
+        {filtered.map((t) => {
+          const isExpanded = expandedId === t.id;
+          const ticketReplies = replies[t.id] || [];
+
+          return (
+            <div key={t.id} className="bg-card rounded-xl shadow-card border border-border/50 hover:shadow-card-hover transition-shadow">
+              <div className="p-5">
+                <div className="flex items-center justify-between mb-2">
+                  <h4 className="font-medium text-card-foreground">{t.subject}</h4>
+                  <div className="flex items-center gap-2">
+                    <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                      t.priority === "urgent" ? "bg-destructive/10 text-destructive" : t.priority === "haute" ? "bg-orange-100 text-orange-600" : "bg-muted text-muted-foreground"
+                    }`}>{t.priority}</span>
+                    <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                      t.status === "ouvert" ? "bg-primary/10 text-primary" : t.status === "en_cours" ? "bg-accent/10 text-accent" : "bg-muted text-muted-foreground"
+                    }`}>{t.status}</span>
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground">{t.message}</p>
+                <div className="flex items-center justify-between mt-2">
+                  <p className="text-xs text-muted-foreground/60">{new Date(t.created_at).toLocaleDateString("fr-CA")}</p>
+                  <button onClick={() => toggleExpand(t.id)} className="text-xs text-primary hover:underline flex items-center gap-1">
+                    <LifeBuoy size={14} />
+                    {isExpanded ? "Masquer" : "Voir la conversation"}
+                  </button>
+                </div>
               </div>
+
+              {isExpanded && (
+                <div className="border-t border-border/50 p-5 bg-muted/20 rounded-b-xl space-y-4">
+                  {ticketReplies.length > 0 ? (
+                    <div className="space-y-3 max-h-64 overflow-y-auto">
+                      {ticketReplies.map((r) => (
+                        <div key={r.id} className={`flex ${r.is_admin ? "justify-start" : "justify-end"}`}>
+                          <div className={`max-w-[80%] rounded-xl px-4 py-2.5 ${
+                            r.is_admin
+                              ? "bg-primary/10 border border-primary/20 text-card-foreground rounded-bl-sm"
+                              : "bg-primary text-primary-foreground rounded-br-sm"
+                          }`}>
+                            <p className="text-sm">{r.message}</p>
+                            <p className={`text-[10px] mt-1 ${r.is_admin ? "text-primary" : "text-primary-foreground/60"}`}>
+                              {r.is_admin ? "CloudMature" : "Vous"} · {new Date(r.created_at).toLocaleString("fr-CA")}
+                            </p>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-2">Aucune réponse pour le moment.</p>
+                  )}
+
+                  {t.status !== "résolu" && (
+                    <div className="flex gap-2">
+                      <Textarea
+                        placeholder="Écrire une réponse..."
+                        value={replyText}
+                        onChange={(e) => setReplyText(e.target.value)}
+                        rows={2}
+                        className="flex-1"
+                      />
+                      <Button
+                        onClick={() => sendReply(t.id)}
+                        disabled={sendingReply || !replyText.trim()}
+                        className="gradient-primary text-primary-foreground border-0 self-end"
+                        size="sm"
+                      >
+                        <Send size={14} />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
-            <p className="text-sm text-muted-foreground">{t.message}</p>
-            <p className="text-xs text-muted-foreground/60 mt-2">{new Date(t.created_at).toLocaleDateString("fr-CA")}</p>
-          </div>
-        ))}
+          );
+        })}
         {filtered.length === 0 && (
           <div className="text-center py-8 text-muted-foreground text-sm">Aucun ticket trouvé.</div>
         )}

@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/sidebar";
 import {
   LayoutDashboard, FolderOpen, LifeBuoy, Users, LogOut, Shield, Clock, CheckCircle2,
-  AlertCircle, Bell, ChevronDown, ChevronUp, MessageSquare, Search,
+  AlertCircle, Bell, ChevronDown, ChevronUp, MessageSquare, Search, Send,
 } from "lucide-react";
 import type { User as SupaUser } from "@supabase/supabase-js";
 
@@ -312,6 +312,10 @@ function AdminTickets() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editStatus, setEditStatus] = useState("");
   const [editPriority, setEditPriority] = useState("");
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [replies, setReplies] = useState<Record<string, any[]>>({});
+  const [replyText, setReplyText] = useState("");
+  const [sendingReply, setSendingReply] = useState(false);
   const { toast } = useToast();
 
   const load = async () => {
@@ -323,7 +327,43 @@ function AdminTickets() {
     setProfiles(map);
   };
 
+  const loadReplies = async (ticketId: string) => {
+    const { data } = await supabase.from("ticket_replies").select("*").eq("ticket_id", ticketId).order("created_at", { ascending: true });
+    setReplies(prev => ({ ...prev, [ticketId]: data || [] }));
+  };
+
   useEffect(() => { load(); }, []);
+
+  const toggleExpand = (ticketId: string) => {
+    if (expandedId === ticketId) {
+      setExpandedId(null);
+    } else {
+      setExpandedId(ticketId);
+      loadReplies(ticketId);
+    }
+    setReplyText("");
+  };
+
+  const sendReply = async (ticketId: string) => {
+    if (!replyText.trim()) return;
+    setSendingReply(true);
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) return;
+    const { error } = await supabase.from("ticket_replies").insert({
+      ticket_id: ticketId,
+      user_id: session.user.id,
+      message: replyText.trim(),
+      is_admin: true,
+    });
+    if (error) {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Réponse envoyée!" });
+      setReplyText("");
+      loadReplies(ticketId);
+    }
+    setSendingReply(false);
+  };
 
   const saveTicket = async (id: string) => {
     const { error } = await supabase.from("support_tickets").update({ status: editStatus, priority: editPriority }).eq("id", id);
@@ -359,56 +399,109 @@ function AdminTickets() {
           const sc = statusConfig[t.status] || statusConfig.ouvert;
           const profile = profiles[t.user_id];
           const isEditing = editingId === t.id;
+          const isExpanded = expandedId === t.id;
+          const ticketReplies = replies[t.id] || [];
 
           return (
-            <div key={t.id} className="bg-card rounded-xl p-5 shadow-card border border-border/50">
-              <div className="flex items-start justify-between mb-2">
-                <div>
-                  <h4 className="font-medium text-card-foreground">{t.subject}</h4>
-                  <p className="text-xs text-primary mt-0.5">👤 {profile?.full_name || "Non renseigné"}</p>
-                </div>
-                <div className="flex items-center gap-2">
-                  {!isEditing && (
-                    <>
-                      <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                        t.priority === "urgent" ? "bg-destructive/10 text-destructive" : t.priority === "haute" ? "bg-orange-100 text-orange-600" : "bg-muted text-muted-foreground"
-                      }`}>{t.priority}</span>
-                      <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${sc.color} ${sc.bg}`}>{t.status}</span>
-                    </>
-                  )}
-                  <Button variant="outline" size="sm" onClick={() => {
-                    if (isEditing) saveTicket(t.id);
-                    else { setEditingId(t.id); setEditStatus(t.status); setEditPriority(t.priority); }
-                  }}>
-                    {isEditing ? "Sauvegarder" : "Modifier"}
-                  </Button>
-                  {isEditing && <Button variant="ghost" size="sm" onClick={() => setEditingId(null)}>Annuler</Button>}
-                </div>
-              </div>
-              <p className="text-sm text-muted-foreground">{t.message}</p>
-              <p className="text-xs text-muted-foreground/60 mt-2">{new Date(t.created_at).toLocaleDateString("fr-CA")}</p>
-
-              {isEditing && (
-                <div className="mt-3 p-4 bg-muted/30 rounded-lg space-y-3">
+            <div key={t.id} className="bg-card rounded-xl shadow-card border border-border/50">
+              <div className="p-5">
+                <div className="flex items-start justify-between mb-2">
                   <div>
-                    <label className="text-sm font-medium text-card-foreground">Statut</label>
-                    <div className="flex gap-2 mt-1">
-                      {["ouvert", "en_cours", "résolu"].map((s) => (
-                        <button key={s} onClick={() => setEditStatus(s)}
-                          className={`text-sm px-3 py-1.5 rounded-lg border transition-colors ${editStatus === s ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground border-border"}`}
-                        >{s}</button>
-                      ))}
+                    <h4 className="font-medium text-card-foreground">{t.subject}</h4>
+                    <p className="text-xs text-primary mt-0.5">👤 {profile?.full_name || "Non renseigné"}</p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    {!isEditing && (
+                      <>
+                        <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
+                          t.priority === "urgent" ? "bg-destructive/10 text-destructive" : t.priority === "haute" ? "bg-orange-100 text-orange-600" : "bg-muted text-muted-foreground"
+                        }`}>{t.priority}</span>
+                        <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${sc.color} ${sc.bg}`}>{t.status}</span>
+                      </>
+                    )}
+                    <Button variant="outline" size="sm" onClick={() => {
+                      if (isEditing) saveTicket(t.id);
+                      else { setEditingId(t.id); setEditStatus(t.status); setEditPriority(t.priority); }
+                    }}>
+                      {isEditing ? "Sauvegarder" : "Modifier"}
+                    </Button>
+                    {isEditing && <Button variant="ghost" size="sm" onClick={() => setEditingId(null)}>Annuler</Button>}
+                  </div>
+                </div>
+                <p className="text-sm text-muted-foreground">{t.message}</p>
+                <div className="flex items-center justify-between mt-2">
+                  <p className="text-xs text-muted-foreground/60">{new Date(t.created_at).toLocaleDateString("fr-CA")}</p>
+                  <button onClick={() => toggleExpand(t.id)} className="text-xs text-primary hover:underline flex items-center gap-1">
+                    <MessageSquare size={14} />
+                    {isExpanded ? "Masquer les réponses" : "Répondre / Voir les réponses"}
+                  </button>
+                </div>
+
+                {isEditing && (
+                  <div className="mt-3 p-4 bg-muted/30 rounded-lg space-y-3">
+                    <div>
+                      <label className="text-sm font-medium text-card-foreground">Statut</label>
+                      <div className="flex gap-2 mt-1">
+                        {["ouvert", "en_cours", "résolu"].map((s) => (
+                          <button key={s} onClick={() => setEditStatus(s)}
+                            className={`text-sm px-3 py-1.5 rounded-lg border transition-colors ${editStatus === s ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground border-border"}`}
+                          >{s}</button>
+                        ))}
+                      </div>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-card-foreground">Priorité</label>
+                      <div className="flex gap-2 mt-1">
+                        {["normal", "haute", "urgent"].map((pr) => (
+                          <button key={pr} onClick={() => setEditPriority(pr)}
+                            className={`text-sm px-3 py-1.5 rounded-lg border transition-colors ${editPriority === pr ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground border-border"}`}
+                          >{pr}</button>
+                        ))}
+                      </div>
                     </div>
                   </div>
-                  <div>
-                    <label className="text-sm font-medium text-card-foreground">Priorité</label>
-                    <div className="flex gap-2 mt-1">
-                      {["normal", "haute", "urgent"].map((pr) => (
-                        <button key={pr} onClick={() => setEditPriority(pr)}
-                          className={`text-sm px-3 py-1.5 rounded-lg border transition-colors ${editPriority === pr ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground border-border"}`}
-                        >{pr}</button>
+                )}
+              </div>
+
+              {isExpanded && (
+                <div className="border-t border-border/50 p-5 bg-muted/20 rounded-b-xl space-y-4">
+                  {ticketReplies.length > 0 ? (
+                    <div className="space-y-3 max-h-64 overflow-y-auto">
+                      {ticketReplies.map((r) => (
+                        <div key={r.id} className={`flex ${r.is_admin ? "justify-end" : "justify-start"}`}>
+                          <div className={`max-w-[80%] rounded-xl px-4 py-2.5 ${
+                            r.is_admin
+                              ? "bg-primary text-primary-foreground rounded-br-sm"
+                              : "bg-card border border-border text-card-foreground rounded-bl-sm"
+                          }`}>
+                            <p className="text-sm">{r.message}</p>
+                            <p className={`text-[10px] mt-1 ${r.is_admin ? "text-primary-foreground/60" : "text-muted-foreground"}`}>
+                              {r.is_admin ? "Admin" : (profiles[r.user_id]?.full_name || "Client")} · {new Date(r.created_at).toLocaleString("fr-CA")}
+                            </p>
+                          </div>
+                        </div>
                       ))}
                     </div>
+                  ) : (
+                    <p className="text-sm text-muted-foreground text-center py-2">Aucune réponse pour le moment.</p>
+                  )}
+
+                  <div className="flex gap-2">
+                    <Textarea
+                      placeholder="Écrire une réponse..."
+                      value={replyText}
+                      onChange={(e) => setReplyText(e.target.value)}
+                      rows={2}
+                      className="flex-1"
+                    />
+                    <Button
+                      onClick={() => sendReply(t.id)}
+                      disabled={sendingReply || !replyText.trim()}
+                      className="gradient-primary text-primary-foreground border-0 self-end"
+                      size="sm"
+                    >
+                      <Send size={14} />
+                    </Button>
                   </div>
                 </div>
               )}
