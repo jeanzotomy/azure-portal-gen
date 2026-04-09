@@ -362,7 +362,7 @@ function AdminProjects() {
                     )}
                     {p.deadline && (
                       <span className="inline-flex items-center gap-1 text-xs bg-orange-50 text-orange-600 border border-orange-200 px-2.5 py-1 rounded-lg dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/20">
-                        <Calendar size={11} /> {p.deadline}
+                        <Calendar size={11} /> {(() => { try { return format(new Date(p.deadline), "d MMM yyyy", { locale: fr }); } catch { return p.deadline; } })()}
                       </span>
                     )}
                   </div>
