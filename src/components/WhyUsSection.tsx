@@ -5,7 +5,7 @@ const reasons = [
   { icon: Users, title: "Approche personnalisée", desc: "Solutions adaptées à votre industrie." },
   { icon: BarChart3, title: "Résultats garantis", desc: "KPIs et SLA mesurables." },
   { icon: Lock, title: "Conformité & Innovation", desc: "Confidentialité et standards élevés." },
-  { icon: MapPin, title: "Équipe locale", desc: "Proactive et disponible à Montréal." },
+  { icon: MapPin, title: "Équipe locale", desc: "Proactive et disponible localement." },
 ];
 
 export function WhyUsSection() {
