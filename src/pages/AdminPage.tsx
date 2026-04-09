@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRoles } from "@/hooks/use-admin";
+import { useMfaCheck } from "@/hooks/use-mfa";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -24,6 +25,7 @@ function AdminContent() {
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<AdminTab>("dashboard");
   const { isAdmin, isAgent, loading: rolesLoading } = useUserRoles();
+  const mfaVerified = useMfaCheck();
   const navigate = useNavigate();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
@@ -37,6 +39,10 @@ function AdminContent() {
   }, [navigate]);
 
   useEffect(() => {
+    if (mfaVerified === false && !loading) navigate("/mfa");
+  }, [mfaVerified, loading, navigate]);
+
+  useEffect(() => {
     if (!rolesLoading && !isAdmin && !isAgent && !loading) navigate("/portal");
   }, [isAdmin, isAgent, rolesLoading, loading, navigate]);
 
@@ -47,7 +53,7 @@ function AdminContent() {
     }
   }, [rolesLoading, isAgent, isAdmin, tab]);
 
-  if (loading || rolesLoading) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">Chargement...</div>;
+  if (loading || rolesLoading || mfaVerified === null) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">Chargement...</div>;
   if (!user || (!isAdmin && !isAgent)) return null;
 
   const handleLogout = async () => { await supabase.auth.signOut(); navigate("/"); };

@@ -31,7 +31,7 @@ export default function AuthPage() {
       } else if (mode === "login") {
         const { error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        navigate("/portal");
+        navigate("/mfa");
       } else {
         const { error } = await supabase.auth.signUp({
           email,
@@ -57,7 +57,7 @@ export default function AuthPage() {
       return;
     }
     if (result.redirected) return;
-    navigate("/portal");
+    navigate("/mfa");
   };
 
   return (

@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useUserRoles } from "@/hooks/use-admin";
+import { useMfaCheck } from "@/hooks/use-mfa";
 import { Progress } from "@/components/ui/progress";
 import {
   SidebarProvider,
@@ -34,6 +35,7 @@ function PortalContent() {
   const [tab, setTab] = useState<Tab>("dashboard");
   const navigate = useNavigate();
   const { isAdmin, isAgent } = useUserRoles();
+  const mfaVerified = useMfaCheck();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
 
@@ -51,7 +53,11 @@ function PortalContent() {
     return () => subscription.unsubscribe();
   }, [navigate]);
 
-  if (loading) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">Chargement...</div>;
+  useEffect(() => {
+    if (mfaVerified === false && !loading) navigate("/mfa");
+  }, [mfaVerified, loading, navigate]);
+
+  if (loading || mfaVerified === null) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">Chargement...</div>;
   if (!user) return null;
 
   const handleLogout = async () => {
