@@ -243,10 +243,12 @@ function DashboardTab({ user }: { user: SupaUser }) {
   const [projects, setProjects] = useState<any[]>([]);
   const [tickets, setTickets] = useState<any[]>([]);
 
-  useEffect(() => {
+  const loadData = () => {
     supabase.from("projects").select("*").order("created_at", { ascending: false }).then(({ data }) => setProjects(data || []));
     supabase.from("support_tickets").select("*").order("created_at", { ascending: false }).then(({ data }) => setTickets(data || []));
-  }, []);
+  };
+
+  useEffect(() => { loadData(); }, []);
 
   const CHART_COLORS = ["hsl(var(--primary))", "hsl(var(--accent))", "hsl(199, 89%, 48%)", "hsl(160, 60%, 45%)"];
 
