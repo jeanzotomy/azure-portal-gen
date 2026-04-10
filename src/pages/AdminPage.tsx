@@ -482,7 +482,7 @@ function AdminDashboard() {
   const [tickets, setTickets] = useState<any[]>([]);
   const [recentProfiles, setRecentProfiles] = useState<any[]>([]);
 
-  useEffect(() => {
+  const loadData = () => {
     Promise.all([
       supabase.from("profiles").select("*").order("created_at", { ascending: false }),
       supabase.from("projects").select("*").order("created_at", { ascending: false }),
@@ -501,7 +501,9 @@ function AdminDashboard() {
         openTickets: ticks.filter(t => t.status === "ouvert").length,
       });
     });
-  }, []);
+  };
+
+  useEffect(() => { loadData(); }, []);
 
   // Project status pie data
   const projectStatusData = [
