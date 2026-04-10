@@ -443,7 +443,7 @@ function AgentDashboard({ user }: { user: SupaUser }) {
                         {(profile?.full_name || "?").charAt(0).toUpperCase()}
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="font-medium text-card-foreground text-sm truncate">{t.subject}</p>
+                        <p className="font-medium text-card-foreground text-sm truncate">{t.ticket_number && <span className="text-muted-foreground mr-1.5 font-mono text-xs">{t.ticket_number}</span>}{t.subject}</p>
                         <p className="text-xs text-muted-foreground mt-0.5">
                           {profile?.full_name || "Client"} {profile?.company ? `· ${profile.company}` : ""}
                         </p>
@@ -1122,6 +1122,7 @@ function AdminTickets() {
   const filtered = tickets.filter(t => {
     const matchesSearch = t.subject.toLowerCase().includes(search.toLowerCase()) ||
       t.message.toLowerCase().includes(search.toLowerCase()) ||
+      (t.ticket_number || "").toLowerCase().includes(search.toLowerCase()) ||
       (profiles[t.user_id]?.full_name || "").toLowerCase().includes(search.toLowerCase());
     const matchesStatus = filter === "all" || t.status === filter;
     const matchesPriority = priorityFilter === "all" || t.priority === priorityFilter;
@@ -1208,6 +1209,7 @@ function AdminTickets() {
                   </div>
                 </div>
 
+                {t.ticket_number && <span className="text-xs font-mono text-muted-foreground">{t.ticket_number}</span>}
                 <h3 className="font-bold text-card-foreground text-lg leading-tight mb-1">{t.subject}</h3>
                 <ExpandableText text={t.message} />
 
