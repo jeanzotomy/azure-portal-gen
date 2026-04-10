@@ -218,6 +218,7 @@ export type Database = {
           name: string
           priority: string
           progress: number
+          project_number: string | null
           status: string
           technologies: string | null
           updated_at: string
@@ -232,6 +233,7 @@ export type Database = {
           name: string
           priority?: string
           progress?: number
+          project_number?: string | null
           status?: string
           technologies?: string | null
           updated_at?: string
@@ -246,6 +248,7 @@ export type Database = {
           name?: string
           priority?: string
           progress?: number
+          project_number?: string | null
           status?: string
           technologies?: string | null
           updated_at?: string
@@ -379,6 +382,7 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      generate_project_number: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

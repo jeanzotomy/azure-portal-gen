@@ -411,7 +411,7 @@ function DashboardTab({ user }: { user: SupaUser }) {
                   <div key={p.id} className="p-4 hover:bg-muted/30 transition-colors">
                     <div className="flex items-start justify-between gap-3 mb-2">
                       <div className="min-w-0 flex-1">
-                        <p className="font-medium text-card-foreground text-sm truncate">{p.name}</p>
+                        <p className="font-medium text-card-foreground text-sm truncate">{p.project_number && <span className="text-muted-foreground mr-1.5">{p.project_number}</span>}{p.name}</p>
                         {p.description && <p className="text-xs text-muted-foreground truncate mt-0.5">{p.description}</p>}
                       </div>
                       <span className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${sc.color} ${sc.bg}`}>
@@ -634,7 +634,8 @@ function ProjectsTab({ user }: { user: SupaUser }) {
 
   const filteredProjects = projects.filter(p => {
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (p.description || "").toLowerCase().includes(searchQuery.toLowerCase());
+      (p.description || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (p.project_number || "").toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === "all" || p.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -800,6 +801,7 @@ function ProjectsTab({ user }: { user: SupaUser }) {
                   </div>
 
                   {/* Title & description */}
+                  {p.project_number && <span className="text-xs font-mono text-muted-foreground">{p.project_number}</span>}
                   <h3 className="font-bold text-card-foreground text-lg leading-tight mb-1">{p.name}</h3>
                   {p.description && (
                     <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{p.description}</p>
