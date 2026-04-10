@@ -939,13 +939,18 @@ function TicketsTab({ user }: { user: SupaUser }) {
           <h1 className="text-2xl font-bold text-foreground">Support</h1>
           <p className="text-sm text-muted-foreground mt-1">Gérez vos demandes d'assistance</p>
         </div>
-        <Button
-          onClick={() => setShowForm(!showForm)}
-          className="gradient-primary text-primary-foreground border-0"
-        >
-          {showForm ? <X size={16} className="mr-2" /> : <Plus size={16} className="mr-2" />}
-          {showForm ? "Annuler" : "Nouveau ticket"}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={loadTickets} className="gap-1.5">
+            <RefreshCw size={14} /> Actualiser
+          </Button>
+          <Button
+            onClick={() => setShowForm(!showForm)}
+            className="gradient-primary text-primary-foreground border-0"
+          >
+            {showForm ? <X size={16} className="mr-2" /> : <Plus size={16} className="mr-2" />}
+            {showForm ? "Annuler" : "Nouveau ticket"}
+          </Button>
+        </div>
       </div>
 
       {/* Stats */}
