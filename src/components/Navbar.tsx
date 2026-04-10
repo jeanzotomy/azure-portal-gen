@@ -25,7 +25,7 @@ export function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 glass">
       <div className="container flex items-center justify-between h-16">
         <Link to="/" className="flex items-center gap-2">
-          <img src={logo} alt="CloudMature" className="h-10 w-auto max-w-[160px]" />
+          <img src={logo} alt="CloudMature" className="h-14 w-auto max-w-[220px]" />
         </Link>
 
         {/* Desktop */}
