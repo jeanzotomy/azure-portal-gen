@@ -743,7 +743,7 @@ function AdminDashboard() {
             {projects.slice(0, 5).map((p) => (
               <div key={p.id} className="p-4 hover:bg-muted/30 transition-colors">
                 <div className="flex items-center justify-between mb-1.5">
-                  <p className="text-sm font-medium text-card-foreground truncate flex-1">{p.name}</p>
+                  <p className="text-sm font-medium text-card-foreground truncate flex-1">{p.project_number && <span className="text-muted-foreground mr-1.5 font-mono text-xs">{p.project_number}</span>}{p.name}</p>
                   <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${
                     p.status === "en_cours" ? "text-primary bg-primary/10" :
                     p.status === "termine" ? "text-teal-600 bg-teal-600/10" : "text-muted-foreground bg-muted"
@@ -819,6 +819,7 @@ function AdminProjects() {
 
   const filtered = projects.filter(p => {
     const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
+      (p.project_number || "").toLowerCase().includes(search.toLowerCase()) ||
       (profiles[p.user_id]?.full_name || "").toLowerCase().includes(search.toLowerCase()) ||
       (profiles[p.user_id]?.company || "").toLowerCase().includes(search.toLowerCase());
     const matchesStatus = statusFilter === "all" || p.status === statusFilter;
@@ -916,6 +917,7 @@ function AdminProjects() {
                   </div>
                 </div>
 
+                {p.project_number && <span className="text-xs font-mono text-muted-foreground">{p.project_number}</span>}
                 <h3 className="font-bold text-card-foreground text-lg leading-tight mb-1">{p.name}</h3>
                 {p.description && <ExpandableText text={p.description} className="text-sm text-muted-foreground mb-2" maxLines="line-clamp-1" />}
                 

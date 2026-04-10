@@ -634,7 +634,8 @@ function ProjectsTab({ user }: { user: SupaUser }) {
 
   const filteredProjects = projects.filter(p => {
     const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (p.description || "").toLowerCase().includes(searchQuery.toLowerCase());
+      (p.description || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (p.project_number || "").toLowerCase().includes(searchQuery.toLowerCase());
     const matchesStatus = statusFilter === "all" || p.status === statusFilter;
     return matchesSearch && matchesStatus;
   });
@@ -800,6 +801,7 @@ function ProjectsTab({ user }: { user: SupaUser }) {
                   </div>
 
                   {/* Title & description */}
+                  {p.project_number && <span className="text-xs font-mono text-muted-foreground">{p.project_number}</span>}
                   <h3 className="font-bold text-card-foreground text-lg leading-tight mb-1">{p.name}</h3>
                   {p.description && (
                     <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{p.description}</p>
