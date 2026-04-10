@@ -29,7 +29,7 @@ import logo from "@/assets/cloudmature-logo.png";
 import {
   LayoutDashboard, FolderOpen, LifeBuoy, User, LogOut, Send, Clock, CheckCircle2, AlertCircle,
   Menu, Bell, Search, Filter, Upload, X, FileText, DollarSign, Calendar, Cpu, Flag, Pencil, Shield,
-  Activity, TrendingUp, Plus, Trash2, Info,
+  Activity, TrendingUp, Plus, Trash2, Info, RefreshCw,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { PieChart as RePieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip } from "recharts";
@@ -243,10 +243,12 @@ function DashboardTab({ user }: { user: SupaUser }) {
   const [projects, setProjects] = useState<any[]>([]);
   const [tickets, setTickets] = useState<any[]>([]);
 
-  useEffect(() => {
+  const loadData = () => {
     supabase.from("projects").select("*").order("created_at", { ascending: false }).then(({ data }) => setProjects(data || []));
     supabase.from("support_tickets").select("*").order("created_at", { ascending: false }).then(({ data }) => setTickets(data || []));
-  }, []);
+  };
+
+  useEffect(() => { loadData(); }, []);
 
   const CHART_COLORS = ["hsl(var(--primary))", "hsl(var(--accent))", "hsl(199, 89%, 48%)", "hsl(160, 60%, 45%)"];
 
@@ -302,9 +304,14 @@ function DashboardTab({ user }: { user: SupaUser }) {
             <h1 className="text-2xl font-bold text-foreground">Bienvenue, {user.user_metadata?.full_name || user.email?.split("@")[0]} 👋</h1>
             <p className="text-muted-foreground mt-1">Voici un aperçu de votre espace client.</p>
           </div>
-          <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
-            <Activity size={16} className="text-primary" />
-            {new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+           <div className="hidden md:flex items-center gap-3 text-sm text-muted-foreground">
+            <Button variant="outline" size="sm" onClick={loadData} className="gap-1.5">
+              <RefreshCw size={14} /> Actualiser
+            </Button>
+            <span className="flex items-center gap-2">
+              <Activity size={16} className="text-primary" />
+              {new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+            </span>
           </div>
         </div>
       </div>
@@ -636,9 +643,14 @@ function ProjectsTab({ user }: { user: SupaUser }) {
     <div className="space-y-6 animate-fade-up">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">Mes Projets</h1>
-        <Button onClick={() => showForm ? closeForm() : openNewForm()} className="gradient-primary text-primary-foreground border-0">
-          {showForm ? "Annuler" : <><Send size={16} className="mr-2" /> Soumettre un projet</>}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={loadProjects} className="gap-1.5">
+            <RefreshCw size={14} /> Actualiser
+          </Button>
+          <Button onClick={() => showForm ? closeForm() : openNewForm()} className="gradient-primary text-primary-foreground border-0">
+            {showForm ? "Annuler" : <><Send size={16} className="mr-2" /> Soumettre un projet</>}
+          </Button>
+        </div>
       </div>
 
       {/* Filter bar */}
@@ -927,13 +939,18 @@ function TicketsTab({ user }: { user: SupaUser }) {
           <h1 className="text-2xl font-bold text-foreground">Support</h1>
           <p className="text-sm text-muted-foreground mt-1">Gérez vos demandes d'assistance</p>
         </div>
-        <Button
-          onClick={() => setShowForm(!showForm)}
-          className="gradient-primary text-primary-foreground border-0"
-        >
-          {showForm ? <X size={16} className="mr-2" /> : <Plus size={16} className="mr-2" />}
-          {showForm ? "Annuler" : "Nouveau ticket"}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={loadTickets} className="gap-1.5">
+            <RefreshCw size={14} /> Actualiser
+          </Button>
+          <Button
+            onClick={() => setShowForm(!showForm)}
+            className="gradient-primary text-primary-foreground border-0"
+          >
+            {showForm ? <X size={16} className="mr-2" /> : <Plus size={16} className="mr-2" />}
+            {showForm ? "Annuler" : "Nouveau ticket"}
+          </Button>
+        </div>
       </div>
 
       {/* Stats */}
@@ -1072,11 +1089,13 @@ function ProfileTab({ user }: { user: SupaUser }) {
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
+  const loadProfile = () => {
     supabase.from("profiles").select("*").eq("user_id", user.id).single().then(({ data }) => {
       if (data) setProfile({ full_name: data.full_name || "", company: data.company || "", phone: data.phone || "" });
     });
-  }, [user.id]);
+  };
+
+  useEffect(() => { loadProfile(); }, [user.id]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1089,7 +1108,12 @@ function ProfileTab({ user }: { user: SupaUser }) {
 
   return (
     <div className="space-y-6 animate-fade-up">
-      <h1 className="text-2xl font-bold text-foreground">Mon Profil</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-foreground">Mon Profil</h1>
+        <Button variant="outline" size="sm" onClick={loadProfile} className="gap-1.5">
+          <RefreshCw size={14} /> Actualiser
+        </Button>
+      </div>
 
       <div className="flex items-center gap-4 bg-card rounded-xl p-6 shadow-card border border-border/50">
         <div className="w-16 h-16 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-2xl font-bold">
