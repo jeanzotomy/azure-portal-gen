@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import dashboardPresentation from "@/assets/dashboard-presentation.png";
 import dashboard1 from "@/assets/dashboard-1.jpg";
 import dashboard2 from "@/assets/dashboard-2.jpg";
 import dashboard3 from "@/assets/dashboard-3.jpg";
@@ -9,6 +10,7 @@ import dashboardIa from "@/assets/dashboard-ia.jpg";
 import dashboardBi from "@/assets/dashboard-bi.jpg";
 
 const slides = [
+  { src: dashboardPresentation, label: "Présentation CloudMature" },
   { src: dashboard1, label: "Cloud Infrastructure" },
   { src: dashboard2, label: "Cybersécurité" },
   { src: dashboard3, label: "DevOps & CI/CD" },
