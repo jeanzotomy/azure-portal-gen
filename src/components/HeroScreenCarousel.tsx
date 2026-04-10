@@ -55,7 +55,7 @@ export function HeroScreenCarousel() {
               loading="lazy"
               width={1280}
               height={720}
-              className={`absolute inset-0 w-full h-full object-cover transition-all duration-1000 ${
+              className={`absolute inset-0 w-full h-full object-contain transition-all duration-1000 ${
                 i === current
                   ? "opacity-100 scale-100"
                   : "opacity-0 scale-105"
