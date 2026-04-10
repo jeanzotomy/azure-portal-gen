@@ -4,6 +4,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRoles } from "@/hooks/use-admin";
 import { useMfaCheck } from "@/hooks/use-mfa";
+import { useAuthSession } from "@/hooks/use-auth-session";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -30,8 +31,7 @@ type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts";
 type AgentTab = "dashboard" | "tickets" | "contacts";
 
 function AdminContent() {
-  const [user, setUser] = useState<SupaUser | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { user, ready } = useAuthSession();
   const [tab, setTab] = useState<AdminTab>("dashboard");
   const [agentTab, setAgentTab] = useState<AgentTab>("dashboard");
   const { isAdmin, isAgent, loading: rolesLoading } = useUserRoles();
@@ -53,28 +53,24 @@ function AdminContent() {
       }
       setUnrepliedCount(count);
     };
-    fetchUnreplied();
+    void fetchUnreplied();
     const interval = setInterval(fetchUnreplied, 30000);
     return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user ?? null);
-      setLoading(false);
-      if (!session?.user) navigate("/auth");
-    });
-  }, [navigate]);
+    if (ready && !user) navigate("/auth");
+  }, [ready, user, navigate]);
 
   useEffect(() => {
-    if (mfaVerified === false && !loading) navigate("/mfa");
-  }, [mfaVerified, loading, navigate]);
+    if (mfaVerified === false && ready && user) navigate("/mfa");
+  }, [mfaVerified, ready, user, navigate]);
 
   useEffect(() => {
-    if (!rolesLoading && !isAdmin && !isAgent && !loading) navigate("/portal");
-  }, [isAdmin, isAgent, rolesLoading, loading, navigate]);
+    if (!rolesLoading && !isAdmin && !isAgent && ready && user) navigate("/portal");
+  }, [isAdmin, isAgent, rolesLoading, ready, user, navigate]);
 
-  if (loading || rolesLoading || mfaVerified === null) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">Chargement...</div>;
+  if (!ready || rolesLoading || mfaVerified === null) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">Chargement...</div>;
   if (!user || (!isAdmin && !isAgent)) return null;
 
   const handleLogout = async () => {
