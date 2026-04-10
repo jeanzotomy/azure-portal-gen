@@ -458,7 +458,7 @@ function DashboardTab({ user }: { user: SupaUser }) {
                   <div key={t.id} className="p-4 hover:bg-muted/30 transition-colors">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 flex-1">
-                        <p className="font-medium text-card-foreground text-sm truncate">{t.subject}</p>
+                        <p className="font-medium text-card-foreground text-sm truncate">{t.ticket_number && <span className="text-muted-foreground mr-1.5">{t.ticket_number}</span>}{t.subject}</p>
                         <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1">{t.message}</p>
                       </div>
                       <span className={`inline-flex items-center text-[11px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${tc.color} ${tc.bg}`}>
@@ -1011,6 +1011,7 @@ function TicketsTab({ user }: { user: SupaUser }) {
             <div key={t.id} className="bg-card rounded-xl shadow-card border border-border/50 hover:shadow-card-hover transition-shadow">
               <div className="p-5">
                 <div className="flex items-center justify-between mb-2">
+                  {t.ticket_number && <span className="text-xs font-mono text-muted-foreground">{t.ticket_number}</span>}
                   <h4 className="font-medium text-card-foreground">{t.subject}</h4>
                   <div className="flex items-center gap-2">
                     <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
