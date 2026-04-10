@@ -5,38 +5,48 @@ export function useMfaCheck() {
   const [mfaVerified, setMfaVerified] = useState<boolean | null>(null);
 
   useEffect(() => {
+    let active = true;
+
     const check = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        setMfaVerified(false);
-        return;
-      }
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
 
-      const { data: factors } = await supabase.auth.mfa.listFactors();
-      const verifiedFactors = (factors?.totp || []).filter(f => f.status === "verified");
+        if (!active) return;
 
-      if (verifiedFactors.length === 0) {
-        setMfaVerified(false);
-        return;
-      }
+        if (!session?.user) {
+          setMfaVerified(false);
+          return;
+        }
 
-      const { data } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-      if (data?.currentLevel !== "aal2") {
-        setMfaVerified(false);
-      } else {
-        setMfaVerified(true);
+        const { data, error } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
+
+        if (!active) return;
+
+        if (error) {
+          console.error("MFA check failed", error);
+          setMfaVerified(false);
+          return;
+        }
+
+        setMfaVerified(data?.currentLevel === "aal2");
+      } catch (error) {
+        console.error("Unexpected MFA check error", error);
+        if (active) {
+          setMfaVerified(false);
+        }
       }
     };
 
-    check();
+    void check();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
-        check();
-      }
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
+      void check();
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      active = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   return mfaVerified;
