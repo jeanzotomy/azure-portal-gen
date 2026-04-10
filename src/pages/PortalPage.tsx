@@ -304,9 +304,14 @@ function DashboardTab({ user }: { user: SupaUser }) {
             <h1 className="text-2xl font-bold text-foreground">Bienvenue, {user.user_metadata?.full_name || user.email?.split("@")[0]} 👋</h1>
             <p className="text-muted-foreground mt-1">Voici un aperçu de votre espace client.</p>
           </div>
-          <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
-            <Activity size={16} className="text-primary" />
-            {new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+           <div className="hidden md:flex items-center gap-3 text-sm text-muted-foreground">
+            <Button variant="outline" size="sm" onClick={loadData} className="gap-1.5">
+              <RefreshCw size={14} /> Actualiser
+            </Button>
+            <span className="flex items-center gap-2">
+              <Activity size={16} className="text-primary" />
+              {new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+            </span>
           </div>
         </div>
       </div>
