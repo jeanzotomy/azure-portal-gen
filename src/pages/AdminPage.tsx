@@ -21,7 +21,7 @@ import {
 import {
   LayoutDashboard, FolderOpen, LifeBuoy, Users, LogOut, Shield, Clock, CheckCircle2,
   AlertCircle, Bell, ChevronDown, ChevronUp, MessageSquare, Search, Send, UserCog,
-  Flag, DollarSign, Calendar, Filter, TrendingUp, Activity, BarChart3, PieChart, ShieldBan, ShieldCheck, Trash2,
+  Flag, DollarSign, Calendar, Filter, TrendingUp, Activity, BarChart3, PieChart, ShieldBan, ShieldCheck, Trash2, RefreshCw,
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RePieChart, Pie, Cell, AreaChart, Area } from "recharts";
 import type { User as SupaUser } from "@supabase/supabase-js";
@@ -266,7 +266,7 @@ function AgentDashboard({ user }: { user: SupaUser }) {
   const [replies, setReplies] = useState<any[]>([]);
   const [profiles, setProfiles] = useState<Record<string, any>>({});
 
-  useEffect(() => {
+  const loadData = () => {
     supabase.from("support_tickets").select("*").order("created_at", { ascending: false }).then(({ data }) => setTickets(data || []));
     supabase.from("ticket_replies").select("*").order("created_at", { ascending: false }).then(({ data }) => setReplies(data || []));
     supabase.from("profiles").select("*").then(({ data }) => {
@@ -274,7 +274,9 @@ function AgentDashboard({ user }: { user: SupaUser }) {
       (data || []).forEach((p: any) => { map[p.user_id] = p; });
       setProfiles(map);
     });
-  }, []);
+  };
+
+  useEffect(() => { loadData(); }, []);
 
   const openTickets = tickets.filter(t => t.status === "ouvert").length;
   const inProgressTickets = tickets.filter(t => t.status === "en_cours").length;
@@ -322,9 +324,14 @@ function AgentDashboard({ user }: { user: SupaUser }) {
             <h1 className="text-2xl font-bold text-foreground">Bonjour, {user.user_metadata?.full_name || user.email?.split("@")[0]} 👋</h1>
             <p className="text-muted-foreground mt-1">Voici votre espace agent — gérez les tickets clients.</p>
           </div>
-          <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
-            <Activity size={16} className="text-accent" />
-            {new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+           <div className="hidden md:flex items-center gap-3 text-sm text-muted-foreground">
+            <Button variant="outline" size="sm" onClick={loadData} className="gap-1.5">
+              <RefreshCw size={14} /> Actualiser
+            </Button>
+            <span className="flex items-center gap-2">
+              <Activity size={16} className="text-accent" />
+              {new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+            </span>
           </div>
         </div>
       </div>
@@ -475,7 +482,7 @@ function AdminDashboard() {
   const [tickets, setTickets] = useState<any[]>([]);
   const [recentProfiles, setRecentProfiles] = useState<any[]>([]);
 
-  useEffect(() => {
+  const loadData = () => {
     Promise.all([
       supabase.from("profiles").select("*").order("created_at", { ascending: false }),
       supabase.from("projects").select("*").order("created_at", { ascending: false }),
@@ -494,7 +501,9 @@ function AdminDashboard() {
         openTickets: ticks.filter(t => t.status === "ouvert").length,
       });
     });
-  }, []);
+  };
+
+  useEffect(() => { loadData(); }, []);
 
   // Project status pie data
   const projectStatusData = [
@@ -562,9 +571,14 @@ function AdminDashboard() {
             <h1 className="text-2xl font-bold text-foreground">Vue d'ensemble</h1>
             <p className="text-muted-foreground mt-1">Suivez l'activité de votre plateforme en temps réel.</p>
           </div>
-          <div className="hidden md:flex items-center gap-2 text-sm text-muted-foreground">
-            <Activity size={16} className="text-primary" />
-            {new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+           <div className="hidden md:flex items-center gap-3 text-sm text-muted-foreground">
+            <Button variant="outline" size="sm" onClick={loadData} className="gap-1.5">
+              <RefreshCw size={14} /> Actualiser
+            </Button>
+            <span className="flex items-center gap-2">
+              <Activity size={16} className="text-primary" />
+              {new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+            </span>
           </div>
         </div>
       </div>
@@ -834,7 +848,12 @@ function AdminProjects() {
     <div className="space-y-6 animate-fade-up">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">Gestion des projets</h1>
-        <span className="text-sm text-muted-foreground">{filtered.length}/{projects.length} projet(s)</span>
+        <div className="flex items-center gap-3">
+          <Button variant="outline" size="sm" onClick={load} className="gap-1.5">
+            <RefreshCw size={14} /> Actualiser
+          </Button>
+          <span className="text-sm text-muted-foreground">{filtered.length}/{projects.length} projet(s)</span>
+        </div>
       </div>
 
       {/* Filter bar */}
@@ -1117,7 +1136,12 @@ function AdminTickets() {
     <div className="space-y-6 animate-fade-up">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">Gestion des tickets</h1>
-        <span className="text-sm text-muted-foreground">{filtered.length}/{tickets.length} ticket(s)</span>
+        <div className="flex items-center gap-3">
+          <Button variant="outline" size="sm" onClick={load} className="gap-1.5">
+            <RefreshCw size={14} /> Actualiser
+          </Button>
+          <span className="text-sm text-muted-foreground">{filtered.length}/{tickets.length} ticket(s)</span>
+        </div>
       </div>
 
       <div className="bg-card rounded-xl p-4 shadow-card border border-border/50 space-y-3">
@@ -1366,6 +1390,12 @@ function AdminContacts() {
 
   return (
     <div className="space-y-6 animate-fade-up">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-foreground">Demandes de contact</h1>
+        <Button variant="outline" size="sm" onClick={load} className="gap-1.5">
+          <RefreshCw size={14} /> Actualiser
+        </Button>
+      </div>
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
@@ -1527,7 +1557,12 @@ function AdminUsers() {
     <div className="space-y-6 animate-fade-up">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">Utilisateurs</h1>
-        <span className="text-sm text-muted-foreground">{filtered.length}/{profilesList.length} utilisateur(s)</span>
+        <div className="flex items-center gap-3">
+          <Button variant="outline" size="sm" onClick={load} className="gap-1.5">
+            <RefreshCw size={14} /> Actualiser
+          </Button>
+          <span className="text-sm text-muted-foreground">{filtered.length}/{profilesList.length} utilisateur(s)</span>
+        </div>
       </div>
 
       <div className="bg-card rounded-xl p-4 shadow-card border border-border/50 space-y-3">
