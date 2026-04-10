@@ -1390,6 +1390,12 @@ function AdminContacts() {
 
   return (
     <div className="space-y-6 animate-fade-up">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-foreground">Demandes de contact</h1>
+        <Button variant="outline" size="sm" onClick={load} className="gap-1.5">
+          <RefreshCw size={14} /> Actualiser
+        </Button>
+      </div>
       {/* Stats */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {[
