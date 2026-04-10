@@ -10,7 +10,7 @@ import { useMfaCheck } from "@/hooks/use-mfa";
 import { Progress } from "@/components/ui/progress";
 import { Calendar as CalendarWidget } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { format } from "date-fns";
+import { format, differenceInDays, isPast } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import {
@@ -815,11 +815,18 @@ function ProjectsTab({ user }: { user: SupaUser }) {
                           <DollarSign size={11} /> {p.budget}
                         </span>
                       )}
-                      {p.deadline && (
-                        <span className="inline-flex items-center gap-1 text-xs bg-orange-50 text-orange-600 border border-orange-200 px-2.5 py-1 rounded-lg dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/20">
-                          <Calendar size={11} /> {(() => { try { return format(new Date(p.deadline), "d MMM yyyy", { locale: fr }); } catch { return p.deadline; } })()}
-                        </span>
-                      )}
+                      {p.deadline && (() => {
+                        const deadlineDate = new Date(p.deadline);
+                        const days = differenceInDays(deadlineDate, new Date());
+                        const overdue = isPast(deadlineDate);
+                        const daysLabel = overdue ? `${Math.abs(days)}j en retard` : days === 0 ? "Aujourd'hui" : `${days}j restants`;
+                        return (
+                          <span className={`inline-flex items-center gap-1 text-xs border px-2.5 py-1 rounded-lg ${overdue ? "bg-destructive/10 text-destructive border-destructive/20" : days <= 7 ? "bg-orange-50 text-orange-600 border-orange-200 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/20" : "bg-primary/5 text-primary border-primary/15"}`}>
+                            <Calendar size={11} /> {(() => { try { return format(deadlineDate, "d MMM yyyy", { locale: fr }); } catch { return p.deadline; } })()}
+                            <span className="font-semibold ml-0.5">· {daysLabel}</span>
+                          </span>
+                        );
+                      })()}
                     </div>
                   )}
                   {p.technologies && (
