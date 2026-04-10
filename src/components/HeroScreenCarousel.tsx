@@ -8,6 +8,7 @@ import dashboardAutomation from "@/assets/dashboard-automation.jpg";
 import dashboardMs365 from "@/assets/dashboard-ms365.jpg";
 import dashboardIa from "@/assets/dashboard-ia.jpg";
 import dashboardBi from "@/assets/dashboard-bi.jpg";
+import dashboardPortail from "@/assets/dashboard-portail.png";
 
 const slides = [
   { src: dashboardPresentation, label: "Présentation CloudMature" },
