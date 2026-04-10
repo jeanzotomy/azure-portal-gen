@@ -1089,11 +1089,13 @@ function ProfileTab({ user }: { user: SupaUser }) {
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
-  useEffect(() => {
+  const loadProfile = () => {
     supabase.from("profiles").select("*").eq("user_id", user.id).single().then(({ data }) => {
       if (data) setProfile({ full_name: data.full_name || "", company: data.company || "", phone: data.phone || "" });
     });
-  }, [user.id]);
+  };
+
+  useEffect(() => { loadProfile(); }, [user.id]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -1106,7 +1108,12 @@ function ProfileTab({ user }: { user: SupaUser }) {
 
   return (
     <div className="space-y-6 animate-fade-up">
-      <h1 className="text-2xl font-bold text-foreground">Mon Profil</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-foreground">Mon Profil</h1>
+        <Button variant="outline" size="sm" onClick={loadProfile} className="gap-1.5">
+          <RefreshCw size={14} /> Actualiser
+        </Button>
+      </div>
 
       <div className="flex items-center gap-4 bg-card rounded-xl p-6 shadow-card border border-border/50">
         <div className="w-16 h-16 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-2xl font-bold">
