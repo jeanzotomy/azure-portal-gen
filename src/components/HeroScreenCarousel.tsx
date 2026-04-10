@@ -20,6 +20,7 @@ const slides = [
   { src: dashboardMs365, label: "Microsoft 365" },
   { src: dashboardIa, label: "Intelligence Artificielle" },
   { src: dashboardBi, label: "Business Intelligence" },
+  { src: dashboardPortail, label: "Portail Client" },
 ];
 
 export function HeroScreenCarousel() {
