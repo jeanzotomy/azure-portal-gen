@@ -848,7 +848,12 @@ function AdminProjects() {
     <div className="space-y-6 animate-fade-up">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">Gestion des projets</h1>
-        <span className="text-sm text-muted-foreground">{filtered.length}/{projects.length} projet(s)</span>
+        <div className="flex items-center gap-3">
+          <Button variant="outline" size="sm" onClick={load} className="gap-1.5">
+            <RefreshCw size={14} /> Actualiser
+          </Button>
+          <span className="text-sm text-muted-foreground">{filtered.length}/{projects.length} projet(s)</span>
+        </div>
       </div>
 
       {/* Filter bar */}
