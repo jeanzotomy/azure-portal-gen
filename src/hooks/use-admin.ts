@@ -1,39 +1,59 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuthSession } from "@/hooks/use-auth-session";
 
 export type AppRole = "admin" | "agent" | "client";
 
 export function useUserRoles() {
+  const { user, ready } = useAuthSession();
   const [roles, setRoles] = useState<AppRole[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const check = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) {
+    let active = true;
+
+    const loadRoles = async () => {
+      if (!ready) return;
+
+      if (!user) {
+        if (active) {
+          setRoles([]);
+          setLoading(false);
+        }
+        return;
+      }
+
+      setLoading(true);
+
+      const { data, error } = await supabase
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", user.id);
+
+      if (!active) return;
+
+      if (error) {
+        console.error("Role load failed", error);
         setRoles([]);
         setLoading(false);
         return;
       }
-      const { data } = await supabase
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", session.user.id);
-      setRoles((data || []).map((r: any) => r.role as AppRole));
+
+      setRoles((data || []).map((roleRecord: { role: AppRole }) => roleRecord.role));
       setLoading(false);
     };
-    check();
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      check();
-    });
-    return () => subscription.unsubscribe();
-  }, []);
+    void loadRoles();
+
+    return () => {
+      active = false;
+    };
+  }, [ready, user]);
 
   const isAdmin = roles.includes("admin");
   const isAgent = roles.includes("agent");
 
-  return { roles, isAdmin, isAgent, loading };
+  return { roles, isAdmin, isAgent, loading: !ready || loading };
 }
 
 /** @deprecated Use useUserRoles instead */
