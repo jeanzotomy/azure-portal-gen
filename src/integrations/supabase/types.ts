@@ -264,6 +264,7 @@ export type Database = {
           priority: string
           status: string
           subject: string
+          ticket_number: string | null
           updated_at: string
           user_id: string
         }
@@ -274,6 +275,7 @@ export type Database = {
           priority?: string
           status?: string
           subject: string
+          ticket_number?: string | null
           updated_at?: string
           user_id: string
         }
@@ -284,6 +286,7 @@ export type Database = {
           priority?: string
           status?: string
           subject?: string
+          ticket_number?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -383,6 +386,7 @@ export type Database = {
         Returns: number
       }
       generate_project_number: { Args: never; Returns: string }
+      generate_ticket_number: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
