@@ -12,17 +12,14 @@ export function useMfaCheck() {
         return;
       }
 
-      // Check if user has any verified TOTP factors
       const { data: factors } = await supabase.auth.mfa.listFactors();
       const verifiedFactors = (factors?.totp || []).filter(f => f.status === "verified");
 
-      // If no verified factors, MFA is not set up — force enrollment
       if (verifiedFactors.length === 0) {
         setMfaVerified(false);
         return;
       }
 
-      // If factors exist, check AAL level
       const { data } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
       if (data?.currentLevel !== "aal2") {
         setMfaVerified(false);
@@ -30,7 +27,16 @@ export function useMfaCheck() {
         setMfaVerified(true);
       }
     };
+
     check();
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (session?.user) {
+        check();
+      }
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
 
   return mfaVerified;
