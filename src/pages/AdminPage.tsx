@@ -266,7 +266,7 @@ function AgentDashboard({ user }: { user: SupaUser }) {
   const [replies, setReplies] = useState<any[]>([]);
   const [profiles, setProfiles] = useState<Record<string, any>>({});
 
-  useEffect(() => {
+  const loadData = () => {
     supabase.from("support_tickets").select("*").order("created_at", { ascending: false }).then(({ data }) => setTickets(data || []));
     supabase.from("ticket_replies").select("*").order("created_at", { ascending: false }).then(({ data }) => setReplies(data || []));
     supabase.from("profiles").select("*").then(({ data }) => {
@@ -274,7 +274,9 @@ function AgentDashboard({ user }: { user: SupaUser }) {
       (data || []).forEach((p: any) => { map[p.user_id] = p; });
       setProfiles(map);
     });
-  }, []);
+  };
+
+  useEffect(() => { loadData(); }, []);
 
   const openTickets = tickets.filter(t => t.status === "ouvert").length;
   const inProgressTickets = tickets.filter(t => t.status === "en_cours").length;
