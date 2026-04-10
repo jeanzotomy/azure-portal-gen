@@ -1,23 +1,23 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
+import { useAuthSession } from "@/hooks/use-auth-session";
 
 export function useMfaCheck() {
+  const { user, ready } = useAuthSession();
   const [mfaVerified, setMfaVerified] = useState<boolean | null>(null);
 
   useEffect(() => {
     let active = true;
 
     const check = async () => {
+      if (!ready) return;
+
+      if (!user) {
+        setMfaVerified(false);
+        return;
+      }
+
       try {
-        const { data: { session } } = await supabase.auth.getSession();
-
-        if (!active) return;
-
-        if (!session?.user) {
-          setMfaVerified(false);
-          return;
-        }
-
         const { data, error } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
 
         if (!active) return;
@@ -37,17 +37,19 @@ export function useMfaCheck() {
       }
     };
 
-    void check();
+    if (!ready) {
+      setMfaVerified(null);
+      return () => {
+        active = false;
+      };
+    }
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(() => {
-      void check();
-    });
+    void check();
 
     return () => {
       active = false;
-      subscription.unsubscribe();
     };
-  }, []);
+  }, [ready, user]);
 
   return mfaVerified;
 }

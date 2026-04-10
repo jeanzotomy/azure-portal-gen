@@ -7,6 +7,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useUserRoles } from "@/hooks/use-admin";
 import { useMfaCheck } from "@/hooks/use-mfa";
+import { useAuthSession } from "@/hooks/use-auth-session";
 import { Progress } from "@/components/ui/progress";
 import { Calendar as CalendarWidget } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -38,8 +39,7 @@ import type { User as SupaUser } from "@supabase/supabase-js";
 type Tab = "dashboard" | "projects" | "tickets" | "profile";
 
 function PortalContent() {
-  const [user, setUser] = useState<SupaUser | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { user, ready } = useAuthSession();
   const [tab, setTab] = useState<Tab>("dashboard");
   const [profileIncomplete, setProfileIncomplete] = useState(false);
   const [daysLeft, setDaysLeft] = useState<number | null>(null);
@@ -50,40 +50,41 @@ function PortalContent() {
   const collapsed = state === "collapsed";
 
   useEffect(() => {
-    const checkBlocked = async (userId: string) => {
-      const { data } = await supabase.from("profiles").select("blocked, deleted_at").eq("user_id", userId).maybeSingle();
-      if (data?.blocked || (data as any)?.deleted_at) {
-        await supabase.auth.signOut();
-        navigate(data?.blocked ? "/auth?blocked=1" : "/auth?deleted=1");
-        return true;
-      }
-      return false;
-    };
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (_event, session) => {
-      if (session?.user) {
-        const blocked = await checkBlocked(session.user.id);
-        if (blocked) return;
-      }
-      setUser(session?.user ?? null);
-      setLoading(false);
-      if (!session?.user) navigate("/auth");
-    });
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      if (session?.user) {
-        const blocked = await checkBlocked(session.user.id);
-        if (blocked) return;
-      }
-      setUser(session?.user ?? null);
-      setLoading(false);
-      if (!session?.user) navigate("/auth");
-    });
-    return () => subscription.unsubscribe();
-  }, [navigate]);
+    if (ready && !user) {
+      navigate("/auth");
+    }
+  }, [ready, user, navigate]);
 
   useEffect(() => {
-    if (mfaVerified === false && !loading) navigate("/mfa");
-  }, [mfaVerified, loading, navigate]);
+    let active = true;
+
+    const checkBlocked = async () => {
+      if (!user) return;
+
+      const { data } = await supabase
+        .from("profiles")
+        .select("blocked, deleted_at")
+        .eq("user_id", user.id)
+        .maybeSingle();
+
+      if (!active) return;
+
+      if (data?.blocked || (data as { deleted_at?: string | null } | null)?.deleted_at) {
+        await supabase.auth.signOut();
+        navigate(data?.blocked ? "/auth?blocked=1" : "/auth?deleted=1");
+      }
+    };
+
+    void checkBlocked();
+
+    return () => {
+      active = false;
+    };
+  }, [user, navigate]);
+
+  useEffect(() => {
+    if (mfaVerified === false && ready && user) navigate("/mfa");
+  }, [mfaVerified, ready, user, navigate]);
 
   useEffect(() => {
     if (!user) return;
@@ -105,10 +106,10 @@ function PortalContent() {
         setProfileIncomplete(false);
       }
     };
-    checkProfile();
+    void checkProfile();
   }, [user]);
 
-  if (loading || mfaVerified === null) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">Chargement...</div>;
+  if (!ready || mfaVerified === null) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">Chargement...</div>;
   if (!user) return null;
 
   const handleLogout = async () => {
