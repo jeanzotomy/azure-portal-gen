@@ -502,6 +502,7 @@ function DashboardTab({ user }: { user: SupaUser }) {
 
 function ProjectsTab({ user }: { user: SupaUser }) {
   const [projects, setProjects] = useState<any[]>([]);
+  const [gestionnaireProfiles, setGestionnaireProfiles] = useState<Record<string, string>>({});
   const [showForm, setShowForm] = useState(false);
   const [editingProject, setEditingProject] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
