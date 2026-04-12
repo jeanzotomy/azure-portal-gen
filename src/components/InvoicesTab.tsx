@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { Upload, FileText, DollarSign, AlertCircle, CheckCircle2, Clock, Loader2, Trash2, Search, Receipt, Sparkles, Plus } from "lucide-react";
+import { Upload, FileText, DollarSign, AlertCircle, CheckCircle2, Clock, Loader2, Trash2, Search, Receipt, Sparkles, Plus, Pencil } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
@@ -88,6 +88,7 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
   const [formDueDate, setFormDueDate] = useState("");
   const [formType, setFormType] = useState<"facture" | "recu">("facture");
   const [formStatus, setFormStatus] = useState<"en_attente" | "validee">("en_attente");
+  const [editingInvoiceId, setEditingInvoiceId] = useState<string | null>(null);
 
   const loadInvoices = useCallback(async () => {
     setLoading(true);
@@ -132,6 +133,25 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
 
   const openDialog = () => {
     resetForm();
+    setEditingInvoiceId(null);
+    setDialogOpen(true);
+    setCurrentStep("validation");
+  };
+
+  const openEditDialog = (inv: Invoice) => {
+    resetForm();
+    setEditingInvoiceId(inv.id);
+    setFormProjectId(inv.project_id || "");
+    setFormInvoiceNumber(inv.invoice_number || "");
+    setFormVendor(inv.vendor || "");
+    setFormDescription(inv.description || "");
+    setFormAmount((inv.amount || 0).toString());
+    setFormTaxAmount((inv.tax_amount || 0).toString());
+    setFormTotalAmount((inv.total_amount || 0).toString());
+    setFormInvoiceDate(inv.invoice_date || "");
+    setFormDueDate(inv.due_date || "");
+    setFormType((inv.type as "facture" | "recu") || "facture");
+    setFormStatus((inv.status as "en_attente" | "validee") || "en_attente");
     setDialogOpen(true);
     setCurrentStep("validation");
   };
@@ -297,9 +317,8 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
 
       setCurrentStep("sauvegarde");
 
-      const { error } = await supabase.from("invoices").insert({
+      const invoiceData = {
         project_id: formProjectId,
-        user_id: session.user.id,
         invoice_number: formInvoiceNumber || null,
         vendor: formVendor || null,
         description: formDescription || null,
@@ -308,19 +327,31 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
         total_amount: parseFloat(formTotalAmount) || 0,
         invoice_date: formInvoiceDate || null,
         due_date: formDueDate || null,
-        type: formType,
-        status: formStatus,
-        file_name: selectedFile?.name || null,
-        sharepoint_url: sharepointUrl || null,
-        parsed_data: parsedData as any,
-      });
+        type: formType as "facture" | "recu",
+        status: formStatus as "en_attente" | "validee",
+        ...(selectedFile ? { file_name: selectedFile.name } : {}),
+        ...(sharepointUrl ? { sharepoint_url: sharepointUrl } : {}),
+      };
+
+      let error;
+      if (editingInvoiceId) {
+        ({ error } = await supabase.from("invoices").update(invoiceData).eq("id", editingInvoiceId));
+      } else {
+        ({ error } = await supabase.from("invoices").insert({
+          ...invoiceData,
+          user_id: session.user.id,
+          file_name: selectedFile?.name || null,
+          sharepoint_url: sharepointUrl || null,
+          parsed_data: parsedData as any,
+        }));
+      }
 
       if (error) throw error;
 
       setCurrentStep("done");
 
       const statusLabel = formStatus === "validee" ? "validée (solde projet mis à jour)" : "en attente de validation";
-      toast({ title: "Facture ajoutée", description: `Statut : ${statusLabel}` });
+      toast({ title: editingInvoiceId ? "Facture modifiée" : "Facture ajoutée", description: `Statut : ${statusLabel}` });
 
       setTimeout(() => {
         setDialogOpen(false);
@@ -561,9 +592,14 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
                     </a>
                   )}
                   {!readOnly && (
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(inv.id)} className="text-destructive">
-                      <Trash2 size={14} />
-                    </Button>
+                    <>
+                      <Button variant="ghost" size="icon" onClick={() => openEditDialog(inv)} title="Modifier">
+                        <Pencil size={14} />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => handleDelete(inv.id)} className="text-destructive">
+                        <Trash2 size={14} />
+                      </Button>
+                    </>
                   )}
                 </div>
               </div>
@@ -583,7 +619,7 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <DollarSign size={18} />
-              {parsedData && !parsedData.project_id ? "Facture à compléter" : "Nouvelle facture / reçu"}
+              {editingInvoiceId ? "Modifier la facture" : parsedData && !parsedData.project_id ? "Facture à compléter" : "Nouvelle facture / reçu"}
             </DialogTitle>
             <DialogDescription>
               Remplissez les champs manuellement ou joignez un fichier pour une analyse automatique.
@@ -752,7 +788,7 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
             </Button>
             <Button type="button" onClick={handleSubmit} disabled={uploading || parsing}>
               {uploading ? <Loader2 size={16} className="mr-2 animate-spin" /> : <CheckCircle2 size={16} className="mr-2" />}
-              {uploading ? "Enregistrement..." : "Valider et enregistrer"}
+              {uploading ? "Enregistrement..." : editingInvoiceId ? "Sauvegarder" : "Valider et enregistrer"}
             </Button>
           </div>
         </DialogContent>
