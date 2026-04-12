@@ -975,7 +975,7 @@ function AdminProjects({ assignedCount }: { assignedCount?: number }) {
   return <AdminProjectsInner readOnly={false} assignedCount={assignedCount} />;
 }
 
-function AdminProjectsInner({ readOnly = false }: { readOnly?: boolean }) {
+function AdminProjectsInner({ readOnly = false, assignedCount }: { readOnly?: boolean; assignedCount?: number }) {
   const [projects, setProjects] = useState<any[]>([]);
   const [profiles, setProfiles] = useState<Record<string, any>>({});
   const [gestionnaires, setGestionnaires] = useState<{ user_id: string; full_name: string }[]>([]);
