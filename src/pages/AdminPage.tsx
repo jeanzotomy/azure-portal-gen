@@ -118,7 +118,8 @@ function AdminContent() {
   const { user, ready } = useAuthSession();
   const [tab, setTab] = useState<AdminTab>("dashboard");
   const [agentTab, setAgentTab] = useState<AgentTab>("dashboard");
-  const { isAdmin, isAgent, isComptable, loading: rolesLoading } = useUserRoles();
+  const [gestionnaireTab, setGestionnaireTab] = useState<GestionnaireTab>("dashboard");
+  const { isAdmin, isAgent, isComptable, isGestionnaire, loading: rolesLoading } = useUserRoles();
   const mfaVerified = useMfaCheck();
   const navigate = useNavigate();
   const { state } = useSidebar();
