@@ -104,7 +104,7 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
   const loadProjects = useCallback(async () => {
     const { data } = await supabase
       .from("projects")
-      .select("id, name, project_number, budget, total_budget, total_paid")
+      .select("id, name, project_number, budget, total_budget, total_paid, user_id")
       .order("name");
     setProjects((data as unknown as Project[]) || []);
   }, []);
