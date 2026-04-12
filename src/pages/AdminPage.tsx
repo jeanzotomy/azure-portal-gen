@@ -1135,19 +1135,16 @@ function AdminProjectsInner({ readOnly = false }: { readOnly?: boolean }) {
                       </span>
                     )}
                     {!readOnly && <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => {
-                      if (isEditing) saveProject(p.id);
-                      else {
                         setEditingId(p.id); setEditStatus(p.status); setEditProgress(p.progress);
                         setEditName(p.name); setEditDescription(p.description || "");
                         setEditBudget(p.budget || ""); setEditDeadline(p.deadline || "");
                         setEditPriority(p.priority || "normal");
                         setEditServices(p.technologies ? p.technologies.split(", ") : []);
                         setEditGestionnaire(p.gestionnaire_id || null);
-                      }
                     }}>
-                      {isEditing ? "Sauvegarder" : "Modifier"}
+                      Modifier
                     </Button>}
-                    {!readOnly && isEditing && <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setEditingId(null)}>Annuler</Button>}
+                  </div>
                   </div>
                 </div>
 
