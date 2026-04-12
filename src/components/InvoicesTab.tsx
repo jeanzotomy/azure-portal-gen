@@ -189,6 +189,7 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
     }
 
     setUploading(true);
+    setCurrentStep("upload");
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Not authenticated");
@@ -263,6 +264,7 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
         }
       }
 
+      setCurrentStep("sauvegarde");
       // 2. Insert invoice record
       const { error } = await supabase.from("invoices").insert({
         project_id: formProjectId,
@@ -284,7 +286,9 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
 
       if (error) throw error;
 
+      setCurrentStep("done");
       toast({ title: "Facture ajoutée", description: "La facture a été enregistrée et le solde du projet mis à jour." });
+      setTimeout(() => setCurrentStep("idle"), 2000);
       setShowForm(false);
       setParsedData(null);
       setSelectedFile(null);
@@ -292,6 +296,7 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
       loadProjects();
     } catch (err: any) {
       toast({ title: "Erreur", description: err.message, variant: "destructive" });
+      setCurrentStep("idle");
     } finally {
       setUploading(false);
     }
