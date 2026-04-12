@@ -920,8 +920,13 @@ function ProjectsTab({ user }: { user: SupaUser }) {
                   {p.description && (
                     <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{p.description}</p>
                   )}
+                  {p.gestionnaire_id && gestionnaireProfiles[p.gestionnaire_id] && (
+                    <div className="flex items-center gap-2 mb-3">
+                      <UserCheck size={14} className="text-accent shrink-0" />
+                      <span className="text-xs text-accent font-medium">Gestionnaire : {gestionnaireProfiles[p.gestionnaire_id]}</span>
+                    </div>
+                  )}
 
-                  {/* Meta tags */}
                   {(p.budget || p.deadline || p.technologies || p.total_paid) && (
                     <div className="flex flex-wrap gap-1.5 mb-4">
                       {p.budget && (
