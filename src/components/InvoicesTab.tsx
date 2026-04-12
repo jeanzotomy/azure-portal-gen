@@ -170,8 +170,8 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
       const { data: spConfig } = await supabase.from("sharepoint_config").select("site_id, drive_id").limit(1).maybeSingle();
 
       if (spConfig && selectedFile) {
-        const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-        const baseUrl = `https://${projectId}.supabase.co/functions/v1/sharepoint-proxy`;
+        const spBaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        const baseUrl = `${spBaseUrl}/functions/v1/sharepoint-proxy`;
 
         // Ensure project folder exists
         const folderParams = new URLSearchParams({
