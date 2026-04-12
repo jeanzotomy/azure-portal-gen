@@ -783,6 +783,10 @@ function AdminDashboard() {
 
 /* ─── Projects Management ─── */
 function AdminProjects() {
+  return <AdminProjectsInner readOnly={false} />;
+}
+
+function AdminProjectsInner({ readOnly = false }: { readOnly?: boolean }) {
   const [projects, setProjects] = useState<any[]>([]);
   const [profiles, setProfiles] = useState<Record<string, any>>({});
   const [search, setSearch] = useState("");
@@ -923,6 +927,19 @@ function AdminProjects() {
                       {isEditing ? "Sauvegarder" : "Modifier"}
                     </Button>
                     {isEditing && <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setEditingId(null)}>Annuler</Button>}
+                    {!readOnly && <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => {
+                      if (isEditing) saveProject(p.id);
+                      else {
+                        setEditingId(p.id); setEditStatus(p.status); setEditProgress(p.progress);
+                        setEditName(p.name); setEditDescription(p.description || "");
+                        setEditBudget(p.budget || ""); setEditDeadline(p.deadline || "");
+                        setEditPriority(p.priority || "normal");
+                        setEditServices(p.technologies ? p.technologies.split(", ") : []);
+                      }
+                    }}>
+                      {isEditing ? "Sauvegarder" : "Modifier"}
+                    </Button>}
+                    {!readOnly && isEditing && <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setEditingId(null)}>Annuler</Button>}
                   </div>
                 </div>
 
