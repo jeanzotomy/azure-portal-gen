@@ -432,11 +432,13 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
         const enAttente = visibleInvoices.filter(i => i.status === "en_attente").length;
         const nonConformes = visibleInvoices.filter(i => i.status === "non_conforme").length;
 
-        const barData = visibleProjects.map(p => {
-          const bgt = parseFloat(((p as any).budget || "0").replace(/[^\d.]/g, "")) || p.total_budget || 0;
-          const paid = p.total_paid || 0;
-          return { name: p.project_number || p.name, budget: bgt, paid, solde: bgt - paid };
-        });
+        const barData = visibleProjects
+          .map(p => {
+            const bgt = parseFloat(((p as any).budget || "0").replace(/[^\d.]/g, "")) || p.total_budget || 0;
+            const paid = p.total_paid || 0;
+            return { name: p.project_number || p.name, budget: bgt, paid, solde: bgt - paid };
+          })
+          .filter(d => d.budget > 0 || d.paid > 0);
 
         return (
           <div className="space-y-4">
