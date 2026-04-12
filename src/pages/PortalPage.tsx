@@ -557,7 +557,6 @@ function ProjectsTab({ user }: { user: SupaUser }) {
     setPriority(p.priority || "normal");
     setFiles([]);
     setShowForm(true);
-    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const closeForm = () => { setShowForm(false); resetForm(); };
