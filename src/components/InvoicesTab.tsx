@@ -317,9 +317,8 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
 
       setCurrentStep("sauvegarde");
 
-      const { error } = await supabase.from("invoices").insert({
+      const invoiceData = {
         project_id: formProjectId,
-        user_id: session.user.id,
         invoice_number: formInvoiceNumber || null,
         vendor: formVendor || null,
         description: formDescription || null,
@@ -328,12 +327,24 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
         total_amount: parseFloat(formTotalAmount) || 0,
         invoice_date: formInvoiceDate || null,
         due_date: formDueDate || null,
-        type: formType,
-        status: formStatus,
-        file_name: selectedFile?.name || null,
-        sharepoint_url: sharepointUrl || null,
-        parsed_data: parsedData as any,
-      });
+        type: formType as "facture" | "recu",
+        status: formStatus as "en_attente" | "validee",
+        ...(selectedFile ? { file_name: selectedFile.name } : {}),
+        ...(sharepointUrl ? { sharepoint_url: sharepointUrl } : {}),
+      };
+
+      let error;
+      if (editingInvoiceId) {
+        ({ error } = await supabase.from("invoices").update(invoiceData).eq("id", editingInvoiceId));
+      } else {
+        ({ error } = await supabase.from("invoices").insert({
+          ...invoiceData,
+          user_id: session.user.id,
+          file_name: selectedFile?.name || null,
+          sharepoint_url: sharepointUrl || null,
+          parsed_data: parsedData as any,
+        }));
+      }
 
       if (error) throw error;
 
