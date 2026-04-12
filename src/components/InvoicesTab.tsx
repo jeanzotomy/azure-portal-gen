@@ -399,7 +399,8 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
       {projectsWithInvoices.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {projectsWithInvoices.map(p => {
-            const balance = (p.total_budget || 0) - (p.total_paid || 0);
+            const allocatedBudget = parseFloat(((p as any).budget || "0").replace(/[^\d.]/g, "")) || p.total_budget || 0;
+            const balance = allocatedBudget - (p.total_paid || 0);
             return (
               <Card key={p.id} className="border">
                 <CardHeader className="pb-2">
