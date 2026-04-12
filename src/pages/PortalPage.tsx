@@ -163,7 +163,7 @@ function PortalContent() {
             {(isAdmin || isAgent || isComptable || isGestionnaire) && (
               <SidebarMenuButton onClick={() => navigate("/admin")} tooltip={isAdmin ? t("portal.admin") : isGestionnaire ? "Espace Gestionnaire" : isComptable ? "Espace Comptable" : t("portal.agentSpace")} className="gap-3 text-primary">
                 <Shield size={18} />
-                <span>{isAdmin ? t("portal.admin") : isComptable ? "Espace Comptable" : t("portal.agentSpace")}</span>
+                <span>{isAdmin ? t("portal.admin") : isGestionnaire ? "Espace Gestionnaire" : isComptable ? "Espace Comptable" : t("portal.agentSpace")}</span>
               </SidebarMenuButton>
             )}
             <SidebarMenuButton onClick={handleLogout} tooltip={t("portal.logout")} className="text-destructive hover:text-destructive gap-3">
