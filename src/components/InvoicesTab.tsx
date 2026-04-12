@@ -788,7 +788,7 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
             </Button>
             <Button type="button" onClick={handleSubmit} disabled={uploading || parsing}>
               {uploading ? <Loader2 size={16} className="mr-2 animate-spin" /> : <CheckCircle2 size={16} className="mr-2" />}
-              {uploading ? "Enregistrement..." : "Valider et enregistrer"}
+              {uploading ? "Enregistrement..." : editingInvoiceId ? "Sauvegarder" : "Valider et enregistrer"}
             </Button>
           </div>
         </DialogContent>
