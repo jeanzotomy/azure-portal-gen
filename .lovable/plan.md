@@ -1,22 +1,48 @@
 
 
-## Problème
+# Plan : Site multi-langues (FR / EN)
 
-Le nom affiché dans l'app Authenticator (Google Authenticator, Authy, etc.) est figé au moment où le QR code est scanné. Même si le code a été mis à jour avec `issuer: "Portail Cloudmature"`, les utilisateurs qui ont scanné le QR **avant** cette modification voient toujours l'ancien nom `azure-portal-gen.lovable.app`.
+## Approche
 
-## Solution
+Créer un système i18n léger basé sur un **React Context** avec des fichiers de traduction JSON, sans dépendance externe. Un sélecteur de langue sera ajouté dans la Navbar.
 
-Il faut réinitialiser le MFA pour chaque utilisateur concerné, puis les faire se réenregistrer. Le nouveau QR code affichera bien "Portail Cloudmature".
+## Étapes
 
-### Étapes
+### 1. Créer les fichiers de traduction
+- `src/i18n/fr.ts` — toutes les chaînes en français (état actuel)
+- `src/i18n/en.ts` — traductions anglaises
+- Clés organisées par section : `hero`, `nav`, `services`, `industries`, `whyUs`, `contact`, `footer`, `auth`, `portal`, `admin`
 
-1. **Depuis le panneau Admin** : utiliser la fonction existante "Désactiver MFA" pour supprimer le facteur TOTP de l'utilisateur (via l'edge function `manage-user-mfa` avec l'action `unenroll`).
+### 2. Créer le contexte i18n
+- `src/i18n/LanguageContext.tsx` — Context + Provider avec :
+  - État `locale` (`"fr"` | `"en"`) persisté dans `localStorage`
+  - Hook `useTranslation()` retournant `{ t, locale, setLocale }`
+  - Fonction `t("hero.title")` pour accéder aux traductions
 
-2. **L'utilisateur se reconnecte** : à la prochaine connexion, la page MFA détectera qu'il n'a plus de facteur vérifié et lancera automatiquement un nouvel enregistrement avec `issuer: "Portail Cloudmature"`.
+### 3. Intégrer le Provider
+- Envelopper `<App>` avec `<LanguageProvider>` dans `src/main.tsx`
 
-3. **L'utilisateur scanne le nouveau QR code** : cette fois, l'app Authenticator affichera bien **"Portail Cloudmature"** comme nom.
+### 4. Ajouter le sélecteur de langue dans la Navbar
+- Bouton toggle FR/EN (petit drapeau ou texte) à côté du bouton "Portail Client"
+- Visible sur desktop et mobile
 
-### Détail technique
+### 5. Remplacer les textes en dur dans chaque composant
+- **Navbar** : liens de navigation
+- **HeroSection** : titre animé, description, boutons
+- **ServicesSection** : titres, descriptions des services
+- **IndustriesSection** : titres, descriptions des industries
+- **WhyUsSection** : titres, descriptions des avantages
+- **ContactSection** : formulaire, labels, placeholders
+- **Footer** : texte copyright
+- **AuthPage** : formulaire login/signup/forgot
+- **PortalPage** : tableau de bord, profil, messages
+- **AdminPage** : interface admin
+- **MfaPage** : instructions MFA
+- **ResetPasswordPage** : formulaire reset
 
-Aucune modification de code n'est nécessaire — le `issuer` est déjà configuré correctement. C'est uniquement une action administrative de réinitialisation du MFA pour les utilisateurs existants.
+## Détails techniques
+- Aucune librairie externe (pas de react-i18next) — solution ~100 lignes
+- Langue par défaut : français
+- Persistance via `localStorage` (clé `lang`)
+- Tous les composants utilisent `const { t } = useTranslation()` puis `t("cle.sous_cle")`
 
