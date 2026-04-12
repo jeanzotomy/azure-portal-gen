@@ -100,11 +100,14 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
   useEffect(() => { loadInvoices(); loadProjects(); }, [loadInvoices, loadProjects]);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+    const input = e.currentTarget;
+    const file = input.files?.[0];
     if (!file) return;
+
     setSelectedFile(file);
     setParsing(true);
     setParsedData(null);
+    setShowForm(false);
 
     try {
       const formData = new FormData();
@@ -114,6 +117,10 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
       if (!session) throw new Error("Not authenticated");
 
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
+      if (!supabaseUrl) {
+        throw new Error("Configuration backend manquante.");
+      }
+
       const res = await fetch(
         `${supabaseUrl}/functions/v1/parse-invoice`,
         {
@@ -124,14 +131,22 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
       );
 
       if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Parsing failed");
+        const errorText = await res.text();
+        let errorMessage = "Parsing failed";
+
+        try {
+          const err = JSON.parse(errorText);
+          errorMessage = err.error || err.details || errorMessage;
+        } catch {
+          errorMessage = errorText || errorMessage;
+        }
+
+        throw new Error(errorMessage);
       }
 
       const parsed: ParsedInvoice = await res.json();
       setParsedData(parsed);
 
-      // Pre-fill form
       if (parsed.project_id) setFormProjectId(parsed.project_id);
       else setFormProjectId("");
       setFormInvoiceNumber(parsed.invoice_number || "");
@@ -144,9 +159,11 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
       setFormDueDate(parsed.due_date || "");
       setFormType(parsed.type || "facture");
       setShowForm(true);
-    } catch (err: any) {
-      toast({ title: "Erreur de lecture", description: err.message, variant: "destructive" });
+    } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Une erreur est survenue pendant l'analyse.";
+      toast({ title: "Erreur de lecture", description: message, variant: "destructive" });
     } finally {
+      input.value = "";
       setParsing(false);
     }
   };
@@ -313,19 +330,22 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
           <p className="text-muted-foreground text-sm mt-1">Gérez les factures et reçus de paiement par projet.</p>
         </div>
         {!readOnly && (
-          <div className="relative">
+          <label htmlFor="invoice-upload-input" className={parsing ? "pointer-events-none" : "cursor-pointer"}>
             <input
+              id="invoice-upload-input"
               type="file"
               accept=".pdf,.png,.jpg,.jpeg,.webp"
-              className="absolute inset-0 opacity-0 cursor-pointer"
+              className="sr-only"
               onChange={handleFileSelect}
               disabled={parsing}
             />
-            <Button disabled={parsing}>
-              {parsing ? <Loader2 size={16} className="animate-spin mr-2" /> : <Upload size={16} className="mr-2" />}
-              {parsing ? "Analyse en cours..." : "Ajouter une facture"}
+            <Button type="button" disabled={parsing} asChild>
+              <span>
+                {parsing ? <Loader2 size={16} className="animate-spin mr-2" /> : <Upload size={16} className="mr-2" />}
+                {parsing ? "Analyse en cours..." : "Ajouter une facture"}
+              </span>
             </Button>
-          </div>
+          </label>
         )}
       </div>
 
@@ -534,8 +554,8 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
           </div>
 
           <div className="flex justify-end gap-2 mt-4">
-            <Button variant="outline" onClick={() => setShowForm(false)}>Annuler</Button>
-            <Button onClick={handleSubmit} disabled={uploading}>
+            <Button type="button" variant="outline" onClick={() => setShowForm(false)}>Annuler</Button>
+            <Button type="button" onClick={handleSubmit} disabled={uploading}>
               {uploading ? <Loader2 size={16} className="animate-spin mr-2" /> : <CheckCircle2 size={16} className="mr-2" />}
               {uploading ? "Enregistrement..." : "Valider et enregistrer"}
             </Button>
