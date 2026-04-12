@@ -1098,6 +1098,16 @@ function AdminProjectsInner({ readOnly = false }: { readOnly?: boolean }) {
               className={`text-xs px-3 py-1.5 rounded-full transition-colors ${priorityFilter === opt.value ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
             >{opt.label}</button>
           ))}
+          {isCurrentUserGestionnaire && (
+            <>
+              <span className="text-xs font-medium text-muted-foreground flex items-center gap-1 ml-2"><UserCheck size={12} /> Assignation :</span>
+              {[{ value: "all", label: "Tous" }, { value: "mine", label: "Mes projets" }].map((opt) => (
+                <button key={opt.value} onClick={() => setAssignedFilter(opt.value as "all" | "mine")}
+                  className={`text-xs px-3 py-1.5 rounded-full transition-colors ${assignedFilter === opt.value ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
+                >{opt.label}</button>
+              ))}
+            </>
+          )}
         </div>
       </div>
 
