@@ -92,6 +92,7 @@ function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser
       </Sidebar>
 
       <div className="flex-1 flex flex-col min-h-screen">
+        <PortalInfoBar />
         <header className="h-14 flex items-center justify-between border-b border-border bg-card px-4">
           <div className="flex items-center gap-3">
             <SidebarTrigger />
@@ -251,6 +252,7 @@ function AdminContent() {
         </Sidebar>
 
         <div className="flex-1 flex flex-col min-h-screen">
+          <PortalInfoBar />
           <header className="h-14 flex items-center justify-between border-b border-border bg-card px-4">
             <div className="flex items-center gap-3">
               <SidebarTrigger />
@@ -336,6 +338,7 @@ function AdminContent() {
         </Sidebar>
 
         <div className="flex-1 flex flex-col min-h-screen">
+          <PortalInfoBar />
           <header className="h-14 flex items-center justify-between border-b border-border bg-card px-4">
             <div className="flex items-center gap-3">
               <SidebarTrigger />
@@ -421,6 +424,7 @@ function AdminContent() {
       </Sidebar>
 
       <div className="flex-1 flex flex-col min-h-screen">
+        <PortalInfoBar />
         <header className="h-14 flex items-center justify-between border-b border-border bg-card px-4">
           <div className="flex items-center gap-3">
             <SidebarTrigger />
