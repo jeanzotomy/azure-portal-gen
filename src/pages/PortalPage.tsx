@@ -46,7 +46,7 @@ function PortalContent() {
   const [profileIncomplete, setProfileIncomplete] = useState(false);
   const [daysLeft, setDaysLeft] = useState<number | null>(null);
   const navigate = useNavigate();
-  const { isAdmin, isAgent, isComptable } = useUserRoles();
+  const { isAdmin, isAgent, isComptable, isGestionnaire } = useUserRoles();
   const mfaVerified = useMfaCheck();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
@@ -160,8 +160,8 @@ function PortalContent() {
           </SidebarGroup>
 
           <div className="mt-auto p-3 border-t border-sidebar-border space-y-1">
-            {(isAdmin || isAgent || isComptable) && (
-              <SidebarMenuButton onClick={() => navigate("/admin")} tooltip={isAdmin ? t("portal.admin") : isComptable ? "Espace Comptable" : t("portal.agentSpace")} className="gap-3 text-primary">
+            {(isAdmin || isAgent || isComptable || isGestionnaire) && (
+              <SidebarMenuButton onClick={() => navigate("/admin")} tooltip={isAdmin ? t("portal.admin") : isGestionnaire ? "Espace Gestionnaire" : isComptable ? "Espace Comptable" : t("portal.agentSpace")} className="gap-3 text-primary">
                 <Shield size={18} />
                 <span>{isAdmin ? t("portal.admin") : isComptable ? "Espace Comptable" : t("portal.agentSpace")}</span>
               </SidebarMenuButton>
@@ -183,9 +183,9 @@ function PortalContent() {
             </h2>
           </div>
           <div className="flex items-center gap-2">
-            {(isAdmin || isAgent || isComptable) && (
+            {(isAdmin || isAgent || isComptable || isGestionnaire) && (
               <span className="text-xs bg-primary/10 text-primary px-2.5 py-1 rounded-full font-medium flex items-center gap-1 cursor-pointer hover:bg-primary/20 transition-colors" onClick={() => navigate("/admin")}>
-                <Shield size={12} /> {isAdmin ? "Admin" : isComptable ? "Comptable" : "Agent"}
+                <Shield size={12} /> {isAdmin ? "Admin" : isGestionnaire ? "Gestionnaire" : isComptable ? "Comptable" : "Agent"}
               </span>
             )}
             <Button variant="ghost" size="icon" className="text-muted-foreground">
