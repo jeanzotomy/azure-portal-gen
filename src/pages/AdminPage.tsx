@@ -38,7 +38,7 @@ function AdminContent() {
   const { user, ready } = useAuthSession();
   const [tab, setTab] = useState<AdminTab>("dashboard");
   const [agentTab, setAgentTab] = useState<AgentTab>("dashboard");
-  const { isAdmin, isAgent, loading: rolesLoading } = useUserRoles();
+  const { isAdmin, isAgent, isComptable, loading: rolesLoading } = useUserRoles();
   const mfaVerified = useMfaCheck();
   const navigate = useNavigate();
   const { state } = useSidebar();
@@ -72,17 +72,22 @@ function AdminContent() {
   }, [mfaVerified, ready, user, navigate]);
 
   useEffect(() => {
-    if (!rolesLoading && !isAdmin && !isAgent && ready && user) navigate("/portal");
-  }, [isAdmin, isAgent, rolesLoading, ready, user, navigate]);
+    if (!rolesLoading && !isAdmin && !isAgent && !isComptable && ready && user) navigate("/portal");
+  }, [isAdmin, isAgent, isComptable, rolesLoading, ready, user, navigate]);
 
   if (!ready || rolesLoading || mfaVerified === null) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">{t("admin.loading")}</div>;
-  if (!user || (!isAdmin && !isAgent)) return null;
+  if (!user || (!isAdmin && !isAgent && !isComptable)) return null;
 
   const handleLogout = async () => {
     clearSmsMfaVerified();
     await supabase.auth.signOut();
     navigate("/");
   };
+
+  if (isComptable && !isAdmin && !isAgent) {
+    type ComptableTab = "projects" | "sharepoint";
+    return <ComptableView user={user} collapsed={collapsed} handleLogout={handleLogout} unrepliedCount={0} />;
+  }
 
   if (isAgent && !isAdmin) {
     const agentNavItems: { id: AgentTab; icon: typeof LayoutDashboard; label: string }[] = [
