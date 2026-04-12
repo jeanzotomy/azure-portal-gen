@@ -957,6 +957,7 @@ function AdminProjects() {
 function AdminProjectsInner({ readOnly = false }: { readOnly?: boolean }) {
   const [projects, setProjects] = useState<any[]>([]);
   const [profiles, setProfiles] = useState<Record<string, any>>({});
+  const [gestionnaires, setGestionnaires] = useState<{ user_id: string; full_name: string }[]>([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
@@ -969,6 +970,7 @@ function AdminProjectsInner({ readOnly = false }: { readOnly?: boolean }) {
   const [editDeadline, setEditDeadline] = useState("");
   const [editPriority, setEditPriority] = useState("normal");
   const [editServices, setEditServices] = useState<string[]>([]);
+  const [editGestionnaire, setEditGestionnaire] = useState<string | null>(null);
   const { toast } = useToast();
 
   const serviceOptions = [
@@ -984,6 +986,10 @@ function AdminProjectsInner({ readOnly = false }: { readOnly?: boolean }) {
     const map: Record<string, any> = {};
     (prof || []).forEach((pr: any) => { map[pr.user_id] = pr; });
     setProfiles(map);
+    // Load gestionnaires
+    const { data: gRoles } = await supabase.from("user_roles").select("user_id").eq("role", "gestionnaire");
+    const gIds = (gRoles || []).map((r: any) => r.user_id);
+    setGestionnaires((prof || []).filter((pr: any) => gIds.includes(pr.user_id)).map((pr: any) => ({ user_id: pr.user_id, full_name: pr.full_name || "Sans nom" })));
   };
 
   useEffect(() => { load(); }, []);
