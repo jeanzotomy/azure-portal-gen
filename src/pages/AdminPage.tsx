@@ -92,7 +92,6 @@ function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser
       </Sidebar>
 
       <div className="flex-1 flex flex-col min-h-screen">
-        <PortalInfoBar />
         <header className="h-14 flex items-center justify-between border-b border-border bg-card px-4">
           <div className="flex items-center gap-3">
             <SidebarTrigger />
@@ -109,6 +108,7 @@ function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser
             </div>
           </div>
         </header>
+        <PortalInfoBar />
         <main className="flex-1 p-6 overflow-auto">
           {tab === "projects" && <AdminProjectsInner readOnly />}
           {tab === "sharepoint" && <SharePointTab readOnly={false} />}
@@ -252,7 +252,6 @@ function AdminContent() {
         </Sidebar>
 
         <div className="flex-1 flex flex-col min-h-screen">
-          <PortalInfoBar />
           <header className="h-14 flex items-center justify-between border-b border-border bg-card px-4">
             <div className="flex items-center gap-3">
               <SidebarTrigger />
@@ -269,6 +268,7 @@ function AdminContent() {
               </div>
             </div>
           </header>
+          <PortalInfoBar />
           <main className="flex-1 p-6 overflow-auto">
             {gestionnaireTab === "dashboard" && <AdminDashboard />}
             {gestionnaireTab === "projects" && <AdminProjects assignedCount={assignedProjectsCount} />}
@@ -338,7 +338,6 @@ function AdminContent() {
         </Sidebar>
 
         <div className="flex-1 flex flex-col min-h-screen">
-          <PortalInfoBar />
           <header className="h-14 flex items-center justify-between border-b border-border bg-card px-4">
             <div className="flex items-center gap-3">
               <SidebarTrigger />
@@ -355,6 +354,7 @@ function AdminContent() {
               </div>
             </div>
           </header>
+          <PortalInfoBar />
           <main className="flex-1 p-6 overflow-auto">
             {agentTab === "dashboard" && <AgentDashboard user={user} />}
             {agentTab === "tickets" && <AdminTickets />}
@@ -424,7 +424,6 @@ function AdminContent() {
       </Sidebar>
 
       <div className="flex-1 flex flex-col min-h-screen">
-        <PortalInfoBar />
         <header className="h-14 flex items-center justify-between border-b border-border bg-card px-4">
           <div className="flex items-center gap-3">
             <SidebarTrigger />
@@ -441,6 +440,7 @@ function AdminContent() {
             </div>
           </div>
         </header>
+        <PortalInfoBar />
 
         <main className="flex-1 p-6 overflow-auto">
           {tab === "dashboard" && <AdminDashboard />}
