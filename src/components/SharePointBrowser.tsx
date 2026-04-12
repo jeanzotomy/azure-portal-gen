@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -6,9 +6,10 @@ import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/i18n/LanguageContext";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   FolderOpen, FileText, Upload, ArrowLeft, RefreshCw, HardDrive,
-  ChevronRight, Download, FolderPlus, AlertCircle, Search,
+  ChevronRight, Download, FolderPlus, AlertCircle, Search, ArrowUpDown,
 } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
@@ -58,7 +59,8 @@ export default function SharePointBrowser() {
   const [newFolderName, setNewFolderName] = useState("");
   const [initError, setInitError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-
+  const [sortBy, setSortBy] = useState<"name" | "date" | "size">("name");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const callProxy = useCallback(async (action: string, params: Record<string, string> = {}) => {
     const queryParams = new URLSearchParams({ action, ...params });
     const { data: { session } } = await supabase.auth.getSession();
@@ -349,9 +351,19 @@ export default function SharePointBrowser() {
             className="pl-8 h-9 text-sm"
           />
         </div>
-        <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowNewFolder(true)}>
-          <FolderPlus size={14} />
-          {t("sharepoint.newFolder")}
+        <Select value={sortBy} onValueChange={(v) => setSortBy(v as "name" | "date" | "size")}>
+          <SelectTrigger className="w-36 h-9 text-sm">
+            <ArrowUpDown size={14} className="mr-1" />
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="name">Nom</SelectItem>
+            <SelectItem value="date">Date</SelectItem>
+            <SelectItem value="size">Taille</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setSortDir(d => d === "asc" ? "desc" : "asc")} title={sortDir === "asc" ? "Croissant" : "Décroissant"}>
+          <ArrowUpDown size={14} className={sortDir === "desc" ? "rotate-180" : ""} />
         </Button>
         <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowNewFolder(true)}>
           <FolderPlus size={14} />
@@ -373,12 +385,27 @@ export default function SharePointBrowser() {
         </div>
       ) : (() => {
         const filteredItems = items.filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
-        if (filteredItems.length === 0) {
+        // Sort: folders first, then by selected criteria
+        const sortedItems = [...filteredItems].sort((a, b) => {
+          // Folders always first
+          if (a.folder && !b.folder) return -1;
+          if (!a.folder && b.folder) return 1;
+          let cmp = 0;
+          if (sortBy === "name") {
+            cmp = a.name.localeCompare(b.name);
+          } else if (sortBy === "date") {
+            cmp = (a.lastModifiedDateTime || "").localeCompare(b.lastModifiedDateTime || "");
+          } else if (sortBy === "size") {
+            cmp = (a.size || 0) - (b.size || 0);
+          }
+          return sortDir === "asc" ? cmp : -cmp;
+        });
+        if (sortedItems.length === 0) {
           return <p className="text-muted-foreground text-sm py-8 text-center">{searchQuery ? t("sharepoint.noResults") : t("sharepoint.emptyFolder")}</p>;
         }
         return (
           <div className="border rounded-lg divide-y">
-            {filteredItems.map(item => (
+            {sortedItems.map(item => (
               <div
                 key={item.id}
                 className={`flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors ${item.folder ? "cursor-pointer" : ""}`}
