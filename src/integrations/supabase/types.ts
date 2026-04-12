@@ -285,6 +285,7 @@ export type Database = {
           created_at: string
           deadline: string | null
           description: string | null
+          gestionnaire_id: string | null
           id: string
           name: string
           priority: string
@@ -303,6 +304,7 @@ export type Database = {
           created_at?: string
           deadline?: string | null
           description?: string | null
+          gestionnaire_id?: string | null
           id?: string
           name: string
           priority?: string
@@ -321,6 +323,7 @@ export type Database = {
           created_at?: string
           deadline?: string | null
           description?: string | null
+          gestionnaire_id?: string | null
           id?: string
           name?: string
           priority?: string
