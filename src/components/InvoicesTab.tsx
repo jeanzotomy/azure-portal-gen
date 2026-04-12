@@ -279,6 +279,16 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
           if (uploadRes.ok) {
             const uploadData = await uploadRes.json();
             sharepointUrl = uploadData.webUrl || "";
+
+            // Enregistrer le fichier dans project_files
+            await supabase.from("project_files").insert({
+              project_id: formProjectId,
+              user_id: session.user.id,
+              file_name: selectedFile.name,
+              file_path: sharepointUrl || filePath,
+              file_size: selectedFile.size,
+              file_type: selectedFile.type || "application/octet-stream",
+            });
           }
         }
       }
