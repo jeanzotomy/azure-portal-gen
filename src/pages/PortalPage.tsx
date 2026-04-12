@@ -159,10 +159,10 @@ function PortalContent() {
           </SidebarGroup>
 
           <div className="mt-auto p-3 border-t border-sidebar-border space-y-1">
-            {(isAdmin || isAgent) && (
-              <SidebarMenuButton onClick={() => navigate("/admin")} tooltip={isAdmin ? t("portal.admin") : t("portal.agentSpace")} className="gap-3 text-primary">
+            {(isAdmin || isAgent || isComptable) && (
+              <SidebarMenuButton onClick={() => navigate("/admin")} tooltip={isAdmin ? t("portal.admin") : isComptable ? "Espace Comptable" : t("portal.agentSpace")} className="gap-3 text-primary">
                 <Shield size={18} />
-                <span>{isAdmin ? t("portal.admin") : t("portal.agentSpace")}</span>
+                <span>{isAdmin ? t("portal.admin") : isComptable ? "Espace Comptable" : t("portal.agentSpace")}</span>
               </SidebarMenuButton>
             )}
             <SidebarMenuButton onClick={handleLogout} tooltip={t("portal.logout")} className="text-destructive hover:text-destructive gap-3">
