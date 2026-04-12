@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { Cloud, ArrowLeft, Mail, ShieldBan } from "lucide-react";
 import favicon from "@/assets/cloudmature-logo.png";
+import { useTranslation } from "@/i18n/LanguageContext";
 
 export default function AuthPage() {
   const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
@@ -18,10 +19,11 @@ export default function AuthPage() {
   const isBlocked = searchParams.get("blocked") === "1";
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useTranslation();
 
   useEffect(() => {
     if (isBlocked) {
-      toast({ title: "Compte bloqué", description: "Votre compte a été suspendu. Veuillez contacter l'administrateur à info@cloudmature.com.", variant: "destructive" });
+      toast({ title: t("auth.blocked"), description: t("auth.blockedDesc"), variant: "destructive" });
     }
   }, [isBlocked]);
 
@@ -34,16 +36,15 @@ export default function AuthPage() {
           redirectTo: `${window.location.origin}/reset-password`,
         });
         if (error) throw error;
-        toast({ title: "Email envoyé!", description: "Vérifiez votre boîte de réception pour réinitialiser votre mot de passe." });
+        toast({ title: t("auth.emailSent"), description: t("auth.emailSentDesc") });
         setMode("login");
       } else if (mode === "login") {
         const { data, error } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw error;
-        // Check if user is blocked
         const { data: profile } = await supabase.from("profiles").select("blocked").eq("user_id", data.user.id).maybeSingle();
         if (profile?.blocked) {
           await supabase.auth.signOut();
-          toast({ title: "Compte bloqué", description: "Votre compte a été suspendu. Veuillez contacter l'administrateur à info@cloudmature.com.", variant: "destructive" });
+          toast({ title: t("auth.blocked"), description: t("auth.blockedDesc"), variant: "destructive" });
           setLoading(false);
           return;
         }
@@ -55,10 +56,10 @@ export default function AuthPage() {
           options: { data: { full_name: fullName }, emailRedirectTo: window.location.origin },
         });
         if (error) throw error;
-        toast({ title: "Inscription réussie!", description: "Vérifiez votre email pour confirmer votre compte." });
+        toast({ title: t("auth.signupSuccess"), description: t("auth.signupSuccessDesc") });
       }
     } catch (err: any) {
-      toast({ title: "Erreur", description: err.message, variant: "destructive" });
+      toast({ title: t("auth.error"), description: err.message, variant: "destructive" });
     } finally {
       setLoading(false);
     }
@@ -69,7 +70,7 @@ export default function AuthPage() {
       redirect_uri: window.location.origin,
     });
     if (result.error) {
-      toast({ title: "Erreur", description: String(result.error), variant: "destructive" });
+      toast({ title: t("auth.error"), description: String(result.error), variant: "destructive" });
       return;
     }
     if (result.redirected) return;
@@ -80,14 +81,14 @@ export default function AuthPage() {
     <div className="min-h-screen gradient-hero flex items-center justify-center px-4">
       <div className="w-full max-w-md">
         <Link to="/" className="inline-flex items-center gap-2 text-sm text-secondary-foreground/60 hover:text-primary mb-8">
-          <ArrowLeft size={16} /> Retour au site
+          <ArrowLeft size={16} /> {t("auth.backToSite")}
         </Link>
 
         <div className="glass rounded-2xl p-8">
           <div className="flex items-center gap-3 mb-8">
             <img src={favicon} alt="CloudMature" className="h-10 w-10" />
             <div>
-              <h1 className="text-xl font-bold text-primary-foreground">Portail Client</h1>
+              <h1 className="text-xl font-bold text-primary-foreground">{t("auth.portalTitle")}</h1>
               <p className="text-sm text-secondary-foreground/60">Cloud Mature</p>
             </div>
           </div>
@@ -96,8 +97,8 @@ export default function AuthPage() {
             <div className="mb-4 flex items-center gap-3 rounded-xl bg-destructive/10 border border-destructive/30 p-4 text-sm text-destructive">
               <ShieldBan size={20} className="flex-shrink-0" />
               <div>
-                <p className="font-semibold">Compte suspendu</p>
-                <p className="text-xs mt-0.5 text-destructive/80">Votre accès a été restreint. Contactez info@cloudmature.com pour plus d'informations.</p>
+                <p className="font-semibold">{t("auth.suspended")}</p>
+                <p className="text-xs mt-0.5 text-destructive/80">{t("auth.suspendedDesc")}</p>
               </div>
             </div>
           )}
@@ -116,7 +117,7 @@ export default function AuthPage() {
                   <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05" />
                   <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335" />
                 </svg>
-                Continuer avec Google
+                {t("auth.continueGoogle")}
               </Button>
 
               <div className="relative mb-4">
@@ -124,7 +125,7 @@ export default function AuthPage() {
                   <div className="w-full border-t border-border/30" />
                 </div>
                 <div className="relative flex justify-center text-xs">
-                  <span className="bg-transparent px-2 text-secondary-foreground/40">ou</span>
+                  <span className="bg-transparent px-2 text-secondary-foreground/40">{t("auth.or")}</span>
                 </div>
               </div>
             </>
@@ -132,37 +133,37 @@ export default function AuthPage() {
 
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === "signup" && (
-              <Input placeholder="Nom complet" required value={fullName} onChange={(e) => setFullName(e.target.value)}
+              <Input placeholder={t("auth.fullName")} required value={fullName} onChange={(e) => setFullName(e.target.value)}
                 className="bg-secondary/30 border-border/30 text-primary-foreground placeholder:text-secondary-foreground/40" />
             )}
-            <Input type="email" placeholder="Email" required value={email} onChange={(e) => setEmail(e.target.value)}
+            <Input type="email" placeholder={t("auth.email")} required value={email} onChange={(e) => setEmail(e.target.value)}
               className="bg-secondary/30 border-border/30 text-primary-foreground placeholder:text-secondary-foreground/40" />
             {mode !== "forgot" && (
-              <Input type="password" placeholder="Mot de passe" required value={password} onChange={(e) => setPassword(e.target.value)}
+              <Input type="password" placeholder={t("auth.password")} required value={password} onChange={(e) => setPassword(e.target.value)}
                 className="bg-secondary/30 border-border/30 text-primary-foreground placeholder:text-secondary-foreground/40" />
             )}
             <Button type="submit" className="w-full gradient-primary text-primary-foreground border-0" disabled={loading}>
               {mode === "forgot" ? (
-                <><Mail size={16} className="mr-2" /> {loading ? "Envoi..." : "Envoyer le lien"}</>
+                <><Mail size={16} className="mr-2" /> {loading ? t("auth.sendingLink") : t("auth.sendLink")}</>
               ) : (
-                <><Cloud size={16} className="mr-2" /> {loading ? "Chargement..." : mode === "login" ? "Se connecter" : "S'inscrire"}</>
+                <><Cloud size={16} className="mr-2" /> {loading ? t("auth.loading") : mode === "login" ? t("auth.login") : t("auth.signup")}</>
               )}
             </Button>
           </form>
 
           {mode === "login" && (
             <button onClick={() => setMode("forgot")} className="block w-full text-center text-sm text-primary hover:underline mt-4">
-              Mot de passe oublié ?
+              {t("auth.forgotPassword")}
             </button>
           )}
 
           <p className="text-center text-sm text-secondary-foreground/60 mt-4">
             {mode === "forgot" ? (
-              <button onClick={() => setMode("login")} className="text-primary hover:underline">Retour à la connexion</button>
+              <button onClick={() => setMode("login")} className="text-primary hover:underline">{t("auth.backToLogin")}</button>
             ) : mode === "login" ? (
-              <>Pas encore de compte ? <button onClick={() => setMode("signup")} className="text-primary hover:underline">S'inscrire</button></>
+              <>{t("auth.noAccount")} <button onClick={() => setMode("signup")} className="text-primary hover:underline">{t("auth.signup")}</button></>
             ) : (
-              <>Déjà un compte ? <button onClick={() => setMode("login")} className="text-primary hover:underline">Se connecter</button></>
+              <>{t("auth.hasAccount")} <button onClick={() => setMode("login")} className="text-primary hover:underline">{t("auth.login")}</button></>
             )}
           </p>
         </div>

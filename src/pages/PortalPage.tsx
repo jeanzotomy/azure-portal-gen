@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { useUserRoles } from "@/hooks/use-admin";
 import { useMfaCheck } from "@/hooks/use-mfa";
 import { useAuthSession } from "@/hooks/use-auth-session";
+import { useTranslation } from "@/i18n/LanguageContext";
 import { Progress } from "@/components/ui/progress";
 import { Calendar as CalendarWidget } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -48,6 +49,7 @@ function PortalContent() {
   const mfaVerified = useMfaCheck();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
+  const { t, locale } = useTranslation();
 
   useEffect(() => {
     if (ready && !user) {
@@ -109,7 +111,7 @@ function PortalContent() {
     void checkProfile();
   }, [user]);
 
-  if (!ready || mfaVerified === null) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">Chargement...</div>;
+  if (!ready || mfaVerified === null) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">{t("portal.loading")}</div>;
   if (!user) return null;
 
   const handleLogout = async () => {
@@ -118,10 +120,10 @@ function PortalContent() {
   };
 
   const navItems: { id: Tab; icon: typeof LayoutDashboard; label: string }[] = [
-    { id: "dashboard", icon: LayoutDashboard, label: "Tableau de bord" },
-    { id: "projects", icon: FolderOpen, label: "Projets" },
-    { id: "tickets", icon: LifeBuoy, label: "Support" },
-    { id: "profile", icon: User, label: "Profil" },
+    { id: "dashboard", icon: LayoutDashboard, label: t("portal.dashboard") },
+    { id: "projects", icon: FolderOpen, label: t("portal.projects") },
+    { id: "tickets", icon: LifeBuoy, label: t("portal.support") },
+    { id: "profile", icon: User, label: t("portal.profile") },
   ];
 
   return (
@@ -157,14 +159,14 @@ function PortalContent() {
 
           <div className="mt-auto p-3 border-t border-sidebar-border space-y-1">
             {(isAdmin || isAgent) && (
-              <SidebarMenuButton onClick={() => navigate("/admin")} tooltip={isAdmin ? "Administration" : "Espace Agent"} className="gap-3 text-primary">
+              <SidebarMenuButton onClick={() => navigate("/admin")} tooltip={isAdmin ? t("portal.admin") : t("portal.agentSpace")} className="gap-3 text-primary">
                 <Shield size={18} />
-                <span>{isAdmin ? "Administration" : "Espace Agent"}</span>
+                <span>{isAdmin ? t("portal.admin") : t("portal.agentSpace")}</span>
               </SidebarMenuButton>
             )}
-            <SidebarMenuButton onClick={handleLogout} tooltip="Déconnexion" className="text-destructive hover:text-destructive gap-3">
+            <SidebarMenuButton onClick={handleLogout} tooltip={t("portal.logout")} className="text-destructive hover:text-destructive gap-3">
               <LogOut size={18} />
-              <span>Déconnexion</span>
+              <span>{t("portal.logout")}</span>
             </SidebarMenuButton>
           </div>
         </SidebarContent>
@@ -199,10 +201,10 @@ function PortalContent() {
               <Info className="h-4 w-4 text-warning" />
               <AlertDescription className="text-warning-foreground">
                 {daysLeft !== null && daysLeft > 0
-                  ? `Veuillez compléter votre profil (nom, entreprise, téléphone) dans les ${daysLeft} jour${daysLeft > 1 ? "s" : ""} restants.`
-                  : "Le délai de 30 jours pour compléter votre profil est dépassé. Veuillez le remplir immédiatement."}
+                  ? t("portal.profileIncomplete").replace("{days}", String(daysLeft)).replace("{s}", daysLeft > 1 ? "s" : "")
+                  : t("portal.profileOverdue")}
                 <Button variant="link" className="ml-2 p-0 h-auto text-primary" onClick={() => setTab("profile")}>
-                  Compléter mon profil
+                  {t("portal.completeProfile")}
                 </Button>
               </AlertDescription>
             </Alert>

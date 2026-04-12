@@ -2,18 +2,20 @@ import { ArrowRight, Cloud, Shield, TrendingUp, UserPlus } from "lucide-react";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import heroPerson from "@/assets/hero-person.png";
-
+import { useTranslation } from "@/i18n/LanguageContext";
 
 export function HeroSection() {
-  const words = ["Innover.", "Optimiser.", "Automatiser."];
+  const { t } = useTranslation();
+  const words: string[] = t("hero.words");
   const [visibleCount, setVisibleCount] = useState(0);
 
   useEffect(() => {
+    setVisibleCount(0);
     const timers = words.map((_, i) =>
       setTimeout(() => setVisibleCount(i + 1), 400 + i * 500)
     );
     return () => timers.forEach(clearTimeout);
-  }, []);
+  }, [words[0]]);
 
   return (
     <section id="hero" className="relative min-h-screen flex items-center overflow-hidden">
@@ -24,16 +26,16 @@ export function HeroSection() {
           <div className="animate-fade-up">
             <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass mb-6 text-sm font-medium tracking-wide border border-cyan-glow/30 shadow-[0_0_15px_hsl(195_100%_40%/0.15)] animate-pulse-glow">
               <Cloud size={16} className="text-cyan-glow" />
-              <span className="text-cyan-glow">Consultation TI</span>
+              <span className="text-cyan-glow">{t("hero.badge.consulting")}</span>
               <span className="text-secondary-foreground/40">·</span>
-              <span className="text-cyan-glow">Cloud</span>
+              <span className="text-cyan-glow">{t("hero.badge.cloud")}</span>
               <span className="text-secondary-foreground/40">·</span>
-              <span className="text-cyan-glow">DevOps</span>
+              <span className="text-cyan-glow">{t("hero.badge.devops")}</span>
               <span className="text-secondary-foreground/40">·</span>
-              <span className="gradient-text font-semibold">IA</span>
+              <span className="gradient-text font-semibold">{t("hero.badge.ai")}</span>
             </div>
             <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-tight text-primary-foreground mb-6">
-              {words.map((word, i) => (
+              {words.map((word: string, i: number) => (
                 <span
                   key={word}
                   className={`inline-block transition-all duration-700 ${
@@ -49,16 +51,16 @@ export function HeroSection() {
               ))}
             </h1>
             <p className="text-lg md:text-xl text-secondary-foreground/70 max-w-2xl mb-8">
-              Cloud Mature accompagne les organisations dans leur transformation vers le Cloud avec une approche sécurisée, performante et conforme aux standards les plus élevés.
+              {t("hero.description")}
             </p>
             <div className="flex flex-wrap gap-4">
               <Button size="lg" className="gradient-primary text-primary-foreground border-0 hover:opacity-90 animate-pulse-glow"
                 onClick={() => document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" })}>
-                Demander une consultation <ArrowRight size={18} className="ml-2" />
+                {t("hero.cta")} <ArrowRight size={18} className="ml-2" />
               </Button>
               <Button size="lg" className="gradient-primary text-primary-foreground border-0 hover:opacity-90 animate-pulse-glow"
                 onClick={() => window.location.href = "/auth"}>
-                <UserPlus size={18} className="mr-2" /> Devenir client
+                <UserPlus size={18} className="mr-2" /> {t("hero.become")}
               </Button>
             </div>
           </div>
@@ -73,9 +75,9 @@ export function HeroSection() {
 
         <div className="flex flex-wrap gap-3 -mt-8 animate-fade-up delay-300">
           {[
-            { icon: Cloud, title: "Multi-Cloud", desc: "AWS, Azure, GCP" },
-            { icon: Shield, title: "Sécurité", desc: "ISO 27001, SOC 2" },
-            { icon: TrendingUp, title: "FinOps", desc: "Optimisation coûts" },
+            { icon: Cloud, title: t("hero.multiCloud"), desc: t("hero.multiCloudDesc") },
+            { icon: Shield, title: t("hero.security"), desc: t("hero.securityDesc") },
+            { icon: TrendingUp, title: t("hero.finops"), desc: t("hero.finopsDesc") },
           ].map((item) => (
             <div key={item.title} className="glass rounded-lg px-4 py-2.5 flex items-center gap-3 hover:scale-[1.02] transition-transform">
               <div className="p-2 rounded-md gradient-primary">
