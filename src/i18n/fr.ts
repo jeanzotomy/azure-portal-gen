@@ -62,7 +62,7 @@ const fr = {
       { title: "Résultats garantis", desc: "KPIs et SLA mesurables." },
       { title: "Conformité & Innovation", desc: "Confidentialité et standards élevés." },
       { title: "Équipe locale", desc: "Proactive et disponible localement." },
-      { title: "Expérience francophone", desc: "Accompagnement bilingue français-anglais dans tous vos projets." },
+      { title: "Expérience francophone", desc: "Contenu 100% francophone et un accompagnement dans vos projets en anglais." },
     ],
   },
   contact: {
