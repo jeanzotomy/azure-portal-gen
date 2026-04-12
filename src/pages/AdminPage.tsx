@@ -939,7 +939,10 @@ function AdminProjectsInner({ readOnly = false }: { readOnly?: boolean }) {
   const totalProjects = projects.length;
   const activeProjects = projects.filter((p) => p.status === "en_cours").length;
   const completedProjects = projects.filter((p) => p.status === "termine").length;
-  const totalBudget = projects.reduce((sum, p) => sum + (Number(p.total_budget) || 0), 0);
+  const totalBudget = projects.reduce((sum, p) => {
+    const num = parseFloat(((p as any).budget || "0").replace(/[^\d.]/g, ""));
+    return sum + (isNaN(num) ? 0 : num);
+  }, 0);
 
   return (
     <div className="space-y-6 animate-fade-up">
