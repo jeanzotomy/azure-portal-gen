@@ -210,7 +210,9 @@ export type Database = {
           deleted_at: string | null
           full_name: string | null
           id: string
+          location: string | null
           phone: string | null
+          timezone: string | null
           updated_at: string
           user_id: string
         }
@@ -221,7 +223,9 @@ export type Database = {
           deleted_at?: string | null
           full_name?: string | null
           id?: string
+          location?: string | null
           phone?: string | null
+          timezone?: string | null
           updated_at?: string
           user_id: string
         }
@@ -232,7 +236,9 @@ export type Database = {
           deleted_at?: string | null
           full_name?: string | null
           id?: string
+          location?: string | null
           phone?: string | null
+          timezone?: string | null
           updated_at?: string
           user_id?: string
         }
