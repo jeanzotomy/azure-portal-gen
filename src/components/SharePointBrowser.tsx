@@ -351,9 +351,19 @@ export default function SharePointBrowser() {
             className="pl-8 h-9 text-sm"
           />
         </div>
-        <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowNewFolder(true)}>
-          <FolderPlus size={14} />
-          {t("sharepoint.newFolder")}
+        <Select value={sortBy} onValueChange={(v) => setSortBy(v as "name" | "date" | "size")}>
+          <SelectTrigger className="w-36 h-9 text-sm">
+            <ArrowUpDown size={14} className="mr-1" />
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="name">Nom</SelectItem>
+            <SelectItem value="date">Date</SelectItem>
+            <SelectItem value="size">Taille</SelectItem>
+          </SelectContent>
+        </Select>
+        <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setSortDir(d => d === "asc" ? "desc" : "asc")} title={sortDir === "asc" ? "Croissant" : "Décroissant"}>
+          <ArrowUpDown size={14} className={sortDir === "desc" ? "rotate-180" : ""} />
         </Button>
         <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowNewFolder(true)}>
           <FolderPlus size={14} />
