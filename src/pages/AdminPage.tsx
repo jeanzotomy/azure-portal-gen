@@ -34,6 +34,7 @@ import type { User as SupaUser } from "@supabase/supabase-js";
 
 type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts" | "sharepoint";
 type AgentTab = "dashboard" | "tickets" | "contacts";
+type GestionnaireTab = "dashboard" | "projects" | "sharepoint" | "tickets" | "contacts";
 
 function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser; collapsed: boolean; handleLogout: () => void }) {
   const [tab, setTab] = useState<"projects" | "sharepoint">("projects");
@@ -117,7 +118,8 @@ function AdminContent() {
   const { user, ready } = useAuthSession();
   const [tab, setTab] = useState<AdminTab>("dashboard");
   const [agentTab, setAgentTab] = useState<AgentTab>("dashboard");
-  const { isAdmin, isAgent, isComptable, loading: rolesLoading } = useUserRoles();
+  const [gestionnaireTab, setGestionnaireTab] = useState<GestionnaireTab>("dashboard");
+  const { isAdmin, isAgent, isComptable, isGestionnaire, loading: rolesLoading } = useUserRoles();
   const mfaVerified = useMfaCheck();
   const navigate = useNavigate();
   const { state } = useSidebar();
@@ -151,11 +153,11 @@ function AdminContent() {
   }, [mfaVerified, ready, user, navigate]);
 
   useEffect(() => {
-    if (!rolesLoading && !isAdmin && !isAgent && !isComptable && ready && user) navigate("/portal");
-  }, [isAdmin, isAgent, isComptable, rolesLoading, ready, user, navigate]);
+    if (!rolesLoading && !isAdmin && !isAgent && !isComptable && !isGestionnaire && ready && user) navigate("/portal");
+  }, [isAdmin, isAgent, isComptable, isGestionnaire, rolesLoading, ready, user, navigate]);
 
   if (!ready || rolesLoading || mfaVerified === null) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">{t("admin.loading")}</div>;
-  if (!user || (!isAdmin && !isAgent && !isComptable)) return null;
+  if (!user || (!isAdmin && !isAgent && !isComptable && !isGestionnaire)) return null;
 
   const handleLogout = async () => {
     clearSmsMfaVerified();
@@ -163,8 +165,95 @@ function AdminContent() {
     navigate("/");
   };
 
-  if (isComptable && !isAdmin && !isAgent) {
+  if (isComptable && !isAdmin && !isAgent && !isGestionnaire) {
     return <ComptableViewInline user={user} collapsed={collapsed} handleLogout={handleLogout} />;
+  }
+
+  if (isGestionnaire && !isAdmin) {
+    const gestionnaireNavItems: { id: GestionnaireTab; icon: typeof LayoutDashboard; label: string }[] = [
+      { id: "dashboard", icon: LayoutDashboard, label: t("admin.overview") },
+      { id: "projects", icon: FolderOpen, label: t("admin.projects") },
+      { id: "sharepoint", icon: HardDrive, label: "SharePoint" },
+      { id: "tickets", icon: LifeBuoy, label: t("admin.tickets") },
+      { id: "contacts", icon: MessageSquare, label: t("admin.contacts") },
+    ];
+
+    return (
+      <div className="min-h-screen flex w-full bg-background">
+        <Sidebar collapsible="icon" className="border-r border-sidebar-border">
+          <SidebarContent className="bg-sidebar">
+            <div className="px-4 py-5 border-b border-sidebar-border">
+              <Link to="/" className="flex items-center gap-2">
+                <img src={adminLogo} alt="CloudMature" className="h-8 w-8" />
+                {!collapsed && (
+                  <div>
+                    <span className="font-bold text-sidebar-foreground">CloudMature</span>
+                    <span className="block text-xs text-blue-500 font-medium">Gestionnaire</span>
+                  </div>
+                )}
+              </Link>
+            </div>
+            <SidebarGroup>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {gestionnaireNavItems.map((item) => (
+                    <SidebarMenuItem key={item.id}>
+                      <SidebarMenuButton onClick={() => setGestionnaireTab(item.id)} isActive={gestionnaireTab === item.id} tooltip={item.label} className="gap-3">
+                        <div className="relative">
+                          <item.icon size={18} />
+                          {item.id === "tickets" && unrepliedCount > 0 && (
+                            <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold px-1">
+                              {unrepliedCount}
+                            </span>
+                          )}
+                        </div>
+                        <span>{item.label}</span>
+                      </SidebarMenuButton>
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+            <div className="mt-auto p-3 border-t border-sidebar-border space-y-1">
+              <SidebarMenuButton onClick={() => navigate("/portal")} tooltip={t("admin.portalClient")} className="gap-3 text-muted-foreground">
+                <Shield size={18} />
+                <span>{t("admin.portalClient")}</span>
+              </SidebarMenuButton>
+              <SidebarMenuButton onClick={handleLogout} tooltip={t("portal.logout")} className="text-destructive hover:text-destructive gap-3">
+                <LogOut size={18} />
+                <span>{t("portal.logout")}</span>
+              </SidebarMenuButton>
+            </div>
+          </SidebarContent>
+        </Sidebar>
+
+        <div className="flex-1 flex flex-col min-h-screen">
+          <header className="h-14 flex items-center justify-between border-b border-border bg-card px-4">
+            <div className="flex items-center gap-3">
+              <SidebarTrigger />
+              <h2 className="text-sm font-semibold text-card-foreground hidden sm:block">
+                {gestionnaireNavItems.find((n) => n.id === gestionnaireTab)?.label}
+              </h2>
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="text-xs bg-blue-500/10 text-blue-500 px-2.5 py-1 rounded-full font-medium flex items-center gap-1">
+                <Shield size={12} /> Gestionnaire
+              </span>
+              <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
+                {(user.user_metadata?.full_name || user.email || "G").charAt(0).toUpperCase()}
+              </div>
+            </div>
+          </header>
+          <main className="flex-1 p-6 overflow-auto">
+            {gestionnaireTab === "dashboard" && <AdminDashboard />}
+            {gestionnaireTab === "projects" && <AdminProjects />}
+            {gestionnaireTab === "tickets" && <AdminTickets />}
+            {gestionnaireTab === "contacts" && <AdminContacts />}
+            {gestionnaireTab === "sharepoint" && <SharePointTab readOnly />}
+          </main>
+        </div>
+      </div>
+    );
   }
 
   if (isAgent && !isAdmin) {
@@ -1669,10 +1758,11 @@ function AdminUsers() {
     setChangingRole(userId);
     const { error: delError } = await supabase.from("user_roles").delete().eq("user_id", userId);
     if (delError) { toast({ title: "Erreur", description: delError.message, variant: "destructive" }); setChangingRole(null); return; }
-    const rolesToInsert: { user_id: string; role: "admin" | "agent" | "client" | "comptable" }[] = [{ user_id: userId, role: "client" }];
+    const rolesToInsert: { user_id: string; role: "admin" | "agent" | "client" | "comptable" | "gestionnaire" }[] = [{ user_id: userId, role: "client" }];
     if (role === "admin") rolesToInsert.push({ user_id: userId, role: "admin" });
     else if (role === "agent") rolesToInsert.push({ user_id: userId, role: "agent" });
     else if (role === "comptable") rolesToInsert.push({ user_id: userId, role: "comptable" });
+    else if (role === "gestionnaire") rolesToInsert.push({ user_id: userId, role: "gestionnaire" });
     const { error } = await supabase.from("user_roles").insert(rolesToInsert);
     if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
     else toast({ title: "Rôle mis à jour!", description: `Rôle changé en ${role}.` });
@@ -1707,12 +1797,13 @@ function AdminUsers() {
 
   const getRoleBadge = (roles: string[]) => {
     if (roles.includes("admin")) return { label: "Admin", color: "bg-primary/10 text-primary border-primary/20" };
+    if (roles.includes("gestionnaire")) return { label: "Gestionnaire", color: "bg-blue-500/10 text-blue-500 border-blue-500/20" };
     if (roles.includes("agent")) return { label: "Agent", color: "bg-orange-500/10 text-orange-500 border-orange-500/20" };
     if (roles.includes("comptable")) return { label: "Comptable", color: "bg-teal-500/10 text-teal-500 border-teal-500/20" };
     return { label: "Client", color: "bg-muted text-muted-foreground border-border" };
   };
 
-  const getCurrentRole = (roles: string[]) => roles.includes("admin") ? "admin" : roles.includes("agent") ? "agent" : roles.includes("comptable") ? "comptable" : "client";
+  const getCurrentRole = (roles: string[]) => roles.includes("admin") ? "admin" : roles.includes("gestionnaire") ? "gestionnaire" : roles.includes("agent") ? "agent" : roles.includes("comptable") ? "comptable" : "client";
 
   const filtered = profilesList.filter(p => {
     const matchesSearch = (p.full_name || "").toLowerCase().includes(search.toLowerCase()) ||
@@ -1726,6 +1817,7 @@ function AdminUsers() {
   const roleOptions = [
     { value: "client", label: "Client" },
     { value: "comptable", label: "Comptable" },
+    { value: "gestionnaire", label: "Gestionnaire" },
     { value: "agent", label: "Agent" },
     { value: "admin", label: "Admin" },
   ];
