@@ -1715,6 +1715,98 @@ function AdminUsers() {
         })}
       </div>
       {filtered.length === 0 && <p className="text-center text-muted-foreground py-8">Aucun utilisateur trouvé.</p>}
+
+      {/* MFA Management Dialog */}
+      {mfaDialogUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setMfaDialogUser(null)}>
+          <div className="bg-card rounded-2xl shadow-xl border border-border/50 w-full max-w-md mx-4 p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                <Shield size={20} className="text-primary" />
+                MFA — {mfaDialogUser.full_name || "Utilisateur"}
+              </h3>
+              <button onClick={() => setMfaDialogUser(null)} className="p-1 rounded-lg hover:bg-muted transition-colors">
+                <X size={18} className="text-muted-foreground" />
+              </button>
+            </div>
+
+            {(() => {
+              const status = mfaStatus[mfaDialogUser.user_id];
+              if (!status) return <p className="text-sm text-muted-foreground">Chargement...</p>;
+
+              return (
+                <div className="space-y-4">
+                  {/* TOTP Factors */}
+                  <div>
+                    <h4 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+                      <Smartphone size={14} /> Authenticator (TOTP)
+                    </h4>
+                    {status.factors.filter(f => f.type === "totp").length > 0 ? (
+                      <div className="space-y-2">
+                        {status.factors.filter(f => f.type === "totp").map((f: any) => (
+                          <div key={f.id} className="flex items-center justify-between bg-muted/50 rounded-lg p-3 border border-border/30">
+                            <div>
+                              <p className="text-sm font-medium text-foreground">{f.friendly_name || "Authenticator"}</p>
+                              <p className="text-xs text-muted-foreground">
+                                Ajouté le {new Date(f.created_at).toLocaleDateString("fr-FR")}
+                              </p>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              className="h-7 text-xs"
+                              disabled={mfaLoading === mfaDialogUser.user_id}
+                              onClick={() => disableFactor(mfaDialogUser.user_id, f.id, "totp")}
+                            >
+                              Désactiver
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-muted-foreground/60 italic">Aucun authenticator configuré</p>
+                    )}
+                  </div>
+
+                  {/* SMS MFA */}
+                  <div>
+                    <h4 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+                      <Phone size={14} /> SMS
+                    </h4>
+                    {status.has_phone ? (
+                      <div className="flex items-center justify-between bg-muted/50 rounded-lg p-3 border border-border/30">
+                        <div>
+                          <p className="text-sm font-medium text-foreground">Éligible</p>
+                          <p className="text-xs text-muted-foreground">📱 {status.phone}</p>
+                        </div>
+                        <span className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary font-medium">Disponible</span>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-muted-foreground/60 italic">Aucun numéro de téléphone configuré</p>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  {status.enrolled && (
+                    <div className="pt-2 border-t border-border/30">
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        className="w-full"
+                        disabled={mfaLoading === mfaDialogUser.user_id}
+                        onClick={() => disableMfa(mfaDialogUser.user_id, mfaDialogUser.full_name || "cet utilisateur")}
+                      >
+                        <Shield size={14} className="mr-2" />
+                        Réinitialiser tout le MFA
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
