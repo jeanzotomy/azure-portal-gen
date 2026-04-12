@@ -250,6 +250,14 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
       toast({ title: "Champ requis", description: "Le montant HT est obligatoire.", variant: "destructive" });
       return;
     }
+    if (!formTaxAmount || parseFloat(formTaxAmount) < 0) {
+      toast({ title: "Champ requis", description: "Le montant des taxes est obligatoire.", variant: "destructive" });
+      return;
+    }
+    if (!formTotalAmount || parseFloat(formTotalAmount) <= 0) {
+      toast({ title: "Champ requis", description: "Le total TTC est obligatoire.", variant: "destructive" });
+      return;
+    }
     if (!formInvoiceDate) {
       toast({ title: "Champ requis", description: "La date de facture est obligatoire.", variant: "destructive" });
       return;
@@ -758,12 +766,12 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
                 <Input type="number" step="0.01" value={formAmount} onChange={e => setFormAmount(e.target.value)} required />
               </div>
               <div>
-                <label className="text-sm font-medium">Taxes</label>
-                <Input type="number" step="0.01" value={formTaxAmount} onChange={e => setFormTaxAmount(e.target.value)} />
+                <label className="text-sm font-medium">Taxes *</label>
+                <Input type="number" step="0.01" value={formTaxAmount} onChange={e => setFormTaxAmount(e.target.value)} required />
               </div>
               <div>
-                <label className="text-sm font-medium">Total TTC</label>
-                <Input type="number" step="0.01" value={formTotalAmount} onChange={e => setFormTotalAmount(e.target.value)} />
+                <label className="text-sm font-medium">Total TTC *</label>
+                <Input type="number" step="0.01" value={formTotalAmount} onChange={e => setFormTotalAmount(e.target.value)} required />
               </div>
             </div>
 
