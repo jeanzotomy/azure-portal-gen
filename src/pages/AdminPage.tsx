@@ -1127,7 +1127,7 @@ function AdminProjectsInner({ readOnly = false }: { readOnly?: boolean }) {
               {[{ value: "all", label: "Tous" }, { value: "mine", label: "Mes projets" }].map((opt) => (
                 <button key={opt.value} onClick={() => setAssignedFilter(opt.value as "all" | "mine")}
                   className={`text-sm px-4 py-1.5 rounded-full font-medium transition-colors ${assignedFilter === opt.value ? "bg-primary text-primary-foreground shadow-sm" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
-                >{opt.label}{opt.value === "mine" && assignedFilter !== "mine" && assignedProjectsCount > 0 ? ` (${assignedProjectsCount})` : ""}</button>
+                >{opt.label}</button>
               ))}
             </div>
           )}
