@@ -351,7 +351,7 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
       setCurrentStep("done");
 
       const statusLabel = formStatus === "validee" ? "validée (solde projet mis à jour)" : "en attente de validation";
-      toast({ title: "Facture ajoutée", description: `Statut : ${statusLabel}` });
+      toast({ title: editingInvoiceId ? "Facture modifiée" : "Facture ajoutée", description: `Statut : ${statusLabel}` });
 
       setTimeout(() => {
         setDialogOpen(false);
