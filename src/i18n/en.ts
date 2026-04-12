@@ -336,6 +336,7 @@ const en = {
     description: "Browse your SharePoint sites, files and lists.",
     filesTab: "Files",
     listsTab: "Lists",
+    invoicesTab: "Invoices",
     selectSite: "Select a SharePoint site",
     searchSites: "Search sites...",
     noSites: "No SharePoint sites found.",
