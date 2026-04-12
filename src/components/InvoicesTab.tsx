@@ -622,7 +622,7 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
               {editingInvoiceId ? "Modifier la facture" : parsedData && !parsedData.project_id ? "Facture à compléter" : "Nouvelle facture / reçu"}
             </DialogTitle>
             <DialogDescription>
-              Remplissez les champs manuellement ou joignez un fichier pour une analyse automatique.
+              Remplissez les champs de la facture ou du reçu.
             </DialogDescription>
           </DialogHeader>
 
@@ -640,34 +640,6 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
             </div>
           )}
 
-          {/* File attach + auto analyze */}
-          <div className="flex flex-wrap gap-2 items-center">
-            <label className={parsing || uploading ? "pointer-events-none" : "cursor-pointer"}>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".pdf,.png,.jpg,.jpeg,.webp"
-                className="sr-only"
-                onChange={handleFileSelectInDialog}
-                disabled={parsing || uploading}
-              />
-              <Button type="button" variant="outline" size="sm" disabled={parsing || uploading} asChild>
-                <span>
-                  <Upload size={14} className="mr-1.5" />
-                  {selectedFile ? "Changer le fichier" : "Joindre un fichier"}
-                </span>
-              </Button>
-            </label>
-            {selectedFile && (
-              <Button type="button" variant="secondary" size="sm" onClick={handleAutoAnalyze} disabled={parsing || uploading}>
-                {parsing ? <Loader2 size={14} className="mr-1.5 animate-spin" /> : <Sparkles size={14} className="mr-1.5" />}
-                {parsing ? "Analyse..." : "Analyser"}
-              </Button>
-            )}
-            {selectedFile && (
-              <span className="text-xs text-muted-foreground truncate max-w-[200px]">{selectedFile.name}</span>
-            )}
-          </div>
 
           {parsedData && !parsedData.project_id && (
             <div className="flex items-start gap-2 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
