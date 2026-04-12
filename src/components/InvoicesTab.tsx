@@ -645,7 +645,7 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
               <DollarSign size={18} />
               {editingInvoiceId ? "Modifier la facture" : parsedData && !parsedData.project_id ? "Facture à compléter" : "Nouvelle facture / reçu"}
             </DialogTitle>
-            <DialogDescription>
+            <DialogDescription className="text-gray-900 dark:text-gray-100">
               Remplissez les champs de la facture ou du reçu.
             </DialogDescription>
           </DialogHeader>
