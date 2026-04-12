@@ -37,6 +37,7 @@ const Index = () => {
     <Footer />
     <ScrollToTop />
   </div>
-);
+  );
+};
 
 export default Index;
