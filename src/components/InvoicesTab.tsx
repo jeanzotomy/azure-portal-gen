@@ -592,9 +592,14 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
                     </a>
                   )}
                   {!readOnly && (
-                    <Button variant="ghost" size="icon" onClick={() => handleDelete(inv.id)} className="text-destructive">
-                      <Trash2 size={14} />
-                    </Button>
+                    <>
+                      <Button variant="ghost" size="icon" onClick={() => openEditDialog(inv)} title="Modifier">
+                        <Pencil size={14} />
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => handleDelete(inv.id)} className="text-destructive">
+                        <Trash2 size={14} />
+                      </Button>
+                    </>
                   )}
                 </div>
               </div>
