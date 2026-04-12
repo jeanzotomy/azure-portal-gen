@@ -1,22 +1,63 @@
 
 
-# Correction de la redirection post-authentification
+# Implémentation de l'authentification SMS avec Twilio
 
-## Problème identifié
+Le connecteur Twilio est connecté. Le numéro trial est **+1 641 348-4830**.
 
-Après connexion via **Google OAuth**, le `redirect_uri` est défini sur `window.location.origin` (c'est-à-dire `/`), ce qui ramène l'utilisateur sur la **page d'accueil** au lieu de le diriger vers `/mfa` puis vers son portail. La page Index ne contient aucune logique de détection d'utilisateur connecté.
+## Architecture
 
-Pour la connexion **email/mot de passe**, `navigate("/mfa")` fonctionne correctement.
+L'authentification SMS native de Supabase ne supporte pas Twilio directement via le connecteur gateway. On va donc implémenter un système SMS custom :
 
-## Solution
+1. **Connexion par SMS** : Edge function qui envoie un OTP via Twilio, vérification côté serveur
+2. **MFA par SMS** : Alternative au TOTP existant, envoi de code SMS au lieu du QR code
 
-### 1. Modifier `AuthPage.tsx` — Google OAuth redirect
-Changer le `redirect_uri` de `window.location.origin` à `window.location.origin + "/mfa"` pour que l'utilisateur soit redirigé vers la page MFA après l'authentification Google.
+```text
+Frontend (AuthPage / MfaPage)
+  │
+  ▼
+Edge Function "send-sms-otp"  ──► Twilio Gateway ──► SMS
+Edge Function "verify-sms-otp" ──► Vérifie le code
+```
 
-### 2. Ajouter une détection sur la page Index
-Ajouter une vérification dans `Index.tsx` : si un utilisateur est déjà authentifié (session active), le rediriger automatiquement vers `/mfa` (qui gère ensuite la redirection vers `/portal` ou `/admin` selon le rôle). Cela couvre le cas où l'utilisateur revient sur `/` alors qu'il est déjà connecté.
+## Étapes
 
-## Fichiers modifiés
-- `src/pages/AuthPage.tsx` — changer `redirect_uri`
-- `src/pages/Index.tsx` — ajouter détection de session et redirection
+### 1. Créer une table `sms_otp_codes`
+Stocke les codes OTP temporaires (phone, code, expires_at, used). RLS service_role uniquement.
+
+### 2. Créer l'edge function `send-sms-otp`
+- Génère un code à 6 chiffres, le stocke en base avec expiration 5 min
+- Envoie le SMS via le connector gateway Twilio (`/Messages.json`)
+- Numéro expéditeur : `+16413484830`
+
+### 3. Créer l'edge function `verify-sms-otp`
+- Vérifie le code contre la base de données
+- Pour la **connexion SMS** : crée/récupère l'utilisateur par téléphone et retourne un token de session
+- Pour le **MFA SMS** : valide le second facteur et élève le niveau AAL
+
+### 4. Modifier `AuthPage.tsx`
+- Ajouter un mode **"phone"** : champ numéro de téléphone + bouton "Envoyer le code"
+- Après envoi, afficher un champ OTP à 6 chiffres pour vérification
+- Bouton toggle entre connexion email et SMS
+
+### 5. Modifier `MfaPage.tsx`
+- Ajouter une option **"Vérification par SMS"** en alternative au TOTP
+- Utilise le numéro de téléphone du profil utilisateur
+- Bouton pour envoyer le code SMS + champ de saisie OTP
+
+### 6. Ajouter les traductions FR/EN
+Nouvelles clés pour : `auth.phoneLogin`, `auth.sendSmsCode`, `auth.enterSmsCode`, `mfa.smsOption`, `mfa.sendSmsCode`, etc.
+
+## Détails techniques
+- Le numéro Twilio trial `+16413484830` sera stocké en dur dans l'edge function (ou en secret si préféré)
+- Les codes OTP expirent après 5 minutes
+- Rate limiting : max 3 tentatives par téléphone par 10 minutes
+- **Limitation trial Twilio** : seuls les numéros vérifiés dans la console Twilio peuvent recevoir des SMS
+
+## Fichiers modifiés/créés
+- `supabase/functions/send-sms-otp/index.ts` (nouveau)
+- `supabase/functions/verify-sms-otp/index.ts` (nouveau)
+- `src/pages/AuthPage.tsx` (mode téléphone)
+- `src/pages/MfaPage.tsx` (option SMS)
+- `src/i18n/fr.ts` et `src/i18n/en.ts` (traductions)
+- Migration SQL pour la table `sms_otp_codes`
 
