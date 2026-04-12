@@ -219,6 +219,7 @@ export type Database = {
           priority: string
           progress: number
           project_number: string | null
+          sharepoint_folder_url: string | null
           status: string
           technologies: string | null
           updated_at: string
@@ -234,6 +235,7 @@ export type Database = {
           priority?: string
           progress?: number
           project_number?: string | null
+          sharepoint_folder_url?: string | null
           status?: string
           technologies?: string | null
           updated_at?: string
@@ -249,8 +251,39 @@ export type Database = {
           priority?: string
           progress?: number
           project_number?: string | null
+          sharepoint_folder_url?: string | null
           status?: string
           technologies?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      sharepoint_config: {
+        Row: {
+          created_at: string
+          drive_id: string | null
+          id: string
+          site_id: string
+          site_name: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          drive_id?: string | null
+          id?: string
+          site_id: string
+          site_name?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          drive_id?: string | null
+          id?: string
+          site_id?: string
+          site_name?: string | null
           updated_at?: string
           user_id?: string
         }
