@@ -395,6 +395,25 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
         )}
       </div>
 
+      {/* Filters */}
+      <div className="flex gap-3 items-center">
+        <div className="relative flex-1 max-w-xs">
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input placeholder="Rechercher..." className="pl-9" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+        </div>
+        <Select value={filterProject} onValueChange={setFilterProject}>
+          <SelectTrigger className="w-48">
+            <SelectValue placeholder="Tous les projets" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">Tous les projets</SelectItem>
+            {projects.map(p => (
+              <SelectItem key={p.id} value={p.id}>{p.project_number} - {p.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
       {/* Financial overview - reactive to filterProject */}
       {projectsWithInvoices.length > 0 && (() => {
         const fmt = (n: number) => n.toLocaleString("fr-CA", { style: "currency", currency: "CAD" });
@@ -475,25 +494,6 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
           </div>
         );
       })()}
-
-      {/* Filters */}
-      <div className="flex gap-3 items-center">
-        <div className="relative flex-1 max-w-xs">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <Input placeholder="Rechercher..." className="pl-9" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
-        </div>
-        <Select value={filterProject} onValueChange={setFilterProject}>
-          <SelectTrigger className="w-48">
-            <SelectValue placeholder="Tous les projets" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tous les projets</SelectItem>
-            {projects.map(p => (
-              <SelectItem key={p.id} value={p.id}>{p.project_number} - {p.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
 
       {/* Invoices list */}
       {loading ? (
