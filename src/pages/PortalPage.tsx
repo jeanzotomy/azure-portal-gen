@@ -795,16 +795,16 @@ function ProjectsTab({ user }: { user: SupaUser }) {
               <Input placeholder="Ex: Refonte du site web" required value={name} onChange={(e) => setName(e.target.value)} />
             </div>
             <div>
-              <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5"><FileText size={14} /> Description</label>
-              <Textarea placeholder="Décrivez votre projet, vos besoins et objectifs..." rows={4} value={description} onChange={(e) => setDescription(e.target.value)} />
+              <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5"><FileText size={14} /> Description *</label>
+              <Textarea placeholder="Décrivez votre projet, vos besoins et objectifs..." rows={4} required value={description} onChange={(e) => setDescription(e.target.value)} />
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5"><DollarSign size={14} /> Budget estimé</label>
-                <Input placeholder="Ex: 5000 - 10000 $" value={budget} onChange={(e) => setBudget(e.target.value)} />
+                <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5"><DollarSign size={14} /> Budget estimé *</label>
+                <Input placeholder="Ex: 5000 - 10000 $" required value={budget} onChange={(e) => setBudget(e.target.value)} />
               </div>
               <div>
-                <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5"><Calendar size={14} /> Délai souhaité</label>
+                <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5"><Calendar size={14} /> Délai souhaité *</label>
                 <Popover>
                   <PopoverTrigger asChild>
                     <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !deadline && "text-muted-foreground")}>
@@ -826,7 +826,7 @@ function ProjectsTab({ user }: { user: SupaUser }) {
               </div>
             </div>
             <div>
-              <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5"><Cpu size={14} /> Services souhaités</label>
+              <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5"><Cpu size={14} /> Services souhaités *</label>
               <div className="flex flex-wrap gap-2">
                 {serviceOptions.map((service) => (
                   <button type="button" key={service} onClick={() => toggleService(service)}
@@ -836,7 +836,7 @@ function ProjectsTab({ user }: { user: SupaUser }) {
               </div>
             </div>
             <div>
-              <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5"><Flag size={14} /> Priorité</label>
+              <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5"><Flag size={14} /> Priorité *</label>
               <div className="flex gap-2">
                 {priorityOptions.map((opt) => (
                   <button type="button" key={opt.value} onClick={() => setPriority(opt.value)}
