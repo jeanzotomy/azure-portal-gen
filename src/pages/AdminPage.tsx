@@ -993,6 +993,12 @@ function AdminProjectsInner({ readOnly = false }: { readOnly?: boolean }) {
     const { data: gRoles } = await supabase.from("user_roles").select("user_id").eq("role", "gestionnaire");
     const gIds = (gRoles || []).map((r: any) => r.user_id);
     setGestionnaires((prof || []).filter((pr: any) => gIds.includes(pr.user_id)).map((pr: any) => ({ user_id: pr.user_id, full_name: pr.full_name || "Sans nom" })));
+    // Check if current user is a gestionnaire
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      setCurrentUserId(session.user.id);
+      setIsCurrentUserGestionnaire(gIds.includes(session.user.id));
+    }
   };
 
   useEffect(() => { load(); }, []);
