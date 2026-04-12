@@ -395,41 +395,77 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
         )}
       </div>
 
-      {/* Project balance cards */}
-      {projectsWithInvoices.length > 0 && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {projectsWithInvoices.map(p => {
-            const allocatedBudget = parseFloat(((p as any).budget || "0").replace(/[^\d.]/g, "")) || p.total_budget || 0;
-            const balance = allocatedBudget - (p.total_paid || 0);
-            return (
-              <Card key={p.id} className="border">
-                <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-medium flex items-center gap-2">
-                    <Receipt size={14} />
-                    {p.project_number} - {p.name}
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-1">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Budget</span>
-                    <span className="font-medium">{allocatedBudget.toLocaleString("fr-CA", { style: "currency", currency: "CAD" })}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Payé</span>
-                    <span className="font-medium text-emerald-600">{(p.total_paid || 0).toLocaleString("fr-CA", { style: "currency", currency: "CAD" })}</span>
-                  </div>
-                  <div className="flex justify-between text-sm border-t pt-1">
-                    <span className="text-muted-foreground font-medium">Solde</span>
-                    <span className={`font-bold ${balance < 0 ? "text-destructive" : "text-primary"}`}>
-                      {balance.toLocaleString("fr-CA", { style: "currency", currency: "CAD" })}
-                    </span>
-                  </div>
-                </CardContent>
-              </Card>
-            );
-          })}
-        </div>
-      )}
+      {/* Financial overview */}
+      {projectsWithInvoices.length > 0 && (() => {
+        const fmt = (n: number) => n.toLocaleString("fr-CA", { style: "currency", currency: "CAD" });
+        const totalBudget = projectsWithInvoices.reduce((s, p) => s + (parseFloat(((p as any).budget || "0").replace(/[^\d.]/g, "")) || p.total_budget || 0), 0);
+        const totalPaid = projectsWithInvoices.reduce((s, p) => s + (p.total_paid || 0), 0);
+        const totalSolde = totalBudget - totalPaid;
+        const totalInv = invoices.length;
+        const validees = invoices.filter(i => i.status === "validee").length;
+        const enAttente = invoices.filter(i => i.status === "en_attente").length;
+        const nonConformes = invoices.filter(i => i.status === "non_conforme").length;
+
+        const barData = projectsWithInvoices.map(p => {
+          const bgt = parseFloat(((p as any).budget || "0").replace(/[^\d.]/g, "")) || p.total_budget || 0;
+          const paid = p.total_paid || 0;
+          return { name: p.project_number || p.name, budget: bgt, paid, solde: bgt - paid };
+        });
+
+        return (
+          <div className="space-y-4">
+            {/* Summary stats */}
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {[
+                { label: "Budget total", value: fmt(totalBudget), sub: `${projectsWithInvoices.length} projet(s)`, color: "text-primary" },
+                { label: "Total payé", value: fmt(totalPaid), sub: `${validees} facture(s) validée(s)`, color: "text-emerald-600" },
+                { label: "Solde restant", value: fmt(totalSolde), sub: totalSolde < 0 ? "Dépassement!" : "Disponible", color: totalSolde < 0 ? "text-destructive" : "text-primary" },
+                { label: "Factures", value: totalInv.toString(), sub: `${enAttente} en attente · ${nonConformes} non conf.`, color: "text-foreground" },
+              ].map(s => (
+                <Card key={s.label} className="border">
+                  <CardContent className="p-4">
+                    <p className="text-[11px] uppercase tracking-widest text-muted-foreground">{s.label}</p>
+                    <p className={`text-xl font-bold mt-1 ${s.color}`}>{s.value}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{s.sub}</p>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+
+            {/* Bar chart per project */}
+            <Card className="border">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-sm font-medium">Répartition financière par projet</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                {barData.map(d => {
+                  const pct = d.budget > 0 ? Math.min((d.paid / d.budget) * 100, 100) : 0;
+                  const overBudget = d.paid > d.budget && d.budget > 0;
+                  return (
+                    <div key={d.name} className="space-y-1">
+                      <div className="flex justify-between items-center text-xs">
+                        <span className="font-medium text-foreground">{d.name}</span>
+                        <span className="text-muted-foreground">
+                          {fmt(d.paid)} / {fmt(d.budget)}
+                          <span className={`ml-2 font-semibold ${overBudget ? "text-destructive" : "text-emerald-600"}`}>
+                            ({pct.toFixed(0)}%)
+                          </span>
+                        </span>
+                      </div>
+                      <div className="h-2.5 bg-muted rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all ${overBudget ? "bg-destructive" : "bg-emerald-500"}`}
+                          style={{ width: `${Math.min(pct, 100)}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </CardContent>
+            </Card>
+          </div>
+        );
+      })()}
 
       {/* Filters */}
       <div className="flex gap-3 items-center">
