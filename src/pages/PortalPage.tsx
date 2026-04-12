@@ -535,8 +535,17 @@ function ProjectsTab({ user }: { user: SupaUser }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  const loadProjects = () => {
-    supabase.from("projects").select("*").order("created_at", { ascending: false }).then(({ data }) => setProjects(data || []));
+  const loadProjects = async () => {
+    const { data } = await supabase.from("projects").select("*").order("created_at", { ascending: false });
+    setProjects(data || []);
+    // Load gestionnaire profiles
+    const gIds = [...new Set((data || []).map((p: any) => p.gestionnaire_id).filter(Boolean))];
+    if (gIds.length > 0) {
+      const { data: profs } = await supabase.from("profiles").select("user_id, full_name").in("user_id", gIds);
+      const map: Record<string, string> = {};
+      (profs || []).forEach((pr: any) => { map[pr.user_id] = pr.full_name || "—"; });
+      setGestionnaireProfiles(map);
+    }
   };
 
   useEffect(() => { loadProjects(); }, []);
