@@ -1,8 +1,19 @@
-import { useEffect, useState } from "react";
+import { createContext, useContext, useEffect, useState, useCallback } from "react";
 import type { Session, User } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
+import React from "react";
 
-export function useAuthSession() {
+interface AuthSessionContextValue {
+  user: User | null;
+  ready: boolean;
+}
+
+const AuthSessionContext = createContext<AuthSessionContextValue>({
+  user: null,
+  ready: false,
+});
+
+export function AuthSessionProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [ready, setReady] = useState(false);
 
@@ -36,5 +47,13 @@ export function useAuthSession() {
     };
   }, []);
 
-  return { user, ready };
+  return React.createElement(
+    AuthSessionContext.Provider,
+    { value: { user, ready } },
+    children
+  );
+}
+
+export function useAuthSession() {
+  return useContext(AuthSessionContext);
 }
