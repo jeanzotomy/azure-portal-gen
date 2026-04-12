@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from "react";
-import { Bell, LifeBuoy, FolderOpen, MessageSquare, CheckCircle2, Clock, AlertCircle } from "lucide-react";
+import { Bell, LifeBuoy, FolderOpen, MessageSquare, CheckCircle2, Clock, DollarSign } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { supabase } from "@/integrations/supabase/client";
@@ -10,20 +10,20 @@ import { fr } from "date-fns/locale";
 
 interface Notification {
   id: string;
-  type: "ticket_reply" | "ticket_status" | "project_update" | "contact_request";
+  type: "ticket_reply" | "ticket_status" | "project_update" | "contact_request" | "invoice";
   title: string;
   description: string;
   time: string;
-  read: boolean;
 }
 
+type Role = "client" | "admin" | "agent" | "gestionnaire" | "comptable";
+
 interface NotificationBellProps {
-  /** "client" shows ticket replies & project updates; "admin" shows new tickets, contacts, unreplied */
-  mode?: "client" | "admin";
+  role?: Role;
   onNavigate?: (target: string) => void;
 }
 
-export function NotificationBell({ mode = "client", onNavigate }: NotificationBellProps) {
+export function NotificationBell({ role = "client", onNavigate }: NotificationBellProps) {
   const { user } = useAuthSession();
   const { locale } = useTranslation();
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -31,13 +31,14 @@ export function NotificationBell({ mode = "client", onNavigate }: NotificationBe
   const [readIds, setReadIds] = useState<Set<string>>(new Set());
 
   const dateLocale = locale === "fr" ? fr : undefined;
+  const isFr = locale === "fr";
 
   const fetchNotifications = useCallback(async () => {
     if (!user) return;
     const items: Notification[] = [];
 
-    if (mode === "client") {
-      // Ticket replies (admin replies on user's tickets)
+    // ── Client: replies on own tickets + project updates ──
+    if (role === "client") {
       const { data: tickets } = await supabase
         .from("support_tickets")
         .select("id, subject, updated_at")
@@ -60,15 +61,13 @@ export function NotificationBell({ mode = "client", onNavigate }: NotificationBe
               id: `reply-${replies[0].id}`,
               type: "ticket_reply",
               title: ticket.subject,
-              description: locale === "fr" ? "Nouvelle réponse de l'équipe" : "New team reply",
+              description: isFr ? "Nouvelle réponse de l'équipe" : "New team reply",
               time: replies[0].created_at,
-              read: false,
             });
           }
         }
       }
 
-      // Project updates
       const { data: projects } = await supabase
         .from("projects")
         .select("id, name, status, updated_at")
@@ -82,20 +81,19 @@ export function NotificationBell({ mode = "client", onNavigate }: NotificationBe
             id: `project-${p.id}`,
             type: "project_update",
             title: p.name,
-            description: locale === "fr" ? `Statut : ${p.status}` : `Status: ${p.status}`,
+            description: isFr ? `Statut : ${p.status}` : `Status: ${p.status}`,
             time: p.updated_at,
-            read: false,
           });
         });
       }
     }
 
-    if (mode === "admin") {
-      // Unreplied tickets
+    // ── Admin / Agent / Gestionnaire: unreplied tickets ──
+    if (role === "admin" || role === "agent" || role === "gestionnaire") {
       const { data: tickets } = await supabase
         .from("support_tickets")
         .select("id, subject, status, created_at, ticket_number")
-        .in("status", ["open", "in_progress"])
+        .in("status", ["ouvert", "en_cours"])
         .order("created_at", { ascending: false })
         .limit(10);
 
@@ -112,15 +110,16 @@ export function NotificationBell({ mode = "client", onNavigate }: NotificationBe
               id: `unreplied-${ticket.id}`,
               type: "ticket_reply",
               title: `${ticket.ticket_number || ""} ${ticket.subject}`.trim(),
-              description: locale === "fr" ? "Ticket sans réponse" : "Unreplied ticket",
+              description: isFr ? "Ticket sans réponse" : "Unreplied ticket",
               time: ticket.created_at,
-              read: false,
             });
           }
         }
       }
+    }
 
-      // New contact requests
+    // ── Admin / Agent / Gestionnaire: new contact requests ──
+    if (role === "admin" || role === "agent" || role === "gestionnaire") {
       const { data: contacts } = await supabase
         .from("contact_requests")
         .select("id, name, email, created_at, status")
@@ -136,16 +135,77 @@ export function NotificationBell({ mode = "client", onNavigate }: NotificationBe
             title: c.name,
             description: c.email,
             time: c.created_at,
-            read: false,
           });
         });
       }
     }
 
-    // Sort by time descending
+    // ── Admin / Gestionnaire: recent project changes ──
+    if (role === "admin" || role === "gestionnaire") {
+      const { data: projects } = await supabase
+        .from("projects")
+        .select("id, name, status, updated_at, project_number")
+        .order("updated_at", { ascending: false })
+        .limit(5);
+
+      if (projects) {
+        projects.forEach((p) => {
+          items.push({
+            id: `proj-${p.id}`,
+            type: "project_update",
+            title: `${p.project_number || ""} ${p.name}`.trim(),
+            description: isFr ? `Statut : ${p.status}` : `Status: ${p.status}`,
+            time: p.updated_at,
+          });
+        });
+      }
+    }
+
+    // ── Comptable: pending invoices + recent project updates ──
+    if (role === "comptable") {
+      const { data: invoices } = await supabase
+        .from("invoices")
+        .select("id, invoice_number, vendor, status, created_at, amount")
+        .eq("status", "en_attente")
+        .order("created_at", { ascending: false })
+        .limit(5);
+
+      if (invoices) {
+        invoices.forEach((inv) => {
+          items.push({
+            id: `inv-${inv.id}`,
+            type: "invoice",
+            title: inv.invoice_number || inv.vendor || (isFr ? "Facture" : "Invoice"),
+            description: isFr
+              ? `En attente — ${Number(inv.amount).toLocaleString("fr-FR")} GNF`
+              : `Pending — ${Number(inv.amount).toLocaleString("en-US")} GNF`,
+            time: inv.created_at,
+          });
+        });
+      }
+
+      const { data: projects } = await supabase
+        .from("projects")
+        .select("id, name, status, updated_at, project_number")
+        .order("updated_at", { ascending: false })
+        .limit(5);
+
+      if (projects) {
+        projects.forEach((p) => {
+          items.push({
+            id: `proj-${p.id}`,
+            type: "project_update",
+            title: `${p.project_number || ""} ${p.name}`.trim(),
+            description: isFr ? `Statut : ${p.status}` : `Status: ${p.status}`,
+            time: p.updated_at,
+          });
+        });
+      }
+    }
+
     items.sort((a, b) => new Date(b.time).getTime() - new Date(a.time).getTime());
-    setNotifications(items.slice(0, 10));
-  }, [user, mode, locale]);
+    setNotifications(items.slice(0, 15));
+  }, [user, role, isFr]);
 
   useEffect(() => {
     fetchNotifications();
@@ -153,19 +213,18 @@ export function NotificationBell({ mode = "client", onNavigate }: NotificationBe
     return () => clearInterval(interval);
   }, [fetchNotifications]);
 
-  // Load read state from sessionStorage
   useEffect(() => {
     try {
-      const stored = sessionStorage.getItem("notif_read_ids");
+      const stored = sessionStorage.getItem(`notif_read_${role}`);
       if (stored) setReadIds(new Set(JSON.parse(stored)));
     } catch {}
-  }, []);
+  }, [role]);
 
   const markAllRead = () => {
     const allIds = new Set(notifications.map((n) => n.id));
     setReadIds(allIds);
     try {
-      sessionStorage.setItem("notif_read_ids", JSON.stringify([...allIds]));
+      sessionStorage.setItem(`notif_read_${role}`, JSON.stringify([...allIds]));
     } catch {}
   };
 
@@ -177,19 +236,18 @@ export function NotificationBell({ mode = "client", onNavigate }: NotificationBe
       case "ticket_status": return <CheckCircle2 size={14} className="text-accent shrink-0" />;
       case "project_update": return <FolderOpen size={14} className="text-primary shrink-0" />;
       case "contact_request": return <MessageSquare size={14} className="text-accent shrink-0" />;
+      case "invoice": return <DollarSign size={14} className="text-primary shrink-0" />;
     }
   };
 
   const handleClick = (notif: Notification) => {
-    // Mark as read
     const newReadIds = new Set(readIds);
     newReadIds.add(notif.id);
     setReadIds(newReadIds);
     try {
-      sessionStorage.setItem("notif_read_ids", JSON.stringify([...newReadIds]));
+      sessionStorage.setItem(`notif_read_${role}`, JSON.stringify([...newReadIds]));
     } catch {}
 
-    // Navigate
     if (onNavigate) {
       if (notif.type === "ticket_reply" || notif.type === "ticket_status") {
         onNavigate("tickets");
@@ -197,6 +255,8 @@ export function NotificationBell({ mode = "client", onNavigate }: NotificationBe
         onNavigate("projects");
       } else if (notif.type === "contact_request") {
         onNavigate("contacts");
+      } else if (notif.type === "invoice") {
+        onNavigate("projects"); // comptable sees invoices in projects tab
       }
     }
     setOpen(false);
@@ -216,12 +276,10 @@ export function NotificationBell({ mode = "client", onNavigate }: NotificationBe
       </PopoverTrigger>
       <PopoverContent align="end" className="w-80 p-0">
         <div className="flex items-center justify-between px-4 py-3 border-b border-border">
-          <span className="text-sm font-semibold text-foreground">
-            {locale === "fr" ? "Notifications" : "Notifications"}
-          </span>
+          <span className="text-sm font-semibold text-foreground">Notifications</span>
           {unreadCount > 0 && (
             <button onClick={markAllRead} className="text-xs text-primary hover:underline">
-              {locale === "fr" ? "Tout marquer lu" : "Mark all read"}
+              {isFr ? "Tout marquer lu" : "Mark all read"}
             </button>
           )}
         </div>
@@ -230,7 +288,7 @@ export function NotificationBell({ mode = "client", onNavigate }: NotificationBe
           {notifications.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
               <Bell size={24} className="mb-2 opacity-40" />
-              <span className="text-xs">{locale === "fr" ? "Aucune notification" : "No notifications"}</span>
+              <span className="text-xs">{isFr ? "Aucune notification" : "No notifications"}</span>
             </div>
           ) : (
             notifications.map((notif) => {
