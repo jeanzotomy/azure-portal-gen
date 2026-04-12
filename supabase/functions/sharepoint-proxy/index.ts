@@ -182,10 +182,69 @@ serve(async (req) => {
         break;
       }
 
+      case "ensure-project-folder": {
+        // Creates a folder for a project if it doesn't exist (uses "fail" conflict to detect existing)
+        const siteId = url.searchParams.get("siteId");
+        const driveId = url.searchParams.get("driveId");
+        const projectName = url.searchParams.get("projectName");
+        const projectNumber = url.searchParams.get("projectNumber");
+        if (!siteId || !projectName) throw new Error("siteId and projectName are required");
+        const folderDisplayName = projectNumber ? `${projectNumber} - ${projectName}` : projectName;
+        // Sanitize folder name for SharePoint
+        const safeFolderName = folderDisplayName.replace(/[<>:"/\\|?*]/g, "_").substring(0, 200);
+        method = "POST";
+        if (driveId) {
+          graphPath = `sites/${siteId}/drives/${driveId}/root/children`;
+        } else {
+          graphPath = `sites/${siteId}/drive/root/children`;
+        }
+        body = JSON.stringify({
+          name: safeFolderName,
+          folder: {},
+          "@microsoft.graph.conflictBehavior": "fail",
+        });
+        gatewayHeaders["Content-Type"] = "application/json";
+        
+        // Try to create; if conflict (409), folder already exists — find it
+        const ensureResponse = await fetch(`${GATEWAY_URL}/${graphPath}`, {
+          method: "POST",
+          headers: gatewayHeaders,
+          body,
+        });
+        
+        if (ensureResponse.ok) {
+          const folderData = await ensureResponse.json();
+          return new Response(JSON.stringify(folderData), {
+            headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+        
+        if (ensureResponse.status === 409) {
+          // Folder already exists, search for it
+          const searchPath = driveId
+            ? `sites/${siteId}/drives/${driveId}/root/children`
+            : `sites/${siteId}/drive/root/children`;
+          const searchRes = await fetch(`${GATEWAY_URL}/${searchPath}`, {
+            method: "GET",
+            headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "X-Connection-Api-Key": MICROSOFT_ONEDRIVE_API_KEY },
+          });
+          const searchData = await searchRes.json();
+          const existing = (searchData.value || []).find((item: { name: string; folder?: unknown }) => item.name === safeFolderName && item.folder);
+          if (existing) {
+            return new Response(JSON.stringify(existing), {
+              headers: { ...corsHeaders, "Content-Type": "application/json" },
+            });
+          }
+        }
+        
+        const errData = await ensureResponse.json().catch(() => ({}));
+        throw new Error(`Failed to ensure folder [${ensureResponse.status}]: ${JSON.stringify(errData)}`);
+      }
+
       default:
         return new Response(JSON.stringify({ error: "Unknown action", availableActions: [
           "list-sites", "get-site", "list-drives", "list-files", "download-file",
-          "upload-file", "list-lists", "list-items", "create-folder"
+          "upload-file", "list-lists", "list-items", "create-folder", "ensure-project-folder"
         ]}), {
           status: 400,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
