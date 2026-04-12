@@ -95,7 +95,17 @@ export default function SharePointBrowser() {
         // Also load drives
         const drivesData = await callProxy("list-drives", { siteId: site.id });
         if (!active) return;
-        setDrives(drivesData.value || []);
+        const drivesList: Drive[] = drivesData.value || [];
+        setDrives(drivesList);
+        const docsDrive = drivesList.find(
+          (d) => d.name.toLowerCase().includes("document")
+        );
+        if (docsDrive) {
+          setSelectedDrive(docsDrive);
+          const filesData = await callProxy("list-files", { siteId: site.id, driveId: docsDrive.id });
+          if (!active) return;
+          setItems(filesData.value || []);
+        }
       } catch (err: unknown) {
         if (active) setInitError(err instanceof Error ? err.message : "Erreur inconnue");
       } finally {
