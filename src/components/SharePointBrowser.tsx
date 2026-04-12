@@ -4,11 +4,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useTranslation } from "@/i18n/LanguageContext";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   FolderOpen, FileText, Upload, ArrowLeft, RefreshCw, HardDrive,
-  ChevronRight, Download, Globe, FolderPlus,
+  ChevronRight, Download, FolderPlus, AlertCircle,
 } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
@@ -52,24 +52,58 @@ export default function SharePointBrowser() {
   const [selectedDrive, setSelectedDrive] = useState<Drive | null>(null);
   const [items, setItems] = useState<DriveItem[]>([]);
   const [breadcrumb, setBreadcrumb] = useState<BreadcrumbItem[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [uploading, setUploading] = useState(false);
   const [showNewFolder, setShowNewFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
   const [initError, setInitError] = useState<string | null>(null);
 
-  const selectSite = async (site: Site) => {
-    setSelectedSite(site);
-    setLoading(true);
-    try {
-      const data = await callProxy("list-drives", { siteId: site.id });
-      setDrives(data.value || []);
-    } catch (err: unknown) {
-      toast({ title: t("sharepoint.error"), description: err instanceof Error ? err.message : "Unknown error", variant: "destructive" });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const callProxy = useCallback(async (action: string, params: Record<string, string> = {}) => {
+    const queryParams = new URLSearchParams({ action, ...params });
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) throw new Error("Not authenticated");
+
+    const res = await fetch(
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sharepoint-proxy?${queryParams}`,
+      {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        },
+      }
+    );
+    const json = await res.json();
+    if (!res.ok) throw new Error(json.error || "Request failed");
+    return json;
+  }, []);
+
+  // Auto-select the "projet" site on mount
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      setLoading(true);
+      try {
+        const data = await callProxy("list-sites", { search: "projet" });
+        const sites: Site[] = data.value || [];
+        if (!active) return;
+        if (sites.length === 0) {
+          setInitError("Site « Projet » introuvable.");
+          return;
+        }
+        const site = sites[0];
+        setSelectedSite(site);
+        // Also load drives
+        const drivesData = await callProxy("list-drives", { siteId: site.id });
+        if (!active) return;
+        setDrives(drivesData.value || []);
+      } catch (err: unknown) {
+        if (active) setInitError(err instanceof Error ? err.message : "Erreur inconnue");
+      } finally {
+        if (active) setLoading(false);
+      }
+    })();
+    return () => { active = false; };
+  }, [callProxy]);
 
   const selectDrive = async (drive: Drive) => {
     setSelectedDrive(drive);
@@ -103,12 +137,7 @@ export default function SharePointBrowser() {
   };
 
   const goBack = async () => {
-    if (!selectedDrive) {
-      if (!selectedSite) return;
-      setSelectedSite(null);
-      setDrives([]);
-      return;
-    }
+    if (!selectedDrive) return; // No going back past drives
     if (breadcrumb.length === 0) {
       setSelectedDrive(null);
       setItems([]);
@@ -168,7 +197,6 @@ export default function SharePointBrowser() {
         throw new Error(errData.error || "Upload failed");
       }
       toast({ title: t("sharepoint.uploadSuccess") });
-      // Refresh
       const refreshParams: Record<string, string> = { siteId: selectedSite.id, driveId: selectedDrive.id };
       if (breadcrumb.length > 0) refreshParams.folderId = breadcrumb[breadcrumb.length - 1].id;
       const data = await callProxy("list-files", refreshParams);
@@ -197,7 +225,6 @@ export default function SharePointBrowser() {
       setShowNewFolder(false);
       setNewFolderName("");
       toast({ title: t("sharepoint.folderCreated") });
-      // Refresh
       const refreshParams: Record<string, string> = { siteId: selectedSite.id, driveId: selectedDrive.id };
       if (breadcrumb.length > 0) refreshParams.folderId = breadcrumb[breadcrumb.length - 1].id;
       const data = await callProxy("list-files", refreshParams);
@@ -216,47 +243,22 @@ export default function SharePointBrowser() {
     return `${(bytes / 1048576).toFixed(1)} MB`;
   };
 
-  // Sites view
+  // Init loading or error
   if (!selectedSite) {
+    if (initError) {
+      return (
+        <div className="flex items-center gap-3 p-6 text-destructive">
+          <AlertCircle className="h-5 w-5" />
+          <p className="text-sm">{initError}</p>
+        </div>
+      );
+    }
     return (
-      <div className="space-y-4">
-        <div className="flex items-center gap-3">
-          <Globe className="h-5 w-5 text-primary" />
-          <h3 className="text-lg font-semibold">{t("sharepoint.selectSite")}</h3>
+      <div className="space-y-3 p-6">
+        <Skeleton className="h-8 w-48" />
+        <div className="grid gap-3 md:grid-cols-2">
+          {[1, 2].map(i => <Skeleton key={i} className="h-20 rounded-lg" />)}
         </div>
-        <div className="flex gap-2">
-          <Input
-            placeholder={t("sharepoint.searchSites")}
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
-            onKeyDown={e => e.key === "Enter" && loadSites()}
-            className="max-w-sm"
-          />
-          <Button variant="outline" size="icon" onClick={loadSites}>
-            <RefreshCw size={16} />
-          </Button>
-        </div>
-        {loading ? (
-          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3].map(i => <Skeleton key={i} className="h-24 rounded-lg" />)}
-          </div>
-        ) : sites.length === 0 ? (
-          <p className="text-muted-foreground text-sm">{t("sharepoint.noSites")}</p>
-        ) : (
-          <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-            {sites.map(site => (
-              <Card key={site.id} className="cursor-pointer hover:border-primary transition-colors" onClick={() => selectSite(site)}>
-                <CardContent className="p-4 flex items-center gap-3">
-                  <Globe className="h-8 w-8 text-primary shrink-0" />
-                  <div className="min-w-0">
-                    <p className="font-medium truncate">{site.displayName}</p>
-                    <p className="text-xs text-muted-foreground truncate">{site.webUrl}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-        )}
       </div>
     );
   }
@@ -266,10 +268,7 @@ export default function SharePointBrowser() {
     return (
       <div className="space-y-4">
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="icon" onClick={goBack}>
-            <ArrowLeft size={16} />
-          </Button>
-          <Globe className="h-5 w-5 text-primary" />
+          <HardDrive className="h-5 w-5 text-primary" />
           <h3 className="text-lg font-semibold">{selectedSite.displayName}</h3>
         </div>
         <p className="text-sm text-muted-foreground">{t("sharepoint.selectDrive")}</p>
@@ -303,9 +302,7 @@ export default function SharePointBrowser() {
         <Button variant="ghost" size="icon" onClick={goBack}>
           <ArrowLeft size={16} />
         </Button>
-        <span className="text-sm text-muted-foreground cursor-pointer hover:text-foreground" onClick={() => { setSelectedSite(null); setSelectedDrive(null); setItems([]); setBreadcrumb([]); }}>
-          {selectedSite.displayName}
-        </span>
+        <span className="text-sm font-medium">{selectedSite.displayName}</span>
         <ChevronRight size={14} className="text-muted-foreground" />
         <span className="text-sm text-muted-foreground cursor-pointer hover:text-foreground" onClick={() => { setSelectedDrive(null); setItems([]); setBreadcrumb([]); }}>
           {selectedDrive.name}
