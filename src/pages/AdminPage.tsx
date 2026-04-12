@@ -34,11 +34,89 @@ import type { User as SupaUser } from "@supabase/supabase-js";
 type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts" | "sharepoint";
 type AgentTab = "dashboard" | "tickets" | "contacts";
 
+function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser; collapsed: boolean; handleLogout: () => void }) {
+  const [tab, setTab] = useState<"projects" | "sharepoint">("projects");
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+
+  const navItems = [
+    { id: "projects" as const, icon: FolderOpen, label: t("admin.projects") },
+    { id: "sharepoint" as const, icon: HardDrive, label: "SharePoint" },
+  ];
+
+  return (
+    <div className="min-h-screen flex w-full bg-background">
+      <Sidebar collapsible="icon" className="border-r border-sidebar-border">
+        <SidebarContent className="bg-sidebar">
+          <div className="px-4 py-5 border-b border-sidebar-border">
+            <Link to="/" className="flex items-center gap-2">
+              <img src={adminLogo} alt="CloudMature" className="h-8 w-8" />
+              {!collapsed && (
+                <div>
+                  <span className="font-bold text-sidebar-foreground">CloudMature</span>
+                  <span className="block text-xs text-teal-500 font-medium">Comptable</span>
+                </div>
+              )}
+            </Link>
+          </div>
+          <SidebarGroup>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {navItems.map((item) => (
+                  <SidebarMenuItem key={item.id}>
+                    <SidebarMenuButton onClick={() => setTab(item.id)} isActive={tab === item.id} tooltip={item.label} className="gap-3">
+                      <item.icon size={18} />
+                      <span>{item.label}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+          <div className="mt-auto p-3 border-t border-sidebar-border space-y-1">
+            <SidebarMenuButton onClick={() => navigate("/portal")} tooltip={t("admin.portalClient")} className="gap-3 text-muted-foreground">
+              <Shield size={18} />
+              <span>{t("admin.portalClient")}</span>
+            </SidebarMenuButton>
+            <SidebarMenuButton onClick={handleLogout} tooltip={t("portal.logout")} className="text-destructive hover:text-destructive gap-3">
+              <LogOut size={18} />
+              <span>{t("portal.logout")}</span>
+            </SidebarMenuButton>
+          </div>
+        </SidebarContent>
+      </Sidebar>
+
+      <div className="flex-1 flex flex-col min-h-screen">
+        <header className="h-14 flex items-center justify-between border-b border-border bg-card px-4">
+          <div className="flex items-center gap-3">
+            <SidebarTrigger />
+            <h2 className="text-sm font-semibold text-card-foreground hidden sm:block">
+              {navItems.find((n) => n.id === tab)?.label}
+            </h2>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs bg-teal-500/10 text-teal-500 px-2.5 py-1 rounded-full font-medium flex items-center gap-1">
+              <Shield size={12} /> Comptable
+            </span>
+            <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
+              {(user.user_metadata?.full_name || user.email || "C").charAt(0).toUpperCase()}
+            </div>
+          </div>
+        </header>
+        <main className="flex-1 p-6 overflow-auto">
+          {tab === "projects" && <AdminProjectsInner readOnly />}
+          {tab === "sharepoint" && <SharePointTab />}
+        </main>
+      </div>
+    </div>
+  );
+}
+
 function AdminContent() {
   const { user, ready } = useAuthSession();
   const [tab, setTab] = useState<AdminTab>("dashboard");
   const [agentTab, setAgentTab] = useState<AgentTab>("dashboard");
-  const { isAdmin, isAgent, loading: rolesLoading } = useUserRoles();
+  const { isAdmin, isAgent, isComptable, loading: rolesLoading } = useUserRoles();
   const mfaVerified = useMfaCheck();
   const navigate = useNavigate();
   const { state } = useSidebar();
@@ -72,17 +150,21 @@ function AdminContent() {
   }, [mfaVerified, ready, user, navigate]);
 
   useEffect(() => {
-    if (!rolesLoading && !isAdmin && !isAgent && ready && user) navigate("/portal");
-  }, [isAdmin, isAgent, rolesLoading, ready, user, navigate]);
+    if (!rolesLoading && !isAdmin && !isAgent && !isComptable && ready && user) navigate("/portal");
+  }, [isAdmin, isAgent, isComptable, rolesLoading, ready, user, navigate]);
 
   if (!ready || rolesLoading || mfaVerified === null) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">{t("admin.loading")}</div>;
-  if (!user || (!isAdmin && !isAgent)) return null;
+  if (!user || (!isAdmin && !isAgent && !isComptable)) return null;
 
   const handleLogout = async () => {
     clearSmsMfaVerified();
     await supabase.auth.signOut();
     navigate("/");
   };
+
+  if (isComptable && !isAdmin && !isAgent) {
+    return <ComptableViewInline user={user} collapsed={collapsed} handleLogout={handleLogout} />;
+  }
 
   if (isAgent && !isAdmin) {
     const agentNavItems: { id: AgentTab; icon: typeof LayoutDashboard; label: string }[] = [
@@ -778,6 +860,10 @@ function AdminDashboard() {
 
 /* ─── Projects Management ─── */
 function AdminProjects() {
+  return <AdminProjectsInner readOnly={false} />;
+}
+
+function AdminProjectsInner({ readOnly = false }: { readOnly?: boolean }) {
   const [projects, setProjects] = useState<any[]>([]);
   const [profiles, setProfiles] = useState<Record<string, any>>({});
   const [search, setSearch] = useState("");
@@ -905,7 +991,7 @@ function AdminProjects() {
                         <Flag size={10} className="inline mr-1" />{pc.label}
                       </span>
                     )}
-                    <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => {
+                    {!readOnly && <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => {
                       if (isEditing) saveProject(p.id);
                       else {
                         setEditingId(p.id); setEditStatus(p.status); setEditProgress(p.progress);
@@ -916,8 +1002,8 @@ function AdminProjects() {
                       }
                     }}>
                       {isEditing ? "Sauvegarder" : "Modifier"}
-                    </Button>
-                    {isEditing && <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setEditingId(null)}>Annuler</Button>}
+                    </Button>}
+                    {!readOnly && isEditing && <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setEditingId(null)}>Annuler</Button>}
                   </div>
                 </div>
 

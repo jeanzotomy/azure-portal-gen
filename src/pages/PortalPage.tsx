@@ -159,10 +159,10 @@ function PortalContent() {
           </SidebarGroup>
 
           <div className="mt-auto p-3 border-t border-sidebar-border space-y-1">
-            {(isAdmin || isAgent) && (
-              <SidebarMenuButton onClick={() => navigate("/admin")} tooltip={isAdmin ? t("portal.admin") : t("portal.agentSpace")} className="gap-3 text-primary">
+            {(isAdmin || isAgent || isComptable) && (
+              <SidebarMenuButton onClick={() => navigate("/admin")} tooltip={isAdmin ? t("portal.admin") : isComptable ? "Espace Comptable" : t("portal.agentSpace")} className="gap-3 text-primary">
                 <Shield size={18} />
-                <span>{isAdmin ? t("portal.admin") : t("portal.agentSpace")}</span>
+                <span>{isAdmin ? t("portal.admin") : isComptable ? "Espace Comptable" : t("portal.agentSpace")}</span>
               </SidebarMenuButton>
             )}
             <SidebarMenuButton onClick={handleLogout} tooltip={t("portal.logout")} className="text-destructive hover:text-destructive gap-3">
@@ -182,9 +182,9 @@ function PortalContent() {
             </h2>
           </div>
           <div className="flex items-center gap-2">
-            {(isAdmin || isAgent) && (
+            {(isAdmin || isAgent || isComptable) && (
               <span className="text-xs bg-primary/10 text-primary px-2.5 py-1 rounded-full font-medium flex items-center gap-1 cursor-pointer hover:bg-primary/20 transition-colors" onClick={() => navigate("/admin")}>
-                <Shield size={12} /> {isAdmin ? "Admin" : "Agent"}
+                <Shield size={12} /> {isAdmin ? "Admin" : isComptable ? "Comptable" : "Agent"}
               </span>
             )}
             <Button variant="ghost" size="icon" className="text-muted-foreground">
