@@ -77,20 +77,31 @@ Deno.serve(async (req) => {
 
       const userId = claimsData.claims.sub;
 
-      // Verify phone matches user profile
-      const { data: profile } = await supabaseAdmin
-        .from("profiles")
-        .select("phone")
-        .eq("user_id", userId)
-        .maybeSingle();
+      // For email MFA: verify email matches user
+      if (phone.startsWith("email:")) {
+        const emailFromCode = phone.replace("email:", "");
+        const { data: userData } = await supabaseAdmin.auth.admin.getUserById(userId);
+        if (!userData?.user?.email || userData.user.email !== emailFromCode) {
+          return new Response(JSON.stringify({ error: "Email does not match user" }), {
+            status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
+      } else {
+        // For SMS MFA: verify phone matches user profile
+        const { data: profile } = await supabaseAdmin
+          .from("profiles")
+          .select("phone")
+          .eq("user_id", userId)
+          .maybeSingle();
 
-      const normalizedProfilePhone = profile?.phone?.replace(/[\s\-()]/g, "") || "";
-      const normalizedInputPhone = phone.replace(/[\s\-()]/g, "");
+        const normalizedProfilePhone = profile?.phone?.replace(/[\s\-()]/g, "") || "";
+        const normalizedInputPhone = phone.replace(/[\s\-()]/g, "");
 
-      if (normalizedProfilePhone !== normalizedInputPhone) {
-        return new Response(JSON.stringify({ error: "Phone number does not match profile" }), {
-          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
+        if (normalizedProfilePhone !== normalizedInputPhone) {
+          return new Response(JSON.stringify({ error: "Phone number does not match profile" }), {
+            status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+          });
+        }
       }
 
       // Get user roles for redirect info
