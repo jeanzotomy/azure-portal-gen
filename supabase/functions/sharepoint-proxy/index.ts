@@ -45,6 +45,8 @@ async function getGraphToken(): Promise<string> {
   }
 
   const data = await res.json();
+  console.log("Azure AD token acquired, expires_in:", data.expires_in, "scopes:", data.scope);
+  console.log("Token prefix:", data.access_token?.substring(0, 20));
   cachedToken = {
     value: data.access_token,
     expiresAt: Date.now() + (data.expires_in * 1000),
@@ -294,6 +296,7 @@ serve(async (req) => {
 
     const data = await response.json();
     if (!response.ok) {
+      console.error("Graph API failed:", response.status, "URL:", `${GRAPH_BASE}/${graphPath}`, "Response:", JSON.stringify(data));
       throw new Error(`Graph API error [${response.status}]: ${JSON.stringify(data)}`);
     }
 
