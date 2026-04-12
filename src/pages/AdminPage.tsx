@@ -85,8 +85,7 @@ function AdminContent() {
   };
 
   if (isComptable && !isAdmin && !isAgent) {
-    type ComptableTab = "projects" | "sharepoint";
-    return <ComptableView user={user} collapsed={collapsed} handleLogout={handleLogout} unrepliedCount={0} />;
+    return <ComptableViewInline user={user} collapsed={collapsed} handleLogout={handleLogout} />;
   }
 
   if (isAgent && !isAdmin) {
