@@ -34,6 +34,7 @@ import type { User as SupaUser } from "@supabase/supabase-js";
 
 type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts" | "sharepoint";
 type AgentTab = "dashboard" | "tickets" | "contacts";
+type GestionnaireTab = "dashboard" | "projects" | "sharepoint" | "tickets" | "contacts";
 
 function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser; collapsed: boolean; handleLogout: () => void }) {
   const [tab, setTab] = useState<"projects" | "sharepoint">("projects");
