@@ -34,6 +34,7 @@ import SharePointTab from "@/components/SharePointTab";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RePieChart, Pie, Cell, AreaChart, Area } from "recharts";
 import type { User as SupaUser } from "@supabase/supabase-js";
 import { PortalInfoBar } from "@/components/PortalInfoBar";
+import { NotificationBell } from "@/components/NotificationBell";
 
 type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts" | "sharepoint";
 type AgentTab = "dashboard" | "tickets" | "contacts";

@@ -39,6 +39,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { PieChart as RePieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip } from "recharts";
 import type { User as SupaUser } from "@supabase/supabase-js";
 import { PortalInfoBar } from "@/components/PortalInfoBar";
+import { NotificationBell } from "@/components/NotificationBell";
 
 type Tab = "dashboard" | "projects" | "tickets" | "profile";
 
@@ -190,9 +191,7 @@ function PortalContent() {
                 <Shield size={12} /> {isAdmin ? "Admin" : isGestionnaire ? "Gestionnaire" : isComptable ? "Comptable" : "Agent"}
               </span>
             )}
-            <Button variant="ghost" size="icon" className="text-muted-foreground">
-              <Bell size={18} />
-            </Button>
+            <NotificationBell mode="client" onNavigate={(target) => setTab(target as Tab)} />
             <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
               {(user.user_metadata?.full_name || user.email || "U").charAt(0).toUpperCase()}
             </div>
