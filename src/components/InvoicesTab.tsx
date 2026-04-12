@@ -77,6 +77,7 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
   const [parsedData, setParsedData] = useState<ParsedInvoice | null>(null);
   const [showForm, setShowForm] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
+  const [filterProject, setFilterProject] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [currentStep, setCurrentStep] = useState<InvoiceStep>("idle");
 
@@ -172,7 +173,9 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
       setShowForm(true);
       setCurrentStep("validation");
     } catch (err: unknown) {
+      const message = err instanceof Error ? err.message : "Une erreur est survenue pendant l'analyse.";
       toast({ title: "Erreur de lecture", description: message, variant: "destructive" });
+      setCurrentStep("idle");
     } finally {
       input.value = "";
       setParsing(false);
