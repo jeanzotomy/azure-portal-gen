@@ -296,6 +296,7 @@ serve(async (req) => {
 
     const data = await response.json();
     if (!response.ok) {
+      console.error("Graph API failed:", response.status, "URL:", `${GRAPH_BASE}/${graphPath}`, "Response:", JSON.stringify(data));
       throw new Error(`Graph API error [${response.status}]: ${JSON.stringify(data)}`);
     }
 
