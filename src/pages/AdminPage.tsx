@@ -153,11 +153,11 @@ function AdminContent() {
   }, [mfaVerified, ready, user, navigate]);
 
   useEffect(() => {
-    if (!rolesLoading && !isAdmin && !isAgent && !isComptable && ready && user) navigate("/portal");
-  }, [isAdmin, isAgent, isComptable, rolesLoading, ready, user, navigate]);
+    if (!rolesLoading && !isAdmin && !isAgent && !isComptable && !isGestionnaire && ready && user) navigate("/portal");
+  }, [isAdmin, isAgent, isComptable, isGestionnaire, rolesLoading, ready, user, navigate]);
 
   if (!ready || rolesLoading || mfaVerified === null) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">{t("admin.loading")}</div>;
-  if (!user || (!isAdmin && !isAgent && !isComptable)) return null;
+  if (!user || (!isAdmin && !isAgent && !isComptable && !isGestionnaire)) return null;
 
   const handleLogout = async () => {
     clearSmsMfaVerified();
