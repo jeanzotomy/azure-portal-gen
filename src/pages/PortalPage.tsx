@@ -1242,7 +1242,7 @@ function TicketsTab({ user }: { user: SupaUser }) {
 }
 
 function ProfileTab({ user }: { user: SupaUser }) {
-  const [profile, setProfile] = useState({ full_name: "", company: "", phone: "" });
+  const [profile, setProfile] = useState({ full_name: "", company: "", phone: "", location: "", timezone: "" });
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
