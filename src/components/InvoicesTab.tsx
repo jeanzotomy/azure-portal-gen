@@ -368,20 +368,45 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
         )}
       </div>
 
-      {/* Status banner */}
-      {(parsing || uploading) && (
-        <div className="flex items-center gap-3 rounded-lg border border-primary/30 bg-primary/5 p-4 animate-fade-up">
-          <Loader2 className="h-5 w-5 animate-spin text-primary shrink-0" />
-          <div>
-            <p className="font-medium text-sm text-foreground">
-              {parsing && "Analyse de la facture en cours…"}
-              {uploading && "Enregistrement et synchronisation…"}
-            </p>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {parsing && "Le fichier est en cours de lecture par l'IA. Veuillez patienter."}
-              {uploading && "Sauvegarde de la facture, envoi sur SharePoint et mise à jour du solde projet."}
-            </p>
+      {/* Step progress bar */}
+      {currentStep !== "idle" && (
+        <div className="rounded-lg border bg-card p-4 space-y-3 animate-fade-up">
+          <div className="flex items-center justify-between">
+            {STEPS.map((step, i) => {
+              const stepIndex = STEPS.findIndex(s => s.key === currentStep);
+              const doneStepIndex = currentStep === "done" ? STEPS.length : stepIndex;
+              const isActive = step.key === currentStep && currentStep !== "done";
+              const isDone = i < doneStepIndex || currentStep === "done";
+
+              return (
+                <div key={step.key} className="flex flex-col items-center flex-1 relative">
+                  {i > 0 && (
+                    <div className={`absolute top-3.5 -left-1/2 w-full h-0.5 ${isDone ? "bg-primary" : "bg-muted"}`} />
+                  )}
+                  <div className={`relative z-10 flex items-center justify-center w-7 h-7 rounded-full border-2 text-xs font-bold transition-all ${
+                    isDone
+                      ? "bg-primary border-primary text-primary-foreground"
+                      : isActive
+                        ? "border-primary text-primary bg-background"
+                        : "border-muted text-muted-foreground bg-background"
+                  }`}>
+                    {isDone ? <Check size={14} /> : isActive ? <Loader2 size={14} className="animate-spin" /> : i + 1}
+                  </div>
+                  <span className={`text-xs mt-1.5 font-medium ${isDone ? "text-primary" : isActive ? "text-foreground" : "text-muted-foreground"}`}>
+                    {step.label}
+                  </span>
+                </div>
+              );
+            })}
           </div>
+          <Progress value={
+            currentStep === "done" ? 100
+            : currentStep === "sauvegarde" ? 75
+            : currentStep === "upload" ? 50
+            : currentStep === "validation" ? 25
+            : currentStep === "analyse" ? 10
+            : 0
+          } className="h-1.5" />
         </div>
       )}
 
