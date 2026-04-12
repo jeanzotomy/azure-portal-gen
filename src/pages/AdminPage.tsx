@@ -3,7 +3,7 @@ import adminLogo from "@/assets/cloudmature-logo.png";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRoles } from "@/hooks/use-admin";
-import { useMfaCheck } from "@/hooks/use-mfa";
+import { useMfaCheck, clearSmsMfaVerified } from "@/hooks/use-mfa";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { useTranslation } from "@/i18n/LanguageContext";
 import { Button } from "@/components/ui/button";
