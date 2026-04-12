@@ -1117,7 +1117,7 @@ function AdminProjectsInner({ readOnly = false }: { readOnly?: boolean }) {
           const sc = statusConfig[p.status] || statusConfig.en_cours;
           const pc = priorityConfig[p.priority] || priorityConfig.normal;
           const profile = profiles[p.user_id];
-          const isEditing = editingId === p.id;
+          
 
           return (
             <div key={p.id} className="group relative bg-card rounded-2xl shadow-card border border-border/50 hover:shadow-card-hover hover:border-primary/30 transition-all duration-300 overflow-hidden">
@@ -1229,6 +1229,105 @@ function AdminProjectsInner({ readOnly = false }: { readOnly?: boolean }) {
         })}
       </div>
       {filtered.length === 0 && <p className="text-center text-muted-foreground py-8">Aucun projet trouvé.</p>}
+
+      {/* Edit Project Dialog */}
+      <Dialog open={!!editingId} onOpenChange={(open) => { if (!open) setEditingId(null); }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Modifier le projet</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium text-card-foreground">Nom du projet</label>
+              <Input value={editName} onChange={(e) => setEditName(e.target.value)} className="mt-1" />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-card-foreground">Description</label>
+              <Textarea value={editDescription} onChange={(e) => setEditDescription(e.target.value)} rows={3} className="mt-1" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-sm font-medium text-card-foreground">Budget</label>
+                <Input value={editBudget} onChange={(e) => setEditBudget(e.target.value)} placeholder="Ex: 5000" className="mt-1" />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-card-foreground">Délai</label>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal mt-1", !editDeadline && "text-muted-foreground")}>
+                      <Calendar size={14} className="mr-2" />
+                      {editDeadline ? (() => { try { return format(new Date(editDeadline), "PPP", { locale: fr }); } catch { return editDeadline; } })() : "Sélectionner une date"}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0 z-[60]" align="start">
+                    <CalendarWidget
+                      mode="single"
+                      selected={editDeadline ? (() => { try { const d = new Date(editDeadline); return isNaN(d.getTime()) ? undefined : d; } catch { return undefined; } })() : undefined}
+                      onSelect={(date) => setEditDeadline(date ? date.toISOString().split("T")[0] : "")}
+                      disabled={(date) => date <= new Date()}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-card-foreground">Priorité</label>
+              <div className="flex gap-2 mt-1">
+                {[{ value: "normal", label: "Normal" }, { value: "haute", label: "Haute" }, { value: "urgent", label: "Urgent" }].map((opt) => (
+                  <button key={opt.value} onClick={() => setEditPriority(opt.value)}
+                    className={`text-sm px-3 py-1.5 rounded-lg border transition-colors ${editPriority === opt.value ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground border-border"}`}
+                  >{opt.label}</button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-card-foreground">Statut</label>
+              <div className="flex gap-2 mt-1">
+                {statusOptions.map((opt) => (
+                  <button key={opt.value} onClick={() => setEditStatus(opt.value)}
+                    className={`text-sm px-3 py-1.5 rounded-lg border transition-colors ${editStatus === opt.value ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground border-border"}`}
+                  >{opt.label}</button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-card-foreground">Progression : {editProgress}%</label>
+              <input type="range" min="0" max="100" value={editProgress} onChange={(e) => setEditProgress(Number(e.target.value))}
+                className="w-full mt-1 accent-[hsl(var(--primary))]" />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-card-foreground">Services</label>
+              <div className="flex flex-wrap gap-1.5 mt-1">
+                {serviceOptions.map((s) => (
+                  <button key={s} onClick={() => setEditServices(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s])}
+                    className={`text-xs px-2.5 py-1 rounded-lg border transition-colors ${editServices.includes(s) ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground border-border"}`}
+                  >{s}</button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-card-foreground">Gestionnaire assigné</label>
+              <Select value={editGestionnaire || "none"} onValueChange={(v) => setEditGestionnaire(v === "none" ? null : v)}>
+                <SelectTrigger className="mt-1">
+                  <SelectValue placeholder="Aucun gestionnaire" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">Aucun gestionnaire</SelectItem>
+                  {gestionnaires.map((g) => (
+                    <SelectItem key={g.user_id} value={g.user_id}>{g.full_name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingId(null)}>Annuler</Button>
+            <Button onClick={() => { if (editingId) saveProject(editingId); }} className="gradient-primary text-primary-foreground border-0">Sauvegarder</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
