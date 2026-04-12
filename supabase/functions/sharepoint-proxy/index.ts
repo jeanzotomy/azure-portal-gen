@@ -7,7 +7,50 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type",
 };
 
-const GATEWAY_URL = "https://connector-gateway.lovable.dev/microsoft_onedrive";
+const GRAPH_BASE = "https://graph.microsoft.com/v1.0";
+
+// Cache the Azure AD token in memory (edge function lifecycle)
+let cachedToken: { value: string; expiresAt: number } | null = null;
+
+async function getGraphToken(): Promise<string> {
+  if (cachedToken && Date.now() < cachedToken.expiresAt - 60_000) {
+    return cachedToken.value;
+  }
+
+  const tenantId = Deno.env.get("AZURE_TENANT_ID");
+  const clientId = Deno.env.get("AZURE_CLIENT_ID");
+  const clientSecret = Deno.env.get("AZURE_CLIENT_SECRET");
+
+  if (!tenantId || !clientId || !clientSecret) {
+    throw new Error("Azure AD credentials (AZURE_TENANT_ID, AZURE_CLIENT_ID, AZURE_CLIENT_SECRET) are not configured");
+  }
+
+  const tokenUrl = `https://login.microsoftonline.com/${tenantId}/oauth2/v2.0/token`;
+  const params = new URLSearchParams({
+    grant_type: "client_credentials",
+    client_id: clientId,
+    client_secret: clientSecret,
+    scope: "https://graph.microsoft.com/.default",
+  });
+
+  const res = await fetch(tokenUrl, {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: params.toString(),
+  });
+
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(`Azure AD token request failed [${res.status}]: ${err}`);
+  }
+
+  const data = await res.json();
+  cachedToken = {
+    value: data.access_token,
+    expiresAt: Date.now() + (data.expires_in * 1000),
+  };
+  return cachedToken.value;
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -15,16 +58,6 @@ serve(async (req) => {
   }
 
   try {
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY is not configured");
-    }
-
-    const MICROSOFT_ONEDRIVE_API_KEY = Deno.env.get("MICROSOFT_ONEDRIVE_API_KEY");
-    if (!MICROSOFT_ONEDRIVE_API_KEY) {
-      throw new Error("MICROSOFT_ONEDRIVE_API_KEY is not configured");
-    }
-
     // Verify JWT
     const authHeader = req.headers.get("Authorization");
     if (!authHeader) {
@@ -48,12 +81,14 @@ serve(async (req) => {
       });
     }
 
+    // Get Microsoft Graph token via Azure AD client credentials
+    const graphToken = await getGraphToken();
+
     const url = new URL(req.url);
     const action = url.searchParams.get("action");
 
-    const gatewayHeaders: Record<string, string> = {
-      Authorization: `Bearer ${LOVABLE_API_KEY}`,
-      "X-Connection-Api-Key": MICROSOFT_ONEDRIVE_API_KEY,
+    const graphHeaders: Record<string, string> = {
+      Authorization: `Bearer ${graphToken}`,
     };
 
     let graphPath: string;
@@ -125,10 +160,10 @@ serve(async (req) => {
         const fileBody = await req.arrayBuffer();
         body = undefined; // We'll handle binary separately
         
-        const uploadResponse = await fetch(`${GATEWAY_URL}/${graphPath}`, {
+        const uploadResponse = await fetch(`${GRAPH_BASE}/${graphPath}`, {
           method: "PUT",
           headers: {
-            ...gatewayHeaders,
+            ...graphHeaders,
             "Content-Type": req.headers.get("Content-Type") || "application/octet-stream",
           },
           body: fileBody,
@@ -178,7 +213,7 @@ serve(async (req) => {
           folder: {},
           "@microsoft.graph.conflictBehavior": "rename",
         });
-        gatewayHeaders["Content-Type"] = "application/json";
+        graphHeaders["Content-Type"] = "application/json";
         break;
       }
 
@@ -203,12 +238,12 @@ serve(async (req) => {
           folder: {},
           "@microsoft.graph.conflictBehavior": "fail",
         });
-        gatewayHeaders["Content-Type"] = "application/json";
+        graphHeaders["Content-Type"] = "application/json";
         
         // Try to create; if conflict (409), folder already exists — find it
-        const ensureResponse = await fetch(`${GATEWAY_URL}/${graphPath}`, {
+        const ensureResponse = await fetch(`${GRAPH_BASE}/${graphPath}`, {
           method: "POST",
-          headers: gatewayHeaders,
+          headers: graphHeaders,
           body,
         });
         
@@ -224,9 +259,9 @@ serve(async (req) => {
           const searchPath = driveId
             ? `sites/${siteId}/drives/${driveId}/root/children`
             : `sites/${siteId}/drive/root/children`;
-          const searchRes = await fetch(`${GATEWAY_URL}/${searchPath}`, {
+          const searchRes = await fetch(`${GRAPH_BASE}/${searchPath}`, {
             method: "GET",
-            headers: { Authorization: `Bearer ${LOVABLE_API_KEY}`, "X-Connection-Api-Key": MICROSOFT_ONEDRIVE_API_KEY },
+            headers: graphHeaders,
           });
           const searchData = await searchRes.json();
           const existing = (searchData.value || []).find((item: { name: string; folder?: unknown }) => item.name === safeFolderName && item.folder);
@@ -251,9 +286,9 @@ serve(async (req) => {
         });
     }
 
-    const response = await fetch(`${GATEWAY_URL}/${graphPath}`, {
+    const response = await fetch(`${GRAPH_BASE}/${graphPath}`, {
       method,
-      headers: gatewayHeaders,
+      headers: graphHeaders,
       body,
     });
 
