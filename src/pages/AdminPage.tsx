@@ -1767,6 +1767,14 @@ function AdminUsers() {
   const [mfaStatus, setMfaStatus] = useState<Record<string, { enrolled: boolean; factors: any[]; has_phone: boolean; phone: string | null }>>({});
   const [mfaLoading, setMfaLoading] = useState<string | null>(null);
   const [mfaDialogUser, setMfaDialogUser] = useState<any | null>(null);
+  const [showInviteDialog, setShowInviteDialog] = useState(false);
+  const [inviteMode, setInviteMode] = useState<"single" | "csv">("single");
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteName, setInviteName] = useState("");
+  const [inviteRole, setInviteRole] = useState("client");
+  const [inviteLoading, setInviteLoading] = useState(false);
+  const [csvUsers, setCsvUsers] = useState<{ email: string; full_name: string; role: string }[]>([]);
+  const [importResults, setImportResults] = useState<{ email: string; success: boolean; error?: string }[] | null>(null);
   const { toast } = useToast();
 
   const load = async () => {
