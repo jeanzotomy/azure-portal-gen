@@ -1124,10 +1124,17 @@ function AdminProjectsInner({ readOnly = false, assignedCount }: { readOnly?: bo
               <span className="text-sm font-semibold text-primary flex items-center gap-1.5">
                 <UserCheck size={14} /> Assignation :
               </span>
-              {[{ value: "all", label: "Tous" }, { value: "mine", label: "Mes projets" }].map((opt) => (
+              {[{ value: "all", label: "Tous" }, { value: "mine", label: "Mes assignations" }].map((opt) => (
                 <button key={opt.value} onClick={() => setAssignedFilter(opt.value as "all" | "mine")}
-                  className={`text-sm px-4 py-1.5 rounded-full font-medium transition-colors ${assignedFilter === opt.value ? "bg-primary text-primary-foreground shadow-sm" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
-                >{opt.label}</button>
+                  className={`relative text-sm px-4 py-1.5 rounded-full font-medium transition-colors ${assignedFilter === opt.value ? "bg-primary text-primary-foreground shadow-sm" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
+                >
+                  {opt.label}
+                  {opt.value === "mine" && (assignedCount ?? 0) > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold px-1">
+                      {assignedCount}
+                    </span>
+                  )}
+                </button>
               ))}
             </div>
           )}
