@@ -127,6 +127,7 @@ function AdminContent() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const [unrepliedCount, setUnrepliedCount] = useState(0);
+  const [assignedProjectsCount, setAssignedProjectsCount] = useState(0);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -145,6 +146,20 @@ function AdminContent() {
     const interval = setInterval(fetchUnreplied, 30000);
     return () => clearInterval(interval);
   }, []);
+
+  useEffect(() => {
+    if (!isGestionnaire || !user) return;
+    const fetchAssigned = async () => {
+      const { count } = await supabase
+        .from("projects")
+        .select("id", { count: "exact", head: true })
+        .eq("gestionnaire_id", user.id);
+      setAssignedProjectsCount(count ?? 0);
+    };
+    void fetchAssigned();
+    const interval = setInterval(fetchAssigned, 30000);
+    return () => clearInterval(interval);
+  }, [isGestionnaire, user]);
 
   useEffect(() => {
     if (ready && !user) navigate("/auth");
@@ -206,6 +221,11 @@ function AdminContent() {
                           {item.id === "tickets" && unrepliedCount > 0 && (
                             <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold px-1">
                               {unrepliedCount}
+                            </span>
+                          )}
+                          {item.id === "projects" && assignedProjectsCount > 0 && (
+                            <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold px-1">
+                              {assignedProjectsCount}
                             </span>
                           )}
                         </div>
