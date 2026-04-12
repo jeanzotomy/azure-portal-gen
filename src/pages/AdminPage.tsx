@@ -1021,7 +1021,8 @@ function AdminProjectsInner({ readOnly = false }: { readOnly?: boolean }) {
       (profiles[p.user_id]?.company || "").toLowerCase().includes(search.toLowerCase());
     const matchesStatus = statusFilter === "all" || p.status === statusFilter;
     const matchesPriority = priorityFilter === "all" || p.priority === priorityFilter;
-    return matchesSearch && matchesStatus && matchesPriority;
+    const matchesAssigned = assignedFilter === "all" || p.gestionnaire_id === currentUserId;
+    return matchesSearch && matchesStatus && matchesPriority && matchesAssigned;
   });
 
   const statusOptions = [
