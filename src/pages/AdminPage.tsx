@@ -24,6 +24,7 @@ import {
   LayoutDashboard, FolderOpen, LifeBuoy, Users, LogOut, Shield, Clock, CheckCircle2,
   AlertCircle, Bell, ChevronDown, ChevronUp, MessageSquare, Search, Send, UserCog,
   Flag, DollarSign, Calendar, Filter, TrendingUp, Activity, BarChart3, PieChart, ShieldBan, ShieldCheck, Trash2, RefreshCw,
+  Smartphone, Phone, X,
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RePieChart, Pie, Cell, AreaChart, Area } from "recharts";
 import type { User as SupaUser } from "@supabase/supabase-js";
