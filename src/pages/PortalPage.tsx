@@ -191,7 +191,7 @@ function PortalContent() {
                 <Shield size={12} /> {isAdmin ? "Admin" : isGestionnaire ? "Gestionnaire" : isComptable ? "Comptable" : "Agent"}
               </span>
             )}
-            <NotificationBell mode="client" onNavigate={(target) => setTab(target as Tab)} />
+            <NotificationBell role="client" onNavigate={(target) => setTab(target as Tab)} />
             <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
               {(user.user_metadata?.full_name || user.email || "U").charAt(0).toUpperCase()}
             </div>
