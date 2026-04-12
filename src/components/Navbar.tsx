@@ -1,25 +1,29 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Globe } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { Button } from "@/components/ui/button";
-
-const navLinks = [
-  { label: "Accueil", href: "#hero" },
-  { label: "Services", href: "#services" },
-  { label: "Industries", href: "#industries" },
-  { label: "Pourquoi Nous", href: "#why-us" },
-  { label: "Contact", href: "#contact" },
-];
+import { useTranslation } from "@/i18n/LanguageContext";
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
+  const { t, locale, setLocale } = useTranslation();
+
+  const navLinks = [
+    { label: t("nav.home"), href: "#hero" },
+    { label: t("nav.services"), href: "#services" },
+    { label: t("nav.industries"), href: "#industries" },
+    { label: t("nav.whyUs"), href: "#why-us" },
+    { label: t("nav.contact"), href: "#contact" },
+  ];
 
   const scrollTo = (id: string) => {
     setOpen(false);
     const el = document.querySelector(id);
     el?.scrollIntoView({ behavior: "smooth" });
   };
+
+  const toggleLang = () => setLocale(locale === "fr" ? "en" : "fr");
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass">
@@ -35,9 +39,16 @@ export function Navbar() {
               {l.label}
             </button>
           ))}
+          <button
+            onClick={toggleLang}
+            className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+          >
+            <Globe size={16} />
+            {locale === "fr" ? "EN" : "FR"}
+          </button>
           <Link to="/portal">
             <Button size="sm" className="gradient-primary text-primary-foreground border-0 hover:opacity-90">
-              Portail Client
+              {t("nav.portal")}
             </Button>
           </Link>
         </div>
@@ -55,9 +66,16 @@ export function Navbar() {
               {l.label}
             </button>
           ))}
+          <button
+            onClick={toggleLang}
+            className="block w-full text-left px-6 py-3 text-sm text-secondary-foreground hover:bg-secondary/50 flex items-center gap-2"
+          >
+            <Globe size={16} />
+            {locale === "fr" ? "English" : "Français"}
+          </button>
           <div className="px-6 pt-2">
             <Link to="/portal" onClick={() => setOpen(false)}>
-              <Button size="sm" className="w-full gradient-primary text-primary-foreground border-0">Portail Client</Button>
+              <Button size="sm" className="w-full gradient-primary text-primary-foreground border-0">{t("nav.portal")}</Button>
             </Link>
           </div>
         </div>
