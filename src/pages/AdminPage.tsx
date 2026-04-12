@@ -34,6 +34,7 @@ import SharePointTab from "@/components/SharePointTab";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RePieChart, Pie, Cell, AreaChart, Area } from "recharts";
 import type { User as SupaUser } from "@supabase/supabase-js";
 import { PortalInfoBar } from "@/components/PortalInfoBar";
+import { NotificationBell } from "@/components/NotificationBell";
 
 type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts" | "sharepoint";
 type AgentTab = "dashboard" | "tickets" | "contacts";
@@ -103,6 +104,7 @@ function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser
             <span className="text-xs bg-teal-500/10 text-teal-500 px-2.5 py-1 rounded-full font-medium flex items-center gap-1">
               <Shield size={12} /> Comptable
             </span>
+            <NotificationBell mode="admin" onNavigate={(target) => setTab(target as "projects" | "sharepoint")} />
             <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
               {(user.user_metadata?.full_name || user.email || "C").charAt(0).toUpperCase()}
             </div>
@@ -263,6 +265,7 @@ function AdminContent() {
               <span className="text-xs bg-blue-500/10 text-blue-500 px-2.5 py-1 rounded-full font-medium flex items-center gap-1">
                 <Shield size={12} /> Gestionnaire
               </span>
+              <NotificationBell mode="admin" onNavigate={(target) => setGestionnaireTab(target as GestionnaireTab)} />
               <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
                 {(user.user_metadata?.full_name || user.email || "G").charAt(0).toUpperCase()}
               </div>
@@ -349,6 +352,7 @@ function AdminContent() {
               <span className="text-xs bg-accent/10 text-accent px-2.5 py-1 rounded-full font-medium flex items-center gap-1">
                 <Shield size={12} /> Agent
               </span>
+              <NotificationBell mode="admin" onNavigate={(target) => setAgentTab(target as AgentTab)} />
               <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
                 {(user.user_metadata?.full_name || user.email || "A").charAt(0).toUpperCase()}
               </div>
@@ -435,6 +439,7 @@ function AdminContent() {
             <span className="text-xs bg-primary/10 text-primary px-2.5 py-1 rounded-full font-medium flex items-center gap-1">
               <Shield size={12} /> Admin
             </span>
+            <NotificationBell mode="admin" onNavigate={(target) => setTab(target as AdminTab)} />
             <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
               {(user.user_metadata?.full_name || user.email || "A").charAt(0).toUpperCase()}
             </div>
