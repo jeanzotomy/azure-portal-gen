@@ -76,6 +76,7 @@ function AdminContent() {
   if (!user || (!isAdmin && !isAgent)) return null;
 
   const handleLogout = async () => {
+    clearSmsMfaVerified();
     await supabase.auth.signOut();
     navigate("/");
   };
