@@ -958,6 +958,8 @@ function AdminProjectsInner({ readOnly = false }: { readOnly?: boolean }) {
   const [projects, setProjects] = useState<any[]>([]);
   const [profiles, setProfiles] = useState<Record<string, any>>({});
   const [gestionnaires, setGestionnaires] = useState<{ user_id: string; full_name: string }[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [assignedFilter, setAssignedFilter] = useState<"all" | "mine">("all");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
@@ -971,6 +973,7 @@ function AdminProjectsInner({ readOnly = false }: { readOnly?: boolean }) {
   const [editPriority, setEditPriority] = useState("normal");
   const [editServices, setEditServices] = useState<string[]>([]);
   const [editGestionnaire, setEditGestionnaire] = useState<string | null>(null);
+  const [isCurrentUserGestionnaire, setIsCurrentUserGestionnaire] = useState(false);
   const { toast } = useToast();
 
   const serviceOptions = [
