@@ -1,36 +1,55 @@
 
 
-## Plan: Auto-navigate to Documents drive on mount
+# Déployer le portail pour une autre organisation
 
-**Goal**: When clicking the "Fichiers" tab, skip the drives selection screen and go directly into the "Documents" library of the "Projet" site.
+## Contexte
 
-### Changes
+Le projet actuel combine un **site web public** (page d'accueil `/`) et un **portail d'administration** (`/admin`, `/portal`, `/auth`, `/mfa`). Pour déployer uniquement la partie portail pour une autre organisation avec un tenant Azure différent, voici les étapes nécessaires.
 
-**File: `src/components/SharePointBrowser.tsx`**
+## Plan
 
-Modify the `useEffect` that runs on mount to also auto-select the "Documents" drive:
+### 1. Supprimer la page d'accueil publique
 
-1. After loading drives, find the drive named "Documents" (or "Documents" / "Shared Documents" — match case-insensitively containing "document").
-2. If found, auto-select it and immediately load its root files.
-3. If not found, fall back to the current drives list view.
+- Modifier `src/App.tsx` pour rediriger `/` directement vers `/auth` (ou `/portal`) au lieu d'afficher la page Index (site web vitrine).
+- Cela élimine le site marketing et présente directement l'interface de connexion.
 
-This means the component will go from loading → directly showing the file browser inside `Projet > Documents`, skipping the intermediate drives selection screen entirely.
+### 2. Configurer le nouveau tenant Azure
 
-### Technical detail
+Les secrets Azure sont stockés au niveau backend. Pour une autre organisation :
+- Mettre à jour les 3 secrets backend avec les valeurs du nouveau tenant :
+  - `AZURE_TENANT_ID` — ID du tenant Azure AD de la nouvelle organisation
+  - `AZURE_CLIENT_ID` — ID de l'application enregistrée dans Azure AD
+  - `AZURE_CLIENT_SECRET` — Secret de l'application Azure AD
+- L'application Azure doit avoir les permissions Microsoft Graph : `Sites.ReadWrite.All`, `Files.ReadWrite.All`
 
-In the existing `useEffect` (around line 81), after `setDrives(drivesData.value || [])`, add:
+### 3. Options de déploiement
 
-```typescript
-const docsDrive = (drivesData.value || []).find(
-  (d: Drive) => d.name.toLowerCase().includes("document")
-);
-if (docsDrive) {
-  setSelectedDrive(docsDrive);
-  const filesData = await callProxy("list-files", { siteId: site.id, driveId: docsDrive.id });
-  if (!active) return;
-  setItems(filesData.value || []);
-}
+**Option A — Dupliquer le projet Lovable (recommandé)**
+1. Créer un nouveau projet Lovable
+2. Copier le code source
+3. Connecter un nouveau backend Cloud
+4. Configurer les nouveaux secrets Azure
+5. Exécuter les migrations de base de données
+6. Publier
+
+**Option B — Self-hosting**
+1. Cloner le repo via GitHub
+2. Configurer un projet Supabase séparé avec les mêmes tables/migrations
+3. Mettre les variables d'environnement (`VITE_SUPABASE_URL`, `VITE_SUPABASE_PUBLISHABLE_KEY`) vers le nouveau Supabase
+4. Configurer les secrets Azure dans le nouveau Supabase
+5. Déployer sur Vercel/Netlify/etc.
+
+### 4. Changement de code minimal requis
+
+Le seul changement de code nécessaire est dans `src/App.tsx` :
+
+```text
+Route "/"  →  Rediriger vers /auth au lieu d'afficher <Index />
 ```
 
-Single file change, no database migration needed.
+Tout le reste (portail, admin, SharePoint, factures) fonctionne sans modification car la configuration Azure est externalisée dans les secrets backend.
+
+---
+
+**Résumé** : Le portail est déjà découplé du site web. Il suffit de (1) rediriger la route `/` vers `/auth`, (2) créer une nouvelle instance backend, et (3) configurer les secrets Azure du nouveau tenant.
 
