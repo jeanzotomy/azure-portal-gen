@@ -1544,9 +1544,10 @@ function AdminUsers() {
     setChangingRole(userId);
     const { error: delError } = await supabase.from("user_roles").delete().eq("user_id", userId);
     if (delError) { toast({ title: "Erreur", description: delError.message, variant: "destructive" }); setChangingRole(null); return; }
-    const rolesToInsert: { user_id: string; role: "admin" | "agent" | "client" }[] = [{ user_id: userId, role: "client" }];
+    const rolesToInsert: { user_id: string; role: "admin" | "agent" | "client" | "comptable" }[] = [{ user_id: userId, role: "client" }];
     if (role === "admin") rolesToInsert.push({ user_id: userId, role: "admin" });
     else if (role === "agent") rolesToInsert.push({ user_id: userId, role: "agent" });
+    else if (role === "comptable") rolesToInsert.push({ user_id: userId, role: "comptable" });
     const { error } = await supabase.from("user_roles").insert(rolesToInsert);
     if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
     else toast({ title: "Rôle mis à jour!", description: `Rôle changé en ${role}.` });
@@ -1582,10 +1583,11 @@ function AdminUsers() {
   const getRoleBadge = (roles: string[]) => {
     if (roles.includes("admin")) return { label: "Admin", color: "bg-primary/10 text-primary border-primary/20" };
     if (roles.includes("agent")) return { label: "Agent", color: "bg-orange-500/10 text-orange-500 border-orange-500/20" };
+    if (roles.includes("comptable")) return { label: "Comptable", color: "bg-teal-500/10 text-teal-500 border-teal-500/20" };
     return { label: "Client", color: "bg-muted text-muted-foreground border-border" };
   };
 
-  const getCurrentRole = (roles: string[]) => roles.includes("admin") ? "admin" : roles.includes("agent") ? "agent" : "client";
+  const getCurrentRole = (roles: string[]) => roles.includes("admin") ? "admin" : roles.includes("agent") ? "agent" : roles.includes("comptable") ? "comptable" : "client";
 
   const filtered = profilesList.filter(p => {
     const matchesSearch = (p.full_name || "").toLowerCase().includes(search.toLowerCase()) ||
