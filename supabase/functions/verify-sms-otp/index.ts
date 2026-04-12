@@ -108,42 +108,48 @@ Deno.serve(async (req) => {
     }
 
     if (purpose === "login") {
-      // Find or create user by phone
-      const { data: existingUsers } = await supabaseAdmin.auth.admin.listUsers();
-      const existingUser = existingUsers?.users?.find((u: { phone?: string }) => u.phone === phone);
+      // Normalize phone: strip non-digits for profile lookup, keep E.164 for exact match
+      const phoneDigits = phone.replace(/\D/g, "");
 
-      let userId: string;
+      // Find user by phone in profiles table
+      const { data: profiles } = await supabaseAdmin
+        .from("profiles")
+        .select("user_id, phone, blocked")
+        .not("phone", "is", null);
 
-      if (existingUser) {
-        userId = existingUser.id;
+      // Match phone: profile may store "5145597235" while input is "+15145597235"
+      const matchedProfile = (profiles || []).find((p: { phone: string | null }) => {
+        if (!p.phone) return false;
+        const pDigits = p.phone.replace(/\D/g, "");
+        return phoneDigits.endsWith(pDigits) || pDigits.endsWith(phoneDigits) || pDigits === phoneDigits;
+      });
 
-        // Check if blocked
-        const { data: profile } = await supabaseAdmin
-          .from("profiles")
-          .select("blocked")
-          .eq("user_id", userId)
-          .maybeSingle();
-
-        if (profile?.blocked) {
-          return new Response(JSON.stringify({ error: "Account blocked" }), {
-            status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
-          });
-        }
-      } else {
-        // Create user with phone
-        const { data: newUser, error: createError } = await supabaseAdmin.auth.admin.createUser({
-          phone,
-          phone_confirm: true,
+      if (!matchedProfile) {
+        return new Response(JSON.stringify({ error: "No account found with this phone number" }), {
+          status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
-
-        if (createError) throw createError;
-        userId = newUser.user.id;
       }
 
-      // Generate a magic link / session
+      if (matchedProfile.blocked) {
+        return new Response(JSON.stringify({ error: "Account blocked" }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const userId = matchedProfile.user_id;
+
+      // Get user's real email from auth
+      const { data: userData, error: userError } = await supabaseAdmin.auth.admin.getUserById(userId);
+      if (userError || !userData?.user?.email) {
+        return new Response(JSON.stringify({ error: "User account not found" }), {
+          status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Generate a magic link with the real email
       const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
         type: "magiclink",
-        email: existingUser?.email || `${phone.replace("+", "")}@phone.local`,
+        email: userData.user.email,
       });
 
       if (linkError) throw linkError;
