@@ -25,7 +25,7 @@ import {
   LayoutDashboard, FolderOpen, LifeBuoy, Users, LogOut, Shield, Clock, CheckCircle2,
   AlertCircle, Bell, ChevronDown, ChevronUp, MessageSquare, Search, Send, UserCog,
   Flag, DollarSign, Calendar, Filter, TrendingUp, Activity, BarChart3, PieChart, ShieldBan, ShieldCheck, Trash2, RefreshCw,
-  Smartphone, Phone, X, UserCheck,
+  Smartphone, Phone, X, UserCheck, UserPlus, Upload, FileSpreadsheet,
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { HardDrive } from "lucide-react";
@@ -1767,6 +1767,14 @@ function AdminUsers() {
   const [mfaStatus, setMfaStatus] = useState<Record<string, { enrolled: boolean; factors: any[]; has_phone: boolean; phone: string | null }>>({});
   const [mfaLoading, setMfaLoading] = useState<string | null>(null);
   const [mfaDialogUser, setMfaDialogUser] = useState<any | null>(null);
+  const [showInviteDialog, setShowInviteDialog] = useState(false);
+  const [inviteMode, setInviteMode] = useState<"single" | "csv">("single");
+  const [inviteEmail, setInviteEmail] = useState("");
+  const [inviteName, setInviteName] = useState("");
+  const [inviteRole, setInviteRole] = useState("client");
+  const [inviteLoading, setInviteLoading] = useState(false);
+  const [csvUsers, setCsvUsers] = useState<{ email: string; full_name: string; role: string }[]>([]);
+  const [importResults, setImportResults] = useState<{ email: string; success: boolean; error?: string }[] | null>(null);
   const { toast } = useToast();
 
   const load = async () => {
@@ -1799,6 +1807,75 @@ function AdminUsers() {
   };
 
   useEffect(() => { load(); }, []);
+
+  const handleInviteSingle = async () => {
+    if (!inviteEmail) return;
+    setInviteLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("invite-user", {
+        body: { action: "invite", users: [{ email: inviteEmail, full_name: inviteName, role: inviteRole }] },
+      });
+      if (error || data?.error) {
+        toast({ title: "Erreur", description: data?.error || error?.message, variant: "destructive" });
+      } else {
+        toast({ title: "Invitation envoyée", description: `Un email d'invitation a été envoyé à ${inviteEmail}.` });
+        setInviteEmail(""); setInviteName(""); setInviteRole("client");
+        setShowInviteDialog(false);
+        load();
+      }
+    } catch (err: any) {
+      toast({ title: "Erreur", description: err.message, variant: "destructive" });
+    } finally {
+      setInviteLoading(false);
+    }
+  };
+
+  const handleCsvImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target?.result as string;
+      const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+      const parsed: { email: string; full_name: string; role: string }[] = [];
+      // Skip header if present
+      const start = lines[0]?.toLowerCase().includes("email") ? 1 : 0;
+      for (let i = start; i < lines.length; i++) {
+        const cols = lines[i].split(/[,;]/).map(c => c.trim().replace(/^"|"$/g, ""));
+        if (cols[0]) {
+          parsed.push({ email: cols[0], full_name: cols[1] || "", role: cols[2] || "client" });
+        }
+      }
+      setCsvUsers(parsed);
+      setImportResults(null);
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  };
+
+  const handleBulkInvite = async () => {
+    if (csvUsers.length === 0) return;
+    setInviteLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("invite-user", {
+        body: { action: "bulk-invite", users: csvUsers },
+      });
+      if (error) {
+        toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      } else {
+        setImportResults(data?.details || []);
+        toast({
+          title: "Import terminé",
+          description: `${data?.invited || 0} invitation(s) envoyée(s), ${data?.failed || 0} échec(s).`,
+        });
+        load();
+      }
+    } catch (err: any) {
+      toast({ title: "Erreur", description: err.message, variant: "destructive" });
+    } finally {
+      setInviteLoading(false);
+    }
+  };
 
   const disableMfa = async (userId: string, userName: string) => {
     if (!window.confirm(`Désactiver tout le MFA pour "${userName}" ? L'utilisateur devra le reconfigurer.`)) return;
@@ -1912,6 +1989,9 @@ function AdminUsers() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">Utilisateurs</h1>
         <div className="flex items-center gap-3">
+          <Button size="sm" className="gap-1.5" onClick={() => { setShowInviteDialog(true); setInviteMode("single"); setCsvUsers([]); setImportResults(null); }}>
+            <UserPlus size={14} /> Inviter
+          </Button>
           <Button variant="outline" size="sm" onClick={load} className="gap-1.5">
             <RefreshCw size={14} /> Actualiser
           </Button>
@@ -2116,6 +2196,145 @@ function AdminUsers() {
           </div>
         </div>
       )}
+
+      {/* Invite Users Dialog */}
+      <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserPlus size={18} />
+              Inviter des utilisateurs
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="flex gap-2 mb-4">
+            <Button
+              variant={inviteMode === "single" ? "default" : "outline"}
+              size="sm"
+              className="gap-1.5"
+              onClick={() => { setInviteMode("single"); setCsvUsers([]); setImportResults(null); }}
+            >
+              <Send size={14} /> Invitation
+            </Button>
+            <Button
+              variant={inviteMode === "csv" ? "default" : "outline"}
+              size="sm"
+              className="gap-1.5"
+              onClick={() => { setInviteMode("csv"); setImportResults(null); }}
+            >
+              <FileSpreadsheet size={14} /> Import CSV
+            </Button>
+          </div>
+
+          {inviteMode === "single" && (
+            <div className="space-y-3">
+              <div>
+                <label className="text-sm font-medium text-foreground">Email *</label>
+                <Input
+                  type="email"
+                  placeholder="utilisateur@exemple.com"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground">Nom complet</label>
+                <Input
+                  placeholder="Jean Dupont"
+                  value={inviteName}
+                  onChange={(e) => setInviteName(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground">Rôle</label>
+                <Select value={inviteRole} onValueChange={setInviteRole}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="client">Client</SelectItem>
+                    <SelectItem value="comptable">Comptable</SelectItem>
+                    <SelectItem value="gestionnaire">Gestionnaire</SelectItem>
+                    <SelectItem value="agent">Agent</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowInviteDialog(false)}>Annuler</Button>
+                <Button onClick={handleInviteSingle} disabled={!inviteEmail || inviteLoading} className="gap-1.5">
+                  {inviteLoading ? <RefreshCw size={14} className="animate-spin" /> : <Send size={14} />}
+                  {inviteLoading ? "Envoi..." : "Envoyer l'invitation"}
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+
+          {inviteMode === "csv" && (
+            <div className="space-y-4">
+              <div className="bg-muted/50 rounded-lg p-3 border border-border/30">
+                <p className="text-sm text-foreground font-medium mb-1">Format CSV attendu :</p>
+                <code className="text-xs text-muted-foreground block">email,nom,role</code>
+                <code className="text-xs text-muted-foreground block">jean@exemple.com,Jean Dupont,client</code>
+                <code className="text-xs text-muted-foreground block">marie@exemple.com,Marie Martin,agent</code>
+                <p className="text-xs text-muted-foreground mt-2">Rôles : client, comptable, gestionnaire, agent, admin</p>
+              </div>
+
+              <label className="cursor-pointer">
+                <input type="file" accept=".csv,.txt" className="hidden" onChange={handleCsvImport} />
+                <Button variant="outline" asChild className="w-full gap-2">
+                  <span><Upload size={14} /> Sélectionner un fichier CSV</span>
+                </Button>
+              </label>
+
+              {csvUsers.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-foreground">{csvUsers.length} utilisateur(s) détecté(s) :</p>
+                  <div className="max-h-40 overflow-y-auto border border-border/30 rounded-lg divide-y">
+                    {csvUsers.map((u, i) => (
+                      <div key={i} className="px-3 py-2 flex items-center justify-between text-sm">
+                        <div>
+                          <span className="font-medium text-foreground">{u.email}</span>
+                          {u.full_name && <span className="text-muted-foreground ml-2">— {u.full_name}</span>}
+                        </div>
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{u.role}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {importResults && (
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-foreground">Résultats :</p>
+                  <div className="max-h-40 overflow-y-auto border border-border/30 rounded-lg divide-y">
+                    {importResults.map((r, i) => (
+                      <div key={i} className="px-3 py-2 flex items-center justify-between text-sm">
+                        <span className="text-foreground">{r.email}</span>
+                        {r.success ? (
+                          <span className="text-xs text-green-600 flex items-center gap-1"><CheckCircle2 size={12} /> OK</span>
+                        ) : (
+                          <span className="text-xs text-destructive flex items-center gap-1"><AlertCircle size={12} /> {r.error}</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowInviteDialog(false)}>Fermer</Button>
+                {csvUsers.length > 0 && !importResults && (
+                  <Button onClick={handleBulkInvite} disabled={inviteLoading} className="gap-1.5">
+                    {inviteLoading ? <RefreshCw size={14} className="animate-spin" /> : <Send size={14} />}
+                    {inviteLoading ? "Import..." : `Inviter ${csvUsers.length} utilisateur(s)`}
+                  </Button>
+                )}
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

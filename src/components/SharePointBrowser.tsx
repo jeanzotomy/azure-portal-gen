@@ -349,15 +349,10 @@ export default function SharePointBrowser() {
             className="pl-8 h-9 text-sm"
           />
         </div>
-        <label className="cursor-pointer">
-          <input type="file" className="hidden" onChange={handleUpload} disabled={uploading} />
-          <Button variant="outline" size="sm" className="gap-2" asChild disabled={uploading}>
-            <span>
-              <Upload size={14} />
-              {uploading ? t("sharepoint.uploading") : t("sharepoint.upload")}
-            </span>
-          </Button>
-        </label>
+        <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowNewFolder(true)}>
+          <FolderPlus size={14} />
+          {t("sharepoint.newFolder")}
+        </Button>
         <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowNewFolder(true)}>
           <FolderPlus size={14} />
           {t("sharepoint.newFolder")}
