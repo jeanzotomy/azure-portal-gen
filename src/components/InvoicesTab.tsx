@@ -59,6 +59,7 @@ interface Project {
   budget: string | null;
   total_budget: number;
   total_paid: number;
+  user_id: string;
 }
 
 export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }) {
