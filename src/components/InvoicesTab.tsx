@@ -68,6 +68,7 @@ interface Project {
 export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }) {
   const { t } = useTranslation();
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -80,7 +81,6 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
   const [searchQuery, setSearchQuery] = useState("");
   const [currentStep, setCurrentStep] = useState<InvoiceStep>("idle");
 
-  // Form state
   const [formProjectId, setFormProjectId] = useState("");
   const [formInvoiceNumber, setFormInvoiceNumber] = useState("");
   const [formVendor, setFormVendor] = useState("");
@@ -103,11 +103,56 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
   }, []);
 
   const loadProjects = useCallback(async () => {
-    const { data } = await supabase.from("projects").select("id, name, project_number, total_budget, total_paid").order("name");
+    const { data } = await supabase
+      .from("projects")
+      .select("id, name, project_number, total_budget, total_paid")
+      .order("name");
     setProjects((data as unknown as Project[]) || []);
   }, []);
 
-  useEffect(() => { loadInvoices(); loadProjects(); }, [loadInvoices, loadProjects]);
+  useEffect(() => {
+    loadInvoices();
+    loadProjects();
+  }, [loadInvoices, loadProjects]);
+
+  const resetForm = () => {
+    setParsedData(null);
+    setSelectedFile(null);
+    setFormProjectId("");
+    setFormInvoiceNumber("");
+    setFormVendor("");
+    setFormDescription("");
+    setFormAmount("");
+    setFormTaxAmount("");
+    setFormTotalAmount("");
+    setFormInvoiceDate("");
+    setFormDueDate("");
+    setFormType("facture");
+    setCurrentStep("idle");
+    if (fileInputRef.current) fileInputRef.current.value = "";
+  };
+
+  const openManualForm = () => {
+    resetForm();
+    setShowForm(true);
+    setCurrentStep("validation");
+  };
+
+  const applyParsedData = (parsed: ParsedInvoice) => {
+    setParsedData(parsed);
+    setFormProjectId(parsed.project_id || "");
+    setFormInvoiceNumber(parsed.invoice_number || "");
+    setFormVendor(parsed.vendor || "");
+    setFormDescription(parsed.description || "");
+    setFormAmount(parsed.amount?.toString() || "0");
+    setFormTaxAmount(parsed.tax_amount?.toString() || "0");
+    setFormTotalAmount(parsed.total_amount?.toString() || "0");
+    setFormInvoiceDate(parsed.invoice_date || "");
+    setFormDueDate(parsed.due_date || "");
+    setFormType(parsed.type || "facture");
+    setShowForm(true);
+    setCurrentStep("validation");
+  };
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const input = e.currentTarget;
@@ -115,68 +160,61 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
     if (!file) return;
 
     setSelectedFile(file);
+    if (!showForm) {
+      setShowForm(true);
+      setCurrentStep("validation");
+    }
+  };
+
+  const handleAutoAnalyze = async () => {
+    if (!selectedFile) {
+      toast({ title: "Fichier requis", description: "Veuillez d'abord choisir un fichier.", variant: "destructive" });
+      return;
+    }
+
     setParsing(true);
-    setParsedData(null);
-    setShowForm(false);
     setCurrentStep("analyse");
 
     try {
       const formData = new FormData();
-      formData.append("file", file);
+      formData.append("file", selectedFile);
 
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Not authenticated");
 
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-      if (!supabaseUrl) {
-        throw new Error("Configuration backend manquante.");
-      }
+      if (!supabaseUrl) throw new Error("Configuration backend manquante.");
 
-      const res = await fetch(
-        `${supabaseUrl}/functions/v1/parse-invoice`,
-        {
-          method: "POST",
-          headers: { Authorization: `Bearer ${session.access_token}` },
-          body: formData,
-        }
-      );
+      const res = await fetch(`${supabaseUrl}/functions/v1/parse-invoice`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${session.access_token}`,
+          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+        },
+        body: formData,
+      });
 
       if (!res.ok) {
         const errorText = await res.text();
-        let errorMessage = "Parsing failed";
-
+        let errorMessage = "Analyse impossible";
         try {
           const err = JSON.parse(errorText);
           errorMessage = err.error || err.details || errorMessage;
         } catch {
           errorMessage = errorText || errorMessage;
         }
-
         throw new Error(errorMessage);
       }
 
       const parsed: ParsedInvoice = await res.json();
-      setParsedData(parsed);
-
-      if (parsed.project_id) setFormProjectId(parsed.project_id);
-      else setFormProjectId("");
-      setFormInvoiceNumber(parsed.invoice_number || "");
-      setFormVendor(parsed.vendor || "");
-      setFormDescription(parsed.description || "");
-      setFormAmount(parsed.amount?.toString() || "0");
-      setFormTaxAmount(parsed.tax_amount?.toString() || "0");
-      setFormTotalAmount(parsed.total_amount?.toString() || "0");
-      setFormInvoiceDate(parsed.invoice_date || "");
-      setFormDueDate(parsed.due_date || "");
-      setFormType(parsed.type || "facture");
-      setShowForm(true);
-      setCurrentStep("validation");
+      applyParsedData(parsed);
+      toast({ title: "Analyse terminée", description: "Les champs ont été préremplis automatiquement." });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Une erreur est survenue pendant l'analyse.";
-      toast({ title: "Erreur de lecture", description: message, variant: "destructive" });
-      setCurrentStep("idle");
+      toast({ title: "Analyse indisponible", description: `${message} Vous pouvez continuer manuellement.`, variant: "destructive" });
+      setCurrentStep("validation");
+      setShowForm(true);
     } finally {
-      input.value = "";
       setParsing(false);
     }
   };
@@ -342,28 +380,35 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
         <div>
           <h2 className="text-2xl font-bold">{t("sharepoint.invoicesTab")}</h2>
-          <p className="text-muted-foreground text-sm mt-1">Gérez les factures et reçus de paiement par projet.</p>
+          <p className="mt-1 text-sm text-muted-foreground">Gérez les factures et reçus de paiement par projet.</p>
         </div>
         {!readOnly && (
-          <label htmlFor="invoice-upload-input" className={parsing ? "pointer-events-none" : "cursor-pointer"}>
-            <input
-              id="invoice-upload-input"
-              type="file"
-              accept=".pdf,.png,.jpg,.jpeg,.webp"
-              className="sr-only"
-              onChange={handleFileSelect}
-              disabled={parsing}
-            />
-            <Button type="button" disabled={parsing} asChild>
-              <span>
-                {parsing ? <Loader2 size={16} className="animate-spin mr-2" /> : <Upload size={16} className="mr-2" />}
-                {parsing ? "Analyse en cours..." : "Ajouter une facture"}
-              </span>
+          <div className="flex flex-wrap gap-2">
+            <Button type="button" variant="outline" onClick={openManualForm} className="gap-2">
+              <Plus size={16} />
+              Nouvelle facture
             </Button>
-          </label>
+            <label htmlFor="invoice-upload-input" className={parsing ? "pointer-events-none" : "cursor-pointer"}>
+              <input
+                ref={fileInputRef}
+                id="invoice-upload-input"
+                type="file"
+                accept=".pdf,.png,.jpg,.jpeg,.webp"
+                className="sr-only"
+                onChange={handleFileSelect}
+                disabled={parsing || uploading}
+              />
+              <Button type="button" variant="secondary" disabled={parsing || uploading} asChild>
+                <span>
+                  <Upload size={16} className="mr-2" />
+                  Choisir un fichier
+                </span>
+              </Button>
+            </label>
+          </div>
         )}
       </div>
 
@@ -517,23 +562,53 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
         </div>
       )}
 
-      {/* Invoice form panel */}
       {showForm && (
         <Card className="border-border shadow-card">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-base">
-              <DollarSign size={18} />
-              {parsedData && !parsedData.project_id ? "⚠️ Facture non conforme — Projet non identifié" : "Confirmer la facture"}
-            </CardTitle>
-            <p className="text-sm text-muted-foreground">
-              Vérifiez les informations extraites puis validez l’enregistrement.
-            </p>
-          </CardHeader>
-          <CardContent className="space-y-4">
+          <CardHeader className="space-y-3">
+            <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+              <div>
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <DollarSign size={18} />
+                  {parsedData && !parsedData.project_id ? "Facture à compléter" : "Nouvelle facture projet"}
+                </CardTitle>
+                <p className="mt-1 text-sm text-muted-foreground">
+                  Saisie manuelle fiable, avec analyse automatique optionnelle si un fichier est joint.
+                </p>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <label htmlFor="invoice-panel-file-input" className={parsing || uploading ? "pointer-events-none" : "cursor-pointer"}>
+                  <input
+                    id="invoice-panel-file-input"
+                    type="file"
+                    accept=".pdf,.png,.jpg,.jpeg,.webp"
+                    className="sr-only"
+                    onChange={handleFileSelect}
+                    disabled={parsing || uploading}
+                  />
+                  <Button type="button" variant="outline" disabled={parsing || uploading} asChild>
+                    <span>
+                      <Upload size={16} className="mr-2" />
+                      {selectedFile ? "Changer le fichier" : "Joindre un fichier"}
+                    </span>
+                  </Button>
+                </label>
+                <Button type="button" variant="secondary" onClick={handleAutoAnalyze} disabled={!selectedFile || parsing || uploading}>
+                  {parsing ? <Loader2 size={16} className="mr-2 animate-spin" /> : <Sparkles size={16} className="mr-2" />}
+                  {parsing ? "Analyse en cours..." : "Analyser automatiquement"}
+                </Button>
+              </div>
+            </div>
+
+            {selectedFile && (
+              <div className="rounded-lg border bg-muted/40 px-3 py-2 text-sm text-muted-foreground">
+                <span className="font-medium text-foreground">Fichier :</span> {selectedFile.name}
+              </div>
+            )}
+
             {parsedData && !parsedData.project_id && (
-              <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive flex items-start gap-2">
+              <div className="flex items-start gap-2 rounded-lg bg-destructive/10 p-3 text-sm text-destructive">
                 <AlertCircle size={16} className="mt-0.5 shrink-0" />
-                <span>Le numéro de projet n'a pas pu être identifié automatiquement. Veuillez sélectionner le projet manuellement.</span>
+                <span>Le projet n’a pas été identifié automatiquement. Vous pouvez continuer en sélectionnant le projet manuellement.</span>
               </div>
             )}
 
@@ -543,7 +618,9 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
                 <span>{parsedData.confidence === "high" ? "Élevée" : parsedData.confidence === "medium" ? "Moyenne" : "Faible"}</span>
               </div>
             )}
+          </CardHeader>
 
+          <CardContent className="space-y-4">
             <div className="space-y-3">
               <div>
                 <label className="text-sm font-medium">Projet *</label>
@@ -552,14 +629,14 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
                     <SelectValue placeholder="Sélectionner un projet" />
                   </SelectTrigger>
                   <SelectContent>
-                    {projects.map(p => (
+                    {projects.map((p) => (
                       <SelectItem key={p.id} value={p.id}>{p.project_number} - {p.name}</SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <div>
                   <label className="text-sm font-medium">Type</label>
                   <Select value={formType} onValueChange={(v: "facture" | "recu") => setFormType(v)}>
@@ -572,58 +649,52 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
                 </div>
                 <div>
                   <label className="text-sm font-medium">N° Facture</label>
-                  <Input value={formInvoiceNumber} onChange={e => setFormInvoiceNumber(e.target.value)} />
+                  <Input value={formInvoiceNumber} onChange={(e) => setFormInvoiceNumber(e.target.value)} />
                 </div>
               </div>
 
               <div>
                 <label className="text-sm font-medium">Fournisseur</label>
-                <Input value={formVendor} onChange={e => setFormVendor(e.target.value)} />
+                <Input value={formVendor} onChange={(e) => setFormVendor(e.target.value)} />
               </div>
 
               <div>
                 <label className="text-sm font-medium">Description</label>
-                <Input value={formDescription} onChange={e => setFormDescription(e.target.value)} />
+                <Input value={formDescription} onChange={(e) => setFormDescription(e.target.value)} />
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
                 <div>
                   <label className="text-sm font-medium">Montant HT</label>
-                  <Input type="number" step="0.01" value={formAmount} onChange={e => setFormAmount(e.target.value)} />
+                  <Input type="number" step="0.01" value={formAmount} onChange={(e) => setFormAmount(e.target.value)} />
                 </div>
                 <div>
                   <label className="text-sm font-medium">Taxes</label>
-                  <Input type="number" step="0.01" value={formTaxAmount} onChange={e => setFormTaxAmount(e.target.value)} />
+                  <Input type="number" step="0.01" value={formTaxAmount} onChange={(e) => setFormTaxAmount(e.target.value)} />
                 </div>
                 <div>
                   <label className="text-sm font-medium">Total TTC</label>
-                  <Input type="number" step="0.01" value={formTotalAmount} onChange={e => setFormTotalAmount(e.target.value)} />
+                  <Input type="number" step="0.01" value={formTotalAmount} onChange={(e) => setFormTotalAmount(e.target.value)} />
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
                 <div>
                   <label className="text-sm font-medium">Date facture</label>
-                  <Input type="date" value={formInvoiceDate} onChange={e => setFormInvoiceDate(e.target.value)} />
+                  <Input type="date" value={formInvoiceDate} onChange={(e) => setFormInvoiceDate(e.target.value)} />
                 </div>
                 <div>
                   <label className="text-sm font-medium">Date échéance</label>
-                  <Input type="date" value={formDueDate} onChange={e => setFormDueDate(e.target.value)} />
+                  <Input type="date" value={formDueDate} onChange={(e) => setFormDueDate(e.target.value)} />
                 </div>
               </div>
             </div>
 
             <div className="flex justify-end gap-2 pt-2">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => {
-                  setShowForm(false);
-                  setParsedData(null);
-                  setSelectedFile(null);
-                  setCurrentStep("idle");
-                }}
-              >
+              <Button type="button" variant="outline" onClick={() => {
+                setShowForm(false);
+                resetForm();
+              }}>
                 Annuler
               </Button>
               <Button type="button" onClick={handleSubmit} disabled={uploading}>

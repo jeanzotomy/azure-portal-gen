@@ -719,6 +719,11 @@ function ProjectsTab({ user }: { user: SupaUser }) {
     return matchesSearch && matchesStatus;
   });
 
+  const totalProjects = projects.length;
+  const activeProjects = projects.filter((p) => p.status === "en_cours").length;
+  const pendingProjects = projects.filter((p) => p.status === "en_attente").length;
+  const completedProjects = projects.filter((p) => p.status === "termine").length;
+
   return (
     <div className="space-y-6 animate-fade-up">
       <div className="flex items-center justify-between">
@@ -733,22 +738,40 @@ function ProjectsTab({ user }: { user: SupaUser }) {
         </div>
       </div>
 
-      {/* Filter bar */}
       {!showForm && projects.length > 0 && (
-        <div className="bg-card rounded-xl p-4 shadow-card border border-border/50 space-y-3">
-          <div className="relative">
-            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-            <Input placeholder="Rechercher un projet..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9" />
-          </div>
-          <div className="flex flex-wrap gap-2 items-center">
-            <span className="text-xs font-medium text-muted-foreground flex items-center gap-1"><Filter size={12} /> Statut :</span>
-            {statusFilterOptions.map((opt) => (
-              <button key={opt.value} onClick={() => setStatusFilter(opt.value)}
-                className={`text-xs px-3 py-1.5 rounded-full transition-colors ${statusFilter === opt.value ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
-              >{opt.label}</button>
+        <>
+          <div className="grid gap-4 md:grid-cols-4">
+            {[
+              { label: "Total projets", value: totalProjects, helper: "Tous vos projets" },
+              { label: "En cours", value: activeProjects, helper: "Travail actif" },
+              { label: "En attente", value: pendingProjects, helper: "À démarrer" },
+              { label: "Terminés", value: completedProjects, helper: "Livrés" },
+            ].map((stat) => (
+              <Card key={stat.label} className="border-border/50 shadow-card">
+                <CardContent className="p-4">
+                  <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{stat.label}</p>
+                  <p className="mt-2 text-2xl font-bold text-foreground">{stat.value}</p>
+                  <p className="mt-1 text-xs text-muted-foreground">{stat.helper}</p>
+                </CardContent>
+              </Card>
             ))}
           </div>
-        </div>
+
+          <div className="bg-card rounded-xl p-4 shadow-card border border-border/50 space-y-3">
+            <div className="relative">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              <Input placeholder="Rechercher un projet..." value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9" />
+            </div>
+            <div className="flex flex-wrap gap-2 items-center">
+              <span className="text-xs font-medium text-muted-foreground flex items-center gap-1"><Filter size={12} /> Statut :</span>
+              {statusFilterOptions.map((opt) => (
+                <button key={opt.value} onClick={() => setStatusFilter(opt.value)}
+                  className={`text-xs px-3 py-1.5 rounded-full transition-colors ${statusFilter === opt.value ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
+                >{opt.label}</button>
+              ))}
+            </div>
+          </div>
+        </>
       )}
 
       {showForm && (

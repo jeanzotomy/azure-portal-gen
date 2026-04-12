@@ -936,6 +936,11 @@ function AdminProjectsInner({ readOnly = false }: { readOnly?: boolean }) {
     normal: { label: "Normal", color: "text-muted-foreground", bg: "bg-muted border-border" },
   };
 
+  const totalProjects = projects.length;
+  const activeProjects = projects.filter((p) => p.status === "en_cours").length;
+  const completedProjects = projects.filter((p) => p.status === "termine").length;
+  const totalBudget = projects.reduce((sum, p) => sum + (Number(p.total_budget) || 0), 0);
+
   return (
     <div className="space-y-6 animate-fade-up">
       <div className="flex items-center justify-between">
@@ -948,7 +953,23 @@ function AdminProjectsInner({ readOnly = false }: { readOnly?: boolean }) {
         </div>
       </div>
 
-      {/* Filter bar */}
+      <div className="grid gap-4 md:grid-cols-4">
+        {[
+          { label: "Total projets", value: totalProjects, helper: "Vue globale" },
+          { label: "En cours", value: activeProjects, helper: "Suivi actif" },
+          { label: "Terminés", value: completedProjects, helper: "Livrés" },
+          { label: "Budget cumulé", value: totalBudget.toLocaleString("fr-CA", { style: "currency", currency: "CAD" }), helper: "Tous projets" },
+        ].map((stat) => (
+          <Card key={stat.label} className="border-border/50 shadow-card">
+            <CardContent className="p-4">
+              <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground">{stat.label}</p>
+              <p className="mt-2 text-2xl font-bold text-foreground">{stat.value}</p>
+              <p className="mt-1 text-xs text-muted-foreground">{stat.helper}</p>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+
       <div className="bg-card rounded-xl p-4 shadow-card border border-border/50 space-y-3">
         <div className="relative">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
