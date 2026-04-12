@@ -37,7 +37,7 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { PieChart as RePieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip } from "recharts";
 import type { User as SupaUser } from "@supabase/supabase-js";
 
-type Tab = "dashboard" | "projects" | "tickets" | "profile";
+type Tab = "dashboard" | "projects" | "tickets" | "sharepoint" | "profile";
 
 function PortalContent() {
   const { user, ready } = useAuthSession();
@@ -124,6 +124,7 @@ function PortalContent() {
     { id: "dashboard", icon: LayoutDashboard, label: t("portal.dashboard") },
     { id: "projects", icon: FolderOpen, label: t("portal.projects") },
     { id: "tickets", icon: LifeBuoy, label: t("portal.support") },
+    { id: "sharepoint", icon: HardDrive, label: "SharePoint" },
     { id: "profile", icon: User, label: t("portal.profile") },
   ];
 
@@ -213,6 +214,7 @@ function PortalContent() {
           {tab === "dashboard" && <DashboardTab user={user} />}
           {tab === "projects" && <ProjectsTab user={user} />}
           {tab === "tickets" && <TicketsTab user={user} />}
+          {tab === "sharepoint" && <SharePointTab />}
           {tab === "profile" && <ProfileTab user={user} />}
         </main>
       </div>
