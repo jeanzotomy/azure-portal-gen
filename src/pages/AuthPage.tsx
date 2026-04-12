@@ -114,13 +114,13 @@ export default function AuthPage() {
         throw new Error(res.data?.error || res.error?.message || "Verification failed");
       }
       if (res.data?.success) {
-        // For SMS login, we use verifyOtp with the hashed_token
-        if (res.data.hashed_token) {
-          const { error: verifyErr } = await supabase.auth.verifyOtp({
-            type: "magiclink",
-            token_hash: res.data.hashed_token,
+        // Sign in with the temporary password provided by the server
+        if (res.data.email && res.data.tempPassword) {
+          const { error: signInErr } = await supabase.auth.signInWithPassword({
+            email: res.data.email,
+            password: res.data.tempPassword,
           });
-          if (verifyErr) throw verifyErr;
+          if (signInErr) throw signInErr;
         }
         toast({ title: t("auth.smsVerified"), description: t("auth.smsVerifiedDesc") });
         navigate(res.data.redirectTo || "/mfa");

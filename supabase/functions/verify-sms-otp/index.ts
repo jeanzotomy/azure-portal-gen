@@ -146,13 +146,12 @@ Deno.serve(async (req) => {
         });
       }
 
-      // Generate a magic link with the real email
-      const { data: linkData, error: linkError } = await supabaseAdmin.auth.admin.generateLink({
-        type: "magiclink",
-        email: userData.user.email,
+      // Set a temporary one-time password for session creation
+      const tempPassword = crypto.randomUUID() + "-Tmp!";
+      const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
+        password: tempPassword,
       });
-
-      if (linkError) throw linkError;
+      if (updateError) throw updateError;
 
       // Get roles
       const { data: roles } = await supabaseAdmin
@@ -166,9 +165,9 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({
         success: true,
         purpose: "login",
-        userId,
+        email: userData.user.email,
+        tempPassword,
         redirectTo,
-        hashed_token: linkData.properties?.hashed_token,
       }), {
         status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
