@@ -385,7 +385,22 @@ export default function SharePointBrowser() {
         </div>
       ) : (() => {
         const filteredItems = items.filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
-        if (filteredItems.length === 0) {
+        // Sort: folders first, then by selected criteria
+        const sortedItems = [...filteredItems].sort((a, b) => {
+          // Folders always first
+          if (a.folder && !b.folder) return -1;
+          if (!a.folder && b.folder) return 1;
+          let cmp = 0;
+          if (sortBy === "name") {
+            cmp = a.name.localeCompare(b.name);
+          } else if (sortBy === "date") {
+            cmp = (a.lastModifiedDateTime || "").localeCompare(b.lastModifiedDateTime || "");
+          } else if (sortBy === "size") {
+            cmp = (a.size || 0) - (b.size || 0);
+          }
+          return sortDir === "asc" ? cmp : -cmp;
+        });
+        if (sortedItems.length === 0) {
           return <p className="text-muted-foreground text-sm py-8 text-center">{searchQuery ? t("sharepoint.noResults") : t("sharepoint.emptyFolder")}</p>;
         }
         return (
