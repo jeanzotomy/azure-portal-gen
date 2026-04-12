@@ -148,7 +148,7 @@ Deno.serve(async (req) => {
 
       // Set a temporary one-time password for session creation
       const tempPassword = crypto.randomUUID() + "-Tmp!";
-      const { error: updateError } = await supabaseAdmin.auth.admin.updateUser(userId, {
+      const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
         password: tempPassword,
       });
       if (updateError) throw updateError;
