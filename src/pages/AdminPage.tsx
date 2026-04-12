@@ -2196,6 +2196,145 @@ function AdminUsers() {
           </div>
         </div>
       )}
+
+      {/* Invite Users Dialog */}
+      <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <UserPlus size={18} />
+              Inviter des utilisateurs
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="flex gap-2 mb-4">
+            <Button
+              variant={inviteMode === "single" ? "default" : "outline"}
+              size="sm"
+              className="gap-1.5"
+              onClick={() => { setInviteMode("single"); setCsvUsers([]); setImportResults(null); }}
+            >
+              <Send size={14} /> Invitation
+            </Button>
+            <Button
+              variant={inviteMode === "csv" ? "default" : "outline"}
+              size="sm"
+              className="gap-1.5"
+              onClick={() => { setInviteMode("csv"); setImportResults(null); }}
+            >
+              <FileSpreadsheet size={14} /> Import CSV
+            </Button>
+          </div>
+
+          {inviteMode === "single" && (
+            <div className="space-y-3">
+              <div>
+                <label className="text-sm font-medium text-foreground">Email *</label>
+                <Input
+                  type="email"
+                  placeholder="utilisateur@exemple.com"
+                  value={inviteEmail}
+                  onChange={(e) => setInviteEmail(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground">Nom complet</label>
+                <Input
+                  placeholder="Jean Dupont"
+                  value={inviteName}
+                  onChange={(e) => setInviteName(e.target.value)}
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground">Rôle</label>
+                <Select value={inviteRole} onValueChange={setInviteRole}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="client">Client</SelectItem>
+                    <SelectItem value="comptable">Comptable</SelectItem>
+                    <SelectItem value="gestionnaire">Gestionnaire</SelectItem>
+                    <SelectItem value="agent">Agent</SelectItem>
+                    <SelectItem value="admin">Admin</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowInviteDialog(false)}>Annuler</Button>
+                <Button onClick={handleInviteSingle} disabled={!inviteEmail || inviteLoading} className="gap-1.5">
+                  {inviteLoading ? <RefreshCw size={14} className="animate-spin" /> : <Send size={14} />}
+                  {inviteLoading ? "Envoi..." : "Envoyer l'invitation"}
+                </Button>
+              </DialogFooter>
+            </div>
+          )}
+
+          {inviteMode === "csv" && (
+            <div className="space-y-4">
+              <div className="bg-muted/50 rounded-lg p-3 border border-border/30">
+                <p className="text-sm text-foreground font-medium mb-1">Format CSV attendu :</p>
+                <code className="text-xs text-muted-foreground block">email,nom,role</code>
+                <code className="text-xs text-muted-foreground block">jean@exemple.com,Jean Dupont,client</code>
+                <code className="text-xs text-muted-foreground block">marie@exemple.com,Marie Martin,agent</code>
+                <p className="text-xs text-muted-foreground mt-2">Rôles : client, comptable, gestionnaire, agent, admin</p>
+              </div>
+
+              <label className="cursor-pointer">
+                <input type="file" accept=".csv,.txt" className="hidden" onChange={handleCsvImport} />
+                <Button variant="outline" asChild className="w-full gap-2">
+                  <span><Upload size={14} /> Sélectionner un fichier CSV</span>
+                </Button>
+              </label>
+
+              {csvUsers.length > 0 && (
+                <div className="space-y-2">
+                  <p className="text-sm font-medium text-foreground">{csvUsers.length} utilisateur(s) détecté(s) :</p>
+                  <div className="max-h-40 overflow-y-auto border border-border/30 rounded-lg divide-y">
+                    {csvUsers.map((u, i) => (
+                      <div key={i} className="px-3 py-2 flex items-center justify-between text-sm">
+                        <div>
+                          <span className="font-medium text-foreground">{u.email}</span>
+                          {u.full_name && <span className="text-muted-foreground ml-2">— {u.full_name}</span>}
+                        </div>
+                        <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{u.role}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {importResults && (
+                <div className="space-y-1">
+                  <p className="text-sm font-medium text-foreground">Résultats :</p>
+                  <div className="max-h-40 overflow-y-auto border border-border/30 rounded-lg divide-y">
+                    {importResults.map((r, i) => (
+                      <div key={i} className="px-3 py-2 flex items-center justify-between text-sm">
+                        <span className="text-foreground">{r.email}</span>
+                        {r.success ? (
+                          <span className="text-xs text-green-600 flex items-center gap-1"><CheckCircle2 size={12} /> OK</span>
+                        ) : (
+                          <span className="text-xs text-destructive flex items-center gap-1"><AlertCircle size={12} /> {r.error}</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setShowInviteDialog(false)}>Fermer</Button>
+                {csvUsers.length > 0 && !importResults && (
+                  <Button onClick={handleBulkInvite} disabled={inviteLoading} className="gap-1.5">
+                    {inviteLoading ? <RefreshCw size={14} className="animate-spin" /> : <Send size={14} />}
+                    {inviteLoading ? "Import..." : `Inviter ${csvUsers.length} utilisateur(s)`}
+                  </Button>
+                )}
+              </DialogFooter>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
