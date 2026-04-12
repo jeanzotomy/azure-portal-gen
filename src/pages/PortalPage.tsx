@@ -121,13 +121,10 @@ function PortalContent() {
     navigate("/");
   };
 
-  const showSharePoint = isAdmin || isComptable;
-
   const navItems: { id: Tab; icon: typeof LayoutDashboard; label: string }[] = [
     { id: "dashboard", icon: LayoutDashboard, label: t("portal.dashboard") },
     { id: "projects", icon: FolderOpen, label: t("portal.projects") },
     { id: "tickets", icon: LifeBuoy, label: t("portal.support") },
-    ...(showSharePoint ? [{ id: "sharepoint" as Tab, icon: HardDrive, label: "SharePoint" }] : []),
     { id: "profile", icon: User, label: t("portal.profile") },
   ];
 
