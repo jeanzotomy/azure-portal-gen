@@ -5,15 +5,19 @@ import { lovable } from "@/integrations/lovable/index";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Cloud, ArrowLeft, Mail, ShieldBan } from "lucide-react";
+import { Cloud, ArrowLeft, Mail, ShieldBan, Phone, Smartphone } from "lucide-react";
 import favicon from "@/assets/cloudmature-logo.png";
 import { useTranslation } from "@/i18n/LanguageContext";
 
 export default function AuthPage() {
   const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
+  const [authMethod, setAuthMethod] = useState<"email" | "phone">("email");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [fullName, setFullName] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [smsOtp, setSmsOtp] = useState("");
+  const [smsSent, setSmsSent] = useState(false);
   const [loading, setLoading] = useState(false);
   const [searchParams] = useSearchParams();
   const isBlocked = searchParams.get("blocked") === "1";
@@ -77,6 +81,58 @@ export default function AuthPage() {
     navigate("/mfa");
   };
 
+  const handleSendSmsOtp = async () => {
+    if (!phoneNumber || !/^\+[1-9]\d{6,14}$/.test(phoneNumber)) {
+      toast({ title: t("auth.error"), description: t("auth.phonePlaceholder"), variant: "destructive" });
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await supabase.functions.invoke("send-sms-otp", {
+        body: { phone: phoneNumber, purpose: "login" },
+      });
+      if (res.error || res.data?.error) {
+        throw new Error(res.data?.error || res.error?.message || "SMS send failed");
+      }
+      setSmsSent(true);
+      toast({ title: t("auth.smsSent"), description: t("auth.smsSentDesc") });
+    } catch (err: any) {
+      toast({ title: t("auth.smsError"), description: err.message, variant: "destructive" });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleVerifySmsOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      const res = await supabase.functions.invoke("verify-sms-otp", {
+        body: { phone: phoneNumber, code: smsOtp, purpose: "login" },
+      });
+      if (res.error || res.data?.error) {
+        throw new Error(res.data?.error || res.error?.message || "Verification failed");
+      }
+      if (res.data?.success) {
+        // For SMS login, we use verifyOtp with the hashed_token
+        if (res.data.hashed_token) {
+          const { error: verifyErr } = await supabase.auth.verifyOtp({
+            type: "magiclink",
+            token_hash: res.data.hashed_token,
+          });
+          if (verifyErr) throw verifyErr;
+        }
+        toast({ title: t("auth.smsVerified"), description: t("auth.smsVerifiedDesc") });
+        navigate(res.data.redirectTo || "/mfa");
+      }
+    } catch (err: any) {
+      toast({ title: t("auth.smsInvalidCode"), description: err.message, variant: "destructive" });
+      setSmsOtp("");
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen gradient-hero flex items-center justify-center px-4">
       <div className="w-full max-w-md">
@@ -103,7 +159,34 @@ export default function AuthPage() {
             </div>
           )}
 
-          {mode !== "forgot" && (
+          {mode === "login" && (
+            <>
+              {/* Auth method toggle */}
+              <div className="flex mb-4 rounded-lg overflow-hidden border border-border/30">
+                <button
+                  type="button"
+                  onClick={() => { setAuthMethod("email"); setSmsSent(false); setSmsOtp(""); }}
+                  className={`flex-1 py-2 text-sm font-medium flex items-center justify-center gap-2 transition-colors ${
+                    authMethod === "email" ? "bg-primary text-primary-foreground" : "bg-secondary/20 text-secondary-foreground/60 hover:bg-secondary/40"
+                  }`}
+                >
+                  <Mail size={14} /> {t("auth.emailTab")}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAuthMethod("phone")}
+                  className={`flex-1 py-2 text-sm font-medium flex items-center justify-center gap-2 transition-colors ${
+                    authMethod === "phone" ? "bg-primary text-primary-foreground" : "bg-secondary/20 text-secondary-foreground/60 hover:bg-secondary/40"
+                  }`}
+                >
+                  <Smartphone size={14} /> {t("auth.phoneTab")}
+                </button>
+              </div>
+            </>
+          )}
+
+          {/* Google login - only for email mode and not forgot */}
+          {mode !== "forgot" && authMethod === "email" && (
             <>
               <Button
                 type="button"
@@ -131,27 +214,89 @@ export default function AuthPage() {
             </>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {mode === "signup" && (
-              <Input placeholder={t("auth.fullName")} required value={fullName} onChange={(e) => setFullName(e.target.value)}
-                className="bg-secondary/30 border-border/30 text-primary-foreground placeholder:text-secondary-foreground/40" />
-            )}
-            <Input type="email" placeholder={t("auth.email")} required value={email} onChange={(e) => setEmail(e.target.value)}
-              className="bg-secondary/30 border-border/30 text-primary-foreground placeholder:text-secondary-foreground/40" />
-            {mode !== "forgot" && (
-              <Input type="password" placeholder={t("auth.password")} required value={password} onChange={(e) => setPassword(e.target.value)}
-                className="bg-secondary/30 border-border/30 text-primary-foreground placeholder:text-secondary-foreground/40" />
-            )}
-            <Button type="submit" className="w-full gradient-primary text-primary-foreground border-0" disabled={loading}>
-              {mode === "forgot" ? (
-                <><Mail size={16} className="mr-2" /> {loading ? t("auth.sendingLink") : t("auth.sendLink")}</>
+          {/* Phone login mode */}
+          {mode === "login" && authMethod === "phone" && (
+            <div className="space-y-4">
+              {!smsSent ? (
+                <>
+                  <Input
+                    type="tel"
+                    placeholder={t("auth.phonePlaceholder")}
+                    required
+                    value={phoneNumber}
+                    onChange={(e) => setPhoneNumber(e.target.value)}
+                    className="bg-secondary/30 border-border/30 text-primary-foreground placeholder:text-secondary-foreground/40"
+                  />
+                  <p className="text-xs text-secondary-foreground/40">{t("auth.twilioTrial")}</p>
+                  <Button
+                    type="button"
+                    className="w-full gradient-primary text-primary-foreground border-0"
+                    disabled={loading || !phoneNumber}
+                    onClick={handleSendSmsOtp}
+                  >
+                    <Phone size={16} className="mr-2" />
+                    {loading ? t("auth.sendingSmsCode") : t("auth.sendSmsCode")}
+                  </Button>
+                </>
               ) : (
-                <><Cloud size={16} className="mr-2" /> {loading ? t("auth.loading") : mode === "login" ? t("auth.login") : t("auth.signup")}</>
+                <form onSubmit={handleVerifySmsOtp} className="space-y-4">
+                  <p className="text-sm text-secondary-foreground/60">{t("auth.enterSmsCode")}</p>
+                  <Input
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]{6}"
+                    maxLength={6}
+                    placeholder="000000"
+                    value={smsOtp}
+                    onChange={(e) => setSmsOtp(e.target.value.replace(/\D/g, ""))}
+                    className="bg-secondary/30 border-border/30 text-primary-foreground text-center text-2xl tracking-[0.5em] placeholder:text-secondary-foreground/40 placeholder:tracking-[0.5em]"
+                    autoFocus
+                    required
+                  />
+                  <Button
+                    type="submit"
+                    className="w-full gradient-primary text-primary-foreground border-0"
+                    disabled={loading || smsOtp.length !== 6}
+                  >
+                    <Phone size={16} className="mr-2" />
+                    {loading ? t("auth.verifyingSmsCode") : t("auth.verifySmsCode")}
+                  </Button>
+                  <button
+                    type="button"
+                    onClick={() => { setSmsSent(false); setSmsOtp(""); }}
+                    className="block w-full text-center text-sm text-primary hover:underline"
+                  >
+                    {t("auth.backToLogin")}
+                  </button>
+                </form>
               )}
-            </Button>
-          </form>
+            </div>
+          )}
 
-          {mode === "login" && (
+          {/* Email login / signup / forgot form */}
+          {(mode !== "login" || authMethod === "email") && (
+            <form onSubmit={handleSubmit} className="space-y-4">
+              {mode === "signup" && (
+                <Input placeholder={t("auth.fullName")} required value={fullName} onChange={(e) => setFullName(e.target.value)}
+                  className="bg-secondary/30 border-border/30 text-primary-foreground placeholder:text-secondary-foreground/40" />
+              )}
+              <Input type="email" placeholder={t("auth.email")} required value={email} onChange={(e) => setEmail(e.target.value)}
+                className="bg-secondary/30 border-border/30 text-primary-foreground placeholder:text-secondary-foreground/40" />
+              {mode !== "forgot" && (
+                <Input type="password" placeholder={t("auth.password")} required value={password} onChange={(e) => setPassword(e.target.value)}
+                  className="bg-secondary/30 border-border/30 text-primary-foreground placeholder:text-secondary-foreground/40" />
+              )}
+              <Button type="submit" className="w-full gradient-primary text-primary-foreground border-0" disabled={loading}>
+                {mode === "forgot" ? (
+                  <><Mail size={16} className="mr-2" /> {loading ? t("auth.sendingLink") : t("auth.sendLink")}</>
+                ) : (
+                  <><Cloud size={16} className="mr-2" /> {loading ? t("auth.loading") : mode === "login" ? t("auth.login") : t("auth.signup")}</>
+                )}
+              </Button>
+            </form>
+          )}
+
+          {mode === "login" && authMethod === "email" && (
             <button onClick={() => setMode("forgot")} className="block w-full text-center text-sm text-primary hover:underline mt-4">
               {t("auth.forgotPassword")}
             </button>
@@ -161,7 +306,7 @@ export default function AuthPage() {
             {mode === "forgot" ? (
               <button onClick={() => setMode("login")} className="text-primary hover:underline">{t("auth.backToLogin")}</button>
             ) : mode === "login" ? (
-              <>{t("auth.noAccount")} <button onClick={() => setMode("signup")} className="text-primary hover:underline">{t("auth.signup")}</button></>
+              <>{t("auth.noAccount")} <button onClick={() => { setMode("signup"); setAuthMethod("email"); }} className="text-primary hover:underline">{t("auth.signup")}</button></>
             ) : (
               <>{t("auth.hasAccount")} <button onClick={() => setMode("login")} className="text-primary hover:underline">{t("auth.login")}</button></>
             )}
