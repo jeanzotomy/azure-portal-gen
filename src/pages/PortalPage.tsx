@@ -35,6 +35,7 @@ import {
   Activity, TrendingUp, Plus, Trash2, Info, RefreshCw,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { PieChart as RePieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip } from "recharts";
 import type { User as SupaUser } from "@supabase/supabase-js";
 
@@ -556,7 +557,6 @@ function ProjectsTab({ user }: { user: SupaUser }) {
     setPriority(p.priority || "normal");
     setFiles([]);
     setShowForm(true);
-    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const closeForm = () => { setShowForm(false); resetForm(); };
@@ -732,13 +732,13 @@ function ProjectsTab({ user }: { user: SupaUser }) {
           <Button variant="outline" size="sm" onClick={loadProjects} className="gap-1.5">
             <RefreshCw size={14} /> Actualiser
           </Button>
-          <Button onClick={() => showForm ? closeForm() : openNewForm()} className="gradient-primary text-primary-foreground border-0">
-            {showForm ? "Annuler" : <><Send size={16} className="mr-2" /> Soumettre un projet</>}
+          <Button onClick={openNewForm} className="gradient-primary text-primary-foreground border-0">
+            <Send size={16} className="mr-2" /> Soumettre un projet
           </Button>
         </div>
       </div>
 
-      {!showForm && projects.length > 0 && (
+      {projects.length > 0 && (
         <>
           <div className="grid gap-4 md:grid-cols-4">
             {[
@@ -774,9 +774,11 @@ function ProjectsTab({ user }: { user: SupaUser }) {
         </>
       )}
 
-      {showForm && (
-        <div className="bg-card rounded-xl p-6 shadow-card border border-border/50">
-          <h3 className="font-semibold text-card-foreground mb-4">{editingProject ? "Modifier le projet" : "Nouveau projet"}</h3>
+      <Dialog open={showForm} onOpenChange={(open) => { if (!open) closeForm(); }}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{editingProject ? "Modifier le projet" : "Nouveau projet"}</DialogTitle>
+          </DialogHeader>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5"><FileText size={14} /> Nom du projet *</label>
@@ -800,7 +802,7 @@ function ProjectsTab({ user }: { user: SupaUser }) {
                       {deadline ? format(new Date(deadline), "PPP", { locale: fr }) : "Sélectionner une date"}
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
+                  <PopoverContent className="w-auto p-0 z-[60]" align="start">
                     <CalendarWidget
                       mode="single"
                       selected={deadline ? new Date(deadline) : undefined}
@@ -856,12 +858,12 @@ function ProjectsTab({ user }: { user: SupaUser }) {
                 </div>
               )}
             </div>
-            <Button type="submit" className="gradient-primary text-primary-foreground border-0" disabled={submitting}>
+            <Button type="submit" className="w-full gradient-primary text-primary-foreground border-0" disabled={submitting}>
               <Send size={16} className="mr-2" /> {submitting ? "Envoi en cours..." : editingProject ? "Enregistrer les modifications" : "Soumettre le projet"}
             </Button>
           </form>
-        </div>
-      )}
+        </DialogContent>
+      </Dialog>
 
       {projects.length === 0 && !showForm ? (
         <div className="bg-card rounded-xl p-12 shadow-card border border-border/50 text-center">
