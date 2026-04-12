@@ -153,9 +153,11 @@ export function PortalInfoBar() {
         {rates.usdGnf !== null && (
           <InfoChip>
             <DollarSign size={13} className="text-primary shrink-0" />
-            <span className="font-semibold text-foreground">USD/GNF</span>
-            <span className="text-border mx-0.5">:</span>
-            <span className="tabular-nums">
+            <span className="font-semibold text-foreground">USD</span>
+            <span className="text-primary">→</span>
+            <span className="font-semibold text-foreground">GNF</span>
+            <span className="text-muted-foreground mx-0.5">:</span>
+            <span className="tabular-nums font-medium">
               {rates.usdGnf.toLocaleString(locale === "fr" ? "fr-FR" : "en-US", { maximumFractionDigits: 0 })}
             </span>
           </InfoChip>
@@ -164,9 +166,11 @@ export function PortalInfoBar() {
         {rates.eurUsd !== null && (
           <InfoChip>
             <TrendingUp size={13} className="text-primary shrink-0" />
-            <span className="font-semibold text-foreground">EUR/USD</span>
-            <span className="text-border mx-0.5">:</span>
-            <span className="tabular-nums">
+            <span className="font-semibold text-foreground">EUR</span>
+            <span className="text-primary">→</span>
+            <span className="font-semibold text-foreground">USD</span>
+            <span className="text-muted-foreground mx-0.5">:</span>
+            <span className="tabular-nums font-medium">
               {rates.eurUsd.toLocaleString(locale === "fr" ? "fr-FR" : "en-US", { minimumFractionDigits: 4, maximumFractionDigits: 4 })}
             </span>
           </InfoChip>
