@@ -59,6 +59,7 @@ interface Project {
   budget: string | null;
   total_budget: number;
   total_paid: number;
+  user_id: string;
 }
 
 export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }) {
@@ -103,7 +104,7 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
   const loadProjects = useCallback(async () => {
     const { data } = await supabase
       .from("projects")
-      .select("id, name, project_number, budget, total_budget, total_paid")
+      .select("id, name, project_number, budget, total_budget, total_paid, user_id")
       .order("name");
     setProjects((data as unknown as Project[]) || []);
   }, []);
@@ -363,7 +364,7 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
       } else {
         ({ error } = await supabase.from("invoices").insert({
           ...invoiceData,
-          user_id: session.user.id,
+          user_id: project.user_id,
           file_name: selectedFile?.name || null,
           sharepoint_url: sharepointUrl || null,
           parsed_data: parsedData as any,
