@@ -1134,13 +1134,19 @@ function AdminProjectsInner({ readOnly = false }: { readOnly?: boolean }) {
                 <h3 className="font-bold text-card-foreground text-lg leading-tight mb-1">{p.name}</h3>
                 {p.description && <ExpandableText text={p.description} className="text-sm text-muted-foreground mb-2" maxLines="line-clamp-1" />}
                 
-                <div className="flex items-center gap-2 mb-3">
+                <div className="flex items-center gap-2 mb-1.5">
                   <div className="w-6 h-6 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-[10px] font-bold flex-shrink-0">
                     {(profile?.full_name || "?").charAt(0).toUpperCase()}
                   </div>
                   <span className="text-xs text-primary font-medium">{profile?.full_name || "Non renseigné"}</span>
                   {profile?.company && <span className="text-xs text-muted-foreground">· {profile.company}</span>}
                 </div>
+                {p.gestionnaire_id && profiles[p.gestionnaire_id] && (
+                  <div className="flex items-center gap-2 mb-3">
+                    <UserCheck size={14} className="text-accent shrink-0" />
+                    <span className="text-xs text-accent font-medium">Gestionnaire : {profiles[p.gestionnaire_id]?.full_name || "—"}</span>
+                  </div>
+                )}
 
                 {(p.budget || p.deadline || p.total_paid) && (
                   <div className="flex flex-wrap gap-1.5 mb-3">
