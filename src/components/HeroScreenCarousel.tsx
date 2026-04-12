@@ -3,7 +3,7 @@ import dashboardPresentation from "@/assets/dashboard-presentation.png";
 import dashboard1 from "@/assets/dashboard-1.jpg";
 import dashboard2 from "@/assets/dashboard-2.jpg";
 import dashboard3 from "@/assets/dashboard-3.jpg";
-import dashboard4 from "@/assets/dashboard-4.jpg";
+import dashboardMs365 from "@/assets/dashboard-ms365.jpg";
 import dashboardIa from "@/assets/dashboard-ia.jpg";
 import dashboardBi from "@/assets/dashboard-bi.jpg";
 import dashboardPortail from "@/assets/dashboard-portail.png";
