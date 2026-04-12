@@ -45,6 +45,7 @@ async function getGraphToken(): Promise<string> {
   }
 
   const data = await res.json();
+  console.log("Azure AD token acquired, expires_in:", data.expires_in, "scopes:", data.scope);
   cachedToken = {
     value: data.access_token,
     expiresAt: Date.now() + (data.expires_in * 1000),
