@@ -5,6 +5,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useUserRoles } from "@/hooks/use-admin";
 import { useMfaCheck } from "@/hooks/use-mfa";
 import { useAuthSession } from "@/hooks/use-auth-session";
+import { useTranslation } from "@/i18n/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -40,6 +41,7 @@ function AdminContent() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const [unrepliedCount, setUnrepliedCount] = useState(0);
+  const { t } = useTranslation();
 
   useEffect(() => {
     const fetchUnreplied = async () => {
@@ -70,7 +72,7 @@ function AdminContent() {
     if (!rolesLoading && !isAdmin && !isAgent && ready && user) navigate("/portal");
   }, [isAdmin, isAgent, rolesLoading, ready, user, navigate]);
 
-  if (!ready || rolesLoading || mfaVerified === null) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">Chargement...</div>;
+  if (!ready || rolesLoading || mfaVerified === null) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">{t("admin.loading")}</div>;
   if (!user || (!isAdmin && !isAgent)) return null;
 
   const handleLogout = async () => {
@@ -80,9 +82,9 @@ function AdminContent() {
 
   if (isAgent && !isAdmin) {
     const agentNavItems: { id: AgentTab; icon: typeof LayoutDashboard; label: string }[] = [
-      { id: "dashboard", icon: LayoutDashboard, label: "Tableau de bord" },
-      { id: "tickets", icon: LifeBuoy, label: "Tickets" },
-      { id: "contacts", icon: MessageSquare, label: "Contacts" },
+      { id: "dashboard", icon: LayoutDashboard, label: t("portal.dashboard") },
+      { id: "tickets", icon: LifeBuoy, label: t("admin.tickets") },
+      { id: "contacts", icon: MessageSquare, label: t("admin.contacts") },
     ];
 
     return (
@@ -122,13 +124,13 @@ function AdminContent() {
               </SidebarGroupContent>
             </SidebarGroup>
             <div className="mt-auto p-3 border-t border-sidebar-border space-y-1">
-              <SidebarMenuButton onClick={() => navigate("/portal")} tooltip="Portail client" className="gap-3 text-muted-foreground">
+              <SidebarMenuButton onClick={() => navigate("/portal")} tooltip={t("admin.portalClient")} className="gap-3 text-muted-foreground">
                 <Shield size={18} />
-                <span>Portail client</span>
+                <span>{t("admin.portalClient")}</span>
               </SidebarMenuButton>
-              <SidebarMenuButton onClick={handleLogout} tooltip="Déconnexion" className="text-destructive hover:text-destructive gap-3">
+              <SidebarMenuButton onClick={handleLogout} tooltip={t("portal.logout")} className="text-destructive hover:text-destructive gap-3">
                 <LogOut size={18} />
-                <span>Déconnexion</span>
+                <span>{t("portal.logout")}</span>
               </SidebarMenuButton>
             </div>
           </SidebarContent>
@@ -162,11 +164,11 @@ function AdminContent() {
   }
 
   const allNavItems: { id: AdminTab; icon: typeof LayoutDashboard; label: string }[] = [
-    { id: "dashboard", icon: LayoutDashboard, label: "Vue d'ensemble" },
-    { id: "projects", icon: FolderOpen, label: "Projets" },
-    { id: "tickets", icon: LifeBuoy, label: "Tickets" },
-    { id: "contacts", icon: MessageSquare, label: "Contacts" },
-    { id: "users", icon: Users, label: "Utilisateurs" },
+    { id: "dashboard", icon: LayoutDashboard, label: t("admin.overview") },
+    { id: "projects", icon: FolderOpen, label: t("admin.projects") },
+    { id: "tickets", icon: LifeBuoy, label: t("admin.tickets") },
+    { id: "contacts", icon: MessageSquare, label: t("admin.contacts") },
+    { id: "users", icon: Users, label: t("admin.users") },
   ];
 
   return (
@@ -206,13 +208,13 @@ function AdminContent() {
             </SidebarGroupContent>
           </SidebarGroup>
           <div className="mt-auto p-3 border-t border-sidebar-border space-y-1">
-            <SidebarMenuButton onClick={() => navigate("/portal")} tooltip="Portail client" className="gap-3 text-muted-foreground">
+            <SidebarMenuButton onClick={() => navigate("/portal")} tooltip={t("admin.portalClient")} className="gap-3 text-muted-foreground">
               <Shield size={18} />
-              <span>Portail client</span>
+              <span>{t("admin.portalClient")}</span>
             </SidebarMenuButton>
-            <SidebarMenuButton onClick={handleLogout} tooltip="Déconnexion" className="text-destructive hover:text-destructive gap-3">
+            <SidebarMenuButton onClick={handleLogout} tooltip={t("portal.logout")} className="text-destructive hover:text-destructive gap-3">
               <LogOut size={18} />
-              <span>Déconnexion</span>
+              <span>{t("portal.logout")}</span>
             </SidebarMenuButton>
           </div>
         </SidebarContent>
