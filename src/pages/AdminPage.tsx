@@ -1263,6 +1263,20 @@ function AdminProjectsInner({ readOnly = false }: { readOnly?: boolean }) {
                         ))}
                       </div>
                     </div>
+                    <div>
+                      <label className="text-sm font-medium text-card-foreground">Gestionnaire assigné</label>
+                      <Select value={editGestionnaire || "none"} onValueChange={(v) => setEditGestionnaire(v === "none" ? null : v)}>
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Aucun gestionnaire" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Aucun gestionnaire</SelectItem>
+                          {gestionnaires.map((g) => (
+                            <SelectItem key={g.user_id} value={g.user_id}>{g.full_name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
                 ) : (
                   <div className="mt-auto">
