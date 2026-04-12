@@ -412,7 +412,7 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
                 <CardContent className="space-y-1">
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Budget</span>
-                    <span className="font-medium">{(p.total_budget || 0).toLocaleString("fr-CA", { style: "currency", currency: "CAD" })}</span>
+                    <span className="font-medium">{allocatedBudget.toLocaleString("fr-CA", { style: "currency", currency: "CAD" })}</span>
                   </div>
                   <div className="flex justify-between text-sm">
                     <span className="text-muted-foreground">Payé</span>
