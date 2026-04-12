@@ -8,7 +8,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Upload, FileText, DollarSign, AlertCircle, CheckCircle2, Clock, Loader2, Trash2, Search, Receipt } from "lucide-react";
+import { Upload, FileText, DollarSign, AlertCircle, CheckCircle2, Clock, Loader2, Trash2, Search, Receipt, Check } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+
+type InvoiceStep = "idle" | "analyse" | "validation" | "upload" | "sauvegarde" | "done";
+
+const STEPS: { key: InvoiceStep; label: string }[] = [
+  { key: "analyse", label: "Analyse IA" },
+  { key: "validation", label: "Validation" },
+  { key: "upload", label: "Upload SharePoint" },
+  { key: "sauvegarde", label: "Sauvegarde" },
+];
 
 interface ParsedInvoice {
   project_number: string | null;
@@ -69,6 +79,7 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [filterProject, setFilterProject] = useState<string>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [currentStep, setCurrentStep] = useState<InvoiceStep>("idle");
 
   // Form state
   const [formProjectId, setFormProjectId] = useState("");
@@ -108,6 +119,7 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
     setParsing(true);
     setParsedData(null);
     setShowForm(false);
+    setCurrentStep("analyse");
 
     try {
       const formData = new FormData();
@@ -159,9 +171,11 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
       setFormDueDate(parsed.due_date || "");
       setFormType(parsed.type || "facture");
       setShowForm(true);
+      setCurrentStep("validation");
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Une erreur est survenue pendant l'analyse.";
       toast({ title: "Erreur de lecture", description: message, variant: "destructive" });
+      setCurrentStep("idle");
     } finally {
       input.value = "";
       setParsing(false);
@@ -175,6 +189,7 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
     }
 
     setUploading(true);
+    setCurrentStep("upload");
     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Not authenticated");
@@ -249,6 +264,7 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
         }
       }
 
+      setCurrentStep("sauvegarde");
       // 2. Insert invoice record
       const { error } = await supabase.from("invoices").insert({
         project_id: formProjectId,
@@ -270,7 +286,9 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
 
       if (error) throw error;
 
+      setCurrentStep("done");
       toast({ title: "Facture ajoutée", description: "La facture a été enregistrée et le solde du projet mis à jour." });
+      setTimeout(() => setCurrentStep("idle"), 2000);
       setShowForm(false);
       setParsedData(null);
       setSelectedFile(null);
@@ -278,6 +296,7 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
       loadProjects();
     } catch (err: any) {
       toast({ title: "Erreur", description: err.message, variant: "destructive" });
+      setCurrentStep("idle");
     } finally {
       setUploading(false);
     }
@@ -349,20 +368,45 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
         )}
       </div>
 
-      {/* Status banner */}
-      {(parsing || uploading) && (
-        <div className="flex items-center gap-3 rounded-lg border border-primary/30 bg-primary/5 p-4 animate-fade-up">
-          <Loader2 className="h-5 w-5 animate-spin text-primary shrink-0" />
-          <div>
-            <p className="font-medium text-sm text-foreground">
-              {parsing && "Analyse de la facture en cours…"}
-              {uploading && "Enregistrement et synchronisation…"}
-            </p>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              {parsing && "Le fichier est en cours de lecture par l'IA. Veuillez patienter."}
-              {uploading && "Sauvegarde de la facture, envoi sur SharePoint et mise à jour du solde projet."}
-            </p>
+      {/* Step progress bar */}
+      {currentStep !== "idle" && (
+        <div className="rounded-lg border bg-card p-4 space-y-3 animate-fade-up">
+          <div className="flex items-center justify-between">
+            {STEPS.map((step, i) => {
+              const stepIndex = STEPS.findIndex(s => s.key === currentStep);
+              const doneStepIndex = currentStep === "done" ? STEPS.length : stepIndex;
+              const isActive = step.key === currentStep && currentStep !== "done";
+              const isDone = i < doneStepIndex || currentStep === "done";
+
+              return (
+                <div key={step.key} className="flex flex-col items-center flex-1 relative">
+                  {i > 0 && (
+                    <div className={`absolute top-3.5 -left-1/2 w-full h-0.5 ${isDone ? "bg-primary" : "bg-muted"}`} />
+                  )}
+                  <div className={`relative z-10 flex items-center justify-center w-7 h-7 rounded-full border-2 text-xs font-bold transition-all ${
+                    isDone
+                      ? "bg-primary border-primary text-primary-foreground"
+                      : isActive
+                        ? "border-primary text-primary bg-background"
+                        : "border-muted text-muted-foreground bg-background"
+                  }`}>
+                    {isDone ? <Check size={14} /> : isActive ? <Loader2 size={14} className="animate-spin" /> : i + 1}
+                  </div>
+                  <span className={`text-xs mt-1.5 font-medium ${isDone ? "text-primary" : isActive ? "text-foreground" : "text-muted-foreground"}`}>
+                    {step.label}
+                  </span>
+                </div>
+              );
+            })}
           </div>
+          <Progress value={
+            currentStep === "done" ? 100
+            : currentStep === "sauvegarde" ? 75
+            : currentStep === "upload" ? 50
+            : currentStep === "validation" ? 25
+            : currentStep === "analyse" ? 10
+            : 0
+          } className="h-1.5" />
         </div>
       )}
 
