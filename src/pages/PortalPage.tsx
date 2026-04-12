@@ -46,7 +46,7 @@ function PortalContent() {
   const [profileIncomplete, setProfileIncomplete] = useState(false);
   const [daysLeft, setDaysLeft] = useState<number | null>(null);
   const navigate = useNavigate();
-  const { isAdmin, isAgent } = useUserRoles();
+  const { isAdmin, isAgent, isComptable } = useUserRoles();
   const mfaVerified = useMfaCheck();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
@@ -121,11 +121,13 @@ function PortalContent() {
     navigate("/");
   };
 
+  const showSharePoint = isAdmin || isComptable;
+
   const navItems: { id: Tab; icon: typeof LayoutDashboard; label: string }[] = [
     { id: "dashboard", icon: LayoutDashboard, label: t("portal.dashboard") },
     { id: "projects", icon: FolderOpen, label: t("portal.projects") },
     { id: "tickets", icon: LifeBuoy, label: t("portal.support") },
-    { id: "sharepoint", icon: HardDrive, label: "SharePoint" },
+    ...(showSharePoint ? [{ id: "sharepoint" as Tab, icon: HardDrive, label: "SharePoint" }] : []),
     { id: "profile", icon: User, label: t("portal.profile") },
   ];
 

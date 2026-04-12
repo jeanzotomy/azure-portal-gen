@@ -1594,6 +1594,7 @@ function AdminUsers() {
 
   const roleOptions = [
     { value: "client", label: "Client" },
+    { value: "comptable", label: "Comptable" },
     { value: "agent", label: "Agent" },
     { value: "admin", label: "Admin" },
   ];
