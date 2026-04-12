@@ -1,48 +1,22 @@
 
 
-# Plan : Site multi-langues (FR / EN)
+# Correction de la redirection post-authentification
 
-## Approche
+## Problème identifié
 
-Créer un système i18n léger basé sur un **React Context** avec des fichiers de traduction JSON, sans dépendance externe. Un sélecteur de langue sera ajouté dans la Navbar.
+Après connexion via **Google OAuth**, le `redirect_uri` est défini sur `window.location.origin` (c'est-à-dire `/`), ce qui ramène l'utilisateur sur la **page d'accueil** au lieu de le diriger vers `/mfa` puis vers son portail. La page Index ne contient aucune logique de détection d'utilisateur connecté.
 
-## Étapes
+Pour la connexion **email/mot de passe**, `navigate("/mfa")` fonctionne correctement.
 
-### 1. Créer les fichiers de traduction
-- `src/i18n/fr.ts` — toutes les chaînes en français (état actuel)
-- `src/i18n/en.ts` — traductions anglaises
-- Clés organisées par section : `hero`, `nav`, `services`, `industries`, `whyUs`, `contact`, `footer`, `auth`, `portal`, `admin`
+## Solution
 
-### 2. Créer le contexte i18n
-- `src/i18n/LanguageContext.tsx` — Context + Provider avec :
-  - État `locale` (`"fr"` | `"en"`) persisté dans `localStorage`
-  - Hook `useTranslation()` retournant `{ t, locale, setLocale }`
-  - Fonction `t("hero.title")` pour accéder aux traductions
+### 1. Modifier `AuthPage.tsx` — Google OAuth redirect
+Changer le `redirect_uri` de `window.location.origin` à `window.location.origin + "/mfa"` pour que l'utilisateur soit redirigé vers la page MFA après l'authentification Google.
 
-### 3. Intégrer le Provider
-- Envelopper `<App>` avec `<LanguageProvider>` dans `src/main.tsx`
+### 2. Ajouter une détection sur la page Index
+Ajouter une vérification dans `Index.tsx` : si un utilisateur est déjà authentifié (session active), le rediriger automatiquement vers `/mfa` (qui gère ensuite la redirection vers `/portal` ou `/admin` selon le rôle). Cela couvre le cas où l'utilisateur revient sur `/` alors qu'il est déjà connecté.
 
-### 4. Ajouter le sélecteur de langue dans la Navbar
-- Bouton toggle FR/EN (petit drapeau ou texte) à côté du bouton "Portail Client"
-- Visible sur desktop et mobile
-
-### 5. Remplacer les textes en dur dans chaque composant
-- **Navbar** : liens de navigation
-- **HeroSection** : titre animé, description, boutons
-- **ServicesSection** : titres, descriptions des services
-- **IndustriesSection** : titres, descriptions des industries
-- **WhyUsSection** : titres, descriptions des avantages
-- **ContactSection** : formulaire, labels, placeholders
-- **Footer** : texte copyright
-- **AuthPage** : formulaire login/signup/forgot
-- **PortalPage** : tableau de bord, profil, messages
-- **AdminPage** : interface admin
-- **MfaPage** : instructions MFA
-- **ResetPasswordPage** : formulaire reset
-
-## Détails techniques
-- Aucune librairie externe (pas de react-i18next) — solution ~100 lignes
-- Langue par défaut : français
-- Persistance via `localStorage` (clé `lang`)
-- Tous les composants utilisent `const { t } = useTranslation()` puis `t("cle.sous_cle")`
+## Fichiers modifiés
+- `src/pages/AuthPage.tsx` — changer `redirect_uri`
+- `src/pages/Index.tsx` — ajouter détection de session et redirection
 
