@@ -1758,10 +1758,11 @@ function AdminUsers() {
     setChangingRole(userId);
     const { error: delError } = await supabase.from("user_roles").delete().eq("user_id", userId);
     if (delError) { toast({ title: "Erreur", description: delError.message, variant: "destructive" }); setChangingRole(null); return; }
-    const rolesToInsert: { user_id: string; role: "admin" | "agent" | "client" | "comptable" }[] = [{ user_id: userId, role: "client" }];
+    const rolesToInsert: { user_id: string; role: "admin" | "agent" | "client" | "comptable" | "gestionnaire" }[] = [{ user_id: userId, role: "client" }];
     if (role === "admin") rolesToInsert.push({ user_id: userId, role: "admin" });
     else if (role === "agent") rolesToInsert.push({ user_id: userId, role: "agent" });
     else if (role === "comptable") rolesToInsert.push({ user_id: userId, role: "comptable" });
+    else if (role === "gestionnaire") rolesToInsert.push({ user_id: userId, role: "gestionnaire" });
     const { error } = await supabase.from("user_roles").insert(rolesToInsert);
     if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
     else toast({ title: "Rôle mis à jour!", description: `Rôle changé en ${role}.` });
