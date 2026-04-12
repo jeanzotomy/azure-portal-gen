@@ -910,13 +910,27 @@ function ProjectsTab({ user }: { user: SupaUser }) {
                   )}
 
                   {/* Meta tags */}
-                  {(p.budget || p.deadline || p.technologies) && (
+                  {(p.budget || p.deadline || p.technologies || p.total_paid) && (
                     <div className="flex flex-wrap gap-1.5 mb-4">
                       {p.budget && (
                         <span className="inline-flex items-center gap-1 text-xs bg-primary/5 text-primary border border-primary/15 px-2.5 py-1 rounded-lg">
-                          <DollarSign size={11} /> {p.budget}
+                          <DollarSign size={11} /> Budget: {p.budget}
                         </span>
                       )}
+                      {(p.total_paid != null && p.total_paid > 0) && (
+                        <span className="inline-flex items-center gap-1 text-xs bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 px-2.5 py-1 rounded-lg dark:text-emerald-400">
+                          <DollarSign size={11} /> Payé: {(p.total_paid || 0).toLocaleString("fr-CA", { style: "currency", currency: "CAD" })}
+                        </span>
+                      )}
+                      {p.budget && (() => {
+                        const bNum = parseFloat((p.budget || "0").replace(/[^\d.]/g, ""));
+                        const solde = bNum - (p.total_paid || 0);
+                        return (
+                          <span className={`inline-flex items-center gap-1 text-xs border px-2.5 py-1 rounded-lg ${solde < 0 ? "bg-destructive/10 text-destructive border-destructive/20" : "bg-primary/5 text-primary border-primary/15"}`}>
+                            <DollarSign size={11} /> Solde: {solde.toLocaleString("fr-CA", { style: "currency", currency: "CAD" })}
+                          </span>
+                        );
+                      })()}
                       {p.deadline && (() => {
                         const deadlineDate = new Date(p.deadline);
                         const days = differenceInDays(deadlineDate, new Date());
