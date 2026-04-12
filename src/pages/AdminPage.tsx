@@ -1145,7 +1145,6 @@ function AdminProjectsInner({ readOnly = false }: { readOnly?: boolean }) {
                       Modifier
                     </Button>}
                   </div>
-                  </div>
                 </div>
 
                 {p.project_number && <span className="text-xs font-mono text-muted-foreground">{p.project_number}</span>}
