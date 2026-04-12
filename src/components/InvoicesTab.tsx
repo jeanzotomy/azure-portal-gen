@@ -512,7 +512,7 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
                   )}
                   <div className="text-right">
                     <div className="font-bold text-sm">
-                      {inv.total_amount.toLocaleString("fr-CA", { style: "currency", currency: "CAD" })}
+                      {(inv.amount || 0).toLocaleString("fr-CA", { style: "currency", currency: "CAD" })}
                     </div>
                     <div className="text-xs text-muted-foreground">
                       {inv.invoice_date ? new Date(inv.invoice_date).toLocaleDateString("fr-CA") : ""}
