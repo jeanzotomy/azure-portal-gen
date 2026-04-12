@@ -971,8 +971,8 @@ function AdminDashboard() {
 }
 
 /* ─── Projects Management ─── */
-function AdminProjects() {
-  return <AdminProjectsInner readOnly={false} />;
+function AdminProjects({ assignedCount }: { assignedCount?: number }) {
+  return <AdminProjectsInner readOnly={false} assignedCount={assignedCount} />;
 }
 
 function AdminProjectsInner({ readOnly = false }: { readOnly?: boolean }) {
