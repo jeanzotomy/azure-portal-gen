@@ -62,7 +62,7 @@ const en = {
       { title: "Guaranteed Results", desc: "Measurable KPIs and SLAs." },
       { title: "Compliance & Innovation", desc: "Confidentiality and high standards." },
       { title: "Local Team", desc: "Proactive and locally available." },
-      { title: "Francophone Experience", desc: "Bilingual French-English support for all your projects." },
+      { title: "Francophone Experience", desc: "100% French-language content and support for your projects in English." },
     ],
   },
   contact: {
