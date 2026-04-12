@@ -1209,105 +1209,16 @@ function AdminProjectsInner({ readOnly = false }: { readOnly?: boolean }) {
                   </div>
                 )}
 
-                {isEditing ? (
-                  <div className="mt-2 p-4 bg-muted/30 rounded-xl space-y-3">
-                    <div>
-                      <label className="text-sm font-medium text-card-foreground">Nom du projet</label>
-                      <Input value={editName} onChange={(e) => setEditName(e.target.value)} className="mt-1" />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-card-foreground">Description</label>
-                      <Textarea value={editDescription} onChange={(e) => setEditDescription(e.target.value)} rows={3} className="mt-1" />
-                    </div>
-                    <div className="grid grid-cols-2 gap-3">
-                      <div>
-                        <label className="text-sm font-medium text-card-foreground">Budget</label>
-                        <Input value={editBudget} onChange={(e) => setEditBudget(e.target.value)} placeholder="Ex: 5000" className="mt-1" />
-                      </div>
-                      <div>
-                        <label className="text-sm font-medium text-card-foreground">Délai</label>
-                        <Popover>
-                          <PopoverTrigger asChild>
-                            <Button variant="outline" className={cn("w-full justify-start text-left font-normal mt-1", !editDeadline && "text-muted-foreground")}>
-                              <Calendar size={14} className="mr-2" />
-                              {editDeadline ? (() => { try { return format(new Date(editDeadline), "PPP", { locale: fr }); } catch { return editDeadline; } })() : "Sélectionner une date"}
-                            </Button>
-                          </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="start">
-                            <CalendarWidget
-                              mode="single"
-                              selected={editDeadline ? (() => { try { const d = new Date(editDeadline); return isNaN(d.getTime()) ? undefined : d; } catch { return undefined; } })() : undefined}
-                              onSelect={(date) => setEditDeadline(date ? date.toISOString().split("T")[0] : "")}
-                              disabled={(date) => date <= new Date()}
-                              initialFocus
-                              className={cn("p-3 pointer-events-auto")}
-                            />
-                          </PopoverContent>
-                        </Popover>
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-card-foreground">Priorité</label>
-                      <div className="flex gap-2 mt-1">
-                        {[{ value: "normal", label: "Normal" }, { value: "haute", label: "Haute" }, { value: "urgent", label: "Urgent" }].map((opt) => (
-                          <button key={opt.value} onClick={() => setEditPriority(opt.value)}
-                            className={`text-sm px-3 py-1.5 rounded-lg border transition-colors ${editPriority === opt.value ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground border-border"}`}
-                          >{opt.label}</button>
-                        ))}
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-card-foreground">Statut</label>
-                      <div className="flex gap-2 mt-1">
-                        {statusOptions.map((opt) => (
-                          <button key={opt.value} onClick={() => setEditStatus(opt.value)}
-                            className={`text-sm px-3 py-1.5 rounded-lg border transition-colors ${editStatus === opt.value ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground border-border"}`}
-                          >{opt.label}</button>
-                        ))}
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-card-foreground">Progression : {editProgress}%</label>
-                      <input type="range" min="0" max="100" value={editProgress} onChange={(e) => setEditProgress(Number(e.target.value))}
-                        className="w-full mt-1 accent-[hsl(var(--primary))]" />
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-card-foreground">Services</label>
-                      <div className="flex flex-wrap gap-1.5 mt-1">
-                        {serviceOptions.map((s) => (
-                          <button key={s} onClick={() => setEditServices(prev => prev.includes(s) ? prev.filter(x => x !== s) : [...prev, s])}
-                            className={`text-xs px-2.5 py-1 rounded-lg border transition-colors ${editServices.includes(s) ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground border-border"}`}
-                          >{s}</button>
-                        ))}
-                      </div>
-                    </div>
-                    <div>
-                      <label className="text-sm font-medium text-card-foreground">Gestionnaire assigné</label>
-                      <Select value={editGestionnaire || "none"} onValueChange={(v) => setEditGestionnaire(v === "none" ? null : v)}>
-                        <SelectTrigger className="mt-1">
-                          <SelectValue placeholder="Aucun gestionnaire" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="none">Aucun gestionnaire</SelectItem>
-                          {gestionnaires.map((g) => (
-                            <SelectItem key={g.user_id} value={g.user_id}>{g.full_name}</SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
+                <div className="mt-auto">
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-xs font-medium text-muted-foreground">Progression</span>
+                    <span className="text-xs font-bold text-card-foreground">{p.progress}%</span>
                   </div>
-                ) : (
-                  <div className="mt-auto">
-                    <div className="flex items-center justify-between mb-1.5">
-                      <span className="text-xs font-medium text-muted-foreground">Progression</span>
-                      <span className="text-xs font-bold text-card-foreground">{p.progress}%</span>
-                    </div>
-                    <div className="relative h-2 bg-muted rounded-full overflow-hidden">
-                      <div className={`absolute inset-y-0 left-0 rounded-full transition-all duration-500 ${p.progress === 100 ? "bg-teal-500" : "bg-gradient-to-r from-primary to-accent"}`}
-                        style={{ width: `${p.progress}%` }} />
-                    </div>
+                  <div className="relative h-2 bg-muted rounded-full overflow-hidden">
+                    <div className={`absolute inset-y-0 left-0 rounded-full transition-all duration-500 ${p.progress === 100 ? "bg-teal-500" : "bg-gradient-to-r from-primary to-accent"}`}
+                      style={{ width: `${p.progress}%` }} />
                   </div>
-                )}
+                </div>
 
                 <p className="text-[11px] text-muted-foreground/50 mt-3">
                   Soumis le {new Date(p.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
