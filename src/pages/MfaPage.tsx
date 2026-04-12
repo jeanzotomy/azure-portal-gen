@@ -4,17 +4,20 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, ShieldCheck, Smartphone, Loader2 } from "lucide-react";
+import { ArrowLeft, ShieldCheck, Smartphone, Loader2, Phone } from "lucide-react";
 import favicon from "@/assets/cloudmature-logo.png";
 import { useTranslation } from "@/i18n/LanguageContext";
 
 export default function MfaPage() {
   const [step, setStep] = useState<"loading" | "enroll" | "verify">("loading");
+  const [mfaMethod, setMfaMethod] = useState<"totp" | "sms">("totp");
   const [qrCode, setQrCode] = useState("");
   const [factorId, setFactorId] = useState("");
   const [otp, setOtp] = useState("");
   const [loading, setLoading] = useState(false);
   const [secret, setSecret] = useState("");
+  const [userPhone, setUserPhone] = useState<string | null>(null);
+  const [smsSent, setSmsSent] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useTranslation();
@@ -34,6 +37,11 @@ export default function MfaPage() {
   const checkMfaStatus = async () => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { navigate("/auth"); return; }
+
+    // Fetch user phone from profile
+    const { data: profile } = await supabase.from("profiles").select("phone").eq("user_id", user.id).maybeSingle();
+    if (profile?.phone) setUserPhone(profile.phone);
+
     const { data: aal } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
     if (aal?.currentLevel === "aal2") { await redirectByRole(user.id); return; }
     const { data: factors } = await supabase.auth.mfa.listFactors();
@@ -66,6 +74,45 @@ export default function MfaPage() {
     } finally { setLoading(false); }
   };
 
+  const handleSendSmsMfa = async () => {
+    if (!userPhone) {
+      toast({ title: t("mfa.noPhone"), description: t("mfa.noPhoneDesc"), variant: "destructive" });
+      return;
+    }
+    setLoading(true);
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const res = await supabase.functions.invoke("send-sms-otp", {
+        body: { phone: userPhone, purpose: "mfa", user_id: user?.id },
+      });
+      if (res.error || res.data?.error) {
+        throw new Error(res.data?.error || res.error?.message || "SMS send failed");
+      }
+      setSmsSent(true);
+      toast({ title: t("mfa.smsSent"), description: t("mfa.smsSentDesc") });
+    } catch (err: any) {
+      toast({ title: t("auth.error"), description: err.message, variant: "destructive" });
+    } finally { setLoading(false); }
+  };
+
+  const handleVerifySmsMfa = async (e: React.FormEvent) => {
+    e.preventDefault(); setLoading(true);
+    try {
+      const res = await supabase.functions.invoke("verify-sms-otp", {
+        body: { phone: userPhone, code: otp, purpose: "mfa" },
+      });
+      if (res.error || res.data?.error) {
+        throw new Error(res.data?.error || res.error?.message || "Verification failed");
+      }
+      if (res.data?.success) {
+        toast({ title: t("mfa.success"), description: t("mfa.successDesc") });
+        navigate(res.data.redirectTo || "/portal");
+      }
+    } catch (err: any) {
+      toast({ title: t("mfa.invalidCode"), description: err.message, variant: "destructive" }); setOtp("");
+    } finally { setLoading(false); }
+  };
+
   if (step === "loading") {
     return (<div className="min-h-screen gradient-hero flex items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-primary" /></div>);
   }
@@ -84,6 +131,30 @@ export default function MfaPage() {
               <p className="text-sm text-secondary-foreground/60">{t("mfa.subtitle")}</p>
             </div>
           </div>
+
+          {/* MFA method toggle - only show on verify step when user has a phone */}
+          {step === "verify" && userPhone && (
+            <div className="flex mb-4 rounded-lg overflow-hidden border border-border/30">
+              <button
+                type="button"
+                onClick={() => { setMfaMethod("totp"); setOtp(""); setSmsSent(false); }}
+                className={`flex-1 py-2 text-xs font-medium flex items-center justify-center gap-1 transition-colors ${
+                  mfaMethod === "totp" ? "bg-primary text-primary-foreground" : "bg-secondary/20 text-secondary-foreground/60 hover:bg-secondary/40"
+                }`}
+              >
+                <ShieldCheck size={14} /> {t("mfa.totpOption")}
+              </button>
+              <button
+                type="button"
+                onClick={() => { setMfaMethod("sms"); setOtp(""); }}
+                className={`flex-1 py-2 text-xs font-medium flex items-center justify-center gap-1 transition-colors ${
+                  mfaMethod === "sms" ? "bg-primary text-primary-foreground" : "bg-secondary/20 text-secondary-foreground/60 hover:bg-secondary/40"
+                }`}
+              >
+                <Phone size={14} /> {t("mfa.smsOption")}
+              </button>
+            </div>
+          )}
 
           {step === "enroll" && (
             <div className="space-y-4">
@@ -115,7 +186,7 @@ export default function MfaPage() {
             </div>
           )}
 
-          {step === "verify" && (
+          {step === "verify" && mfaMethod === "totp" && (
             <div className="space-y-4">
               <div className="flex items-center gap-2 text-primary mb-2">
                 <ShieldCheck size={20} />
@@ -130,6 +201,41 @@ export default function MfaPage() {
                   <ShieldCheck size={16} className="mr-2" /> {loading ? t("mfa.verifying") : t("mfa.verify")}
                 </Button>
               </form>
+            </div>
+          )}
+
+          {step === "verify" && mfaMethod === "sms" && (
+            <div className="space-y-4">
+              <div className="flex items-center gap-2 text-primary mb-2">
+                <Phone size={20} />
+                <span className="font-medium text-primary-foreground">{t("mfa.smsOption")}</span>
+              </div>
+              {!smsSent ? (
+                <>
+                  <p className="text-sm text-secondary-foreground/60">
+                    {t("mfa.enterSmsCode")} ({userPhone})
+                  </p>
+                  <Button
+                    type="button"
+                    className="w-full gradient-primary text-primary-foreground border-0"
+                    disabled={loading}
+                    onClick={handleSendSmsMfa}
+                  >
+                    <Phone size={16} className="mr-2" />
+                    {loading ? t("mfa.sendingSmsCode") : t("mfa.sendSmsCode")}
+                  </Button>
+                </>
+              ) : (
+                <form onSubmit={handleVerifySmsMfa} className="space-y-4">
+                  <p className="text-sm text-secondary-foreground/60">{t("mfa.enterSmsCode")}</p>
+                  <Input type="text" inputMode="numeric" pattern="[0-9]{6}" maxLength={6} placeholder="000000" value={otp}
+                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                    className="bg-secondary/30 border-border/30 text-primary-foreground text-center text-2xl tracking-[0.5em] placeholder:text-secondary-foreground/40 placeholder:tracking-[0.5em]" autoFocus required />
+                  <Button type="submit" className="w-full gradient-primary text-primary-foreground border-0" disabled={loading || otp.length !== 6}>
+                    <Phone size={16} className="mr-2" /> {loading ? t("mfa.verifying") : t("mfa.smsVerify")}
+                  </Button>
+                </form>
+              )}
             </div>
           )}
         </div>
