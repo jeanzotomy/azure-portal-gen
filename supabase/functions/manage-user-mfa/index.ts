@@ -34,12 +34,12 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Accès refusé — admin requis" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const { user_id, action } = await req.json();
+    const { user_id, action, factor_id } = await req.json();
     if (!user_id || typeof user_id !== "string") {
       return new Response(JSON.stringify({ error: "user_id requis" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
-    if (!["list", "unenroll"].includes(action)) {
-      return new Response(JSON.stringify({ error: "action must be 'list' or 'unenroll'" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    if (!["list", "unenroll", "unenroll_factor"].includes(action)) {
+      return new Response(JSON.stringify({ error: "action must be 'list', 'unenroll', or 'unenroll_factor'" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
     const adminClient = createClient(supabaseUrl, serviceRoleKey, {
@@ -51,8 +51,39 @@ Deno.serve(async (req) => {
       if (error) {
         return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
       }
-      const verifiedFactors = (data?.factors || []).filter((f: any) => f.status === "verified");
-      return new Response(JSON.stringify({ enrolled: verifiedFactors.length > 0, factors: verifiedFactors }), {
+      const factors = (data?.factors || []).map((f: any) => ({
+        id: f.id,
+        type: f.factor_type,
+        friendly_name: f.friendly_name || null,
+        status: f.status,
+        created_at: f.created_at,
+      }));
+      const verifiedFactors = factors.filter((f: any) => f.status === "verified");
+
+      // Also check if user has a phone in profile (SMS MFA eligible)
+      const { data: profile } = await adminClient.from("profiles").select("phone").eq("user_id", user_id).maybeSingle();
+      const hasPhone = !!(profile?.phone);
+
+      return new Response(JSON.stringify({
+        enrolled: verifiedFactors.length > 0,
+        factors: verifiedFactors,
+        all_factors: factors,
+        has_phone: hasPhone,
+        phone: profile?.phone || null,
+      }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    if (action === "unenroll_factor") {
+      if (!factor_id || typeof factor_id !== "string") {
+        return new Response(JSON.stringify({ error: "factor_id requis" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      const { error } = await adminClient.auth.admin.mfa.deleteFactor({ id: factor_id, userId: user_id });
+      if (error) {
+        return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+      return new Response(JSON.stringify({ success: true }), {
         status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }

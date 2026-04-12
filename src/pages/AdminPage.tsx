@@ -24,6 +24,7 @@ import {
   LayoutDashboard, FolderOpen, LifeBuoy, Users, LogOut, Shield, Clock, CheckCircle2,
   AlertCircle, Bell, ChevronDown, ChevronUp, MessageSquare, Search, Send, UserCog,
   Flag, DollarSign, Calendar, Filter, TrendingUp, Activity, BarChart3, PieChart, ShieldBan, ShieldCheck, Trash2, RefreshCw,
+  Smartphone, Phone, X,
 } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RePieChart, Pie, Cell, AreaChart, Area } from "recharts";
 import type { User as SupaUser } from "@supabase/supabase-js";
@@ -1460,8 +1461,9 @@ function AdminUsers() {
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [changingRole, setChangingRole] = useState<string | null>(null);
-  const [mfaStatus, setMfaStatus] = useState<Record<string, boolean>>({});
+  const [mfaStatus, setMfaStatus] = useState<Record<string, { enrolled: boolean; factors: any[]; has_phone: boolean; phone: string | null }>>({});
   const [mfaLoading, setMfaLoading] = useState<string | null>(null);
+  const [mfaDialogUser, setMfaDialogUser] = useState<any | null>(null);
   const { toast } = useToast();
 
   const load = async () => {
@@ -1476,12 +1478,19 @@ function AdminUsers() {
     setUserRoles(map);
 
     // Load MFA status for all users
-    const mfaMap: Record<string, boolean> = {};
+    const mfaMap: Record<string, { enrolled: boolean; factors: any[]; has_phone: boolean; phone: string | null }> = {};
     for (const prof of (profs || [])) {
       try {
         const { data } = await supabase.functions.invoke("manage-user-mfa", { body: { user_id: prof.user_id, action: "list" } });
-        mfaMap[prof.user_id] = !!data?.enrolled;
-      } catch { mfaMap[prof.user_id] = false; }
+        mfaMap[prof.user_id] = {
+          enrolled: !!data?.enrolled,
+          factors: data?.factors || [],
+          has_phone: !!data?.has_phone,
+          phone: data?.phone || null,
+        };
+      } catch {
+        mfaMap[prof.user_id] = { enrolled: false, factors: [], has_phone: false, phone: null };
+      }
     }
     setMfaStatus(mfaMap);
   };
@@ -1489,14 +1498,40 @@ function AdminUsers() {
   useEffect(() => { load(); }, []);
 
   const disableMfa = async (userId: string, userName: string) => {
-    if (!window.confirm(`Désactiver le MFA pour "${userName}" ? L'utilisateur devra le reconfigurer.`)) return;
+    if (!window.confirm(`Désactiver tout le MFA pour "${userName}" ? L'utilisateur devra le reconfigurer.`)) return;
     setMfaLoading(userId);
     const { data, error } = await supabase.functions.invoke("manage-user-mfa", { body: { user_id: userId, action: "unenroll" } });
     if (error || data?.error) {
       toast({ title: "Erreur", description: data?.error || error?.message || "Impossible de désactiver le MFA.", variant: "destructive" });
     } else {
-      toast({ title: "MFA désactivé", description: `Le MFA de "${userName}" a été réinitialisé.` });
-      setMfaStatus(prev => ({ ...prev, [userId]: false }));
+      toast({ title: "MFA désactivé", description: `Tout le MFA de "${userName}" a été réinitialisé.` });
+      setMfaStatus(prev => ({ ...prev, [userId]: { ...prev[userId], enrolled: false, factors: [] } }));
+      setMfaDialogUser(null);
+    }
+    setMfaLoading(null);
+  };
+
+  const disableFactor = async (userId: string, factorId: string, factorType: string) => {
+    if (!window.confirm(`Désactiver le facteur ${factorType === "totp" ? "Authenticator" : factorType} ?`)) return;
+    setMfaLoading(userId);
+    const { data, error } = await supabase.functions.invoke("manage-user-mfa", { body: { user_id: userId, action: "unenroll_factor", factor_id: factorId } });
+    if (error || data?.error) {
+      toast({ title: "Erreur", description: data?.error || error?.message || "Impossible de désactiver ce facteur.", variant: "destructive" });
+    } else {
+      toast({ title: "Facteur désactivé", description: `Le facteur ${factorType === "totp" ? "Authenticator" : factorType} a été supprimé.` });
+      // Refresh MFA status for this user
+      try {
+        const { data: refreshed } = await supabase.functions.invoke("manage-user-mfa", { body: { user_id: userId, action: "list" } });
+        setMfaStatus(prev => ({
+          ...prev,
+          [userId]: {
+            enrolled: !!refreshed?.enrolled,
+            factors: refreshed?.factors || [],
+            has_phone: !!refreshed?.has_phone,
+            phone: refreshed?.phone || null,
+          },
+        }));
+      } catch { /* ignore */ }
     }
     setMfaLoading(null);
   };
@@ -1632,20 +1667,23 @@ function AdminUsers() {
                     >
                       <Trash2 size={16} />
                     </button>
-                    {mfaStatus[p.user_id] && (
+                    {mfaStatus[p.user_id]?.enrolled ? (
                       <button
-                        onClick={() => disableMfa(p.user_id, p.full_name || "cet utilisateur")}
+                        onClick={() => setMfaDialogUser(p)}
                         disabled={mfaLoading === p.user_id}
-                        title="Désactiver MFA"
+                        title="Gérer MFA"
                         className="p-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
                       >
                         <Shield size={16} />
                       </button>
-                    )}
-                    {!mfaStatus[p.user_id] && (
-                      <span title="MFA non activé" className="p-1.5 rounded-lg bg-muted text-muted-foreground/40">
+                    ) : (
+                      <button
+                        onClick={() => setMfaDialogUser(p)}
+                        title="Voir statut MFA"
+                        className="p-1.5 rounded-lg bg-muted text-muted-foreground/40 hover:bg-muted/80 transition-colors"
+                      >
                         <Shield size={16} />
-                      </span>
+                      </button>
                     )}
                   <div className="flex items-center gap-1.5">
                     <UserCog size={14} className="text-muted-foreground" />
@@ -1677,6 +1715,98 @@ function AdminUsers() {
         })}
       </div>
       {filtered.length === 0 && <p className="text-center text-muted-foreground py-8">Aucun utilisateur trouvé.</p>}
+
+      {/* MFA Management Dialog */}
+      {mfaDialogUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setMfaDialogUser(null)}>
+          <div className="bg-card rounded-2xl shadow-xl border border-border/50 w-full max-w-md mx-4 p-6 space-y-4" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center justify-between">
+              <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
+                <Shield size={20} className="text-primary" />
+                MFA — {mfaDialogUser.full_name || "Utilisateur"}
+              </h3>
+              <button onClick={() => setMfaDialogUser(null)} className="p-1 rounded-lg hover:bg-muted transition-colors">
+                <X size={18} className="text-muted-foreground" />
+              </button>
+            </div>
+
+            {(() => {
+              const status = mfaStatus[mfaDialogUser.user_id];
+              if (!status) return <p className="text-sm text-muted-foreground">Chargement...</p>;
+
+              return (
+                <div className="space-y-4">
+                  {/* TOTP Factors */}
+                  <div>
+                    <h4 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+                      <Smartphone size={14} /> Authenticator (TOTP)
+                    </h4>
+                    {status.factors.filter(f => f.type === "totp").length > 0 ? (
+                      <div className="space-y-2">
+                        {status.factors.filter(f => f.type === "totp").map((f: any) => (
+                          <div key={f.id} className="flex items-center justify-between bg-muted/50 rounded-lg p-3 border border-border/30">
+                            <div>
+                              <p className="text-sm font-medium text-foreground">{f.friendly_name || "Authenticator"}</p>
+                              <p className="text-xs text-muted-foreground">
+                                Ajouté le {new Date(f.created_at).toLocaleDateString("fr-FR")}
+                              </p>
+                            </div>
+                            <Button
+                              size="sm"
+                              variant="destructive"
+                              className="h-7 text-xs"
+                              disabled={mfaLoading === mfaDialogUser.user_id}
+                              onClick={() => disableFactor(mfaDialogUser.user_id, f.id, "totp")}
+                            >
+                              Désactiver
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-xs text-muted-foreground/60 italic">Aucun authenticator configuré</p>
+                    )}
+                  </div>
+
+                  {/* SMS MFA */}
+                  <div>
+                    <h4 className="text-sm font-semibold text-foreground mb-2 flex items-center gap-2">
+                      <Phone size={14} /> SMS
+                    </h4>
+                    {status.has_phone ? (
+                      <div className="flex items-center justify-between bg-muted/50 rounded-lg p-3 border border-border/30">
+                        <div>
+                          <p className="text-sm font-medium text-foreground">Éligible</p>
+                          <p className="text-xs text-muted-foreground">📱 {status.phone}</p>
+                        </div>
+                        <span className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary font-medium">Disponible</span>
+                      </div>
+                    ) : (
+                      <p className="text-xs text-muted-foreground/60 italic">Aucun numéro de téléphone configuré</p>
+                    )}
+                  </div>
+
+                  {/* Actions */}
+                  {status.enrolled && (
+                    <div className="pt-2 border-t border-border/30">
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        className="w-full"
+                        disabled={mfaLoading === mfaDialogUser.user_id}
+                        onClick={() => disableMfa(mfaDialogUser.user_id, mfaDialogUser.full_name || "cet utilisateur")}
+                      >
+                        <Shield size={14} className="mr-2" />
+                        Réinitialiser tout le MFA
+                      </Button>
+                    </div>
+                  )}
+                </div>
+              );
+            })()}
+          </div>
+        </div>
+      )}
     </div>
   );
 }
