@@ -88,6 +88,7 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
   const [formDueDate, setFormDueDate] = useState("");
   const [formType, setFormType] = useState<"facture" | "recu">("facture");
   const [formStatus, setFormStatus] = useState<"en_attente" | "validee">("en_attente");
+  const [editingInvoiceId, setEditingInvoiceId] = useState<string | null>(null);
 
   const loadInvoices = useCallback(async () => {
     setLoading(true);
