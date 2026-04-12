@@ -673,7 +673,21 @@ function ProjectsTab({ user }: { user: SupaUser }) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!name.trim()) return;
+    if (!name.trim()) {
+      toast({ title: "Champ requis", description: "Le nom du projet est obligatoire.", variant: "destructive" }); return;
+    }
+    if (!description.trim()) {
+      toast({ title: "Champ requis", description: "La description est obligatoire.", variant: "destructive" }); return;
+    }
+    if (!budget.trim()) {
+      toast({ title: "Champ requis", description: "Le budget estimé est obligatoire.", variant: "destructive" }); return;
+    }
+    if (!deadline.trim()) {
+      toast({ title: "Champ requis", description: "Le délai souhaité est obligatoire.", variant: "destructive" }); return;
+    }
+    if (selectedServices.length === 0) {
+      toast({ title: "Champ requis", description: "Veuillez sélectionner au moins un service.", variant: "destructive" }); return;
+    }
     setSubmitting(true);
 
     const payload = {
