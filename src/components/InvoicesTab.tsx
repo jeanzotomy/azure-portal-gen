@@ -55,6 +55,7 @@ interface Project {
   id: string;
   name: string;
   project_number: string | null;
+  budget: string | null;
   total_budget: number;
   total_paid: number;
 }
@@ -100,7 +101,7 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
   const loadProjects = useCallback(async () => {
     const { data } = await supabase
       .from("projects")
-      .select("id, name, project_number, total_budget, total_paid")
+      .select("id, name, project_number, budget, total_budget, total_paid")
       .order("name");
     setProjects((data as unknown as Project[]) || []);
   }, []);
