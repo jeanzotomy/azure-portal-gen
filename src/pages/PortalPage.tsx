@@ -577,14 +577,83 @@ function ProjectsTab({ user }: { user: SupaUser }) {
   };
 
   const uploadFiles = async (projectId: string) => {
+    // Get SharePoint config for the current user
+    const { data: spConfig } = await supabase.from("sharepoint_config").select("*").limit(1).maybeSingle();
+    
     for (const file of files) {
-      const filePath = `${user.id}/${projectId}/${Date.now()}_${file.name}`;
-      const { error: uploadError } = await supabase.storage.from("project-files").upload(filePath, file);
-      if (!uploadError) {
-        await supabase.from("project_files").insert({
-          project_id: projectId, user_id: user.id, file_name: file.name,
-          file_path: filePath, file_size: file.size, file_type: file.type,
-        });
+      try {
+        if (spConfig?.site_id) {
+          // Upload to SharePoint
+          const { data: { session } } = await supabase.auth.getSession();
+          if (!session) throw new Error("Not authenticated");
+          
+          // Get project info for folder name
+          const { data: project } = await supabase.from("projects").select("name, project_number").eq("id", projectId).single();
+          
+          // Ensure project folder exists on SharePoint
+          const ensureParams = new URLSearchParams({
+            action: "ensure-project-folder",
+            siteId: spConfig.site_id,
+            ...(spConfig.drive_id ? { driveId: spConfig.drive_id } : {}),
+            projectName: project?.name || projectId,
+            ...(project?.project_number ? { projectNumber: project.project_number } : {}),
+          });
+          const ensureRes = await fetch(
+            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sharepoint-proxy?${ensureParams}`,
+            { headers: { Authorization: `Bearer ${session.access_token}`, apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY } }
+          );
+          if (!ensureRes.ok) {
+            const errData = await ensureRes.json();
+            throw new Error(errData.error || "Failed to create project folder");
+          }
+          const folder = await ensureRes.json();
+          
+          // Upload the file into the project folder
+          const safeFolderName = folder.name;
+          const uploadParams = new URLSearchParams({
+            action: "upload-file",
+            siteId: spConfig.site_id,
+            ...(spConfig.drive_id ? { driveId: spConfig.drive_id } : {}),
+            filePath: `${safeFolderName}/${file.name}`,
+          });
+          const uploadRes = await fetch(
+            `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sharepoint-proxy?${uploadParams}`,
+            {
+              method: "PUT",
+              headers: {
+                Authorization: `Bearer ${session.access_token}`,
+                apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+                "Content-Type": file.type || "application/octet-stream",
+              },
+              body: file,
+            }
+          );
+          if (!uploadRes.ok) {
+            const errData = await uploadRes.json();
+            throw new Error(errData.error || "SharePoint upload failed");
+          }
+          const uploadData = await uploadRes.json();
+          
+          // Record in project_files with SharePoint path
+          await supabase.from("project_files").insert({
+            project_id: projectId, user_id: user.id, file_name: file.name,
+            file_path: uploadData.webUrl || `sharepoint://${safeFolderName}/${file.name}`,
+            file_size: file.size, file_type: file.type,
+          });
+        } else {
+          // Fallback: upload to Supabase Storage
+          const filePath = `${user.id}/${projectId}/${Date.now()}_${file.name}`;
+          const { error: uploadError } = await supabase.storage.from("project-files").upload(filePath, file);
+          if (!uploadError) {
+            await supabase.from("project_files").insert({
+              project_id: projectId, user_id: user.id, file_name: file.name,
+              file_path: filePath, file_size: file.size, file_type: file.type,
+            });
+          }
+        }
+      } catch (err) {
+        console.error("File upload error:", err);
+        toast({ title: "Erreur d'upload", description: err instanceof Error ? err.message : "Erreur inconnue", variant: "destructive" });
       }
     }
   };
