@@ -364,7 +364,7 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
       } else {
         ({ error } = await supabase.from("invoices").insert({
           ...invoiceData,
-          user_id: session.user.id,
+          user_id: project.user_id,
           file_name: selectedFile?.name || null,
           sharepoint_url: sharepointUrl || null,
           parsed_data: parsedData as any,
