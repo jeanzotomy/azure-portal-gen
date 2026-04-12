@@ -1808,6 +1808,75 @@ function AdminUsers() {
 
   useEffect(() => { load(); }, []);
 
+  const handleInviteSingle = async () => {
+    if (!inviteEmail) return;
+    setInviteLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("invite-user", {
+        body: { action: "invite", users: [{ email: inviteEmail, full_name: inviteName, role: inviteRole }] },
+      });
+      if (error || data?.error) {
+        toast({ title: "Erreur", description: data?.error || error?.message, variant: "destructive" });
+      } else {
+        toast({ title: "Invitation envoyée", description: `Un email d'invitation a été envoyé à ${inviteEmail}.` });
+        setInviteEmail(""); setInviteName(""); setInviteRole("client");
+        setShowInviteDialog(false);
+        load();
+      }
+    } catch (err: any) {
+      toast({ title: "Erreur", description: err.message, variant: "destructive" });
+    } finally {
+      setInviteLoading(false);
+    }
+  };
+
+  const handleCsvImport = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const text = event.target?.result as string;
+      const lines = text.split("\n").map(l => l.trim()).filter(Boolean);
+      const parsed: { email: string; full_name: string; role: string }[] = [];
+      // Skip header if present
+      const start = lines[0]?.toLowerCase().includes("email") ? 1 : 0;
+      for (let i = start; i < lines.length; i++) {
+        const cols = lines[i].split(/[,;]/).map(c => c.trim().replace(/^"|"$/g, ""));
+        if (cols[0]) {
+          parsed.push({ email: cols[0], full_name: cols[1] || "", role: cols[2] || "client" });
+        }
+      }
+      setCsvUsers(parsed);
+      setImportResults(null);
+    };
+    reader.readAsText(file);
+    e.target.value = "";
+  };
+
+  const handleBulkInvite = async () => {
+    if (csvUsers.length === 0) return;
+    setInviteLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("invite-user", {
+        body: { action: "bulk-invite", users: csvUsers },
+      });
+      if (error) {
+        toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      } else {
+        setImportResults(data?.details || []);
+        toast({
+          title: "Import terminé",
+          description: `${data?.invited || 0} invitation(s) envoyée(s), ${data?.failed || 0} échec(s).`,
+        });
+        load();
+      }
+    } catch (err: any) {
+      toast({ title: "Erreur", description: err.message, variant: "destructive" });
+    } finally {
+      setInviteLoading(false);
+    }
+  };
+
   const disableMfa = async (userId: string, userName: string) => {
     if (!window.confirm(`Désactiver tout le MFA pour "${userName}" ? L'utilisateur devra le reconfigurer.`)) return;
     setMfaLoading(userId);
