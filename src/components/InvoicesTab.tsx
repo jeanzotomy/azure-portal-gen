@@ -230,7 +230,31 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
 
   const handleSubmit = async () => {
     if (!formProjectId) {
-      toast({ title: "Projet requis", description: "Veuillez sélectionner un projet.", variant: "destructive" });
+      toast({ title: "Champ requis", description: "Veuillez sélectionner un projet.", variant: "destructive" });
+      return;
+    }
+    if (!formInvoiceNumber.trim()) {
+      toast({ title: "Champ requis", description: "Le numéro de facture est obligatoire.", variant: "destructive" });
+      return;
+    }
+    if (!formVendor.trim()) {
+      toast({ title: "Champ requis", description: "Le fournisseur est obligatoire.", variant: "destructive" });
+      return;
+    }
+    if (!formDescription.trim()) {
+      toast({ title: "Champ requis", description: "La description est obligatoire.", variant: "destructive" });
+      return;
+    }
+    if (!formAmount || parseFloat(formAmount) <= 0) {
+      toast({ title: "Champ requis", description: "Le montant HT est obligatoire.", variant: "destructive" });
+      return;
+    }
+    if (!formInvoiceDate) {
+      toast({ title: "Champ requis", description: "La date de facture est obligatoire.", variant: "destructive" });
+      return;
+    }
+    if (!formDueDate) {
+      toast({ title: "Champ requis", description: "La date d'échéance est obligatoire.", variant: "destructive" });
       return;
     }
 
@@ -713,24 +737,24 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-sm font-medium">N° Facture</label>
-                <Input value={formInvoiceNumber} onChange={e => setFormInvoiceNumber(e.target.value)} />
+                <label className="text-sm font-medium">N° Facture *</label>
+                <Input value={formInvoiceNumber} onChange={e => setFormInvoiceNumber(e.target.value)} required />
               </div>
               <div>
-                <label className="text-sm font-medium">Fournisseur</label>
-                <Input value={formVendor} onChange={e => setFormVendor(e.target.value)} />
+                <label className="text-sm font-medium">Fournisseur *</label>
+                <Input value={formVendor} onChange={e => setFormVendor(e.target.value)} required />
               </div>
             </div>
 
             <div>
-              <label className="text-sm font-medium">Description</label>
-              <Input value={formDescription} onChange={e => setFormDescription(e.target.value)} />
+              <label className="text-sm font-medium">Description *</label>
+              <Input value={formDescription} onChange={e => setFormDescription(e.target.value)} required />
             </div>
 
             <div className="grid grid-cols-3 gap-3">
               <div>
-                <label className="text-sm font-medium">Montant HT</label>
-                <Input type="number" step="0.01" value={formAmount} onChange={e => setFormAmount(e.target.value)} />
+                <label className="text-sm font-medium">Montant HT *</label>
+                <Input type="number" step="0.01" value={formAmount} onChange={e => setFormAmount(e.target.value)} required />
               </div>
               <div>
                 <label className="text-sm font-medium">Taxes</label>
@@ -744,12 +768,12 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
 
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="text-sm font-medium">Date facture</label>
-                <Input type="date" value={formInvoiceDate} onChange={e => setFormInvoiceDate(e.target.value)} />
+                <label className="text-sm font-medium">Date facture *</label>
+                <Input type="date" value={formInvoiceDate} onChange={e => setFormInvoiceDate(e.target.value)} required />
               </div>
               <div>
-                <label className="text-sm font-medium">Date échéance</label>
-                <Input type="date" value={formDueDate} onChange={e => setFormDueDate(e.target.value)} />
+                <label className="text-sm font-medium">Date échéance *</label>
+                <Input type="date" value={formDueDate} onChange={e => setFormDueDate(e.target.value)} required />
               </div>
             </div>
           </div>
