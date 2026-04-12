@@ -55,6 +55,7 @@ interface Project {
   id: string;
   name: string;
   project_number: string | null;
+  budget: string | null;
   total_budget: number;
   total_paid: number;
 }
@@ -100,7 +101,7 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
   const loadProjects = useCallback(async () => {
     const { data } = await supabase
       .from("projects")
-      .select("id, name, project_number, total_budget, total_paid")
+      .select("id, name, project_number, budget, total_budget, total_paid")
       .order("name");
     setProjects((data as unknown as Project[]) || []);
   }, []);
@@ -587,13 +588,14 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
               {formProjectId && (() => {
                 const sp = projects.find(p => p.id === formProjectId);
                 if (!sp) return null;
-                const balance = (sp.total_budget || 0) - (sp.total_paid || 0);
+                const allocatedBudget = parseFloat(sp.budget || "0") || sp.total_budget || 0;
+                const balance = allocatedBudget - (sp.total_paid || 0);
                 return (
                   <div>
                     <label className="text-sm font-medium">Budget du projet</label>
                     <div className="flex items-center gap-2 h-9 rounded-md border bg-muted/50 px-3 text-sm">
                       <DollarSign size={14} className="text-muted-foreground" />
-                      <span className="font-medium">{(sp.total_budget || 0).toLocaleString("fr-CA", { style: "currency", currency: "CAD" })}</span>
+                      <span className="font-medium">{allocatedBudget.toLocaleString("fr-CA", { style: "currency", currency: "CAD" })}</span>
                       <span className="text-muted-foreground">·</span>
                       <span className="text-xs text-muted-foreground">Payé : {(sp.total_paid || 0).toLocaleString("fr-CA", { style: "currency", currency: "CAD" })}</span>
                       <span className="text-muted-foreground">·</span>
