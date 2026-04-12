@@ -8,7 +8,17 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Upload, FileText, DollarSign, AlertCircle, CheckCircle2, Clock, Loader2, Trash2, Search, Receipt } from "lucide-react";
+import { Upload, FileText, DollarSign, AlertCircle, CheckCircle2, Clock, Loader2, Trash2, Search, Receipt, Check } from "lucide-react";
+import { Progress } from "@/components/ui/progress";
+
+type InvoiceStep = "idle" | "analyse" | "validation" | "upload" | "sauvegarde" | "done";
+
+const STEPS: { key: InvoiceStep; label: string }[] = [
+  { key: "analyse", label: "Analyse IA" },
+  { key: "validation", label: "Validation" },
+  { key: "upload", label: "Upload SharePoint" },
+  { key: "sauvegarde", label: "Sauvegarde" },
+];
 
 interface ParsedInvoice {
   project_number: string | null;
