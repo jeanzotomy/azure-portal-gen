@@ -415,11 +415,11 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
       </div>
 
       {/* Financial overview - reactive to filterProject */}
-      {projectsWithInvoices.length > 0 && (() => {
+      {projects.length > 0 && (() => {
         const fmt = (n: number) => n.toLocaleString("fr-CA", { style: "currency", currency: "CAD" });
         const visibleProjects = filterProject === "all"
-          ? projectsWithInvoices
-          : projectsWithInvoices.filter(p => p.id === filterProject);
+          ? projects
+          : projects.filter(p => p.id === filterProject);
         const visibleInvoices = filterProject === "all"
           ? invoices
           : invoices.filter(i => i.project_id === filterProject);
