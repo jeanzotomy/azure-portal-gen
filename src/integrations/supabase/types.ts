@@ -131,6 +131,77 @@ export type Database = {
         }
         Relationships: []
       }
+      invoices: {
+        Row: {
+          amount: number
+          created_at: string
+          description: string | null
+          due_date: string | null
+          file_name: string | null
+          id: string
+          invoice_date: string | null
+          invoice_number: string | null
+          parsed_data: Json | null
+          project_id: string | null
+          sharepoint_url: string | null
+          status: Database["public"]["Enums"]["invoice_status"]
+          tax_amount: number
+          total_amount: number
+          type: Database["public"]["Enums"]["invoice_type"]
+          updated_at: string
+          user_id: string
+          vendor: string | null
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          file_name?: string | null
+          id?: string
+          invoice_date?: string | null
+          invoice_number?: string | null
+          parsed_data?: Json | null
+          project_id?: string | null
+          sharepoint_url?: string | null
+          status?: Database["public"]["Enums"]["invoice_status"]
+          tax_amount?: number
+          total_amount?: number
+          type?: Database["public"]["Enums"]["invoice_type"]
+          updated_at?: string
+          user_id: string
+          vendor?: string | null
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          file_name?: string | null
+          id?: string
+          invoice_date?: string | null
+          invoice_number?: string | null
+          parsed_data?: Json | null
+          project_id?: string | null
+          sharepoint_url?: string | null
+          status?: Database["public"]["Enums"]["invoice_status"]
+          tax_amount?: number
+          total_amount?: number
+          type?: Database["public"]["Enums"]["invoice_type"]
+          updated_at?: string
+          user_id?: string
+          vendor?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "invoices_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           blocked: boolean
@@ -222,6 +293,8 @@ export type Database = {
           sharepoint_folder_url: string | null
           status: string
           technologies: string | null
+          total_budget: number | null
+          total_paid: number | null
           updated_at: string
           user_id: string
         }
@@ -238,6 +311,8 @@ export type Database = {
           sharepoint_folder_url?: string | null
           status?: string
           technologies?: string | null
+          total_budget?: number | null
+          total_paid?: number | null
           updated_at?: string
           user_id: string
         }
@@ -254,6 +329,8 @@ export type Database = {
           sharepoint_folder_url?: string | null
           status?: string
           technologies?: string | null
+          total_budget?: number | null
+          total_paid?: number | null
           updated_at?: string
           user_id?: string
         }
@@ -484,6 +561,8 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user" | "agent" | "client" | "comptable"
+      invoice_status: "en_attente" | "validee" | "non_conforme"
+      invoice_type: "facture" | "recu"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -612,6 +691,8 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user", "agent", "client", "comptable"],
+      invoice_status: ["en_attente", "validee", "non_conforme"],
+      invoice_type: ["facture", "recu"],
     },
   },
 } as const
