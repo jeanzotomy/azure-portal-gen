@@ -32,7 +32,7 @@ import logo from "@/assets/cloudmature-logo.png";
 import {
   LayoutDashboard, FolderOpen, LifeBuoy, User, LogOut, Send, Clock, CheckCircle2, AlertCircle,
   Menu, Bell, Search, Filter, Upload, X, FileText, DollarSign, Calendar, Cpu, Flag, Pencil, Shield,
-  Activity, TrendingUp, Plus, Trash2, Info, RefreshCw,
+  Activity, TrendingUp, Plus, Trash2, Info, RefreshCw, UserCheck,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -502,6 +502,7 @@ function DashboardTab({ user }: { user: SupaUser }) {
 
 function ProjectsTab({ user }: { user: SupaUser }) {
   const [projects, setProjects] = useState<any[]>([]);
+  const [gestionnaireProfiles, setGestionnaireProfiles] = useState<Record<string, string>>({});
   const [showForm, setShowForm] = useState(false);
   const [editingProject, setEditingProject] = useState<any>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -534,8 +535,17 @@ function ProjectsTab({ user }: { user: SupaUser }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-  const loadProjects = () => {
-    supabase.from("projects").select("*").order("created_at", { ascending: false }).then(({ data }) => setProjects(data || []));
+  const loadProjects = async () => {
+    const { data } = await supabase.from("projects").select("*").order("created_at", { ascending: false });
+    setProjects(data || []);
+    // Load gestionnaire profiles
+    const gIds = [...new Set((data || []).map((p: any) => p.gestionnaire_id).filter(Boolean))];
+    if (gIds.length > 0) {
+      const { data: profs } = await supabase.from("profiles").select("user_id, full_name").in("user_id", gIds);
+      const map: Record<string, string> = {};
+      (profs || []).forEach((pr: any) => { map[pr.user_id] = pr.full_name || "—"; });
+      setGestionnaireProfiles(map);
+    }
   };
 
   useEffect(() => { loadProjects(); }, []);
@@ -910,8 +920,13 @@ function ProjectsTab({ user }: { user: SupaUser }) {
                   {p.description && (
                     <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{p.description}</p>
                   )}
+                  {p.gestionnaire_id && gestionnaireProfiles[p.gestionnaire_id] && (
+                    <div className="flex items-center gap-2 mb-3">
+                      <UserCheck size={14} className="text-accent shrink-0" />
+                      <span className="text-xs text-accent font-medium">Gestionnaire : {gestionnaireProfiles[p.gestionnaire_id]}</span>
+                    </div>
+                  )}
 
-                  {/* Meta tags */}
                   {(p.budget || p.deadline || p.technologies || p.total_paid) && (
                     <div className="flex flex-wrap gap-1.5 mb-4">
                       {p.budget && (

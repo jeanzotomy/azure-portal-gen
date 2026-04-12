@@ -25,8 +25,9 @@ import {
   LayoutDashboard, FolderOpen, LifeBuoy, Users, LogOut, Shield, Clock, CheckCircle2,
   AlertCircle, Bell, ChevronDown, ChevronUp, MessageSquare, Search, Send, UserCog,
   Flag, DollarSign, Calendar, Filter, TrendingUp, Activity, BarChart3, PieChart, ShieldBan, ShieldCheck, Trash2, RefreshCw,
-  Smartphone, Phone, X,
+  Smartphone, Phone, X, UserCheck,
 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { HardDrive } from "lucide-react";
 import SharePointTab from "@/components/SharePointTab";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RePieChart, Pie, Cell, AreaChart, Area } from "recharts";
@@ -956,6 +957,7 @@ function AdminProjects() {
 function AdminProjectsInner({ readOnly = false }: { readOnly?: boolean }) {
   const [projects, setProjects] = useState<any[]>([]);
   const [profiles, setProfiles] = useState<Record<string, any>>({});
+  const [gestionnaires, setGestionnaires] = useState<{ user_id: string; full_name: string }[]>([]);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
@@ -968,6 +970,7 @@ function AdminProjectsInner({ readOnly = false }: { readOnly?: boolean }) {
   const [editDeadline, setEditDeadline] = useState("");
   const [editPriority, setEditPriority] = useState("normal");
   const [editServices, setEditServices] = useState<string[]>([]);
+  const [editGestionnaire, setEditGestionnaire] = useState<string | null>(null);
   const { toast } = useToast();
 
   const serviceOptions = [
@@ -983,6 +986,10 @@ function AdminProjectsInner({ readOnly = false }: { readOnly?: boolean }) {
     const map: Record<string, any> = {};
     (prof || []).forEach((pr: any) => { map[pr.user_id] = pr; });
     setProfiles(map);
+    // Load gestionnaires
+    const { data: gRoles } = await supabase.from("user_roles").select("user_id").eq("role", "gestionnaire");
+    const gIds = (gRoles || []).map((r: any) => r.user_id);
+    setGestionnaires((prof || []).filter((pr: any) => gIds.includes(pr.user_id)).map((pr: any) => ({ user_id: pr.user_id, full_name: pr.full_name || "Sans nom" })));
   };
 
   useEffect(() => { load(); }, []);
@@ -992,6 +999,7 @@ function AdminProjectsInner({ readOnly = false }: { readOnly?: boolean }) {
       name: editName, description: editDescription || null, budget: editBudget || null,
       deadline: editDeadline || null, priority: editPriority, status: editStatus, progress: editProgress,
       technologies: editServices.length > 0 ? editServices.join(", ") : null,
+      gestionnaire_id: editGestionnaire || null,
     }).eq("id", id);
     if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
     else { toast({ title: "Projet mis à jour!" }); setEditingId(null); load(); }
@@ -1113,6 +1121,7 @@ function AdminProjectsInner({ readOnly = false }: { readOnly?: boolean }) {
                         setEditBudget(p.budget || ""); setEditDeadline(p.deadline || "");
                         setEditPriority(p.priority || "normal");
                         setEditServices(p.technologies ? p.technologies.split(", ") : []);
+                        setEditGestionnaire(p.gestionnaire_id || null);
                       }
                     }}>
                       {isEditing ? "Sauvegarder" : "Modifier"}
@@ -1125,13 +1134,19 @@ function AdminProjectsInner({ readOnly = false }: { readOnly?: boolean }) {
                 <h3 className="font-bold text-card-foreground text-lg leading-tight mb-1">{p.name}</h3>
                 {p.description && <ExpandableText text={p.description} className="text-sm text-muted-foreground mb-2" maxLines="line-clamp-1" />}
                 
-                <div className="flex items-center gap-2 mb-3">
+                <div className="flex items-center gap-2 mb-1.5">
                   <div className="w-6 h-6 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-[10px] font-bold flex-shrink-0">
                     {(profile?.full_name || "?").charAt(0).toUpperCase()}
                   </div>
                   <span className="text-xs text-primary font-medium">{profile?.full_name || "Non renseigné"}</span>
                   {profile?.company && <span className="text-xs text-muted-foreground">· {profile.company}</span>}
                 </div>
+                {p.gestionnaire_id && profiles[p.gestionnaire_id] && (
+                  <div className="flex items-center gap-2 mb-3">
+                    <UserCheck size={14} className="text-accent shrink-0" />
+                    <span className="text-xs text-accent font-medium">Gestionnaire : {profiles[p.gestionnaire_id]?.full_name || "—"}</span>
+                  </div>
+                )}
 
                 {(p.budget || p.deadline || p.total_paid) && (
                   <div className="flex flex-wrap gap-1.5 mb-3">
@@ -1247,6 +1262,20 @@ function AdminProjectsInner({ readOnly = false }: { readOnly?: boolean }) {
                           >{s}</button>
                         ))}
                       </div>
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium text-card-foreground">Gestionnaire assigné</label>
+                      <Select value={editGestionnaire || "none"} onValueChange={(v) => setEditGestionnaire(v === "none" ? null : v)}>
+                        <SelectTrigger className="mt-1">
+                          <SelectValue placeholder="Aucun gestionnaire" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">Aucun gestionnaire</SelectItem>
+                          {gestionnaires.map((g) => (
+                            <SelectItem key={g.user_id} value={g.user_id}>{g.full_name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
                 ) : (
