@@ -958,6 +958,8 @@ function AdminProjectsInner({ readOnly = false }: { readOnly?: boolean }) {
   const [projects, setProjects] = useState<any[]>([]);
   const [profiles, setProfiles] = useState<Record<string, any>>({});
   const [gestionnaires, setGestionnaires] = useState<{ user_id: string; full_name: string }[]>([]);
+  const [currentUserId, setCurrentUserId] = useState<string | null>(null);
+  const [assignedFilter, setAssignedFilter] = useState<"all" | "mine">("all");
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [priorityFilter, setPriorityFilter] = useState("all");
@@ -971,6 +973,7 @@ function AdminProjectsInner({ readOnly = false }: { readOnly?: boolean }) {
   const [editPriority, setEditPriority] = useState("normal");
   const [editServices, setEditServices] = useState<string[]>([]);
   const [editGestionnaire, setEditGestionnaire] = useState<string | null>(null);
+  const [isCurrentUserGestionnaire, setIsCurrentUserGestionnaire] = useState(false);
   const { toast } = useToast();
 
   const serviceOptions = [
@@ -990,6 +993,12 @@ function AdminProjectsInner({ readOnly = false }: { readOnly?: boolean }) {
     const { data: gRoles } = await supabase.from("user_roles").select("user_id").eq("role", "gestionnaire");
     const gIds = (gRoles || []).map((r: any) => r.user_id);
     setGestionnaires((prof || []).filter((pr: any) => gIds.includes(pr.user_id)).map((pr: any) => ({ user_id: pr.user_id, full_name: pr.full_name || "Sans nom" })));
+    // Check if current user is a gestionnaire
+    const { data: { session } } = await supabase.auth.getSession();
+    if (session) {
+      setCurrentUserId(session.user.id);
+      setIsCurrentUserGestionnaire(gIds.includes(session.user.id));
+    }
   };
 
   useEffect(() => { load(); }, []);
@@ -1012,7 +1021,8 @@ function AdminProjectsInner({ readOnly = false }: { readOnly?: boolean }) {
       (profiles[p.user_id]?.company || "").toLowerCase().includes(search.toLowerCase());
     const matchesStatus = statusFilter === "all" || p.status === statusFilter;
     const matchesPriority = priorityFilter === "all" || p.priority === priorityFilter;
-    return matchesSearch && matchesStatus && matchesPriority;
+    const matchesAssigned = assignedFilter === "all" || p.gestionnaire_id === currentUserId;
+    return matchesSearch && matchesStatus && matchesPriority && matchesAssigned;
   });
 
   const statusOptions = [
@@ -1088,6 +1098,16 @@ function AdminProjectsInner({ readOnly = false }: { readOnly?: boolean }) {
               className={`text-xs px-3 py-1.5 rounded-full transition-colors ${priorityFilter === opt.value ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
             >{opt.label}</button>
           ))}
+          {isCurrentUserGestionnaire && (
+            <>
+              <span className="text-xs font-medium text-muted-foreground flex items-center gap-1 ml-2"><UserCheck size={12} /> Assignation :</span>
+              {[{ value: "all", label: "Tous" }, { value: "mine", label: "Mes projets" }].map((opt) => (
+                <button key={opt.value} onClick={() => setAssignedFilter(opt.value as "all" | "mine")}
+                  className={`text-xs px-3 py-1.5 rounded-full transition-colors ${assignedFilter === opt.value ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
+                >{opt.label}</button>
+              ))}
+            </>
+          )}
         </div>
       </div>
 
