@@ -7,6 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, ShieldCheck, Smartphone, Loader2, Phone } from "lucide-react";
 import favicon from "@/assets/cloudmature-logo.png";
 import { useTranslation } from "@/i18n/LanguageContext";
+import { markSmsMfaVerified } from "@/hooks/use-mfa";
 
 type MfaMethod = "totp" | "sms";
 
@@ -111,6 +112,7 @@ export default function MfaPage() {
         throw new Error(res.data?.error || res.error?.message || "Verification failed");
       }
       if (res.data?.success) {
+        markSmsMfaVerified();
         toast({ title: t("mfa.success"), description: t("mfa.successDesc") });
         navigate(res.data.redirectTo || "/portal");
       }

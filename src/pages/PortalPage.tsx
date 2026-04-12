@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { useUserRoles } from "@/hooks/use-admin";
-import { useMfaCheck } from "@/hooks/use-mfa";
+import { useMfaCheck, clearSmsMfaVerified } from "@/hooks/use-mfa";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { useTranslation } from "@/i18n/LanguageContext";
 import { Progress } from "@/components/ui/progress";
@@ -115,6 +115,7 @@ function PortalContent() {
   if (!user) return null;
 
   const handleLogout = async () => {
+    clearSmsMfaVerified();
     await supabase.auth.signOut();
     navigate("/");
   };
