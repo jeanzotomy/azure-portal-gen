@@ -1989,6 +1989,9 @@ function AdminUsers() {
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-foreground">Utilisateurs</h1>
         <div className="flex items-center gap-3">
+          <Button size="sm" className="gap-1.5" onClick={() => { setShowInviteDialog(true); setInviteMode("single"); setCsvUsers([]); setImportResults(null); }}>
+            <UserPlus size={14} /> Inviter
+          </Button>
           <Button variant="outline" size="sm" onClick={load} className="gap-1.5">
             <RefreshCw size={14} /> Actualiser
           </Button>
