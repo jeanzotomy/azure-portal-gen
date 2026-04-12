@@ -1242,13 +1242,13 @@ function TicketsTab({ user }: { user: SupaUser }) {
 }
 
 function ProfileTab({ user }: { user: SupaUser }) {
-  const [profile, setProfile] = useState({ full_name: "", company: "", phone: "" });
+  const [profile, setProfile] = useState({ full_name: "", company: "", phone: "", location: "", timezone: "" });
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
   const loadProfile = () => {
     supabase.from("profiles").select("*").eq("user_id", user.id).single().then(({ data }) => {
-      if (data) setProfile({ full_name: data.full_name || "", company: data.company || "", phone: data.phone || "" });
+      if (data) setProfile({ full_name: data.full_name || "", company: data.company || "", phone: data.phone || "", location: (data as any).location || "", timezone: (data as any).timezone || "" });
     });
   };
 
@@ -1300,6 +1300,30 @@ function ProfileTab({ user }: { user: SupaUser }) {
         <div>
           <label className="text-sm font-medium text-card-foreground">Téléphone</label>
           <Input value={profile.phone} onChange={(e) => setProfile({ ...profile, phone: e.target.value })} className="mt-1" />
+        </div>
+        <div>
+          <label className="text-sm font-medium text-card-foreground">Localisation</label>
+          <Input value={profile.location} onChange={(e) => setProfile({ ...profile, location: e.target.value })} placeholder="Ex: Montréal, QC" className="mt-1" />
+        </div>
+        <div>
+          <label className="text-sm font-medium text-card-foreground">Fuseau horaire</label>
+          <select
+            value={profile.timezone}
+            onChange={(e) => setProfile({ ...profile, timezone: e.target.value })}
+            className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+          >
+            <option value="">Sélectionner un fuseau horaire</option>
+            <option value="America/Toronto">Eastern (Toronto)</option>
+            <option value="America/Montreal">Eastern (Montréal)</option>
+            <option value="America/Winnipeg">Central (Winnipeg)</option>
+            <option value="America/Edmonton">Mountain (Edmonton)</option>
+            <option value="America/Vancouver">Pacific (Vancouver)</option>
+            <option value="Europe/Paris">Europe (Paris)</option>
+            <option value="Europe/London">Europe (Londres)</option>
+            <option value="Africa/Casablanca">Afrique (Casablanca)</option>
+            <option value="Asia/Dubai">Asie (Dubaï)</option>
+            <option value="UTC">UTC</option>
+          </select>
         </div>
         <Button type="submit" className="gradient-primary text-primary-foreground border-0" disabled={saving}>
           {saving ? "Sauvegarde..." : "Sauvegarder"}

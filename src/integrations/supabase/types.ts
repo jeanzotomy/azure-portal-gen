@@ -210,7 +210,9 @@ export type Database = {
           deleted_at: string | null
           full_name: string | null
           id: string
+          location: string | null
           phone: string | null
+          timezone: string | null
           updated_at: string
           user_id: string
         }
@@ -221,7 +223,9 @@ export type Database = {
           deleted_at?: string | null
           full_name?: string | null
           id?: string
+          location?: string | null
           phone?: string | null
+          timezone?: string | null
           updated_at?: string
           user_id: string
         }
@@ -232,7 +236,9 @@ export type Database = {
           deleted_at?: string | null
           full_name?: string | null
           id?: string
+          location?: string | null
           phone?: string | null
+          timezone?: string | null
           updated_at?: string
           user_id?: string
         }
@@ -557,10 +563,21 @@ export type Database = {
           read_ct: number
         }[]
       }
-      update_own_profile: {
-        Args: { _company?: string; _full_name?: string; _phone?: string }
-        Returns: undefined
-      }
+      update_own_profile:
+        | {
+            Args: { _company?: string; _full_name?: string; _phone?: string }
+            Returns: undefined
+          }
+        | {
+            Args: {
+              _company?: string
+              _full_name?: string
+              _location?: string
+              _phone?: string
+              _timezone?: string
+            }
+            Returns: undefined
+          }
     }
     Enums: {
       app_role:
