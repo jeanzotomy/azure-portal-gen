@@ -468,30 +468,19 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
                   {filterProject === "all" ? "Répartition financière par projet" : `Consommation budgétaire — ${visibleProjects[0]?.project_number || ""}`}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                {barData.map(d => {
-                  const pct = d.budget > 0 ? Math.min((d.paid / d.budget) * 100, 100) : 0;
-                  const overBudget = d.paid > d.budget && d.budget > 0;
-                  return (
-                    <div key={d.name} className="space-y-1">
-                      <div className="flex justify-between items-center text-xs">
-                        <span className="font-medium text-foreground">{d.name}</span>
-                        <span className="text-muted-foreground">
-                          {fmt(d.paid)} / {fmt(d.budget)}
-                          <span className={`ml-2 font-semibold ${overBudget ? "text-destructive" : "text-emerald-600"}`}>
-                            ({pct.toFixed(0)}%)
-                          </span>
-                        </span>
-                      </div>
-                      <div className="h-2.5 bg-muted rounded-full overflow-hidden">
-                        <div
-                          className={`h-full rounded-full transition-all ${overBudget ? "bg-destructive" : "bg-emerald-500"}`}
-                          style={{ width: `${Math.min(pct, 100)}%` }}
-                        />
-                      </div>
-                    </div>
-                  );
-                })}
+              <CardContent>
+                <ResponsiveContainer width="100%" height={barData.length * 60 + 40}>
+                  <BarChart data={barData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" horizontal={false} />
+                    <XAxis type="number" tickFormatter={(v) => `${(v / 1000).toFixed(0)}k $`} />
+                    <YAxis type="category" dataKey="name" width={100} tick={{ fontSize: 12 }} />
+                    <Tooltip formatter={(value: number) => fmt(value)} />
+                    <Legend />
+                    <Bar dataKey="budget" name="Budget" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
+                    <Bar dataKey="paid" name="Payé" fill="hsl(142, 71%, 45%)" radius={[0, 4, 4, 0]} />
+                    <Bar dataKey="solde" name="Solde" fill="hsl(var(--accent))" radius={[0, 4, 4, 0]} />
+                  </BarChart>
+                </ResponsiveContainer>
               </CardContent>
             </Card>
           </div>
