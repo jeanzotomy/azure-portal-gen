@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Upload, FileText, DollarSign, AlertCircle, CheckCircle2, Clock, Loader2, Trash2, Search, Receipt, Check } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
@@ -518,111 +517,123 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
         </div>
       )}
 
-      {/* Invoice form dialog */}
-      <Dialog open={showForm} onOpenChange={setShowForm}>
-        <DialogContent className="max-w-lg">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+      {/* Invoice form panel */}
+      {showForm && (
+        <Card className="border-border shadow-card">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-base">
               <DollarSign size={18} />
               {parsedData && !parsedData.project_id ? "⚠️ Facture non conforme — Projet non identifié" : "Confirmer la facture"}
-            </DialogTitle>
-          </DialogHeader>
+            </CardTitle>
+            <p className="text-sm text-muted-foreground">
+              Vérifiez les informations extraites puis validez l’enregistrement.
+            </p>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            {parsedData && !parsedData.project_id && (
+              <div className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive flex items-start gap-2">
+                <AlertCircle size={16} className="mt-0.5 shrink-0" />
+                <span>Le numéro de projet n'a pas pu être identifié automatiquement. Veuillez sélectionner le projet manuellement.</span>
+              </div>
+            )}
 
-          {parsedData && !parsedData.project_id && (
-            <div className="bg-destructive/10 text-destructive text-sm p-3 rounded-lg flex items-start gap-2">
-              <AlertCircle size={16} className="mt-0.5 shrink-0" />
-              <span>Le numéro de projet n'a pas pu être identifié automatiquement. Veuillez sélectionner le projet manuellement.</span>
-            </div>
-          )}
+            {parsedData?.confidence && (
+              <div className="inline-flex w-fit items-center gap-1 rounded bg-muted px-2 py-1 text-xs text-muted-foreground">
+                <span className="font-medium">Confiance :</span>
+                <span>{parsedData.confidence === "high" ? "Élevée" : parsedData.confidence === "medium" ? "Moyenne" : "Faible"}</span>
+              </div>
+            )}
 
-          {parsedData?.confidence && (
-            <div className={`text-xs px-2 py-1 rounded inline-flex items-center gap-1 w-fit ${
-              parsedData.confidence === "high" ? "bg-emerald-100 text-emerald-700" :
-              parsedData.confidence === "medium" ? "bg-amber-100 text-amber-700" :
-              "bg-red-100 text-red-700"
-            }`}>
-              Confiance: {parsedData.confidence === "high" ? "Élevée" : parsedData.confidence === "medium" ? "Moyenne" : "Faible"}
-            </div>
-          )}
-
-          <div className="space-y-3 mt-2">
-            <div>
-              <label className="text-sm font-medium">Projet *</label>
-              <Select value={formProjectId} onValueChange={setFormProjectId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Sélectionner un projet" />
-                </SelectTrigger>
-                <SelectContent>
-                  {projects.map(p => (
-                    <SelectItem key={p.id} value={p.id}>{p.project_number} - {p.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
+            <div className="space-y-3">
               <div>
-                <label className="text-sm font-medium">Type</label>
-                <Select value={formType} onValueChange={(v: "facture" | "recu") => setFormType(v)}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
+                <label className="text-sm font-medium">Projet *</label>
+                <Select value={formProjectId} onValueChange={setFormProjectId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Sélectionner un projet" />
+                  </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="facture">Facture</SelectItem>
-                    <SelectItem value="recu">Reçu de paiement</SelectItem>
+                    {projects.map(p => (
+                      <SelectItem key={p.id} value={p.id}>{p.project_number} - {p.name}</SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm font-medium">Type</label>
+                  <Select value={formType} onValueChange={(v: "facture" | "recu") => setFormType(v)}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="facture">Facture</SelectItem>
+                      <SelectItem value="recu">Reçu de paiement</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium">N° Facture</label>
+                  <Input value={formInvoiceNumber} onChange={e => setFormInvoiceNumber(e.target.value)} />
+                </div>
+              </div>
+
               <div>
-                <label className="text-sm font-medium">N° Facture</label>
-                <Input value={formInvoiceNumber} onChange={e => setFormInvoiceNumber(e.target.value)} />
+                <label className="text-sm font-medium">Fournisseur</label>
+                <Input value={formVendor} onChange={e => setFormVendor(e.target.value)} />
+              </div>
+
+              <div>
+                <label className="text-sm font-medium">Description</label>
+                <Input value={formDescription} onChange={e => setFormDescription(e.target.value)} />
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="text-sm font-medium">Montant HT</label>
+                  <Input type="number" step="0.01" value={formAmount} onChange={e => setFormAmount(e.target.value)} />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Taxes</label>
+                  <Input type="number" step="0.01" value={formTaxAmount} onChange={e => setFormTaxAmount(e.target.value)} />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Total TTC</label>
+                  <Input type="number" step="0.01" value={formTotalAmount} onChange={e => setFormTotalAmount(e.target.value)} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="text-sm font-medium">Date facture</label>
+                  <Input type="date" value={formInvoiceDate} onChange={e => setFormInvoiceDate(e.target.value)} />
+                </div>
+                <div>
+                  <label className="text-sm font-medium">Date échéance</label>
+                  <Input type="date" value={formDueDate} onChange={e => setFormDueDate(e.target.value)} />
+                </div>
               </div>
             </div>
 
-            <div>
-              <label className="text-sm font-medium">Fournisseur</label>
-              <Input value={formVendor} onChange={e => setFormVendor(e.target.value)} />
+            <div className="flex justify-end gap-2 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setShowForm(false);
+                  setParsedData(null);
+                  setSelectedFile(null);
+                  setCurrentStep("idle");
+                }}
+              >
+                Annuler
+              </Button>
+              <Button type="button" onClick={handleSubmit} disabled={uploading}>
+                {uploading ? <Loader2 size={16} className="mr-2 animate-spin" /> : <CheckCircle2 size={16} className="mr-2" />}
+                {uploading ? "Enregistrement..." : "Valider et enregistrer"}
+              </Button>
             </div>
-
-            <div>
-              <label className="text-sm font-medium">Description</label>
-              <Input value={formDescription} onChange={e => setFormDescription(e.target.value)} />
-            </div>
-
-            <div className="grid grid-cols-3 gap-3">
-              <div>
-                <label className="text-sm font-medium">Montant HT</label>
-                <Input type="number" step="0.01" value={formAmount} onChange={e => setFormAmount(e.target.value)} />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Taxes</label>
-                <Input type="number" step="0.01" value={formTaxAmount} onChange={e => setFormTaxAmount(e.target.value)} />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Total TTC</label>
-                <Input type="number" step="0.01" value={formTotalAmount} onChange={e => setFormTotalAmount(e.target.value)} />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-sm font-medium">Date facture</label>
-                <Input type="date" value={formInvoiceDate} onChange={e => setFormInvoiceDate(e.target.value)} />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Date échéance</label>
-                <Input type="date" value={formDueDate} onChange={e => setFormDueDate(e.target.value)} />
-              </div>
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-2 mt-4">
-            <Button type="button" variant="outline" onClick={() => setShowForm(false)}>Annuler</Button>
-            <Button type="button" onClick={handleSubmit} disabled={uploading}>
-              {uploading ? <Loader2 size={16} className="animate-spin mr-2" /> : <CheckCircle2 size={16} className="mr-2" />}
-              {uploading ? "Enregistrement..." : "Valider et enregistrer"}
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }
