@@ -605,6 +605,11 @@ function ProjectsTab({ user }: { user: SupaUser }) {
           }
           const folder = await ensureRes.json();
           
+          // Save SharePoint folder URL on the project if not already set
+          if (folder.webUrl) {
+            await supabase.from("projects").update({ sharepoint_folder_url: folder.webUrl }).eq("id", projectId).is("sharepoint_folder_url", null);
+          }
+          
           // Upload the file into the project folder
           const safeFolderName = folder.name;
           const uploadParams = new URLSearchParams({
