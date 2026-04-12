@@ -378,36 +378,38 @@ export default function SharePointBrowser() {
         </div>
       ) : (() => {
         const filteredItems = items.filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
-        return filteredItems.length === 0 ? (
-        <p className="text-muted-foreground text-sm py-8 text-center">{searchQuery ? t("sharepoint.noResults") : t("sharepoint.emptyFolder")}</p>
-      ) : (
-        (<div className="border rounded-lg divide-y">
-          {filteredItems.map(item => (
-            <div
-              key={item.id}
-              className={`flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors ${item.folder ? "cursor-pointer" : ""}`}
-              onClick={() => item.folder && openFolder(item)}
-            >
-              {item.folder ? (
-                <FolderOpen className="h-5 w-5 text-primary shrink-0" />
-              ) : (
-                <FileText className="h-5 w-5 text-muted-foreground shrink-0" />
-              )}
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{item.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {item.folder ? `${item.folder.childCount} ${t("sharepoint.items")}` : formatSize(item.size)}
-                  {item.lastModifiedDateTime && ` · ${new Date(item.lastModifiedDateTime).toLocaleDateString()}`}
-                </p>
+        if (filteredItems.length === 0) {
+          return <p className="text-muted-foreground text-sm py-8 text-center">{searchQuery ? t("sharepoint.noResults") : t("sharepoint.emptyFolder")}</p>;
+        }
+        return (
+          <div className="border rounded-lg divide-y">
+            {filteredItems.map(item => (
+              <div
+                key={item.id}
+                className={`flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors ${item.folder ? "cursor-pointer" : ""}`}
+                onClick={() => item.folder && openFolder(item)}
+              >
+                {item.folder ? (
+                  <FolderOpen className="h-5 w-5 text-primary shrink-0" />
+                ) : (
+                  <FileText className="h-5 w-5 text-muted-foreground shrink-0" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{item.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {item.folder ? `${item.folder.childCount} ${t("sharepoint.items")}` : formatSize(item.size)}
+                    {item.lastModifiedDateTime && ` · ${new Date(item.lastModifiedDateTime).toLocaleDateString()}`}
+                  </p>
+                </div>
+                {item.webUrl && !item.folder && (
+                  <Button variant="ghost" size="icon" className="shrink-0" onClick={e => { e.stopPropagation(); window.open(item.webUrl, "_blank"); }}>
+                    <Download size={14} />
+                  </Button>
+                )}
               </div>
-              {item.webUrl && !item.folder && (
-                <Button variant="ghost" size="icon" className="shrink-0" onClick={e => { e.stopPropagation(); window.open(item.webUrl, "_blank"); }}>
-                  <Download size={14} />
-                </Button>
-              )}
-            </div>
-          ))}
-        </div>);
+            ))}
+          </div>
+        );
       })()}
 
       <Dialog open={showNewFolder} onOpenChange={setShowNewFolder}>
