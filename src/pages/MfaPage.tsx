@@ -82,8 +82,10 @@ export default function MfaPage() {
     setLoading(true);
     try {
       const { data: { user } } = await supabase.auth.getUser();
+      // Normalize phone to E.164 format if needed
+      const normalizedPhone = userPhone.startsWith("+") ? userPhone : `+1${userPhone.replace(/\D/g, "")}`;
       const res = await supabase.functions.invoke("send-sms-otp", {
-        body: { phone: userPhone, purpose: "mfa", user_id: user?.id },
+        body: { phone: normalizedPhone, purpose: "mfa", user_id: user?.id },
       });
       if (res.error || res.data?.error) {
         throw new Error(res.data?.error || res.error?.message || "SMS send failed");
