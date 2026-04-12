@@ -1121,6 +1121,7 @@ function AdminProjectsInner({ readOnly = false }: { readOnly?: boolean }) {
                         setEditBudget(p.budget || ""); setEditDeadline(p.deadline || "");
                         setEditPriority(p.priority || "normal");
                         setEditServices(p.technologies ? p.technologies.split(", ") : []);
+                        setEditGestionnaire(p.gestionnaire_id || null);
                       }
                     }}>
                       {isEditing ? "Sauvegarder" : "Modifier"}
