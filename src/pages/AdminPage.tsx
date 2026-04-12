@@ -914,19 +914,6 @@ function AdminProjectsInner({ readOnly = false }: { readOnly?: boolean }) {
                         <Flag size={10} className="inline mr-1" />{pc.label}
                       </span>
                     )}
-                    <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => {
-                      if (isEditing) saveProject(p.id);
-                      else {
-                        setEditingId(p.id); setEditStatus(p.status); setEditProgress(p.progress);
-                        setEditName(p.name); setEditDescription(p.description || "");
-                        setEditBudget(p.budget || ""); setEditDeadline(p.deadline || "");
-                        setEditPriority(p.priority || "normal");
-                        setEditServices(p.technologies ? p.technologies.split(", ") : []);
-                      }
-                    }}>
-                      {isEditing ? "Sauvegarder" : "Modifier"}
-                    </Button>
-                    {isEditing && <Button variant="ghost" size="sm" className="h-7 text-xs" onClick={() => setEditingId(null)}>Annuler</Button>}
                     {!readOnly && <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => {
                       if (isEditing) saveProject(p.id);
                       else {
