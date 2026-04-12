@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "@/i18n/LanguageContext";
 import { useToast } from "@/hooks/use-toast";
@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Upload, FileText, DollarSign, AlertCircle, CheckCircle2, Clock, Loader2, Trash2, Search, Receipt, Check } from "lucide-react";
+import { Upload, FileText, DollarSign, AlertCircle, CheckCircle2, Clock, Loader2, Trash2, Search, Receipt, Check, Sparkles, Plus } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 
 type InvoiceStep = "idle" | "analyse" | "validation" | "upload" | "sauvegarde" | "done";

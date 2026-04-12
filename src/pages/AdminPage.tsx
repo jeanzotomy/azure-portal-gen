@@ -9,6 +9,7 @@ import { useTranslation } from "@/i18n/LanguageContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { useToast } from "@/hooks/use-toast";
 import { Calendar as CalendarWidget } from "@/components/ui/calendar";
