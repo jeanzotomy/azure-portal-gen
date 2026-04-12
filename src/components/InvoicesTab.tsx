@@ -133,6 +133,25 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
 
   const openDialog = () => {
     resetForm();
+    setEditingInvoiceId(null);
+    setDialogOpen(true);
+    setCurrentStep("validation");
+  };
+
+  const openEditDialog = (inv: Invoice) => {
+    resetForm();
+    setEditingInvoiceId(inv.id);
+    setFormProjectId(inv.project_id || "");
+    setFormInvoiceNumber(inv.invoice_number || "");
+    setFormVendor(inv.vendor || "");
+    setFormDescription(inv.description || "");
+    setFormAmount((inv.amount || 0).toString());
+    setFormTaxAmount((inv.tax_amount || 0).toString());
+    setFormTotalAmount((inv.total_amount || 0).toString());
+    setFormInvoiceDate(inv.invoice_date || "");
+    setFormDueDate(inv.due_date || "");
+    setFormType((inv.type as "facture" | "recu") || "facture");
+    setFormStatus((inv.status as "en_attente" | "validee") || "en_attente");
     setDialogOpen(true);
     setCurrentStep("validation");
   };
