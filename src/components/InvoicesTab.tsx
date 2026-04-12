@@ -395,18 +395,25 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
         )}
       </div>
 
-      {/* Financial overview */}
+      {/* Financial overview - reactive to filterProject */}
       {projectsWithInvoices.length > 0 && (() => {
         const fmt = (n: number) => n.toLocaleString("fr-CA", { style: "currency", currency: "CAD" });
-        const totalBudget = projectsWithInvoices.reduce((s, p) => s + (parseFloat(((p as any).budget || "0").replace(/[^\d.]/g, "")) || p.total_budget || 0), 0);
-        const totalPaid = projectsWithInvoices.reduce((s, p) => s + (p.total_paid || 0), 0);
-        const totalSolde = totalBudget - totalPaid;
-        const totalInv = invoices.length;
-        const validees = invoices.filter(i => i.status === "validee").length;
-        const enAttente = invoices.filter(i => i.status === "en_attente").length;
-        const nonConformes = invoices.filter(i => i.status === "non_conforme").length;
+        const visibleProjects = filterProject === "all"
+          ? projectsWithInvoices
+          : projectsWithInvoices.filter(p => p.id === filterProject);
+        const visibleInvoices = filterProject === "all"
+          ? invoices
+          : invoices.filter(i => i.project_id === filterProject);
 
-        const barData = projectsWithInvoices.map(p => {
+        const totalBudget = visibleProjects.reduce((s, p) => s + (parseFloat(((p as any).budget || "0").replace(/[^\d.]/g, "")) || p.total_budget || 0), 0);
+        const totalPaid = visibleProjects.reduce((s, p) => s + (p.total_paid || 0), 0);
+        const totalSolde = totalBudget - totalPaid;
+        const totalInv = visibleInvoices.length;
+        const validees = visibleInvoices.filter(i => i.status === "validee").length;
+        const enAttente = visibleInvoices.filter(i => i.status === "en_attente").length;
+        const nonConformes = visibleInvoices.filter(i => i.status === "non_conforme").length;
+
+        const barData = visibleProjects.map(p => {
           const bgt = parseFloat(((p as any).budget || "0").replace(/[^\d.]/g, "")) || p.total_budget || 0;
           const paid = p.total_paid || 0;
           return { name: p.project_number || p.name, budget: bgt, paid, solde: bgt - paid };
@@ -417,7 +424,7 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
             {/* Summary stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {[
-                { label: "Budget total", value: fmt(totalBudget), sub: `${projectsWithInvoices.length} projet(s)`, color: "text-primary" },
+                { label: filterProject === "all" ? "Budget total" : "Budget projet", value: fmt(totalBudget), sub: filterProject === "all" ? `${visibleProjects.length} projet(s)` : visibleProjects[0]?.project_number || "", color: "text-primary" },
                 { label: "Total payé", value: fmt(totalPaid), sub: `${validees} facture(s) validée(s)`, color: "text-emerald-600" },
                 { label: "Solde restant", value: fmt(totalSolde), sub: totalSolde < 0 ? "Dépassement!" : "Disponible", color: totalSolde < 0 ? "text-destructive" : "text-primary" },
                 { label: "Factures", value: totalInv.toString(), sub: `${enAttente} en attente · ${nonConformes} non conf.`, color: "text-foreground" },
@@ -435,7 +442,9 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
             {/* Bar chart per project */}
             <Card className="border">
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-medium">Répartition financière par projet</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  {filterProject === "all" ? "Répartition financière par projet" : `Consommation budgétaire — ${visibleProjects[0]?.project_number || ""}`}
+                </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
                 {barData.map(d => {
