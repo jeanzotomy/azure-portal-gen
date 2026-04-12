@@ -47,50 +47,16 @@ export default function SharePointBrowser() {
   const { t } = useTranslation();
   const { toast } = useToast();
 
-  const [sites, setSites] = useState<Site[]>([]);
   const [selectedSite, setSelectedSite] = useState<Site | null>(null);
   const [drives, setDrives] = useState<Drive[]>([]);
   const [selectedDrive, setSelectedDrive] = useState<Drive | null>(null);
   const [items, setItems] = useState<DriveItem[]>([]);
   const [breadcrumb, setBreadcrumb] = useState<BreadcrumbItem[]>([]);
   const [loading, setLoading] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
   const [uploading, setUploading] = useState(false);
   const [showNewFolder, setShowNewFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
-
-  const callProxy = useCallback(async (action: string, params: Record<string, string> = {}) => {
-    const queryParams = new URLSearchParams({ action, ...params });
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) throw new Error("Not authenticated");
-
-    const res = await fetch(
-      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/sharepoint-proxy?${queryParams}`,
-      {
-        headers: {
-          Authorization: `Bearer ${session.access_token}`,
-          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-        },
-      }
-    );
-    const json = await res.json();
-    if (!res.ok) throw new Error(json.error || "Request failed");
-    return json;
-  }, []);
-
-  const loadSites = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await callProxy("list-sites", { search: searchQuery || "*" });
-      setSites(data.value || []);
-    } catch (err: unknown) {
-      toast({ title: t("sharepoint.error"), description: err instanceof Error ? err.message : "Unknown error", variant: "destructive" });
-    } finally {
-      setLoading(false);
-    }
-  }, [callProxy, searchQuery, t, toast]);
-
-  useEffect(() => { loadSites(); }, []);
+  const [initError, setInitError] = useState<string | null>(null);
 
   const selectSite = async (site: Site) => {
     setSelectedSite(site);
