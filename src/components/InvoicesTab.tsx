@@ -619,7 +619,7 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
               <DollarSign size={18} />
-              {parsedData && !parsedData.project_id ? "Facture à compléter" : "Nouvelle facture / reçu"}
+              {editingInvoiceId ? "Modifier la facture" : parsedData && !parsedData.project_id ? "Facture à compléter" : "Nouvelle facture / reçu"}
             </DialogTitle>
             <DialogDescription>
               Remplissez les champs manuellement ou joignez un fichier pour une analyse automatique.
