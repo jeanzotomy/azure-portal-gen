@@ -475,6 +475,21 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
                       {inv.vendor && <span>{inv.vendor} · </span>}
                       {inv.projects?.project_number} - {inv.projects?.name}
                     </div>
+                    {inv.project_id && (() => {
+                      const proj = projects.find(pp => pp.id === inv.project_id);
+                      if (!proj) return null;
+                      const bgt = parseFloat(((proj as any).budget || "0").replace(/[^\d.]/g, "")) || proj.total_budget || 0;
+                      const paid = proj.total_paid || 0;
+                      const solde = bgt - paid;
+                      const fmt = (n: number) => n.toLocaleString("fr-CA", { style: "currency", currency: "CAD" });
+                      return (
+                        <div className="flex gap-3 text-[11px] mt-0.5">
+                          <span className="text-muted-foreground">Budget: <span className="font-medium text-foreground">{fmt(bgt)}</span></span>
+                          <span className="text-muted-foreground">Payé: <span className="font-medium text-emerald-600">{fmt(paid)}</span></span>
+                          <span className="text-muted-foreground">Solde: <span className={`font-semibold ${solde < 0 ? "text-destructive" : "text-primary"}`}>{fmt(solde)}</span></span>
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
