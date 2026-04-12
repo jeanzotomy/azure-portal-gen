@@ -113,9 +113,9 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Not authenticated");
 
-      const projectId = (window as any).__VITE_SUPABASE_PROJECT_ID || import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const res = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/parse-invoice`,
+        `${supabaseUrl}/functions/v1/parse-invoice`,
         {
           method: "POST",
           headers: { Authorization: `Bearer ${session.access_token}` },
@@ -170,8 +170,8 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
       const { data: spConfig } = await supabase.from("sharepoint_config").select("site_id, drive_id").limit(1).maybeSingle();
 
       if (spConfig && selectedFile) {
-        const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-        const baseUrl = `https://${projectId}.supabase.co/functions/v1/sharepoint-proxy`;
+        const spBaseUrl = import.meta.env.VITE_SUPABASE_URL;
+        const baseUrl = `${spBaseUrl}/functions/v1/sharepoint-proxy`;
 
         // Ensure project folder exists
         const folderParams = new URLSearchParams({
