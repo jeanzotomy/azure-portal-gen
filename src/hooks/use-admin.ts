@@ -45,8 +45,13 @@ export function useUserRoles() {
 
     void loadRoles();
 
+    // Re-fetch roles when window regains focus (e.g. after admin assigns a new role)
+    const onFocus = () => { void loadRoles(); };
+    window.addEventListener("focus", onFocus);
+
     return () => {
       active = false;
+      window.removeEventListener("focus", onFocus);
     };
   }, [ready, user]);
 
