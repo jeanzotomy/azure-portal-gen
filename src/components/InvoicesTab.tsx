@@ -469,16 +469,16 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={barData.length * 60 + 40}>
-                  <BarChart data={barData} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
-                    <CartesianGrid strokeDasharray="3 3" horizontal={false} />
-                    <XAxis type="number" tickFormatter={(v) => `${(v / 1000).toFixed(0)}k $`} />
-                    <YAxis type="category" dataKey="name" width={100} tick={{ fontSize: 12 }} />
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={barData} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                    <XAxis dataKey="name" tick={{ fontSize: 11 }} />
+                    <YAxis tickFormatter={(v) => `${(v / 1000).toFixed(0)}k $`} />
                     <Tooltip formatter={(value: number) => fmt(value)} />
                     <Legend />
-                    <Bar dataKey="budget" name="Budget" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
-                    <Bar dataKey="paid" name="Payé" fill="hsl(142, 71%, 45%)" radius={[0, 4, 4, 0]} />
-                    <Bar dataKey="solde" name="Solde" fill="hsl(var(--accent))" radius={[0, 4, 4, 0]} />
+                    <Bar dataKey="budget" name="Budget" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="paid" name="Payé" fill="hsl(142, 71%, 45%)" radius={[4, 4, 0, 0]} />
+                    <Bar dataKey="solde" name="Solde" fill="hsl(var(--accent))" radius={[4, 4, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
               </CardContent>
