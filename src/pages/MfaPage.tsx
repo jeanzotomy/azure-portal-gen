@@ -40,7 +40,7 @@ export default function MfaPage() {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) { navigate("/auth"); return; }
 
-    setUserEmail(user.email || null);
+    // removed email MFA
 
     const { data: profile } = await supabase.from("profiles").select("phone").eq("user_id", user.id).maybeSingle();
     if (profile?.phone) setUserPhone(profile.phone);
