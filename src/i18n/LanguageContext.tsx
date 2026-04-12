@@ -3,7 +3,7 @@ import fr from "./fr";
 import en from "./en";
 
 type Locale = "fr" | "en";
-type Translations = typeof fr;
+type Translations = Record<string, any>;
 
 const translations: Record<Locale, Translations> = { fr, en };
 
