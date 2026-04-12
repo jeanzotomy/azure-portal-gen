@@ -268,7 +268,7 @@ function AdminContent() {
           </header>
           <main className="flex-1 p-6 overflow-auto">
             {gestionnaireTab === "dashboard" && <AdminDashboard />}
-            {gestionnaireTab === "projects" && <AdminProjects />}
+            {gestionnaireTab === "projects" && <AdminProjects assignedCount={assignedProjectsCount} />}
             {gestionnaireTab === "tickets" && <AdminTickets />}
             {gestionnaireTab === "contacts" && <AdminContacts />}
             {gestionnaireTab === "sharepoint" && <SharePointTab readOnly />}
