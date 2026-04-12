@@ -478,7 +478,23 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
                   </div>
                 </div>
                 <div className="flex items-center gap-3 shrink-0">
-                  {statusBadge(inv.status)}
+                  {readOnly ? statusBadge(inv.status) : (
+                    <Select value={inv.status} onValueChange={async (v: "en_attente" | "validee" | "non_conforme") => {
+                      await supabase.from("invoices").update({ status: v }).eq("id", inv.id);
+                      loadInvoices();
+                      loadProjects();
+                      toast({ title: "Statut mis à jour", description: v === "validee" ? "Facture validée — solde projet ajusté" : `Statut : ${v.replace("_", " ")}` });
+                    }}>
+                      <SelectTrigger className="w-[150px] h-8 text-xs">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="en_attente">En attente</SelectItem>
+                        <SelectItem value="validee">Validée</SelectItem>
+                        <SelectItem value="non_conforme">Non conforme</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  )}
                   <div className="text-right">
                     <div className="font-bold text-sm">
                       {inv.total_amount.toLocaleString("fr-CA", { style: "currency", currency: "CAD" })}
