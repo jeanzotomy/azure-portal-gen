@@ -355,6 +355,8 @@ const fr = {
     error: "Erreur SharePoint",
     listsTitle: "Listes SharePoint",
     noLists: "Aucune liste trouvée.",
+    searchFiles: "Rechercher des fichiers...",
+    noResults: "Aucun fichier correspondant.",
   },
 } as const;
 
