@@ -1797,12 +1797,13 @@ function AdminUsers() {
 
   const getRoleBadge = (roles: string[]) => {
     if (roles.includes("admin")) return { label: "Admin", color: "bg-primary/10 text-primary border-primary/20" };
+    if (roles.includes("gestionnaire")) return { label: "Gestionnaire", color: "bg-blue-500/10 text-blue-500 border-blue-500/20" };
     if (roles.includes("agent")) return { label: "Agent", color: "bg-orange-500/10 text-orange-500 border-orange-500/20" };
     if (roles.includes("comptable")) return { label: "Comptable", color: "bg-teal-500/10 text-teal-500 border-teal-500/20" };
     return { label: "Client", color: "bg-muted text-muted-foreground border-border" };
   };
 
-  const getCurrentRole = (roles: string[]) => roles.includes("admin") ? "admin" : roles.includes("agent") ? "agent" : roles.includes("comptable") ? "comptable" : "client";
+  const getCurrentRole = (roles: string[]) => roles.includes("admin") ? "admin" : roles.includes("gestionnaire") ? "gestionnaire" : roles.includes("agent") ? "agent" : roles.includes("comptable") ? "comptable" : "client";
 
   const filtered = profilesList.filter(p => {
     const matchesSearch = (p.full_name || "").toLowerCase().includes(search.toLowerCase()) ||
@@ -1816,6 +1817,7 @@ function AdminUsers() {
   const roleOptions = [
     { value: "client", label: "Client" },
     { value: "comptable", label: "Comptable" },
+    { value: "gestionnaire", label: "Gestionnaire" },
     { value: "agent", label: "Agent" },
     { value: "admin", label: "Admin" },
   ];
