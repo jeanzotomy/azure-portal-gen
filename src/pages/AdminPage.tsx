@@ -105,7 +105,7 @@ function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser
         </header>
         <main className="flex-1 p-6 overflow-auto">
           {tab === "projects" && <AdminProjectsInner readOnly />}
-          {tab === "sharepoint" && <SharePointTab />}
+          {tab === "sharepoint" && <SharePointTab readOnly />}
         </main>
       </div>
     </div>
