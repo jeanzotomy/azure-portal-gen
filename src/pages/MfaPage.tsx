@@ -4,11 +4,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, ShieldCheck, Smartphone, Loader2, Phone, Mail } from "lucide-react";
+import { ArrowLeft, ShieldCheck, Smartphone, Loader2, Phone } from "lucide-react";
 import favicon from "@/assets/cloudmature-logo.png";
 import { useTranslation } from "@/i18n/LanguageContext";
 
-type MfaMethod = "totp" | "sms" | "email";
+type MfaMethod = "totp" | "sms";
 
 export default function MfaPage() {
   const [step, setStep] = useState<"loading" | "enroll" | "verify">("loading");
@@ -19,9 +19,7 @@ export default function MfaPage() {
   const [loading, setLoading] = useState(false);
   const [secret, setSecret] = useState("");
   const [userPhone, setUserPhone] = useState<string | null>(null);
-  const [userEmail, setUserEmail] = useState<string | null>(null);
   const [smsSent, setSmsSent] = useState(false);
-  const [emailSent, setEmailSent] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useTranslation();
@@ -121,46 +119,10 @@ export default function MfaPage() {
     } finally { setLoading(false); }
   };
 
-  // Email MFA
-  const handleSendEmailMfa = async () => {
-    setLoading(true);
-    try {
-      const res = await supabase.functions.invoke("send-email-otp", {
-        body: { purpose: "mfa" },
-      });
-      if (res.error || res.data?.error) {
-        throw new Error(res.data?.error || res.error?.message || "Email send failed");
-      }
-      setEmailSent(true);
-      toast({ title: t("mfa.emailSent"), description: t("mfa.emailSentDesc") });
-    } catch (err: any) {
-      toast({ title: t("auth.error"), description: err.message, variant: "destructive" });
-    } finally { setLoading(false); }
-  };
-
-  const handleVerifyEmailMfa = async (e: React.FormEvent) => {
-    e.preventDefault(); setLoading(true);
-    try {
-      const res = await supabase.functions.invoke("verify-sms-otp", {
-        body: { phone: `email:${userEmail}`, code: otp, purpose: "mfa" },
-      });
-      if (res.error || res.data?.error) {
-        throw new Error(res.data?.error || res.error?.message || "Verification failed");
-      }
-      if (res.data?.success) {
-        toast({ title: t("mfa.success"), description: t("mfa.successDesc") });
-        navigate(res.data.redirectTo || "/portal");
-      }
-    } catch (err: any) {
-      toast({ title: t("mfa.invalidCode"), description: err.message, variant: "destructive" }); setOtp("");
-    } finally { setLoading(false); }
-  };
-
   const switchMethod = (method: MfaMethod) => {
     setMfaMethod(method);
     setOtp("");
     setSmsSent(false);
-    setEmailSent(false);
   };
 
   if (step === "loading") {
@@ -170,7 +132,6 @@ export default function MfaPage() {
   const methodButtons: { key: MfaMethod; icon: React.ReactNode; label: string; available: boolean }[] = [
     { key: "totp", icon: <ShieldCheck size={14} />, label: t("mfa.totpOption"), available: true },
     { key: "sms", icon: <Phone size={14} />, label: t("mfa.smsOption"), available: !!userPhone },
-    { key: "email", icon: <Mail size={14} />, label: t("mfa.emailOption"), available: !!userEmail },
   ];
 
   const availableMethods = methodButtons.filter(m => m.available);
@@ -289,36 +250,6 @@ export default function MfaPage() {
             </div>
           )}
 
-          {/* Email verification */}
-          {step === "verify" && mfaMethod === "email" && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-2 text-primary mb-2">
-                <Mail size={20} />
-                <span className="font-medium text-primary-foreground">{t("mfa.emailOption")}</span>
-              </div>
-              {!emailSent ? (
-                <>
-                  <p className="text-sm text-secondary-foreground/60">
-                    {t("mfa.emailSendDesc")} ({userEmail})
-                  </p>
-                  <Button type="button" className="w-full gradient-primary text-primary-foreground border-0" disabled={loading} onClick={handleSendEmailMfa}>
-                    <Mail size={16} className="mr-2" />
-                    {loading ? t("mfa.sendingEmailCode") : t("mfa.sendEmailCode")}
-                  </Button>
-                </>
-              ) : (
-                <form onSubmit={handleVerifyEmailMfa} className="space-y-4">
-                  <p className="text-sm text-secondary-foreground/60">{t("mfa.enterEmailCode")}</p>
-                  <Input type="text" inputMode="numeric" pattern="[0-9]{6}" maxLength={6} placeholder="000000" value={otp}
-                    onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                    className="bg-secondary/30 border-border/30 text-primary-foreground text-center text-2xl tracking-[0.5em] placeholder:text-secondary-foreground/40 placeholder:tracking-[0.5em]" autoFocus required />
-                  <Button type="submit" className="w-full gradient-primary text-primary-foreground border-0" disabled={loading || otp.length !== 6}>
-                    <Mail size={16} className="mr-2" /> {loading ? t("mfa.verifying") : t("mfa.emailVerify")}
-                  </Button>
-                </form>
-              )}
-            </div>
-          )}
         </div>
       </div>
     </div>
