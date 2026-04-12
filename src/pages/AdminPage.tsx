@@ -223,6 +223,11 @@ function AdminContent() {
                               {unrepliedCount}
                             </span>
                           )}
+                          {item.id === "projects" && assignedProjectsCount > 0 && (
+                            <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold px-1">
+                              {assignedProjectsCount}
+                            </span>
+                          )}
                         </div>
                         <span>{item.label}</span>
                       </SidebarMenuButton>
