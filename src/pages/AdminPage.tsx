@@ -1461,8 +1461,9 @@ function AdminUsers() {
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [changingRole, setChangingRole] = useState<string | null>(null);
-  const [mfaStatus, setMfaStatus] = useState<Record<string, boolean>>({});
+  const [mfaStatus, setMfaStatus] = useState<Record<string, { enrolled: boolean; factors: any[]; has_phone: boolean; phone: string | null }>>({});
   const [mfaLoading, setMfaLoading] = useState<string | null>(null);
+  const [mfaDialogUser, setMfaDialogUser] = useState<any | null>(null);
   const { toast } = useToast();
 
   const load = async () => {
@@ -1477,12 +1478,19 @@ function AdminUsers() {
     setUserRoles(map);
 
     // Load MFA status for all users
-    const mfaMap: Record<string, boolean> = {};
+    const mfaMap: Record<string, { enrolled: boolean; factors: any[]; has_phone: boolean; phone: string | null }> = {};
     for (const prof of (profs || [])) {
       try {
         const { data } = await supabase.functions.invoke("manage-user-mfa", { body: { user_id: prof.user_id, action: "list" } });
-        mfaMap[prof.user_id] = !!data?.enrolled;
-      } catch { mfaMap[prof.user_id] = false; }
+        mfaMap[prof.user_id] = {
+          enrolled: !!data?.enrolled,
+          factors: data?.factors || [],
+          has_phone: !!data?.has_phone,
+          phone: data?.phone || null,
+        };
+      } catch {
+        mfaMap[prof.user_id] = { enrolled: false, factors: [], has_phone: false, phone: null };
+      }
     }
     setMfaStatus(mfaMap);
   };
@@ -1490,14 +1498,40 @@ function AdminUsers() {
   useEffect(() => { load(); }, []);
 
   const disableMfa = async (userId: string, userName: string) => {
-    if (!window.confirm(`Désactiver le MFA pour "${userName}" ? L'utilisateur devra le reconfigurer.`)) return;
+    if (!window.confirm(`Désactiver tout le MFA pour "${userName}" ? L'utilisateur devra le reconfigurer.`)) return;
     setMfaLoading(userId);
     const { data, error } = await supabase.functions.invoke("manage-user-mfa", { body: { user_id: userId, action: "unenroll" } });
     if (error || data?.error) {
       toast({ title: "Erreur", description: data?.error || error?.message || "Impossible de désactiver le MFA.", variant: "destructive" });
     } else {
-      toast({ title: "MFA désactivé", description: `Le MFA de "${userName}" a été réinitialisé.` });
-      setMfaStatus(prev => ({ ...prev, [userId]: false }));
+      toast({ title: "MFA désactivé", description: `Tout le MFA de "${userName}" a été réinitialisé.` });
+      setMfaStatus(prev => ({ ...prev, [userId]: { ...prev[userId], enrolled: false, factors: [] } }));
+      setMfaDialogUser(null);
+    }
+    setMfaLoading(null);
+  };
+
+  const disableFactor = async (userId: string, factorId: string, factorType: string) => {
+    if (!window.confirm(`Désactiver le facteur ${factorType === "totp" ? "Authenticator" : factorType} ?`)) return;
+    setMfaLoading(userId);
+    const { data, error } = await supabase.functions.invoke("manage-user-mfa", { body: { user_id: userId, action: "unenroll_factor", factor_id: factorId } });
+    if (error || data?.error) {
+      toast({ title: "Erreur", description: data?.error || error?.message || "Impossible de désactiver ce facteur.", variant: "destructive" });
+    } else {
+      toast({ title: "Facteur désactivé", description: `Le facteur ${factorType === "totp" ? "Authenticator" : factorType} a été supprimé.` });
+      // Refresh MFA status for this user
+      try {
+        const { data: refreshed } = await supabase.functions.invoke("manage-user-mfa", { body: { user_id: userId, action: "list" } });
+        setMfaStatus(prev => ({
+          ...prev,
+          [userId]: {
+            enrolled: !!refreshed?.enrolled,
+            factors: refreshed?.factors || [],
+            has_phone: !!refreshed?.has_phone,
+            phone: refreshed?.phone || null,
+          },
+        }));
+      } catch { /* ignore */ }
     }
     setMfaLoading(null);
   };
