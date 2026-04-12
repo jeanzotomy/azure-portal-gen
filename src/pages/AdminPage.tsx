@@ -1120,14 +1120,16 @@ function AdminProjectsInner({ readOnly = false }: { readOnly?: boolean }) {
             >{opt.label}</button>
           ))}
           {isCurrentUserGestionnaire && (
-            <>
-              <span className="text-xs font-medium text-muted-foreground flex items-center gap-1 ml-2"><UserCheck size={12} /> Assignation :</span>
+            <div className="flex items-center gap-2 ml-3 pl-3 border-l-2 border-primary/30">
+              <span className="text-sm font-semibold text-primary flex items-center gap-1.5">
+                <UserCheck size={14} /> Assignation :
+              </span>
               {[{ value: "all", label: "Tous" }, { value: "mine", label: "Mes projets" }].map((opt) => (
                 <button key={opt.value} onClick={() => setAssignedFilter(opt.value as "all" | "mine")}
-                  className={`text-xs px-3 py-1.5 rounded-full transition-colors ${assignedFilter === opt.value ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
+                  className={`text-sm px-4 py-1.5 rounded-full font-medium transition-colors ${assignedFilter === opt.value ? "bg-primary text-primary-foreground shadow-sm" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
                 >{opt.label}</button>
               ))}
-            </>
+            </div>
           )}
         </div>
       </div>
