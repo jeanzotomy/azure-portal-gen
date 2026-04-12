@@ -572,16 +572,38 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
 
           {/* Form fields */}
           <div className="space-y-3">
-            <div>
-              <label className="text-sm font-medium">Projet *</label>
-              <Select value={formProjectId} onValueChange={setFormProjectId}>
-                <SelectTrigger><SelectValue placeholder="Sélectionner un projet" /></SelectTrigger>
-                <SelectContent>
-                  {projects.map(p => (
-                    <SelectItem key={p.id} value={p.id}>{p.project_number} - {p.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-sm font-medium">Projet *</label>
+                <Select value={formProjectId} onValueChange={setFormProjectId}>
+                  <SelectTrigger><SelectValue placeholder="Sélectionner un projet" /></SelectTrigger>
+                  <SelectContent>
+                    {projects.map(p => (
+                      <SelectItem key={p.id} value={p.id}>{p.project_number} - {p.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              {formProjectId && (() => {
+                const sp = projects.find(p => p.id === formProjectId);
+                if (!sp) return null;
+                const balance = (sp.total_budget || 0) - (sp.total_paid || 0);
+                return (
+                  <div>
+                    <label className="text-sm font-medium">Budget du projet</label>
+                    <div className="flex items-center gap-2 h-9 rounded-md border bg-muted/50 px-3 text-sm">
+                      <DollarSign size={14} className="text-muted-foreground" />
+                      <span className="font-medium">{(sp.total_budget || 0).toLocaleString("fr-CA", { style: "currency", currency: "CAD" })}</span>
+                      <span className="text-muted-foreground">·</span>
+                      <span className="text-xs text-muted-foreground">Payé : {(sp.total_paid || 0).toLocaleString("fr-CA", { style: "currency", currency: "CAD" })}</span>
+                      <span className="text-muted-foreground">·</span>
+                      <span className={`text-xs font-semibold ${balance < 0 ? "text-destructive" : "text-emerald-600"}`}>
+                        Solde : {balance.toLocaleString("fr-CA", { style: "currency", currency: "CAD" })}
+                      </span>
+                    </div>
+                  </div>
+                );
+              })()}
             </div>
 
             <div className="grid grid-cols-2 gap-3">
