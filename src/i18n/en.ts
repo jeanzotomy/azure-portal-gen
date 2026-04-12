@@ -355,6 +355,8 @@ const en = {
     error: "SharePoint Error",
     listsTitle: "SharePoint Lists",
     noLists: "No lists found.",
+    searchFiles: "Search files...",
+    noResults: "No matching files.",
   },
 } as const;
 

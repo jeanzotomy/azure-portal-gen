@@ -8,7 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   FolderOpen, FileText, Upload, ArrowLeft, RefreshCw, HardDrive,
-  ChevronRight, Download, FolderPlus, AlertCircle,
+  ChevronRight, Download, FolderPlus, AlertCircle, Search,
 } from "lucide-react";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
@@ -57,6 +57,7 @@ export default function SharePointBrowser() {
   const [showNewFolder, setShowNewFolder] = useState(false);
   const [newFolderName, setNewFolderName] = useState("");
   const [initError, setInitError] = useState<string | null>(null);
+  const [searchQuery, setSearchQuery] = useState("");
 
   const callProxy = useCallback(async (action: string, params: Record<string, string> = {}) => {
     const queryParams = new URLSearchParams({ action, ...params });
@@ -118,6 +119,7 @@ export default function SharePointBrowser() {
   const selectDrive = async (drive: Drive) => {
     setSelectedDrive(drive);
     setBreadcrumb([]);
+    setSearchQuery("");
     setLoading(true);
     try {
       const data = await callProxy("list-files", { siteId: selectedSite!.id, driveId: drive.id });
@@ -131,6 +133,7 @@ export default function SharePointBrowser() {
 
   const openFolder = async (folder: DriveItem) => {
     setLoading(true);
+    setSearchQuery("");
     setBreadcrumb(prev => [...prev, { id: folder.id, name: folder.name }]);
     try {
       const data = await callProxy("list-files", {
@@ -336,7 +339,16 @@ export default function SharePointBrowser() {
         ))}
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 flex-wrap">
+        <div className="relative flex-1 min-w-[180px] max-w-xs">
+          <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            placeholder={t("sharepoint.searchFiles")}
+            value={searchQuery}
+            onChange={e => setSearchQuery(e.target.value)}
+            className="pl-8 h-9 text-sm"
+          />
+        </div>
         <label className="cursor-pointer">
           <input type="file" className="hidden" onChange={handleUpload} disabled={uploading} />
           <Button variant="outline" size="sm" className="gap-2" asChild disabled={uploading}>
@@ -364,37 +376,41 @@ export default function SharePointBrowser() {
         <div className="space-y-2">
           {[1, 2, 3, 4].map(i => <Skeleton key={i} className="h-12 rounded" />)}
         </div>
-      ) : items.length === 0 ? (
-        <p className="text-muted-foreground text-sm py-8 text-center">{t("sharepoint.emptyFolder")}</p>
-      ) : (
-        <div className="border rounded-lg divide-y">
-          {items.map(item => (
-            <div
-              key={item.id}
-              className={`flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors ${item.folder ? "cursor-pointer" : ""}`}
-              onClick={() => item.folder && openFolder(item)}
-            >
-              {item.folder ? (
-                <FolderOpen className="h-5 w-5 text-primary shrink-0" />
-              ) : (
-                <FileText className="h-5 w-5 text-muted-foreground shrink-0" />
-              )}
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{item.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {item.folder ? `${item.folder.childCount} ${t("sharepoint.items")}` : formatSize(item.size)}
-                  {item.lastModifiedDateTime && ` · ${new Date(item.lastModifiedDateTime).toLocaleDateString()}`}
-                </p>
+      ) : (() => {
+        const filteredItems = items.filter(item => item.name.toLowerCase().includes(searchQuery.toLowerCase()));
+        if (filteredItems.length === 0) {
+          return <p className="text-muted-foreground text-sm py-8 text-center">{searchQuery ? t("sharepoint.noResults") : t("sharepoint.emptyFolder")}</p>;
+        }
+        return (
+          <div className="border rounded-lg divide-y">
+            {filteredItems.map(item => (
+              <div
+                key={item.id}
+                className={`flex items-center gap-3 px-4 py-3 hover:bg-muted/50 transition-colors ${item.folder ? "cursor-pointer" : ""}`}
+                onClick={() => item.folder && openFolder(item)}
+              >
+                {item.folder ? (
+                  <FolderOpen className="h-5 w-5 text-primary shrink-0" />
+                ) : (
+                  <FileText className="h-5 w-5 text-muted-foreground shrink-0" />
+                )}
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium truncate">{item.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {item.folder ? `${item.folder.childCount} ${t("sharepoint.items")}` : formatSize(item.size)}
+                    {item.lastModifiedDateTime && ` · ${new Date(item.lastModifiedDateTime).toLocaleDateString()}`}
+                  </p>
+                </div>
+                {item.webUrl && !item.folder && (
+                  <Button variant="ghost" size="icon" className="shrink-0" onClick={e => { e.stopPropagation(); window.open(item.webUrl, "_blank"); }}>
+                    <Download size={14} />
+                  </Button>
+                )}
               </div>
-              {item.webUrl && !item.folder && (
-                <Button variant="ghost" size="icon" className="shrink-0" onClick={e => { e.stopPropagation(); window.open(item.webUrl, "_blank"); }}>
-                  <Download size={14} />
-                </Button>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
+            ))}
+          </div>
+        );
+      })()}
 
       <Dialog open={showNewFolder} onOpenChange={setShowNewFolder}>
         <DialogContent>
