@@ -336,6 +336,7 @@ const fr = {
     description: "Parcourez vos sites SharePoint, fichiers et listes.",
     filesTab: "Fichiers",
     listsTab: "Listes",
+    invoicesTab: "Factures",
     selectSite: "Sélectionnez un site SharePoint",
     searchSites: "Rechercher des sites...",
     noSites: "Aucun site SharePoint trouvé.",

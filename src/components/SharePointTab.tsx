@@ -1,21 +1,11 @@
-import { useState } from "react";
 import { useTranslation } from "@/i18n/LanguageContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FolderOpen, List } from "lucide-react";
+import { FolderOpen, Receipt } from "lucide-react";
 import SharePointBrowser from "./SharePointBrowser";
-import SharePointLists from "./SharePointLists";
+import InvoicesTab from "./InvoicesTab";
 
-interface Site {
-  id: string;
-  displayName: string;
-  webUrl: string;
-  name: string;
-}
-
-export default function SharePointTab() {
+export default function SharePointTab({ readOnly = false }: { readOnly?: boolean }) {
   const { t } = useTranslation();
-  const [listsSiteId, setListsSiteId] = useState<string | null>(null);
-  const [listsSiteName, setListsSiteName] = useState("");
 
   return (
     <div className="space-y-6">
@@ -30,9 +20,9 @@ export default function SharePointTab() {
             <FolderOpen size={14} />
             {t("sharepoint.filesTab")}
           </TabsTrigger>
-          <TabsTrigger value="lists" className="gap-2">
-            <List size={14} />
-            {t("sharepoint.listsTab")}
+          <TabsTrigger value="invoices" className="gap-2">
+            <Receipt size={14} />
+            {t("sharepoint.invoicesTab")}
           </TabsTrigger>
         </TabsList>
 
@@ -40,16 +30,8 @@ export default function SharePointTab() {
           <SharePointBrowser />
         </TabsContent>
 
-        <TabsContent value="lists" className="mt-4">
-          {listsSiteId ? (
-            <SharePointLists
-              siteId={listsSiteId}
-              siteName={listsSiteName}
-              onBack={() => setListsSiteId(null)}
-            />
-          ) : (
-            <SharePointBrowser />
-          )}
+        <TabsContent value="invoices" className="mt-4">
+          <InvoicesTab readOnly={readOnly} />
         </TabsContent>
       </Tabs>
     </div>
