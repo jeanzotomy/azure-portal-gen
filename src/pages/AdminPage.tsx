@@ -26,10 +26,12 @@ import {
   Flag, DollarSign, Calendar, Filter, TrendingUp, Activity, BarChart3, PieChart, ShieldBan, ShieldCheck, Trash2, RefreshCw,
   Smartphone, Phone, X,
 } from "lucide-react";
+import { HardDrive } from "lucide-react";
+import SharePointTab from "@/components/SharePointTab";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RePieChart, Pie, Cell, AreaChart, Area } from "recharts";
 import type { User as SupaUser } from "@supabase/supabase-js";
 
-type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts";
+type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts" | "sharepoint";
 type AgentTab = "dashboard" | "tickets" | "contacts";
 
 function AdminContent() {
@@ -168,6 +170,7 @@ function AdminContent() {
   const allNavItems: { id: AdminTab; icon: typeof LayoutDashboard; label: string }[] = [
     { id: "dashboard", icon: LayoutDashboard, label: t("admin.overview") },
     { id: "projects", icon: FolderOpen, label: t("admin.projects") },
+    { id: "sharepoint", icon: HardDrive, label: "SharePoint" },
     { id: "tickets", icon: LifeBuoy, label: t("admin.tickets") },
     { id: "contacts", icon: MessageSquare, label: t("admin.contacts") },
     { id: "users", icon: Users, label: t("admin.users") },
@@ -246,6 +249,7 @@ function AdminContent() {
           {tab === "tickets" && <AdminTickets />}
           {tab === "contacts" && <AdminContacts />}
           {tab === "users" && <AdminUsers />}
+          {tab === "sharepoint" && <SharePointTab />}
         </main>
       </div>
     </div>

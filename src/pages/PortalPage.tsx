@@ -31,14 +31,13 @@ import logo from "@/assets/cloudmature-logo.png";
 import {
   LayoutDashboard, FolderOpen, LifeBuoy, User, LogOut, Send, Clock, CheckCircle2, AlertCircle,
   Menu, Bell, Search, Filter, Upload, X, FileText, DollarSign, Calendar, Cpu, Flag, Pencil, Shield,
-  Activity, TrendingUp, Plus, Trash2, Info, RefreshCw, HardDrive,
+  Activity, TrendingUp, Plus, Trash2, Info, RefreshCw,
 } from "lucide-react";
-import SharePointTab from "@/components/SharePointTab";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { PieChart as RePieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip } from "recharts";
 import type { User as SupaUser } from "@supabase/supabase-js";
 
-type Tab = "dashboard" | "projects" | "tickets" | "sharepoint" | "profile";
+type Tab = "dashboard" | "projects" | "tickets" | "profile";
 
 function PortalContent() {
   const { user, ready } = useAuthSession();
@@ -121,13 +120,10 @@ function PortalContent() {
     navigate("/");
   };
 
-  const showSharePoint = isAdmin || isComptable;
-
   const navItems: { id: Tab; icon: typeof LayoutDashboard; label: string }[] = [
     { id: "dashboard", icon: LayoutDashboard, label: t("portal.dashboard") },
     { id: "projects", icon: FolderOpen, label: t("portal.projects") },
     { id: "tickets", icon: LifeBuoy, label: t("portal.support") },
-    ...(showSharePoint ? [{ id: "sharepoint" as Tab, icon: HardDrive, label: "SharePoint" }] : []),
     { id: "profile", icon: User, label: t("portal.profile") },
   ];
 
@@ -217,7 +213,6 @@ function PortalContent() {
           {tab === "dashboard" && <DashboardTab user={user} />}
           {tab === "projects" && <ProjectsTab user={user} />}
           {tab === "tickets" && <TicketsTab user={user} />}
-          {tab === "sharepoint" && <SharePointTab />}
           {tab === "profile" && <ProfileTab user={user} />}
         </main>
       </div>
