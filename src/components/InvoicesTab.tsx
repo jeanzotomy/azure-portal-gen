@@ -349,6 +349,23 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
         )}
       </div>
 
+      {/* Status banner */}
+      {(parsing || uploading) && (
+        <div className="flex items-center gap-3 rounded-lg border border-primary/30 bg-primary/5 p-4 animate-fade-up">
+          <Loader2 className="h-5 w-5 animate-spin text-primary shrink-0" />
+          <div>
+            <p className="font-medium text-sm text-foreground">
+              {parsing && "Analyse de la facture en cours…"}
+              {uploading && "Enregistrement et synchronisation…"}
+            </p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              {parsing && "Le fichier est en cours de lecture par l'IA. Veuillez patienter."}
+              {uploading && "Sauvegarde de la facture, envoi sur SharePoint et mise à jour du solde projet."}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Project balance cards */}
       {projectsWithInvoices.length > 0 && (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
