@@ -113,9 +113,9 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
       const { data: { session } } = await supabase.auth.getSession();
       if (!session) throw new Error("Not authenticated");
 
-      const projectId = (window as any).__VITE_SUPABASE_PROJECT_ID || import.meta.env.VITE_SUPABASE_PROJECT_ID;
+      const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       const res = await fetch(
-        `https://${projectId}.supabase.co/functions/v1/parse-invoice`,
+        `${supabaseUrl}/functions/v1/parse-invoice`,
         {
           method: "POST",
           headers: { Authorization: `Bearer ${session.access_token}` },
