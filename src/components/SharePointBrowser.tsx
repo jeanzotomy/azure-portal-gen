@@ -59,7 +59,8 @@ export default function SharePointBrowser() {
   const [newFolderName, setNewFolderName] = useState("");
   const [initError, setInitError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-
+  const [sortBy, setSortBy] = useState<"name" | "date" | "size">("name");
+  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
   const callProxy = useCallback(async (action: string, params: Record<string, string> = {}) => {
     const queryParams = new URLSearchParams({ action, ...params });
     const { data: { session } } = await supabase.auth.getSession();
