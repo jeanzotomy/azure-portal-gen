@@ -1,8 +1,8 @@
-import { Cloud, DollarSign, Shield, Server, ArrowUpRight, GraduationCap, Headphones, BrainCircuit } from "lucide-react";
+import { Cloud, DollarSign, Shield, Server, ArrowUpRight, GraduationCap, Headphones, BrainCircuit, Code, MoreHorizontal } from "lucide-react";
 import servicesImage from "@/assets/two-business-woman-cafe-2.jpg";
 import { useTranslation } from "@/i18n/LanguageContext";
 
-const icons = [Cloud, DollarSign, Shield, Server, ArrowUpRight, GraduationCap, Headphones, BrainCircuit];
+const icons = [Cloud, DollarSign, Shield, Server, ArrowUpRight, GraduationCap, Headphones, BrainCircuit, Code, MoreHorizontal];
 
 function ServiceCard({ s }: { s: { title: string; desc: string; icon: typeof Cloud } }) {
   return (
@@ -35,6 +35,7 @@ export function ServicesSection() {
   const middleLeft = [services[3]];
   const middleRight = [services[4]];
   const bottomRow = services.slice(5, 8);
+  const extraRow = services.slice(8, 10);
 
   return (
     <section id="services" className="py-28 bg-background relative overflow-hidden">
@@ -102,6 +103,13 @@ export function ServicesSection() {
             {bottomRow.map((s) => (
               <ServiceCard key={s.title} s={s} />
             ))}
+          </div>
+
+          <div className="grid grid-cols-3 gap-6">
+            {extraRow.map((s) => (
+              <ServiceCard key={s.title} s={s} />
+            ))}
+            <div />
           </div>
         </div>
       </div>

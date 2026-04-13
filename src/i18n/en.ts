@@ -35,6 +35,8 @@ const en = {
       { title: "Training & Coaching", desc: "Technical training, hands-on workshops, personalized mentoring and private LMS platform." },
       { title: "Managed Services & Support", desc: "24/7 monitoring, L1-L3 support, incident management and SLA tracking." },
       { title: "AI Adoption & Maturity", desc: "AI maturity assessment, adoption strategy and integration of responsible AI solutions into business processes." },
+      { title: "Web / Application Development", desc: "Design and development of custom web, mobile, and business applications, from concept to deployment." },
+      { title: "Other Services", desc: "Personalized consulting, technical audits, custom integrations and support tailored to your specific needs." },
     ],
   },
   industries: {
