@@ -308,7 +308,7 @@ function DashboardTab({ user }: { user: SupaUser }) {
         <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
         <div className="relative flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-foreground">Bienvenue, {user.user_metadata?.full_name || user.email?.split("@")[0]}</h1>
+            <h1 className="text-lg sm:text-2xl font-bold text-foreground">Bienvenue, {user.user_metadata?.full_name || user.email?.split("@")[0]}</h1>
             <p className="text-muted-foreground mt-1">Voici un aperçu de votre espace client.</p>
           </div>
            <div className="hidden md:flex items-center gap-3 text-sm text-muted-foreground">
