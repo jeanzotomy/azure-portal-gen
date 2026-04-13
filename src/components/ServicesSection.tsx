@@ -35,7 +35,7 @@ export function ServicesSection() {
   const middleLeft = [services[3]];
   const middleRight = [services[4]];
   const bottomRow = services.slice(5, 8);
-  const extraRow = services.slice(8, 10);
+  
 
   return (
     <section id="services" className="py-28 bg-background relative overflow-hidden">
