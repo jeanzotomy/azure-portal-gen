@@ -192,9 +192,9 @@ function PortalContent() {
               </span>
             )}
             <NotificationBell role="client" onNavigate={(target) => setTab(target as Tab)} />
-            <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
+            <button onClick={() => setTab("profile")} className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold cursor-pointer hover:opacity-80 transition-opacity" title={t("portal.profile")}>
               {(user.user_metadata?.full_name || user.email || "U").charAt(0).toUpperCase()}
-            </div>
+            </button>
           </div>
         </header>
         <PortalInfoBar />
