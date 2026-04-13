@@ -1,8 +1,8 @@
-import { Cloud, DollarSign, Shield, Server, ArrowUpRight, GraduationCap, Headphones, BrainCircuit, Code, MoreHorizontal } from "lucide-react";
+import { Cloud, DollarSign, Shield, Server, ArrowUpRight, GraduationCap, Headphones, BrainCircuit } from "lucide-react";
 import servicesImage from "@/assets/two-business-woman-cafe-2.jpg";
 import { useTranslation } from "@/i18n/LanguageContext";
 
-const icons = [Cloud, DollarSign, Shield, Server, ArrowUpRight, GraduationCap, Headphones, BrainCircuit, Code, MoreHorizontal];
+const icons = [Cloud, DollarSign, Shield, Server, ArrowUpRight, GraduationCap, Headphones, BrainCircuit];
 
 function ServiceCard({ s }: { s: { title: string; desc: string; icon: typeof Cloud } }) {
   return (
