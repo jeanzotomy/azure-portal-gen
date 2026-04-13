@@ -1091,20 +1091,21 @@ function TicketsTab({ user }: { user: SupaUser }) {
   return (
     <div className="space-y-6 animate-fade-up">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Support</h1>
-          <p className="text-sm text-muted-foreground mt-1">Gérez vos demandes d'assistance</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground">Support</h1>
+          <p className="text-xs sm:text-sm text-muted-foreground mt-1">Gérez vos demandes d'assistance</p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={loadTickets} className="gap-1.5">
-            <RefreshCw size={14} /> Actualiser
+            <RefreshCw size={14} /> <span className="hidden sm:inline">Actualiser</span>
           </Button>
           <Button
             onClick={() => setShowForm(!showForm)}
+            size="sm"
             className="gradient-primary text-primary-foreground border-0"
           >
-            {showForm ? <X size={16} className="mr-2" /> : <Plus size={16} className="mr-2" />}
+            {showForm ? <X size={14} className="mr-1" /> : <Plus size={14} className="mr-1" />}
             {showForm ? "Annuler" : "Nouveau ticket"}
           </Button>
         </div>
