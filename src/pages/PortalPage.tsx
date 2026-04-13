@@ -523,6 +523,8 @@ function ProjectsTab({ user }: { user: SupaUser }) {
     "Formation & Coaching",
     "Infogérance & Support",
     "Adoption & Maturité IA",
+    "Développement Web / Applicatif",
+    "Autres",
   ];
 
   const toggleService = (service: string) => {
