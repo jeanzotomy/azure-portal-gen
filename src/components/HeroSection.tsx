@@ -1,4 +1,5 @@
-import { ArrowRight, Cloud, Shield, TrendingUp, UserPlus } from "lucide-react";
+import { ArrowRight, Cloud, Shield, TrendingUp, UserPlus, Smartphone } from "lucide-react";
+import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import heroPerson from "@/assets/hero-person.png";
@@ -62,6 +63,11 @@ export function HeroSection() {
                 onClick={() => window.location.href = "/auth"}>
                 <UserPlus size={18} className="mr-2" /> {t("hero.become")}
               </Button>
+              <Link to="/install">
+                <Button size="lg" variant="outline" className="border-cyan-glow/40 text-cyan-glow hover:bg-cyan-glow/10">
+                  <Smartphone size={18} className="mr-2" /> {t("install.navButton")}
+                </Button>
+              </Link>
             </div>
           </div>
 

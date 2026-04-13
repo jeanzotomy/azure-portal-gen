@@ -366,7 +366,7 @@ const en = {
     ios3: 'Confirm by tapping "Add".',
     android1: "Tap the \u22EE menu at the top right of Chrome.",
     android2: 'Select "Install app" or "Add to Home Screen".',
-    navButton: "Install",
+    navButton: "Get the App",
   },
 } as const;
 
