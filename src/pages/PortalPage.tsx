@@ -751,14 +751,14 @@ function ProjectsTab({ user }: { user: SupaUser }) {
 
   return (
     <div className="space-y-6 animate-fade-up">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-foreground">Mes Projets</h1>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <h1 className="text-xl sm:text-2xl font-bold text-foreground">Mes Projets</h1>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={loadProjects} className="gap-1.5">
-            <RefreshCw size={14} /> Actualiser
+            <RefreshCw size={14} /> <span className="hidden sm:inline">Actualiser</span>
           </Button>
-          <Button onClick={openNewForm} className="gradient-primary text-primary-foreground border-0">
-            <Send size={16} className="mr-2" /> Soumettre un projet
+          <Button onClick={openNewForm} size="sm" className="gradient-primary text-primary-foreground border-0">
+            <Send size={14} className="mr-1.5" /> Soumettre
           </Button>
         </div>
       </div>
