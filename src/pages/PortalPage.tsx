@@ -923,7 +923,7 @@ function ProjectsTab({ user }: { user: SupaUser }) {
                           <Flag size={10} className="inline mr-1" />{pc.label}
                         </span>
                       )}
-                      <button onClick={() => openEditForm(p)} className="opacity-0 group-hover:opacity-100 p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all" title="Modifier">
+                      <button onClick={() => openEditForm(p)} className="sm:opacity-0 sm:group-hover:opacity-100 p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all" title="Modifier">
                         <Pencil size={14} />
                       </button>
                     </div>
