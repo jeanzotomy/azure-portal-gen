@@ -104,13 +104,6 @@ export function ServicesSection() {
               <ServiceCard key={s.title} s={s} />
             ))}
           </div>
-
-          <div className="grid grid-cols-3 gap-6">
-            {extraRow.map((s) => (
-              <ServiceCard key={s.title} s={s} />
-            ))}
-            <div />
-          </div>
         </div>
       </div>
     </section>
