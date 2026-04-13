@@ -1,19 +1,38 @@
 
 
-# Ajouter une barre de recherche dans la section Fichiers SharePoint
+# Plan : Convertir l'app en PWA (Application Web Installable)
 
-## Approche
+## Ce que ça va faire
 
-Ajouter un filtre de recherche **côté client** qui filtre les fichiers/dossiers affichés en temps réel par nom. La barre sera placée dans la toolbar existante (à côté des boutons Upload, Nouveau dossier, Refresh).
+Vos utilisateurs pourront **installer l'app directement depuis leur navigateur** sur leur téléphone (iPhone ou Android), comme une vraie application. Elle apparaîtra sur l'écran d'accueil avec votre logo CloudMature. Pas besoin de passer par l'App Store ou le Play Store.
 
-## Changements
+---
 
-### 1. `src/components/SharePointBrowser.tsx`
-- Ajouter un state `searchQuery` (string)
-- Ajouter un `Input` avec icône `Search` dans la barre d'outils du file browser
-- Filtrer `items` par `searchQuery` avant le rendu (filtre insensible à la casse sur `item.name`)
-- Réinitialiser `searchQuery` quand on change de dossier/drive
+## Étapes techniques
 
-### 2. Traductions (`src/i18n/en.ts` et `src/i18n/fr.ts`)
-- Ajouter `sharepoint.searchFiles` : "Rechercher des fichiers..." / "Search files..."
+### 1. Créer le fichier `public/manifest.json`
+Fichier de configuration PWA qui décrit l'application (nom, couleurs, icônes, mode d'affichage plein écran).
+
+### 2. Générer les icônes PWA
+Créer les icônes aux tailles requises (192x192, 512x512) à partir du `favicon.png` existant et les placer dans `public/`.
+
+### 3. Mettre à jour `index.html`
+Ajouter les balises meta nécessaires pour mobile :
+- Lien vers le manifest
+- `apple-mobile-web-app-capable` et `apple-mobile-web-app-status-bar-style` pour iOS
+- `theme-color` pour la barre de navigation mobile
+
+### 4. Créer une page `/install`
+Page dédiée avec un bouton d'installation et des instructions visuelles pour guider les utilisateurs (sur iOS : Partager → Ajouter à l'écran d'accueil, sur Android : menu du navigateur).
+
+### 5. Ajouter un lien d'installation dans le Navbar
+Bouton discret "Installer l'app" visible uniquement sur mobile.
+
+---
+
+## Pas de service worker
+Cette approche n'utilise **pas** de service worker ni de `vite-plugin-pwa`, ce qui évite les problèmes de cache et reste simple. L'app nécessitera une connexion internet pour fonctionner (ce qui est normal pour votre portail client/admin).
+
+## Résultat
+Après publication, vos utilisateurs mobiles pourront installer l'app en un clic et y accéder comme une application native depuis leur écran d'accueil.
 
