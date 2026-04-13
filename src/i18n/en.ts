@@ -358,6 +358,16 @@ const en = {
     searchFiles: "Search files...",
     noResults: "No matching files.",
   },
+  install: {
+    title: "Install CloudMature",
+    subtitle: "Add the app to your home screen to access it like a native app.",
+    ios1: "Tap the Share button at the bottom of Safari.",
+    ios2: "Select "Add to Home Screen".",
+    ios3: "Confirm by tapping "Add".",
+    android1: "Tap the ⋮ menu at the top right of Chrome.",
+    android2: "Select "Install app" or "Add to Home Screen".",
+    navButton: "Install",
+  },
 } as const;
 
 export default en;

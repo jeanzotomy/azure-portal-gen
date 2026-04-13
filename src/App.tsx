@@ -9,6 +9,7 @@ import PortalPage from "./pages/PortalPage.tsx";
 import ResetPasswordPage from "./pages/ResetPasswordPage.tsx";
 import AdminPage from "./pages/AdminPage.tsx";
 import MfaPage from "./pages/MfaPage.tsx";
+import InstallPage from "./pages/InstallPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/portal" element={<PortalPage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/mfa" element={<MfaPage />} />
+          <Route path="/install" element={<InstallPage />} />
           <Route path="/admin" element={<AdminPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
