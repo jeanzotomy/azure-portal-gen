@@ -1,13 +1,15 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Menu, X, Globe } from "lucide-react";
+import { Menu, X, Globe, Smartphone } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/i18n/LanguageContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
   const { t, locale, setLocale } = useTranslation();
+  const isMobile = useIsMobile();
 
   const navLinks = [
     { label: t("nav.home"), href: "#hero" },
@@ -53,6 +55,15 @@ export function Navbar() {
           </Link>
         </div>
 
+        {/* Mobile install button */}
+        {isMobile && (
+          <Link to="/install" className="md:hidden mr-2">
+            <Button size="icon" variant="ghost" className="text-muted-foreground">
+              <Smartphone size={20} />
+            </Button>
+          </Link>
+        )}
+
         {/* Mobile */}
         <button className="md:hidden text-foreground" onClick={() => setOpen(!open)}>
           {open ? <X size={24} /> : <Menu size={24} />}
@@ -73,6 +84,14 @@ export function Navbar() {
             <Globe size={16} />
             {locale === "fr" ? "English" : "Français"}
           </button>
+          <Link
+            to="/install"
+            onClick={() => setOpen(false)}
+            className="block w-full text-left px-6 py-3 text-sm text-secondary-foreground hover:bg-secondary/50 flex items-center gap-2"
+          >
+            <Smartphone size={16} />
+            {t("install.navButton")}
+          </Link>
           <div className="px-6 pt-2">
             <Link to="/portal" onClick={() => setOpen(false)}>
               <Button size="sm" className="w-full gradient-primary text-primary-foreground border-0">{t("nav.portal")}</Button>

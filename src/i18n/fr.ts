@@ -358,6 +358,16 @@ const fr = {
     searchFiles: "Rechercher des fichiers...",
     noResults: "Aucun fichier correspondant.",
   },
+  install: {
+    title: "Installer CloudMature",
+    subtitle: "Ajoutez l'application à votre écran d'accueil pour y accéder comme une app native.",
+    ios1: "Appuyez sur le bouton Partager en bas de Safari.",
+    ios2: "Sélectionnez « Sur l'écran d'accueil ».",
+    ios3: "Confirmez en appuyant sur « Ajouter ».",
+    android1: "Appuyez sur le menu ⋮ en haut à droite de Chrome.",
+    android2: "Sélectionnez « Installer l'application » ou « Ajouter à l'écran d'accueil ».",
+    navButton: "Installer",
+  },
 } as const;
 
 export default fr;
