@@ -35,8 +35,6 @@ const fr = {
       { title: "Formation & Coaching", desc: "Formations techniques, ateliers pratiques, mentoring personnalisé et plateforme LMS privée." },
       { title: "Infogérance & Support", desc: "Surveillance 24/7, support N1-N3, gestion des incidents et suivi SLA." },
       { title: "Adoption & Maturité IA", desc: "Évaluation de maturité IA, stratégie d'adoption et intégration de solutions IA responsables dans les processus métiers." },
-      { title: "Développement Web / Applicatif", desc: "Conception et développement d'applications web, mobiles et métiers sur mesure, de l'idée au déploiement." },
-      { title: "Autres Services", desc: "Conseil personnalisé, audits techniques, intégrations sur mesure et accompagnement selon vos besoins spécifiques." },
     ],
   },
   industries: {

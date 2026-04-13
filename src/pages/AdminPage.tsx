@@ -1011,6 +1011,7 @@ function AdminProjectsInner({ readOnly = false, assignedCount }: { readOnly?: bo
     "Stratégie & Adoption Cloud", "Optimisation FinOps", "Gouvernance & Sécurité",
     "Architecture & Ingénierie", "Migration Cloud", "Formation & Coaching",
     "Infogérance & Support", "Adoption & Maturité IA",
+    "Développement Web / Applicatif", "Autres",
   ];
 
   const load = async () => {
