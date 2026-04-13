@@ -9,7 +9,7 @@ const fr = {
   },
   hero: {
     words: ["Innover.", "Optimiser.", "Automatiser."],
-    badge: { consulting: "Consultation TI", cloud: "Cloud", devops: "DevOps", ai: "IA" },
+    badge: { consulting: "Consultation", cloud: "Cloud", devops: "DevOps", ai: "IA" },
     description: "Cloud Mature accompagne les organisations dans leur transformation vers le Cloud avec une approche sécurisée, performante et conforme aux standards les plus élevés.",
     cta: "Demander une consultation",
     become: "Devenir client",
