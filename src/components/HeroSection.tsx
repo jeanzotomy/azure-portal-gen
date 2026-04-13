@@ -54,17 +54,17 @@ export function HeroSection() {
             <p className="text-lg md:text-xl text-secondary-foreground/70 max-w-2xl mb-8">
               {t("hero.description")}
             </p>
-            <div className="flex flex-wrap gap-4">
-              <Button size="lg" className="gradient-primary text-primary-foreground border-0 hover:opacity-90 animate-pulse-glow"
+            <div className="flex flex-col sm:flex-row flex-wrap gap-3">
+              <Button size="lg" className="gradient-primary text-primary-foreground border-0 hover:opacity-90 animate-pulse-glow w-full sm:w-auto"
                 onClick={() => document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" })}>
                 {t("hero.cta")} <ArrowRight size={18} className="ml-2" />
               </Button>
-              <Button size="lg" className="gradient-primary text-primary-foreground border-0 hover:opacity-90 animate-pulse-glow"
+              <Button size="lg" className="gradient-primary text-primary-foreground border-0 hover:opacity-90 animate-pulse-glow w-full sm:w-auto"
                 onClick={() => window.location.href = "/auth"}>
                 <UserPlus size={18} className="mr-2" /> {t("hero.become")}
               </Button>
-              <Link to="/install">
-                <Button size="lg" variant="outline" className="border-cyan-glow/40 text-cyan-glow hover:bg-cyan-glow/10">
+              <Link to="/install" className="w-full sm:w-auto">
+                <Button size="lg" variant="outline" className="border-cyan-glow/40 text-cyan-glow hover:bg-cyan-glow/10 w-full sm:w-auto">
                   <Smartphone size={18} className="mr-2" /> {t("install.navButton")}
                 </Button>
               </Link>
@@ -79,7 +79,7 @@ export function HeroSection() {
           </div>
         </div>
 
-        <div className="flex flex-wrap gap-3 -mt-8 animate-fade-up delay-300">
+        <div className="flex flex-wrap gap-3 mt-4 md:-mt-8 animate-fade-up delay-300">
           {[
             { icon: Cloud, title: t("hero.multiCloud"), desc: t("hero.multiCloudDesc") },
             { icon: Shield, title: t("hero.security"), desc: t("hero.securityDesc") },
