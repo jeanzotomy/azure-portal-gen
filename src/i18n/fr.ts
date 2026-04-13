@@ -366,7 +366,7 @@ const fr = {
     ios3: "Confirmez en appuyant sur « Ajouter ».",
     android1: "Appuyez sur le menu ⋮ en haut à droite de Chrome.",
     android2: "Sélectionnez « Installer l'application » ou « Ajouter à l'écran d'accueil ».",
-    navButton: "Installer",
+    navButton: "Télécharger l'app",
   },
 } as const;
 
