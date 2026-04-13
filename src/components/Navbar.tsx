@@ -4,12 +4,11 @@ import { Menu, X, Globe, Smartphone } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { Button } from "@/components/ui/button";
 import { useTranslation } from "@/i18n/LanguageContext";
-import { useIsMobile } from "@/hooks/use-mobile";
+
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
   const { t, locale, setLocale } = useTranslation();
-  const isMobile = useIsMobile();
 
   const navLinks = [
     { label: t("nav.home"), href: "#hero" },
@@ -55,14 +54,8 @@ export function Navbar() {
           </Link>
         </div>
 
-        {/* Mobile install button */}
-        {isMobile && (
-          <Link to="/install" className="md:hidden mr-2">
-            <Button size="icon" variant="ghost" className="text-muted-foreground">
-              <Smartphone size={20} />
-            </Button>
-          </Link>
-        )}
+
+        {/* Mobile hamburger */}
 
         {/* Mobile */}
         <button className="md:hidden text-foreground" onClick={() => setOpen(!open)}>
