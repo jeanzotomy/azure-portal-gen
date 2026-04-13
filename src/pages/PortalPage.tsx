@@ -1268,20 +1268,20 @@ function ProfileTab({ user }: { user: SupaUser }) {
   return (
     <div className="space-y-6 animate-fade-up">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-foreground">Mon Profil</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-foreground">Mon Profil</h1>
         <Button variant="outline" size="sm" onClick={loadProfile} className="gap-1.5">
           <RefreshCw size={14} /> Actualiser
         </Button>
       </div>
 
-      <div className="flex items-center gap-4 bg-card rounded-xl p-6 shadow-card border border-border/50">
-        <div className="w-16 h-16 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-2xl font-bold">
+      <div className="flex items-center gap-3 sm:gap-4 bg-card rounded-xl p-4 sm:p-6 shadow-card border border-border/50">
+        <div className="w-12 h-12 sm:w-16 sm:h-16 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xl sm:text-2xl font-bold shrink-0">
           {(profile.full_name || user.email || "U").charAt(0).toUpperCase()}
         </div>
-        <div>
-          <p className="font-semibold text-card-foreground text-lg">{profile.full_name || "Non renseigné"}</p>
-          <p className="text-sm text-muted-foreground">{user.email}</p>
-          {profile.company && <p className="text-sm text-muted-foreground">{profile.company}</p>}
+        <div className="min-w-0">
+          <p className="font-semibold text-card-foreground text-base sm:text-lg truncate">{profile.full_name || "Non renseigné"}</p>
+          <p className="text-xs sm:text-sm text-muted-foreground truncate">{user.email}</p>
+          {profile.company && <p className="text-xs sm:text-sm text-muted-foreground truncate">{profile.company}</p>}
         </div>
       </div>
 
