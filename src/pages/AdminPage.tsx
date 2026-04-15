@@ -1256,7 +1256,9 @@ function AdminProjectsInner({ readOnly = false, assignedCount }: { readOnly?: bo
                 <div className="mt-auto">
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="text-xs font-medium text-muted-foreground">Progression</span>
-                    <span className="text-xs font-bold text-card-foreground">{p.progress}%</span>
+                    <span className="text-xs font-bold text-card-foreground">
+                      {p.progress === 0 ? "📋 Soumis" : p.progress === 33 ? "🔍 En analyse" : p.progress === 66 ? "⚙️ En cours" : p.progress === 100 ? "✅ Terminé" : `${p.progress}%`}
+                    </span>
                   </div>
                   <div className="relative h-2 bg-muted rounded-full overflow-hidden">
                     <div className={`absolute inset-y-0 left-0 rounded-full transition-all duration-500 ${p.progress === 100 ? "bg-teal-500" : "bg-gradient-to-r from-primary to-accent"}`}
