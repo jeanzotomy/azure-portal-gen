@@ -1250,13 +1250,13 @@ function TicketsTab({ user }: { user: SupaUser }) {
 }
 
 function ProfileTab({ user }: { user: SupaUser }) {
-  const [profile, setProfile] = useState({ full_name: "", company: "", phone: "", location: "", timezone: "" });
+  const [profile, setProfile] = useState({ full_name: "", company: "", phone: "", location: "", timezone: "", country: "", city: "", address_line: "" });
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
   const loadProfile = () => {
     supabase.from("profiles").select("*").eq("user_id", user.id).single().then(({ data }) => {
-      if (data) setProfile({ full_name: data.full_name || "", company: data.company || "", phone: data.phone || "", location: (data as any).location || "", timezone: (data as any).timezone || "" });
+      if (data) setProfile({ full_name: data.full_name || "", company: data.company || "", phone: data.phone || "", location: (data as any).location || "", timezone: (data as any).timezone || "", country: (data as any).country || "", city: (data as any).city || "", address_line: (data as any).address_line || "" });
     });
   };
 
@@ -1319,8 +1319,42 @@ function ProfileTab({ user }: { user: SupaUser }) {
               <Input value={profile.company} onChange={(e) => setProfile({ ...profile, company: e.target.value })} className="mt-1" />
             </div>
             <div>
-              <label className="text-sm font-medium text-card-foreground">Localisation</label>
-              <Input value={profile.location} onChange={(e) => setProfile({ ...profile, location: e.target.value })} placeholder="Ex: Montréal, QC" className="mt-1" />
+              <label className="text-sm font-medium text-card-foreground">Pays</label>
+              <select
+                value={profile.country}
+                onChange={(e) => setProfile({ ...profile, country: e.target.value })}
+                className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                <option value="">Sélectionner un pays</option>
+                <option value="GN">Guinée</option>
+                <option value="SN">Sénégal</option>
+                <option value="CI">Côte d'Ivoire</option>
+                <option value="ML">Mali</option>
+                <option value="BF">Burkina Faso</option>
+                <option value="CM">Cameroun</option>
+                <option value="GA">Gabon</option>
+                <option value="CG">Congo</option>
+                <option value="CD">RD Congo</option>
+                <option value="MA">Maroc</option>
+                <option value="TN">Tunisie</option>
+                <option value="DZ">Algérie</option>
+                <option value="FR">France</option>
+                <option value="BE">Belgique</option>
+                <option value="CH">Suisse</option>
+                <option value="CA">Canada</option>
+                <option value="US">États-Unis</option>
+                <option value="GB">Royaume-Uni</option>
+                <option value="DE">Allemagne</option>
+                <option value="AE">Émirats arabes unis</option>
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-card-foreground">Ville</label>
+              <Input value={profile.city} onChange={(e) => setProfile({ ...profile, city: e.target.value })} placeholder="Ex: Conakry" className="mt-1" />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-card-foreground">Adresse postale</label>
+              <Input value={profile.address_line} onChange={(e) => setProfile({ ...profile, address_line: e.target.value })} placeholder="Ex: Quartier Almamya, Commune de Kaloum" className="mt-1" />
             </div>
           </div>
 
