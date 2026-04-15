@@ -42,7 +42,8 @@ export function Navbar() {
     navigate("/");
   };
 
-  const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "";
+  const fullName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "";
+  const firstName = fullName.split(" ")[0];
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass">
@@ -68,11 +69,11 @@ export function Navbar() {
 
           {user ? (
             <div className="flex items-center gap-2">
-              <Link to="/portal" className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-colors">
-                <div className="w-6 h-6 rounded-full gradient-primary flex items-center justify-center">
-                  <User size={13} className="text-primary-foreground" />
+              <Link to="/portal" className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-colors">
+                <div className="w-7 h-7 rounded-full gradient-primary flex items-center justify-center shadow-sm">
+                  <User size={14} className="text-primary-foreground" />
                 </div>
-                <span className="text-sm font-medium text-foreground max-w-[120px] truncate">{displayName}</span>
+                <span className="text-sm font-semibold text-foreground">{firstName}</span>
               </Link>
               <button
                 onClick={handleLogout}
@@ -127,7 +128,7 @@ export function Navbar() {
                     <User size={16} className="text-primary-foreground" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-foreground truncate">{displayName}</p>
+                    <p className="text-sm font-semibold text-foreground truncate">{firstName}</p>
                     <p className="text-xs text-muted-foreground">{t("nav.portal")}</p>
                   </div>
                 </Link>
