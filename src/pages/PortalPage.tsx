@@ -680,6 +680,19 @@ function ProjectsTab({ user }: { user: SupaUser }) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    // Vérifier que le profil est complet avant de soumettre
+    if (!editingProject) {
+      const { data: prof } = await supabase.from("profiles").select("full_name, company, country").eq("user_id", user.id).maybeSingle();
+      if (!prof?.full_name || !prof?.company || !(prof as any).country) {
+        toast({
+          title: "Profil incomplet",
+          description: "Veuillez compléter votre nom complet, entreprise et pays dans votre profil avant de soumettre un projet.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
     if (!name.trim()) {
       toast({ title: "Champ requis", description: "Le nom du projet est obligatoire.", variant: "destructive" }); return;
     }
