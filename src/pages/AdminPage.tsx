@@ -1791,6 +1791,9 @@ function AdminUsers() {
   const [inviteLoading, setInviteLoading] = useState(false);
   const [csvUsers, setCsvUsers] = useState<{ email: string; full_name: string; role: string }[]>([]);
   const [importResults, setImportResults] = useState<{ email: string; success: boolean; error?: string }[] | null>(null);
+  const [editingUser, setEditingUser] = useState<any | null>(null);
+  const [editForm, setEditForm] = useState({ full_name: "", company: "", phone: "", country: "", city: "", address_line: "", timezone: "" });
+  const [editSaving, setEditSaving] = useState(false);
   const { toast } = useToast();
 
   const load = async () => {
