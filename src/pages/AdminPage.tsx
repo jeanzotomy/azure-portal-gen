@@ -126,7 +126,7 @@ function AdminContent() {
   const [agentTab, setAgentTab] = useState<AgentTab>("dashboard");
   const [gestionnaireTab, setGestionnaireTab] = useState<GestionnaireTab>("dashboard");
   const { isAdmin, isAgent, isComptable, isGestionnaire, loading: rolesLoading } = useUserRoles();
-  const mfaVerified = useMfaCheck();
+  const { mfaVerified, timedOut: mfaTimedOut } = useMfaCheck();
   const navigate = useNavigate();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";

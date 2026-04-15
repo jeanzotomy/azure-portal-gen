@@ -50,7 +50,7 @@ function PortalContent() {
   const [daysLeft, setDaysLeft] = useState<number | null>(null);
   const navigate = useNavigate();
   const { isAdmin, isAgent, isComptable, isGestionnaire } = useUserRoles();
-  const mfaVerified = useMfaCheck();
+  const { mfaVerified, timedOut: mfaTimedOut } = useMfaCheck();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const { t, locale } = useTranslation();
