@@ -1780,7 +1780,7 @@ function AdminUsers() {
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [changingRole, setChangingRole] = useState<string | null>(null);
-  const [mfaStatus, setMfaStatus] = useState<Record<string, { enrolled: boolean; factors: any[]; has_phone: boolean; phone: string | null }>>({});
+  const [mfaStatus, setMfaStatus] = useState<Record<string, { enrolled: boolean; factors: any[]; has_phone: boolean; phone: string | null; email?: string | null }>>({});
   const [mfaLoading, setMfaLoading] = useState<string | null>(null);
   const [mfaDialogUser, setMfaDialogUser] = useState<any | null>(null);
   const [showInviteDialog, setShowInviteDialog] = useState(false);
