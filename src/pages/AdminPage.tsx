@@ -1182,7 +1182,7 @@ function AdminProjectsInner({ readOnly = false, assignedCount }: { readOnly?: bo
                       </span>
                     )}
                     {!readOnly && <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => {
-                        setEditingId(p.id); setEditStatus(p.status); setEditProgress(p.progress);
+                        setEditingId(p.id); setEditStatus(p.status); setEditProgress(p.progress <= 16 ? 0 : p.progress <= 49 ? 33 : p.progress <= 82 ? 66 : 100);
                         setEditName(p.name); setEditDescription(p.description || "");
                         setEditBudget(p.budget || ""); setEditDeadline(p.deadline || "");
                         setEditPriority(p.priority || "normal");
