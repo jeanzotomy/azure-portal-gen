@@ -181,6 +181,11 @@ function AdminContent() {
     <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
       <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
       <p className="text-muted-foreground text-sm">{t("admin.loading")}</p>
+      {mfaTimedOut && (
+        <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
+          Réessayer
+        </Button>
+      )}
     </div>
   );
   if (!user || (!isAdmin && !isAgent && !isComptable && !isGestionnaire)) return null;
