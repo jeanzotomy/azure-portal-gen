@@ -1780,7 +1780,7 @@ function AdminUsers() {
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState("all");
   const [changingRole, setChangingRole] = useState<string | null>(null);
-  const [mfaStatus, setMfaStatus] = useState<Record<string, { enrolled: boolean; factors: any[]; has_phone: boolean; phone: string | null }>>({});
+  const [mfaStatus, setMfaStatus] = useState<Record<string, { enrolled: boolean; factors: any[]; has_phone: boolean; phone: string | null; email?: string | null }>>({});
   const [mfaLoading, setMfaLoading] = useState<string | null>(null);
   const [mfaDialogUser, setMfaDialogUser] = useState<any | null>(null);
   const [showInviteDialog, setShowInviteDialog] = useState(false);
@@ -1808,7 +1808,7 @@ function AdminUsers() {
     setUserRoles(map);
 
     // Load MFA status for all users
-    const mfaMap: Record<string, { enrolled: boolean; factors: any[]; has_phone: boolean; phone: string | null }> = {};
+    const mfaMap: Record<string, { enrolled: boolean; factors: any[]; has_phone: boolean; phone: string | null; email?: string | null }> = {};
     for (const prof of (profs || [])) {
       try {
         const { data } = await supabase.functions.invoke("manage-user-mfa", { body: { user_id: prof.user_id, action: "list" } });
@@ -1817,9 +1817,10 @@ function AdminUsers() {
           factors: data?.factors || [],
           has_phone: !!data?.has_phone,
           phone: data?.phone || null,
+          email: data?.email || null,
         };
       } catch {
-        mfaMap[prof.user_id] = { enrolled: false, factors: [], has_phone: false, phone: null };
+        mfaMap[prof.user_id] = { enrolled: false, factors: [], has_phone: false, phone: null, email: null };
       }
     }
     setMfaStatus(mfaMap);
@@ -2086,6 +2087,7 @@ function AdminUsers() {
                     <span className={`text-[11px] px-2 py-0.5 rounded-full font-semibold border ${badge.color}`}>{badge.label}</span>
                   </div>
                   <div className="flex flex-wrap gap-x-3 gap-y-0.5">
+                    {mfaStatus[p.user_id]?.email && <span className="text-xs text-muted-foreground">✉️ {mfaStatus[p.user_id].email}</span>}
                     {p.company && <span className="text-xs text-muted-foreground">🏢 {p.company}</span>}
                     {p.phone && <span className="text-xs text-muted-foreground">📱 {p.phone}</span>}
                   </div>
@@ -2267,6 +2269,10 @@ function AdminUsers() {
             </DialogTitle>
           </DialogHeader>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="md:col-span-2">
+              <label className="text-sm font-medium text-muted-foreground">Email (non modifiable)</label>
+              <Input value={editingUser ? (mfaStatus[editingUser.user_id]?.email || "—") : ""} disabled className="mt-1 bg-muted/50 cursor-not-allowed" />
+            </div>
             <div>
               <label className="text-sm font-medium text-foreground">Nom complet</label>
               <Input value={editForm.full_name} onChange={(e) => setEditForm({ ...editForm, full_name: e.target.value })} className="mt-1" />
