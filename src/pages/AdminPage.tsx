@@ -969,7 +969,9 @@ function AdminDashboard() {
                     <div className={`absolute inset-y-0 left-0 rounded-full transition-all duration-500 ${p.progress === 100 ? "bg-teal-500" : "bg-gradient-to-r from-primary to-accent"}`}
                       style={{ width: `${p.progress}%` }} />
                   </div>
-                  <span className="text-[11px] font-bold text-card-foreground w-8 text-right">{p.progress}%</span>
+                  <span className="text-[11px] font-bold text-card-foreground text-right whitespace-nowrap">
+                    {p.progress === 0 ? "Soumis" : p.progress === 33 ? "En analyse" : p.progress === 66 ? "En cours" : p.progress === 100 ? "Terminé" : `${p.progress}%`}
+                  </span>
                 </div>
               </div>
             ))}
@@ -1180,7 +1182,7 @@ function AdminProjectsInner({ readOnly = false, assignedCount }: { readOnly?: bo
                       </span>
                     )}
                     {!readOnly && <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => {
-                        setEditingId(p.id); setEditStatus(p.status); setEditProgress(p.progress);
+                        setEditingId(p.id); setEditStatus(p.status); setEditProgress(p.progress <= 16 ? 0 : p.progress <= 49 ? 33 : p.progress <= 82 ? 66 : 100);
                         setEditName(p.name); setEditDescription(p.description || "");
                         setEditBudget(p.budget || ""); setEditDeadline(p.deadline || "");
                         setEditPriority(p.priority || "normal");
@@ -1256,7 +1258,9 @@ function AdminProjectsInner({ readOnly = false, assignedCount }: { readOnly?: bo
                 <div className="mt-auto">
                   <div className="flex items-center justify-between mb-1.5">
                     <span className="text-xs font-medium text-muted-foreground">Progression</span>
-                    <span className="text-xs font-bold text-card-foreground">{p.progress}%</span>
+                    <span className="text-xs font-bold text-card-foreground">
+                      {p.progress === 0 ? "📋 Soumis" : p.progress === 33 ? "🔍 En analyse" : p.progress === 66 ? "⚙️ En cours" : p.progress === 100 ? "✅ Terminé" : `${p.progress}%`}
+                    </span>
                   </div>
                   <div className="relative h-2 bg-muted rounded-full overflow-hidden">
                     <div className={`absolute inset-y-0 left-0 rounded-full transition-all duration-500 ${p.progress === 100 ? "bg-teal-500" : "bg-gradient-to-r from-primary to-accent"}`}
@@ -1337,9 +1341,26 @@ function AdminProjectsInner({ readOnly = false, assignedCount }: { readOnly?: bo
               </div>
             </div>
             <div>
-              <label className="text-sm font-medium text-card-foreground">Progression : {editProgress}%</label>
-              <input type="range" min="0" max="100" value={editProgress} onChange={(e) => setEditProgress(Number(e.target.value))}
-                className="w-full mt-1 accent-[hsl(var(--primary))]" />
+              <label className="text-sm font-medium text-card-foreground">Progression</label>
+              <div className="flex gap-2 mt-2">
+                {[
+                  { value: 0, label: "Soumis", icon: "📋" },
+                  { value: 33, label: "En analyse", icon: "🔍" },
+                  { value: 66, label: "En cours", icon: "⚙️" },
+                  { value: 100, label: "Terminé", icon: "✅" },
+                ].map((step) => (
+                  <button key={step.value} onClick={() => setEditProgress(step.value)}
+                    className={`flex-1 flex flex-col items-center gap-1 px-2 py-2.5 rounded-xl border-2 transition-all text-center ${
+                      editProgress === step.value
+                        ? "bg-primary/10 border-primary text-primary font-semibold"
+                        : "bg-card border-border text-muted-foreground hover:border-primary/40"
+                    }`}
+                  >
+                    <span className="text-lg">{step.icon}</span>
+                    <span className="text-[11px] leading-tight">{step.label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
             <div>
               <label className="text-sm font-medium text-card-foreground">Services</label>
