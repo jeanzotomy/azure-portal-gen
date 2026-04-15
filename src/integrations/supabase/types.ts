@@ -204,8 +204,11 @@ export type Database = {
       }
       profiles: {
         Row: {
+          address_line: string | null
           blocked: boolean
+          city: string | null
           company: string | null
+          country: string | null
           created_at: string
           deleted_at: string | null
           full_name: string | null
@@ -217,8 +220,11 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          address_line?: string | null
           blocked?: boolean
+          city?: string | null
           company?: string | null
+          country?: string | null
           created_at?: string
           deleted_at?: string | null
           full_name?: string | null
@@ -230,8 +236,11 @@ export type Database = {
           user_id: string
         }
         Update: {
+          address_line?: string | null
           blocked?: boolean
+          city?: string | null
           company?: string | null
+          country?: string | null
           created_at?: string
           deleted_at?: string | null
           full_name?: string | null
