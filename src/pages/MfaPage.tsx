@@ -116,8 +116,14 @@ export default function MfaPage() {
       }
       if (res.data?.success) {
         markSmsMfaVerified();
+        const { data: { user: smsUser } } = await supabase.auth.getUser();
+        if (smsUser) markMfaVerified(smsUser.id);
         toast({ title: t("mfa.success"), description: t("mfa.successDesc") });
-        navigate(res.data.redirectTo || "/portal");
+        if (smsUser) {
+          await redirectByRole(smsUser.id);
+        } else {
+          navigate(res.data.redirectTo || "/portal");
+        }
       }
     } catch (err: any) {
       toast({ title: t("mfa.invalidCode"), description: err.message, variant: "destructive" }); setOtp("");
