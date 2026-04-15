@@ -4,16 +4,22 @@ import { useAuthSession } from "@/hooks/use-auth-session";
 
 const SMS_MFA_KEY = "sms_mfa_verified";
 const mfaStatusCache = new Map<string, boolean>();
-const MFA_CHECK_TIMEOUT_MS = 8000;
+const MFA_CHECK_TIMEOUT_MS = 6000;
 
 /** Mark SMS/custom MFA as verified for the current session */
 export function markSmsMfaVerified() {
   sessionStorage.setItem(SMS_MFA_KEY, "true");
 }
 
+/** Mark MFA as verified in memory cache (call after successful TOTP verify) */
+export function markMfaVerified(userId: string) {
+  mfaStatusCache.set(userId, true);
+}
+
 /** Clear SMS MFA flag (call on logout) */
 export function clearSmsMfaVerified() {
   sessionStorage.removeItem(SMS_MFA_KEY);
+  mfaStatusCache.clear();
 }
 
 export function useMfaCheck() {
@@ -24,7 +30,6 @@ export function useMfaCheck() {
     if (!ready) return null;
     if (!userId) return false;
     if (mfaStatusCache.has(userId)) return mfaStatusCache.get(userId) ?? false;
-    // Check sessionStorage synchronously for instant resolution
     if (sessionStorage.getItem(SMS_MFA_KEY) === "true") {
       mfaStatusCache.set(userId, true);
       return true;
@@ -32,16 +37,18 @@ export function useMfaCheck() {
     return null;
   });
 
-  const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const resolvedRef = useRef(false);
 
   useEffect(() => {
     let active = true;
+    resolvedRef.current = false;
 
-    // Clear any previous timeout
-    if (timeoutRef.current) {
-      clearTimeout(timeoutRef.current);
-      timeoutRef.current = null;
-    }
+    const resolve = (value: boolean) => {
+      if (!active || resolvedRef.current) return;
+      resolvedRef.current = true;
+      if (userId) mfaStatusCache.set(userId, value);
+      setMfaVerified(value);
+    };
 
     if (!ready) {
       setMfaVerified(null);
@@ -49,79 +56,64 @@ export function useMfaCheck() {
     }
 
     if (!userId) {
-      setMfaVerified(false);
+      resolve(false);
       return () => { active = false; };
     }
 
     // Fast path: cached or sessionStorage
     if (mfaStatusCache.has(userId)) {
-      setMfaVerified(mfaStatusCache.get(userId) ?? false);
+      resolve(mfaStatusCache.get(userId) ?? false);
       return () => { active = false; };
     }
 
     if (sessionStorage.getItem(SMS_MFA_KEY) === "true") {
-      mfaStatusCache.set(userId, true);
-      setMfaVerified(true);
+      resolve(true);
       return () => { active = false; };
     }
 
-    // Set timeout fallback to prevent infinite loading
-    timeoutRef.current = setTimeout(() => {
-      if (active && mfaVerified === null) {
-        console.warn("MFA check timed out, defaulting to unverified");
-        mfaStatusCache.set(userId, false);
-        setMfaVerified(false);
-      }
+    // Timeout fallback
+    const timer = setTimeout(() => {
+      console.warn("MFA check timed out, defaulting to unverified");
+      resolve(false);
     }, MFA_CHECK_TIMEOUT_MS);
 
     const check = async () => {
       try {
-        // Run both calls in parallel when possible
         const [aalResult, factorsResult] = await Promise.all([
           supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
           supabase.auth.mfa.listFactors(),
         ]);
 
-        if (!active) return;
+        if (!active || resolvedRef.current) return;
 
         if (aalResult.error) {
           console.error("MFA AAL check failed", aalResult.error);
-          mfaStatusCache.set(userId, false);
-          setMfaVerified(false);
+          resolve(false);
           return;
         }
 
         if (aalResult.data?.currentLevel === "aal2") {
-          mfaStatusCache.set(userId, true);
-          setMfaVerified(true);
+          resolve(true);
           return;
         }
 
-        // Check SMS MFA again (may have been set during the async call)
         if (sessionStorage.getItem(SMS_MFA_KEY) === "true") {
-          mfaStatusCache.set(userId, true);
-          setMfaVerified(true);
+          resolve(true);
           return;
         }
 
         const hasVerifiedTotp = (factorsResult.data?.totp || []).some(f => f.status === "verified");
 
         if (!hasVerifiedTotp) {
-          // No TOTP enrolled and no SMS MFA → needs MFA setup
-          mfaStatusCache.set(userId, false);
-          setMfaVerified(false);
+          resolve(false);
           return;
         }
 
         // Has TOTP but not at AAL2 → needs verification
-        mfaStatusCache.set(userId, false);
-        setMfaVerified(false);
+        resolve(false);
       } catch (error) {
         console.error("Unexpected MFA check error", error);
-        if (active) {
-          mfaStatusCache.set(userId, false);
-          setMfaVerified(false);
-        }
+        resolve(false);
       }
     };
 
@@ -129,10 +121,7 @@ export function useMfaCheck() {
 
     return () => {
       active = false;
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-        timeoutRef.current = null;
-      }
+      clearTimeout(timer);
     };
   }, [ready, userId]);
 
