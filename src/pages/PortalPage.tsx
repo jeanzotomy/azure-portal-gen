@@ -1250,7 +1250,7 @@ function TicketsTab({ user }: { user: SupaUser }) {
 }
 
 function ProfileTab({ user }: { user: SupaUser }) {
-  const [profile, setProfile] = useState({ full_name: "", company: "", phone: "", location: "", timezone: "" });
+  const [profile, setProfile] = useState({ full_name: "", company: "", phone: "", location: "", timezone: "", country: "", city: "", address_line: "" });
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
