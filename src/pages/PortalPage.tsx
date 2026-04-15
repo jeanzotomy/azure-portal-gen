@@ -1256,7 +1256,7 @@ function ProfileTab({ user }: { user: SupaUser }) {
 
   const loadProfile = () => {
     supabase.from("profiles").select("*").eq("user_id", user.id).single().then(({ data }) => {
-      if (data) setProfile({ full_name: data.full_name || "", company: data.company || "", phone: data.phone || "", location: (data as any).location || "", timezone: (data as any).timezone || "" });
+      if (data) setProfile({ full_name: data.full_name || "", company: data.company || "", phone: data.phone || "", location: (data as any).location || "", timezone: (data as any).timezone || "", country: (data as any).country || "", city: (data as any).city || "", address_line: (data as any).address_line || "" });
     });
   };
 
