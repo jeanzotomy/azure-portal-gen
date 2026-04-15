@@ -1808,7 +1808,7 @@ function AdminUsers() {
     setUserRoles(map);
 
     // Load MFA status for all users
-    const mfaMap: Record<string, { enrolled: boolean; factors: any[]; has_phone: boolean; phone: string | null }> = {};
+    const mfaMap: Record<string, { enrolled: boolean; factors: any[]; has_phone: boolean; phone: string | null; email?: string | null }> = {};
     for (const prof of (profs || [])) {
       try {
         const { data } = await supabase.functions.invoke("manage-user-mfa", { body: { user_id: prof.user_id, action: "list" } });
