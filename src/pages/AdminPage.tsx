@@ -2269,6 +2269,10 @@ function AdminUsers() {
             </DialogTitle>
           </DialogHeader>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="md:col-span-2">
+              <label className="text-sm font-medium text-muted-foreground">Email (non modifiable)</label>
+              <Input value={editingUser ? (mfaStatus[editingUser.user_id]?.email || "—") : ""} disabled className="mt-1 bg-muted/50 cursor-not-allowed" />
+            </div>
             <div>
               <label className="text-sm font-medium text-foreground">Nom complet</label>
               <Input value={editForm.full_name} onChange={(e) => setEditForm({ ...editForm, full_name: e.target.value })} className="mt-1" />
