@@ -1,6 +1,7 @@
 const fr = {
   nav: {
     home: "Accueil",
+    about: "À propos",
     services: "Services",
     industries: "Industries",
     whyUs: "Pourquoi Nous",
