@@ -1817,9 +1817,10 @@ function AdminUsers() {
           factors: data?.factors || [],
           has_phone: !!data?.has_phone,
           phone: data?.phone || null,
+          email: data?.email || null,
         };
       } catch {
-        mfaMap[prof.user_id] = { enrolled: false, factors: [], has_phone: false, phone: null };
+        mfaMap[prof.user_id] = { enrolled: false, factors: [], has_phone: false, phone: null, email: null };
       }
     }
     setMfaStatus(mfaMap);
