@@ -1008,10 +1008,10 @@ function AdminProjectsInner({ readOnly = false, assignedCount }: { readOnly?: bo
   const { toast } = useToast();
 
   const serviceOptions = [
-    "Stratégie & Adoption Cloud", "Optimisation FinOps", "Gouvernance & Sécurité",
-    "Architecture & Ingénierie", "Migration Cloud", "Formation & Coaching",
-    "Infogérance & Support", "Adoption & Maturité IA",
-    "Développement Web / Applicatif", "Autres",
+    "Écosystème Microsoft 365 & Azure", "Licences & Souscriptions Cloud",
+    "Infrastructures Hybrides & Privées", "Architecture & Ingénierie Cloud",
+    "Migration & Modernisation", "Sécurité & Conformité",
+    "Infogérance & Support Managé", "IA & Automatisation Intelligente", "Autres",
   ];
 
   const load = async () => {

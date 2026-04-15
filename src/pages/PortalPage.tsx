@@ -515,8 +515,16 @@ function ProjectsTab({ user }: { user: SupaUser }) {
   const [selectedServices, setSelectedServices] = useState<string[]>([]);
 
   const serviceOptions = [
-    "Stratégie & Adoption Cloud",
-    "Optimisation FinOps",
+    "Écosystème Microsoft 365 & Azure",
+    "Licences & Souscriptions Cloud",
+    "Infrastructures Hybrides & Privées",
+    "Architecture & Ingénierie Cloud",
+    "Migration & Modernisation",
+    "Sécurité & Conformité",
+    "Infogérance & Support Managé",
+    "IA & Automatisation Intelligente",
+    "Autres",
+  ];
     "Gouvernance & Sécurité",
     "Architecture & Ingénierie",
     "Migration Cloud",
