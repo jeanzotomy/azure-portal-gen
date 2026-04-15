@@ -73,7 +73,7 @@ export function Navbar() {
                 <div className="w-7 h-7 rounded-full gradient-primary flex items-center justify-center shadow-sm">
                   <User size={14} className="text-primary-foreground" />
                 </div>
-                <span className="text-sm font-semibold text-primary-foreground">{firstName}</span>
+                <span className="text-sm font-semibold text-primary">{firstName}</span>
               </Link>
               <button
                 onClick={handleLogout}
