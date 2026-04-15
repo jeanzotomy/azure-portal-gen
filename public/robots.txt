@@ -12,3 +12,10 @@ Allow: /
 
 User-agent: *
 Allow: /
+Disallow: /portal
+Disallow: /admin
+Disallow: /auth
+Disallow: /mfa
+Disallow: /reset-password
+
+Sitemap: https://azure-portal-gen.lovable.app/sitemap.xml
