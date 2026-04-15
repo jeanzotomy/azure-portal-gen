@@ -8,6 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Cloud, ArrowLeft, Mail, ShieldBan } from "lucide-react";
 import favicon from "@/assets/cloudmature-logo.png";
 import { useTranslation } from "@/i18n/LanguageContext";
+import { cn } from "@/lib/utils";
 
 export default function AuthPage() {
   const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
@@ -20,6 +21,8 @@ export default function AuthPage() {
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useTranslation();
+
+  const activeTab = mode === "forgot" ? "login" : mode;
 
   useEffect(() => {
     if (isBlocked) {
@@ -85,13 +88,45 @@ export default function AuthPage() {
         </Link>
 
         <div className="glass rounded-2xl p-8">
-          <div className="flex items-center gap-3 mb-8">
+          <div className="flex items-center gap-3 mb-6">
             <img src={favicon} alt="CloudMature" className="h-10 w-10" />
             <div>
               <h1 className="text-xl font-bold text-primary-foreground">{t("auth.portalTitle")}</h1>
               <p className="text-sm text-secondary-foreground/60">Cloud Mature</p>
             </div>
           </div>
+
+          {/* Tab switcher */}
+          {mode !== "forgot" && (
+            <div className="relative flex items-center bg-secondary/20 rounded-xl p-1 mb-6">
+              <div
+                className={cn(
+                  "absolute top-1 bottom-1 rounded-lg bg-primary transition-all duration-300 ease-in-out",
+                  activeTab === "login" ? "left-1 w-[calc(50%-4px)]" : "left-[calc(50%+2px)] w-[calc(50%-4px)]"
+                )}
+              />
+              <button
+                type="button"
+                onClick={() => setMode("login")}
+                className={cn(
+                  "relative z-10 flex-1 py-2.5 text-sm font-semibold rounded-lg transition-colors duration-200",
+                  activeTab === "login" ? "text-primary-foreground" : "text-secondary-foreground/60 hover:text-secondary-foreground"
+                )}
+              >
+                {t("auth.login")}
+              </button>
+              <button
+                type="button"
+                onClick={() => setMode("signup")}
+                className={cn(
+                  "relative z-10 flex-1 py-2.5 text-sm font-semibold rounded-lg transition-colors duration-200",
+                  activeTab === "signup" ? "text-primary-foreground" : "text-secondary-foreground/60 hover:text-secondary-foreground"
+                )}
+              >
+                {t("auth.signup")}
+              </button>
+            </div>
+          )}
 
           {isBlocked && (
             <div className="mb-4 flex items-center gap-3 rounded-xl bg-destructive/10 border border-destructive/30 p-4 text-sm text-destructive">
@@ -132,7 +167,7 @@ export default function AuthPage() {
             </>
           )}
 
-          {/* Email login / signup / forgot form */}
+          {/* Form */}
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === "signup" && (
               <Input placeholder={t("auth.fullName")} required value={fullName} onChange={(e) => setFullName(e.target.value)}
@@ -159,15 +194,11 @@ export default function AuthPage() {
             </button>
           )}
 
-          <p className="text-center text-sm text-secondary-foreground/60 mt-4">
-            {mode === "forgot" ? (
+          {mode === "forgot" && (
+            <p className="text-center text-sm text-secondary-foreground/60 mt-4">
               <button onClick={() => setMode("login")} className="text-primary hover:underline">{t("auth.backToLogin")}</button>
-            ) : mode === "login" ? (
-              <>{t("auth.noAccount")} <button onClick={() => setMode("signup")} className="text-primary hover:underline">{t("auth.signup")}</button></>
-            ) : (
-              <>{t("auth.hasAccount")} <button onClick={() => setMode("login")} className="text-primary hover:underline">{t("auth.login")}</button></>
-            )}
-          </p>
+            </p>
+          )}
         </div>
       </div>
     </div>
