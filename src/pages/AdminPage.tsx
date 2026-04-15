@@ -2097,6 +2097,13 @@ function AdminUsers() {
                 </p>
                   <div className="flex items-center gap-2">
                     <button
+                      onClick={() => openEditUser(p)}
+                      title="Modifier le profil"
+                      className="p-1.5 rounded-lg bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+                    >
+                      <Pencil size={16} />
+                    </button>
+                    <button
                       onClick={() => toggleBlock(p.user_id, !!p.blocked)}
                       title={p.blocked ? "Débloquer" : "Bloquer"}
                       className={`p-1.5 rounded-lg transition-colors ${p.blocked ? "bg-destructive/10 text-destructive hover:bg-destructive/20" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
