@@ -5,37 +5,32 @@ const missionIcons = [Target, Eye, Compass, Users, Lightbulb, ShieldCheck];
 
 export function AboutSection() {
   const { t } = useTranslation();
-  const about = t.about;
+  const missions: { title: string; desc: string }[] = t("about.missions");
 
   return (
     <section id="about" className="py-20 bg-background relative overflow-hidden">
-      {/* Decorative elements */}
       <div className="absolute top-0 left-0 w-72 h-72 bg-primary/5 rounded-full -translate-x-1/2 -translate-y-1/2" />
       <div className="absolute bottom-0 right-0 w-96 h-96 bg-accent/5 rounded-full translate-x-1/3 translate-y-1/3" />
 
       <div className="container mx-auto px-4 relative z-10">
-        {/* Badge */}
         <div className="flex justify-center mb-4">
           <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold tracking-wide">
-            {about.badge}
+            {t("about.badge")}
           </span>
         </div>
 
-        {/* Title */}
         <h2 className="text-3xl md:text-4xl font-bold text-center mb-4">
-          {about.title}{" "}
-          <span className="gradient-text">{about.titleHighlight}</span>
+          {t("about.title")}{" "}
+          <span className="gradient-text">{t("about.titleHighlight")}</span>
         </h2>
         <p className="text-muted-foreground text-center max-w-3xl mx-auto mb-6 text-lg leading-relaxed">
-          {about.description}
+          {t("about.description")}
         </p>
 
-        {/* Separator */}
         <div className="w-20 h-1 bg-primary/30 rounded-full mx-auto mb-12" />
 
-        {/* Mission cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
-          {about.missions.map((m: { title: string; desc: string }, i: number) => {
+          {missions.map((m, i) => {
             const Icon = missionIcons[i] || Target;
             return (
               <div

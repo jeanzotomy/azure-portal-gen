@@ -7,6 +7,20 @@ const en = {
     contact: "Contact",
     portal: "Client Portal",
   },
+  about: {
+    badge: "About Us",
+    title: "Who is",
+    titleHighlight: "Cloud Mature?",
+    description: "Cloud Mature is an IT consulting firm based in Conakry, specializing in Cloud transformation, DevOps and Artificial Intelligence. We guide businesses and institutions through their digital modernization journey with rigor, expertise and commitment.",
+    missions: [
+      { title: "Cloud Transformation", desc: "Design and execute tailored Cloud migration and adoption strategies aligned with your business objectives and compliance requirements." },
+      { title: "Operational Excellence", desc: "Optimize your IT processes through DevOps practices, automation and disciplined FinOps governance to maximize your return on investment." },
+      { title: "Responsible Innovation", desc: "Integrate Artificial Intelligence ethically and pragmatically into your operations to create lasting, measurable value." },
+      { title: "Tailored Partnership", desc: "Deliver a hands-on partnership with certified local teams that are available and committed to the success of every project." },
+      { title: "Security & Compliance", desc: "Ensure data protection and regulatory compliance according to international standards including ISO 27001, SOC 2 and GDPR." },
+      { title: "Skills Development", desc: "Train and coach your teams to ensure technological autonomy and the long-term success of your digital transformation." },
+    ],
+  },
   hero: {
     words: ["Innovate.", "Optimize.", "Automate."],
     badge: { consulting: "Consulting", cloud: "Cloud", devops: "DevOps", ai: "AI" },
