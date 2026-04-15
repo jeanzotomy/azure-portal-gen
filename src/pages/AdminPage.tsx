@@ -969,7 +969,9 @@ function AdminDashboard() {
                     <div className={`absolute inset-y-0 left-0 rounded-full transition-all duration-500 ${p.progress === 100 ? "bg-teal-500" : "bg-gradient-to-r from-primary to-accent"}`}
                       style={{ width: `${p.progress}%` }} />
                   </div>
-                  <span className="text-[11px] font-bold text-card-foreground w-8 text-right">{p.progress}%</span>
+                  <span className="text-[11px] font-bold text-card-foreground text-right whitespace-nowrap">
+                    {p.progress === 0 ? "Soumis" : p.progress === 33 ? "En analyse" : p.progress === 66 ? "En cours" : p.progress === 100 ? "Terminé" : `${p.progress}%`}
+                  </span>
                 </div>
               </div>
             ))}
