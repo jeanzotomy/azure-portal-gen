@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Menu, X, Globe, Smartphone } from "lucide-react";
 import logo from "@/assets/logo.png";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,8 @@ import { useTranslation } from "@/i18n/LanguageContext";
 export function Navbar() {
   const [open, setOpen] = useState(false);
   const { t, locale, setLocale } = useTranslation();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   const navLinks = [
     { label: t("nav.home"), href: "#hero" },
@@ -21,8 +23,12 @@ export function Navbar() {
 
   const scrollTo = (id: string) => {
     setOpen(false);
-    const el = document.querySelector(id);
-    el?.scrollIntoView({ behavior: "smooth" });
+    if (location.pathname !== "/") {
+      navigate("/" + id);
+    } else {
+      const el = document.querySelector(id);
+      el?.scrollIntoView({ behavior: "smooth" });
+    }
   };
 
   const toggleLang = () => setLocale(locale === "fr" ? "en" : "fr");
