@@ -7,6 +7,20 @@ const fr = {
     contact: "Contact",
     portal: "Portail Client",
   },
+  about: {
+    badge: "À propos",
+    title: "Qui sommes-nous,",
+    titleHighlight: "Cloud Mature?",
+    description: "Cloud Mature est un cabinet de conseil en technologies de l'information basé à Conakry, spécialisé dans la transformation Cloud, le DevOps et l'Intelligence Artificielle. Nous accompagnons les entreprises et institutions dans leur parcours de modernisation numérique avec rigueur, expertise et engagement.",
+    missions: [
+      { title: "Transformation Cloud", desc: "Concevoir et exécuter des stratégies de migration et d'adoption Cloud sur mesure, alignées sur vos objectifs métiers et vos exigences de conformité." },
+      { title: "Excellence opérationnelle", desc: "Optimiser vos processus IT grâce aux pratiques DevOps, à l'automatisation et à une gouvernance FinOps maîtrisée pour maximiser votre retour sur investissement." },
+      { title: "Innovation responsable", desc: "Intégrer l'Intelligence Artificielle de manière éthique et pragmatique dans vos opérations pour créer de la valeur durable et mesurable." },
+      { title: "Accompagnement sur mesure", desc: "Offrir un partenariat de proximité avec des équipes locales certifiées, disponibles et engagées dans la réussite de chaque projet." },
+      { title: "Sécurité & Conformité", desc: "Garantir la protection de vos données et la conformité réglementaire selon les standards internationaux ISO 27001, SOC 2 et RGPD." },
+      { title: "Renforcement des compétences", desc: "Former et coacher vos équipes pour assurer l'autonomie technologique et la pérennité de votre transformation numérique." },
+    ],
+  },
   hero: {
     words: ["Innover.", "Optimiser.", "Automatiser."],
     badge: { consulting: "Consultation", cloud: "Cloud", devops: "DevOps", ai: "IA" },
