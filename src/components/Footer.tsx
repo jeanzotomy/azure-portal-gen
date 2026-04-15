@@ -1,5 +1,6 @@
 import logo from "@/assets/logo.png";
 import { useTranslation } from "@/i18n/LanguageContext";
+import { Link } from "react-router-dom";
 
 export function Footer() {
   const { t } = useTranslation();
@@ -20,9 +21,20 @@ export function Footer() {
             <span className="text-secondary-foreground/40">·</span>
             <span className="gradient-text font-semibold">{t("hero.badge.ai")}</span>
           </div>
+        </div>
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 mt-8 pt-6 border-t border-secondary-foreground/10">
           <p className="text-sm text-secondary-foreground/60">
             {t("footer.copyright").replace("{year}", String(new Date().getFullYear()))}
           </p>
+          <div className="flex items-center gap-4">
+            <Link to="/privacy" className="text-sm text-secondary-foreground/60 hover:text-primary transition-colors">
+              {t("footer.privacy")}
+            </Link>
+            <span className="text-secondary-foreground/30">|</span>
+            <Link to="/terms" className="text-sm text-secondary-foreground/60 hover:text-primary transition-colors">
+              {t("footer.terms")}
+            </Link>
+          </div>
         </div>
       </div>
     </footer>
