@@ -1976,6 +1976,41 @@ function AdminUsers() {
     }
   };
 
+  const openEditUser = (p: any) => {
+    setEditForm({
+      full_name: p.full_name || "",
+      company: p.company || "",
+      phone: p.phone || "",
+      country: p.country || "",
+      city: p.city || "",
+      address_line: p.address_line || "",
+      timezone: p.timezone || "",
+    });
+    setEditingUser(p);
+  };
+
+  const handleSaveProfile = async () => {
+    if (!editingUser) return;
+    setEditSaving(true);
+    const { error } = await supabase.from("profiles").update({
+      full_name: editForm.full_name || null,
+      company: editForm.company || null,
+      phone: editForm.phone || null,
+      country: editForm.country || null,
+      city: editForm.city || null,
+      address_line: editForm.address_line || null,
+      timezone: editForm.timezone || null,
+    }).eq("user_id", editingUser.user_id);
+    if (error) {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Profil mis à jour", description: `Le profil de "${editForm.full_name || "l'utilisateur"}" a été modifié.` });
+      setEditingUser(null);
+      load();
+    }
+    setEditSaving(false);
+  };
+
   const getRoleBadge = (roles: string[]) => {
     if (roles.includes("admin")) return { label: "Admin", color: "bg-primary/10 text-primary border-primary/20" };
     if (roles.includes("gestionnaire")) return { label: "Gestionnaire", color: "bg-blue-500/10 text-blue-500 border-blue-500/20" };
