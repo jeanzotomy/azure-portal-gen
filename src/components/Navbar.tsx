@@ -42,7 +42,8 @@ export function Navbar() {
     navigate("/");
   };
 
-  const displayName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "";
+  const fullName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "";
+  const firstName = fullName.split(" ")[0];
 
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 glass">
