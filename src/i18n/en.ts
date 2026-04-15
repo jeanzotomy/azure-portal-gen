@@ -1,6 +1,7 @@
 const en = {
   nav: {
     home: "Home",
+    about: "About",
     services: "Services",
     industries: "Industries",
     whyUs: "Why Us",
