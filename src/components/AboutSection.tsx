@@ -1,7 +1,7 @@
 import { useTranslation } from "@/i18n/LanguageContext";
-import { Target, Eye, Compass, Users, Lightbulb, ShieldCheck } from "lucide-react";
+import { Cloud, Cog, BrainCircuit, Users, ShieldCheck, GraduationCap } from "lucide-react";
 
-const missionIcons = [Target, Eye, Compass, Users, Lightbulb, ShieldCheck];
+const missionIcons = [Cloud, Cog, BrainCircuit, Users, ShieldCheck, GraduationCap];
 
 export function AboutSection() {
   const { t } = useTranslation();
