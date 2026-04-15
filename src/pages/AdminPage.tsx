@@ -2087,6 +2087,7 @@ function AdminUsers() {
                     <span className={`text-[11px] px-2 py-0.5 rounded-full font-semibold border ${badge.color}`}>{badge.label}</span>
                   </div>
                   <div className="flex flex-wrap gap-x-3 gap-y-0.5">
+                    {mfaStatus[p.user_id]?.email && <span className="text-xs text-muted-foreground">✉️ {mfaStatus[p.user_id].email}</span>}
                     {p.company && <span className="text-xs text-muted-foreground">🏢 {p.company}</span>}
                     {p.phone && <span className="text-xs text-muted-foreground">📱 {p.phone}</span>}
                   </div>
