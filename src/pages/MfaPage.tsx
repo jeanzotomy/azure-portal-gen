@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, ShieldCheck, Smartphone, Loader2, Phone } from "lucide-react";
 import favicon from "@/assets/cloudmature-logo.png";
 import { useTranslation } from "@/i18n/LanguageContext";
-import { markSmsMfaVerified } from "@/hooks/use-mfa";
+import { markSmsMfaVerified, markMfaVerified } from "@/hooks/use-mfa";
 
 type MfaMethod = "totp" | "sms";
 
