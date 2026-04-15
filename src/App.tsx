@@ -10,6 +10,8 @@ import ResetPasswordPage from "./pages/ResetPasswordPage.tsx";
 import AdminPage from "./pages/AdminPage.tsx";
 import MfaPage from "./pages/MfaPage.tsx";
 import InstallPage from "./pages/InstallPage.tsx";
+import PrivacyPage from "./pages/PrivacyPage.tsx";
+import TermsPage from "./pages/TermsPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const queryClient = new QueryClient();
@@ -28,6 +30,8 @@ const App = () => (
           <Route path="/mfa" element={<MfaPage />} />
           <Route path="/install" element={<InstallPage />} />
           <Route path="/admin" element={<AdminPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/terms" element={<TermsPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
