@@ -525,15 +525,6 @@ function ProjectsTab({ user }: { user: SupaUser }) {
     "IA & Automatisation Intelligente",
     "Autres",
   ];
-    "Gouvernance & Sécurité",
-    "Architecture & Ingénierie",
-    "Migration Cloud",
-    "Formation & Coaching",
-    "Infogérance & Support",
-    "Adoption & Maturité IA",
-    "Développement Web / Applicatif",
-    "Autres",
-  ];
 
   const toggleService = (service: string) => {
     setSelectedServices(prev =>
