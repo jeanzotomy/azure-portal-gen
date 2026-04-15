@@ -2,23 +2,27 @@ import { useEffect, useState, useRef } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthSession } from "@/hooks/use-auth-session";
 
+const MFA_VERIFIED_KEY = "mfa_verified";
 const SMS_MFA_KEY = "sms_mfa_verified";
 const mfaStatusCache = new Map<string, boolean>();
 const MFA_CHECK_TIMEOUT_MS = 6000;
 
+/** Mark MFA as verified for any method (persists in sessionStorage + memory) */
+export function markMfaVerified(userId: string) {
+  mfaStatusCache.set(userId, true);
+  sessionStorage.setItem(MFA_VERIFIED_KEY, "true");
+}
+
 /** Mark SMS/custom MFA as verified for the current session */
 export function markSmsMfaVerified() {
   sessionStorage.setItem(SMS_MFA_KEY, "true");
+  sessionStorage.setItem(MFA_VERIFIED_KEY, "true");
 }
 
-/** Mark MFA as verified in memory cache (call after successful TOTP verify) */
-export function markMfaVerified(userId: string) {
-  mfaStatusCache.set(userId, true);
-}
-
-/** Clear SMS MFA flag (call on logout) */
+/** Clear all MFA flags (call on logout) */
 export function clearSmsMfaVerified() {
   sessionStorage.removeItem(SMS_MFA_KEY);
+  sessionStorage.removeItem(MFA_VERIFIED_KEY);
   mfaStatusCache.clear();
 }
 
@@ -30,23 +34,27 @@ export function useMfaCheck() {
     if (!ready) return null;
     if (!userId) return false;
     if (mfaStatusCache.has(userId)) return mfaStatusCache.get(userId) ?? false;
-    if (sessionStorage.getItem(SMS_MFA_KEY) === "true") {
+    // Fast path: sessionStorage flag from any previous MFA verification
+    if (sessionStorage.getItem(MFA_VERIFIED_KEY) === "true") {
       mfaStatusCache.set(userId, true);
       return true;
     }
     return null;
   });
 
+  const [timedOut, setTimedOut] = useState(false);
   const resolvedRef = useRef(false);
 
   useEffect(() => {
     let active = true;
     resolvedRef.current = false;
+    setTimedOut(false);
 
     const resolve = (value: boolean) => {
       if (!active || resolvedRef.current) return;
       resolvedRef.current = true;
       if (userId) mfaStatusCache.set(userId, value);
+      if (value) sessionStorage.setItem(MFA_VERIFIED_KEY, "true");
       setMfaVerified(value);
     };
 
@@ -66,14 +74,16 @@ export function useMfaCheck() {
       return () => { active = false; };
     }
 
-    if (sessionStorage.getItem(SMS_MFA_KEY) === "true") {
+    if (sessionStorage.getItem(MFA_VERIFIED_KEY) === "true") {
       resolve(true);
       return () => { active = false; };
     }
 
     // Timeout fallback
     const timer = setTimeout(() => {
+      if (!active || resolvedRef.current) return;
       console.warn("MFA check timed out, defaulting to unverified");
+      setTimedOut(true);
       resolve(false);
     }, MFA_CHECK_TIMEOUT_MS);
 
@@ -125,5 +135,5 @@ export function useMfaCheck() {
     };
   }, [ready, userId]);
 
-  return mfaVerified;
+  return { mfaVerified, timedOut };
 }
