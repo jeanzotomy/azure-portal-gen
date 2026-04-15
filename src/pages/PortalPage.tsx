@@ -115,7 +115,12 @@ function PortalContent() {
     void checkProfile();
   }, [user]);
 
-  if (!ready || mfaVerified === null) return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground">{t("portal.loading")}</div>;
+  if (!ready || mfaVerified === null) return (
+    <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
+      <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
+      <p className="text-muted-foreground text-sm">{t("portal.loading")}</p>
+    </div>
+  );
   if (!user) return null;
 
   const handleLogout = async () => {
