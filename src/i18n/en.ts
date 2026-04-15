@@ -110,7 +110,7 @@ const en = {
     title: "Privacy Policy",
     lastUpdated: "Last updated: April 2026",
     sections: [
-      { title: "1. Introduction", content: "Cloud Mature ("we", "our") is committed to protecting the privacy of users of its services and website. This policy describes the data we collect, how we use it and the measures we take to protect it." },
+      { title: "1. Introduction", content: "Cloud Mature ('we', 'our') is committed to protecting the privacy of users of its services and website. This policy describes the data we collect, how we use it and the measures we take to protect it." },
       { title: "2. Data Collected", content: "We collect information you provide directly: name, email address, phone number, company name, and any information submitted through our contact forms or client portal.\n\nWe also automatically collect technical data: IP address, browser type, pages visited and visit duration." },
       { title: "3. Use of Data", content: "Your data is used to:\n• Provide and improve our Cloud, DevOps and AI services\n• Manage your client portal account\n• Communicate with you regarding your projects and support requests\n• Ensure the security of our systems\n• Comply with our legal obligations" },
       { title: "4. Data Sharing", content: "We never sell your personal data. We may share it with:\n• Our technical subcontractors (Cloud hosting, email delivery) strictly within the scope of service provision\n• Competent authorities when legally required\n\nAll our partners are bound by confidentiality obligations." },
@@ -125,7 +125,7 @@ const en = {
     title: "Terms of Use",
     lastUpdated: "Last updated: April 2026",
     sections: [
-      { title: "1. Purpose", content: "These terms of use ("Terms") govern access to and use of the Cloud Mature website and client portal. Cloud Mature is an information technology company specializing in Cloud, DevOps and Artificial Intelligence." },
+      { title: "1. Purpose", content: "These terms of use ('Terms') govern access to and use of the Cloud Mature website and client portal. Cloud Mature is an information technology company specializing in Cloud, DevOps and Artificial Intelligence." },
       { title: "2. Acceptance", content: "By accessing our services or creating an account on the client portal, you unconditionally accept these Terms. If you do not accept these conditions, please do not use our services." },
       { title: "3. Description of Services", content: "Cloud Mature provides multi-cloud consulting, architecture and engineering services (Microsoft Azure, AWS, Google Cloud), including:\n• Cloud licenses and subscriptions (Microsoft 365, Azure, AWS, Google Workspace)\n• Equipment for hybrid and private infrastructures\n• Security and compliance solutions\n• Managed services and technical support\n• Artificial Intelligence integration" },
       { title: "4. User Account", content: "Access to the client portal requires account creation. You are responsible for the confidentiality of your credentials and all activity under your account. Multi-factor authentication (MFA) is mandatory for all users." },
