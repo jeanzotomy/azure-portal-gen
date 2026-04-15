@@ -1,10 +1,10 @@
-import { Cloud, DollarSign, Shield, Server, ArrowUpRight, GraduationCap, Headphones, BrainCircuit } from "lucide-react";
+import { Monitor, KeyRound, Server, Blocks, ArrowUpRight, ShieldCheck, Headphones, BrainCircuit } from "lucide-react";
 import servicesImage from "@/assets/two-business-woman-cafe-2.jpg";
 import { useTranslation } from "@/i18n/LanguageContext";
 
-const icons = [Cloud, DollarSign, Shield, Server, ArrowUpRight, GraduationCap, Headphones, BrainCircuit];
+const icons = [Monitor, KeyRound, Server, Blocks, ArrowUpRight, ShieldCheck, Headphones, BrainCircuit];
 
-function ServiceCard({ s }: { s: { title: string; desc: string; icon: typeof Cloud } }) {
+function ServiceCard({ s }: { s: { title: string; desc: string; icon: typeof Monitor } }) {
   return (
     <div className="group relative bg-card rounded-2xl p-7 shadow-card hover:shadow-card-hover transition-all duration-500 hover:-translate-y-2 border border-border hover:border-primary/30 overflow-hidden">
       <div className="absolute inset-0 bg-gradient-to-br from-primary/0 via-transparent to-accent/0 group-hover:from-primary/5 group-hover:to-accent/5 transition-all duration-500 rounded-2xl" />
