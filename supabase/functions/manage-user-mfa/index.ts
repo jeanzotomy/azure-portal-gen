@@ -64,12 +64,20 @@ Deno.serve(async (req) => {
       const { data: profile } = await adminClient.from("profiles").select("phone").eq("user_id", user_id).maybeSingle();
       const hasPhone = !!(profile?.phone);
 
+      // Get user email from auth
+      let email: string | null = null;
+      try {
+        const { data: authUser } = await adminClient.auth.admin.getUserById(user_id);
+        email = authUser?.user?.email || null;
+      } catch { /* ignore */ }
+
       return new Response(JSON.stringify({
         enrolled: verifiedFactors.length > 0,
         factors: verifiedFactors,
         all_factors: factors,
         has_phone: hasPhone,
         phone: profile?.phone || null,
+        email,
       }), {
         status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
