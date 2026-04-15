@@ -70,9 +70,12 @@ export default function MfaPage() {
       if (challengeError) throw challengeError;
       const { error: verifyError } = await supabase.auth.mfa.verify({ factorId, challengeId: challenge.id, code: otp });
       if (verifyError) throw verifyError;
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      if (currentUser) {
+        markMfaVerified(currentUser.id);
+      }
       toast({ title: t("mfa.success"), description: t("mfa.successDesc") });
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) { await redirectByRole(user.id); } else { navigate("/portal"); }
+      if (currentUser) { await redirectByRole(currentUser.id); } else { navigate("/portal"); }
     } catch (err: any) {
       toast({ title: t("mfa.invalidCode"), description: err.message, variant: "destructive" }); setOtp("");
     } finally { setLoading(false); }
