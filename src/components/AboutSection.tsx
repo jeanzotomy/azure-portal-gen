@@ -31,7 +31,7 @@ export function AboutSection() {
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {missions.map((m, i) => {
-            const Icon = missionIcons[i] || Target;
+            const Icon = missionIcons[i] || Cloud;
             return (
               <div
                 key={i}
