@@ -1291,48 +1291,66 @@ function ProfileTab({ user }: { user: SupaUser }) {
         </div>
       </div>
 
-      <form onSubmit={handleSave} className="bg-card rounded-xl p-6 shadow-card border border-border/50 max-w-lg space-y-4">
+      <form onSubmit={handleSave} className="bg-card rounded-xl p-6 shadow-card border border-border/50 space-y-6">
         <h3 className="font-semibold text-card-foreground mb-2">Modifier mes informations</h3>
-        <div>
-          <label className="text-sm font-medium text-card-foreground">Email</label>
-          <Input value={user.email || ""} disabled className="mt-1 bg-muted" />
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Colonne 1 : Informations personnelles */}
+          <div className="space-y-4">
+            <h4 className="text-sm font-semibold text-primary flex items-center gap-1.5"><User size={14} /> Informations personnelles</h4>
+            <div>
+              <label className="text-sm font-medium text-card-foreground">Email</label>
+              <Input value={user.email || ""} disabled className="mt-1 bg-muted" />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-card-foreground">Nom complet</label>
+              <Input value={profile.full_name} onChange={(e) => setProfile({ ...profile, full_name: e.target.value })} className="mt-1" />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-card-foreground">Téléphone</label>
+              <Input value={profile.phone} onChange={(e) => setProfile({ ...profile, phone: e.target.value })} className="mt-1" />
+            </div>
+          </div>
+
+          {/* Colonne 2 : Adresse */}
+          <div className="space-y-4">
+            <h4 className="text-sm font-semibold text-primary flex items-center gap-1.5"><Flag size={14} /> Adresse</h4>
+            <div>
+              <label className="text-sm font-medium text-card-foreground">Entreprise</label>
+              <Input value={profile.company} onChange={(e) => setProfile({ ...profile, company: e.target.value })} className="mt-1" />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-card-foreground">Localisation</label>
+              <Input value={profile.location} onChange={(e) => setProfile({ ...profile, location: e.target.value })} placeholder="Ex: Montréal, QC" className="mt-1" />
+            </div>
+          </div>
+
+          {/* Colonne 3 : Localisation */}
+          <div className="space-y-4">
+            <h4 className="text-sm font-semibold text-primary flex items-center gap-1.5"><Clock size={14} /> Localisation</h4>
+            <div>
+              <label className="text-sm font-medium text-card-foreground">Fuseau horaire</label>
+              <select
+                value={profile.timezone}
+                onChange={(e) => setProfile({ ...profile, timezone: e.target.value })}
+                className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                <option value="">Sélectionner un fuseau horaire</option>
+                <option value="America/Toronto">Eastern (Toronto)</option>
+                <option value="America/Montreal">Eastern (Montréal)</option>
+                <option value="America/Winnipeg">Central (Winnipeg)</option>
+                <option value="America/Edmonton">Mountain (Edmonton)</option>
+                <option value="America/Vancouver">Pacific (Vancouver)</option>
+                <option value="Europe/Paris">Europe (Paris)</option>
+                <option value="Europe/London">Europe (Londres)</option>
+                <option value="Africa/Casablanca">Afrique (Casablanca)</option>
+                <option value="Africa/Conakry">Afrique (Conakry)</option>
+                <option value="Asia/Dubai">Asie (Dubaï)</option>
+                <option value="UTC">UTC</option>
+              </select>
+            </div>
+          </div>
         </div>
-        <div>
-          <label className="text-sm font-medium text-card-foreground">Nom complet</label>
-          <Input value={profile.full_name} onChange={(e) => setProfile({ ...profile, full_name: e.target.value })} className="mt-1" />
-        </div>
-        <div>
-          <label className="text-sm font-medium text-card-foreground">Entreprise</label>
-          <Input value={profile.company} onChange={(e) => setProfile({ ...profile, company: e.target.value })} className="mt-1" />
-        </div>
-        <div>
-          <label className="text-sm font-medium text-card-foreground">Téléphone</label>
-          <Input value={profile.phone} onChange={(e) => setProfile({ ...profile, phone: e.target.value })} className="mt-1" />
-        </div>
-        <div>
-          <label className="text-sm font-medium text-card-foreground">Localisation</label>
-          <Input value={profile.location} onChange={(e) => setProfile({ ...profile, location: e.target.value })} placeholder="Ex: Montréal, QC" className="mt-1" />
-        </div>
-        <div>
-          <label className="text-sm font-medium text-card-foreground">Fuseau horaire</label>
-          <select
-            value={profile.timezone}
-            onChange={(e) => setProfile({ ...profile, timezone: e.target.value })}
-            className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          >
-            <option value="">Sélectionner un fuseau horaire</option>
-            <option value="America/Toronto">Eastern (Toronto)</option>
-            <option value="America/Montreal">Eastern (Montréal)</option>
-            <option value="America/Winnipeg">Central (Winnipeg)</option>
-            <option value="America/Edmonton">Mountain (Edmonton)</option>
-            <option value="America/Vancouver">Pacific (Vancouver)</option>
-            <option value="Europe/Paris">Europe (Paris)</option>
-            <option value="Europe/London">Europe (Londres)</option>
-            <option value="Africa/Casablanca">Afrique (Casablanca)</option>
-            <option value="Asia/Dubai">Asie (Dubaï)</option>
-            <option value="UTC">UTC</option>
-          </select>
-        </div>
+
         <Button type="submit" className="gradient-primary text-primary-foreground border-0" disabled={saving}>
           {saving ? "Sauvegarde..." : "Sauvegarder"}
         </Button>
