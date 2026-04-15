@@ -2258,6 +2258,121 @@ function AdminUsers() {
         </div>
       )}
 
+      {/* Edit User Profile Dialog */}
+      <Dialog open={!!editingUser} onOpenChange={(open) => { if (!open) setEditingUser(null); }}>
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Pencil size={18} /> Modifier le profil — {editForm.full_name || "Utilisateur"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label className="text-sm font-medium text-foreground">Nom complet</label>
+              <Input value={editForm.full_name} onChange={(e) => setEditForm({ ...editForm, full_name: e.target.value })} className="mt-1" />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-foreground">Entreprise</label>
+              <Input value={editForm.company} onChange={(e) => setEditForm({ ...editForm, company: e.target.value })} className="mt-1" />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-foreground">Téléphone</label>
+              <Input value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} className="mt-1" />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-foreground">Pays</label>
+              <select
+                value={editForm.country}
+                onChange={(e) => setEditForm({ ...editForm, country: e.target.value })}
+                className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                <option value="">Sélectionner un pays</option>
+                <option value="GN">🇬🇳 Guinée</option>
+                <optgroup label="Afrique">
+                  <option value="DZ">Algérie</option><option value="AO">Angola</option><option value="BJ">Bénin</option><option value="BW">Botswana</option>
+                  <option value="BF">Burkina Faso</option><option value="BI">Burundi</option><option value="CM">Cameroun</option><option value="CV">Cap-Vert</option>
+                  <option value="CF">Centrafrique</option><option value="TD">Tchad</option><option value="KM">Comores</option><option value="CG">Congo</option>
+                  <option value="CD">RD Congo</option><option value="CI">Côte d'Ivoire</option><option value="DJ">Djibouti</option><option value="EG">Égypte</option>
+                  <option value="GQ">Guinée équatoriale</option><option value="ER">Érythrée</option><option value="SZ">Eswatini</option><option value="ET">Éthiopie</option>
+                  <option value="GA">Gabon</option><option value="GM">Gambie</option><option value="GH">Ghana</option><option value="GW">Guinée-Bissau</option>
+                  <option value="KE">Kenya</option><option value="LS">Lesotho</option><option value="LR">Liberia</option><option value="LY">Libye</option>
+                  <option value="MG">Madagascar</option><option value="MW">Malawi</option><option value="ML">Mali</option><option value="MR">Mauritanie</option>
+                  <option value="MU">Maurice</option><option value="MA">Maroc</option><option value="MZ">Mozambique</option><option value="NA">Namibie</option>
+                  <option value="NE">Niger</option><option value="NG">Nigeria</option><option value="RW">Rwanda</option><option value="ST">São Tomé-et-Príncipe</option>
+                  <option value="SN">Sénégal</option><option value="SC">Seychelles</option><option value="SL">Sierra Leone</option><option value="SO">Somalie</option>
+                  <option value="ZA">Afrique du Sud</option><option value="SS">Soudan du Sud</option><option value="SD">Soudan</option><option value="TZ">Tanzanie</option>
+                  <option value="TG">Togo</option><option value="TN">Tunisie</option><option value="UG">Ouganda</option><option value="ZM">Zambie</option><option value="ZW">Zimbabwe</option>
+                </optgroup>
+                <optgroup label="Europe">
+                  <option value="AL">Albanie</option><option value="DE">Allemagne</option><option value="AT">Autriche</option><option value="BE">Belgique</option>
+                  <option value="BA">Bosnie-Herzégovine</option><option value="BG">Bulgarie</option><option value="HR">Croatie</option><option value="DK">Danemark</option>
+                  <option value="ES">Espagne</option><option value="EE">Estonie</option><option value="FI">Finlande</option><option value="FR">France</option>
+                  <option value="GR">Grèce</option><option value="HU">Hongrie</option><option value="IE">Irlande</option><option value="IS">Islande</option>
+                  <option value="IT">Italie</option><option value="LV">Lettonie</option><option value="LT">Lituanie</option><option value="LU">Luxembourg</option>
+                  <option value="MK">Macédoine du Nord</option><option value="MT">Malte</option><option value="MD">Moldavie</option><option value="ME">Monténégro</option>
+                  <option value="NO">Norvège</option><option value="NL">Pays-Bas</option><option value="PL">Pologne</option><option value="PT">Portugal</option>
+                  <option value="CZ">République tchèque</option><option value="RO">Roumanie</option><option value="GB">Royaume-Uni</option><option value="RS">Serbie</option>
+                  <option value="SK">Slovaquie</option><option value="SI">Slovénie</option><option value="SE">Suède</option><option value="CH">Suisse</option><option value="UA">Ukraine</option>
+                </optgroup>
+                <optgroup label="Amérique">
+                  <option value="AR">Argentine</option><option value="BR">Brésil</option><option value="CA">Canada</option><option value="CL">Chili</option>
+                  <option value="CO">Colombie</option><option value="CR">Costa Rica</option><option value="CU">Cuba</option><option value="DO">République dominicaine</option>
+                  <option value="EC">Équateur</option><option value="US">États-Unis</option><option value="GT">Guatemala</option><option value="HT">Haïti</option>
+                  <option value="HN">Honduras</option><option value="JM">Jamaïque</option><option value="MX">Mexique</option><option value="PA">Panama</option>
+                  <option value="PY">Paraguay</option><option value="PE">Pérou</option><option value="TT">Trinité-et-Tobago</option><option value="UY">Uruguay</option><option value="VE">Venezuela</option>
+                </optgroup>
+                <optgroup label="Asie">
+                  <option value="SA">Arabie saoudite</option><option value="CN">Chine</option><option value="KR">Corée du Sud</option><option value="AE">Émirats arabes unis</option>
+                  <option value="IN">Inde</option><option value="ID">Indonésie</option><option value="IQ">Irak</option><option value="IL">Israël</option>
+                  <option value="JP">Japon</option><option value="JO">Jordanie</option><option value="KW">Koweït</option><option value="LB">Liban</option>
+                  <option value="MY">Malaisie</option><option value="PK">Pakistan</option><option value="PH">Philippines</option><option value="QA">Qatar</option>
+                  <option value="SG">Singapour</option><option value="TH">Thaïlande</option><option value="TR">Turquie</option><option value="VN">Vietnam</option>
+                </optgroup>
+                <optgroup label="Océanie">
+                  <option value="AU">Australie</option><option value="NZ">Nouvelle-Zélande</option>
+                </optgroup>
+              </select>
+            </div>
+            <div>
+              <label className="text-sm font-medium text-foreground">Ville</label>
+              <Input value={editForm.city} onChange={(e) => setEditForm({ ...editForm, city: e.target.value })} placeholder="Ex: Conakry" className="mt-1" />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-foreground">Adresse postale</label>
+              <Input value={editForm.address_line} onChange={(e) => setEditForm({ ...editForm, address_line: e.target.value })} placeholder="Ex: Quartier Almamya" className="mt-1" />
+            </div>
+            <div className="md:col-span-2">
+              <label className="text-sm font-medium text-foreground">Fuseau horaire</label>
+              <select
+                value={editForm.timezone}
+                onChange={(e) => setEditForm({ ...editForm, timezone: e.target.value })}
+                className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+              >
+                <option value="">Sélectionner un fuseau horaire</option>
+                <option value="America/Toronto">Eastern (Toronto)</option>
+                <option value="America/Montreal">Eastern (Montréal)</option>
+                <option value="America/Winnipeg">Central (Winnipeg)</option>
+                <option value="America/Edmonton">Mountain (Edmonton)</option>
+                <option value="America/Vancouver">Pacific (Vancouver)</option>
+                <option value="Europe/Paris">Europe (Paris)</option>
+                <option value="Europe/London">Europe (Londres)</option>
+                <option value="Africa/Casablanca">Afrique (Casablanca)</option>
+                <option value="Africa/Conakry">Afrique (Conakry)</option>
+                <option value="Asia/Dubai">Asie (Dubaï)</option>
+                <option value="UTC">UTC</option>
+              </select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditingUser(null)}>Annuler</Button>
+            <Button onClick={handleSaveProfile} disabled={editSaving} className="gap-1.5">
+              {editSaving ? <RefreshCw size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
+              {editSaving ? "Sauvegarde..." : "Sauvegarder"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
       {/* Invite Users Dialog */}
       <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
         <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
