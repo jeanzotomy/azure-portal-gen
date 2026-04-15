@@ -7,7 +7,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, ShieldCheck, Smartphone, Loader2, Phone } from "lucide-react";
 import favicon from "@/assets/cloudmature-logo.png";
 import { useTranslation } from "@/i18n/LanguageContext";
-import { markSmsMfaVerified } from "@/hooks/use-mfa";
+import { markSmsMfaVerified, markMfaVerified } from "@/hooks/use-mfa";
 
 type MfaMethod = "totp" | "sms";
 
@@ -70,9 +70,12 @@ export default function MfaPage() {
       if (challengeError) throw challengeError;
       const { error: verifyError } = await supabase.auth.mfa.verify({ factorId, challengeId: challenge.id, code: otp });
       if (verifyError) throw verifyError;
+      const { data: { user: currentUser } } = await supabase.auth.getUser();
+      if (currentUser) {
+        markMfaVerified(currentUser.id);
+      }
       toast({ title: t("mfa.success"), description: t("mfa.successDesc") });
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) { await redirectByRole(user.id); } else { navigate("/portal"); }
+      if (currentUser) { await redirectByRole(currentUser.id); } else { navigate("/portal"); }
     } catch (err: any) {
       toast({ title: t("mfa.invalidCode"), description: err.message, variant: "destructive" }); setOtp("");
     } finally { setLoading(false); }
@@ -113,8 +116,14 @@ export default function MfaPage() {
       }
       if (res.data?.success) {
         markSmsMfaVerified();
+        const { data: { user: smsUser } } = await supabase.auth.getUser();
+        if (smsUser) markMfaVerified(smsUser.id);
         toast({ title: t("mfa.success"), description: t("mfa.successDesc") });
-        navigate(res.data.redirectTo || "/portal");
+        if (smsUser) {
+          await redirectByRole(smsUser.id);
+        } else {
+          navigate(res.data.redirectTo || "/portal");
+        }
       }
     } catch (err: any) {
       toast({ title: t("mfa.invalidCode"), description: err.message, variant: "destructive" }); setOtp("");
