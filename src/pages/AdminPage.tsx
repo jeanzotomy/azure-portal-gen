@@ -1337,9 +1337,26 @@ function AdminProjectsInner({ readOnly = false, assignedCount }: { readOnly?: bo
               </div>
             </div>
             <div>
-              <label className="text-sm font-medium text-card-foreground">Progression : {editProgress}%</label>
-              <input type="range" min="0" max="100" value={editProgress} onChange={(e) => setEditProgress(Number(e.target.value))}
-                className="w-full mt-1 accent-[hsl(var(--primary))]" />
+              <label className="text-sm font-medium text-card-foreground">Progression</label>
+              <div className="flex gap-2 mt-2">
+                {[
+                  { value: 0, label: "Soumis", icon: "📋" },
+                  { value: 33, label: "En analyse", icon: "🔍" },
+                  { value: 66, label: "En cours", icon: "⚙️" },
+                  { value: 100, label: "Terminé", icon: "✅" },
+                ].map((step) => (
+                  <button key={step.value} onClick={() => setEditProgress(step.value)}
+                    className={`flex-1 flex flex-col items-center gap-1 px-2 py-2.5 rounded-xl border-2 transition-all text-center ${
+                      editProgress === step.value
+                        ? "bg-primary/10 border-primary text-primary font-semibold"
+                        : "bg-card border-border text-muted-foreground hover:border-primary/40"
+                    }`}
+                  >
+                    <span className="text-lg">{step.icon}</span>
+                    <span className="text-[11px] leading-tight">{step.label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
             <div>
               <label className="text-sm font-medium text-card-foreground">Services</label>
