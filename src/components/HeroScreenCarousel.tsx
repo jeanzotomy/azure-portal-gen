@@ -1,6 +1,23 @@
+import { useRef, useState } from "react";
+import { Volume2, VolumeX } from "lucide-react";
+
 const YOUTUBE_VIDEO_ID = "DSVNKPM68-E";
 
 export function HeroScreenCarousel() {
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+  const [muted, setMuted] = useState(true);
+
+  const toggleSound = () => {
+    const iframe = iframeRef.current;
+    if (!iframe?.contentWindow) return;
+    const command = muted ? "unMute" : "mute";
+    iframe.contentWindow.postMessage(
+      JSON.stringify({ event: "command", func: command, args: [] }),
+      "*"
+    );
+    setMuted(!muted);
+  };
+
   return (
     <div className="relative mx-auto max-w-5xl animate-fade-up delay-500">
       {/* Glow behind monitor */}
@@ -20,12 +37,22 @@ export function HeroScreenCarousel() {
         {/* Screen area */}
         <div className="relative bg-secondary overflow-hidden aspect-[16/9] rounded-b-lg border-x-4 border-b-4 border-secondary">
           <iframe
-            src={`https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}?autoplay=1&mute=1&loop=1&playlist=${YOUTUBE_VIDEO_ID}&controls=0&modestbranding=1&rel=0&playsinline=1`}
+            ref={iframeRef}
+            src={`https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}?autoplay=1&mute=1&loop=1&playlist=${YOUTUBE_VIDEO_ID}&controls=0&modestbranding=1&rel=0&playsinline=1&enablejsapi=1`}
             title="CloudMature Présentation"
             allow="autoplay; encrypted-media; picture-in-picture"
             allowFullScreen
             className="absolute inset-0 w-full h-full border-0"
           />
+
+          {/* Sound toggle button */}
+          <button
+            onClick={toggleSound}
+            aria-label={muted ? "Activer le son" : "Couper le son"}
+            className="absolute bottom-4 right-4 z-10 bg-secondary/80 backdrop-blur-sm hover:bg-primary/90 text-primary-foreground p-2.5 rounded-full border border-primary/30 transition-all duration-300 hover:scale-110"
+          >
+            {muted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+          </button>
         </div>
 
         {/* Monitor stand */}
