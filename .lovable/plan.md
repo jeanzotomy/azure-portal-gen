@@ -1,38 +1,22 @@
 
+Remplacer le carrousel d'images par la vidéo jointe.
 
-# Plan : Convertir l'app en PWA (Application Web Installable)
+## Plan
 
-## Ce que ça va faire
+1. **Sauvegarder la vidéo** dans `src/assets/hero-video.mp4` (depuis l'upload utilisateur).
+2. **Refactoriser `src/components/HeroScreenCarousel.tsx`**:
+   - Supprimer toutes les images et l'array `slides`.
+   - Supprimer la logique d'auto-rotation (`useState`, `useEffect`, `setInterval`).
+   - Supprimer les indicateurs (dots) et le label de slide.
+   - Garder le cadre "moniteur" (bezel haut avec les 3 points rouge/jaune/vert, support, ombres/glow) pour conserver l'esthétique actuelle.
+   - Remplacer la zone d'écran par une balise `<video>` HTML standard avec : `autoPlay`, `muted`, `loop`, `playsInline`, `controls={false}`, et `className="w-full h-full object-cover"` pour remplir l'écran 16:9.
+3. **Conserver** : ratio 16/9, bordures, glow, animation `animate-fade-up`, et le composant reste utilisé tel quel dans `src/pages/Index.tsx` (aucun changement requis là).
 
-Vos utilisateurs pourront **installer l'app directement depuis leur navigateur** sur leur téléphone (iPhone ou Android), comme une vraie application. Elle apparaîtra sur l'écran d'accueil avec votre logo CloudMature. Pas besoin de passer par l'App Store ou le Play Store.
+## Note technique
+- Utiliser la balise HTML `<video>` native (pas besoin de librairie).
+- Garder l'image `dashboard-presentation.png` comme `poster` pour l'affichage avant chargement.
+- Le nom du composant `HeroScreenCarousel` reste inchangé pour éviter les ruptures d'imports.
 
----
-
-## Étapes techniques
-
-### 1. Créer le fichier `public/manifest.json`
-Fichier de configuration PWA qui décrit l'application (nom, couleurs, icônes, mode d'affichage plein écran).
-
-### 2. Générer les icônes PWA
-Créer les icônes aux tailles requises (192x192, 512x512) à partir du `favicon.png` existant et les placer dans `public/`.
-
-### 3. Mettre à jour `index.html`
-Ajouter les balises meta nécessaires pour mobile :
-- Lien vers le manifest
-- `apple-mobile-web-app-capable` et `apple-mobile-web-app-status-bar-style` pour iOS
-- `theme-color` pour la barre de navigation mobile
-
-### 4. Créer une page `/install`
-Page dédiée avec un bouton d'installation et des instructions visuelles pour guider les utilisateurs (sur iOS : Partager → Ajouter à l'écran d'accueil, sur Android : menu du navigateur).
-
-### 5. Ajouter un lien d'installation dans le Navbar
-Bouton discret "Installer l'app" visible uniquement sur mobile.
-
----
-
-## Pas de service worker
-Cette approche n'utilise **pas** de service worker ni de `vite-plugin-pwa`, ce qui évite les problèmes de cache et reste simple. L'app nécessitera une connexion internet pour fonctionner (ce qui est normal pour votre portail client/admin).
-
-## Résultat
-Après publication, vos utilisateurs mobiles pourront installer l'app en un clic et y accéder comme une application native depuis leur écran d'accueil.
-
+## Fichiers modifiés
+- `src/assets/hero-video.mp4` (nouveau)
+- `src/components/HeroScreenCarousel.tsx` (refonte)
