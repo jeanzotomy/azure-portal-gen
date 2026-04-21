@@ -20,6 +20,18 @@ export interface InvoicePaymentDetails {
   reference?: string;
 }
 
+export interface InvoicePaymentMethodEntry {
+  label: string;
+  type: "virement" | "mobile_money" | "especes" | "cheque" | "depot" | "autre";
+  currency?: string;
+  bank?: string | null;
+  iban?: string | null;
+  swift?: string | null;
+  account_holder?: string | null;
+  mobile_number?: string | null;
+  instructions?: string | null;
+}
+
 export interface InvoicePDFData {
   invoice_number: string;
   invoice_date: string; // ISO yyyy-mm-dd
