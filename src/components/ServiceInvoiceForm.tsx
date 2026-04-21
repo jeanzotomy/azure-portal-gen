@@ -262,11 +262,31 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
           </div>
           <div className="col-span-6 md:col-span-2">
             <label className="text-xs font-medium">Date</label>
-            <Input type="date" value={invoiceDate} onChange={(e) => setInvoiceDate(e.target.value)} />
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button type="button" variant="outline" className={cn("w-full justify-start text-left font-normal", !invoiceDate && "text-muted-foreground")}>
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {invoiceDate ? format(parseISO(invoiceDate), "dd/MM/yyyy") : "Choisir"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 z-50 bg-popover" align="start">
+                <Calendar mode="single" selected={invoiceDate ? parseISO(invoiceDate) : undefined} onSelect={(d) => d && setInvoiceDate(format(d, "yyyy-MM-dd"))} initialFocus locale={fr} className="pointer-events-auto" />
+              </PopoverContent>
+            </Popover>
           </div>
           <div className="col-span-6 md:col-span-2">
             <label className="text-xs font-medium">Échéance</label>
-            <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button type="button" variant="outline" className={cn("w-full justify-start text-left font-normal", !dueDate && "text-muted-foreground")}>
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {dueDate ? format(parseISO(dueDate), "dd/MM/yyyy") : "Choisir"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0 z-50 bg-popover" align="start">
+                <Calendar mode="single" selected={dueDate ? parseISO(dueDate) : undefined} onSelect={(d) => setDueDate(d ? format(d, "yyyy-MM-dd") : "")} initialFocus locale={fr} className="pointer-events-auto" />
+              </PopoverContent>
+            </Popover>
           </div>
           <div className="col-span-12 md:col-span-2">
             <label className="text-xs font-medium">Devise</label>
