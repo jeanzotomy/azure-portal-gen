@@ -8,13 +8,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus, Trash2, FileText, FileType2, RefreshCw, CalendarIcon } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Plus, Trash2, FileText, FileType2, RefreshCw, CalendarIcon, CreditCard, Building2, Smartphone, Banknote, PiggyBank } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import { InvoicePDFTemplate, type InvoicePDFData } from "@/components/InvoicePDFTemplate";
+import { InvoicePDFTemplate, type InvoicePDFData, type InvoicePaymentMethodEntry } from "@/components/InvoicePDFTemplate";
 import { generateInvoicePDFBlob, generateInvoiceDocxBlob, sanitizeName } from "@/lib/invoice-generator";
 import { saveAs } from "file-saver";
 import { useExchangeRates, type Currency } from "@/hooks/use-exchange-rates";
@@ -22,6 +23,11 @@ import { useExchangeRates, type Currency } from "@/hooks/use-exchange-rates";
 interface SClient { id: string; client_name: string; nif: string | null; rccm: string | null; address_line: string | null; city: string | null; country: string | null; phone: string | null; email: string | null; contact_person: string | null; }
 interface CatItem { id: string; name: string; description: string | null; default_unit_price: number; default_currency: Currency; default_unit: string; active: boolean; }
 interface LineItem { catalog_id?: string | null; description: string; subtitle?: string; quantity: number; unit: string; unit_price: number; discount_rate?: number; }
+interface PMRow {
+  id: string; label: string; type: "virement" | "mobile_money" | "especes" | "cheque" | "depot" | "autre";
+  currency: Currency; bank: string | null; iban: string | null; swift: string | null;
+  account_holder: string | null; mobile_number: string | null; instructions: string | null; active: boolean; position: number;
+}
 
 const lineTotal = (it: LineItem) => {
   const gross = (it.quantity || 0) * (it.unit_price || 0);
@@ -31,12 +37,21 @@ const lineTotal = (it: LineItem) => {
 const UNIT_OPTIONS = ["unité", "heure", "jour", "mois", "année", "forfait"] as const;
 const DEFAULT_PAYMENT = { bank: "", iban: "", swift: "", mobile_money: "+224 626 441 150", reference: "" };
 
-export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { open: boolean; onOpenChange: (v: boolean) => void; onSaved: () => void; }) {
+const PM_TYPE_ICONS: Record<PMRow["type"], typeof CreditCard> = {
+  virement: Building2, mobile_money: Smartphone, especes: Banknote, cheque: FileText, depot: PiggyBank, autre: CreditCard,
+};
+const PM_TYPE_LABELS: Record<PMRow["type"], string> = {
+  virement: "Virement", mobile_money: "Mobile Money", especes: "Espèces", cheque: "Chèque", depot: "Dépôt", autre: "Autre",
+};
+
+export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId }: { open: boolean; onOpenChange: (v: boolean) => void; onSaved: () => void; editId?: string | null; }) {
   const { user } = useAuthSession();
   const { toast } = useToast();
   const { rates, loading: ratesLoading, refresh: refreshRates, convert } = useExchangeRates();
   const [clients, setClients] = useState<SClient[]>([]);
   const [catalog, setCatalog] = useState<CatItem[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState<PMRow[]>([]);
+  const [selectedPaymentIds, setSelectedPaymentIds] = useState<string[]>([]);
   const [clientId, setClientId] = useState<string>("");
   const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().slice(0, 10));
   const [dueDate, setDueDate] = useState("");
@@ -55,12 +70,14 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
   useEffect(() => {
     if (!open) return;
     void (async () => {
-      const [{ data: cls }, { data: cat }] = await Promise.all([
+      const [{ data: cls }, { data: cat }, { data: pms }] = await Promise.all([
         supabase.from("service_clients").select("*").order("client_name"),
         supabase.from("service_catalog").select("*").eq("active", true).order("name"),
+        supabase.from("payment_methods").select("*").eq("active", true).order("position", { ascending: true }),
       ]);
       setClients(cls ?? []);
       setCatalog(cat ?? []);
+      setPaymentMethods((pms ?? []) as PMRow[]);
       // Charger le profil + rôle de l'émetteur
       if (user) {
         const [{ data: prof }, { data: roles }] = await Promise.all([
@@ -68,12 +85,8 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
           supabase.from("user_roles").select("role").eq("user_id", user.id),
         ]);
         const roleLabels: Record<string, string> = {
-          admin: "Administrateur",
-          comptable: "Comptable",
-          gestionnaire: "Gestionnaire de projet",
-          agent: "Agent",
-          client: "Client",
-          user: "Utilisateur",
+          admin: "Administrateur", comptable: "Comptable", gestionnaire: "Gestionnaire de projet",
+          agent: "Agent", client: "Client", user: "Utilisateur",
         };
         const priority = ["admin", "comptable", "gestionnaire", "agent", "user", "client"];
         const userRoles = (roles ?? []).map((r) => r.role as string);
@@ -84,8 +97,40 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
           signature_url: prof?.signature_url ?? null,
         });
       }
+
+      // Charger la facture si édition
+      if (editId) {
+        const { data: inv } = await supabase.from("service_invoices").select("*").eq("id", editId).maybeSingle();
+        const { data: its } = await supabase.from("service_invoice_items").select("*").eq("invoice_id", editId).order("position");
+        if (inv) {
+          setClientId(inv.client_id);
+          setInvoiceDate(inv.invoice_date);
+          setDueDate(inv.due_date ?? "");
+          setCurrency(inv.currency as Currency);
+          setDiscountRate(Number(inv.discount_rate));
+          setTaxRate(Number(inv.tax_rate));
+          setEarlyPaymentDiscountRate(Number(inv.early_payment_discount_rate));
+          setNotes(inv.notes ?? "");
+          setSelectedPaymentIds((inv.payment_method_ids ?? []) as string[]);
+          const pd = (inv.payment_details ?? {}) as typeof DEFAULT_PAYMENT;
+          setPayment({ ...DEFAULT_PAYMENT, ...pd });
+          prevCurrencyRef.current = inv.currency as Currency;
+        }
+        if (its && its.length > 0) {
+          setItems(its.map((x) => ({
+            catalog_id: x.catalog_id, description: x.description, subtitle: x.subtitle ?? "",
+            quantity: Number(x.quantity), unit: x.unit, unit_price: Number(x.unit_price), discount_rate: Number(x.discount_rate),
+          })));
+        }
+      } else {
+        // reset propre quand on ouvre en création
+        setClientId(""); setInvoiceDate(new Date().toISOString().slice(0, 10)); setDueDate("");
+        setCurrency("GNF"); setDiscountRate(0); setTaxRate(18); setEarlyPaymentDiscountRate(0);
+        setNotes(""); setSelectedPaymentIds([]); setPayment({ ...DEFAULT_PAYMENT });
+        setItems([{ description: "", quantity: 1, unit: "unité", unit_price: 0, discount_rate: 0 }]);
+      }
     })();
-  }, [open, user]);
+  }, [open, user, editId]);
 
   const subtotal = items.reduce((s, i) => s + lineTotal(i), 0);
   const discountAmount = subtotal * (discountRate / 100);
@@ -133,6 +178,14 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
     }
   }, [currency, convert]);
 
+  const selectedPaymentMethods: InvoicePaymentMethodEntry[] = paymentMethods
+    .filter((p) => selectedPaymentIds.includes(p.id))
+    .map((p) => ({
+      label: p.label, type: p.type, currency: p.currency,
+      bank: p.bank, iban: p.iban, swift: p.swift,
+      account_holder: p.account_holder, mobile_number: p.mobile_number, instructions: p.instructions,
+    }));
+
   const buildPdfData = (invoiceNumber: string): InvoicePDFData => ({
     invoice_number: invoiceNumber,
     invoice_date: invoiceDate,
@@ -150,6 +203,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
       email: selectedClient?.email ?? null,
     },
     payment_details: payment,
+    payment_methods: selectedPaymentMethods,
     items: items.map((it, i) => ({ position: i + 1, description: it.description, subtitle: it.subtitle ?? null, quantity: it.quantity, unit: it.unit, unit_price: it.unit_price, discount_rate: it.discount_rate ?? 0, total: lineTotal(it) })),
     subtotal, discount_rate: discountRate, discount_amount: discountAmount, tax_rate: taxRate, tax_amount: taxAmount,
     early_payment_discount_rate: earlyPaymentDiscountRate, early_payment_discount_amount: earlyPaymentDiscountAmount,
@@ -184,16 +238,29 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
     }
     setSaving(true);
     try {
-      const { data: inv, error } = await supabase.from("service_invoices").insert({
+      const payloadCommon = {
         client_id: clientId, invoice_date: invoiceDate, due_date: dueDate || null, currency,
-        payment_details: payment as never, subtotal, discount_rate: discountRate, discount_amount: discountAmount,
+        payment_details: payment as never, payment_method_ids: selectedPaymentIds,
+        subtotal, discount_rate: discountRate, discount_amount: discountAmount,
         tax_rate: taxRate, tax_amount: taxAmount,
         early_payment_discount_rate: earlyPaymentDiscountRate, early_payment_discount_amount: earlyPaymentDiscountAmount,
-        total, notes: notes || null, status, created_by: user.id,
-      }).select().single();
-      if (error || !inv) throw new Error(error?.message ?? "Insert failed");
+        total, notes: notes || null, status,
+      };
 
-      const itemsPayload = items.map((it, i) => ({ invoice_id: inv.id, position: i + 1, catalog_id: it.catalog_id ?? null, description: it.description, subtitle: it.subtitle ?? null, quantity: it.quantity, unit: it.unit, unit_price: it.unit_price, discount_rate: it.discount_rate ?? 0, total: lineTotal(it) }));
+      let inv: { id: string; invoice_number: string | null } | null = null;
+      if (editId) {
+        const { data, error } = await supabase.from("service_invoices").update(payloadCommon).eq("id", editId).select("id, invoice_number").single();
+        if (error || !data) throw new Error(error?.message ?? "Update failed");
+        inv = data;
+        // Replace items entirely
+        await supabase.from("service_invoice_items").delete().eq("invoice_id", editId);
+      } else {
+        const { data, error } = await supabase.from("service_invoices").insert({ ...payloadCommon, created_by: user.id }).select("id, invoice_number").single();
+        if (error || !data) throw new Error(error?.message ?? "Insert failed");
+        inv = data;
+      }
+
+      const itemsPayload = items.map((it, i) => ({ invoice_id: inv!.id, position: i + 1, catalog_id: it.catalog_id ?? null, description: it.description, subtitle: it.subtitle ?? null, quantity: it.quantity, unit: it.unit, unit_price: it.unit_price, discount_rate: it.discount_rate ?? 0, total: lineTotal(it) }));
       await supabase.from("service_invoice_items").insert(itemsPayload);
 
       // Generate documents according to chosen format
@@ -201,8 +268,8 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
       const wantPdf = outputFormat === "pdf" || outputFormat === "both";
       const wantDocx = outputFormat === "docx" || outputFormat === "both";
       const pdfBlob = wantPdf && pdfRef.current ? await generateInvoicePDFBlob(pdfRef.current) : null;
-      const docxBlob = wantDocx ? await generateInvoiceDocxBlob(buildPdfData(inv.invoice_number ?? "")) : null;
-      const safeNum = sanitizeName(inv.invoice_number ?? "facture");
+      const docxBlob = wantDocx ? await generateInvoiceDocxBlob(buildPdfData(inv!.invoice_number ?? "")) : null;
+      const safeNum = sanitizeName(inv!.invoice_number ?? "facture");
       const safeClient = sanitizeName(selectedClient.client_name);
 
       // Upload to SharePoint
@@ -216,18 +283,16 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
         if (up2) { updates.sharepoint_docx_id = up2.id; updates.docx_generated_at = new Date().toISOString(); if (!updates.sharepoint_url) updates.sharepoint_url = up2.webUrl; }
       }
 
-      if (Object.keys(updates).length) await supabase.from("service_invoices").update(updates).eq("id", inv.id);
+      if (Object.keys(updates).length) await supabase.from("service_invoices").update(updates).eq("id", inv!.id);
 
       // Local download
       if (pdfBlob) saveAs(pdfBlob, `${safeNum}_${safeClient}.pdf`);
       if (docxBlob) saveAs(docxBlob, `${safeNum}_${safeClient}.docx`);
 
       const formatLabel = outputFormat === "both" ? "PDF + Word" : outputFormat === "pdf" ? "PDF" : "Word";
-      toast({ title: "Facture créée", description: `${inv.invoice_number} • ${formatLabel} • ${updates.sharepoint_url ? "Stockée dans SharePoint" : "Téléchargée localement"}` });
+      toast({ title: editId ? "Facture mise à jour" : "Facture créée", description: `${inv!.invoice_number} • ${formatLabel} • ${updates.sharepoint_url ? "Stockée dans SharePoint" : "Téléchargée localement"}` });
       onSaved();
       onOpenChange(false);
-      // Reset
-      setClientId(""); setDueDate(""); setItems([{ description: "", quantity: 1, unit: "unité", unit_price: 0, discount_rate: 0 }]); setNotes(""); setDiscountRate(0); setEarlyPaymentDiscountRate(0); setPayment({ ...DEFAULT_PAYMENT });
     } catch (e) {
       toast({ title: "Erreur", description: e instanceof Error ? e.message : "Erreur inconnue", variant: "destructive" });
     } finally {
@@ -239,7 +304,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[calc(100vw-1rem)] sm:w-auto max-w-5xl max-h-[92vh] overflow-y-auto p-3 sm:p-6">
         <DialogHeader>
-          <DialogTitle className="text-base sm:text-lg">Nouvelle facture</DialogTitle>
+          <DialogTitle className="text-base sm:text-lg">{editId ? "Modifier la facture" : "Nouvelle facture"}</DialogTitle>
         </DialogHeader>
 
         <div className="grid grid-cols-12 gap-3">
@@ -320,15 +385,63 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
           </Button>
         </div>
 
-        <div className="border rounded-md p-3 space-y-2">
-          <div className="text-xs font-semibold">Détails de paiement</div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-            <Input placeholder="Banque" value={payment.bank} onChange={(e) => setPayment({ ...payment, bank: e.target.value })} />
-            <Input placeholder="IBAN / Compte" value={payment.iban} onChange={(e) => setPayment({ ...payment, iban: e.target.value })} />
-            <Input placeholder="SWIFT" value={payment.swift} onChange={(e) => setPayment({ ...payment, swift: e.target.value })} />
-            <Input placeholder="Mobile Money" value={payment.mobile_money} onChange={(e) => setPayment({ ...payment, mobile_money: e.target.value })} />
-            <Input placeholder="Référence" value={payment.reference} onChange={(e) => setPayment({ ...payment, reference: e.target.value })} />
+        <div className="border rounded-md p-3 space-y-3">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="text-sm font-semibold flex items-center gap-2">
+              <CreditCard size={16} className="text-primary" />
+              Modes de paiement à proposer au client
+            </div>
+            <span className="text-xs text-muted-foreground">
+              {selectedPaymentIds.length} sélectionné{selectedPaymentIds.length > 1 ? "s" : ""}
+            </span>
           </div>
+          {paymentMethods.length === 0 ? (
+            <div className="text-xs text-muted-foreground bg-muted/40 border border-dashed rounded-md p-3">
+              Aucun mode de paiement actif. Allez dans <span className="font-semibold">Modes de paiement</span> pour en créer.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              {paymentMethods.map((pm) => {
+                const Icon = PM_TYPE_ICONS[pm.type];
+                const checked = selectedPaymentIds.includes(pm.id);
+                return (
+                  <label
+                    key={pm.id}
+                    className={cn(
+                      "flex items-start gap-3 p-3 rounded-md border cursor-pointer transition-colors",
+                      checked ? "border-primary bg-primary/5" : "border-border hover:bg-muted/40"
+                    )}
+                  >
+                    <Checkbox
+                      checked={checked}
+                      onCheckedChange={(v) => {
+                        setSelectedPaymentIds((prev) =>
+                          v ? [...prev, pm.id] : prev.filter((id) => id !== pm.id)
+                        );
+                      }}
+                      className="mt-0.5"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Icon size={14} className="text-primary shrink-0" />
+                        <span className="font-medium text-sm truncate">{pm.label}</span>
+                        <span className="text-[10px] uppercase tracking-wide bg-muted px-1.5 py-0.5 rounded">
+                          {PM_TYPE_LABELS[pm.type]}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground">{pm.currency}</span>
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1 space-y-0.5">
+                        {pm.bank && <div>Banque : {pm.bank}</div>}
+                        {pm.iban && <div className="truncate">Compte : {pm.iban}</div>}
+                        {pm.mobile_number && <div>Mobile : {pm.mobile_number}</div>}
+                        {pm.account_holder && <div>Titulaire : {pm.account_holder}</div>}
+                      </div>
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         <div className="space-y-2">
@@ -440,7 +553,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
             <FileType2 size={14} className="mr-1" /> <span className="truncate">Enregistrer brouillon</span>
           </Button>
           <Button onClick={() => void handleSave("emise")} disabled={saving} className="w-full sm:w-auto">
-            <FileText size={14} className="mr-1" /> <span className="truncate">{saving ? "Génération..." : `Émettre & Générer ${outputFormat === "both" ? "PDF + Word" : outputFormat === "pdf" ? "PDF" : "Word"}`}</span>
+            <FileText size={14} className="mr-1" /> <span className="truncate">{saving ? "Génération..." : editId ? `Mettre à jour & Générer ${outputFormat === "both" ? "PDF + Word" : outputFormat === "pdf" ? "PDF" : "Word"}` : `Émettre & Générer ${outputFormat === "both" ? "PDF + Word" : outputFormat === "pdf" ? "PDF" : "Word"}`}</span>
           </Button>
         </DialogFooter>
       </DialogContent>

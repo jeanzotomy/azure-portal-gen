@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Search, ExternalLink, RefreshCw, Receipt, Trash2, FileText } from "lucide-react";
+import { Plus, Search, ExternalLink, RefreshCw, Receipt, Trash2, FileText, Pencil } from "lucide-react";
 import ServiceInvoiceForm from "@/components/ServiceInvoiceForm";
 
 interface InvoiceRow {
@@ -36,6 +36,7 @@ export default function ServiceInvoicesTab() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [formOpen, setFormOpen] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
@@ -86,7 +87,7 @@ export default function ServiceInvoicesTab() {
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => void load()}><RefreshCw size={14} className="mr-1" /> Actualiser</Button>
-          <Button size="sm" onClick={() => setFormOpen(true)}><Plus size={14} className="mr-1" /> Nouvelle facture</Button>
+          <Button size="sm" onClick={() => { setEditId(null); setFormOpen(true); }}><Plus size={14} className="mr-1" /> Nouvelle facture</Button>
         </div>
       </div>
 
@@ -159,7 +160,10 @@ export default function ServiceInvoicesTab() {
                         <a href={r.sharepoint_url} target="_blank" rel="noreferrer" title="Ouvrir dans SharePoint"><ExternalLink size={14} /></a>
                       </Button>
                     )}
-                    <Button size="icon" variant="ghost" onClick={() => void remove(r.id)}><Trash2 size={14} className="text-destructive" /></Button>
+                    <Button size="icon" variant="ghost" onClick={() => { setEditId(r.id); setFormOpen(true); }} title="Modifier la facture">
+                      <Pencil size={14} className="text-primary" />
+                    </Button>
+                    <Button size="icon" variant="ghost" onClick={() => void remove(r.id)} title="Supprimer"><Trash2 size={14} className="text-destructive" /></Button>
                   </div>
                 </div>
               </CardContent></Card>
@@ -168,7 +172,7 @@ export default function ServiceInvoicesTab() {
         </div>
       )}
 
-      <ServiceInvoiceForm open={formOpen} onOpenChange={setFormOpen} onSaved={() => void load()} />
+      <ServiceInvoiceForm open={formOpen} onOpenChange={(v) => { setFormOpen(v); if (!v) setEditId(null); }} editId={editId} onSaved={() => void load()} />
     </div>
   );
 }
