@@ -117,14 +117,16 @@ export default function HrTab() {
 
   const load = async () => {
     setLoading(true);
-    const [jobsRes, appsRes, deptsRes] = await Promise.all([
+    const [jobsRes, appsRes, deptsRes, sectorsRes] = await Promise.all([
       supabase.from("job_postings").select("*").order("created_at", { ascending: false }),
       supabase.from("job_applications").select("*").order("created_at", { ascending: false }),
       supabase.from("departments").select("*").order("name", { ascending: true }),
+      (supabase as any).from("sectors").select("*").order("name", { ascending: true }),
     ]);
     if (jobsRes.data) setJobs(jobsRes.data as JobPosting[]);
     if (appsRes.data) setApplications(appsRes.data as JobApplication[]);
     if (deptsRes.data) setDepartments(deptsRes.data as Department[]);
+    if (sectorsRes.data) setSectors(sectorsRes.data as Sector[]);
     setLoading(false);
   };
 
