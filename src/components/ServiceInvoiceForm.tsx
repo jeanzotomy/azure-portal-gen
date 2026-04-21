@@ -238,16 +238,29 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
     }
     setSaving(true);
     try {
-      const { data: inv, error } = await supabase.from("service_invoices").insert({
+      const payloadCommon = {
         client_id: clientId, invoice_date: invoiceDate, due_date: dueDate || null, currency,
-        payment_details: payment as never, subtotal, discount_rate: discountRate, discount_amount: discountAmount,
+        payment_details: payment as never, payment_method_ids: selectedPaymentIds,
+        subtotal, discount_rate: discountRate, discount_amount: discountAmount,
         tax_rate: taxRate, tax_amount: taxAmount,
         early_payment_discount_rate: earlyPaymentDiscountRate, early_payment_discount_amount: earlyPaymentDiscountAmount,
-        total, notes: notes || null, status, created_by: user.id,
-      }).select().single();
-      if (error || !inv) throw new Error(error?.message ?? "Insert failed");
+        total, notes: notes || null, status,
+      };
 
-      const itemsPayload = items.map((it, i) => ({ invoice_id: inv.id, position: i + 1, catalog_id: it.catalog_id ?? null, description: it.description, subtitle: it.subtitle ?? null, quantity: it.quantity, unit: it.unit, unit_price: it.unit_price, discount_rate: it.discount_rate ?? 0, total: lineTotal(it) }));
+      let inv: { id: string; invoice_number: string | null } | null = null;
+      if (editId) {
+        const { data, error } = await supabase.from("service_invoices").update(payloadCommon).eq("id", editId).select("id, invoice_number").single();
+        if (error || !data) throw new Error(error?.message ?? "Update failed");
+        inv = data;
+        // Replace items entirely
+        await supabase.from("service_invoice_items").delete().eq("invoice_id", editId);
+      } else {
+        const { data, error } = await supabase.from("service_invoices").insert({ ...payloadCommon, created_by: user.id }).select("id, invoice_number").single();
+        if (error || !data) throw new Error(error?.message ?? "Insert failed");
+        inv = data;
+      }
+
+      const itemsPayload = items.map((it, i) => ({ invoice_id: inv!.id, position: i + 1, catalog_id: it.catalog_id ?? null, description: it.description, subtitle: it.subtitle ?? null, quantity: it.quantity, unit: it.unit, unit_price: it.unit_price, discount_rate: it.discount_rate ?? 0, total: lineTotal(it) }));
       await supabase.from("service_invoice_items").insert(itemsPayload);
 
       // Generate documents according to chosen format
@@ -255,8 +268,8 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
       const wantPdf = outputFormat === "pdf" || outputFormat === "both";
       const wantDocx = outputFormat === "docx" || outputFormat === "both";
       const pdfBlob = wantPdf && pdfRef.current ? await generateInvoicePDFBlob(pdfRef.current) : null;
-      const docxBlob = wantDocx ? await generateInvoiceDocxBlob(buildPdfData(inv.invoice_number ?? "")) : null;
-      const safeNum = sanitizeName(inv.invoice_number ?? "facture");
+      const docxBlob = wantDocx ? await generateInvoiceDocxBlob(buildPdfData(inv!.invoice_number ?? "")) : null;
+      const safeNum = sanitizeName(inv!.invoice_number ?? "facture");
       const safeClient = sanitizeName(selectedClient.client_name);
 
       // Upload to SharePoint
@@ -270,18 +283,16 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
         if (up2) { updates.sharepoint_docx_id = up2.id; updates.docx_generated_at = new Date().toISOString(); if (!updates.sharepoint_url) updates.sharepoint_url = up2.webUrl; }
       }
 
-      if (Object.keys(updates).length) await supabase.from("service_invoices").update(updates).eq("id", inv.id);
+      if (Object.keys(updates).length) await supabase.from("service_invoices").update(updates).eq("id", inv!.id);
 
       // Local download
       if (pdfBlob) saveAs(pdfBlob, `${safeNum}_${safeClient}.pdf`);
       if (docxBlob) saveAs(docxBlob, `${safeNum}_${safeClient}.docx`);
 
       const formatLabel = outputFormat === "both" ? "PDF + Word" : outputFormat === "pdf" ? "PDF" : "Word";
-      toast({ title: "Facture créée", description: `${inv.invoice_number} • ${formatLabel} • ${updates.sharepoint_url ? "Stockée dans SharePoint" : "Téléchargée localement"}` });
+      toast({ title: editId ? "Facture mise à jour" : "Facture créée", description: `${inv!.invoice_number} • ${formatLabel} • ${updates.sharepoint_url ? "Stockée dans SharePoint" : "Téléchargée localement"}` });
       onSaved();
       onOpenChange(false);
-      // Reset
-      setClientId(""); setDueDate(""); setItems([{ description: "", quantity: 1, unit: "unité", unit_price: 0, discount_rate: 0 }]); setNotes(""); setDiscountRate(0); setEarlyPaymentDiscountRate(0); setPayment({ ...DEFAULT_PAYMENT });
     } catch (e) {
       toast({ title: "Erreur", description: e instanceof Error ? e.message : "Erreur inconnue", variant: "destructive" });
     } finally {
