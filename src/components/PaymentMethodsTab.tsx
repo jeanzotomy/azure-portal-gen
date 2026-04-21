@@ -32,13 +32,13 @@ interface PMRow {
   position: number;
 }
 
-const TYPE_META: Record<PaymentType, { label: string; icon: typeof CreditCard }> = {
-  virement: { label: "Virement bancaire", icon: Building2 },
-  mobile_money: { label: "Mobile Money", icon: Smartphone },
-  depot: { label: "Dépôt en espèces", icon: PiggyBank },
-  especes: { label: "Espèces", icon: Banknote },
-  cheque: { label: "Chèque", icon: FileText },
-  autre: { label: "Autre", icon: CreditCard },
+const TYPE_META: Record<PaymentType, { label: string; icon: typeof CreditCard; hint: string }> = {
+  virement: { label: "Virement bancaire", icon: Building2, hint: "Renseignez les coordonnées bancaires complètes (banque, IBAN, SWIFT)." },
+  mobile_money: { label: "Mobile Money", icon: Smartphone, hint: "Indiquez l'opérateur (Orange, MTN…) et le numéro à créditer." },
+  depot: { label: "Dépôt en espèces", icon: PiggyBank, hint: "Banque destinataire et numéro de compte à créditer en agence." },
+  especes: { label: "Espèces", icon: Banknote, hint: "Aucune coordonnée bancaire requise — précisez le bénéficiaire et le lieu de remise." },
+  cheque: { label: "Chèque", icon: FileText, hint: "Indiquez le bénéficiaire (à l'ordre de) et la banque émettrice si nécessaire." },
+  autre: { label: "Autre", icon: CreditCard, hint: "Mode personnalisé : remplissez uniquement les champs pertinents." },
 };
 
 // Définit quels champs afficher selon le type
