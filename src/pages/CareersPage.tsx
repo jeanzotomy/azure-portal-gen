@@ -8,7 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { JobApplicationDialog } from "@/components/JobApplicationDialog";
-import { Briefcase, MapPin, Calendar, Clock } from "lucide-react";
+import { Briefcase, MapPin, Calendar, Clock, ChevronDown, ChevronUp } from "lucide-react";
 import { format } from "date-fns";
 
 interface JobPosting {
@@ -32,6 +32,9 @@ export default function CareersPage() {
   const [loading, setLoading] = useState(true);
   const [selected, setSelected] = useState<JobPosting | null>(null);
   const [applyOpen, setApplyOpen] = useState(false);
+  const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+
+  const toggleExpand = (id: string) => setExpanded((p) => ({ ...p, [id]: !p[id] }));
 
   useEffect(() => {
     document.title = "Carrières — CloudMature";
@@ -111,7 +114,17 @@ export default function CareersPage() {
                           {job.salary_range && <div><span className="font-semibold text-foreground">Rémunération :</span> <span className="text-muted-foreground">{job.salary_range}</span></div>}
                         </div>
                       )}
-                      <p className="text-sm text-foreground/80 whitespace-pre-line line-clamp-4">{job.description}</p>
+                      <h4 className="text-sm font-semibold mb-1 text-foreground">Description du poste</h4>
+                      <p className={`text-sm text-foreground/80 whitespace-pre-line ${expanded[job.id] ? "" : "line-clamp-4"}`}>{job.description}</p>
+                      {job.description.length > 200 && (
+                        <button
+                          type="button"
+                          onClick={() => toggleExpand(job.id)}
+                          className="mt-1 text-xs font-medium text-primary hover:underline inline-flex items-center gap-1"
+                        >
+                          {expanded[job.id] ? (<>Réduire <ChevronUp size={12} /></>) : (<>Lire tout <ChevronDown size={12} /></>)}
+                        </button>
+                      )}
                     </div>
                     <Button onClick={() => handleApply(job)} className="gradient-primary text-primary-foreground border-0 shrink-0">
                       Postuler
