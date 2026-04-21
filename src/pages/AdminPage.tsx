@@ -249,6 +249,11 @@ function AdminContent() {
     if (!rolesLoading && !isAdmin && !isAgent && !isComptable && !isGestionnaire && ready && user) navigate("/portal");
   }, [isAdmin, isAgent, isComptable, isGestionnaire, rolesLoading, ready, user, navigate]);
 
+  // Compute admin services tab membership BEFORE any early return so hook order stays stable
+  const adminServicesGroupIds: AdminTab[] = ["service-clients", "service-catalog", "service-invoices", "payment-methods"];
+  const isAdminServicesTab = adminServicesGroupIds.includes(tab);
+  useEffect(() => { if (isAdminServicesTab) setAdminServicesOpen(true); }, [isAdminServicesTab]);
+
   if (!ready || rolesLoading || mfaVerified === null) return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
       <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
@@ -509,8 +514,8 @@ function AdminContent() {
     { id: "hr", icon: Briefcase, label: "Recrutement" },
   ];
 
-  const isAdminServicesTab = adminServicesGroup.some((s) => s.id === tab);
-  useEffect(() => { if (isAdminServicesTab) setAdminServicesOpen(true); }, [isAdminServicesTab]);
+
+
 
   return (
     <div className="min-h-screen flex w-full bg-background">
