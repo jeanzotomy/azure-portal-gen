@@ -20,6 +20,9 @@ interface JobPosting {
   description: string;
   closing_date: string | null;
   created_at: string;
+  sector: string | null;
+  start_date: string | null;
+  salary_range: string | null;
 }
 
 export default function CareersPage() {
