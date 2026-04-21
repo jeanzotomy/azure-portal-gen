@@ -2118,6 +2118,42 @@ function AdminUsers() {
     }
   };
 
+  const promoteToBillableClient = async (p: any) => {
+    if (!p.full_name && !p.company) {
+      toast({ title: "Profil incomplet", description: "Le nom complet ou l'entreprise est requis pour créer un client facturable.", variant: "destructive" });
+      return;
+    }
+    const email = mfaStatus[p.user_id]?.email || null;
+    // Check duplicates by email or client_name
+    const { data: existing } = await supabase
+      .from("service_clients")
+      .select("id, client_name")
+      .or(email ? `email.eq.${email},client_name.eq.${(p.company || p.full_name).replace(/,/g, " ")}` : `client_name.eq.${(p.company || p.full_name).replace(/,/g, " ")}`)
+      .limit(1);
+    if (existing && existing.length > 0) {
+      toast({ title: "Déjà existant", description: `Un client facturable existe déjà : ${existing[0].client_name}.`, variant: "destructive" });
+      return;
+    }
+    if (!window.confirm(`Créer un client facturable à partir du profil de "${p.full_name || p.company}" ?`)) return;
+    const { data: { user: currentUser } } = await supabase.auth.getUser();
+    if (!currentUser) return;
+    const { error } = await supabase.from("service_clients").insert({
+      client_name: p.company || p.full_name,
+      contact_person: p.company ? p.full_name : null,
+      address_line: p.address_line || null,
+      city: p.city || null,
+      country: p.country || "Guinée",
+      phone: p.phone || null,
+      email,
+      created_by: currentUser.id,
+    });
+    if (error) {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Client facturable créé", description: `${p.full_name || p.company} est maintenant un client facturable.` });
+    }
+  };
+
   const openEditUser = (p: any) => {
     setEditForm({
       full_name: p.full_name || "",
