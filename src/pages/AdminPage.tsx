@@ -58,6 +58,7 @@ function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser
     { id: "service-clients" as const, icon: Briefcase, label: "Clients services" },
     { id: "service-catalog" as const, icon: BookOpen, label: "Catalogue services" },
     { id: "service-invoices" as const, icon: Receipt, label: "Facturation services" },
+    { id: "payment-methods" as const, icon: CreditCard, label: "Modes de paiement" },
   ];
 
   return (
