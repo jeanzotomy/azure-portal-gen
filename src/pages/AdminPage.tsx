@@ -31,23 +31,30 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { HardDrive } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import SharePointTab from "@/components/SharePointTab";
+import ServiceClientsTab from "@/components/ServiceClientsTab";
+import ServiceCatalogTab from "@/components/ServiceCatalogTab";
+import ServiceInvoicesTab from "@/components/ServiceInvoicesTab";
+import { Briefcase, BookOpen, Receipt } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RePieChart, Pie, Cell, AreaChart, Area } from "recharts";
 import type { User as SupaUser } from "@supabase/supabase-js";
 import { PortalInfoBar } from "@/components/PortalInfoBar";
 import { NotificationBell } from "@/components/NotificationBell";
 
-type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts" | "sharepoint";
+type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts" | "sharepoint" | "service-clients" | "service-catalog" | "service-invoices";
 type AgentTab = "dashboard" | "tickets" | "contacts";
 type GestionnaireTab = "dashboard" | "projects" | "sharepoint" | "tickets" | "contacts";
 
 function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser; collapsed: boolean; handleLogout: () => void }) {
-  const [tab, setTab] = useState<"projects" | "sharepoint">("projects");
+  const [tab, setTab] = useState<"projects" | "sharepoint" | "service-clients" | "service-catalog" | "service-invoices">("projects");
   const navigate = useNavigate();
   const { t } = useTranslation();
 
   const navItems = [
     { id: "projects" as const, icon: FolderOpen, label: t("admin.projects") },
     { id: "sharepoint" as const, icon: HardDrive, label: "SharePoint" },
+    { id: "service-clients" as const, icon: Briefcase, label: "Clients services" },
+    { id: "service-catalog" as const, icon: BookOpen, label: "Catalogue services" },
+    { id: "service-invoices" as const, icon: Receipt, label: "Facturation services" },
   ];
 
   return (
@@ -104,7 +111,7 @@ function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser
             <span className="text-xs bg-teal-500/10 text-teal-500 px-2.5 py-1 rounded-full font-medium flex items-center gap-1">
               <Shield size={12} /> Comptable
             </span>
-            <NotificationBell role="comptable" onNavigate={(target) => setTab(target as "projects" | "sharepoint")} />
+            <NotificationBell role="comptable" onNavigate={(target) => setTab(target as typeof tab)} />
             <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
               {(user.user_metadata?.full_name || user.email || "C").charAt(0).toUpperCase()}
             </div>
@@ -114,6 +121,9 @@ function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser
         <main className="flex-1 p-6 overflow-auto">
           {tab === "projects" && <AdminProjectsInner readOnly />}
           {tab === "sharepoint" && <SharePointTab readOnly={false} />}
+          {tab === "service-clients" && <ServiceClientsTab />}
+          {tab === "service-catalog" && <ServiceCatalogTab />}
+          {tab === "service-invoices" && <ServiceInvoicesTab />}
         </main>
       </div>
     </div>
@@ -383,6 +393,9 @@ function AdminContent() {
     { id: "dashboard", icon: LayoutDashboard, label: t("admin.overview") },
     { id: "projects", icon: FolderOpen, label: t("admin.projects") },
     { id: "sharepoint", icon: HardDrive, label: "SharePoint" },
+    { id: "service-clients", icon: Briefcase, label: "Clients services" },
+    { id: "service-catalog", icon: BookOpen, label: "Catalogue services" },
+    { id: "service-invoices", icon: Receipt, label: "Facturation services" },
     { id: "tickets", icon: LifeBuoy, label: t("admin.tickets") },
     { id: "contacts", icon: MessageSquare, label: t("admin.contacts") },
     { id: "users", icon: Users, label: t("admin.users") },
@@ -464,6 +477,9 @@ function AdminContent() {
           {tab === "contacts" && <AdminContacts />}
           {tab === "users" && <AdminUsers />}
           {tab === "sharepoint" && <SharePointTab />}
+          {tab === "service-clients" && <ServiceClientsTab />}
+          {tab === "service-catalog" && <ServiceCatalogTab />}
+          {tab === "service-invoices" && <ServiceInvoicesTab />}
         </main>
       </div>
     </div>
