@@ -7,7 +7,8 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Plus, Pencil, Trash2, Search, Building2, RefreshCw } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Building2, RefreshCw, User, FileText, MapPin, Phone, Mail, StickyNote, Hash } from "lucide-react";
+import { Label } from "@/components/ui/label";
 
 interface ServiceClient {
   id: string;
@@ -209,55 +210,161 @@ export default function ServiceClientsTab() {
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{editing ? "Modifier le client" : "Nouveau client facturable"}</DialogTitle>
+        <DialogContent className="max-w-3xl max-h-[92vh] overflow-y-auto p-0 gap-0">
+          <DialogHeader className="bg-gradient-to-r from-primary to-[#007aa3] text-white px-6 py-4 rounded-t-lg">
+            <DialogTitle className="text-white flex items-center gap-2 text-lg">
+              <Building2 size={20} />
+              {editing ? "Modifier le client" : "Nouveau client facturable"}
+            </DialogTitle>
+            <p className="text-xs text-white/80 mt-1">
+              {editing ? "Mettez à jour les informations du client." : "Renseignez les informations pour facturer ce client."}
+            </p>
           </DialogHeader>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="col-span-2">
-              <label className="text-xs font-medium">Nom du client / société *</label>
-              <Input value={form.client_name ?? ""} onChange={(e) => setForm({ ...form, client_name: e.target.value })} />
-            </div>
-            <div className="col-span-2">
-              <label className="text-xs font-medium">Personne de contact</label>
-              <Input value={form.contact_person ?? ""} onChange={(e) => setForm({ ...form, contact_person: e.target.value })} />
-            </div>
-            <div>
-              <label className="text-xs font-medium">NIF</label>
-              <Input value={form.nif ?? ""} onChange={(e) => setForm({ ...form, nif: e.target.value })} />
-            </div>
-            <div>
-              <label className="text-xs font-medium">N°RCCM</label>
-              <Input value={form.rccm ?? ""} onChange={(e) => setForm({ ...form, rccm: e.target.value })} />
-            </div>
-            <div className="col-span-2">
-              <label className="text-xs font-medium">Adresse</label>
-              <Input value={form.address_line ?? ""} onChange={(e) => setForm({ ...form, address_line: e.target.value })} />
-            </div>
-            <div>
-              <label className="text-xs font-medium">Ville</label>
-              <Input value={form.city ?? ""} onChange={(e) => setForm({ ...form, city: e.target.value })} />
-            </div>
-            <div>
-              <label className="text-xs font-medium">Pays</label>
-              <Input value={form.country ?? ""} onChange={(e) => setForm({ ...form, country: e.target.value })} />
-            </div>
-            <div>
-              <label className="text-xs font-medium">Téléphone</label>
-              <Input value={form.phone ?? ""} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-            </div>
-            <div>
-              <label className="text-xs font-medium">Email</label>
-              <Input type="email" value={form.email ?? ""} onChange={(e) => setForm({ ...form, email: e.target.value })} />
-            </div>
-            <div className="col-span-2">
-              <label className="text-xs font-medium">Notes</label>
-              <Textarea rows={2} value={form.notes ?? ""} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
-            </div>
+
+          <div className="p-6 space-y-6">
+            <section className="space-y-3">
+              <div className="flex items-center gap-2 text-sm font-semibold text-primary border-b pb-1">
+                <User size={16} /> Identité
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="col-span-2">
+                  <Label className="text-xs font-medium flex items-center gap-1">
+                    <Building2 size={12} /> Nom du client / société <span className="text-destructive">*</span>
+                  </Label>
+                  <Input
+                    placeholder="Ex : ACME Guinée SARL"
+                    value={form.client_name ?? ""}
+                    onChange={(e) => setForm({ ...form, client_name: e.target.value })}
+                    className="mt-1"
+                  />
+                </div>
+                <div className="col-span-2">
+                  <Label className="text-xs font-medium flex items-center gap-1">
+                    <User size={12} /> Personne de contact
+                  </Label>
+                  <Input
+                    placeholder="Nom du référent"
+                    value={form.contact_person ?? ""}
+                    onChange={(e) => setForm({ ...form, contact_person: e.target.value })}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+            </section>
+
+            <section className="space-y-3">
+              <div className="flex items-center gap-2 text-sm font-semibold text-primary border-b pb-1">
+                <FileText size={16} /> Informations légales
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-xs font-medium flex items-center gap-1">
+                    <Hash size={12} /> NIF
+                  </Label>
+                  <Input
+                    placeholder="Numéro d'identification fiscale"
+                    value={form.nif ?? ""}
+                    onChange={(e) => setForm({ ...form, nif: e.target.value })}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs font-medium flex items-center gap-1">
+                    <Hash size={12} /> N°RCCM
+                  </Label>
+                  <Input
+                    placeholder="Registre du commerce"
+                    value={form.rccm ?? ""}
+                    onChange={(e) => setForm({ ...form, rccm: e.target.value })}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+            </section>
+
+            <section className="space-y-3">
+              <div className="flex items-center gap-2 text-sm font-semibold text-primary border-b pb-1">
+                <MapPin size={16} /> Adresse
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="col-span-2">
+                  <Label className="text-xs font-medium">Adresse complète</Label>
+                  <Input
+                    placeholder="Rue, quartier, immeuble..."
+                    value={form.address_line ?? ""}
+                    onChange={(e) => setForm({ ...form, address_line: e.target.value })}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs font-medium">Ville</Label>
+                  <Input
+                    placeholder="Conakry"
+                    value={form.city ?? ""}
+                    onChange={(e) => setForm({ ...form, city: e.target.value })}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs font-medium">Pays</Label>
+                  <Input
+                    value={form.country ?? ""}
+                    onChange={(e) => setForm({ ...form, country: e.target.value })}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+            </section>
+
+            <section className="space-y-3">
+              <div className="flex items-center gap-2 text-sm font-semibold text-primary border-b pb-1">
+                <Phone size={16} /> Coordonnées
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-xs font-medium flex items-center gap-1">
+                    <Phone size={12} /> Téléphone
+                  </Label>
+                  <Input
+                    placeholder="+224 6XX XX XX XX"
+                    value={form.phone ?? ""}
+                    onChange={(e) => setForm({ ...form, phone: e.target.value })}
+                    className="mt-1"
+                  />
+                </div>
+                <div>
+                  <Label className="text-xs font-medium flex items-center gap-1">
+                    <Mail size={12} /> Email
+                  </Label>
+                  <Input
+                    type="email"
+                    placeholder="contact@societe.com"
+                    value={form.email ?? ""}
+                    onChange={(e) => setForm({ ...form, email: e.target.value })}
+                    className="mt-1"
+                  />
+                </div>
+              </div>
+            </section>
+
+            <section className="space-y-3">
+              <div className="flex items-center gap-2 text-sm font-semibold text-primary border-b pb-1">
+                <StickyNote size={16} /> Notes internes
+              </div>
+              <Textarea
+                rows={3}
+                placeholder="Conditions particulières, remarques, historique..."
+                value={form.notes ?? ""}
+                onChange={(e) => setForm({ ...form, notes: e.target.value })}
+              />
+            </section>
           </div>
-          <DialogFooter>
+
+          <DialogFooter className="border-t bg-muted/30 px-6 py-3 rounded-b-lg">
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Annuler</Button>
-            <Button onClick={() => void save()} disabled={saving}>{saving ? "Enregistrement..." : "Enregistrer"}</Button>
+            <Button onClick={() => void save()} disabled={saving} className="bg-primary hover:bg-primary/90">
+              {saving ? "Enregistrement..." : editing ? "Mettre à jour" : "Enregistrer le client"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
