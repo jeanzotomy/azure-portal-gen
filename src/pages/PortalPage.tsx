@@ -32,7 +32,7 @@ import logo from "@/assets/cloudmature-logo.png";
 import {
   LayoutDashboard, FolderOpen, LifeBuoy, User, LogOut, Send, Clock, CheckCircle2, AlertCircle,
   Menu, Bell, Search, Filter, Upload, X, FileText, DollarSign, Calendar, Cpu, Flag, Pencil, Shield,
-  Activity, TrendingUp, Plus, Trash2, Info, RefreshCw, UserCheck,
+  Activity, TrendingUp, Plus, Trash2, Info, RefreshCw, UserCheck, Briefcase,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -40,8 +40,9 @@ import { PieChart as RePieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area
 import type { User as SupaUser } from "@supabase/supabase-js";
 import { PortalInfoBar } from "@/components/PortalInfoBar";
 import { NotificationBell } from "@/components/NotificationBell";
+import ApplicationsTab from "@/components/ApplicationsTab";
 
-type Tab = "dashboard" | "projects" | "tickets" | "profile";
+type Tab = "dashboard" | "projects" | "tickets" | "applications" | "profile";
 
 function PortalContent() {
   const { user, ready } = useAuthSession();
@@ -138,6 +139,7 @@ function PortalContent() {
     { id: "dashboard", icon: LayoutDashboard, label: t("portal.dashboard") },
     { id: "projects", icon: FolderOpen, label: t("portal.projects") },
     { id: "tickets", icon: LifeBuoy, label: t("portal.support") },
+    { id: "applications", icon: Briefcase, label: "Mes candidatures" },
     { id: "profile", icon: User, label: t("portal.profile") },
   ];
 
@@ -226,6 +228,7 @@ function PortalContent() {
           {tab === "dashboard" && <DashboardTab user={user} />}
           {tab === "projects" && <ProjectsTab user={user} />}
           {tab === "tickets" && <TicketsTab user={user} />}
+          {tab === "applications" && <ApplicationsTab user={user} />}
           {tab === "profile" && <ProfileTab user={user} />}
         </main>
       </div>
