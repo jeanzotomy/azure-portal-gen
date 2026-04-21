@@ -9,6 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, Search, Building2, RefreshCw, User, FileText, MapPin, Phone, Mail, StickyNote, Hash } from "lucide-react";
 import { Label } from "@/components/ui/label";
+import { getDialCode, applyDialCode } from "@/lib/country-dial-codes";
 
 interface ServiceClient {
   id: string;
@@ -309,7 +310,15 @@ export default function ServiceClientsTab() {
                   <Label className="text-xs font-medium">Pays</Label>
                   <Input
                     value={form.country ?? ""}
-                    onChange={(e) => setForm({ ...form, country: e.target.value })}
+                    onChange={(e) => {
+                      const newCountry = e.target.value;
+                      const dial = getDialCode(newCountry);
+                      setForm((prev) => ({
+                        ...prev,
+                        country: newCountry,
+                        phone: dial ? applyDialCode(prev.phone ?? "", dial) : prev.phone,
+                      }));
+                    }}
                     className="mt-1"
                   />
                 </div>
