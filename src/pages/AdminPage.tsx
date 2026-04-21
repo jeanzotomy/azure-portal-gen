@@ -2024,7 +2024,7 @@ function AdminUsers() {
     setMfaStatus(mfaMap);
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); void loadBillableLinks(); }, []);
 
   const handleInviteSingle = async () => {
     if (!inviteEmail) return;
