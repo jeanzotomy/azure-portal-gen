@@ -51,7 +51,7 @@ export default function ServiceInvoicesTab() {
   useEffect(() => { void load(); }, []);
 
   const updateStatus = async (id: string, status: InvoiceRow["status"]) => {
-    const patch: Record<string, unknown> = { status };
+    const patch: import("@/integrations/supabase/types").TablesUpdate<"service_invoices"> = { status };
     if (status === "payee") patch.paid_at = new Date().toISOString();
     const { error } = await supabase.from("service_invoices").update(patch).eq("id", id);
     if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
