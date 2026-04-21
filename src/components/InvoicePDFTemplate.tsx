@@ -185,32 +185,60 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
             )}
           </div>
           <div style={{ padding: "12px" }}>
-            {data.payment_details.bank && (
-              <div style={{ fontSize: "11px" }}>
-                <span style={{ fontWeight: 700, textDecoration: "underline" }}>Banque :</span>{" "}
-                {data.payment_details.bank}
-              </div>
-            )}
-            {data.payment_details.iban && (
-              <div style={{ fontSize: "11px", marginTop: "2px" }}>
-                <span style={{ fontWeight: 700 }}>IBAN / Compte :</span> {data.payment_details.iban}
-              </div>
-            )}
-            {data.payment_details.swift && (
-              <div style={{ fontSize: "11px", marginTop: "2px" }}>
-                <span style={{ fontWeight: 700, textDecoration: "underline" }}>SWIFT :</span>{" "}
-                {data.payment_details.swift}
-              </div>
-            )}
-            {data.payment_details.mobile_money && (
-              <div style={{ fontSize: "11px", marginTop: "2px" }}>
-                <span style={{ fontWeight: 700 }}>Mobile Money :</span> {data.payment_details.mobile_money}
-              </div>
-            )}
-            {data.payment_details.reference && (
-              <div style={{ fontSize: "11px", marginTop: "2px" }}>
-                <span style={{ fontWeight: 700 }}>Référence :</span> {data.payment_details.reference}
-              </div>
+            {data.payment_methods && data.payment_methods.length > 0 ? (
+              data.payment_methods.map((pm, i) => {
+                const typeLabels: Record<string, string> = {
+                  virement: "Virement bancaire",
+                  mobile_money: "Mobile Money",
+                  especes: "Espèces",
+                  cheque: "Chèque",
+                  depot: "Dépôt en espèces",
+                  autre: "Autre",
+                };
+                return (
+                  <div key={i} style={{ marginBottom: i < (data.payment_methods!.length - 1) ? "8px" : 0, paddingBottom: i < (data.payment_methods!.length - 1) ? "6px" : 0, borderBottom: i < (data.payment_methods!.length - 1) ? "1px dashed #B6D8E5" : "none" }}>
+                    <div style={{ fontSize: "11px", fontWeight: 700, color: navy }}>
+                      {pm.label} <span style={{ fontWeight: 400, color: "#6B7280" }}>· {typeLabels[pm.type] ?? pm.type}</span>
+                    </div>
+                    {pm.bank && <div style={{ fontSize: "10.5px", marginTop: "2px" }}><b>Banque :</b> {pm.bank}</div>}
+                    {pm.account_holder && <div style={{ fontSize: "10.5px" }}><b>Titulaire :</b> {pm.account_holder}</div>}
+                    {pm.iban && <div style={{ fontSize: "10.5px" }}><b>IBAN / Compte :</b> {pm.iban}</div>}
+                    {pm.swift && <div style={{ fontSize: "10.5px" }}><b>SWIFT :</b> {pm.swift}</div>}
+                    {pm.mobile_number && <div style={{ fontSize: "10.5px" }}><b>Mobile Money :</b> {pm.mobile_number}</div>}
+                    {pm.instructions && <div style={{ fontSize: "10px", fontStyle: "italic", color: "#6B7280", marginTop: "2px" }}>{pm.instructions}</div>}
+                  </div>
+                );
+              })
+            ) : (
+              <>
+                {data.payment_details.bank && (
+                  <div style={{ fontSize: "11px" }}>
+                    <span style={{ fontWeight: 700, textDecoration: "underline" }}>Banque :</span>{" "}
+                    {data.payment_details.bank}
+                  </div>
+                )}
+                {data.payment_details.iban && (
+                  <div style={{ fontSize: "11px", marginTop: "2px" }}>
+                    <span style={{ fontWeight: 700 }}>IBAN / Compte :</span> {data.payment_details.iban}
+                  </div>
+                )}
+                {data.payment_details.swift && (
+                  <div style={{ fontSize: "11px", marginTop: "2px" }}>
+                    <span style={{ fontWeight: 700, textDecoration: "underline" }}>SWIFT :</span>{" "}
+                    {data.payment_details.swift}
+                  </div>
+                )}
+                {data.payment_details.mobile_money && (
+                  <div style={{ fontSize: "11px", marginTop: "2px" }}>
+                    <span style={{ fontWeight: 700 }}>Mobile Money :</span> {data.payment_details.mobile_money}
+                  </div>
+                )}
+                {data.payment_details.reference && (
+                  <div style={{ fontSize: "11px", marginTop: "2px" }}>
+                    <span style={{ fontWeight: 700 }}>Référence :</span> {data.payment_details.reference}
+                  </div>
+                )}
+              </>
             )}
           </div>
         </div>
