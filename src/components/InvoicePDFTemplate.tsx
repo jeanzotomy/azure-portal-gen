@@ -47,6 +47,11 @@ export interface InvoicePDFData {
   early_payment_discount_amount?: number;
   total: number;
   notes?: string | null;
+  issuer?: {
+    full_name?: string | null;
+    role?: string | null;
+    signature_url?: string | null;
+  } | null;
 }
 
 const formatCurrency = (n: number, currency: string) => {
@@ -316,10 +321,39 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
           </div>
         </div>
 
+        {/* Bloc Émis par (signataire) */}
+        {data.issuer && (data.issuer.full_name || data.issuer.signature_url) && (
+          <div style={{ marginTop: "32px", display: "flex", justifyContent: "flex-end" }}>
+            <div style={{ minWidth: "260px", textAlign: "center" }}>
+              <div style={{ fontSize: "10px", color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "4px" }}>
+                Émis par
+              </div>
+              {data.issuer.signature_url && (
+                <img
+                  src={data.issuer.signature_url}
+                  alt="Signature"
+                  crossOrigin="anonymous"
+                  style={{ maxHeight: "70px", maxWidth: "240px", objectFit: "contain", display: "block", margin: "0 auto" }}
+                />
+              )}
+              <div style={{ borderTop: `1px solid ${navy}`, marginTop: "4px", paddingTop: "4px" }}>
+                <div style={{ fontSize: "12px", fontWeight: 700, color: navy }}>
+                  {data.issuer.full_name || "—"}
+                </div>
+                {data.issuer.role && (
+                  <div style={{ fontSize: "10px", color: cyan, fontWeight: 600, textTransform: "capitalize" }}>
+                    {data.issuer.role}
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
         {/* Footer */}
         <div
           style={{
-            marginTop: "40px",
+            marginTop: "24px",
             paddingTop: "12px",
             borderTop: `2px solid ${cyan}`,
             fontSize: "9px",

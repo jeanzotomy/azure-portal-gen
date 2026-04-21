@@ -44,6 +44,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
   const [outputFormat, setOutputFormat] = useState<"pdf" | "docx" | "both">("both");
+  const [issuer, setIssuer] = useState<{ full_name: string | null; role: string | null; signature_url: string | null }>({ full_name: null, role: null, signature_url: null });
   const pdfRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -55,8 +56,31 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
       ]);
       setClients(cls ?? []);
       setCatalog(cat ?? []);
+      // Charger le profil + rôle de l'émetteur
+      if (user) {
+        const [{ data: prof }, { data: roles }] = await Promise.all([
+          supabase.from("profiles").select("full_name, signature_url").eq("user_id", user.id).maybeSingle(),
+          supabase.from("user_roles").select("role").eq("user_id", user.id),
+        ]);
+        const roleLabels: Record<string, string> = {
+          admin: "Administrateur",
+          comptable: "Comptable",
+          gestionnaire: "Gestionnaire de projet",
+          agent: "Agent",
+          client: "Client",
+          user: "Utilisateur",
+        };
+        const priority = ["admin", "comptable", "gestionnaire", "agent", "user", "client"];
+        const userRoles = (roles ?? []).map((r) => r.role as string);
+        const primary = priority.find((r) => userRoles.includes(r)) ?? userRoles[0] ?? null;
+        setIssuer({
+          full_name: prof?.full_name ?? null,
+          role: primary ? (roleLabels[primary] ?? primary) : null,
+          signature_url: prof?.signature_url ?? null,
+        });
+      }
     })();
-  }, [open]);
+  }, [open, user]);
 
   const subtotal = items.reduce((s, i) => s + lineTotal(i), 0);
   const discountAmount = subtotal * (discountRate / 100);
@@ -125,6 +149,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
     subtotal, discount_rate: discountRate, discount_amount: discountAmount, tax_rate: taxRate, tax_amount: taxAmount,
     early_payment_discount_rate: earlyPaymentDiscountRate, early_payment_discount_amount: earlyPaymentDiscountAmount,
     total, notes: notes || null,
+    issuer,
   });
 
   const uploadToSharePoint = async (clientName: string, fileName: string, blob: Blob, contentType: string) => {
