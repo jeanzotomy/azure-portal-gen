@@ -48,8 +48,8 @@ export function Navbar() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 navbar-dark">
       <div className="container flex items-center justify-between h-16">
-        <Link to="/" className="flex items-center rounded-md bg-secondary/70 px-2.5 py-1 ring-1 ring-secondary-foreground/10 shadow-sm">
-          <img src={logo} alt="CloudMature" className="h-10 w-auto max-w-[180px] drop-shadow-sm" />
+        <Link to="/" className="flex items-center gap-2">
+          <img src={logo} alt="CloudMature" className="h-12 w-auto max-w-[190px] brightness-[1.15] contrast-[1.1]" />
         </Link>
 
         {/* Desktop */}
