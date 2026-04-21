@@ -31,6 +31,10 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { HardDrive } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import SharePointTab from "@/components/SharePointTab";
+import ServiceClientsTab from "@/components/ServiceClientsTab";
+import ServiceCatalogTab from "@/components/ServiceCatalogTab";
+import ServiceInvoicesTab from "@/components/ServiceInvoicesTab";
+import { Briefcase, BookOpen, Receipt } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RePieChart, Pie, Cell, AreaChart, Area } from "recharts";
 import type { User as SupaUser } from "@supabase/supabase-js";
 import { PortalInfoBar } from "@/components/PortalInfoBar";
