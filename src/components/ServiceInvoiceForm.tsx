@@ -156,11 +156,13 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
       const { data: inv, error } = await supabase.from("service_invoices").insert({
         client_id: clientId, invoice_date: invoiceDate, due_date: dueDate || null, currency,
         payment_details: payment as never, subtotal, discount_rate: discountRate, discount_amount: discountAmount,
-        tax_rate: taxRate, tax_amount: taxAmount, total, notes: notes || null, status, created_by: user.id,
+        tax_rate: taxRate, tax_amount: taxAmount,
+        early_payment_discount_rate: earlyPaymentDiscountRate, early_payment_discount_amount: earlyPaymentDiscountAmount,
+        total, notes: notes || null, status, created_by: user.id,
       }).select().single();
       if (error || !inv) throw new Error(error?.message ?? "Insert failed");
 
-      const itemsPayload = items.map((it, i) => ({ invoice_id: inv.id, position: i + 1, catalog_id: it.catalog_id ?? null, description: it.description, subtitle: it.subtitle ?? null, quantity: it.quantity, unit: it.unit, unit_price: it.unit_price, total: it.quantity * it.unit_price }));
+      const itemsPayload = items.map((it, i) => ({ invoice_id: inv.id, position: i + 1, catalog_id: it.catalog_id ?? null, description: it.description, subtitle: it.subtitle ?? null, quantity: it.quantity, unit: it.unit, unit_price: it.unit_price, discount_rate: it.discount_rate ?? 0, total: lineTotal(it) }));
       await supabase.from("service_invoice_items").insert(itemsPayload);
 
       // Generate PDF + DOCX
