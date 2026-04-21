@@ -605,7 +605,8 @@ export default function HrTab() {
                 </CardContent>
               </Card>
             );
-          })}
+          });
+          })()}
         </TabsContent>
       </Tabs>
 
