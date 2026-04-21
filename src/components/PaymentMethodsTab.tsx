@@ -185,7 +185,7 @@ export default function PaymentMethodsTab() {
             </DialogTitle>
           </DialogHeader>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div className="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div className="sm:col-span-2">
               <Label>Libellé *</Label>
               <Input value={editing?.label ?? ""} onChange={(e) => setEditing({ ...editing, label: e.target.value })} placeholder="Ex: Virement Ecobank GNF" />
@@ -244,7 +244,7 @@ export default function PaymentMethodsTab() {
             </div>
           </div>
 
-          <DialogFooter className="flex-col sm:flex-row gap-2">
+          <DialogFooter className="flex-col sm:flex-row gap-2 px-4 sm:px-6 pb-4 sm:pb-6">
             <Button variant="outline" onClick={() => setOpen(false)} className="w-full sm:w-auto">Annuler</Button>
             <Button onClick={() => void save()} className="w-full sm:w-auto">Enregistrer</Button>
           </DialogFooter>
