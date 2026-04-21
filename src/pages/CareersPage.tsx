@@ -146,6 +146,68 @@ export default function CareersPage() {
 
           {loading && <p className="text-center text-muted-foreground">Chargement des offres...</p>}
 
+          {!loading && jobs.length > 0 && (
+            <div className="mb-8 p-4 rounded-xl border bg-card/50 backdrop-blur-sm space-y-3">
+              <div className="relative">
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Rechercher par titre, mot-clé, lieu..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-9 pr-9"
+                />
+                {search && (
+                  <button
+                    type="button"
+                    onClick={() => setSearch("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    aria-label="Effacer"
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                <Select value={contractFilter} onValueChange={setContractFilter}>
+                  <SelectTrigger><SelectValue placeholder="Type de contrat" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tous les contrats</SelectItem>
+                    {contractTypes.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+                <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
+                  <SelectTrigger><SelectValue placeholder="Département" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tous les départements</SelectItem>
+                    {departments.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+                <Select value={locationFilter} onValueChange={setLocationFilter}>
+                  <SelectTrigger><SelectValue placeholder="Lieu" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tous les lieux</SelectItem>
+                    {locations.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+                <Select value={sectorFilter} onValueChange={setSectorFilter}>
+                  <SelectTrigger><SelectValue placeholder="Secteur" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tous les secteurs</SelectItem>
+                    {sectors.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>{filteredJobs.length} offre{filteredJobs.length > 1 ? "s" : ""} trouvée{filteredJobs.length > 1 ? "s" : ""} sur {jobs.length}</span>
+                {hasActiveFilters && (
+                  <button type="button" onClick={resetFilters} className="text-primary hover:underline font-medium">
+                    Réinitialiser les filtres
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
           {!loading && jobs.length === 0 && (
             <Card>
               <CardContent className="p-12 text-center">
@@ -157,8 +219,19 @@ export default function CareersPage() {
             </Card>
           )}
 
+          {!loading && jobs.length > 0 && filteredJobs.length === 0 && (
+            <Card>
+              <CardContent className="p-10 text-center">
+                <Search className="mx-auto mb-3 text-muted-foreground" size={36} />
+                <h3 className="font-semibold mb-1">Aucune offre ne correspond à votre recherche</h3>
+                <p className="text-sm text-muted-foreground mb-4">Essayez d'autres mots-clés ou réinitialisez les filtres.</p>
+                <Button variant="outline" onClick={resetFilters}>Réinitialiser</Button>
+              </CardContent>
+            </Card>
+          )}
+
           <div className="space-y-4">
-            {jobs.map((job) => (
+            {filteredJobs.map((job) => (
               <Card key={job.id} className="hover:shadow-md transition-shadow">
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between gap-4 flex-wrap">
