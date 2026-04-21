@@ -42,14 +42,14 @@ import { NotificationBell } from "@/components/NotificationBell";
 import PaymentMethodsTab from "@/components/PaymentMethodsTab";
 import HrTab from "@/components/HrTab";
 import { ProfileSignatureDialog } from "@/components/ProfileSignatureDialog";
-import { FormDialogHeader, formDialogContentClass } from "@/components/FormDialogHeader";
+import { getDialCode, applyDialCode } from "@/lib/country-dial-codes";
 
 type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts" | "sharepoint" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods" | "hr";
 type AgentTab = "dashboard" | "tickets" | "contacts";
 type GestionnaireTab = "dashboard" | "projects" | "sharepoint" | "tickets" | "contacts" | "hr" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods";
 
 function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser; collapsed: boolean; handleLogout: () => void }) {
-  const [tab, setTab] = useState<"dashboard" | "projects" | "sharepoint" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods">("dashboard");
+  const [tab, setTab] = useState<"projects" | "sharepoint" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods">("projects");
   const [signatureOpen, setSignatureOpen] = useState(false);
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -62,7 +62,6 @@ function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser
   ];
 
   const navItems = [
-    { id: "dashboard" as const, icon: LayoutDashboard, label: "Tableau de bord" },
     { id: "projects" as const, icon: FolderOpen, label: t("admin.projects") },
     { id: "sharepoint" as const, icon: HardDrive, label: "SharePoint" },
     ...servicesGroup,
@@ -90,12 +89,6 @@ function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu>
-                <SidebarMenuItem>
-                  <SidebarMenuButton onClick={() => setTab("dashboard")} isActive={tab === "dashboard"} tooltip="Tableau de bord" className="gap-3">
-                    <LayoutDashboard size={18} />
-                    <span>Tableau de bord</span>
-                  </SidebarMenuButton>
-                </SidebarMenuItem>
                 <SidebarMenuItem>
                   <SidebarMenuButton onClick={() => setTab("projects")} isActive={tab === "projects"} tooltip={t("admin.projects")} className="gap-3">
                     <FolderOpen size={18} />
@@ -175,7 +168,6 @@ function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser
         </header>
         <PortalInfoBar />
         <main className="flex-1 p-6 overflow-auto">
-          {tab === "dashboard" && <ComptableDashboard />}
           {tab === "projects" && <AdminProjectsInner readOnly />}
           {tab === "sharepoint" && <SharePointTab readOnly={false} />}
           {tab === "service-clients" && <ServiceClientsTab />}
@@ -248,11 +240,6 @@ function AdminContent() {
   useEffect(() => {
     if (!rolesLoading && !isAdmin && !isAgent && !isComptable && !isGestionnaire && ready && user) navigate("/portal");
   }, [isAdmin, isAgent, isComptable, isGestionnaire, rolesLoading, ready, user, navigate]);
-
-  // Compute admin services tab membership BEFORE any early return so hook order stays stable
-  const adminServicesGroupIds: AdminTab[] = ["service-clients", "service-catalog", "service-invoices", "payment-methods"];
-  const isAdminServicesTab = adminServicesGroupIds.includes(tab);
-  useEffect(() => { if (isAdminServicesTab) setAdminServicesOpen(true); }, [isAdminServicesTab]);
 
   if (!ready || rolesLoading || mfaVerified === null) return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
@@ -514,8 +501,8 @@ function AdminContent() {
     { id: "hr", icon: Briefcase, label: "Recrutement" },
   ];
 
-
-
+  const isAdminServicesTab = adminServicesGroup.some((s) => s.id === tab);
+  useEffect(() => { if (isAdminServicesTab) setAdminServicesOpen(true); }, [isAdminServicesTab]);
 
   return (
     <div className="min-h-screen flex w-full bg-background">
@@ -868,324 +855,29 @@ function AgentDashboard({ user }: { user: SupaUser }) {
 /* ─── Admin Dashboard ─── */
 const CHART_COLORS = ["hsl(var(--primary))", "hsl(var(--accent))", "hsl(199, 89%, 48%)", "hsl(160, 60%, 45%)"];
 
-/* ─── Comptable Dashboard ─── */
-function ComptableDashboard() {
-  const [loading, setLoading] = useState(true);
-  const [invoices, setInvoices] = useState<any[]>([]);
-  const [clients, setClients] = useState<any[]>([]);
-  const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
-
-  const load = () => {
-    setLoading(true);
-    Promise.all([
-      supabase.from("service_invoices").select("id, status, total, currency, invoice_date, due_date, paid_at, created_at, client_id, service_clients(client_name)").order("created_at", { ascending: false }),
-      supabase.from("service_clients").select("id, client_name, country, created_at").order("created_at", { ascending: false }),
-      supabase.from("payment_methods").select("id, label, type, currency, active"),
-    ]).then(([invRes, cliRes, pmRes]) => {
-      setInvoices((invRes.data ?? []) as any[]);
-      setClients((cliRes.data ?? []) as any[]);
-      setPaymentMethods((pmRes.data ?? []) as any[]);
-      setLoading(false);
-    });
-  };
-
-  useEffect(() => { load(); }, []);
-
-  const fmt = (n: number) => new Intl.NumberFormat("fr-FR").format(n);
-
-  const counts = {
-    total: invoices.length,
-    brouillon: invoices.filter((i) => i.status === "brouillon").length,
-    emise: invoices.filter((i) => i.status === "emise").length,
-    payee: invoices.filter((i) => i.status === "payee").length,
-    enRetard: invoices.filter((i) => i.status === "en_retard").length,
-    annulee: invoices.filter((i) => i.status === "annulee").length,
-  };
-
-  const sumByCurrency = (status: string, cur: string) =>
-    invoices.filter((i) => i.status === status && i.currency === cur)
-      .reduce((s, i) => s + Number(i.total || 0), 0);
-
-  const totals = {
-    paid: { GNF: sumByCurrency("payee", "GNF"), USD: sumByCurrency("payee", "USD"), EUR: sumByCurrency("payee", "EUR") },
-    pending: {
-      GNF: invoices.filter((i) => (i.status === "emise" || i.status === "en_retard") && i.currency === "GNF").reduce((s, i) => s + Number(i.total || 0), 0),
-      USD: invoices.filter((i) => (i.status === "emise" || i.status === "en_retard") && i.currency === "USD").reduce((s, i) => s + Number(i.total || 0), 0),
-      EUR: invoices.filter((i) => (i.status === "emise" || i.status === "en_retard") && i.currency === "EUR").reduce((s, i) => s + Number(i.total || 0), 0),
-    },
-  };
-
-  // Monthly invoices (6 months)
-  const monthlyData = (() => {
-    const months: { name: string; emises: number; payees: number; retard: number }[] = [];
-    for (let i = 5; i >= 0; i--) {
-      const d = new Date();
-      d.setMonth(d.getMonth() - i);
-      const monthName = d.toLocaleDateString("fr-FR", { month: "short" });
-      const y = d.getFullYear();
-      const m = d.getMonth();
-      const inMonth = invoices.filter((inv) => {
-        const cd = new Date(inv.created_at || inv.invoice_date);
-        return cd.getFullYear() === y && cd.getMonth() === m;
-      });
-      months.push({
-        name: monthName,
-        emises: inMonth.filter((i) => i.status === "emise").length,
-        payees: inMonth.filter((i) => i.status === "payee").length,
-        retard: inMonth.filter((i) => i.status === "en_retard").length,
-      });
-    }
-    return months;
-  })();
-
-  const statusPie = [
-    { name: "Brouillon", value: counts.brouillon },
-    { name: "Émise", value: counts.emise },
-    { name: "Payée", value: counts.payee },
-    { name: "En retard", value: counts.enRetard },
-    { name: "Annulée", value: counts.annulee },
-  ].filter((d) => d.value > 0);
-
-  const recentInvoices = invoices.slice(0, 6);
-
-  const cards = [
-    { label: "Factures total", value: counts.total, icon: Receipt, color: "gradient-primary", subtitle: `${counts.brouillon} brouillon(s)` },
-    { label: "Émises", value: counts.emise, icon: Send, color: "bg-blue-500", subtitle: "À encaisser" },
-    { label: "Payées", value: counts.payee, icon: CheckCircle2, color: "bg-green-500", subtitle: "Encaissées" },
-    { label: "En retard", value: counts.enRetard, icon: AlertCircle, color: "bg-destructive", subtitle: "Action requise" },
-    { label: "Clients facturables", value: clients.length, icon: Briefcase, color: "bg-teal-500", subtitle: "Comptes actifs" },
-    { label: "Modes de paiement", value: paymentMethods.filter((p) => p.active).length, icon: CreditCard, color: "bg-accent", subtitle: `${paymentMethods.length} configurés` },
-  ];
-
-  return (
-    <div className="space-y-6 animate-fade-up">
-      {/* Welcome banner */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-accent/5 to-primary/10 rounded-2xl p-6 border border-primary/10">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
-        <div className="relative flex items-center justify-between">
-          <div>
-            <h1 className="text-2xl font-bold text-foreground">Vue comptable</h1>
-            <p className="text-muted-foreground mt-1">Synthèse de la facturation, des encaissements et des clients facturables.</p>
-          </div>
-          <div className="hidden md:flex items-center gap-3 text-sm text-muted-foreground">
-            <Button variant="outline" size="sm" onClick={load} className="gap-1.5">
-              <RefreshCw size={14} /> Actualiser
-            </Button>
-            <span className="flex items-center gap-2">
-              <Activity size={16} className="text-primary" />
-              {new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Encaissements / Restant à encaisser */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <Card className="border-border/50 shadow-card">
-          <CardContent className="p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <CheckCircle2 size={16} className="text-green-500" />
-              <h3 className="font-semibold text-card-foreground">Encaissé</h3>
-            </div>
-            <div className="grid grid-cols-3 gap-3">
-              {(["GNF", "USD", "EUR"] as const).map((cur) => (
-                <div key={cur}>
-                  <p className="text-xs text-muted-foreground">{cur}</p>
-                  <p className="text-lg font-bold text-foreground">{fmt(totals.paid[cur])}</p>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-        <Card className="border-border/50 shadow-card">
-          <CardContent className="p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <Clock size={16} className="text-orange-500" />
-              <h3 className="font-semibold text-card-foreground">Restant à encaisser</h3>
-            </div>
-            <div className="grid grid-cols-3 gap-3">
-              {(["GNF", "USD", "EUR"] as const).map((cur) => (
-                <div key={cur}>
-                  <p className="text-xs text-muted-foreground">{cur}</p>
-                  <p className="text-lg font-bold text-foreground">{fmt(totals.pending[cur])}</p>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Cards grid */}
-      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
-        {cards.map((c) => (
-          <div key={c.label} className="bg-card rounded-xl p-4 shadow-card border border-border/50 hover:shadow-card-hover transition-all">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-xs text-muted-foreground font-medium">{c.label}</span>
-              <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${c.color}`}>
-                <c.icon size={16} className="text-primary-foreground" />
-              </div>
-            </div>
-            <p className="text-2xl font-bold text-card-foreground">{c.value}</p>
-            <p className="text-[11px] text-muted-foreground mt-0.5">{c.subtitle}</p>
-          </div>
-        ))}
-      </div>
-
-      {/* Charts */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-2 bg-card rounded-xl shadow-card border border-border/50 p-5">
-          <div className="flex items-center gap-2 mb-4">
-            <BarChart3 size={16} className="text-primary" />
-            <h3 className="font-semibold text-card-foreground">Activité de facturation (6 mois)</h3>
-          </div>
-          <div className="h-64">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart data={monthlyData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-                <XAxis dataKey="name" tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
-                <YAxis tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" allowDecimals={false} />
-                <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "0.75rem", fontSize: 12 }} />
-                <Bar dataKey="emises" fill="hsl(199, 89%, 48%)" name="Émises" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="payees" fill="hsl(160, 60%, 45%)" name="Payées" radius={[4, 4, 0, 0]} />
-                <Bar dataKey="retard" fill="hsl(var(--destructive))" name="En retard" radius={[4, 4, 0, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-
-        <div className="bg-card rounded-xl shadow-card border border-border/50 p-5">
-          <div className="flex items-center gap-2 mb-2">
-            <PieChart size={14} className="text-primary" />
-            <h4 className="text-sm font-semibold text-card-foreground">Répartition par statut</h4>
-          </div>
-          {statusPie.length > 0 ? (
-            <div className="h-48">
-              <ResponsiveContainer width="100%" height="100%">
-                <RePieChart>
-                  <Pie data={statusPie} cx="50%" cy="50%" innerRadius={36} outerRadius={64} paddingAngle={4} dataKey="value">
-                    {statusPie.map((_, i) => (
-                      <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
-                    ))}
-                  </Pie>
-                  <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "0.5rem", fontSize: 11 }} />
-                </RePieChart>
-              </ResponsiveContainer>
-            </div>
-          ) : (
-            <p className="text-xs text-muted-foreground text-center py-8">Aucune facture</p>
-          )}
-          <div className="flex flex-wrap gap-2 justify-center mt-2">
-            {statusPie.map((d, i) => (
-              <span key={d.name} className="text-[10px] text-muted-foreground flex items-center gap-1">
-                <span className="w-2 h-2 rounded-full" style={{ background: CHART_COLORS[i % CHART_COLORS.length] }} />
-                {d.name} ({d.value})
-              </span>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Recent invoices */}
-      <div className="bg-card rounded-xl shadow-card border border-border/50 overflow-hidden">
-        <div className="p-5 border-b border-border/50 flex items-center justify-between">
-          <h3 className="font-semibold text-card-foreground flex items-center gap-2">
-            <Receipt size={16} className="text-primary" /> Factures récentes
-          </h3>
-        </div>
-        <div className="divide-y divide-border/50">
-          {recentInvoices.map((inv: any) => (
-            <div key={inv.id} className="p-4 hover:bg-muted/30 transition-colors flex items-center justify-between gap-3 flex-wrap">
-              <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium text-card-foreground truncate">{inv.service_clients?.client_name ?? "Client supprimé"}</p>
-                <p className="text-[11px] text-muted-foreground">
-                  {new Date(inv.invoice_date).toLocaleDateString("fr-FR")} · {inv.currency}
-                </p>
-              </div>
-              <span className="text-sm font-bold text-foreground">{fmt(Number(inv.total))} {inv.currency}</span>
-              <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
-                inv.status === "payee" ? "bg-green-500/10 text-green-600" :
-                inv.status === "emise" ? "bg-blue-500/10 text-blue-600" :
-                inv.status === "en_retard" ? "bg-destructive/10 text-destructive" :
-                inv.status === "annulee" ? "bg-orange-500/10 text-orange-600" :
-                "bg-muted text-muted-foreground"
-              }`}>
-                {inv.status === "payee" ? "Payée" : inv.status === "emise" ? "Émise" : inv.status === "en_retard" ? "En retard" : inv.status === "annulee" ? "Annulée" : "Brouillon"}
-              </span>
-            </div>
-          ))}
-          {recentInvoices.length === 0 && !loading && (
-            <p className="p-8 text-center text-sm text-muted-foreground">Aucune facture</p>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
-
-
 function AdminDashboard() {
-  const [stats, setStats] = useState({
-    users: 0,
-    projects: 0,
-    activeProjects: 0,
-    openTickets: 0,
-    serviceClients: 0,
-    serviceInvoices: 0,
-    invoicesEmitted: 0,
-    invoicesPaid: 0,
-    invoicesOverdue: 0,
-    paidAmountGNF: 0,
-    paidAmountUSD: 0,
-    paidAmountEUR: 0,
-    openJobs: 0,
-    newApplications: 0,
-  });
+  const [stats, setStats] = useState({ users: 0, projects: 0, activeProjects: 0, openTickets: 0 });
   const [projects, setProjects] = useState<any[]>([]);
   const [tickets, setTickets] = useState<any[]>([]);
   const [recentProfiles, setRecentProfiles] = useState<any[]>([]);
-  const [serviceInvoices, setServiceInvoices] = useState<any[]>([]);
 
   const loadData = () => {
     Promise.all([
       supabase.from("profiles").select("*").order("created_at", { ascending: false }),
       supabase.from("projects").select("*").order("created_at", { ascending: false }),
       supabase.from("support_tickets").select("*").order("created_at", { ascending: false }),
-      supabase.from("service_clients").select("id"),
-      supabase.from("service_invoices").select("id, status, total, currency, invoice_date, paid_at, created_at"),
-      supabase.from("job_postings").select("id, status"),
-      supabase.from("job_applications").select("id, status"),
-    ]).then(([profRes, projRes, tickRes, scRes, siRes, jpRes, jaRes]) => {
+    ]).then(([profRes, projRes, tickRes]) => {
       const profs = profRes.data || [];
       const projs = projRes.data || [];
       const ticks = tickRes.data || [];
-      const sClients = scRes.data || [];
-      const sInvoices = (siRes.data || []) as any[];
-      const jobs = jpRes.data || [];
-      const apps = jaRes.data || [];
-
-      const paidByCurrency = (cur: string) =>
-        sInvoices.filter((i) => i.status === "payee" && i.currency === cur)
-          .reduce((s, i) => s + Number(i.total || 0), 0);
-
       setRecentProfiles(profs.slice(0, 5));
       setProjects(projs);
       setTickets(ticks);
-      setServiceInvoices(sInvoices);
       setStats({
         users: profs.length,
         projects: projs.length,
         activeProjects: projs.filter(p => p.status === "en_cours").length,
         openTickets: ticks.filter(t => t.status === "ouvert").length,
-        serviceClients: sClients.length,
-        serviceInvoices: sInvoices.length,
-        invoicesEmitted: sInvoices.filter((i) => i.status === "emise").length,
-        invoicesPaid: sInvoices.filter((i) => i.status === "payee").length,
-        invoicesOverdue: sInvoices.filter((i) => i.status === "en_retard").length,
-        paidAmountGNF: paidByCurrency("GNF"),
-        paidAmountUSD: paidByCurrency("USD"),
-        paidAmountEUR: paidByCurrency("EUR"),
-        openJobs: jobs.filter((j: any) => j.status === "publiee").length,
-        newApplications: apps.filter((a: any) => a.status === "nouvelle").length,
       });
     });
   };
@@ -1206,9 +898,9 @@ function AdminDashboard() {
     { name: "Résolu", value: tickets.filter(t => t.status === "résolu").length },
   ].filter(d => d.value > 0);
 
-  // Monthly activity (last 6 months) - now includes service invoices
+  // Monthly activity (last 6 months)
   const monthlyData = (() => {
-    const months: { name: string; projets: number; tickets: number; factures: number }[] = [];
+    const months: { name: string; projets: number; tickets: number }[] = [];
     for (let i = 5; i >= 0; i--) {
       const d = new Date();
       d.setMonth(d.getMonth() - i);
@@ -1223,10 +915,6 @@ function AdminDashboard() {
         }).length,
         tickets: tickets.filter(t => {
           const cd = new Date(t.created_at);
-          return cd.getFullYear() === year && cd.getMonth() === month;
-        }).length,
-        factures: serviceInvoices.filter((inv: any) => {
-          const cd = new Date(inv.created_at || inv.invoice_date);
           return cd.getFullYear() === year && cd.getMonth() === month;
         }).length,
       });
@@ -1245,17 +933,11 @@ function AdminDashboard() {
     ? Math.round(projects.reduce((sum, p) => sum + (p.progress || 0), 0) / projects.length)
     : 0;
 
-  const fmtNum = (n: number) => new Intl.NumberFormat("fr-FR").format(n);
-
   const cards = [
     { label: "Clients inscrits", value: stats.users, icon: Users, color: "gradient-primary", subtitle: "Total" },
     { label: "Projets total", value: stats.projects, icon: FolderOpen, color: "bg-accent", subtitle: `${stats.activeProjects} actifs` },
     { label: "Tickets ouverts", value: stats.openTickets, icon: LifeBuoy, color: "bg-destructive", subtitle: `${tickets.length} total` },
-    { label: "Budget projets", value: totalBudget, icon: DollarSign, color: "bg-primary", subtitle: `Moy. ${avgProgress}% progression`, isCurrency: true },
-    { label: "Clients facturables", value: stats.serviceClients, icon: Briefcase, color: "bg-teal-500", subtitle: "Comptes actifs" },
-    { label: "Factures émises", value: stats.invoicesEmitted, icon: Receipt, color: "bg-blue-500", subtitle: `${stats.serviceInvoices} au total` },
-    { label: "Factures payées", value: stats.invoicesPaid, icon: CheckCircle2, color: "bg-green-500", subtitle: `${stats.invoicesOverdue} en retard` },
-    { label: "Recrutement", value: stats.newApplications, icon: UserPlus, color: "bg-orange-500", subtitle: `${stats.openJobs} offres publiées` },
+    { label: "Budget total", value: totalBudget, icon: DollarSign, color: "bg-primary", subtitle: `Moy. ${avgProgress}% progression`, isCurrency: true },
   ];
 
   return (
@@ -1278,28 +960,6 @@ function AdminDashboard() {
             </span>
           </div>
         </div>
-      </div>
-
-      {/* Revenue strip */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card className="border-border/50 shadow-card">
-          <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground">Encaissé GNF</p>
-            <p className="text-xl font-bold text-foreground mt-1">{fmtNum(stats.paidAmountGNF)} <span className="text-sm font-normal text-muted-foreground">GNF</span></p>
-          </CardContent>
-        </Card>
-        <Card className="border-border/50 shadow-card">
-          <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground">Encaissé USD</p>
-            <p className="text-xl font-bold text-foreground mt-1">{fmtNum(stats.paidAmountUSD)} <span className="text-sm font-normal text-muted-foreground">USD</span></p>
-          </CardContent>
-        </Card>
-        <Card className="border-border/50 shadow-card">
-          <CardContent className="p-4">
-            <p className="text-xs text-muted-foreground">Encaissé EUR</p>
-            <p className="text-xl font-bold text-foreground mt-1">{fmtNum(stats.paidAmountEUR)} <span className="text-sm font-normal text-muted-foreground">EUR</span></p>
-          </CardContent>
-        </Card>
       </div>
 
       {/* Stats grid */}
@@ -1340,10 +1000,6 @@ function AdminDashboard() {
                     <stop offset="5%" stopColor="hsl(var(--accent))" stopOpacity={0.3} />
                     <stop offset="95%" stopColor="hsl(var(--accent))" stopOpacity={0} />
                   </linearGradient>
-                  <linearGradient id="gradFactures" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(160, 60%, 45%)" stopOpacity={0.3} />
-                    <stop offset="95%" stopColor="hsl(160, 60%, 45%)" stopOpacity={0} />
-                  </linearGradient>
                 </defs>
                 <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
                 <XAxis dataKey="name" tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
@@ -1354,7 +1010,6 @@ function AdminDashboard() {
                 />
                 <Area type="monotone" dataKey="projets" stroke="hsl(var(--primary))" fill="url(#gradProjects)" strokeWidth={2} name="Projets" />
                 <Area type="monotone" dataKey="tickets" stroke="hsl(var(--accent))" fill="url(#gradTickets)" strokeWidth={2} name="Tickets" />
-                <Area type="monotone" dataKey="factures" stroke="hsl(160, 60%, 45%)" fill="url(#gradFactures)" strokeWidth={2} name="Factures" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
@@ -1791,14 +1446,11 @@ function AdminProjectsInner({ readOnly = false, assignedCount }: { readOnly?: bo
 
       {/* Edit Project Dialog */}
       <Dialog open={!!editingId} onOpenChange={(open) => { if (!open) setEditingId(null); }}>
-        <DialogContent className={`max-w-2xl max-h-[90vh] overflow-y-auto ${formDialogContentClass}`}>
-          <FormDialogHeader
-            icon={Pencil}
-            title="Modifier le projet"
-            subtitle="Mettez à jour les informations principales du projet."
-            badges={[]}
-          />
-          <div className="p-4 sm:p-6 space-y-4">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Modifier le projet</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
             <div>
               <label className="text-sm font-medium text-card-foreground">Nom du projet</label>
               <Input value={editName} onChange={(e) => setEditName(e.target.value)} className="mt-1" />
@@ -2840,14 +2492,12 @@ function AdminUsers() {
 
       {/* Edit User Profile Dialog */}
       <Dialog open={!!editingUser} onOpenChange={(open) => { if (!open) setEditingUser(null); }}>
-        <DialogContent className={`max-w-2xl max-h-[85vh] overflow-y-auto ${formDialogContentClass}`}>
-          <FormDialogHeader
-            icon={UserCog}
-            title="Modifier le profil"
-            subtitle={editForm.full_name || "Utilisateur"}
-            badges={[]}
-          />
-          <div className="p-4 sm:p-6 space-y-4">
+        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Pencil size={18} /> Modifier le profil — {editForm.full_name || "Utilisateur"}
+            </DialogTitle>
+          </DialogHeader>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
               <label className="text-sm font-medium text-muted-foreground">Email (non modifiable)</label>
@@ -2863,13 +2513,26 @@ function AdminUsers() {
             </div>
             <div>
               <label className="text-sm font-medium text-foreground">Téléphone</label>
-              <Input value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} className="mt-1" />
+              <Input
+                value={editForm.phone}
+                onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                placeholder={getDialCode(editForm.country) ? `${getDialCode(editForm.country)} ...` : "+XXX ..."}
+                className="mt-1"
+              />
             </div>
             <div>
               <label className="text-sm font-medium text-foreground">Pays</label>
               <select
                 value={editForm.country}
-                onChange={(e) => setEditForm({ ...editForm, country: e.target.value })}
+                onChange={(e) => {
+                  const newCountry = e.target.value;
+                  const dial = getDialCode(newCountry);
+                  setEditForm((prev) => ({
+                    ...prev,
+                    country: newCountry,
+                    phone: dial ? applyDialCode(prev.phone, dial) : prev.phone,
+                  }));
+                }}
                 className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 <option value="">Sélectionner un pays</option>
@@ -2956,7 +2619,6 @@ function AdminUsers() {
               {editSaving ? "Sauvegarde..." : "Sauvegarder"}
             </Button>
           </DialogFooter>
-          </div>
         </DialogContent>
       </Dialog>
 

@@ -6,11 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Plus, Pencil, Trash2, Search, Package, RefreshCw } from "lucide-react";
-import { FormDialogHeader, formDialogContentClass } from "@/components/FormDialogHeader";
 
 interface CatalogService {
   id: string;
@@ -180,14 +179,11 @@ export default function ServiceCatalogTab() {
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className={`max-w-lg ${formDialogContentClass}`}>
-          <FormDialogHeader
-            icon={Package}
-            title={editing ? "Modifier le service" : "Nouveau service"}
-            subtitle="Renseignez les informations du service du catalogue."
-            badges={[]}
-          />
-          <div className="space-y-3 p-4 sm:p-6">
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle>{editing ? "Modifier le service" : "Nouveau service"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
             <div>
               <label className="text-xs font-medium">Nom *</label>
               <Input value={form.name ?? ""} onChange={(e) => setForm({ ...form, name: e.target.value })} />

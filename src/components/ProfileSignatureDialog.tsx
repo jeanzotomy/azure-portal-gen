@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { useToast } from "@/hooks/use-toast";
 import { SignaturePad } from "@/components/SignaturePad";
-import { PenLine, Trash2, ShieldCheck } from "lucide-react";
+import { PenLine, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { FormDialogHeader, formDialogContentClass } from "@/components/FormDialogHeader";
 
 interface Props {
   open: boolean;
@@ -73,13 +72,15 @@ export function ProfileSignatureDialog({ open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className={`w-[calc(100vw-1rem)] sm:w-auto max-w-xl ${formDialogContentClass}`}>
-        <FormDialogHeader
-          icon={PenLine}
-          title="Ma signature"
-          subtitle="Dessinez votre signature : elle sera apposée automatiquement sur vos factures."
-          badges={[{ icon: ShieldCheck, label: "Stockage sécurisé" }]}
-        />
+      <DialogContent className="w-[calc(100vw-1rem)] sm:w-auto max-w-xl p-0 gap-0 [&>button]:text-white [&>button]:opacity-90 [&>button]:hover:opacity-100">
+        <DialogHeader className="bg-gradient-to-r from-primary to-[#007aa3] text-primary-foreground px-4 sm:px-6 py-4 rounded-t-lg pr-12">
+          <DialogTitle className="text-primary-foreground flex items-center gap-2 text-base sm:text-lg">
+            <PenLine size={20} className="shrink-0" /> Ma signature
+          </DialogTitle>
+          <DialogDescription className="text-primary-foreground/80 text-xs sm:text-sm">
+            Dessinez votre signature ci-dessous. Elle apparaîtra automatiquement sur les factures que vous émettez.
+          </DialogDescription>
+        </DialogHeader>
 
         <div className="p-4 sm:p-6 space-y-3">
 

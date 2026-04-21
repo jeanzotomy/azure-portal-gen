@@ -7,8 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
-import { FormDialogHeader, formDialogContentClass } from "@/components/FormDialogHeader";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import { Upload, FileText, DollarSign, AlertCircle, CheckCircle2, Clock, Loader2, Trash2, Search, Receipt, Sparkles, Plus, Pencil } from "lucide-react";
 import { Progress } from "@/components/ui/progress";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
@@ -649,14 +648,16 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
           resetForm();
         }
       }}>
-        <DialogContent className={`max-w-2xl max-h-[90vh] overflow-y-auto ${formDialogContentClass}`} onPointerDownOutside={e => { if (uploading || parsing) e.preventDefault(); }}>
-          <FormDialogHeader
-            icon={DollarSign}
-            title={editingInvoiceId ? "Modifier la facture" : parsedData && !parsedData.project_id ? "Facture à compléter" : "Nouvelle facture / reçu"}
-            subtitle="Remplissez les champs de la facture ou du reçu."
-            badges={[]}
-          />
-          <div className="p-4 sm:p-6 space-y-4">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto" onPointerDownOutside={e => { if (uploading || parsing) e.preventDefault(); }}>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <DollarSign size={18} />
+              {editingInvoiceId ? "Modifier la facture" : parsedData && !parsedData.project_id ? "Facture à compléter" : "Nouvelle facture / reçu"}
+            </DialogTitle>
+            <DialogDescription className="text-gray-900 dark:text-gray-100">
+              Remplissez les champs de la facture ou du reçu.
+            </DialogDescription>
+          </DialogHeader>
 
           {/* Progress */}
           {currentStep !== "idle" && currentStep !== "validation" && (
@@ -794,7 +795,6 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
               {uploading ? <Loader2 size={16} className="mr-2 animate-spin" /> : <CheckCircle2 size={16} className="mr-2" />}
               {uploading ? "Enregistrement..." : editingInvoiceId ? "Sauvegarder" : "Valider et enregistrer"}
             </Button>
-          </div>
           </div>
         </DialogContent>
       </Dialog>
