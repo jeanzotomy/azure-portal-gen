@@ -228,6 +228,7 @@ function PortalContent() {
           {tab === "dashboard" && <DashboardTab user={user} />}
           {tab === "projects" && <ProjectsTab user={user} />}
           {tab === "tickets" && <TicketsTab user={user} />}
+          {tab === "applications" && <ApplicationsTab user={user} />}
           {tab === "profile" && <ProfileTab user={user} />}
         </main>
       </div>
