@@ -23,6 +23,8 @@ interface JobPosting {
   sector: string | null;
   start_date: string | null;
   salary_range: string | null;
+  contract_duration: string | null;
+  renewable: boolean;
 }
 
 export default function CareersPage() {
