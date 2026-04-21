@@ -612,8 +612,8 @@ export default function HrTab() {
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl">
-          <DialogHeader className="bg-gradient-to-r from-primary to-[#007aa3] text-primary-foreground -m-6 mb-2 p-6 rounded-t-lg">
-            <DialogTitle className="text-primary-foreground">{editing ? "Modifier l'offre" : "Nouvelle offre d'emploi"}</DialogTitle>
+          <DialogHeader>
+            <DialogTitle className="text-white">{editing ? "Modifier l'offre" : "Nouvelle offre d'emploi"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
             <div>
@@ -731,8 +731,8 @@ export default function HrTab() {
 
       <Dialog open={deptDialogOpen} onOpenChange={setDeptDialogOpen}>
         <DialogContent className="max-w-lg">
-          <DialogHeader className="bg-gradient-to-r from-primary to-[#007aa3] text-primary-foreground -m-6 mb-2 p-6 rounded-t-lg">
-            <DialogTitle className="text-primary-foreground flex items-center gap-2"><Building2 size={18} /> Gérer les départements</DialogTitle>
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2"><Building2 size={18} /> Gérer les départements</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2 p-3 rounded-lg border bg-muted/30">
@@ -785,8 +785,8 @@ export default function HrTab() {
 
       <Dialog open={sectorDialogOpen} onOpenChange={setSectorDialogOpen}>
         <DialogContent className="max-w-lg">
-          <DialogHeader className="bg-gradient-to-r from-primary to-[#007aa3] text-primary-foreground -m-6 mb-2 p-6 rounded-t-lg">
-            <DialogTitle className="text-primary-foreground flex items-center gap-2"><Briefcase size={18} /> Gérer les secteurs</DialogTitle>
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2"><Briefcase size={18} /> Gérer les secteurs</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2 p-3 rounded-lg border bg-muted/30">

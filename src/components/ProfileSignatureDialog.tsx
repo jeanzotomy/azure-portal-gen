@@ -72,17 +72,17 @@ export function ProfileSignatureDialog({ open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[calc(100vw-1rem)] sm:w-auto max-w-xl p-0 gap-0 [&>button]:text-white [&>button]:opacity-90 [&>button]:hover:opacity-100">
-        <DialogHeader className="bg-gradient-to-r from-primary to-[#007aa3] text-primary-foreground px-4 sm:px-6 py-4 rounded-t-lg pr-12">
-          <DialogTitle className="text-primary-foreground flex items-center gap-2 text-base sm:text-lg">
+      <DialogContent className="w-[calc(100vw-1rem)] sm:w-auto max-w-xl">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2 text-white">
             <PenLine size={20} className="shrink-0" /> Ma signature
           </DialogTitle>
-          <DialogDescription className="text-primary-foreground/80 text-xs sm:text-sm">
+          <DialogDescription className="text-white/85">
             Dessinez votre signature ci-dessous. Elle apparaîtra automatiquement sur les factures que vous émettez.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="p-4 sm:p-6 space-y-3">
+        <div className="space-y-3">
 
           <SignaturePad initialImage={currentUrl} onSave={handleSave} saving={saving} />
 
