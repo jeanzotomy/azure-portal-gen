@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Briefcase, Plus, Pencil, Trash2, FileText, Download, Calendar, MapPin, RefreshCw } from "lucide-react";
+import { Briefcase, Plus, Pencil, Trash2, FileText, Download, Calendar, MapPin, RefreshCw, Building2, X } from "lucide-react";
 import { format } from "date-fns";
 
 type JobStatus = "brouillon" | "publiee" | "fermee";
@@ -68,14 +68,24 @@ const APP_STATUS_COLORS: Record<AppStatus, string> = {
   refusee: "bg-destructive/10 text-destructive",
 };
 
+interface Department {
+  id: string;
+  name: string;
+  description: string | null;
+}
+
 export default function HrTab() {
   const { user } = useAuthSession();
   const { toast } = useToast();
   const [jobs, setJobs] = useState<JobPosting[]>([]);
   const [applications, setApplications] = useState<JobApplication[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<JobPosting | null>(null);
+  const [deptDialogOpen, setDeptDialogOpen] = useState(false);
+  const [newDeptName, setNewDeptName] = useState("");
+  const [newDeptDesc, setNewDeptDesc] = useState("");
   const [form, setForm] = useState({
     title: "",
     department: "",
@@ -88,16 +98,45 @@ export default function HrTab() {
 
   const load = async () => {
     setLoading(true);
-    const [jobsRes, appsRes] = await Promise.all([
+    const [jobsRes, appsRes, deptsRes] = await Promise.all([
       supabase.from("job_postings").select("*").order("created_at", { ascending: false }),
       supabase.from("job_applications").select("*").order("created_at", { ascending: false }),
+      supabase.from("departments").select("*").order("name", { ascending: true }),
     ]);
     if (jobsRes.data) setJobs(jobsRes.data as JobPosting[]);
     if (appsRes.data) setApplications(appsRes.data as JobApplication[]);
+    if (deptsRes.data) setDepartments(deptsRes.data as Department[]);
     setLoading(false);
   };
 
   useEffect(() => { load(); }, []);
+
+  const handleAddDepartment = async () => {
+    if (!user || !newDeptName.trim()) return;
+    const { error } = await supabase.from("departments").insert({
+      name: newDeptName.trim(),
+      description: newDeptDesc.trim() || null,
+      created_by: user.id,
+    });
+    if (error) {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Département ajouté" });
+    setNewDeptName("");
+    setNewDeptDesc("");
+    load();
+  };
+
+  const handleDeleteDepartment = async (id: string) => {
+    if (!confirm("Supprimer ce département ?")) return;
+    const { error } = await supabase.from("departments").delete().eq("id", id);
+    if (error) {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      return;
+    }
+    load();
+  };
 
   const openNew = () => {
     setEditing(null);
@@ -184,6 +223,7 @@ export default function HrTab() {
         </div>
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={load}><RefreshCw size={14} /> Actualiser</Button>
+          <Button variant="outline" size="sm" onClick={() => setDeptDialogOpen(true)}><Building2 size={14} /> Départements</Button>
           <Button size="sm" onClick={openNew}><Plus size={14} /> Nouvelle offre</Button>
         </div>
       </div>
@@ -293,7 +333,18 @@ export default function HrTab() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-sm font-medium">Département</label>
-                <Input value={form.department} onChange={(e) => setForm({ ...form, department: e.target.value })} placeholder="Ex: Ingénierie" />
+                <Select value={form.department || "__none__"} onValueChange={(v) => setForm({ ...form, department: v === "__none__" ? "" : v })}>
+                  <SelectTrigger><SelectValue placeholder="Sélectionner..." /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">— Aucun —</SelectItem>
+                    {departments.map((d) => (
+                      <SelectItem key={d.id} value={d.name}>{d.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {departments.length === 0 && (
+                  <p className="text-xs text-muted-foreground mt-1">Aucun département. <button type="button" className="text-primary hover:underline" onClick={() => setDeptDialogOpen(true)}>Créer</button></p>
+                )}
               </div>
               <div>
                 <label className="text-sm font-medium">Lieu *</label>
@@ -336,6 +387,42 @@ export default function HrTab() {
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Annuler</Button>
             <Button onClick={handleSave}>{editing ? "Enregistrer" : "Créer"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={deptDialogOpen} onOpenChange={setDeptDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader className="bg-gradient-to-r from-primary to-[#007aa3] text-primary-foreground -m-6 mb-2 p-6 rounded-t-lg">
+            <DialogTitle className="text-primary-foreground flex items-center gap-2"><Building2 size={18} /> Gérer les départements</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2 p-3 rounded-lg border bg-muted/30">
+              <p className="text-sm font-medium">Ajouter un département</p>
+              <Input value={newDeptName} onChange={(e) => setNewDeptName(e.target.value)} placeholder="Nom (ex: Ingénierie)" />
+              <Input value={newDeptDesc} onChange={(e) => setNewDeptDesc(e.target.value)} placeholder="Description (optionnel)" />
+              <Button size="sm" onClick={handleAddDepartment} disabled={!newDeptName.trim()}>
+                <Plus size={14} /> Ajouter
+              </Button>
+            </div>
+            <div className="space-y-1 max-h-64 overflow-y-auto">
+              {departments.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">Aucun département.</p>
+              ) : departments.map((d) => (
+                <div key={d.id} className="flex items-center justify-between gap-2 p-2 rounded border hover:bg-muted/50">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium truncate">{d.name}</p>
+                    {d.description && <p className="text-xs text-muted-foreground truncate">{d.description}</p>}
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={() => handleDeleteDepartment(d.id)} className="text-destructive shrink-0">
+                    <X size={14} />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeptDialogOpen(false)}>Fermer</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
