@@ -453,6 +453,7 @@ export default function SharePointBrowser() {
             <Button variant="outline" onClick={() => setShowNewFolder(false)}>{t("sharepoint.cancel")}</Button>
             <Button onClick={createFolder} disabled={!newFolderName}>{t("sharepoint.create")}</Button>
           </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
