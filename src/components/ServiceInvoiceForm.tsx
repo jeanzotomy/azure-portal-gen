@@ -166,10 +166,12 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
       const itemsPayload = items.map((it, i) => ({ invoice_id: inv.id, position: i + 1, catalog_id: it.catalog_id ?? null, description: it.description, subtitle: it.subtitle ?? null, quantity: it.quantity, unit: it.unit, unit_price: it.unit_price, discount_rate: it.discount_rate ?? 0, total: lineTotal(it) }));
       await supabase.from("service_invoice_items").insert(itemsPayload);
 
-      // Generate PDF + DOCX
+      // Generate documents according to chosen format
       await new Promise((r) => setTimeout(r, 100));
-      const pdfBlob = pdfRef.current ? await generateInvoicePDFBlob(pdfRef.current) : null;
-      const docxBlob = await generateInvoiceDocxBlob(buildPdfData(inv.invoice_number ?? ""));
+      const wantPdf = outputFormat === "pdf" || outputFormat === "both";
+      const wantDocx = outputFormat === "docx" || outputFormat === "both";
+      const pdfBlob = wantPdf && pdfRef.current ? await generateInvoicePDFBlob(pdfRef.current) : null;
+      const docxBlob = wantDocx ? await generateInvoiceDocxBlob(buildPdfData(inv.invoice_number ?? "")) : null;
       const safeNum = sanitizeName(inv.invoice_number ?? "facture");
       const safeClient = sanitizeName(selectedClient.client_name);
 
@@ -179,16 +181,19 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
         const up = await uploadToSharePoint(selectedClient.client_name, `${safeNum}_${safeClient}.pdf`, pdfBlob, "application/pdf");
         if (up) { updates.sharepoint_pdf_id = up.id; updates.sharepoint_url = up.webUrl; updates.pdf_generated_at = new Date().toISOString(); }
       }
-      const up2 = await uploadToSharePoint(selectedClient.client_name, `${safeNum}_${safeClient}.docx`, docxBlob, "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-      if (up2) { updates.sharepoint_docx_id = up2.id; updates.docx_generated_at = new Date().toISOString(); if (!updates.sharepoint_url) updates.sharepoint_url = up2.webUrl; }
+      if (docxBlob) {
+        const up2 = await uploadToSharePoint(selectedClient.client_name, `${safeNum}_${safeClient}.docx`, docxBlob, "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+        if (up2) { updates.sharepoint_docx_id = up2.id; updates.docx_generated_at = new Date().toISOString(); if (!updates.sharepoint_url) updates.sharepoint_url = up2.webUrl; }
+      }
 
       if (Object.keys(updates).length) await supabase.from("service_invoices").update(updates).eq("id", inv.id);
 
       // Local download
       if (pdfBlob) saveAs(pdfBlob, `${safeNum}_${safeClient}.pdf`);
-      saveAs(docxBlob, `${safeNum}_${safeClient}.docx`);
+      if (docxBlob) saveAs(docxBlob, `${safeNum}_${safeClient}.docx`);
 
-      toast({ title: "Facture créée", description: `${inv.invoice_number} • ${updates.sharepoint_url ? "Stockée dans SharePoint" : "Téléchargée localement"}` });
+      const formatLabel = outputFormat === "both" ? "PDF + Word" : outputFormat === "pdf" ? "PDF" : "Word";
+      toast({ title: "Facture créée", description: `${inv.invoice_number} • ${formatLabel} • ${updates.sharepoint_url ? "Stockée dans SharePoint" : "Téléchargée localement"}` });
       onSaved();
       onOpenChange(false);
       // Reset
