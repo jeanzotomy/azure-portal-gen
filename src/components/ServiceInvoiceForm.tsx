@@ -303,10 +303,12 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
                 <div className="col-span-12">
                   <Input placeholder="Sous-titre / précisions (italique)" value={it.subtitle ?? ""} onChange={(e) => updateItem(idx, { subtitle: e.target.value })} />
                 </div>
-                <div className="col-span-3 md:col-span-1">
+                <div className="col-span-6 md:col-span-1">
+                  <label className="text-[10px] uppercase text-muted-foreground md:hidden">Qté</label>
                   <Input type="number" min={0} placeholder="Qté" value={it.quantity} onChange={(e) => updateItem(idx, { quantity: Number(e.target.value) })} />
                 </div>
-                <div className="col-span-4 md:col-span-2">
+                <div className="col-span-6 md:col-span-2">
+                  <label className="text-[10px] uppercase text-muted-foreground md:hidden">Unité</label>
                   <Select value={it.unit} onValueChange={(v) => updateItem(idx, { unit: v })}>
                     <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -314,19 +316,21 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="col-span-5 md:col-span-3">
+                <div className="col-span-7 md:col-span-3">
+                  <label className="text-[10px] uppercase text-muted-foreground md:hidden">Prix unitaire</label>
                   <Input type="number" min={0} placeholder="Prix unitaire" value={it.unit_price} onChange={(e) => updateItem(idx, { unit_price: Number(e.target.value) })} />
                 </div>
-                <div className="col-span-6 md:col-span-2">
+                <div className="col-span-5 md:col-span-2">
+                  <label className="text-[10px] uppercase text-muted-foreground md:hidden">Remise</label>
                   <div className="relative">
                     <Input type="number" min={0} max={100} placeholder="Remise" value={it.discount_rate ?? 0} onChange={(e) => updateItem(idx, { discount_rate: Number(e.target.value) })} />
                     <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">%</span>
                   </div>
                 </div>
-                <div className="col-span-12 md:col-span-3 flex items-center justify-end text-sm font-semibold">
+                <div className="col-span-9 md:col-span-3 flex items-center md:justify-end text-sm font-semibold">
                   Total : {new Intl.NumberFormat("fr-FR").format(lineTotal(it))} {currency}
                 </div>
-                <div className="col-span-12 md:col-span-1 flex items-center justify-end">
+                <div className="col-span-3 md:col-span-1 flex items-center justify-end">
                   <Button size="icon" variant="ghost" onClick={() => removeLine(idx)} disabled={items.length === 1}><Trash2 size={14} className="text-destructive" /></Button>
                 </div>
               </div>
