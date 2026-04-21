@@ -856,28 +856,68 @@ function AgentDashboard({ user }: { user: SupaUser }) {
 const CHART_COLORS = ["hsl(var(--primary))", "hsl(var(--accent))", "hsl(199, 89%, 48%)", "hsl(160, 60%, 45%)"];
 
 function AdminDashboard() {
-  const [stats, setStats] = useState({ users: 0, projects: 0, activeProjects: 0, openTickets: 0 });
+  const [stats, setStats] = useState({
+    users: 0,
+    projects: 0,
+    activeProjects: 0,
+    openTickets: 0,
+    serviceClients: 0,
+    serviceInvoices: 0,
+    invoicesEmitted: 0,
+    invoicesPaid: 0,
+    invoicesOverdue: 0,
+    paidAmountGNF: 0,
+    paidAmountUSD: 0,
+    paidAmountEUR: 0,
+    openJobs: 0,
+    newApplications: 0,
+  });
   const [projects, setProjects] = useState<any[]>([]);
   const [tickets, setTickets] = useState<any[]>([]);
   const [recentProfiles, setRecentProfiles] = useState<any[]>([]);
+  const [serviceInvoices, setServiceInvoices] = useState<any[]>([]);
 
   const loadData = () => {
     Promise.all([
       supabase.from("profiles").select("*").order("created_at", { ascending: false }),
       supabase.from("projects").select("*").order("created_at", { ascending: false }),
       supabase.from("support_tickets").select("*").order("created_at", { ascending: false }),
-    ]).then(([profRes, projRes, tickRes]) => {
+      supabase.from("service_clients").select("id"),
+      supabase.from("service_invoices").select("id, status, total, currency, invoice_date, paid_at, created_at"),
+      supabase.from("job_postings").select("id, status"),
+      supabase.from("job_applications").select("id, status"),
+    ]).then(([profRes, projRes, tickRes, scRes, siRes, jpRes, jaRes]) => {
       const profs = profRes.data || [];
       const projs = projRes.data || [];
       const ticks = tickRes.data || [];
+      const sClients = scRes.data || [];
+      const sInvoices = (siRes.data || []) as any[];
+      const jobs = jpRes.data || [];
+      const apps = jaRes.data || [];
+
+      const paidByCurrency = (cur: string) =>
+        sInvoices.filter((i) => i.status === "payee" && i.currency === cur)
+          .reduce((s, i) => s + Number(i.total || 0), 0);
+
       setRecentProfiles(profs.slice(0, 5));
       setProjects(projs);
       setTickets(ticks);
+      setServiceInvoices(sInvoices);
       setStats({
         users: profs.length,
         projects: projs.length,
         activeProjects: projs.filter(p => p.status === "en_cours").length,
         openTickets: ticks.filter(t => t.status === "ouvert").length,
+        serviceClients: sClients.length,
+        serviceInvoices: sInvoices.length,
+        invoicesEmitted: sInvoices.filter((i) => i.status === "emise").length,
+        invoicesPaid: sInvoices.filter((i) => i.status === "payee").length,
+        invoicesOverdue: sInvoices.filter((i) => i.status === "en_retard").length,
+        paidAmountGNF: paidByCurrency("GNF"),
+        paidAmountUSD: paidByCurrency("USD"),
+        paidAmountEUR: paidByCurrency("EUR"),
+        openJobs: jobs.filter((j: any) => j.status === "publiee").length,
+        newApplications: apps.filter((a: any) => a.status === "nouvelle").length,
       });
     });
   };
@@ -898,9 +938,9 @@ function AdminDashboard() {
     { name: "Résolu", value: tickets.filter(t => t.status === "résolu").length },
   ].filter(d => d.value > 0);
 
-  // Monthly activity (last 6 months)
+  // Monthly activity (last 6 months) - now includes service invoices
   const monthlyData = (() => {
-    const months: { name: string; projets: number; tickets: number }[] = [];
+    const months: { name: string; projets: number; tickets: number; factures: number }[] = [];
     for (let i = 5; i >= 0; i--) {
       const d = new Date();
       d.setMonth(d.getMonth() - i);
@@ -915,6 +955,10 @@ function AdminDashboard() {
         }).length,
         tickets: tickets.filter(t => {
           const cd = new Date(t.created_at);
+          return cd.getFullYear() === year && cd.getMonth() === month;
+        }).length,
+        factures: serviceInvoices.filter((inv: any) => {
+          const cd = new Date(inv.created_at || inv.invoice_date);
           return cd.getFullYear() === year && cd.getMonth() === month;
         }).length,
       });
@@ -933,11 +977,17 @@ function AdminDashboard() {
     ? Math.round(projects.reduce((sum, p) => sum + (p.progress || 0), 0) / projects.length)
     : 0;
 
+  const fmtNum = (n: number) => new Intl.NumberFormat("fr-FR").format(n);
+
   const cards = [
     { label: "Clients inscrits", value: stats.users, icon: Users, color: "gradient-primary", subtitle: "Total" },
     { label: "Projets total", value: stats.projects, icon: FolderOpen, color: "bg-accent", subtitle: `${stats.activeProjects} actifs` },
     { label: "Tickets ouverts", value: stats.openTickets, icon: LifeBuoy, color: "bg-destructive", subtitle: `${tickets.length} total` },
-    { label: "Budget total", value: totalBudget, icon: DollarSign, color: "bg-primary", subtitle: `Moy. ${avgProgress}% progression`, isCurrency: true },
+    { label: "Budget projets", value: totalBudget, icon: DollarSign, color: "bg-primary", subtitle: `Moy. ${avgProgress}% progression`, isCurrency: true },
+    { label: "Clients facturables", value: stats.serviceClients, icon: Briefcase, color: "bg-teal-500", subtitle: "Comptes actifs" },
+    { label: "Factures émises", value: stats.invoicesEmitted, icon: Receipt, color: "bg-blue-500", subtitle: `${stats.serviceInvoices} au total` },
+    { label: "Factures payées", value: stats.invoicesPaid, icon: CheckCircle2, color: "bg-green-500", subtitle: `${stats.invoicesOverdue} en retard` },
+    { label: "Recrutement", value: stats.newApplications, icon: UserPlus, color: "bg-orange-500", subtitle: `${stats.openJobs} offres publiées` },
   ];
 
   return (
@@ -960,6 +1010,28 @@ function AdminDashboard() {
             </span>
           </div>
         </div>
+      </div>
+
+      {/* Revenue strip */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Card className="border-border/50 shadow-card">
+          <CardContent className="p-4">
+            <p className="text-xs text-muted-foreground">Encaissé GNF</p>
+            <p className="text-xl font-bold text-foreground mt-1">{fmtNum(stats.paidAmountGNF)} <span className="text-sm font-normal text-muted-foreground">GNF</span></p>
+          </CardContent>
+        </Card>
+        <Card className="border-border/50 shadow-card">
+          <CardContent className="p-4">
+            <p className="text-xs text-muted-foreground">Encaissé USD</p>
+            <p className="text-xl font-bold text-foreground mt-1">{fmtNum(stats.paidAmountUSD)} <span className="text-sm font-normal text-muted-foreground">USD</span></p>
+          </CardContent>
+        </Card>
+        <Card className="border-border/50 shadow-card">
+          <CardContent className="p-4">
+            <p className="text-xs text-muted-foreground">Encaissé EUR</p>
+            <p className="text-xl font-bold text-foreground mt-1">{fmtNum(stats.paidAmountEUR)} <span className="text-sm font-normal text-muted-foreground">EUR</span></p>
+          </CardContent>
+        </Card>
       </div>
 
       {/* Stats grid */}
