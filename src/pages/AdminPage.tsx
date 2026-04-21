@@ -514,8 +514,8 @@ function AdminContent() {
     { id: "hr", icon: Briefcase, label: "Recrutement" },
   ];
 
-  const isAdminServicesTab = adminServicesGroup.some((s) => s.id === tab);
-  useEffect(() => { if (isAdminServicesTab) setAdminServicesOpen(true); }, [isAdminServicesTab]);
+
+
 
   return (
     <div className="min-h-screen flex w-full bg-background">
