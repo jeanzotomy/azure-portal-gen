@@ -185,8 +185,8 @@ export default function PaymentMethodsTab() {
             </DialogTitle>
           </DialogHeader>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="col-span-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="sm:col-span-2">
               <Label>Libellé *</Label>
               <Input value={editing?.label ?? ""} onChange={(e) => setEditing({ ...editing, label: e.target.value })} placeholder="Ex: Virement Ecobank GNF" />
             </div>
