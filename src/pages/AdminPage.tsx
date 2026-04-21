@@ -1559,7 +1559,6 @@ function AdminProjectsInner({ readOnly = false, assignedCount }: { readOnly?: bo
             <Button variant="outline" onClick={() => setEditingId(null)}>Annuler</Button>
             <Button onClick={() => { if (editingId) saveProject(editingId); }} className="gradient-primary text-primary-foreground border-0">Sauvegarder</Button>
           </DialogFooter>
-          </div>
         </DialogContent>
       </Dialog>
     </div>
