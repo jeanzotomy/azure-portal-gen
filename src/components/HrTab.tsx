@@ -68,14 +68,24 @@ const APP_STATUS_COLORS: Record<AppStatus, string> = {
   refusee: "bg-destructive/10 text-destructive",
 };
 
+interface Department {
+  id: string;
+  name: string;
+  description: string | null;
+}
+
 export default function HrTab() {
   const { user } = useAuthSession();
   const { toast } = useToast();
   const [jobs, setJobs] = useState<JobPosting[]>([]);
   const [applications, setApplications] = useState<JobApplication[]>([]);
+  const [departments, setDepartments] = useState<Department[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<JobPosting | null>(null);
+  const [deptDialogOpen, setDeptDialogOpen] = useState(false);
+  const [newDeptName, setNewDeptName] = useState("");
+  const [newDeptDesc, setNewDeptDesc] = useState("");
   const [form, setForm] = useState({
     title: "",
     department: "",
@@ -88,16 +98,45 @@ export default function HrTab() {
 
   const load = async () => {
     setLoading(true);
-    const [jobsRes, appsRes] = await Promise.all([
+    const [jobsRes, appsRes, deptsRes] = await Promise.all([
       supabase.from("job_postings").select("*").order("created_at", { ascending: false }),
       supabase.from("job_applications").select("*").order("created_at", { ascending: false }),
+      supabase.from("departments").select("*").order("name", { ascending: true }),
     ]);
     if (jobsRes.data) setJobs(jobsRes.data as JobPosting[]);
     if (appsRes.data) setApplications(appsRes.data as JobApplication[]);
+    if (deptsRes.data) setDepartments(deptsRes.data as Department[]);
     setLoading(false);
   };
 
   useEffect(() => { load(); }, []);
+
+  const handleAddDepartment = async () => {
+    if (!user || !newDeptName.trim()) return;
+    const { error } = await supabase.from("departments").insert({
+      name: newDeptName.trim(),
+      description: newDeptDesc.trim() || null,
+      created_by: user.id,
+    });
+    if (error) {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Département ajouté" });
+    setNewDeptName("");
+    setNewDeptDesc("");
+    load();
+  };
+
+  const handleDeleteDepartment = async (id: string) => {
+    if (!confirm("Supprimer ce département ?")) return;
+    const { error } = await supabase.from("departments").delete().eq("id", id);
+    if (error) {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      return;
+    }
+    load();
+  };
 
   const openNew = () => {
     setEditing(null);
