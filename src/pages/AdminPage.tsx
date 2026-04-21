@@ -34,11 +34,13 @@ import SharePointTab from "@/components/SharePointTab";
 import ServiceClientsTab from "@/components/ServiceClientsTab";
 import ServiceCatalogTab from "@/components/ServiceCatalogTab";
 import ServiceInvoicesTab from "@/components/ServiceInvoicesTab";
-import { Briefcase, BookOpen, Receipt } from "lucide-react";
+import { Briefcase, BookOpen, Receipt, CreditCard, PenLine } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RePieChart, Pie, Cell, AreaChart, Area } from "recharts";
 import type { User as SupaUser } from "@supabase/supabase-js";
 import { PortalInfoBar } from "@/components/PortalInfoBar";
 import { NotificationBell } from "@/components/NotificationBell";
+import PaymentMethodsTab from "@/components/PaymentMethodsTab";
+import { ProfileSignatureDialog } from "@/components/ProfileSignatureDialog";
 
 type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts" | "sharepoint" | "service-clients" | "service-catalog" | "service-invoices";
 type AgentTab = "dashboard" | "tickets" | "contacts";
