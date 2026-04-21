@@ -2343,13 +2343,23 @@ function AdminUsers() {
                     >
                       <Pencil size={16} />
                     </button>
-                    <button
-                      onClick={() => promoteToBillableClient(p)}
-                      title="Convertir en client facturable"
-                      className="p-1.5 rounded-lg bg-muted text-muted-foreground hover:bg-teal-500/10 hover:text-teal-600 transition-colors"
-                    >
-                      <Receipt size={16} />
-                    </button>
+                    {billableLinks[p.user_id] ? (
+                      <button
+                        disabled
+                        title={`Déjà client facturable : ${billableLinks[p.user_id].client_name}`}
+                        className="p-1.5 rounded-lg bg-teal-500/15 text-teal-600 cursor-default"
+                      >
+                        <Receipt size={16} />
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => promoteToBillableClient(p)}
+                        title="Définir comme client facturable"
+                        className="p-1.5 rounded-lg bg-muted text-muted-foreground hover:bg-teal-500/10 hover:text-teal-600 transition-colors"
+                      >
+                        <Receipt size={16} />
+                      </button>
+                    )}
                     <button
                       onClick={() => toggleBlock(p.user_id, !!p.blocked)}
                       title={p.blocked ? "Débloquer" : "Bloquer"}
