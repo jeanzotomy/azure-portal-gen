@@ -477,6 +477,9 @@ function AdminContent() {
           {tab === "contacts" && <AdminContacts />}
           {tab === "users" && <AdminUsers />}
           {tab === "sharepoint" && <SharePointTab />}
+          {tab === "service-clients" && <ServiceClientsTab />}
+          {tab === "service-catalog" && <ServiceCatalogTab />}
+          {tab === "service-invoices" && <ServiceInvoicesTab />}
         </main>
       </div>
     </div>
