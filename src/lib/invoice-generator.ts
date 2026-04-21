@@ -214,7 +214,8 @@ export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blo
       cell("DESCRIPTION", { fill: CYAN, color: "FFFFFF", bold: true, width: colWidths[1] }),
       cell("QTÉ", { fill: CYAN, color: "FFFFFF", bold: true, align: AlignmentType.CENTER, width: colWidths[2] }),
       cell("PRIX UNIT.", { fill: CYAN, color: "FFFFFF", bold: true, align: AlignmentType.RIGHT, width: colWidths[3] }),
-      cell("TOTAL", { fill: CYAN, color: "FFFFFF", bold: true, align: AlignmentType.RIGHT, width: colWidths[4] }),
+      cell("REMISE", { fill: CYAN, color: "FFFFFF", bold: true, align: AlignmentType.CENTER, width: colWidths[4] }),
+      cell("TOTAL", { fill: CYAN, color: "FFFFFF", bold: true, align: AlignmentType.RIGHT, width: colWidths[5] }),
     ],
   });
 
@@ -235,7 +236,8 @@ export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blo
           }),
           cell(`${item.quantity}${item.unit && item.unit !== "unité" ? ` ${item.unit}` : ""}`, { align: AlignmentType.CENTER, width: colWidths[2] }),
           cell(formatCurrency(item.unit_price, data.currency), { align: AlignmentType.RIGHT, width: colWidths[3] }),
-          cell(formatCurrency(item.total, data.currency), { align: AlignmentType.RIGHT, bold: true, width: colWidths[4] }),
+          cell(item.discount_rate ? `−${item.discount_rate}%` : "—", { align: AlignmentType.CENTER, width: colWidths[4] }),
+          cell(formatCurrency(item.total, data.currency), { align: AlignmentType.RIGHT, bold: true, width: colWidths[5] }),
         ],
       })
   );
