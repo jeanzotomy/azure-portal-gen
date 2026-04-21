@@ -19,7 +19,7 @@ import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import {
   SidebarProvider, Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
-  SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarTrigger, useSidebar,
+  SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarMenuSub, SidebarMenuSubItem, SidebarMenuSubButton, SidebarTrigger, useSidebar,
 } from "@/components/ui/sidebar";
 import {
   LayoutDashboard, FolderOpen, LifeBuoy, Users, LogOut, Shield, Clock, CheckCircle2,
@@ -52,14 +52,22 @@ function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  const navItems = [
-    { id: "projects" as const, icon: FolderOpen, label: t("admin.projects") },
-    { id: "sharepoint" as const, icon: HardDrive, label: "SharePoint" },
+  const servicesGroup = [
     { id: "service-clients" as const, icon: Briefcase, label: "Clients services" },
     { id: "service-catalog" as const, icon: BookOpen, label: "Catalogue services" },
     { id: "service-invoices" as const, icon: Receipt, label: "Facturation services" },
     { id: "payment-methods" as const, icon: CreditCard, label: "Modes de paiement" },
   ];
+
+  const navItems = [
+    { id: "projects" as const, icon: FolderOpen, label: t("admin.projects") },
+    { id: "sharepoint" as const, icon: HardDrive, label: "SharePoint" },
+    ...servicesGroup,
+  ];
+
+  const isServicesTab = servicesGroup.some((s) => s.id === tab);
+  const [servicesOpen, setServicesOpen] = useState(true);
+  useEffect(() => { if (isServicesTab) setServicesOpen(true); }, [isServicesTab]);
 
   return (
     <div className="min-h-screen flex w-full bg-background">
@@ -79,14 +87,45 @@ function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu>
-                {navItems.map((item) => (
-                  <SidebarMenuItem key={item.id}>
-                    <SidebarMenuButton onClick={() => setTab(item.id)} isActive={tab === item.id} tooltip={item.label} className="gap-3">
-                      <item.icon size={18} />
-                      <span>{item.label}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+                <SidebarMenuItem>
+                  <SidebarMenuButton onClick={() => setTab("projects")} isActive={tab === "projects"} tooltip={t("admin.projects")} className="gap-3">
+                    <FolderOpen size={18} />
+                    <span>{t("admin.projects")}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton onClick={() => setTab("sharepoint")} isActive={tab === "sharepoint"} tooltip="SharePoint" className="gap-3">
+                    <HardDrive size={18} />
+                    <span>SharePoint</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    onClick={() => {
+                      setServicesOpen((v) => !v);
+                      if (!isServicesTab) setTab("service-clients");
+                    }}
+                    isActive={isServicesTab}
+                    tooltip="Services aux clients"
+                    className="gap-3"
+                  >
+                    <Briefcase size={18} />
+                    <span className="flex-1 text-left">Services aux clients</span>
+                    {servicesOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                  </SidebarMenuButton>
+                  {servicesOpen && (
+                    <SidebarMenuSub>
+                      {servicesGroup.map((s) => (
+                        <SidebarMenuSubItem key={s.id}>
+                          <SidebarMenuSubButton onClick={() => setTab(s.id)} isActive={tab === s.id} className="gap-2 cursor-pointer">
+                            <s.icon size={14} />
+                            <span>{s.label}</span>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  )}
+                </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -400,18 +439,25 @@ function AdminContent() {
     );
   }
 
-  const allNavItems: { id: AdminTab; icon: typeof LayoutDashboard; label: string }[] = [
-    { id: "dashboard", icon: LayoutDashboard, label: t("admin.overview") },
-    { id: "projects", icon: FolderOpen, label: t("admin.projects") },
-    { id: "sharepoint", icon: HardDrive, label: "SharePoint" },
+  const adminServicesGroup: { id: AdminTab; icon: typeof LayoutDashboard; label: string }[] = [
     { id: "service-clients", icon: Briefcase, label: "Clients services" },
     { id: "service-catalog", icon: BookOpen, label: "Catalogue services" },
     { id: "service-invoices", icon: Receipt, label: "Facturation services" },
     { id: "payment-methods", icon: CreditCard, label: "Modes de paiement" },
+  ];
+
+  const allNavItems: { id: AdminTab; icon: typeof LayoutDashboard; label: string }[] = [
+    { id: "dashboard", icon: LayoutDashboard, label: t("admin.overview") },
+    { id: "projects", icon: FolderOpen, label: t("admin.projects") },
+    { id: "sharepoint", icon: HardDrive, label: "SharePoint" },
     { id: "tickets", icon: LifeBuoy, label: t("admin.tickets") },
     { id: "contacts", icon: MessageSquare, label: t("admin.contacts") },
     { id: "users", icon: Users, label: t("admin.users") },
   ];
+
+  const isAdminServicesTab = adminServicesGroup.some((s) => s.id === tab);
+  const [adminServicesOpen, setAdminServicesOpen] = useState(true);
+  useEffect(() => { if (isAdminServicesTab) setAdminServicesOpen(true); }, [isAdminServicesTab]);
 
   return (
     <div className="min-h-screen flex w-full bg-background">
@@ -431,7 +477,42 @@ function AdminContent() {
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu>
-                {allNavItems.map((item) => (
+                {allNavItems.slice(0, 3).map((item) => (
+                  <SidebarMenuItem key={item.id}>
+                    <SidebarMenuButton onClick={() => setTab(item.id)} isActive={tab === item.id} tooltip={item.label} className="gap-3">
+                      <item.icon size={18} />
+                      <span>{item.label}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    onClick={() => {
+                      setAdminServicesOpen((v) => !v);
+                      if (!isAdminServicesTab) setTab("service-clients");
+                    }}
+                    isActive={isAdminServicesTab}
+                    tooltip="Services aux clients"
+                    className="gap-3"
+                  >
+                    <Briefcase size={18} />
+                    <span className="flex-1 text-left">Services aux clients</span>
+                    {adminServicesOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                  </SidebarMenuButton>
+                  {adminServicesOpen && (
+                    <SidebarMenuSub>
+                      {adminServicesGroup.map((s) => (
+                        <SidebarMenuSubItem key={s.id}>
+                          <SidebarMenuSubButton onClick={() => setTab(s.id)} isActive={tab === s.id} className="gap-2 cursor-pointer">
+                            <s.icon size={14} />
+                            <span>{s.label}</span>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  )}
+                </SidebarMenuItem>
+                {allNavItems.slice(3).map((item) => (
                   <SidebarMenuItem key={item.id}>
                     <SidebarMenuButton onClick={() => setTab(item.id)} isActive={tab === item.id} tooltip={item.label} className="gap-3">
                       <div className="relative">
@@ -467,7 +548,7 @@ function AdminContent() {
           <div className="flex items-center gap-3">
             <SidebarTrigger />
             <h2 className="text-sm font-semibold text-card-foreground hidden sm:block">
-              {allNavItems.find((n) => n.id === tab)?.label}
+              {[...allNavItems, ...adminServicesGroup].find((n) => n.id === tab)?.label}
             </h2>
           </div>
           <div className="flex items-center gap-2">
@@ -2037,6 +2118,42 @@ function AdminUsers() {
     }
   };
 
+  const promoteToBillableClient = async (p: any) => {
+    if (!p.full_name && !p.company) {
+      toast({ title: "Profil incomplet", description: "Le nom complet ou l'entreprise est requis pour créer un client facturable.", variant: "destructive" });
+      return;
+    }
+    const email = mfaStatus[p.user_id]?.email || null;
+    // Check duplicates by email or client_name
+    const { data: existing } = await supabase
+      .from("service_clients")
+      .select("id, client_name")
+      .or(email ? `email.eq.${email},client_name.eq.${(p.company || p.full_name).replace(/,/g, " ")}` : `client_name.eq.${(p.company || p.full_name).replace(/,/g, " ")}`)
+      .limit(1);
+    if (existing && existing.length > 0) {
+      toast({ title: "Déjà existant", description: `Un client facturable existe déjà : ${existing[0].client_name}.`, variant: "destructive" });
+      return;
+    }
+    if (!window.confirm(`Créer un client facturable à partir du profil de "${p.full_name || p.company}" ?`)) return;
+    const { data: { user: currentUser } } = await supabase.auth.getUser();
+    if (!currentUser) return;
+    const { error } = await supabase.from("service_clients").insert({
+      client_name: p.company || p.full_name,
+      contact_person: p.company ? p.full_name : null,
+      address_line: p.address_line || null,
+      city: p.city || null,
+      country: p.country || "Guinée",
+      phone: p.phone || null,
+      email,
+      created_by: currentUser.id,
+    });
+    if (error) {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Client facturable créé", description: `${p.full_name || p.company} est maintenant un client facturable.` });
+    }
+  };
+
   const openEditUser = (p: any) => {
     setEditForm({
       full_name: p.full_name || "",
@@ -2164,6 +2281,13 @@ function AdminUsers() {
                       className="p-1.5 rounded-lg bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
                     >
                       <Pencil size={16} />
+                    </button>
+                    <button
+                      onClick={() => promoteToBillableClient(p)}
+                      title="Convertir en client facturable"
+                      className="p-1.5 rounded-lg bg-muted text-muted-foreground hover:bg-teal-500/10 hover:text-teal-600 transition-colors"
+                    >
+                      <Receipt size={16} />
                     </button>
                     <button
                       onClick={() => toggleBlock(p.user_id, !!p.blocked)}
