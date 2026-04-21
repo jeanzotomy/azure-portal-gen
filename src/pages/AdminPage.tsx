@@ -116,9 +116,13 @@ function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser
               <Shield size={12} /> Comptable
             </span>
             <NotificationBell role="comptable" onNavigate={(target) => setTab(target as typeof tab)} />
-            <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
+            <button
+              onClick={() => setSignatureOpen(true)}
+              title="Ma signature"
+              className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold cursor-pointer hover:opacity-80 transition-opacity"
+            >
               {(user.user_metadata?.full_name || user.email || "C").charAt(0).toUpperCase()}
-            </div>
+            </button>
           </div>
         </header>
         <PortalInfoBar />
@@ -128,8 +132,10 @@ function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser
           {tab === "service-clients" && <ServiceClientsTab />}
           {tab === "service-catalog" && <ServiceCatalogTab />}
           {tab === "service-invoices" && <ServiceInvoicesTab />}
+          {tab === "payment-methods" && <PaymentMethodsTab />}
         </main>
       </div>
+      <ProfileSignatureDialog open={signatureOpen} onOpenChange={setSignatureOpen} />
     </div>
   );
 }
