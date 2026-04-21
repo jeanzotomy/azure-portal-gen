@@ -354,6 +354,242 @@ export type Database = {
         }
         Relationships: []
       }
+      service_catalog: {
+        Row: {
+          active: boolean
+          created_at: string
+          created_by: string
+          default_currency: Database["public"]["Enums"]["invoice_currency"]
+          default_unit_price: number
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          created_at?: string
+          created_by: string
+          default_currency?: Database["public"]["Enums"]["invoice_currency"]
+          default_unit_price?: number
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          created_at?: string
+          created_by?: string
+          default_currency?: Database["public"]["Enums"]["invoice_currency"]
+          default_unit_price?: number
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      service_clients: {
+        Row: {
+          address_line: string | null
+          city: string | null
+          client_name: string
+          contact_person: string | null
+          country: string | null
+          created_at: string
+          created_by: string
+          email: string | null
+          id: string
+          nif: string | null
+          notes: string | null
+          phone: string | null
+          rccm: string | null
+          sharepoint_folder_id: string | null
+          sharepoint_folder_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          address_line?: string | null
+          city?: string | null
+          client_name: string
+          contact_person?: string | null
+          country?: string | null
+          created_at?: string
+          created_by: string
+          email?: string | null
+          id?: string
+          nif?: string | null
+          notes?: string | null
+          phone?: string | null
+          rccm?: string | null
+          sharepoint_folder_id?: string | null
+          sharepoint_folder_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          address_line?: string | null
+          city?: string | null
+          client_name?: string
+          contact_person?: string | null
+          country?: string | null
+          created_at?: string
+          created_by?: string
+          email?: string | null
+          id?: string
+          nif?: string | null
+          notes?: string | null
+          phone?: string | null
+          rccm?: string | null
+          sharepoint_folder_id?: string | null
+          sharepoint_folder_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      service_invoice_items: {
+        Row: {
+          catalog_id: string | null
+          created_at: string
+          description: string
+          id: string
+          invoice_id: string
+          position: number
+          quantity: number
+          subtitle: string | null
+          total: number
+          unit_price: number
+        }
+        Insert: {
+          catalog_id?: string | null
+          created_at?: string
+          description: string
+          id?: string
+          invoice_id: string
+          position?: number
+          quantity?: number
+          subtitle?: string | null
+          total?: number
+          unit_price?: number
+        }
+        Update: {
+          catalog_id?: string | null
+          created_at?: string
+          description?: string
+          id?: string
+          invoice_id?: string
+          position?: number
+          quantity?: number
+          subtitle?: string | null
+          total?: number
+          unit_price?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_invoice_items_catalog_id_fkey"
+            columns: ["catalog_id"]
+            isOneToOne: false
+            referencedRelation: "service_catalog"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "service_invoice_items_invoice_id_fkey"
+            columns: ["invoice_id"]
+            isOneToOne: false
+            referencedRelation: "service_invoices"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      service_invoices: {
+        Row: {
+          client_id: string
+          created_at: string
+          created_by: string
+          currency: Database["public"]["Enums"]["invoice_currency"]
+          discount_amount: number
+          discount_rate: number
+          docx_generated_at: string | null
+          due_date: string | null
+          id: string
+          invoice_date: string
+          invoice_number: string | null
+          notes: string | null
+          paid_at: string | null
+          payment_details: Json
+          pdf_generated_at: string | null
+          sharepoint_docx_id: string | null
+          sharepoint_pdf_id: string | null
+          sharepoint_url: string | null
+          status: Database["public"]["Enums"]["service_invoice_status"]
+          subtotal: number
+          tax_amount: number
+          tax_rate: number
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          client_id: string
+          created_at?: string
+          created_by: string
+          currency?: Database["public"]["Enums"]["invoice_currency"]
+          discount_amount?: number
+          discount_rate?: number
+          docx_generated_at?: string | null
+          due_date?: string | null
+          id?: string
+          invoice_date?: string
+          invoice_number?: string | null
+          notes?: string | null
+          paid_at?: string | null
+          payment_details?: Json
+          pdf_generated_at?: string | null
+          sharepoint_docx_id?: string | null
+          sharepoint_pdf_id?: string | null
+          sharepoint_url?: string | null
+          status?: Database["public"]["Enums"]["service_invoice_status"]
+          subtotal?: number
+          tax_amount?: number
+          tax_rate?: number
+          total?: number
+          updated_at?: string
+        }
+        Update: {
+          client_id?: string
+          created_at?: string
+          created_by?: string
+          currency?: Database["public"]["Enums"]["invoice_currency"]
+          discount_amount?: number
+          discount_rate?: number
+          docx_generated_at?: string | null
+          due_date?: string | null
+          id?: string
+          invoice_date?: string
+          invoice_number?: string | null
+          notes?: string | null
+          paid_at?: string | null
+          payment_details?: Json
+          pdf_generated_at?: string | null
+          sharepoint_docx_id?: string | null
+          sharepoint_pdf_id?: string | null
+          sharepoint_url?: string | null
+          status?: Database["public"]["Enums"]["service_invoice_status"]
+          subtotal?: number
+          tax_amount?: number
+          tax_rate?: number
+          total?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "service_invoices_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "service_clients"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sharepoint_config: {
         Row: {
           created_at: string
@@ -547,6 +783,7 @@ export type Database = {
         Returns: number
       }
       generate_project_number: { Args: never; Returns: string }
+      generate_service_invoice_number: { Args: never; Returns: string }
       generate_ticket_number: { Args: never; Returns: string }
       has_role: {
         Args: {
@@ -596,8 +833,15 @@ export type Database = {
         | "client"
         | "comptable"
         | "gestionnaire"
+      invoice_currency: "GNF" | "USD" | "EUR"
       invoice_status: "en_attente" | "validee" | "non_conforme"
       invoice_type: "facture" | "recu"
+      service_invoice_status:
+        | "brouillon"
+        | "emise"
+        | "payee"
+        | "en_retard"
+        | "annulee"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -733,8 +977,16 @@ export const Constants = {
         "comptable",
         "gestionnaire",
       ],
+      invoice_currency: ["GNF", "USD", "EUR"],
       invoice_status: ["en_attente", "validee", "non_conforme"],
       invoice_type: ["facture", "recu"],
+      service_invoice_status: [
+        "brouillon",
+        "emise",
+        "payee",
+        "en_retard",
+        "annulee",
+      ],
     },
   },
 } as const
