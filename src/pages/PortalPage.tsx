@@ -35,7 +35,8 @@ import {
   Activity, TrendingUp, Plus, Trash2, Info, RefreshCw, UserCheck, Briefcase,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { FormDialogHeader, formDialogContentClass } from "@/components/FormDialogHeader";
 import { PieChart as RePieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip } from "recharts";
 import type { User as SupaUser } from "@supabase/supabase-js";
 import { PortalInfoBar } from "@/components/PortalInfoBar";
@@ -827,10 +828,14 @@ function ProjectsTab({ user }: { user: SupaUser }) {
       )}
 
       <Dialog open={showForm} onOpenChange={(open) => { if (!open) closeForm(); }}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>{editingProject ? "Modifier le projet" : "Nouveau projet"}</DialogTitle>
-          </DialogHeader>
+        <DialogContent className={`max-w-2xl max-h-[90vh] overflow-y-auto ${formDialogContentClass}`}>
+          <FormDialogHeader
+            icon={FolderOpen}
+            title={editingProject ? "Modifier le projet" : "Nouveau projet"}
+            subtitle={editingProject ? "Mettez à jour les informations du projet." : "Créez un nouveau projet et associez-y un service."}
+            badges={[]}
+          />
+          <div className="p-4 sm:p-6">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5"><FileText size={14} /> Nom du projet *</label>

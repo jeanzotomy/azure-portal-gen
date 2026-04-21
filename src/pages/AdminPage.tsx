@@ -1445,11 +1445,14 @@ function AdminProjectsInner({ readOnly = false, assignedCount }: { readOnly?: bo
 
       {/* Edit Project Dialog */}
       <Dialog open={!!editingId} onOpenChange={(open) => { if (!open) setEditingId(null); }}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Modifier le projet</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
+        <DialogContent className={`max-w-2xl max-h-[90vh] overflow-y-auto ${formDialogContentClass}`}>
+          <FormDialogHeader
+            icon={Pencil}
+            title="Modifier le projet"
+            subtitle="Mettez à jour les informations principales du projet."
+            badges={[]}
+          />
+          <div className="p-4 sm:p-6 space-y-4">
             <div>
               <label className="text-sm font-medium text-card-foreground">Nom du projet</label>
               <Input value={editName} onChange={(e) => setEditName(e.target.value)} className="mt-1" />
@@ -2491,12 +2494,14 @@ function AdminUsers() {
 
       {/* Edit User Profile Dialog */}
       <Dialog open={!!editingUser} onOpenChange={(open) => { if (!open) setEditingUser(null); }}>
-        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              <Pencil size={18} /> Modifier le profil — {editForm.full_name || "Utilisateur"}
-            </DialogTitle>
-          </DialogHeader>
+        <DialogContent className={`max-w-2xl max-h-[85vh] overflow-y-auto ${formDialogContentClass}`}>
+          <FormDialogHeader
+            icon={UserCog}
+            title="Modifier le profil"
+            subtitle={editForm.full_name || "Utilisateur"}
+            badges={[]}
+          />
+          <div className="p-4 sm:p-6 space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
               <label className="text-sm font-medium text-muted-foreground">Email (non modifiable)</label>
