@@ -380,6 +380,20 @@ export default function HrTab() {
                 <Input type="date" value={form.closing_date} onChange={(e) => setForm({ ...form, closing_date: e.target.value })} />
               </div>
             </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-sm font-medium">Secteur</label>
+                <Input value={form.sector} onChange={(e) => setForm({ ...form, sector: e.target.value })} placeholder="Ex: Technologies Cloud & Transformation Numérique" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Date de prise de poste</label>
+                <Input value={form.start_date} onChange={(e) => setForm({ ...form, start_date: e.target.value })} placeholder="Ex: Dès que possible" />
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Rémunération</label>
+              <Input value={form.salary_range} onChange={(e) => setForm({ ...form, salary_range: e.target.value })} placeholder="Ex: Selon profil et expérience — package attractif" />
+            </div>
             <div>
               <label className="text-sm font-medium">Description *</label>
               <Textarea rows={6} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Missions, profil recherché, compétences requises..." />
