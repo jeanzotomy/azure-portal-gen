@@ -191,7 +191,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
       onSaved();
       onOpenChange(false);
       // Reset
-      setClientId(""); setDueDate(""); setItems([{ description: "", quantity: 1, unit: "unité", unit_price: 0 }]); setNotes(""); setDiscountRate(0); setPayment({ ...DEFAULT_PAYMENT });
+      setClientId(""); setDueDate(""); setItems([{ description: "", quantity: 1, unit: "unité", unit_price: 0, discount_rate: 0 }]); setNotes(""); setDiscountRate(0); setEarlyPaymentDiscountRate(0); setPayment({ ...DEFAULT_PAYMENT });
     } catch (e) {
       toast({ title: "Erreur", description: e instanceof Error ? e.message : "Erreur inconnue", variant: "destructive" });
     } finally {
