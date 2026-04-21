@@ -234,11 +234,11 @@ export default function PaymentMethodsTab() {
               <Label>Ordre d'affichage</Label>
               <Input type="number" value={editing?.position ?? 0} onChange={(e) => setEditing({ ...editing, position: Number(e.target.value) })} />
             </div>
-            <div className="col-span-2">
+            <div className="sm:col-span-2">
               <Label>Instructions / Référence</Label>
               <Textarea rows={2} value={editing?.instructions ?? ""} onChange={(e) => setEditing({ ...editing, instructions: e.target.value })} placeholder="Ex: Mentionner le numéro de facture en référence" />
             </div>
-            <div className="col-span-2 flex items-center gap-2">
+            <div className="sm:col-span-2 flex items-center gap-2">
               <Switch checked={editing?.active ?? true} onCheckedChange={(v) => setEditing({ ...editing, active: v })} />
               <Label className="cursor-pointer">Mode actif (proposé dans les factures)</Label>
             </div>
