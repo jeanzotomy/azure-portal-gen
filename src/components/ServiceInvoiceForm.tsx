@@ -553,7 +553,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
             <FileType2 size={14} className="mr-1" /> <span className="truncate">Enregistrer brouillon</span>
           </Button>
           <Button onClick={() => void handleSave("emise")} disabled={saving} className="w-full sm:w-auto">
-            <FileText size={14} className="mr-1" /> <span className="truncate">{saving ? "Génération..." : `Émettre & Générer ${outputFormat === "both" ? "PDF + Word" : outputFormat === "pdf" ? "PDF" : "Word"}`}</span>
+            <FileText size={14} className="mr-1" /> <span className="truncate">{saving ? "Génération..." : editId ? `Mettre à jour & Générer ${outputFormat === "both" ? "PDF + Word" : outputFormat === "pdf" ? "PDF" : "Word"}` : `Émettre & Générer ${outputFormat === "both" ? "PDF + Word" : outputFormat === "pdf" ? "PDF" : "Word"}`}</span>
           </Button>
         </DialogFooter>
       </DialogContent>
