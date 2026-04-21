@@ -52,14 +52,22 @@ function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser
   const navigate = useNavigate();
   const { t } = useTranslation();
 
-  const navItems = [
-    { id: "projects" as const, icon: FolderOpen, label: t("admin.projects") },
-    { id: "sharepoint" as const, icon: HardDrive, label: "SharePoint" },
+  const servicesGroup = [
     { id: "service-clients" as const, icon: Briefcase, label: "Clients services" },
     { id: "service-catalog" as const, icon: BookOpen, label: "Catalogue services" },
     { id: "service-invoices" as const, icon: Receipt, label: "Facturation services" },
     { id: "payment-methods" as const, icon: CreditCard, label: "Modes de paiement" },
   ];
+
+  const navItems = [
+    { id: "projects" as const, icon: FolderOpen, label: t("admin.projects") },
+    { id: "sharepoint" as const, icon: HardDrive, label: "SharePoint" },
+    ...servicesGroup,
+  ];
+
+  const isServicesTab = servicesGroup.some((s) => s.id === tab);
+  const [servicesOpen, setServicesOpen] = useState(true);
+  useEffect(() => { if (isServicesTab) setServicesOpen(true); }, [isServicesTab]);
 
   return (
     <div className="min-h-screen flex w-full bg-background">
@@ -79,14 +87,45 @@ function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu>
-                {navItems.map((item) => (
-                  <SidebarMenuItem key={item.id}>
-                    <SidebarMenuButton onClick={() => setTab(item.id)} isActive={tab === item.id} tooltip={item.label} className="gap-3">
-                      <item.icon size={18} />
-                      <span>{item.label}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+                <SidebarMenuItem>
+                  <SidebarMenuButton onClick={() => setTab("projects")} isActive={tab === "projects"} tooltip={t("admin.projects")} className="gap-3">
+                    <FolderOpen size={18} />
+                    <span>{t("admin.projects")}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton onClick={() => setTab("sharepoint")} isActive={tab === "sharepoint"} tooltip="SharePoint" className="gap-3">
+                    <HardDrive size={18} />
+                    <span>SharePoint</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    onClick={() => {
+                      setServicesOpen((v) => !v);
+                      if (!isServicesTab) setTab("service-clients");
+                    }}
+                    isActive={isServicesTab}
+                    tooltip="Services aux clients"
+                    className="gap-3"
+                  >
+                    <Briefcase size={18} />
+                    <span className="flex-1 text-left">Services aux clients</span>
+                    {servicesOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                  </SidebarMenuButton>
+                  {servicesOpen && (
+                    <SidebarMenuSub>
+                      {servicesGroup.map((s) => (
+                        <SidebarMenuSubItem key={s.id}>
+                          <SidebarMenuSubButton onClick={() => setTab(s.id)} isActive={tab === s.id} className="gap-2 cursor-pointer">
+                            <s.icon size={14} />
+                            <span>{s.label}</span>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  )}
+                </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
