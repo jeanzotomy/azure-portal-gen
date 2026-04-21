@@ -91,6 +91,12 @@ function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser
             <SidebarGroupContent>
               <SidebarMenu>
                 <SidebarMenuItem>
+                  <SidebarMenuButton onClick={() => setTab("dashboard")} isActive={tab === "dashboard"} tooltip="Tableau de bord" className="gap-3">
+                    <LayoutDashboard size={18} />
+                    <span>Tableau de bord</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
                   <SidebarMenuButton onClick={() => setTab("projects")} isActive={tab === "projects"} tooltip={t("admin.projects")} className="gap-3">
                     <FolderOpen size={18} />
                     <span>{t("admin.projects")}</span>
