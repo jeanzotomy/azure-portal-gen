@@ -304,7 +304,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="w-[calc(100vw-1rem)] sm:w-auto max-w-5xl max-h-[92vh] overflow-y-auto p-3 sm:p-6">
         <DialogHeader>
-          <DialogTitle className="text-base sm:text-lg">Nouvelle facture</DialogTitle>
+          <DialogTitle className="text-base sm:text-lg">{editId ? "Modifier la facture" : "Nouvelle facture"}</DialogTitle>
         </DialogHeader>
 
         <div className="grid grid-cols-12 gap-3">
