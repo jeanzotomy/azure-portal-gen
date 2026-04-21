@@ -439,18 +439,25 @@ function AdminContent() {
     );
   }
 
-  const allNavItems: { id: AdminTab; icon: typeof LayoutDashboard; label: string }[] = [
-    { id: "dashboard", icon: LayoutDashboard, label: t("admin.overview") },
-    { id: "projects", icon: FolderOpen, label: t("admin.projects") },
-    { id: "sharepoint", icon: HardDrive, label: "SharePoint" },
+  const adminServicesGroup: { id: AdminTab; icon: typeof LayoutDashboard; label: string }[] = [
     { id: "service-clients", icon: Briefcase, label: "Clients services" },
     { id: "service-catalog", icon: BookOpen, label: "Catalogue services" },
     { id: "service-invoices", icon: Receipt, label: "Facturation services" },
     { id: "payment-methods", icon: CreditCard, label: "Modes de paiement" },
+  ];
+
+  const allNavItems: { id: AdminTab; icon: typeof LayoutDashboard; label: string }[] = [
+    { id: "dashboard", icon: LayoutDashboard, label: t("admin.overview") },
+    { id: "projects", icon: FolderOpen, label: t("admin.projects") },
+    { id: "sharepoint", icon: HardDrive, label: "SharePoint" },
     { id: "tickets", icon: LifeBuoy, label: t("admin.tickets") },
     { id: "contacts", icon: MessageSquare, label: t("admin.contacts") },
     { id: "users", icon: Users, label: t("admin.users") },
   ];
+
+  const isAdminServicesTab = adminServicesGroup.some((s) => s.id === tab);
+  const [adminServicesOpen, setAdminServicesOpen] = useState(true);
+  useEffect(() => { if (isAdminServicesTab) setAdminServicesOpen(true); }, [isAdminServicesTab]);
 
   return (
     <div className="min-h-screen flex w-full bg-background">
@@ -470,7 +477,42 @@ function AdminContent() {
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu>
-                {allNavItems.map((item) => (
+                {allNavItems.slice(0, 3).map((item) => (
+                  <SidebarMenuItem key={item.id}>
+                    <SidebarMenuButton onClick={() => setTab(item.id)} isActive={tab === item.id} tooltip={item.label} className="gap-3">
+                      <item.icon size={18} />
+                      <span>{item.label}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                ))}
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    onClick={() => {
+                      setAdminServicesOpen((v) => !v);
+                      if (!isAdminServicesTab) setTab("service-clients");
+                    }}
+                    isActive={isAdminServicesTab}
+                    tooltip="Services aux clients"
+                    className="gap-3"
+                  >
+                    <Briefcase size={18} />
+                    <span className="flex-1 text-left">Services aux clients</span>
+                    {adminServicesOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                  </SidebarMenuButton>
+                  {adminServicesOpen && (
+                    <SidebarMenuSub>
+                      {adminServicesGroup.map((s) => (
+                        <SidebarMenuSubItem key={s.id}>
+                          <SidebarMenuSubButton onClick={() => setTab(s.id)} isActive={tab === s.id} className="gap-2 cursor-pointer">
+                            <s.icon size={14} />
+                            <span>{s.label}</span>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  )}
+                </SidebarMenuItem>
+                {allNavItems.slice(3).map((item) => (
                   <SidebarMenuItem key={item.id}>
                     <SidebarMenuButton onClick={() => setTab(item.id)} isActive={tab === item.id} tooltip={item.label} className="gap-3">
                       <div className="relative">
