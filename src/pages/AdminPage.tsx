@@ -34,18 +34,21 @@ import SharePointTab from "@/components/SharePointTab";
 import ServiceClientsTab from "@/components/ServiceClientsTab";
 import ServiceCatalogTab from "@/components/ServiceCatalogTab";
 import ServiceInvoicesTab from "@/components/ServiceInvoicesTab";
-import { Briefcase, BookOpen, Receipt } from "lucide-react";
+import { Briefcase, BookOpen, Receipt, CreditCard, PenLine } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart as RePieChart, Pie, Cell, AreaChart, Area } from "recharts";
 import type { User as SupaUser } from "@supabase/supabase-js";
 import { PortalInfoBar } from "@/components/PortalInfoBar";
 import { NotificationBell } from "@/components/NotificationBell";
+import PaymentMethodsTab from "@/components/PaymentMethodsTab";
+import { ProfileSignatureDialog } from "@/components/ProfileSignatureDialog";
 
-type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts" | "sharepoint" | "service-clients" | "service-catalog" | "service-invoices";
+type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts" | "sharepoint" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods";
 type AgentTab = "dashboard" | "tickets" | "contacts";
 type GestionnaireTab = "dashboard" | "projects" | "sharepoint" | "tickets" | "contacts";
 
 function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser; collapsed: boolean; handleLogout: () => void }) {
-  const [tab, setTab] = useState<"projects" | "sharepoint" | "service-clients" | "service-catalog" | "service-invoices">("projects");
+  const [tab, setTab] = useState<"projects" | "sharepoint" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods">("projects");
+  const [signatureOpen, setSignatureOpen] = useState(false);
   const navigate = useNavigate();
   const { t } = useTranslation();
 
@@ -55,6 +58,7 @@ function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser
     { id: "service-clients" as const, icon: Briefcase, label: "Clients services" },
     { id: "service-catalog" as const, icon: BookOpen, label: "Catalogue services" },
     { id: "service-invoices" as const, icon: Receipt, label: "Facturation services" },
+    { id: "payment-methods" as const, icon: CreditCard, label: "Modes de paiement" },
   ];
 
   return (
@@ -112,9 +116,13 @@ function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser
               <Shield size={12} /> Comptable
             </span>
             <NotificationBell role="comptable" onNavigate={(target) => setTab(target as typeof tab)} />
-            <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
+            <button
+              onClick={() => setSignatureOpen(true)}
+              title="Ma signature"
+              className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold cursor-pointer hover:opacity-80 transition-opacity"
+            >
               {(user.user_metadata?.full_name || user.email || "C").charAt(0).toUpperCase()}
-            </div>
+            </button>
           </div>
         </header>
         <PortalInfoBar />
@@ -124,8 +132,10 @@ function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser
           {tab === "service-clients" && <ServiceClientsTab />}
           {tab === "service-catalog" && <ServiceCatalogTab />}
           {tab === "service-invoices" && <ServiceInvoicesTab />}
+          {tab === "payment-methods" && <PaymentMethodsTab />}
         </main>
       </div>
+      <ProfileSignatureDialog open={signatureOpen} onOpenChange={setSignatureOpen} />
     </div>
   );
 }
@@ -142,6 +152,7 @@ function AdminContent() {
   const collapsed = state === "collapsed";
   const [unrepliedCount, setUnrepliedCount] = useState(0);
   const [assignedProjectsCount, setAssignedProjectsCount] = useState(0);
+  const [signatureOpen, setSignatureOpen] = useState(false);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -396,6 +407,7 @@ function AdminContent() {
     { id: "service-clients", icon: Briefcase, label: "Clients services" },
     { id: "service-catalog", icon: BookOpen, label: "Catalogue services" },
     { id: "service-invoices", icon: Receipt, label: "Facturation services" },
+    { id: "payment-methods", icon: CreditCard, label: "Modes de paiement" },
     { id: "tickets", icon: LifeBuoy, label: t("admin.tickets") },
     { id: "contacts", icon: MessageSquare, label: t("admin.contacts") },
     { id: "users", icon: Users, label: t("admin.users") },
@@ -463,9 +475,13 @@ function AdminContent() {
               <Shield size={12} /> Admin
             </span>
             <NotificationBell role="admin" onNavigate={(target) => setTab(target as AdminTab)} />
-            <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
+            <button
+              onClick={() => setSignatureOpen(true)}
+              title="Ma signature"
+              className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold cursor-pointer hover:opacity-80 transition-opacity"
+            >
               {(user.user_metadata?.full_name || user.email || "A").charAt(0).toUpperCase()}
-            </div>
+            </button>
           </div>
         </header>
         <PortalInfoBar />
@@ -480,8 +496,10 @@ function AdminContent() {
           {tab === "service-clients" && <ServiceClientsTab />}
           {tab === "service-catalog" && <ServiceCatalogTab />}
           {tab === "service-invoices" && <ServiceInvoicesTab />}
+          {tab === "payment-methods" && <PaymentMethodsTab />}
         </main>
       </div>
+      <ProfileSignatureDialog open={signatureOpen} onOpenChange={setSignatureOpen} />
     </div>
   );
 }
