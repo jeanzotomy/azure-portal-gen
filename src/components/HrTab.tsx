@@ -376,7 +376,83 @@ export default function HrTab() {
           {!loading && jobs.length === 0 && (
             <Card><CardContent className="p-8 text-center text-muted-foreground">Aucune offre. Créez la première !</CardContent></Card>
           )}
-          {jobs.map((job) => {
+          {!loading && jobs.length > 0 && (() => {
+            const jobDepartments = Array.from(new Set(jobs.map((j) => j.department).filter((d): d is string => !!d))).sort();
+            const jobContracts = Array.from(new Set(jobs.map((j) => j.contract_type)));
+            const filteredJobs = jobs.filter((j) => {
+              const q = jobSearch.trim().toLowerCase();
+              if (q) {
+                const haystack = [j.title, j.description, j.location, j.department, j.sector].filter(Boolean).join(" ").toLowerCase();
+                if (!haystack.includes(q)) return false;
+              }
+              if (jobStatusFilter !== "all" && j.status !== jobStatusFilter) return false;
+              if (jobContractFilter !== "all" && j.contract_type !== jobContractFilter) return false;
+              if (jobDeptFilter !== "all" && j.department !== jobDeptFilter) return false;
+              return true;
+            });
+            const hasJobFilters = !!jobSearch || jobStatusFilter !== "all" || jobContractFilter !== "all" || jobDeptFilter !== "all";
+            const resetJobFilters = () => { setJobSearch(""); setJobStatusFilter("all"); setJobContractFilter("all"); setJobDeptFilter("all"); };
+            return (
+              <>
+                <div className="p-3 rounded-xl border bg-card/50 backdrop-blur-sm space-y-2.5">
+                  <div className="relative">
+                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <Input placeholder="Rechercher une offre..." value={jobSearch} onChange={(e) => setJobSearch(e.target.value)} className="pl-9 pr-9 h-9" />
+                    {jobSearch && (
+                      <button type="button" onClick={() => setJobSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"><X size={14} /></button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    <Select value={jobStatusFilter} onValueChange={setJobStatusFilter}>
+                      <SelectTrigger className="h-9"><SelectValue placeholder="Statut" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tous les statuts</SelectItem>
+                        <SelectItem value="brouillon">Brouillon</SelectItem>
+                        <SelectItem value="publiee">Publiée</SelectItem>
+                        <SelectItem value="fermee">Fermée</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Select value={jobContractFilter} onValueChange={setJobContractFilter}>
+                      <SelectTrigger className="h-9"><SelectValue placeholder="Contrat" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tous les contrats</SelectItem>
+                        {jobContracts.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                    <Select value={jobDeptFilter} onValueChange={setJobDeptFilter}>
+                      <SelectTrigger className="h-9"><SelectValue placeholder="Département" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tous les départements</SelectItem>
+                        {jobDepartments.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span>{filteredJobs.length} sur {jobs.length}</span>
+                    {hasJobFilters && (
+                      <button type="button" onClick={resetJobFilters} className="text-primary hover:underline font-medium">Réinitialiser</button>
+                    )}
+                  </div>
+                </div>
+                {filteredJobs.length === 0 && (
+                  <Card><CardContent className="p-8 text-center text-muted-foreground text-sm">Aucune offre ne correspond aux filtres.</CardContent></Card>
+                )}
+              </>
+            );
+          })()}
+          {(() => {
+            const filteredJobs = jobs.filter((j) => {
+              const q = jobSearch.trim().toLowerCase();
+              if (q) {
+                const haystack = [j.title, j.description, j.location, j.department, j.sector].filter(Boolean).join(" ").toLowerCase();
+                if (!haystack.includes(q)) return false;
+              }
+              if (jobStatusFilter !== "all" && j.status !== jobStatusFilter) return false;
+              if (jobContractFilter !== "all" && j.contract_type !== jobContractFilter) return false;
+              if (jobDeptFilter !== "all" && j.department !== jobDeptFilter) return false;
+              return true;
+            });
+            return filteredJobs.map((job) => {
             const appCount = applications.filter((a) => a.job_id === job.id).length;
             return (
               <Card key={job.id}>
