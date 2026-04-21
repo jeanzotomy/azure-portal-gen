@@ -8,28 +8,31 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus, Trash2, FileText, FileType2 } from "lucide-react";
+import { Plus, Trash2, FileText, FileType2, RefreshCw } from "lucide-react";
 import { InvoicePDFTemplate, type InvoicePDFData } from "@/components/InvoicePDFTemplate";
 import { generateInvoicePDFBlob, generateInvoiceDocxBlob, sanitizeName } from "@/lib/invoice-generator";
 import { saveAs } from "file-saver";
+import { useExchangeRates, type Currency } from "@/hooks/use-exchange-rates";
 
 interface SClient { id: string; client_name: string; nif: string | null; rccm: string | null; address_line: string | null; city: string | null; country: string | null; phone: string | null; email: string | null; contact_person: string | null; }
-interface CatItem { id: string; name: string; description: string | null; default_unit_price: number; default_currency: "GNF" | "USD" | "EUR"; active: boolean; }
-interface LineItem { catalog_id?: string | null; description: string; subtitle?: string; quantity: number; unit_price: number; }
+interface CatItem { id: string; name: string; description: string | null; default_unit_price: number; default_currency: Currency; default_unit: string; active: boolean; }
+interface LineItem { catalog_id?: string | null; description: string; subtitle?: string; quantity: number; unit: string; unit_price: number; }
 
+const UNIT_OPTIONS = ["unité", "heure", "jour", "mois", "année", "forfait"] as const;
 const DEFAULT_PAYMENT = { bank: "", iban: "", swift: "", mobile_money: "+224 626 441 150", reference: "" };
 
 export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { open: boolean; onOpenChange: (v: boolean) => void; onSaved: () => void; }) {
   const { user } = useAuthSession();
   const { toast } = useToast();
+  const { rates, loading: ratesLoading, refresh: refreshRates, convert } = useExchangeRates();
   const [clients, setClients] = useState<SClient[]>([]);
   const [catalog, setCatalog] = useState<CatItem[]>([]);
   const [clientId, setClientId] = useState<string>("");
   const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().slice(0, 10));
   const [dueDate, setDueDate] = useState("");
-  const [currency, setCurrency] = useState<"GNF" | "USD" | "EUR">("GNF");
+  const [currency, setCurrency] = useState<Currency>("GNF");
   const [payment, setPayment] = useState({ ...DEFAULT_PAYMENT });
-  const [items, setItems] = useState<LineItem[]>([{ description: "", quantity: 1, unit_price: 0 }]);
+  const [items, setItems] = useState<LineItem[]>([{ description: "", quantity: 1, unit: "unité", unit_price: 0 }]);
   const [discountRate, setDiscountRate] = useState(0);
   const [taxRate, setTaxRate] = useState(18);
   const [notes, setNotes] = useState("");
@@ -63,12 +66,34 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
   const pickFromCatalog = (idx: number, catId: string) => {
     const c = catalog.find((x) => x.id === catId);
     if (!c) return;
-    updateItem(idx, { catalog_id: c.id, description: c.name, subtitle: c.description ?? "", unit_price: c.default_unit_price });
-    if (idx === 0) setCurrency(c.default_currency);
+    // Convertit le prix par défaut depuis la devise du catalogue vers la devise courante de la facture
+    const converted = convert(c.default_unit_price, c.default_currency, currency);
+    updateItem(idx, {
+      catalog_id: c.id,
+      description: c.name,
+      subtitle: c.description ?? "",
+      unit: c.default_unit ?? "unité",
+      unit_price: Math.round(converted),
+    });
   };
 
-  const addLine = () => setItems((p) => [...p, { description: "", quantity: 1, unit_price: 0 }]);
+  const addLine = () => setItems((p) => [...p, { description: "", quantity: 1, unit: "unité", unit_price: 0 }]);
   const removeLine = (idx: number) => setItems((p) => p.filter((_, i) => i !== idx));
+
+  // Conversion automatique des prix unitaires quand la devise change
+  const prevCurrencyRef = useRef<Currency>(currency);
+  useEffect(() => {
+    const prev = prevCurrencyRef.current;
+    if (prev !== currency) {
+      setItems((prevItems) =>
+        prevItems.map((it) => ({
+          ...it,
+          unit_price: Math.round(convert(it.unit_price, prev, currency)),
+        }))
+      );
+      prevCurrencyRef.current = currency;
+    }
+  }, [currency, convert]);
 
   const buildPdfData = (invoiceNumber: string): InvoicePDFData => ({
     invoice_number: invoiceNumber,
