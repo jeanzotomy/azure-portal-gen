@@ -1,0 +1,3 @@
+ALTER TABLE public.job_postings 
+ADD COLUMN IF NOT EXISTS contract_duration TEXT,
+ADD COLUMN IF NOT EXISTS renewable BOOLEAN NOT NULL DEFAULT false;

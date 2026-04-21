@@ -23,6 +23,8 @@ interface JobPosting {
   sector: string | null;
   start_date: string | null;
   salary_range: string | null;
+  contract_duration: string | null;
+  renewable: boolean;
 }
 
 export default function CareersPage() {
@@ -95,7 +97,11 @@ export default function CareersPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap mb-2">
                         <h3 className="text-xl font-semibold">{job.title}</h3>
-                        <Badge variant="outline">{job.contract_type}</Badge>
+                        <Badge variant="outline">
+                          {job.contract_type}
+                          {job.contract_type === "CDD" && job.contract_duration ? ` · ${job.contract_duration}` : ""}
+                          {job.contract_type === "CDD" && job.renewable ? " · renouvelable" : ""}
+                        </Badge>
                         {job.department && <Badge variant="secondary">{job.department}</Badge>}
                       </div>
                       <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-3">
