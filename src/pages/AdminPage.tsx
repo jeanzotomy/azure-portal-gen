@@ -152,6 +152,7 @@ function AdminContent() {
   const collapsed = state === "collapsed";
   const [unrepliedCount, setUnrepliedCount] = useState(0);
   const [assignedProjectsCount, setAssignedProjectsCount] = useState(0);
+  const [signatureOpen, setSignatureOpen] = useState(false);
   const { t } = useTranslation();
 
   useEffect(() => {
