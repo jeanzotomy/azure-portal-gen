@@ -172,7 +172,7 @@ export default function ServiceInvoicesTab() {
         </div>
       )}
 
-      <ServiceInvoiceForm open={formOpen} onOpenChange={setFormOpen} onSaved={() => void load()} />
+      <ServiceInvoiceForm open={formOpen} onOpenChange={(v) => { setFormOpen(v); if (!v) setEditId(null); }} editId={editId} onSaved={() => void load()} />
     </div>
   );
 }
