@@ -374,10 +374,10 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
         </div>
 
         <DialogFooter className="flex-col sm:flex-row sm:items-center gap-2">
-          <div className="flex items-center gap-2 sm:mr-auto">
-            <label className="text-xs font-medium text-muted-foreground">Format :</label>
+          <div className="flex items-center gap-2 sm:mr-auto w-full sm:w-auto">
+            <label className="text-xs font-medium text-muted-foreground shrink-0">Format :</label>
             <Select value={outputFormat} onValueChange={(v) => setOutputFormat(v as "pdf" | "docx" | "both")}>
-              <SelectTrigger className="h-9 w-[160px]"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="h-9 w-full sm:w-[160px]"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="pdf">PDF uniquement</SelectItem>
                 <SelectItem value="docx">Word uniquement</SelectItem>
@@ -385,12 +385,12 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
               </SelectContent>
             </Select>
           </div>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>Annuler</Button>
-          <Button variant="secondary" onClick={() => void handleSave("brouillon")} disabled={saving}>
-            <FileType2 size={14} className="mr-1" /> Enregistrer brouillon
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving} className="w-full sm:w-auto">Annuler</Button>
+          <Button variant="secondary" onClick={() => void handleSave("brouillon")} disabled={saving} className="w-full sm:w-auto">
+            <FileType2 size={14} className="mr-1" /> <span className="truncate">Enregistrer brouillon</span>
           </Button>
-          <Button onClick={() => void handleSave("emise")} disabled={saving}>
-            <FileText size={14} className="mr-1" /> {saving ? "Génération..." : `Émettre & Générer ${outputFormat === "both" ? "PDF + Word" : outputFormat === "pdf" ? "PDF" : "Word"}`}
+          <Button onClick={() => void handleSave("emise")} disabled={saving} className="w-full sm:w-auto">
+            <FileText size={14} className="mr-1" /> <span className="truncate">{saving ? "Génération..." : `Émettre & Générer ${outputFormat === "both" ? "PDF + Word" : outputFormat === "pdf" ? "PDF" : "Word"}`}</span>
           </Button>
         </DialogFooter>
       </DialogContent>
