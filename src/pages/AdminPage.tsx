@@ -42,12 +42,13 @@ import { NotificationBell } from "@/components/NotificationBell";
 import PaymentMethodsTab from "@/components/PaymentMethodsTab";
 import { ProfileSignatureDialog } from "@/components/ProfileSignatureDialog";
 
-type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts" | "sharepoint" | "service-clients" | "service-catalog" | "service-invoices";
+type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts" | "sharepoint" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods";
 type AgentTab = "dashboard" | "tickets" | "contacts";
 type GestionnaireTab = "dashboard" | "projects" | "sharepoint" | "tickets" | "contacts";
 
 function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser; collapsed: boolean; handleLogout: () => void }) {
-  const [tab, setTab] = useState<"projects" | "sharepoint" | "service-clients" | "service-catalog" | "service-invoices">("projects");
+  const [tab, setTab] = useState<"projects" | "sharepoint" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods">("projects");
+  const [signatureOpen, setSignatureOpen] = useState(false);
   const navigate = useNavigate();
   const { t } = useTranslation();
 
