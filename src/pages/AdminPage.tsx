@@ -1981,7 +1981,18 @@ function AdminUsers() {
   const [editingUser, setEditingUser] = useState<any | null>(null);
   const [editForm, setEditForm] = useState({ full_name: "", company: "", phone: "", country: "", city: "", address_line: "", timezone: "" });
   const [editSaving, setEditSaving] = useState(false);
+  const [billableLinks, setBillableLinks] = useState<Record<string, { id: string; client_name: string }>>({});
   const { toast } = useToast();
+
+  const loadBillableLinks = async () => {
+    const { data } = await supabase
+      .from("service_clients")
+      .select("id, client_name, user_id")
+      .not("user_id", "is", null);
+    const map: Record<string, { id: string; client_name: string }> = {};
+    (data || []).forEach((c: any) => { if (c.user_id) map[c.user_id] = { id: c.id, client_name: c.client_name }; });
+    setBillableLinks(map);
+  };
 
   const load = async () => {
     const { data: profs } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
