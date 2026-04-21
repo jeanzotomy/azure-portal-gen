@@ -505,6 +505,29 @@ export default function HrTab() {
                 <Input type="date" value={form.closing_date} onChange={(e) => setForm({ ...form, closing_date: e.target.value })} />
               </div>
             </div>
+            {form.contract_type === "CDD" && (
+              <div className="grid grid-cols-2 gap-3 p-3 rounded-lg border bg-muted/30">
+                <div>
+                  <label className="text-sm font-medium">Durée du CDD *</label>
+                  <Input
+                    value={form.contract_duration}
+                    onChange={(e) => setForm({ ...form, contract_duration: e.target.value })}
+                    placeholder="Ex: 6 mois, 1 an, 24 mois"
+                  />
+                </div>
+                <div className="flex items-end">
+                  <label className="flex items-center gap-2 text-sm font-medium cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      checked={form.renewable}
+                      onChange={(e) => setForm({ ...form, renewable: e.target.checked })}
+                      className="h-4 w-4 rounded border-input accent-primary"
+                    />
+                    Contrat renouvelable
+                  </label>
+                </div>
+              </div>
+            )}
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-sm font-medium">Secteur</label>
