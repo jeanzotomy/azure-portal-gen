@@ -49,7 +49,7 @@ type AgentTab = "dashboard" | "tickets" | "contacts";
 type GestionnaireTab = "dashboard" | "projects" | "sharepoint" | "tickets" | "contacts" | "hr" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods";
 
 function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser; collapsed: boolean; handleLogout: () => void }) {
-  const [tab, setTab] = useState<"projects" | "sharepoint" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods">("projects");
+  const [tab, setTab] = useState<"dashboard" | "projects" | "sharepoint" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods">("dashboard");
   const [signatureOpen, setSignatureOpen] = useState(false);
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -62,6 +62,7 @@ function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser
   ];
 
   const navItems = [
+    { id: "dashboard" as const, icon: LayoutDashboard, label: "Tableau de bord" },
     { id: "projects" as const, icon: FolderOpen, label: t("admin.projects") },
     { id: "sharepoint" as const, icon: HardDrive, label: "SharePoint" },
     ...servicesGroup,
