@@ -205,15 +205,15 @@ export default function PaymentMethodsTab() {
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="w-[calc(100vw-1rem)] sm:w-auto max-w-2xl max-h-[92vh] overflow-y-auto p-0 gap-0 [&>button]:text-white [&>button]:opacity-90 [&>button]:hover:opacity-100 [&>button]:top-4 [&>button]:right-4">
-          <DialogHeader className="bg-gradient-to-r from-primary to-[#007aa3] text-primary-foreground px-4 sm:px-6 py-4 rounded-t-lg pr-14">
-            <DialogTitle className="text-primary-foreground flex items-center gap-2 text-base sm:text-lg">
+        <DialogContent className="w-[calc(100vw-1rem)] sm:w-auto max-w-2xl max-h-[92vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-white">
               <CreditCard size={20} className="shrink-0" />
               <span className="truncate">{editing?.id ? "Modifier" : "Nouveau"} mode de paiement</span>
             </DialogTitle>
           </DialogHeader>
 
-          <div className="p-4 sm:p-6 space-y-5">
+          <div className="space-y-5">
             {/* Bandeau d'aide contextuelle */}
             <div className="flex gap-2.5 rounded-md border border-primary/20 bg-primary/5 p-3 text-xs sm:text-sm">
               <Info size={16} className="text-primary shrink-0 mt-0.5" />
