@@ -1,12 +1,14 @@
 import { useState } from "react";
+import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Upload } from "lucide-react";
+import { Upload, User, Mail, Briefcase, FileText, CheckCircle2, X, Loader2, Cloud } from "lucide-react";
 
 interface Props {
   open: boolean;
@@ -15,7 +17,8 @@ interface Props {
   jobTitle: string;
 }
 
-const MAX_FILE = 5 * 1024 * 1024; // 5 MB
+const MAX_FILE = 5 * 1024 * 1024;
+const ACCEPTED = [".pdf", ".doc", ".docx"];
 
 const sanitize = (s: string) =>
   s.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
@@ -23,12 +26,70 @@ const sanitize = (s: string) =>
     .replace(/\s+/g, "-")
     .trim();
 
+const schema = z.object({
+  first_name: z.string().trim().min(2, "Min. 2 caractères").max(50),
+  last_name: z.string().trim().min(2, "Min. 2 caractères").max(50),
+  email: z.string().trim().email("Email invalide").max(255),
+  phone: z.string().trim().max(30).optional().or(z.literal("")),
+  linkedin_url: z.string().trim().url("URL invalide").max(255).optional().or(z.literal("")),
+  portfolio_url: z.string().trim().url("URL invalide").max(255).optional().or(z.literal("")),
+  years_experience: z.string().refine((v) => v === "" || (parseInt(v) >= 0 && parseInt(v) <= 60), "0–60").optional(),
+  salary_expectation: z.string().trim().max(100).optional(),
+  cover_letter_text: z.string().trim().max(2000, "Max. 2000 caractères").optional(),
+});
+
+const SectionTitle = ({ icon: Icon, title }: { icon: React.ElementType; title: string }) => (
+  <div className="flex items-center gap-2 pt-1">
+    <div className="p-1.5 rounded-md bg-primary/10 text-primary"><Icon size={14} /></div>
+    <h3 className="text-sm font-semibold">{title}</h3>
+    <div className="flex-1 h-px bg-border" />
+  </div>
+);
+
+const FileDrop = ({ file, onChange, onClear, label, required }: {
+  file: File | null;
+  onChange: (f: File | null) => void;
+  onClear: () => void;
+  label: string;
+  required?: boolean;
+}) => (
+  <div>
+    <label className="text-sm font-medium flex items-center gap-1">
+      {label} {required && <span className="text-destructive">*</span>}
+      <span className="text-xs text-muted-foreground font-normal ml-auto">PDF/DOC · max 5 Mo</span>
+    </label>
+    {file ? (
+      <div className="mt-1 flex items-center gap-2 p-2.5 rounded-md border border-primary/30 bg-primary/5">
+        <CheckCircle2 size={16} className="text-primary shrink-0" />
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-medium truncate">{file.name}</p>
+          <p className="text-xs text-muted-foreground">{(file.size / 1024).toFixed(0)} Ko</p>
+        </div>
+        <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={onClear}>
+          <X size={14} />
+        </Button>
+      </div>
+    ) : (
+      <label className="mt-1 flex flex-col items-center justify-center gap-1 p-4 rounded-md border-2 border-dashed border-border hover:border-primary/50 hover:bg-muted/30 cursor-pointer transition-colors">
+        <Upload size={18} className="text-muted-foreground" />
+        <span className="text-xs text-muted-foreground">Cliquez pour sélectionner un fichier</span>
+        <input
+          type="file"
+          accept={ACCEPTED.join(",")}
+          className="hidden"
+          onChange={(e) => onChange(e.target.files?.[0] || null)}
+        />
+      </label>
+    )}
+  </div>
+);
+
 export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Props) {
   const { user } = useAuthSession();
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [form, setForm] = useState({
-    full_name: user?.user_metadata?.full_name || "",
     first_name: "",
     last_name: "",
     email: user?.email || "",
@@ -42,19 +103,23 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [letterFile, setLetterFile] = useState<File | null>(null);
 
+  const update = (k: keyof typeof form, v: string) => {
+    setForm((f) => ({ ...f, [k]: v }));
+    if (errors[k]) setErrors((e) => { const n = { ...e }; delete n[k]; return n; });
+  };
+
   const uploadToSharePoint = async (file: File, folderPath: string, fileName: string): Promise<string | null> => {
     if (file.size > MAX_FILE) {
-      toast({ title: "Fichier trop volumineux", description: "Maximum 5 Mo.", variant: "destructive" });
+      toast({ title: "Fichier trop volumineux", description: `${file.name} dépasse 5 Mo.`, variant: "destructive" });
       return null;
     }
-    // Récupérer config SharePoint
     const { data: cfg, error: cfgErr } = await supabase
       .from("sharepoint_config")
       .select("site_id, drive_id")
       .limit(1)
       .maybeSingle();
     if (cfgErr || !cfg) {
-      toast({ title: "Configuration SharePoint manquante", description: "Contactez l'administrateur.", variant: "destructive" });
+      toast({ title: "SharePoint non configuré", description: "Contactez l'administrateur.", variant: "destructive" });
       return null;
     }
     const filePath = `${folderPath}/${fileName}`;
@@ -79,10 +144,19 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
 
   const handleSubmit = async () => {
     if (!user) return;
-    if (!form.first_name.trim() || !form.last_name.trim() || !form.email.trim() || !cvFile) {
-      toast({ title: "Champs requis", description: "Nom, prénom, email et CV sont obligatoires.", variant: "destructive" });
+    const parsed = schema.safeParse(form);
+    if (!parsed.success) {
+      const errs: Record<string, string> = {};
+      parsed.error.errors.forEach((e) => { if (e.path[0]) errs[e.path[0] as string] = e.message; });
+      setErrors(errs);
+      toast({ title: "Formulaire incomplet", description: "Corrigez les champs en rouge.", variant: "destructive" });
       return;
     }
+    if (!cvFile) {
+      toast({ title: "CV requis", description: "Veuillez joindre votre CV.", variant: "destructive" });
+      return;
+    }
+
     setSubmitting(true);
     const fullName = `${form.first_name.trim()} ${form.last_name.trim()}`;
     const folderName = `Candidat-${sanitize(form.last_name)}-${sanitize(form.first_name)}-${jobId.substring(0, 8)}`;
@@ -108,83 +182,118 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
       salary_expectation: form.salary_expectation.trim() || null,
       cv_path: cvPath,
       cover_letter_path: letterPath,
-      notes: form.cover_letter_text.trim() || null,
+      notes: form.cover_letter_text?.trim() || null,
     });
-    setSubmitting(false);
+    setsubmittingDone();
+
+    function setsubmittingDone() { setSubmitting(false); }
+
     if (error) {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
       return;
     }
-    toast({ title: "Candidature envoyée", description: "Documents stockés dans SharePoint. Nous reviendrons vers vous rapidement." });
+    toast({ title: "✓ Candidature envoyée", description: "Nous vous recontacterons rapidement." });
     onOpenChange(false);
   };
 
+  const fieldClass = (k: string) => errors[k] ? "border-destructive focus-visible:ring-destructive" : "";
+  const ErrMsg = ({ k }: { k: string }) => errors[k] ? <p className="text-xs text-destructive mt-1">{errors[k]}</p> : null;
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader className="bg-gradient-to-r from-primary to-[#007aa3] text-primary-foreground -m-6 mb-2 p-6 rounded-t-lg">
-          <DialogTitle className="text-primary-foreground">Postuler : {jobTitle}</DialogTitle>
+      <DialogContent className="max-w-2xl p-0 gap-0 overflow-hidden">
+        <DialogHeader className="bg-gradient-to-r from-primary to-[#007aa3] text-primary-foreground p-6">
+          <DialogTitle className="text-primary-foreground text-xl flex items-center gap-2">
+            <Briefcase size={20} /> Postuler
+          </DialogTitle>
+          <p className="text-primary-foreground/90 text-sm font-normal">{jobTitle}</p>
         </DialogHeader>
-        <div className="space-y-3 max-h-[65vh] overflow-y-auto pr-1">
+
+        <div className="space-y-4 max-h-[65vh] overflow-y-auto px-6 py-4">
+          <SectionTitle icon={User} title="Identité" />
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-sm font-medium">Nom *</label>
-              <Input value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} />
+              <label className="text-sm font-medium">Nom <span className="text-destructive">*</span></label>
+              <Input className={fieldClass("last_name")} value={form.last_name} onChange={(e) => update("last_name", e.target.value)} />
+              <ErrMsg k="last_name" />
             </div>
             <div>
-              <label className="text-sm font-medium">Prénom *</label>
-              <Input value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} />
+              <label className="text-sm font-medium">Prénom <span className="text-destructive">*</span></label>
+              <Input className={fieldClass("first_name")} value={form.first_name} onChange={(e) => update("first_name", e.target.value)} />
+              <ErrMsg k="first_name" />
             </div>
           </div>
+
+          <SectionTitle icon={Mail} title="Contact" />
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-sm font-medium">Email *</label>
-              <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+              <label className="text-sm font-medium">Email <span className="text-destructive">*</span></label>
+              <Input type="email" className={fieldClass("email")} value={form.email} onChange={(e) => update("email", e.target.value)} />
+              <ErrMsg k="email" />
             </div>
             <div>
               <label className="text-sm font-medium">Téléphone</label>
-              <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+              <Input placeholder="+224 ..." value={form.phone} onChange={(e) => update("phone", e.target.value)} />
             </div>
           </div>
+
+          <SectionTitle icon={Briefcase} title="Profil professionnel" />
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-sm font-medium">Années d'expérience</label>
-              <Input type="number" min="0" value={form.years_experience} onChange={(e) => setForm({ ...form, years_experience: e.target.value })} />
+              <Input type="number" min="0" max="60" className={fieldClass("years_experience")} value={form.years_experience} onChange={(e) => update("years_experience", e.target.value)} />
+              <ErrMsg k="years_experience" />
             </div>
             <div>
               <label className="text-sm font-medium">Prétention salariale</label>
-              <Input placeholder="Ex: 15 000 000 GNF / mois" value={form.salary_expectation} onChange={(e) => setForm({ ...form, salary_expectation: e.target.value })} />
+              <Input placeholder="Ex: 15M GNF / mois" value={form.salary_expectation} onChange={(e) => update("salary_expectation", e.target.value)} />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-sm font-medium">LinkedIn</label>
-              <Input placeholder="https://linkedin.com/in/..." value={form.linkedin_url} onChange={(e) => setForm({ ...form, linkedin_url: e.target.value })} />
+              <Input placeholder="https://linkedin.com/in/..." className={fieldClass("linkedin_url")} value={form.linkedin_url} onChange={(e) => update("linkedin_url", e.target.value)} />
+              <ErrMsg k="linkedin_url" />
             </div>
             <div>
-              <label className="text-sm font-medium">Portfolio / Site web</label>
-              <Input placeholder="https://..." value={form.portfolio_url} onChange={(e) => setForm({ ...form, portfolio_url: e.target.value })} />
+              <label className="text-sm font-medium">Portfolio</label>
+              <Input placeholder="https://..." className={fieldClass("portfolio_url")} value={form.portfolio_url} onChange={(e) => update("portfolio_url", e.target.value)} />
+              <ErrMsg k="portfolio_url" />
             </div>
           </div>
-          <div>
-            <label className="text-sm font-medium">CV (PDF, max 5 Mo) *</label>
-            <Input type="file" accept=".pdf,.doc,.docx" onChange={(e) => setCvFile(e.target.files?.[0] || null)} />
-            {cvFile && <p className="text-xs text-muted-foreground mt-1"><Upload size={12} className="inline" /> {cvFile.name}</p>}
+
+          <SectionTitle icon={FileText} title="Documents" />
+          <div className="grid grid-cols-2 gap-3">
+            <FileDrop file={cvFile} onChange={setCvFile} onClear={() => setCvFile(null)} label="CV" required />
+            <FileDrop file={letterFile} onChange={setLetterFile} onClear={() => setLetterFile(null)} label="Lettre de motivation" />
           </div>
+
           <div>
-            <label className="text-sm font-medium">Lettre de motivation (PDF, optionnel)</label>
-            <Input type="file" accept=".pdf,.doc,.docx" onChange={(e) => setLetterFile(e.target.files?.[0] || null)} />
-            {letterFile && <p className="text-xs text-muted-foreground mt-1"><Upload size={12} className="inline" /> {letterFile.name}</p>}
+            <label className="text-sm font-medium flex justify-between">
+              <span>Message complémentaire</span>
+              <span className="text-xs text-muted-foreground font-normal">{form.cover_letter_text.length}/2000</span>
+            </label>
+            <Textarea
+              rows={4}
+              maxLength={2000}
+              className={fieldClass("cover_letter_text")}
+              value={form.cover_letter_text}
+              onChange={(e) => update("cover_letter_text", e.target.value)}
+              placeholder="Présentez-vous brièvement, vos motivations…"
+            />
+            <ErrMsg k="cover_letter_text" />
           </div>
-          <div>
-            <label className="text-sm font-medium">Message complémentaire</label>
-            <Textarea rows={4} value={form.cover_letter_text} onChange={(e) => setForm({ ...form, cover_letter_text: e.target.value })} placeholder="Présentez-vous brièvement..." />
-          </div>
-          <p className="text-xs text-muted-foreground">📁 Vos documents seront stockés dans SharePoint : <code>Candidatures/Candidat-Nom-Prenom-...</code></p>
+
+          <Badge variant="secondary" className="gap-1.5 font-normal">
+            <Cloud size={12} /> Documents stockés en sécurité sur SharePoint
+          </Badge>
         </div>
-        <DialogFooter>
+
+        <DialogFooter className="px-6 py-4 border-t bg-muted/30">
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>Annuler</Button>
-          <Button onClick={handleSubmit} disabled={submitting}>{submitting ? "Envoi..." : "Envoyer ma candidature"}</Button>
+          <Button onClick={handleSubmit} disabled={submitting} className="min-w-[180px]">
+            {submitting ? (<><Loader2 size={14} className="mr-2 animate-spin" /> Envoi en cours…</>) : "Envoyer ma candidature"}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>
