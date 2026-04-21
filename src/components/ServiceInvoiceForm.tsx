@@ -136,7 +136,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
       const safeClient = sanitizeName(selectedClient.client_name);
 
       // Upload to SharePoint
-      const updates: Record<string, string | null> = {};
+      const updates: import("@/integrations/supabase/types").TablesUpdate<"service_invoices"> = {};
       if (pdfBlob) {
         const up = await uploadToSharePoint(selectedClient.client_name, `${safeNum}_${safeClient}.pdf`, pdfBlob, "application/pdf");
         if (up) { updates.sharepoint_pdf_id = up.id; updates.sharepoint_url = up.webUrl; updates.pdf_generated_at = new Date().toISOString(); }
