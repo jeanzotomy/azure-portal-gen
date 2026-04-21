@@ -29,6 +29,8 @@ interface JobPosting {
   sector: string | null;
   start_date: string | null;
   salary_range: string | null;
+  contract_duration: string | null;
+  renewable: boolean;
   created_at: string;
 }
 
@@ -113,6 +115,8 @@ export default function HrTab() {
     sector: "",
     start_date: "",
     salary_range: "",
+    contract_duration: "",
+    renewable: false,
   });
 
   const load = async () => {
@@ -246,7 +250,7 @@ export default function HrTab() {
 
   const openNew = () => {
     setEditing(null);
-    setForm({ title: "", department: "", location: "", contract_type: "CDI", description: "", closing_date: "", status: "brouillon", sector: "", start_date: "", salary_range: "" });
+    setForm({ title: "", department: "", location: "", contract_type: "CDI", description: "", closing_date: "", status: "brouillon", sector: "", start_date: "", salary_range: "", contract_duration: "", renewable: false });
     setDialogOpen(true);
   };
 
@@ -263,6 +267,8 @@ export default function HrTab() {
       sector: job.sector || "",
       start_date: job.start_date || "",
       salary_range: job.salary_range || "",
+      contract_duration: job.contract_duration || "",
+      renewable: job.renewable || false,
     });
     setDialogOpen(true);
   };
@@ -284,6 +290,8 @@ export default function HrTab() {
       sector: form.sector.trim() || null,
       start_date: form.start_date.trim() || null,
       salary_range: form.salary_range.trim() || null,
+      contract_duration: form.contract_type === "CDD" ? (form.contract_duration.trim() || null) : null,
+      renewable: form.contract_type === "CDD" ? form.renewable : false,
     };
     const res = editing
       ? await supabase.from("job_postings").update(payload).eq("id", editing.id)
