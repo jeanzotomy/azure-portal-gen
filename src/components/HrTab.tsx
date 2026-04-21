@@ -97,6 +97,9 @@ export default function HrTab() {
     description: "",
     closing_date: "",
     status: "brouillon" as JobStatus,
+    sector: "",
+    start_date: "",
+    salary_range: "",
   });
 
   const load = async () => {
