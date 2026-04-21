@@ -111,7 +111,7 @@ function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser
             <span className="text-xs bg-teal-500/10 text-teal-500 px-2.5 py-1 rounded-full font-medium flex items-center gap-1">
               <Shield size={12} /> Comptable
             </span>
-            <NotificationBell role="comptable" onNavigate={(target) => setTab(target as "projects" | "sharepoint")} />
+            <NotificationBell role="comptable" onNavigate={(target) => setTab(target as typeof tab)} />
             <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
               {(user.user_metadata?.full_name || user.email || "C").charAt(0).toUpperCase()}
             </div>
@@ -121,6 +121,9 @@ function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser
         <main className="flex-1 p-6 overflow-auto">
           {tab === "projects" && <AdminProjectsInner readOnly />}
           {tab === "sharepoint" && <SharePointTab readOnly={false} />}
+          {tab === "service-clients" && <ServiceClientsTab />}
+          {tab === "service-catalog" && <ServiceCatalogTab />}
+          {tab === "service-invoices" && <ServiceInvoicesTab />}
         </main>
       </div>
     </div>
