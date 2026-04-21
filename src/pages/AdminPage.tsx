@@ -319,6 +319,33 @@ function AdminContent() {
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   ))}
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      onClick={() => {
+                        setGestionnaireServicesOpen((v) => !v);
+                        if (!isGestionnaireServicesTab) setGestionnaireTab("service-clients");
+                      }}
+                      isActive={isGestionnaireServicesTab}
+                      tooltip="Services aux clients"
+                      className="gap-3"
+                    >
+                      <Briefcase size={18} />
+                      <span className="flex-1 text-left">Services aux clients</span>
+                      {gestionnaireServicesOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                    </SidebarMenuButton>
+                    {gestionnaireServicesOpen && (
+                      <SidebarMenuSub>
+                        {gestionnaireServicesGroup.map((s) => (
+                          <SidebarMenuSubItem key={s.id}>
+                            <SidebarMenuSubButton onClick={() => setGestionnaireTab(s.id)} isActive={gestionnaireTab === s.id} className="gap-2 cursor-pointer">
+                              <s.icon size={14} />
+                              <span>{s.label}</span>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
+                      </SidebarMenuSub>
+                    )}
+                  </SidebarMenuItem>
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
