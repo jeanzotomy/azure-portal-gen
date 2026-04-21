@@ -178,6 +178,14 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
     }
   }, [currency, convert]);
 
+  const selectedPaymentMethods: InvoicePaymentMethodEntry[] = paymentMethods
+    .filter((p) => selectedPaymentIds.includes(p.id))
+    .map((p) => ({
+      label: p.label, type: p.type, currency: p.currency,
+      bank: p.bank, iban: p.iban, swift: p.swift,
+      account_holder: p.account_holder, mobile_number: p.mobile_number, instructions: p.instructions,
+    }));
+
   const buildPdfData = (invoiceNumber: string): InvoicePDFData => ({
     invoice_number: invoiceNumber,
     invoice_date: invoiceDate,
@@ -195,6 +203,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
       email: selectedClient?.email ?? null,
     },
     payment_details: payment,
+    payment_methods: selectedPaymentMethods,
     items: items.map((it, i) => ({ position: i + 1, description: it.description, subtitle: it.subtitle ?? null, quantity: it.quantity, unit: it.unit, unit_price: it.unit_price, discount_rate: it.discount_rate ?? 0, total: lineTotal(it) })),
     subtotal, discount_rate: discountRate, discount_amount: discountAmount, tax_rate: taxRate, tax_amount: taxAmount,
     early_payment_discount_rate: earlyPaymentDiscountRate, early_payment_discount_amount: earlyPaymentDiscountAmount,
