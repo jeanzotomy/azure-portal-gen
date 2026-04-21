@@ -47,6 +47,11 @@ export interface InvoicePDFData {
   early_payment_discount_amount?: number;
   total: number;
   notes?: string | null;
+  issuer?: {
+    full_name?: string | null;
+    role?: string | null;
+    signature_url?: string | null;
+  } | null;
 }
 
 const formatCurrency = (n: number, currency: string) => {
