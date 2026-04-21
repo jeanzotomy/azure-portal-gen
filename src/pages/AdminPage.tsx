@@ -461,7 +461,6 @@ function AdminContent() {
   ];
 
   const isAdminServicesTab = adminServicesGroup.some((s) => s.id === tab);
-  const [adminServicesOpen, setAdminServicesOpen] = useState(true);
   useEffect(() => { if (isAdminServicesTab) setAdminServicesOpen(true); }, [isAdminServicesTab]);
 
   return (
