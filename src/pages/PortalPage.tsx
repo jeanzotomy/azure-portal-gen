@@ -41,6 +41,7 @@ import type { User as SupaUser } from "@supabase/supabase-js";
 import { PortalInfoBar } from "@/components/PortalInfoBar";
 import { NotificationBell } from "@/components/NotificationBell";
 import ApplicationsTab from "@/components/ApplicationsTab";
+import { getDialCode, applyDialCode } from "@/lib/country-dial-codes";
 
 type Tab = "dashboard" | "projects" | "tickets" | "applications" | "profile";
 
