@@ -77,18 +77,31 @@ interface Department {
   description: string | null;
 }
 
+interface Sector {
+  id: string;
+  name: string;
+  description: string | null;
+}
+
 export default function HrTab() {
   const { user } = useAuthSession();
   const { toast } = useToast();
   const [jobs, setJobs] = useState<JobPosting[]>([]);
   const [applications, setApplications] = useState<JobApplication[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
+  const [sectors, setSectors] = useState<Sector[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<JobPosting | null>(null);
   const [deptDialogOpen, setDeptDialogOpen] = useState(false);
   const [newDeptName, setNewDeptName] = useState("");
   const [newDeptDesc, setNewDeptDesc] = useState("");
+  const [sectorDialogOpen, setSectorDialogOpen] = useState(false);
+  const [newSectorName, setNewSectorName] = useState("");
+  const [newSectorDesc, setNewSectorDesc] = useState("");
+  const [editingSectorId, setEditingSectorId] = useState<string | null>(null);
+  const [editSectorName, setEditSectorName] = useState("");
+  const [editSectorDesc, setEditSectorDesc] = useState("");
   const [form, setForm] = useState({
     title: "",
     department: "",
@@ -104,14 +117,16 @@ export default function HrTab() {
 
   const load = async () => {
     setLoading(true);
-    const [jobsRes, appsRes, deptsRes] = await Promise.all([
+    const [jobsRes, appsRes, deptsRes, sectorsRes] = await Promise.all([
       supabase.from("job_postings").select("*").order("created_at", { ascending: false }),
       supabase.from("job_applications").select("*").order("created_at", { ascending: false }),
       supabase.from("departments").select("*").order("name", { ascending: true }),
+      (supabase as any).from("sectors").select("*").order("name", { ascending: true }),
     ]);
     if (jobsRes.data) setJobs(jobsRes.data as JobPosting[]);
     if (appsRes.data) setApplications(appsRes.data as JobApplication[]);
     if (deptsRes.data) setDepartments(deptsRes.data as Department[]);
+    if (sectorsRes.data) setSectors(sectorsRes.data as Sector[]);
     setLoading(false);
   };
 
@@ -172,6 +187,60 @@ export default function HrTab() {
     }
     toast({ title: "Département modifié" });
     cancelEditDepartment();
+    load();
+  };
+
+  const handleAddSector = async () => {
+    if (!user || !newSectorName.trim()) return;
+    const { error } = await (supabase as any).from("sectors").insert({
+      name: newSectorName.trim(),
+      description: newSectorDesc.trim() || null,
+      created_by: user.id,
+    });
+    if (error) {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Secteur ajouté" });
+    setNewSectorName("");
+    setNewSectorDesc("");
+    load();
+  };
+
+  const handleDeleteSector = async (id: string) => {
+    if (!confirm("Supprimer ce secteur ?")) return;
+    const { error } = await (supabase as any).from("sectors").delete().eq("id", id);
+    if (error) {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      return;
+    }
+    load();
+  };
+
+  const startEditSector = (s: Sector) => {
+    setEditingSectorId(s.id);
+    setEditSectorName(s.name);
+    setEditSectorDesc(s.description || "");
+  };
+
+  const cancelEditSector = () => {
+    setEditingSectorId(null);
+    setEditSectorName("");
+    setEditSectorDesc("");
+  };
+
+  const handleUpdateSector = async () => {
+    if (!editingSectorId || !editSectorName.trim()) return;
+    const { error } = await (supabase as any)
+      .from("sectors")
+      .update({ name: editSectorName.trim(), description: editSectorDesc.trim() || null })
+      .eq("id", editingSectorId);
+    if (error) {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Secteur modifié" });
+    cancelEditSector();
     load();
   };
 
@@ -267,6 +336,7 @@ export default function HrTab() {
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={load}><RefreshCw size={14} /> Actualiser</Button>
           <Button variant="outline" size="sm" onClick={() => setDeptDialogOpen(true)}><Building2 size={14} /> Départements</Button>
+          <Button variant="outline" size="sm" onClick={() => setSectorDialogOpen(true)}><Briefcase size={14} /> Secteurs</Button>
           <Button size="sm" onClick={openNew}><Plus size={14} /> Nouvelle offre</Button>
         </div>
       </div>
@@ -414,7 +484,18 @@ export default function HrTab() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-sm font-medium">Secteur</label>
-                <Input value={form.sector} onChange={(e) => setForm({ ...form, sector: e.target.value })} placeholder="Ex: Technologies Cloud & Transformation Numérique" />
+                <Select value={form.sector || "__none__"} onValueChange={(v) => setForm({ ...form, sector: v === "__none__" ? "" : v })}>
+                  <SelectTrigger><SelectValue placeholder="Sélectionner..." /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">— Aucun —</SelectItem>
+                    {sectors.map((s) => (
+                      <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {sectors.length === 0 && (
+                  <p className="text-xs text-muted-foreground mt-1">Aucun secteur. <button type="button" className="text-primary hover:underline" onClick={() => setSectorDialogOpen(true)}>Créer</button></p>
+                )}
               </div>
               <div>
                 <label className="text-sm font-medium">Date de prise de poste</label>
@@ -498,6 +579,60 @@ export default function HrTab() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDeptDialogOpen(false)}>Fermer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={sectorDialogOpen} onOpenChange={setSectorDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader className="bg-gradient-to-r from-primary to-[#007aa3] text-primary-foreground -m-6 mb-2 p-6 rounded-t-lg">
+            <DialogTitle className="text-primary-foreground flex items-center gap-2"><Briefcase size={18} /> Gérer les secteurs</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2 p-3 rounded-lg border bg-muted/30">
+              <p className="text-sm font-medium">Ajouter un secteur</p>
+              <Input value={newSectorName} onChange={(e) => setNewSectorName(e.target.value)} placeholder="Nom (ex: Technologies Cloud)" />
+              <Input value={newSectorDesc} onChange={(e) => setNewSectorDesc(e.target.value)} placeholder="Description (optionnel)" />
+              <Button size="sm" onClick={handleAddSector} disabled={!newSectorName.trim()}>
+                <Plus size={14} /> Ajouter
+              </Button>
+            </div>
+            <div className="space-y-1 max-h-64 overflow-y-auto">
+              {sectors.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">Aucun secteur.</p>
+              ) : sectors.map((s) => (
+                <div key={s.id} className="p-2 rounded border hover:bg-muted/50">
+                  {editingSectorId === s.id ? (
+                    <div className="space-y-2">
+                      <Input value={editSectorName} onChange={(e) => setEditSectorName(e.target.value)} placeholder="Nom" />
+                      <Input value={editSectorDesc} onChange={(e) => setEditSectorDesc(e.target.value)} placeholder="Description (optionnel)" />
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={handleUpdateSector} disabled={!editSectorName.trim()}>Enregistrer</Button>
+                        <Button size="sm" variant="outline" onClick={cancelEditSector}>Annuler</Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium truncate">{s.name}</p>
+                        {s.description && <p className="text-xs text-muted-foreground truncate">{s.description}</p>}
+                      </div>
+                      <div className="flex gap-1 shrink-0">
+                        <Button variant="ghost" size="sm" onClick={() => startEditSector(s)}>
+                          <Pencil size={14} />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => handleDeleteSector(s.id)} className="text-destructive">
+                          <X size={14} />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSectorDialogOpen(false)}>Fermer</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
