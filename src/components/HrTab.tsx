@@ -144,6 +144,37 @@ export default function HrTab() {
     load();
   };
 
+  const [editingDeptId, setEditingDeptId] = useState<string | null>(null);
+  const [editDeptName, setEditDeptName] = useState("");
+  const [editDeptDesc, setEditDeptDesc] = useState("");
+
+  const startEditDepartment = (d: Department) => {
+    setEditingDeptId(d.id);
+    setEditDeptName(d.name);
+    setEditDeptDesc(d.description || "");
+  };
+
+  const cancelEditDepartment = () => {
+    setEditingDeptId(null);
+    setEditDeptName("");
+    setEditDeptDesc("");
+  };
+
+  const handleUpdateDepartment = async () => {
+    if (!editingDeptId || !editDeptName.trim()) return;
+    const { error } = await supabase
+      .from("departments")
+      .update({ name: editDeptName.trim(), description: editDeptDesc.trim() || null })
+      .eq("id", editingDeptId);
+    if (error) {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Département modifié" });
+    cancelEditDepartment();
+    load();
+  };
+
   const openNew = () => {
     setEditing(null);
     setForm({ title: "", department: "", location: "", contract_type: "CDI", description: "", closing_date: "", status: "brouillon", sector: "", start_date: "", salary_range: "" });
@@ -435,14 +466,32 @@ export default function HrTab() {
               {departments.length === 0 ? (
                 <p className="text-sm text-muted-foreground text-center py-4">Aucun département.</p>
               ) : departments.map((d) => (
-                <div key={d.id} className="flex items-center justify-between gap-2 p-2 rounded border hover:bg-muted/50">
-                  <div className="min-w-0">
-                    <p className="text-sm font-medium truncate">{d.name}</p>
-                    {d.description && <p className="text-xs text-muted-foreground truncate">{d.description}</p>}
-                  </div>
-                  <Button variant="ghost" size="sm" onClick={() => handleDeleteDepartment(d.id)} className="text-destructive shrink-0">
-                    <X size={14} />
-                  </Button>
+                <div key={d.id} className="p-2 rounded border hover:bg-muted/50">
+                  {editingDeptId === d.id ? (
+                    <div className="space-y-2">
+                      <Input value={editDeptName} onChange={(e) => setEditDeptName(e.target.value)} placeholder="Nom" />
+                      <Input value={editDeptDesc} onChange={(e) => setEditDeptDesc(e.target.value)} placeholder="Description (optionnel)" />
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={handleUpdateDepartment} disabled={!editDeptName.trim()}>Enregistrer</Button>
+                        <Button size="sm" variant="outline" onClick={cancelEditDepartment}>Annuler</Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium truncate">{d.name}</p>
+                        {d.description && <p className="text-xs text-muted-foreground truncate">{d.description}</p>}
+                      </div>
+                      <div className="flex gap-1 shrink-0">
+                        <Button variant="ghost" size="sm" onClick={() => startEditDepartment(d)}>
+                          <Pencil size={14} />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => handleDeleteDepartment(d.id)} className="text-destructive">
+                          <X size={14} />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
