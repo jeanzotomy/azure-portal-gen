@@ -4,7 +4,9 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Briefcase, RefreshCw, Calendar, MapPin, ExternalLink } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Briefcase, RefreshCw, Calendar, MapPin, ExternalLink, Search, X } from "lucide-react";
 import { format } from "date-fns";
 import type { User as SupaUser } from "@supabase/supabase-js";
 
@@ -58,6 +60,9 @@ export default function ApplicationsTab({ user }: { user: SupaUser }) {
   const [apps, setApps] = useState<Application[]>([]);
   const [jobs, setJobs] = useState<Record<string, Job>>({});
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [contractFilter, setContractFilter] = useState<string>("all");
 
   const load = async () => {
     setLoading(true);
@@ -84,6 +89,21 @@ export default function ApplicationsTab({ user }: { user: SupaUser }) {
   };
 
   useEffect(() => { load(); }, [user.id]);
+
+  const filteredApps = apps.filter((a) => {
+    const job = jobs[a.job_id];
+    const q = search.trim().toLowerCase();
+    if (q) {
+      const haystack = [job?.title, job?.location, job?.department].filter(Boolean).join(" ").toLowerCase();
+      if (!haystack.includes(q)) return false;
+    }
+    if (statusFilter !== "all" && a.status !== statusFilter) return false;
+    if (contractFilter !== "all" && job?.contract_type !== contractFilter) return false;
+    return true;
+  });
+  const contractTypes = Array.from(new Set(Object.values(jobs).map((j) => j.contract_type).filter(Boolean)));
+  const hasActiveFilters = !!search || statusFilter !== "all" || contractFilter !== "all";
+  const resetFilters = () => { setSearch(""); setStatusFilter("all"); setContractFilter("all"); };
 
   return (
     <div className="space-y-6">
@@ -123,8 +143,53 @@ export default function ApplicationsTab({ user }: { user: SupaUser }) {
         </Card>
       )}
 
+      {!loading && apps.length > 0 && (
+        <div className="p-4 rounded-xl border bg-card/50 backdrop-blur-sm space-y-3">
+          <div className="relative">
+            <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              placeholder="Rechercher par titre d'offre, lieu, département..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-9 pr-9"
+            />
+            {search && (
+              <button type="button" onClick={() => setSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground" aria-label="Effacer">
+                <X size={14} />
+              </button>
+            )}
+          </div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger><SelectValue placeholder="Statut" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous les statuts</SelectItem>
+                <SelectItem value="nouvelle">Reçue</SelectItem>
+                <SelectItem value="en_revue">En revue</SelectItem>
+                <SelectItem value="entretien">Entretien</SelectItem>
+                <SelectItem value="acceptee">Acceptée</SelectItem>
+                <SelectItem value="refusee">Refusée</SelectItem>
+              </SelectContent>
+            </Select>
+            <Select value={contractFilter} onValueChange={setContractFilter}>
+              <SelectTrigger><SelectValue placeholder="Type de contrat" /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">Tous les contrats</SelectItem>
+                {contractTypes.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex items-center justify-between text-xs text-muted-foreground">
+            <span>{filteredApps.length} candidature{filteredApps.length > 1 ? "s" : ""} sur {apps.length}</span>
+            {hasActiveFilters && (
+              <button type="button" onClick={resetFilters} className="text-primary hover:underline font-medium">Réinitialiser</button>
+            )}
+          </div>
+        </div>
+      )}
+
       <div className="space-y-3">
-        {apps.map((app) => {
+        {filteredApps.map((app) => {
           const job = jobs[app.job_id];
           return (
             <Card key={app.id} className="hover:shadow-md transition-shadow">

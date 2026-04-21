@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Briefcase, Plus, Pencil, Trash2, FileText, Download, Calendar, MapPin, RefreshCw, Building2, X } from "lucide-react";
+import { Briefcase, Plus, Pencil, Trash2, FileText, Download, Calendar, MapPin, RefreshCw, Building2, X, Search } from "lucide-react";
 import { format } from "date-fns";
 
 type JobStatus = "brouillon" | "publiee" | "fermee";
@@ -104,6 +104,15 @@ export default function HrTab() {
   const [editingSectorId, setEditingSectorId] = useState<string | null>(null);
   const [editSectorName, setEditSectorName] = useState("");
   const [editSectorDesc, setEditSectorDesc] = useState("");
+  // Filters – Offres
+  const [jobSearch, setJobSearch] = useState("");
+  const [jobStatusFilter, setJobStatusFilter] = useState<string>("all");
+  const [jobContractFilter, setJobContractFilter] = useState<string>("all");
+  const [jobDeptFilter, setJobDeptFilter] = useState<string>("all");
+  // Filters – Candidatures
+  const [appSearch, setAppSearch] = useState("");
+  const [appStatusFilter, setAppStatusFilter] = useState<string>("all");
+  const [appJobFilter, setAppJobFilter] = useState<string>("all");
   const [form, setForm] = useState({
     title: "",
     department: "",
@@ -367,7 +376,83 @@ export default function HrTab() {
           {!loading && jobs.length === 0 && (
             <Card><CardContent className="p-8 text-center text-muted-foreground">Aucune offre. Créez la première !</CardContent></Card>
           )}
-          {jobs.map((job) => {
+          {!loading && jobs.length > 0 && (() => {
+            const jobDepartments = Array.from(new Set(jobs.map((j) => j.department).filter((d): d is string => !!d))).sort();
+            const jobContracts = Array.from(new Set(jobs.map((j) => j.contract_type)));
+            const filteredJobs = jobs.filter((j) => {
+              const q = jobSearch.trim().toLowerCase();
+              if (q) {
+                const haystack = [j.title, j.description, j.location, j.department, j.sector].filter(Boolean).join(" ").toLowerCase();
+                if (!haystack.includes(q)) return false;
+              }
+              if (jobStatusFilter !== "all" && j.status !== jobStatusFilter) return false;
+              if (jobContractFilter !== "all" && j.contract_type !== jobContractFilter) return false;
+              if (jobDeptFilter !== "all" && j.department !== jobDeptFilter) return false;
+              return true;
+            });
+            const hasJobFilters = !!jobSearch || jobStatusFilter !== "all" || jobContractFilter !== "all" || jobDeptFilter !== "all";
+            const resetJobFilters = () => { setJobSearch(""); setJobStatusFilter("all"); setJobContractFilter("all"); setJobDeptFilter("all"); };
+            return (
+              <>
+                <div className="p-3 rounded-xl border bg-card/50 backdrop-blur-sm space-y-2.5">
+                  <div className="relative">
+                    <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <Input placeholder="Rechercher une offre..." value={jobSearch} onChange={(e) => setJobSearch(e.target.value)} className="pl-9 pr-9 h-9" />
+                    {jobSearch && (
+                      <button type="button" onClick={() => setJobSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"><X size={14} /></button>
+                    )}
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                    <Select value={jobStatusFilter} onValueChange={setJobStatusFilter}>
+                      <SelectTrigger className="h-9"><SelectValue placeholder="Statut" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tous les statuts</SelectItem>
+                        <SelectItem value="brouillon">Brouillon</SelectItem>
+                        <SelectItem value="publiee">Publiée</SelectItem>
+                        <SelectItem value="fermee">Fermée</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <Select value={jobContractFilter} onValueChange={setJobContractFilter}>
+                      <SelectTrigger className="h-9"><SelectValue placeholder="Contrat" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tous les contrats</SelectItem>
+                        {jobContracts.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                    <Select value={jobDeptFilter} onValueChange={setJobDeptFilter}>
+                      <SelectTrigger className="h-9"><SelectValue placeholder="Département" /></SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="all">Tous les départements</SelectItem>
+                        {jobDepartments.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex items-center justify-between text-xs text-muted-foreground">
+                    <span>{filteredJobs.length} sur {jobs.length}</span>
+                    {hasJobFilters && (
+                      <button type="button" onClick={resetJobFilters} className="text-primary hover:underline font-medium">Réinitialiser</button>
+                    )}
+                  </div>
+                </div>
+                {filteredJobs.length === 0 && (
+                  <Card><CardContent className="p-8 text-center text-muted-foreground text-sm">Aucune offre ne correspond aux filtres.</CardContent></Card>
+                )}
+              </>
+            );
+          })()}
+          {(() => {
+            const filteredJobs = jobs.filter((j) => {
+              const q = jobSearch.trim().toLowerCase();
+              if (q) {
+                const haystack = [j.title, j.description, j.location, j.department, j.sector].filter(Boolean).join(" ").toLowerCase();
+                if (!haystack.includes(q)) return false;
+              }
+              if (jobStatusFilter !== "all" && j.status !== jobStatusFilter) return false;
+              if (jobContractFilter !== "all" && j.contract_type !== jobContractFilter) return false;
+              if (jobDeptFilter !== "all" && j.department !== jobDeptFilter) return false;
+              return true;
+            });
+            return filteredJobs.map((job) => {
             const appCount = applications.filter((a) => a.job_id === job.id).length;
             return (
               <Card key={job.id}>
@@ -404,7 +489,8 @@ export default function HrTab() {
                 </CardContent>
               </Card>
             );
-          })}
+          });
+          })()}
         </TabsContent>
 
         <TabsContent value="applications" className="space-y-3 mt-4">
@@ -412,7 +498,73 @@ export default function HrTab() {
           {!loading && applications.length === 0 && (
             <Card><CardContent className="p-8 text-center text-muted-foreground">Aucune candidature reçue.</CardContent></Card>
           )}
-          {applications.map((app) => {
+          {!loading && applications.length > 0 && (() => {
+            const filteredApps = applications.filter((a) => {
+              const job = jobs.find((j) => j.id === a.job_id);
+              const q = appSearch.trim().toLowerCase();
+              if (q) {
+                const haystack = [a.full_name, a.email, a.phone, job?.title, job?.location].filter(Boolean).join(" ").toLowerCase();
+                if (!haystack.includes(q)) return false;
+              }
+              if (appStatusFilter !== "all" && a.status !== appStatusFilter) return false;
+              if (appJobFilter !== "all" && a.job_id !== appJobFilter) return false;
+              return true;
+            });
+            const hasAppFilters = !!appSearch || appStatusFilter !== "all" || appJobFilter !== "all";
+            const resetAppFilters = () => { setAppSearch(""); setAppStatusFilter("all"); setAppJobFilter("all"); };
+            const jobsWithApps = jobs.filter((j) => applications.some((a) => a.job_id === j.id));
+            return (
+              <div className="p-3 rounded-xl border bg-card/50 backdrop-blur-sm space-y-2.5">
+                <div className="relative">
+                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <Input placeholder="Rechercher un candidat (nom, email, offre)..." value={appSearch} onChange={(e) => setAppSearch(e.target.value)} className="pl-9 pr-9 h-9" />
+                  {appSearch && (
+                    <button type="button" onClick={() => setAppSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"><X size={14} /></button>
+                  )}
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <Select value={appStatusFilter} onValueChange={setAppStatusFilter}>
+                    <SelectTrigger className="h-9"><SelectValue placeholder="Statut" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tous les statuts</SelectItem>
+                      {(Object.keys(APP_STATUS_LABELS) as AppStatus[]).map((s) => (
+                        <SelectItem key={s} value={s}>{APP_STATUS_LABELS[s]}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select value={appJobFilter} onValueChange={setAppJobFilter}>
+                    <SelectTrigger className="h-9"><SelectValue placeholder="Offre" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Toutes les offres</SelectItem>
+                      {jobsWithApps.map((j) => <SelectItem key={j.id} value={j.id}>{j.title}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span>{filteredApps.length} sur {applications.length}</span>
+                  {hasAppFilters && (
+                    <button type="button" onClick={resetAppFilters} className="text-primary hover:underline font-medium">Réinitialiser</button>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
+          {(() => {
+            const filteredApps = applications.filter((a) => {
+              const job = jobs.find((j) => j.id === a.job_id);
+              const q = appSearch.trim().toLowerCase();
+              if (q) {
+                const haystack = [a.full_name, a.email, a.phone, job?.title, job?.location].filter(Boolean).join(" ").toLowerCase();
+                if (!haystack.includes(q)) return false;
+              }
+              if (appStatusFilter !== "all" && a.status !== appStatusFilter) return false;
+              if (appJobFilter !== "all" && a.job_id !== appJobFilter) return false;
+              return true;
+            });
+            if (!loading && applications.length > 0 && filteredApps.length === 0) {
+              return <Card><CardContent className="p-8 text-center text-muted-foreground text-sm">Aucune candidature ne correspond aux filtres.</CardContent></Card>;
+            }
+            return filteredApps.map((app) => {
             const job = jobs.find((j) => j.id === app.job_id);
             return (
               <Card key={app.id}>
@@ -453,7 +605,8 @@ export default function HrTab() {
                 </CardContent>
               </Card>
             );
-          })}
+          });
+          })()}
         </TabsContent>
       </Tabs>
 
