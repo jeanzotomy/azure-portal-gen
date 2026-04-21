@@ -5,7 +5,9 @@ import { useToast } from "@/hooks/use-toast";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
+import { FormDialogHeader, formDialogContentClass } from "@/components/FormDialogHeader";
+import { FileText as FileTextIcon } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -302,12 +304,15 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[calc(100vw-1rem)] sm:w-auto max-w-5xl max-h-[92vh] overflow-y-auto p-3 sm:p-6">
-        <DialogHeader>
-          <DialogTitle className="text-base sm:text-lg">{editId ? "Modifier la facture" : "Nouvelle facture"}</DialogTitle>
-        </DialogHeader>
+      <DialogContent className={`w-[calc(100vw-1rem)] sm:w-auto max-w-5xl max-h-[92vh] overflow-y-auto ${formDialogContentClass}`}>
+        <FormDialogHeader
+          icon={FileTextIcon}
+          title={editId ? "Modifier la facture" : "Nouvelle facture de service"}
+          subtitle="Renseignez le client, les lignes et les conditions de paiement."
+          badges={[]}
+        />
 
-        <div className="grid grid-cols-12 gap-3">
+        <div className="grid grid-cols-12 gap-3 p-3 sm:p-6">
           <div className="col-span-12 md:col-span-6">
             <label className="text-xs font-medium">Client *</label>
             <Select value={clientId} onValueChange={setClientId}>
