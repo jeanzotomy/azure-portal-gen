@@ -795,6 +795,7 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
               {uploading ? "Enregistrement..." : editingInvoiceId ? "Sauvegarder" : "Valider et enregistrer"}
             </Button>
           </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
