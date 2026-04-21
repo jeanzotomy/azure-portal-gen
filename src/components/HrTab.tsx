@@ -484,7 +484,18 @@ export default function HrTab() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-sm font-medium">Secteur</label>
-                <Input value={form.sector} onChange={(e) => setForm({ ...form, sector: e.target.value })} placeholder="Ex: Technologies Cloud & Transformation Numérique" />
+                <Select value={form.sector || "__none__"} onValueChange={(v) => setForm({ ...form, sector: v === "__none__" ? "" : v })}>
+                  <SelectTrigger><SelectValue placeholder="Sélectionner..." /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">— Aucun —</SelectItem>
+                    {sectors.map((s) => (
+                      <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {sectors.length === 0 && (
+                  <p className="text-xs text-muted-foreground mt-1">Aucun secteur. <button type="button" className="text-primary hover:underline" onClick={() => setSectorDialogOpen(true)}>Créer</button></p>
+                )}
               </div>
               <div>
                 <label className="text-sm font-medium">Date de prise de poste</label>
