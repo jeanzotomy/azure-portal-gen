@@ -2170,17 +2170,19 @@ function AdminUsers() {
       return;
     }
     const email = mfaStatus[p.user_id]?.email || null;
-    // Check duplicates by email or client_name
-    const { data: existing } = await supabase
+
+    // Priority check: existing link via user_id
+    const { data: linked } = await supabase
       .from("service_clients")
       .select("id, client_name")
-      .or(email ? `email.eq.${email},client_name.eq.${(p.company || p.full_name).replace(/,/g, " ")}` : `client_name.eq.${(p.company || p.full_name).replace(/,/g, " ")}`)
+      .eq("user_id", p.user_id)
       .limit(1);
-    if (existing && existing.length > 0) {
-      toast({ title: "Déjà existant", description: `Un client facturable existe déjà : ${existing[0].client_name}.`, variant: "destructive" });
+    if (linked && linked.length > 0) {
+      toast({ title: "Déjà client facturable", description: `Cet utilisateur est déjà lié au client : ${linked[0].client_name}.` });
       return;
     }
-    if (!window.confirm(`Créer un client facturable à partir du profil de "${p.full_name || p.company}" ?`)) return;
+
+    if (!window.confirm(`Créer un client facturable à partir du profil de "${p.full_name || p.company}" ?\n\nLe client sera automatiquement lié à ce compte utilisateur.`)) return;
     const { data: { user: currentUser } } = await supabase.auth.getUser();
     if (!currentUser) return;
     const { error } = await supabase.from("service_clients").insert({
@@ -2191,12 +2193,14 @@ function AdminUsers() {
       country: p.country || "Guinée",
       phone: p.phone || null,
       email,
+      user_id: p.user_id,
       created_by: currentUser.id,
     });
     if (error) {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
     } else {
-      toast({ title: "Client facturable créé", description: `${p.full_name || p.company} est maintenant un client facturable.` });
+      toast({ title: "Client facturable créé", description: `${p.full_name || p.company} est maintenant un client facturable lié à son compte.` });
+      void loadBillableLinks();
     }
   };
 
