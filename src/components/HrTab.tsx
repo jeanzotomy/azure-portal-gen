@@ -390,6 +390,42 @@ export default function HrTab() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={deptDialogOpen} onOpenChange={setDeptDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader className="bg-gradient-to-r from-primary to-[#007aa3] text-primary-foreground -m-6 mb-2 p-6 rounded-t-lg">
+            <DialogTitle className="text-primary-foreground flex items-center gap-2"><Building2 size={18} /> Gérer les départements</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2 p-3 rounded-lg border bg-muted/30">
+              <p className="text-sm font-medium">Ajouter un département</p>
+              <Input value={newDeptName} onChange={(e) => setNewDeptName(e.target.value)} placeholder="Nom (ex: Ingénierie)" />
+              <Input value={newDeptDesc} onChange={(e) => setNewDeptDesc(e.target.value)} placeholder="Description (optionnel)" />
+              <Button size="sm" onClick={handleAddDepartment} disabled={!newDeptName.trim()}>
+                <Plus size={14} /> Ajouter
+              </Button>
+            </div>
+            <div className="space-y-1 max-h-64 overflow-y-auto">
+              {departments.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">Aucun département.</p>
+              ) : departments.map((d) => (
+                <div key={d.id} className="flex items-center justify-between gap-2 p-2 rounded border hover:bg-muted/50">
+                  <div className="min-w-0">
+                    <p className="text-sm font-medium truncate">{d.name}</p>
+                    {d.description && <p className="text-xs text-muted-foreground truncate">{d.description}</p>}
+                  </div>
+                  <Button variant="ghost" size="sm" onClick={() => handleDeleteDepartment(d.id)} className="text-destructive shrink-0">
+                    <X size={14} />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDeptDialogOpen(false)}>Fermer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
