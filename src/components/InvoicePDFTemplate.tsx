@@ -8,6 +8,7 @@ export interface InvoiceItemData {
   quantity: number;
   unit?: string | null;
   unit_price: number;
+  discount_rate?: number;
   total: number;
 }
 
