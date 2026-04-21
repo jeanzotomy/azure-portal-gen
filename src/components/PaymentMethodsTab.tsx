@@ -342,7 +342,7 @@ export default function PaymentMethodsTab() {
             </div>
           </div>
 
-          <DialogFooter className="flex-col sm:flex-row gap-2 px-4 sm:px-6 pb-4 sm:pb-6 border-t pt-4 bg-muted/30">
+          <DialogFooter className="flex-col sm:flex-row gap-2 border-t pt-4 -mx-6 -mb-6 px-6 pb-6 bg-muted/30">
             <Button variant="outline" onClick={() => setOpen(false)} className="w-full sm:w-auto">Annuler</Button>
             <Button onClick={() => void save()} className="w-full sm:w-auto">Enregistrer</Button>
           </DialogFooter>
