@@ -205,7 +205,7 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
         <DialogHeader className="relative bg-gradient-to-br from-primary via-primary to-[#005f80] text-primary-foreground p-6 overflow-hidden">
           {/* Decorative blobs */}
           <div className="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-white/10 blur-2xl pointer-events-none" />
-          <div className="absolute -bottom-16 -left-8 w-44 h-44 rounded-full bg-cyan-300/15 blur-3xl pointer-events-none" />
+          <div className="absolute -bottom-16 -left-8 w-44 h-44 rounded-full bg-white/10 blur-3xl pointer-events-none" />
           <div className="relative flex items-start gap-4">
             <div className="shrink-0 h-12 w-12 rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center shadow-lg">
               <Briefcase size={22} className="text-primary-foreground" />
