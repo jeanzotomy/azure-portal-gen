@@ -45,7 +45,7 @@ import { ProfileSignatureDialog } from "@/components/ProfileSignatureDialog";
 
 type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts" | "sharepoint" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods" | "hr";
 type AgentTab = "dashboard" | "tickets" | "contacts";
-type GestionnaireTab = "dashboard" | "projects" | "sharepoint" | "tickets" | "contacts" | "hr";
+type GestionnaireTab = "dashboard" | "projects" | "sharepoint" | "tickets" | "contacts" | "hr" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods";
 
 function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser; collapsed: boolean; handleLogout: () => void }) {
   const [tab, setTab] = useState<"projects" | "sharepoint" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods">("projects");
@@ -194,6 +194,7 @@ function AdminContent() {
   const [assignedProjectsCount, setAssignedProjectsCount] = useState(0);
   const [signatureOpen, setSignatureOpen] = useState(false);
   const [adminServicesOpen, setAdminServicesOpen] = useState(true);
+  const [gestionnaireServicesOpen, setGestionnaireServicesOpen] = useState(true);
   const { t } = useTranslation();
 
   useEffect(() => {
