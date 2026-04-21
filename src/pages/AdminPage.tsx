@@ -40,11 +40,12 @@ import type { User as SupaUser } from "@supabase/supabase-js";
 import { PortalInfoBar } from "@/components/PortalInfoBar";
 import { NotificationBell } from "@/components/NotificationBell";
 import PaymentMethodsTab from "@/components/PaymentMethodsTab";
+import HrTab from "@/components/HrTab";
 import { ProfileSignatureDialog } from "@/components/ProfileSignatureDialog";
 
-type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts" | "sharepoint" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods";
+type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts" | "sharepoint" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods" | "hr";
 type AgentTab = "dashboard" | "tickets" | "contacts";
-type GestionnaireTab = "dashboard" | "projects" | "sharepoint" | "tickets" | "contacts";
+type GestionnaireTab = "dashboard" | "projects" | "sharepoint" | "tickets" | "contacts" | "hr";
 
 function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser; collapsed: boolean; handleLogout: () => void }) {
   const [tab, setTab] = useState<"projects" | "sharepoint" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods">("projects");
@@ -267,6 +268,7 @@ function AdminContent() {
       { id: "sharepoint", icon: HardDrive, label: "SharePoint" },
       { id: "tickets", icon: LifeBuoy, label: t("admin.tickets") },
       { id: "contacts", icon: MessageSquare, label: t("admin.contacts") },
+      { id: "hr", icon: Briefcase, label: "Recrutement" },
     ];
 
     return (
@@ -348,6 +350,7 @@ function AdminContent() {
             {gestionnaireTab === "tickets" && <AdminTickets />}
             {gestionnaireTab === "contacts" && <AdminContacts />}
             {gestionnaireTab === "sharepoint" && <SharePointTab readOnly />}
+            {gestionnaireTab === "hr" && <HrTab />}
           </main>
         </div>
       </div>
@@ -453,6 +456,7 @@ function AdminContent() {
     { id: "tickets", icon: LifeBuoy, label: t("admin.tickets") },
     { id: "contacts", icon: MessageSquare, label: t("admin.contacts") },
     { id: "users", icon: Users, label: t("admin.users") },
+    { id: "hr", icon: Briefcase, label: "Recrutement" },
   ];
 
   const isAdminServicesTab = adminServicesGroup.some((s) => s.id === tab);
@@ -578,6 +582,7 @@ function AdminContent() {
           {tab === "service-catalog" && <ServiceCatalogTab />}
           {tab === "service-invoices" && <ServiceInvoicesTab />}
           {tab === "payment-methods" && <PaymentMethodsTab />}
+          {tab === "hr" && <HrTab />}
         </main>
       </div>
       <ProfileSignatureDialog open={signatureOpen} onOpenChange={setSignatureOpen} />

@@ -26,7 +26,11 @@ export function Footer() {
           <p className="text-sm text-secondary-foreground/60">
             {t("footer.copyright").replace("{year}", String(new Date().getFullYear()))}
           </p>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 flex-wrap justify-center">
+            <Link to="/careers" className="text-sm text-secondary-foreground/60 hover:text-primary transition-colors">
+              Carrières
+            </Link>
+            <span className="text-secondary-foreground/30">|</span>
             <Link to="/privacy" className="text-sm text-secondary-foreground/60 hover:text-primary transition-colors">
               {t("footer.privacy")}
             </Link>

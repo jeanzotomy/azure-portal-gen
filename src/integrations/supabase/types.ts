@@ -202,6 +202,113 @@ export type Database = {
           },
         ]
       }
+      job_applications: {
+        Row: {
+          cover_letter_path: string | null
+          created_at: string
+          cv_path: string
+          email: string
+          full_name: string
+          id: string
+          job_id: string
+          linkedin_url: string | null
+          notes: string | null
+          phone: string | null
+          portfolio_url: string | null
+          salary_expectation: string | null
+          status: Database["public"]["Enums"]["application_status"]
+          updated_at: string
+          user_id: string
+          years_experience: number | null
+        }
+        Insert: {
+          cover_letter_path?: string | null
+          created_at?: string
+          cv_path: string
+          email: string
+          full_name: string
+          id?: string
+          job_id: string
+          linkedin_url?: string | null
+          notes?: string | null
+          phone?: string | null
+          portfolio_url?: string | null
+          salary_expectation?: string | null
+          status?: Database["public"]["Enums"]["application_status"]
+          updated_at?: string
+          user_id: string
+          years_experience?: number | null
+        }
+        Update: {
+          cover_letter_path?: string | null
+          created_at?: string
+          cv_path?: string
+          email?: string
+          full_name?: string
+          id?: string
+          job_id?: string
+          linkedin_url?: string | null
+          notes?: string | null
+          phone?: string | null
+          portfolio_url?: string | null
+          salary_expectation?: string | null
+          status?: Database["public"]["Enums"]["application_status"]
+          updated_at?: string
+          user_id?: string
+          years_experience?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_applications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "job_postings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      job_postings: {
+        Row: {
+          closing_date: string | null
+          contract_type: Database["public"]["Enums"]["contract_type"]
+          created_at: string
+          created_by: string
+          department: string | null
+          description: string
+          id: string
+          location: string
+          status: Database["public"]["Enums"]["job_status"]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          closing_date?: string | null
+          contract_type?: Database["public"]["Enums"]["contract_type"]
+          created_at?: string
+          created_by: string
+          department?: string | null
+          description: string
+          id?: string
+          location: string
+          status?: Database["public"]["Enums"]["job_status"]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          closing_date?: string | null
+          contract_type?: Database["public"]["Enums"]["contract_type"]
+          created_at?: string
+          created_by?: string
+          department?: string | null
+          description?: string
+          id?: string
+          location?: string
+          status?: Database["public"]["Enums"]["job_status"]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       payment_methods: {
         Row: {
           account_holder: string | null
@@ -908,9 +1015,17 @@ export type Database = {
         | "client"
         | "comptable"
         | "gestionnaire"
+      application_status:
+        | "nouvelle"
+        | "en_revue"
+        | "entretien"
+        | "acceptee"
+        | "refusee"
+      contract_type: "CDI" | "CDD" | "Stage" | "Freelance" | "Alternance"
       invoice_currency: "GNF" | "USD" | "EUR"
       invoice_status: "en_attente" | "validee" | "non_conforme"
       invoice_type: "facture" | "recu"
+      job_status: "brouillon" | "publiee" | "fermee"
       payment_method_type:
         | "virement"
         | "mobile_money"
@@ -1059,9 +1174,18 @@ export const Constants = {
         "comptable",
         "gestionnaire",
       ],
+      application_status: [
+        "nouvelle",
+        "en_revue",
+        "entretien",
+        "acceptee",
+        "refusee",
+      ],
+      contract_type: ["CDI", "CDD", "Stage", "Freelance", "Alternance"],
       invoice_currency: ["GNF", "USD", "EUR"],
       invoice_status: ["en_attente", "validee", "non_conforme"],
       invoice_type: ["facture", "recu"],
+      job_status: ["brouillon", "publiee", "fermee"],
       payment_method_type: [
         "virement",
         "mobile_money",
