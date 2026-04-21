@@ -43,6 +43,8 @@ export interface InvoicePDFData {
   discount_amount: number;
   tax_rate: number;
   tax_amount: number;
+  early_payment_discount_rate?: number;
+  early_payment_discount_amount?: number;
   total: number;
   notes?: string | null;
 }
