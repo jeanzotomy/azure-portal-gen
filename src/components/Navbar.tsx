@@ -46,7 +46,7 @@ export function Navbar() {
   const firstName = fullName.split(" ")[0];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-[hsl(215_35%_12%)]/95 backdrop-blur-md border-b border-white/10 shadow-sm">
+    <nav className="fixed top-0 left-0 right-0 z-50 navbar-dark">
       <div className="container flex items-center justify-between h-16">
         <Link to="/" className="flex items-center gap-2">
           <img src={logo} alt="CloudMature" className="h-12 w-auto max-w-[190px]" />
@@ -55,13 +55,13 @@ export function Navbar() {
         {/* Desktop */}
         <div className="hidden md:flex items-center gap-6">
           {navLinks.map((l) => (
-            <button key={l.href} onClick={() => scrollTo(l.href)} className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors">
+            <button key={l.href} onClick={() => scrollTo(l.href)} className="text-sm font-medium text-secondary-foreground/80 hover:text-primary transition-colors">
               {l.label}
             </button>
           ))}
           <button
             onClick={toggleLang}
-            className="flex items-center gap-1.5 text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
+            className="flex items-center gap-1.5 text-sm font-medium text-secondary-foreground/80 hover:text-primary transition-colors"
           >
             <Globe size={16} />
             {locale === "fr" ? "EN" : "FR"}
@@ -69,7 +69,7 @@ export function Navbar() {
 
           {user ? (
             <div className="flex items-center gap-2">
-              <Link to="/portal" className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-primary/10 border border-primary/20 hover:bg-primary/20 transition-colors">
+              <Link to="/portal" className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-primary/15 border border-primary/30 hover:bg-primary/25 transition-colors">
                 <div className="w-7 h-7 rounded-full gradient-primary flex items-center justify-center shadow-sm">
                   <User size={14} className="text-primary-foreground" />
                 </div>
@@ -77,7 +77,7 @@ export function Navbar() {
               </Link>
               <button
                 onClick={handleLogout}
-                className="p-1.5 rounded-lg text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors"
+                className="p-1.5 rounded-lg text-secondary-foreground/70 hover:text-destructive hover:bg-destructive/10 transition-colors"
                 title={locale === "fr" ? "Déconnexion" : "Sign out"}
               >
                 <LogOut size={16} />

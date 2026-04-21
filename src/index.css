@@ -118,6 +118,12 @@
     backdrop-filter: blur(12px);
     border: 1px solid hsl(0 0% 100% / 0.1);
   }
+  .navbar-dark {
+    background: hsl(var(--navy) / 0.96);
+    backdrop-filter: blur(12px);
+    border-bottom: 1px solid hsl(0 0% 100% / 0.1);
+    box-shadow: 0 8px 24px -16px hsl(var(--navy) / 0.7);
+  }
 }
 
 @keyframes fade-up {
