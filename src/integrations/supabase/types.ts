@@ -414,8 +414,10 @@ export type Database = {
           country: string | null
           created_at: string
           deleted_at: string | null
+          first_name: string | null
           full_name: string | null
           id: string
+          last_name: string | null
           location: string | null
           phone: string | null
           signature_url: string | null
@@ -431,8 +433,10 @@ export type Database = {
           country?: string | null
           created_at?: string
           deleted_at?: string | null
+          first_name?: string | null
           full_name?: string | null
           id?: string
+          last_name?: string | null
           location?: string | null
           phone?: string | null
           signature_url?: string | null
@@ -448,8 +452,10 @@ export type Database = {
           country?: string | null
           created_at?: string
           deleted_at?: string | null
+          first_name?: string | null
           full_name?: string | null
           id?: string
+          last_name?: string | null
           location?: string | null
           phone?: string | null
           signature_url?: string | null

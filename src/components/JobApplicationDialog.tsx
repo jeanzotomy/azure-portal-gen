@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthSession } from "@/hooks/use-auth-session";
@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, User, Mail, Briefcase, FileText, CheckCircle2, X, Loader2, Cloud } from "lucide-react";
+import { Upload, User, Mail, Briefcase, FileText, CheckCircle2, X, Loader2, Cloud, Lock } from "lucide-react";
 
 interface Props {
   open: boolean;
@@ -89,6 +89,8 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [profileLoaded, setProfileLoaded] = useState(false);
+  const [lockedFields, setLockedFields] = useState({ first_name: false, last_name: false, phone: false });
   const [form, setForm] = useState({
     first_name: "",
     last_name: "",
@@ -102,6 +104,40 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
   });
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [letterFile, setLetterFile] = useState<File | null>(null);
+
+  // Préremplir depuis le profil utilisateur
+  useEffect(() => {
+    if (!user || !open || profileLoaded) return;
+    supabase
+      .from("profiles")
+      .select("first_name, last_name, full_name, phone")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!data) { setProfileLoaded(true); return; }
+        const d = data as any;
+        let first = (d.first_name || "").trim();
+        let last = (d.last_name || "").trim();
+        if ((!first || !last) && d.full_name) {
+          const parts = String(d.full_name).trim().split(/\s+/);
+          if (!first) first = parts.shift() || "";
+          if (!last) last = parts.join(" ");
+        }
+        const phone = (d.phone || "").trim();
+        setForm((f) => ({
+          ...f,
+          first_name: first || f.first_name,
+          last_name: last || f.last_name,
+          phone: phone || f.phone,
+        }));
+        setLockedFields({
+          first_name: !!first,
+          last_name: !!last,
+          phone: !!phone,
+        });
+        setProfileLoaded(true);
+      });
+  }, [user, open, profileLoaded]);
 
   const update = (k: keyof typeof form, v: string) => {
     setForm((f) => ({ ...f, [k]: v }));
@@ -229,16 +265,38 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
 
         <div className="space-y-4 max-h-[65vh] overflow-y-auto px-6 py-4">
           <SectionTitle icon={User} title="Identité" />
+          {(lockedFields.first_name || lockedFields.last_name || lockedFields.phone) && (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/40 border border-border rounded-md px-3 py-2">
+              <Lock size={12} className="shrink-0 text-primary" />
+              <span>Ces informations proviennent de votre profil. Pour les modifier, mettez à jour votre profil dans l'espace client.</span>
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-sm font-medium">Nom <span className="text-destructive">*</span></label>
-              <Input className={fieldClass("last_name")} value={form.last_name} onChange={(e) => update("last_name", e.target.value)} />
-              <ErrMsg k="last_name" />
+              <label className="text-sm font-medium flex items-center gap-1">
+                Prénom <span className="text-destructive">*</span>
+                {lockedFields.first_name && <Lock size={11} className="text-muted-foreground" />}
+              </label>
+              <Input
+                className={`${fieldClass("first_name")} ${lockedFields.first_name ? "bg-muted cursor-not-allowed" : ""}`}
+                value={form.first_name}
+                onChange={(e) => update("first_name", e.target.value)}
+                readOnly={lockedFields.first_name}
+              />
+              <ErrMsg k="first_name" />
             </div>
             <div>
-              <label className="text-sm font-medium">Prénom <span className="text-destructive">*</span></label>
-              <Input className={fieldClass("first_name")} value={form.first_name} onChange={(e) => update("first_name", e.target.value)} />
-              <ErrMsg k="first_name" />
+              <label className="text-sm font-medium flex items-center gap-1">
+                Nom <span className="text-destructive">*</span>
+                {lockedFields.last_name && <Lock size={11} className="text-muted-foreground" />}
+              </label>
+              <Input
+                className={`${fieldClass("last_name")} ${lockedFields.last_name ? "bg-muted cursor-not-allowed" : ""}`}
+                value={form.last_name}
+                onChange={(e) => update("last_name", e.target.value)}
+                readOnly={lockedFields.last_name}
+              />
+              <ErrMsg k="last_name" />
             </div>
           </div>
 
@@ -250,8 +308,17 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
               <ErrMsg k="email" />
             </div>
             <div>
-              <label className="text-sm font-medium">Téléphone</label>
-              <Input placeholder="+224 ..." value={form.phone} onChange={(e) => update("phone", e.target.value)} />
+              <label className="text-sm font-medium flex items-center gap-1">
+                Téléphone
+                {lockedFields.phone && <Lock size={11} className="text-muted-foreground" />}
+              </label>
+              <Input
+                placeholder="+224 ..."
+                className={lockedFields.phone ? "bg-muted cursor-not-allowed" : ""}
+                value={form.phone}
+                onChange={(e) => update("phone", e.target.value)}
+                readOnly={lockedFields.phone}
+              />
             </div>
           </div>
 
