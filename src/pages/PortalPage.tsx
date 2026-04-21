@@ -1344,7 +1344,12 @@ function ProfileTab({ user }: { user: SupaUser }) {
             </div>
             <div>
               <label className="text-sm font-medium text-card-foreground">Téléphone</label>
-              <Input value={profile.phone} onChange={(e) => setProfile({ ...profile, phone: e.target.value })} className="mt-1" />
+              <Input
+                value={profile.phone}
+                onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+                placeholder={getDialCode(profile.country) ? `${getDialCode(profile.country)} ...` : "+XXX ..."}
+                className="mt-1"
+              />
             </div>
           </div>
 
@@ -1359,7 +1364,15 @@ function ProfileTab({ user }: { user: SupaUser }) {
               <label className="text-sm font-medium text-card-foreground">Pays</label>
               <select
                 value={profile.country}
-                onChange={(e) => setProfile({ ...profile, country: e.target.value })}
+                onChange={(e) => {
+                  const newCountry = e.target.value;
+                  const dial = getDialCode(newCountry);
+                  setProfile((prev) => ({
+                    ...prev,
+                    country: newCountry,
+                    phone: dial ? applyDialCode(prev.phone, dial) : prev.phone,
+                  }));
+                }}
                 className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 <option value="">Sélectionner un pays</option>
