@@ -104,6 +104,13 @@ export default function CareersPage() {
                           </span>
                         )}
                       </div>
+                      {(job.sector || job.start_date || job.salary_range) && (
+                        <div className="grid sm:grid-cols-3 gap-2 text-xs mb-3 p-3 rounded-lg bg-muted/40 border">
+                          {job.sector && <div><span className="font-semibold text-foreground">Secteur :</span> <span className="text-muted-foreground">{job.sector}</span></div>}
+                          {job.start_date && <div><span className="font-semibold text-foreground">Prise de poste :</span> <span className="text-muted-foreground">{job.start_date}</span></div>}
+                          {job.salary_range && <div><span className="font-semibold text-foreground">Rémunération :</span> <span className="text-muted-foreground">{job.salary_range}</span></div>}
+                        </div>
+                      )}
                       <p className="text-sm text-foreground/80 whitespace-pre-line line-clamp-4">{job.description}</p>
                     </div>
                     <Button onClick={() => handleApply(job)} className="gradient-primary text-primary-foreground border-0 shrink-0">
