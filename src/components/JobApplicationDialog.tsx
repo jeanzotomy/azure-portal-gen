@@ -17,12 +17,20 @@ interface Props {
 
 const MAX_FILE = 5 * 1024 * 1024; // 5 MB
 
+const sanitize = (s: string) =>
+  s.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
+    .replace(/[<>:"/\\|?*]/g, "")
+    .replace(/\s+/g, "-")
+    .trim();
+
 export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Props) {
   const { user } = useAuthSession();
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState(false);
   const [form, setForm] = useState({
     full_name: user?.user_metadata?.full_name || "",
+    first_name: "",
+    last_name: "",
     email: user?.email || "",
     phone: "",
     linkedin_url: "",
@@ -34,39 +42,64 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [letterFile, setLetterFile] = useState<File | null>(null);
 
-  const uploadFile = async (file: File, suffix: string): Promise<string | null> => {
-    if (!user) return null;
+  const uploadToSharePoint = async (file: File, folderPath: string, fileName: string): Promise<string | null> => {
     if (file.size > MAX_FILE) {
       toast({ title: "Fichier trop volumineux", description: "Maximum 5 Mo.", variant: "destructive" });
       return null;
     }
-    const ext = file.name.split(".").pop();
-    const path = `${user.id}/${jobId}-${suffix}-${Date.now()}.${ext}`;
-    const { error } = await supabase.storage.from("cv-applications").upload(path, file);
-    if (error) {
-      toast({ title: "Erreur upload", description: error.message, variant: "destructive" });
+    // Récupérer config SharePoint
+    const { data: cfg, error: cfgErr } = await supabase
+      .from("sharepoint_config")
+      .select("site_id, drive_id")
+      .limit(1)
+      .maybeSingle();
+    if (cfgErr || !cfg) {
+      toast({ title: "Configuration SharePoint manquante", description: "Contactez l'administrateur.", variant: "destructive" });
       return null;
     }
-    return path;
+    const filePath = `${folderPath}/${fileName}`;
+    const { data: { session } } = await supabase.auth.getSession();
+    const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+    const url = `https://${projectId}.supabase.co/functions/v1/sharepoint-proxy?action=upload-file&siteId=${encodeURIComponent(cfg.site_id)}&driveId=${encodeURIComponent(cfg.drive_id || "")}&filePath=${encodeURIComponent(filePath)}`;
+    const res = await fetch(url, {
+      method: "PUT",
+      headers: {
+        Authorization: `Bearer ${session?.access_token}`,
+        "Content-Type": file.type || "application/octet-stream",
+      },
+      body: file,
+    });
+    if (!res.ok) {
+      const err = await res.text();
+      toast({ title: "Erreur SharePoint", description: err.substring(0, 200), variant: "destructive" });
+      return null;
+    }
+    return filePath;
   };
 
   const handleSubmit = async () => {
     if (!user) return;
-    if (!form.full_name.trim() || !form.email.trim() || !cvFile) {
-      toast({ title: "Champs requis", description: "Nom, email et CV sont obligatoires.", variant: "destructive" });
+    if (!form.first_name.trim() || !form.last_name.trim() || !form.email.trim() || !cvFile) {
+      toast({ title: "Champs requis", description: "Nom, prénom, email et CV sont obligatoires.", variant: "destructive" });
       return;
     }
     setSubmitting(true);
-    const cvPath = await uploadFile(cvFile, "cv");
+    const fullName = `${form.first_name.trim()} ${form.last_name.trim()}`;
+    const folderName = `Candidat-${sanitize(form.last_name)}-${sanitize(form.first_name)}-${jobId.substring(0, 8)}`;
+    const folderPath = `Candidatures/${folderName}`;
+    const ts = Date.now();
+    const cvExt = cvFile.name.split(".").pop();
+    const cvPath = await uploadToSharePoint(cvFile, folderPath, `CV-${ts}.${cvExt}`);
     if (!cvPath) { setSubmitting(false); return; }
     let letterPath: string | null = null;
     if (letterFile) {
-      letterPath = await uploadFile(letterFile, "letter");
+      const lExt = letterFile.name.split(".").pop();
+      letterPath = await uploadToSharePoint(letterFile, folderPath, `Lettre-${ts}.${lExt}`);
     }
     const { error } = await supabase.from("job_applications").insert({
       job_id: jobId,
       user_id: user.id,
-      full_name: form.full_name.trim(),
+      full_name: fullName,
       email: form.email.trim(),
       phone: form.phone.trim() || null,
       linkedin_url: form.linkedin_url.trim() || null,
@@ -82,7 +115,7 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
       return;
     }
-    toast({ title: "Candidature envoyée", description: "Nous reviendrons vers vous rapidement." });
+    toast({ title: "Candidature envoyée", description: "Documents stockés dans SharePoint. Nous reviendrons vers vous rapidement." });
     onOpenChange(false);
   };
 
@@ -95,22 +128,32 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
         <div className="space-y-3 max-h-[65vh] overflow-y-auto pr-1">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-sm font-medium">Nom complet *</label>
-              <Input value={form.full_name} onChange={(e) => setForm({ ...form, full_name: e.target.value })} />
+              <label className="text-sm font-medium">Nom *</label>
+              <Input value={form.last_name} onChange={(e) => setForm({ ...form, last_name: e.target.value })} />
             </div>
             <div>
-              <label className="text-sm font-medium">Email *</label>
-              <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+              <label className="text-sm font-medium">Prénom *</label>
+              <Input value={form.first_name} onChange={(e) => setForm({ ...form, first_name: e.target.value })} />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
+              <label className="text-sm font-medium">Email *</label>
+              <Input type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+            </div>
+            <div>
               <label className="text-sm font-medium">Téléphone</label>
               <Input value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
             </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="text-sm font-medium">Années d'expérience</label>
               <Input type="number" min="0" value={form.years_experience} onChange={(e) => setForm({ ...form, years_experience: e.target.value })} />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Prétention salariale</label>
+              <Input placeholder="Ex: 15 000 000 GNF / mois" value={form.salary_expectation} onChange={(e) => setForm({ ...form, salary_expectation: e.target.value })} />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -122,10 +165,6 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
               <label className="text-sm font-medium">Portfolio / Site web</label>
               <Input placeholder="https://..." value={form.portfolio_url} onChange={(e) => setForm({ ...form, portfolio_url: e.target.value })} />
             </div>
-          </div>
-          <div>
-            <label className="text-sm font-medium">Prétention salariale</label>
-            <Input placeholder="Ex: 15 000 000 GNF / mois" value={form.salary_expectation} onChange={(e) => setForm({ ...form, salary_expectation: e.target.value })} />
           </div>
           <div>
             <label className="text-sm font-medium">CV (PDF, max 5 Mo) *</label>
@@ -141,6 +180,7 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
             <label className="text-sm font-medium">Message complémentaire</label>
             <Textarea rows={4} value={form.cover_letter_text} onChange={(e) => setForm({ ...form, cover_letter_text: e.target.value })} placeholder="Présentez-vous brièvement..." />
           </div>
+          <p className="text-xs text-muted-foreground">📁 Vos documents seront stockés dans SharePoint : <code>Candidatures/Candidat-Nom-Prenom-...</code></p>
         </div>
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>Annuler</Button>
