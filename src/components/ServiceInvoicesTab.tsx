@@ -87,7 +87,7 @@ export default function ServiceInvoicesTab() {
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => void load()}><RefreshCw size={14} className="mr-1" /> Actualiser</Button>
-          <Button size="sm" onClick={() => setFormOpen(true)}><Plus size={14} className="mr-1" /> Nouvelle facture</Button>
+          <Button size="sm" onClick={() => { setEditId(null); setFormOpen(true); }}><Plus size={14} className="mr-1" /> Nouvelle facture</Button>
         </div>
       </div>
 
