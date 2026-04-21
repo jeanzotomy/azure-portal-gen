@@ -8,10 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { JobApplicationDialog } from "@/components/JobApplicationDialog";
-import { Briefcase, MapPin, Calendar, Clock, ChevronDown, ChevronUp, Share2, Linkedin, Facebook, Mail, Link2, MessageCircle } from "lucide-react";
+import { Briefcase, MapPin, Calendar, Clock, ChevronDown, ChevronUp, Share2, Linkedin, Facebook, Mail, Link2, MessageCircle, Search, X } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface JobPosting {
   id: string;
@@ -37,7 +39,42 @@ export default function CareersPage() {
   const [selected, setSelected] = useState<JobPosting | null>(null);
   const [applyOpen, setApplyOpen] = useState(false);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [search, setSearch] = useState("");
+  const [contractFilter, setContractFilter] = useState<string>("all");
+  const [departmentFilter, setDepartmentFilter] = useState<string>("all");
+  const [locationFilter, setLocationFilter] = useState<string>("all");
+  const [sectorFilter, setSectorFilter] = useState<string>("all");
   const { toast } = useToast();
+
+  const uniqueValues = (key: keyof JobPosting) =>
+    Array.from(new Set(jobs.map((j) => j[key]).filter((v): v is string => !!v && typeof v === "string"))).sort();
+  const departments = uniqueValues("department");
+  const locations = uniqueValues("location");
+  const sectors = uniqueValues("sector");
+  const contractTypes = uniqueValues("contract_type");
+
+  const filteredJobs = jobs.filter((job) => {
+    const q = search.trim().toLowerCase();
+    if (q) {
+      const haystack = [job.title, job.description, job.department, job.location, job.sector]
+        .filter(Boolean).join(" ").toLowerCase();
+      if (!haystack.includes(q)) return false;
+    }
+    if (contractFilter !== "all" && job.contract_type !== contractFilter) return false;
+    if (departmentFilter !== "all" && job.department !== departmentFilter) return false;
+    if (locationFilter !== "all" && job.location !== locationFilter) return false;
+    if (sectorFilter !== "all" && job.sector !== sectorFilter) return false;
+    return true;
+  });
+
+  const hasActiveFilters = !!search || contractFilter !== "all" || departmentFilter !== "all" || locationFilter !== "all" || sectorFilter !== "all";
+  const resetFilters = () => {
+    setSearch("");
+    setContractFilter("all");
+    setDepartmentFilter("all");
+    setLocationFilter("all");
+    setSectorFilter("all");
+  };
 
   const toggleExpand = (id: string) => setExpanded((p) => ({ ...p, [id]: !p[id] }));
 
@@ -109,6 +146,68 @@ export default function CareersPage() {
 
           {loading && <p className="text-center text-muted-foreground">Chargement des offres...</p>}
 
+          {!loading && jobs.length > 0 && (
+            <div className="mb-8 p-4 rounded-xl border bg-card/50 backdrop-blur-sm space-y-3">
+              <div className="relative">
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <Input
+                  placeholder="Rechercher par titre, mot-clé, lieu..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="pl-9 pr-9"
+                />
+                {search && (
+                  <button
+                    type="button"
+                    onClick={() => setSearch("")}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    aria-label="Effacer"
+                  >
+                    <X size={14} />
+                  </button>
+                )}
+              </div>
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                <Select value={contractFilter} onValueChange={setContractFilter}>
+                  <SelectTrigger><SelectValue placeholder="Type de contrat" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tous les contrats</SelectItem>
+                    {contractTypes.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+                <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
+                  <SelectTrigger><SelectValue placeholder="Département" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tous les départements</SelectItem>
+                    {departments.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+                <Select value={locationFilter} onValueChange={setLocationFilter}>
+                  <SelectTrigger><SelectValue placeholder="Lieu" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tous les lieux</SelectItem>
+                    {locations.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+                <Select value={sectorFilter} onValueChange={setSectorFilter}>
+                  <SelectTrigger><SelectValue placeholder="Secteur" /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">Tous les secteurs</SelectItem>
+                    {sectors.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>{filteredJobs.length} offre{filteredJobs.length > 1 ? "s" : ""} trouvée{filteredJobs.length > 1 ? "s" : ""} sur {jobs.length}</span>
+                {hasActiveFilters && (
+                  <button type="button" onClick={resetFilters} className="text-primary hover:underline font-medium">
+                    Réinitialiser les filtres
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
           {!loading && jobs.length === 0 && (
             <Card>
               <CardContent className="p-12 text-center">
@@ -120,8 +219,19 @@ export default function CareersPage() {
             </Card>
           )}
 
+          {!loading && jobs.length > 0 && filteredJobs.length === 0 && (
+            <Card>
+              <CardContent className="p-10 text-center">
+                <Search className="mx-auto mb-3 text-muted-foreground" size={36} />
+                <h3 className="font-semibold mb-1">Aucune offre ne correspond à votre recherche</h3>
+                <p className="text-sm text-muted-foreground mb-4">Essayez d'autres mots-clés ou réinitialisez les filtres.</p>
+                <Button variant="outline" onClick={resetFilters}>Réinitialiser</Button>
+              </CardContent>
+            </Card>
+          )}
+
           <div className="space-y-4">
-            {jobs.map((job) => (
+            {filteredJobs.map((job) => (
               <Card key={job.id} className="hover:shadow-md transition-shadow">
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between gap-4 flex-wrap">
