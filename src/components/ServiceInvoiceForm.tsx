@@ -311,8 +311,14 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
                 <div className="col-span-5 md:col-span-3">
                   <Input type="number" min={0} placeholder="Prix unitaire" value={it.unit_price} onChange={(e) => updateItem(idx, { unit_price: Number(e.target.value) })} />
                 </div>
-                <div className="col-span-12 md:col-span-5 flex items-center justify-end text-sm font-semibold">
-                  Total : {new Intl.NumberFormat("fr-FR").format((it.quantity || 0) * (it.unit_price || 0))} {currency}
+                <div className="col-span-6 md:col-span-2">
+                  <div className="relative">
+                    <Input type="number" min={0} max={100} placeholder="Remise" value={it.discount_rate ?? 0} onChange={(e) => updateItem(idx, { discount_rate: Number(e.target.value) })} />
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">%</span>
+                  </div>
+                </div>
+                <div className="col-span-12 md:col-span-3 flex items-center justify-end text-sm font-semibold">
+                  Total : {new Intl.NumberFormat("fr-FR").format(lineTotal(it))} {currency}
                 </div>
                 <div className="col-span-12 md:col-span-1 flex items-center justify-end">
                   <Button size="icon" variant="ghost" onClick={() => removeLine(idx)} disabled={items.length === 1}><Trash2 size={14} className="text-destructive" /></Button>
