@@ -198,6 +198,14 @@ function AdminContent() {
   const [gestionnaireServicesOpen, setGestionnaireServicesOpen] = useState(true);
   const { t } = useTranslation();
 
+  // Auto-open services submenu when a services tab is active. Must run before any early return to keep hook order stable.
+  const ADMIN_SERVICES_TABS: AdminTab[] = ["service-clients", "service-catalog", "service-invoices", "payment-methods"];
+  const GESTIONNAIRE_SERVICES_TABS: GestionnaireTab[] = ["service-clients", "service-catalog", "service-invoices", "payment-methods"];
+  const isAdminServicesTab = ADMIN_SERVICES_TABS.includes(tab);
+  const isGestionnaireServicesTab = GESTIONNAIRE_SERVICES_TABS.includes(gestionnaireTab);
+  useEffect(() => { if (isAdminServicesTab) setAdminServicesOpen(true); }, [isAdminServicesTab]);
+  useEffect(() => { if (isGestionnaireServicesTab) setGestionnaireServicesOpen(true); }, [isGestionnaireServicesTab]);
+
   useEffect(() => {
     const fetchUnreplied = async () => {
       const { data: tickets } = await supabase.from("support_tickets").select("id, status");
