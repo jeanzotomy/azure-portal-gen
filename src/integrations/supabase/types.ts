@@ -360,6 +360,7 @@ export type Database = {
           created_at: string
           created_by: string
           default_currency: Database["public"]["Enums"]["invoice_currency"]
+          default_unit: string
           default_unit_price: number
           description: string | null
           id: string
@@ -371,6 +372,7 @@ export type Database = {
           created_at?: string
           created_by: string
           default_currency?: Database["public"]["Enums"]["invoice_currency"]
+          default_unit?: string
           default_unit_price?: number
           description?: string | null
           id?: string
@@ -382,6 +384,7 @@ export type Database = {
           created_at?: string
           created_by?: string
           default_currency?: Database["public"]["Enums"]["invoice_currency"]
+          default_unit?: string
           default_unit_price?: number
           description?: string | null
           id?: string
@@ -458,6 +461,7 @@ export type Database = {
           quantity: number
           subtitle: string | null
           total: number
+          unit: string
           unit_price: number
         }
         Insert: {
@@ -470,6 +474,7 @@ export type Database = {
           quantity?: number
           subtitle?: string | null
           total?: number
+          unit?: string
           unit_price?: number
         }
         Update: {
@@ -482,6 +487,7 @@ export type Database = {
           quantity?: number
           subtitle?: string | null
           total?: number
+          unit?: string
           unit_price?: number
         }
         Relationships: [
