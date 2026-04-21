@@ -308,6 +308,13 @@ export default function HrTab() {
     load();
   };
 
+  const updateJobStatus = async (id: string, status: JobStatus) => {
+    const { error } = await supabase.from("job_postings").update({ status }).eq("id", id);
+    if (error) { toast({ title: "Erreur", description: error.message, variant: "destructive" }); return; }
+    setJobs((prev) => prev.map((j) => (j.id === id ? { ...j, status } : j)));
+    toast({ title: "Statut mis à jour" });
+  };
+
   const updateAppStatus = async (id: string, status: AppStatus) => {
     const { error } = await supabase.from("job_applications").update({ status }).eq("id", id);
     if (error) {
@@ -361,7 +368,16 @@ export default function HrTab() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <h3 className="font-semibold">{job.title}</h3>
-                        <Badge className={STATUS_COLORS[job.status]}>{job.status}</Badge>
+                        <Select value={job.status} onValueChange={(v) => updateJobStatus(job.id, v as JobStatus)}>
+                          <SelectTrigger className={`h-7 w-auto gap-1 px-2 text-xs border-0 ${STATUS_COLORS[job.status]}`}>
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="brouillon">Brouillon</SelectItem>
+                            <SelectItem value="publiee">Publiée</SelectItem>
+                            <SelectItem value="fermee">Fermée</SelectItem>
+                          </SelectContent>
+                        </Select>
                         <Badge variant="outline">{job.contract_type}</Badge>
                         {appCount > 0 && <Badge variant="secondary">{appCount} candidature{appCount > 1 ? "s" : ""}</Badge>}
                       </div>
