@@ -1271,13 +1271,24 @@ function TicketsTab({ user }: { user: SupaUser }) {
 }
 
 function ProfileTab({ user }: { user: SupaUser }) {
-  const [profile, setProfile] = useState({ full_name: "", company: "", phone: "", location: "", timezone: "", country: "", city: "", address_line: "" });
+  const [profile, setProfile] = useState({ first_name: "", last_name: "", full_name: "", company: "", phone: "", location: "", timezone: "", country: "", city: "", address_line: "" });
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
 
   const loadProfile = () => {
     supabase.from("profiles").select("*").eq("user_id", user.id).single().then(({ data }) => {
-      if (data) setProfile({ full_name: data.full_name || "", company: data.company || "", phone: data.phone || "", location: (data as any).location || "", timezone: (data as any).timezone || "", country: (data as any).country || "", city: (data as any).city || "", address_line: (data as any).address_line || "" });
+      if (data) setProfile({
+        first_name: (data as any).first_name || "",
+        last_name: (data as any).last_name || "",
+        full_name: data.full_name || "",
+        company: data.company || "",
+        phone: data.phone || "",
+        location: (data as any).location || "",
+        timezone: (data as any).timezone || "",
+        country: (data as any).country || "",
+        city: (data as any).city || "",
+        address_line: (data as any).address_line || "",
+      });
     });
   };
 
@@ -1286,7 +1297,8 @@ function ProfileTab({ user }: { user: SupaUser }) {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setSaving(true);
-    const { error } = await supabase.from("profiles").update(profile).eq("user_id", user.id);
+    const fullName = `${profile.first_name.trim()} ${profile.last_name.trim()}`.trim();
+    const { error } = await supabase.from("profiles").update({ ...profile, full_name: fullName || profile.full_name }).eq("user_id", user.id);
     if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
     else toast({ title: "Profil mis à jour!" });
     setSaving(false);
@@ -1323,8 +1335,12 @@ function ProfileTab({ user }: { user: SupaUser }) {
               <Input value={user.email || ""} disabled className="mt-1 bg-muted" />
             </div>
             <div>
-              <label className="text-sm font-medium text-card-foreground">Nom complet</label>
-              <Input value={profile.full_name} onChange={(e) => setProfile({ ...profile, full_name: e.target.value })} className="mt-1" />
+              <label className="text-sm font-medium text-card-foreground">Prénom</label>
+              <Input value={profile.first_name} onChange={(e) => setProfile({ ...profile, first_name: e.target.value })} className="mt-1" />
+            </div>
+            <div>
+              <label className="text-sm font-medium text-card-foreground">Nom</label>
+              <Input value={profile.last_name} onChange={(e) => setProfile({ ...profile, last_name: e.target.value })} className="mt-1" />
             </div>
             <div>
               <label className="text-sm font-medium text-card-foreground">Téléphone</label>
