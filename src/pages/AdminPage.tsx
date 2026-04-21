@@ -2345,7 +2345,7 @@ function AdminUsers() {
                     >
                       <Pencil size={16} />
                     </button>
-                    {billableLinks[p.user_id] ? (
+                    {canPromoteBillable && (billableLinks[p.user_id] ? (
                       <button
                         disabled
                         title={`Déjà client facturable : ${billableLinks[p.user_id].client_name}`}
@@ -2361,7 +2361,7 @@ function AdminUsers() {
                       >
                         <Receipt size={16} />
                       </button>
-                    )}
+                    ))}
                     <button
                       onClick={() => toggleBlock(p.user_id, !!p.blocked)}
                       title={p.blocked ? "Débloquer" : "Bloquer"}
