@@ -297,6 +297,7 @@ export type Database = {
       job_postings: {
         Row: {
           closing_date: string | null
+          contract_duration: string | null
           contract_type: Database["public"]["Enums"]["contract_type"]
           created_at: string
           created_by: string
@@ -304,6 +305,7 @@ export type Database = {
           description: string
           id: string
           location: string
+          renewable: boolean
           salary_range: string | null
           sector: string | null
           start_date: string | null
@@ -313,6 +315,7 @@ export type Database = {
         }
         Insert: {
           closing_date?: string | null
+          contract_duration?: string | null
           contract_type?: Database["public"]["Enums"]["contract_type"]
           created_at?: string
           created_by: string
@@ -320,6 +323,7 @@ export type Database = {
           description: string
           id?: string
           location: string
+          renewable?: boolean
           salary_range?: string | null
           sector?: string | null
           start_date?: string | null
@@ -329,6 +333,7 @@ export type Database = {
         }
         Update: {
           closing_date?: string | null
+          contract_duration?: string | null
           contract_type?: Database["public"]["Enums"]["contract_type"]
           created_at?: string
           created_by?: string
@@ -336,6 +341,7 @@ export type Database = {
           description?: string
           id?: string
           location?: string
+          renewable?: boolean
           salary_range?: string | null
           sector?: string | null
           start_date?: string | null
