@@ -335,16 +335,25 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
           </div>
           <div className="space-y-2 bg-muted/30 p-3 rounded-md">
             <div className="grid grid-cols-2 gap-2 items-center">
-              <label className="text-xs">Remise (%)</label>
+              <label className="text-xs">Remise globale (%)</label>
               <Input type="number" min={0} max={100} value={discountRate} onChange={(e) => setDiscountRate(Number(e.target.value))} />
               <label className="text-xs">TVA (%)</label>
               <Input type="number" min={0} max={100} value={taxRate} onChange={(e) => setTaxRate(Number(e.target.value))} />
+              <label className="text-xs" title="Réduction accordée pour paiement anticipé, déduite après TVA">
+                Escompte paiement (%)
+              </label>
+              <Input type="number" min={0} max={100} value={earlyPaymentDiscountRate} onChange={(e) => setEarlyPaymentDiscountRate(Number(e.target.value))} />
             </div>
             <div className="border-t pt-2 text-sm space-y-1">
               <div className="flex justify-between"><span>Sous-total</span><span>{new Intl.NumberFormat("fr-FR").format(subtotal)} {currency}</span></div>
-              <div className="flex justify-between"><span>Remise</span><span>— {new Intl.NumberFormat("fr-FR").format(discountAmount)} {currency}</span></div>
-              <div className="flex justify-between"><span>TVA</span><span>{new Intl.NumberFormat("fr-FR").format(taxAmount)} {currency}</span></div>
-              <div className="flex justify-between font-bold text-base border-t pt-1"><span>TOTAL TTC</span><span>{new Intl.NumberFormat("fr-FR").format(total)} {currency}</span></div>
+              {discountRate > 0 && (
+                <div className="flex justify-between text-destructive"><span>Remise globale ({discountRate}%)</span><span>— {new Intl.NumberFormat("fr-FR").format(discountAmount)} {currency}</span></div>
+              )}
+              <div className="flex justify-between"><span>TVA ({taxRate}%)</span><span>{new Intl.NumberFormat("fr-FR").format(taxAmount)} {currency}</span></div>
+              {earlyPaymentDiscountRate > 0 && (
+                <div className="flex justify-between text-destructive"><span>Escompte ({earlyPaymentDiscountRate}%)</span><span>— {new Intl.NumberFormat("fr-FR").format(earlyPaymentDiscountAmount)} {currency}</span></div>
+              )}
+              <div className="flex justify-between font-bold text-base border-t pt-1"><span>NET À PAYER</span><span>{new Intl.NumberFormat("fr-FR").format(total)} {currency}</span></div>
             </div>
           </div>
         </div>
