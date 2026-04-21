@@ -160,7 +160,10 @@ export default function ServiceInvoicesTab() {
                         <a href={r.sharepoint_url} target="_blank" rel="noreferrer" title="Ouvrir dans SharePoint"><ExternalLink size={14} /></a>
                       </Button>
                     )}
-                    <Button size="icon" variant="ghost" onClick={() => void remove(r.id)}><Trash2 size={14} className="text-destructive" /></Button>
+                    <Button size="icon" variant="ghost" onClick={() => { setEditId(r.id); setFormOpen(true); }} title="Modifier la facture">
+                      <Pencil size={14} className="text-primary" />
+                    </Button>
+                    <Button size="icon" variant="ghost" onClick={() => void remove(r.id)} title="Supprimer"><Trash2 size={14} className="text-destructive" /></Button>
                   </div>
                 </div>
               </CardContent></Card>
