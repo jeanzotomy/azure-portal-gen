@@ -13,6 +13,7 @@ import MfaPage from "./pages/MfaPage.tsx";
 import InstallPage from "./pages/InstallPage.tsx";
 import PrivacyPage from "./pages/PrivacyPage.tsx";
 import TermsPage from "./pages/TermsPage.tsx";
+import CareersPage from "./pages/CareersPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 
 const ScrollToTopOnNavigate = () => {
@@ -40,6 +41,7 @@ const App = () => (
           <Route path="/admin" element={<AdminPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/terms" element={<TermsPage />} />
+          <Route path="/careers" element={<CareersPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

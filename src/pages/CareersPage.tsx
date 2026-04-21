@@ -96,7 +96,7 @@ export default function CareersPage() {
                         <span className="flex items-center gap-1"><MapPin size={14} /> {job.location}</span>
                         <span className="flex items-center gap-1"><Clock size={14} /> Publié le {format(new Date(job.created_at), "dd/MM/yyyy")}</span>
                         {job.closing_date && (
-                          <span className="flex items-center gap-1 text-amber-600">
+                          <span className="flex items-center gap-1 text-destructive">
                             <Calendar size={14} /> Clôture le {format(new Date(job.closing_date), "dd/MM/yyyy")}
                           </span>
                         )}
