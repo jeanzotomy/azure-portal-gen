@@ -385,15 +385,63 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
           </Button>
         </div>
 
-        <div className="border rounded-md p-3 space-y-2">
-          <div className="text-xs font-semibold">Détails de paiement</div>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-            <Input placeholder="Banque" value={payment.bank} onChange={(e) => setPayment({ ...payment, bank: e.target.value })} />
-            <Input placeholder="IBAN / Compte" value={payment.iban} onChange={(e) => setPayment({ ...payment, iban: e.target.value })} />
-            <Input placeholder="SWIFT" value={payment.swift} onChange={(e) => setPayment({ ...payment, swift: e.target.value })} />
-            <Input placeholder="Mobile Money" value={payment.mobile_money} onChange={(e) => setPayment({ ...payment, mobile_money: e.target.value })} />
-            <Input placeholder="Référence" value={payment.reference} onChange={(e) => setPayment({ ...payment, reference: e.target.value })} />
+        <div className="border rounded-md p-3 space-y-3">
+          <div className="flex items-center justify-between flex-wrap gap-2">
+            <div className="text-sm font-semibold flex items-center gap-2">
+              <CreditCard size={16} className="text-primary" />
+              Modes de paiement à proposer au client
+            </div>
+            <span className="text-xs text-muted-foreground">
+              {selectedPaymentIds.length} sélectionné{selectedPaymentIds.length > 1 ? "s" : ""}
+            </span>
           </div>
+          {paymentMethods.length === 0 ? (
+            <div className="text-xs text-muted-foreground bg-muted/40 border border-dashed rounded-md p-3">
+              Aucun mode de paiement actif. Allez dans <span className="font-semibold">Modes de paiement</span> pour en créer.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              {paymentMethods.map((pm) => {
+                const Icon = PM_TYPE_ICONS[pm.type];
+                const checked = selectedPaymentIds.includes(pm.id);
+                return (
+                  <label
+                    key={pm.id}
+                    className={cn(
+                      "flex items-start gap-3 p-3 rounded-md border cursor-pointer transition-colors",
+                      checked ? "border-primary bg-primary/5" : "border-border hover:bg-muted/40"
+                    )}
+                  >
+                    <Checkbox
+                      checked={checked}
+                      onCheckedChange={(v) => {
+                        setSelectedPaymentIds((prev) =>
+                          v ? [...prev, pm.id] : prev.filter((id) => id !== pm.id)
+                        );
+                      }}
+                      className="mt-0.5"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <Icon size={14} className="text-primary shrink-0" />
+                        <span className="font-medium text-sm truncate">{pm.label}</span>
+                        <span className="text-[10px] uppercase tracking-wide bg-muted px-1.5 py-0.5 rounded">
+                          {PM_TYPE_LABELS[pm.type]}
+                        </span>
+                        <span className="text-[10px] text-muted-foreground">{pm.currency}</span>
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1 space-y-0.5">
+                        {pm.bank && <div>Banque : {pm.bank}</div>}
+                        {pm.iban && <div className="truncate">Compte : {pm.iban}</div>}
+                        {pm.mobile_number && <div>Mobile : {pm.mobile_number}</div>}
+                        {pm.account_holder && <div>Titulaire : {pm.account_holder}</div>}
+                      </div>
+                    </div>
+                  </label>
+                );
+              })}
+            </div>
+          )}
         </div>
 
         <div className="space-y-2">
