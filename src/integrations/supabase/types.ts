@@ -202,6 +202,60 @@ export type Database = {
           },
         ]
       }
+      payment_methods: {
+        Row: {
+          account_holder: string | null
+          active: boolean
+          bank: string | null
+          created_at: string
+          created_by: string
+          currency: Database["public"]["Enums"]["invoice_currency"]
+          iban: string | null
+          id: string
+          instructions: string | null
+          label: string
+          mobile_number: string | null
+          position: number
+          swift: string | null
+          type: Database["public"]["Enums"]["payment_method_type"]
+          updated_at: string
+        }
+        Insert: {
+          account_holder?: string | null
+          active?: boolean
+          bank?: string | null
+          created_at?: string
+          created_by: string
+          currency?: Database["public"]["Enums"]["invoice_currency"]
+          iban?: string | null
+          id?: string
+          instructions?: string | null
+          label: string
+          mobile_number?: string | null
+          position?: number
+          swift?: string | null
+          type?: Database["public"]["Enums"]["payment_method_type"]
+          updated_at?: string
+        }
+        Update: {
+          account_holder?: string | null
+          active?: boolean
+          bank?: string | null
+          created_at?: string
+          created_by?: string
+          currency?: Database["public"]["Enums"]["invoice_currency"]
+          iban?: string | null
+          id?: string
+          instructions?: string | null
+          label?: string
+          mobile_number?: string | null
+          position?: number
+          swift?: string | null
+          type?: Database["public"]["Enums"]["payment_method_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address_line: string | null
@@ -215,6 +269,7 @@ export type Database = {
           id: string
           location: string | null
           phone: string | null
+          signature_url: string | null
           timezone: string | null
           updated_at: string
           user_id: string
@@ -231,6 +286,7 @@ export type Database = {
           id?: string
           location?: string | null
           phone?: string | null
+          signature_url?: string | null
           timezone?: string | null
           updated_at?: string
           user_id: string
@@ -247,6 +303,7 @@ export type Database = {
           id?: string
           location?: string | null
           phone?: string | null
+          signature_url?: string | null
           timezone?: string | null
           updated_at?: string
           user_id?: string
@@ -528,6 +585,7 @@ export type Database = {
           notes: string | null
           paid_at: string | null
           payment_details: Json
+          payment_method_ids: string[]
           pdf_generated_at: string | null
           sharepoint_docx_id: string | null
           sharepoint_pdf_id: string | null
@@ -556,6 +614,7 @@ export type Database = {
           notes?: string | null
           paid_at?: string | null
           payment_details?: Json
+          payment_method_ids?: string[]
           pdf_generated_at?: string | null
           sharepoint_docx_id?: string | null
           sharepoint_pdf_id?: string | null
@@ -584,6 +643,7 @@ export type Database = {
           notes?: string | null
           paid_at?: string | null
           payment_details?: Json
+          payment_method_ids?: string[]
           pdf_generated_at?: string | null
           sharepoint_docx_id?: string | null
           sharepoint_pdf_id?: string | null
@@ -851,6 +911,12 @@ export type Database = {
       invoice_currency: "GNF" | "USD" | "EUR"
       invoice_status: "en_attente" | "validee" | "non_conforme"
       invoice_type: "facture" | "recu"
+      payment_method_type:
+        | "virement"
+        | "mobile_money"
+        | "especes"
+        | "cheque"
+        | "autre"
       service_invoice_status:
         | "brouillon"
         | "emise"
@@ -995,6 +1061,13 @@ export const Constants = {
       invoice_currency: ["GNF", "USD", "EUR"],
       invoice_status: ["en_attente", "validee", "non_conforme"],
       invoice_type: ["facture", "recu"],
+      payment_method_type: [
+        "virement",
+        "mobile_money",
+        "especes",
+        "cheque",
+        "autre",
+      ],
       service_invoice_status: [
         "brouillon",
         "emise",
