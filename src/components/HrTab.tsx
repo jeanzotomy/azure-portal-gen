@@ -104,6 +104,15 @@ export default function HrTab() {
   const [editingSectorId, setEditingSectorId] = useState<string | null>(null);
   const [editSectorName, setEditSectorName] = useState("");
   const [editSectorDesc, setEditSectorDesc] = useState("");
+  // Filters – Offres
+  const [jobSearch, setJobSearch] = useState("");
+  const [jobStatusFilter, setJobStatusFilter] = useState<string>("all");
+  const [jobContractFilter, setJobContractFilter] = useState<string>("all");
+  const [jobDeptFilter, setJobDeptFilter] = useState<string>("all");
+  // Filters – Candidatures
+  const [appSearch, setAppSearch] = useState("");
+  const [appStatusFilter, setAppStatusFilter] = useState<string>("all");
+  const [appJobFilter, setAppJobFilter] = useState<string>("all");
   const [form, setForm] = useState({
     title: "",
     department: "",
