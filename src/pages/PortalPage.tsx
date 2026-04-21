@@ -139,6 +139,7 @@ function PortalContent() {
     { id: "dashboard", icon: LayoutDashboard, label: t("portal.dashboard") },
     { id: "projects", icon: FolderOpen, label: t("portal.projects") },
     { id: "tickets", icon: LifeBuoy, label: t("portal.support") },
+    { id: "applications", icon: Briefcase, label: "Mes candidatures" },
     { id: "profile", icon: User, label: t("portal.profile") },
   ];
 
