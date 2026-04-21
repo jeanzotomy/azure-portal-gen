@@ -273,6 +273,14 @@ function AdminContent() {
       { id: "hr", icon: Briefcase, label: "Recrutement" },
     ];
 
+    const gestionnaireServicesGroup: { id: GestionnaireTab; icon: typeof LayoutDashboard; label: string }[] = [
+      { id: "service-clients", icon: Briefcase, label: "Clients facturables" },
+      { id: "service-catalog", icon: BookOpen, label: "Catalogue services" },
+      { id: "service-invoices", icon: Receipt, label: "Facturation services" },
+      { id: "payment-methods", icon: CreditCard, label: "Méthodes de paiement" },
+    ];
+    const isGestionnaireServicesTab = gestionnaireServicesGroup.some((s) => s.id === gestionnaireTab);
+
     return (
       <div className="min-h-screen flex w-full bg-background">
         <Sidebar collapsible="icon" className="border-r border-sidebar-border">
