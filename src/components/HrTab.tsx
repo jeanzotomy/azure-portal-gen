@@ -77,18 +77,31 @@ interface Department {
   description: string | null;
 }
 
+interface Sector {
+  id: string;
+  name: string;
+  description: string | null;
+}
+
 export default function HrTab() {
   const { user } = useAuthSession();
   const { toast } = useToast();
   const [jobs, setJobs] = useState<JobPosting[]>([]);
   const [applications, setApplications] = useState<JobApplication[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
+  const [sectors, setSectors] = useState<Sector[]>([]);
   const [loading, setLoading] = useState(true);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editing, setEditing] = useState<JobPosting | null>(null);
   const [deptDialogOpen, setDeptDialogOpen] = useState(false);
   const [newDeptName, setNewDeptName] = useState("");
   const [newDeptDesc, setNewDeptDesc] = useState("");
+  const [sectorDialogOpen, setSectorDialogOpen] = useState(false);
+  const [newSectorName, setNewSectorName] = useState("");
+  const [newSectorDesc, setNewSectorDesc] = useState("");
+  const [editingSectorId, setEditingSectorId] = useState<string | null>(null);
+  const [editSectorName, setEditSectorName] = useState("");
+  const [editSectorDesc, setEditSectorDesc] = useState("");
   const [form, setForm] = useState({
     title: "",
     department: "",
