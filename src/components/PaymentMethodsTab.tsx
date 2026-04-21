@@ -11,7 +11,8 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Trash2, CreditCard, RefreshCw, Building2, Smartphone, Banknote, FileText, PiggyBank } from "lucide-react";
+import { Plus, Pencil, Trash2, CreditCard, RefreshCw, Building2, Smartphone, Banknote, FileText, PiggyBank, Info, User, Hash, Globe } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 type PaymentType = "virement" | "mobile_money" | "especes" | "cheque" | "depot" | "autre";
 type Currency = "GNF" | "USD" | "EUR";
@@ -31,13 +32,13 @@ interface PMRow {
   position: number;
 }
 
-const TYPE_META: Record<PaymentType, { label: string; icon: typeof CreditCard }> = {
-  virement: { label: "Virement bancaire", icon: Building2 },
-  mobile_money: { label: "Mobile Money", icon: Smartphone },
-  depot: { label: "Dépôt en espèces", icon: PiggyBank },
-  especes: { label: "Espèces", icon: Banknote },
-  cheque: { label: "Chèque", icon: FileText },
-  autre: { label: "Autre", icon: CreditCard },
+const TYPE_META: Record<PaymentType, { label: string; icon: typeof CreditCard; hint: string }> = {
+  virement: { label: "Virement bancaire", icon: Building2, hint: "Renseignez les coordonnées bancaires complètes (banque, IBAN, SWIFT)." },
+  mobile_money: { label: "Mobile Money", icon: Smartphone, hint: "Indiquez l'opérateur (Orange, MTN…) et le numéro à créditer." },
+  depot: { label: "Dépôt en espèces", icon: PiggyBank, hint: "Banque destinataire et numéro de compte à créditer en agence." },
+  especes: { label: "Espèces", icon: Banknote, hint: "Aucune coordonnée bancaire requise — précisez le bénéficiaire et le lieu de remise." },
+  cheque: { label: "Chèque", icon: FileText, hint: "Indiquez le bénéficiaire (à l'ordre de) et la banque émettrice si nécessaire." },
+  autre: { label: "Autre", icon: CreditCard, hint: "Mode personnalisé : remplissez uniquement les champs pertinents." },
 };
 
 // Définit quels champs afficher selon le type
@@ -212,92 +213,132 @@ export default function PaymentMethodsTab() {
             </DialogTitle>
           </DialogHeader>
 
-          <div className="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="sm:col-span-2 space-y-1.5">
-              <Label>Libellé *</Label>
-              <Input value={editing?.label ?? ""} onChange={(e) => setEditing({ ...editing, label: e.target.value })} placeholder="Ex: Virement Ecobank GNF" />
+          <div className="p-4 sm:p-6 space-y-5">
+            {/* Bandeau d'aide contextuelle */}
+            <div className="flex gap-2.5 rounded-md border border-primary/20 bg-primary/5 p-3 text-xs sm:text-sm">
+              <Info size={16} className="text-primary shrink-0 mt-0.5" />
+              <p className="text-foreground/80 leading-snug">{TYPE_META[currentType].hint}</p>
             </div>
 
-            <div className="space-y-1.5">
-              <Label>Type</Label>
-              <Select value={currentType} onValueChange={(v) => setEditing({ ...editing, type: v as PaymentType })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  {Object.entries(TYPE_META).map(([k, v]) => <SelectItem key={k} value={k}>{v.label}</SelectItem>)}
-                </SelectContent>
-              </Select>
+            {/* Section 1 : identification */}
+            <div className="space-y-3">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Identification</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="sm:col-span-2 space-y-1.5">
+                  <Label htmlFor="pm-label">Libellé <span className="text-destructive">*</span></Label>
+                  <Input id="pm-label" value={editing?.label ?? ""} onChange={(e) => setEditing({ ...editing, label: e.target.value })} placeholder="Ex: Virement Ecobank GNF" />
+                  <p className="text-[11px] text-muted-foreground">Nom court qui apparaîtra dans le formulaire de facture.</p>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label>Type de paiement</Label>
+                  <Select value={currentType} onValueChange={(v) => setEditing({ ...editing, type: v as PaymentType })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {Object.entries(TYPE_META).map(([k, v]) => {
+                        const I = v.icon;
+                        return (
+                          <SelectItem key={k} value={k}>
+                            <span className="flex items-center gap-2"><I size={14} /> {v.label}</span>
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="flex items-center gap-1.5"><Globe size={13} className="text-muted-foreground" /> Devise</Label>
+                  <Select value={editing?.currency ?? "GNF"} onValueChange={(v) => setEditing({ ...editing, currency: v as Currency })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="GNF">GNF — Franc guinéen</SelectItem>
+                      <SelectItem value="USD">USD — Dollar US</SelectItem>
+                      <SelectItem value="EUR">EUR — Euro</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </div>
 
-            <div className="space-y-1.5">
-              <Label>Devise</Label>
-              <Select value={editing?.currency ?? "GNF"} onValueChange={(v) => setEditing({ ...editing, currency: v as Currency })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="GNF">GNF</SelectItem>
-                  <SelectItem value="USD">USD</SelectItem>
-                  <SelectItem value="EUR">EUR</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            {/* Section 2 : coordonnées (uniquement si pertinent) */}
+            {(currentFields.bank || currentFields.account_holder || currentFields.iban || currentFields.swift || currentFields.mobile_number) && (
+              <>
+                <Separator />
+                <div className="space-y-3">
+                  <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Coordonnées</h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    {currentFields.bank && (
+                      <div className="space-y-1.5">
+                        <Label className="flex items-center gap-1.5"><Building2 size={13} className="text-muted-foreground" /> {currentFields.bankLabel ?? "Banque"}</Label>
+                        <Input value={editing?.bank ?? ""} onChange={(e) => setEditing({ ...editing, bank: e.target.value })} />
+                      </div>
+                    )}
 
-            {currentFields.bank && (
-              <div className="space-y-1.5">
-                <Label>{currentFields.bankLabel ?? "Banque"}</Label>
-                <Input value={editing?.bank ?? ""} onChange={(e) => setEditing({ ...editing, bank: e.target.value })} />
-              </div>
+                    {currentFields.account_holder && (
+                      <div className="space-y-1.5">
+                        <Label className="flex items-center gap-1.5"><User size={13} className="text-muted-foreground" /> Titulaire / Bénéficiaire</Label>
+                        <Input value={editing?.account_holder ?? ""} onChange={(e) => setEditing({ ...editing, account_holder: e.target.value })} placeholder="Nom complet ou raison sociale" />
+                      </div>
+                    )}
+
+                    {currentFields.iban && (
+                      <div className="space-y-1.5">
+                        <Label className="flex items-center gap-1.5"><Hash size={13} className="text-muted-foreground" /> {currentFields.ibanLabel ?? "IBAN / N° de compte"}</Label>
+                        <Input value={editing?.iban ?? ""} onChange={(e) => setEditing({ ...editing, iban: e.target.value })} className="font-mono text-sm" />
+                      </div>
+                    )}
+
+                    {currentFields.swift && (
+                      <div className="space-y-1.5">
+                        <Label>SWIFT / BIC</Label>
+                        <Input value={editing?.swift ?? ""} onChange={(e) => setEditing({ ...editing, swift: e.target.value })} className="font-mono text-sm uppercase" placeholder="ECOCGNCN" />
+                      </div>
+                    )}
+
+                    {currentFields.mobile_number && (
+                      <div className="space-y-1.5 sm:col-span-2">
+                        <Label className="flex items-center gap-1.5"><Smartphone size={13} className="text-muted-foreground" /> {currentFields.mobileLabel ?? "Numéro de téléphone"}</Label>
+                        <Input value={editing?.mobile_number ?? ""} onChange={(e) => setEditing({ ...editing, mobile_number: e.target.value })} placeholder="+224 6XX XX XX XX" />
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </>
             )}
 
-            {currentFields.account_holder && (
-              <div className="space-y-1.5">
-                <Label>Titulaire / Bénéficiaire</Label>
-                <Input value={editing?.account_holder ?? ""} onChange={(e) => setEditing({ ...editing, account_holder: e.target.value })} />
+            {/* Section 3 : options & instructions */}
+            <Separator />
+            <div className="space-y-3">
+              <h3 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">Options</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label>Ordre d'affichage</Label>
+                  <Input type="number" value={editing?.position ?? 0} onChange={(e) => setEditing({ ...editing, position: Number(e.target.value) })} />
+                  <p className="text-[11px] text-muted-foreground">Plus petit = affiché en premier.</p>
+                </div>
+                <div className="space-y-1.5 flex flex-col">
+                  <Label>Statut</Label>
+                  <div className="flex items-center gap-2 h-10 px-3 rounded-md border bg-background">
+                    <Switch checked={editing?.active ?? true} onCheckedChange={(v) => setEditing({ ...editing, active: v })} />
+                    <span className="text-sm">{(editing?.active ?? true) ? "Actif (proposé dans les factures)" : "Inactif (masqué)"}</span>
+                  </div>
+                </div>
+                <div className="sm:col-span-2 space-y-1.5">
+                  <Label>Instructions / Référence à mentionner</Label>
+                  <Textarea
+                    rows={2}
+                    value={editing?.instructions ?? ""}
+                    onChange={(e) => setEditing({ ...editing, instructions: e.target.value })}
+                    placeholder={
+                      currentType === "especes" ? "Ex: Paiement à remettre au caissier au siège social" :
+                      currentType === "depot" ? "Ex: Mentionner le n° de facture sur le bordereau de dépôt" :
+                      currentType === "cheque" ? "Ex: Chèque à libeller au nom de…" :
+                      "Ex: Mentionner le numéro de facture en référence"
+                    }
+                  />
+                </div>
               </div>
-            )}
-
-            {currentFields.iban && (
-              <div className="space-y-1.5">
-                <Label>{currentFields.ibanLabel ?? "IBAN / N° de compte"}</Label>
-                <Input value={editing?.iban ?? ""} onChange={(e) => setEditing({ ...editing, iban: e.target.value })} />
-              </div>
-            )}
-
-            {currentFields.swift && (
-              <div className="space-y-1.5">
-                <Label>SWIFT / BIC</Label>
-                <Input value={editing?.swift ?? ""} onChange={(e) => setEditing({ ...editing, swift: e.target.value })} />
-              </div>
-            )}
-
-            {currentFields.mobile_number && (
-              <div className="space-y-1.5">
-                <Label>{currentFields.mobileLabel ?? "Numéro de téléphone"}</Label>
-                <Input value={editing?.mobile_number ?? ""} onChange={(e) => setEditing({ ...editing, mobile_number: e.target.value })} placeholder="+224 ..." />
-              </div>
-            )}
-
-            <div className="space-y-1.5">
-              <Label>Ordre d'affichage</Label>
-              <Input type="number" value={editing?.position ?? 0} onChange={(e) => setEditing({ ...editing, position: Number(e.target.value) })} />
-            </div>
-
-            <div className="sm:col-span-2 space-y-1.5">
-              <Label>Instructions / Référence</Label>
-              <Textarea
-                rows={2}
-                value={editing?.instructions ?? ""}
-                onChange={(e) => setEditing({ ...editing, instructions: e.target.value })}
-                placeholder={
-                  currentType === "especes" ? "Ex: Paiement à remettre au caissier au siège social" :
-                  currentType === "depot" ? "Ex: Mentionner le n° de facture sur le bordereau de dépôt" :
-                  currentType === "cheque" ? "Ex: Chèque à libeller au nom de…" :
-                  "Ex: Mentionner le numéro de facture en référence"
-                }
-              />
-            </div>
-
-            <div className="sm:col-span-2 flex items-center gap-2 pt-1">
-              <Switch checked={editing?.active ?? true} onCheckedChange={(v) => setEditing({ ...editing, active: v })} />
-              <Label className="cursor-pointer">Mode actif (proposé dans les factures)</Label>
             </div>
           </div>
 
