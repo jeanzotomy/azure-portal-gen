@@ -42,6 +42,7 @@ import { NotificationBell } from "@/components/NotificationBell";
 import PaymentMethodsTab from "@/components/PaymentMethodsTab";
 import HrTab from "@/components/HrTab";
 import { ProfileSignatureDialog } from "@/components/ProfileSignatureDialog";
+import { getDialCode, applyDialCode } from "@/lib/country-dial-codes";
 
 type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts" | "sharepoint" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods" | "hr";
 type AgentTab = "dashboard" | "tickets" | "contacts";
@@ -2512,13 +2513,26 @@ function AdminUsers() {
             </div>
             <div>
               <label className="text-sm font-medium text-foreground">Téléphone</label>
-              <Input value={editForm.phone} onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })} className="mt-1" />
+              <Input
+                value={editForm.phone}
+                onChange={(e) => setEditForm({ ...editForm, phone: e.target.value })}
+                placeholder={getDialCode(editForm.country) ? `${getDialCode(editForm.country)} ...` : "+XXX ..."}
+                className="mt-1"
+              />
             </div>
             <div>
               <label className="text-sm font-medium text-foreground">Pays</label>
               <select
                 value={editForm.country}
-                onChange={(e) => setEditForm({ ...editForm, country: e.target.value })}
+                onChange={(e) => {
+                  const newCountry = e.target.value;
+                  const dial = getDialCode(newCountry);
+                  setEditForm((prev) => ({
+                    ...prev,
+                    country: newCountry,
+                    phone: dial ? applyDialCode(prev.phone, dial) : prev.phone,
+                  }));
+                }}
                 className="mt-1 flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
               >
                 <option value="">Sélectionner un pays</option>
