@@ -336,6 +336,7 @@ export default function HrTab() {
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={load}><RefreshCw size={14} /> Actualiser</Button>
           <Button variant="outline" size="sm" onClick={() => setDeptDialogOpen(true)}><Building2 size={14} /> Départements</Button>
+          <Button variant="outline" size="sm" onClick={() => setSectorDialogOpen(true)}><Briefcase size={14} /> Secteurs</Button>
           <Button size="sm" onClick={openNew}><Plus size={14} /> Nouvelle offre</Button>
         </div>
       </div>
