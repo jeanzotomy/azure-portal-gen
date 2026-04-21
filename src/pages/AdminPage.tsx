@@ -1962,6 +1962,8 @@ function AdminContacts() {
 
 /* ─── Users Management ─── */
 function AdminUsers() {
+  const { isAdmin, isGestionnaire } = useUserRoles();
+  const canPromoteBillable = isAdmin || isGestionnaire;
   const [profilesList, setProfilesList] = useState<any[]>([]);
   const [userRoles, setUserRoles] = useState<Record<string, string[]>>({});
   const [search, setSearch] = useState("");
@@ -2343,7 +2345,7 @@ function AdminUsers() {
                     >
                       <Pencil size={16} />
                     </button>
-                    {billableLinks[p.user_id] ? (
+                    {canPromoteBillable && (billableLinks[p.user_id] ? (
                       <button
                         disabled
                         title={`Déjà client facturable : ${billableLinks[p.user_id].client_name}`}
@@ -2359,7 +2361,7 @@ function AdminUsers() {
                       >
                         <Receipt size={16} />
                       </button>
-                    )}
+                    ))}
                     <button
                       onClick={() => toggleBlock(p.user_id, !!p.blocked)}
                       title={p.blocked ? "Débloquer" : "Bloquer"}
