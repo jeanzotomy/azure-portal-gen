@@ -855,6 +855,261 @@ function AgentDashboard({ user }: { user: SupaUser }) {
 /* ─── Admin Dashboard ─── */
 const CHART_COLORS = ["hsl(var(--primary))", "hsl(var(--accent))", "hsl(199, 89%, 48%)", "hsl(160, 60%, 45%)"];
 
+/* ─── Comptable Dashboard ─── */
+function ComptableDashboard() {
+  const [loading, setLoading] = useState(true);
+  const [invoices, setInvoices] = useState<any[]>([]);
+  const [clients, setClients] = useState<any[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState<any[]>([]);
+
+  const load = () => {
+    setLoading(true);
+    Promise.all([
+      supabase.from("service_invoices").select("id, status, total, currency, invoice_date, due_date, paid_at, created_at, client_id, service_clients(client_name)").order("created_at", { ascending: false }),
+      supabase.from("service_clients").select("id, client_name, country, created_at").order("created_at", { ascending: false }),
+      supabase.from("payment_methods").select("id, label, type, currency, active"),
+    ]).then(([invRes, cliRes, pmRes]) => {
+      setInvoices((invRes.data ?? []) as any[]);
+      setClients((cliRes.data ?? []) as any[]);
+      setPaymentMethods((pmRes.data ?? []) as any[]);
+      setLoading(false);
+    });
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const fmt = (n: number) => new Intl.NumberFormat("fr-FR").format(n);
+
+  const counts = {
+    total: invoices.length,
+    brouillon: invoices.filter((i) => i.status === "brouillon").length,
+    emise: invoices.filter((i) => i.status === "emise").length,
+    payee: invoices.filter((i) => i.status === "payee").length,
+    enRetard: invoices.filter((i) => i.status === "en_retard").length,
+    annulee: invoices.filter((i) => i.status === "annulee").length,
+  };
+
+  const sumByCurrency = (status: string, cur: string) =>
+    invoices.filter((i) => i.status === status && i.currency === cur)
+      .reduce((s, i) => s + Number(i.total || 0), 0);
+
+  const totals = {
+    paid: { GNF: sumByCurrency("payee", "GNF"), USD: sumByCurrency("payee", "USD"), EUR: sumByCurrency("payee", "EUR") },
+    pending: {
+      GNF: invoices.filter((i) => (i.status === "emise" || i.status === "en_retard") && i.currency === "GNF").reduce((s, i) => s + Number(i.total || 0), 0),
+      USD: invoices.filter((i) => (i.status === "emise" || i.status === "en_retard") && i.currency === "USD").reduce((s, i) => s + Number(i.total || 0), 0),
+      EUR: invoices.filter((i) => (i.status === "emise" || i.status === "en_retard") && i.currency === "EUR").reduce((s, i) => s + Number(i.total || 0), 0),
+    },
+  };
+
+  // Monthly invoices (6 months)
+  const monthlyData = (() => {
+    const months: { name: string; emises: number; payees: number; retard: number }[] = [];
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date();
+      d.setMonth(d.getMonth() - i);
+      const monthName = d.toLocaleDateString("fr-FR", { month: "short" });
+      const y = d.getFullYear();
+      const m = d.getMonth();
+      const inMonth = invoices.filter((inv) => {
+        const cd = new Date(inv.created_at || inv.invoice_date);
+        return cd.getFullYear() === y && cd.getMonth() === m;
+      });
+      months.push({
+        name: monthName,
+        emises: inMonth.filter((i) => i.status === "emise").length,
+        payees: inMonth.filter((i) => i.status === "payee").length,
+        retard: inMonth.filter((i) => i.status === "en_retard").length,
+      });
+    }
+    return months;
+  })();
+
+  const statusPie = [
+    { name: "Brouillon", value: counts.brouillon },
+    { name: "Émise", value: counts.emise },
+    { name: "Payée", value: counts.payee },
+    { name: "En retard", value: counts.enRetard },
+    { name: "Annulée", value: counts.annulee },
+  ].filter((d) => d.value > 0);
+
+  const recentInvoices = invoices.slice(0, 6);
+
+  const cards = [
+    { label: "Factures total", value: counts.total, icon: Receipt, color: "gradient-primary", subtitle: `${counts.brouillon} brouillon(s)` },
+    { label: "Émises", value: counts.emise, icon: Send, color: "bg-blue-500", subtitle: "À encaisser" },
+    { label: "Payées", value: counts.payee, icon: CheckCircle2, color: "bg-green-500", subtitle: "Encaissées" },
+    { label: "En retard", value: counts.enRetard, icon: AlertCircle, color: "bg-destructive", subtitle: "Action requise" },
+    { label: "Clients facturables", value: clients.length, icon: Briefcase, color: "bg-teal-500", subtitle: "Comptes actifs" },
+    { label: "Modes de paiement", value: paymentMethods.filter((p) => p.active).length, icon: CreditCard, color: "bg-accent", subtitle: `${paymentMethods.length} configurés` },
+  ];
+
+  return (
+    <div className="space-y-6 animate-fade-up">
+      {/* Welcome banner */}
+      <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-accent/5 to-primary/10 rounded-2xl p-6 border border-primary/10">
+        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
+        <div className="relative flex items-center justify-between">
+          <div>
+            <h1 className="text-2xl font-bold text-foreground">Vue comptable</h1>
+            <p className="text-muted-foreground mt-1">Synthèse de la facturation, des encaissements et des clients facturables.</p>
+          </div>
+          <div className="hidden md:flex items-center gap-3 text-sm text-muted-foreground">
+            <Button variant="outline" size="sm" onClick={load} className="gap-1.5">
+              <RefreshCw size={14} /> Actualiser
+            </Button>
+            <span className="flex items-center gap-2">
+              <Activity size={16} className="text-primary" />
+              {new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Encaissements / Restant à encaisser */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <Card className="border-border/50 shadow-card">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <CheckCircle2 size={16} className="text-green-500" />
+              <h3 className="font-semibold text-card-foreground">Encaissé</h3>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              {(["GNF", "USD", "EUR"] as const).map((cur) => (
+                <div key={cur}>
+                  <p className="text-xs text-muted-foreground">{cur}</p>
+                  <p className="text-lg font-bold text-foreground">{fmt(totals.paid[cur])}</p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+        <Card className="border-border/50 shadow-card">
+          <CardContent className="p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <Clock size={16} className="text-orange-500" />
+              <h3 className="font-semibold text-card-foreground">Restant à encaisser</h3>
+            </div>
+            <div className="grid grid-cols-3 gap-3">
+              {(["GNF", "USD", "EUR"] as const).map((cur) => (
+                <div key={cur}>
+                  <p className="text-xs text-muted-foreground">{cur}</p>
+                  <p className="text-lg font-bold text-foreground">{fmt(totals.pending[cur])}</p>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Cards grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+        {cards.map((c) => (
+          <div key={c.label} className="bg-card rounded-xl p-4 shadow-card border border-border/50 hover:shadow-card-hover transition-all">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-xs text-muted-foreground font-medium">{c.label}</span>
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center ${c.color}`}>
+                <c.icon size={16} className="text-primary-foreground" />
+              </div>
+            </div>
+            <p className="text-2xl font-bold text-card-foreground">{c.value}</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">{c.subtitle}</p>
+          </div>
+        ))}
+      </div>
+
+      {/* Charts */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+        <div className="lg:col-span-2 bg-card rounded-xl shadow-card border border-border/50 p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <BarChart3 size={16} className="text-primary" />
+            <h3 className="font-semibold text-card-foreground">Activité de facturation (6 mois)</h3>
+          </div>
+          <div className="h-64">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={monthlyData}>
+                <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
+                <XAxis dataKey="name" tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" />
+                <YAxis tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))" allowDecimals={false} />
+                <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "0.75rem", fontSize: 12 }} />
+                <Bar dataKey="emises" fill="hsl(199, 89%, 48%)" name="Émises" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="payees" fill="hsl(160, 60%, 45%)" name="Payées" radius={[4, 4, 0, 0]} />
+                <Bar dataKey="retard" fill="hsl(var(--destructive))" name="En retard" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        <div className="bg-card rounded-xl shadow-card border border-border/50 p-5">
+          <div className="flex items-center gap-2 mb-2">
+            <PieChart size={14} className="text-primary" />
+            <h4 className="text-sm font-semibold text-card-foreground">Répartition par statut</h4>
+          </div>
+          {statusPie.length > 0 ? (
+            <div className="h-48">
+              <ResponsiveContainer width="100%" height="100%">
+                <RePieChart>
+                  <Pie data={statusPie} cx="50%" cy="50%" innerRadius={36} outerRadius={64} paddingAngle={4} dataKey="value">
+                    {statusPie.map((_, i) => (
+                      <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip contentStyle={{ background: "hsl(var(--card))", border: "1px solid hsl(var(--border))", borderRadius: "0.5rem", fontSize: 11 }} />
+                </RePieChart>
+              </ResponsiveContainer>
+            </div>
+          ) : (
+            <p className="text-xs text-muted-foreground text-center py-8">Aucune facture</p>
+          )}
+          <div className="flex flex-wrap gap-2 justify-center mt-2">
+            {statusPie.map((d, i) => (
+              <span key={d.name} className="text-[10px] text-muted-foreground flex items-center gap-1">
+                <span className="w-2 h-2 rounded-full" style={{ background: CHART_COLORS[i % CHART_COLORS.length] }} />
+                {d.name} ({d.value})
+              </span>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Recent invoices */}
+      <div className="bg-card rounded-xl shadow-card border border-border/50 overflow-hidden">
+        <div className="p-5 border-b border-border/50 flex items-center justify-between">
+          <h3 className="font-semibold text-card-foreground flex items-center gap-2">
+            <Receipt size={16} className="text-primary" /> Factures récentes
+          </h3>
+        </div>
+        <div className="divide-y divide-border/50">
+          {recentInvoices.map((inv: any) => (
+            <div key={inv.id} className="p-4 hover:bg-muted/30 transition-colors flex items-center justify-between gap-3 flex-wrap">
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-medium text-card-foreground truncate">{inv.service_clients?.client_name ?? "Client supprimé"}</p>
+                <p className="text-[11px] text-muted-foreground">
+                  {new Date(inv.invoice_date).toLocaleDateString("fr-FR")} · {inv.currency}
+                </p>
+              </div>
+              <span className="text-sm font-bold text-foreground">{fmt(Number(inv.total))} {inv.currency}</span>
+              <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full ${
+                inv.status === "payee" ? "bg-green-500/10 text-green-600" :
+                inv.status === "emise" ? "bg-blue-500/10 text-blue-600" :
+                inv.status === "en_retard" ? "bg-destructive/10 text-destructive" :
+                inv.status === "annulee" ? "bg-orange-500/10 text-orange-600" :
+                "bg-muted text-muted-foreground"
+              }`}>
+                {inv.status === "payee" ? "Payée" : inv.status === "emise" ? "Émise" : inv.status === "en_retard" ? "En retard" : inv.status === "annulee" ? "Annulée" : "Brouillon"}
+              </span>
+            </div>
+          ))}
+          {recentInvoices.length === 0 && !loading && (
+            <p className="p-8 text-center text-sm text-muted-foreground">Aucune facture</p>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
 function AdminDashboard() {
   const [stats, setStats] = useState({
     users: 0,
