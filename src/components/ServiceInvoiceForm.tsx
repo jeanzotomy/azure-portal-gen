@@ -70,12 +70,14 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
   useEffect(() => {
     if (!open) return;
     void (async () => {
-      const [{ data: cls }, { data: cat }] = await Promise.all([
+      const [{ data: cls }, { data: cat }, { data: pms }] = await Promise.all([
         supabase.from("service_clients").select("*").order("client_name"),
         supabase.from("service_catalog").select("*").eq("active", true).order("name"),
+        supabase.from("payment_methods").select("*").eq("active", true).order("position", { ascending: true }),
       ]);
       setClients(cls ?? []);
       setCatalog(cat ?? []);
+      setPaymentMethods((pms ?? []) as PMRow[]);
       // Charger le profil + rôle de l'émetteur
       if (user) {
         const [{ data: prof }, { data: roles }] = await Promise.all([
@@ -83,12 +85,8 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
           supabase.from("user_roles").select("role").eq("user_id", user.id),
         ]);
         const roleLabels: Record<string, string> = {
-          admin: "Administrateur",
-          comptable: "Comptable",
-          gestionnaire: "Gestionnaire de projet",
-          agent: "Agent",
-          client: "Client",
-          user: "Utilisateur",
+          admin: "Administrateur", comptable: "Comptable", gestionnaire: "Gestionnaire de projet",
+          agent: "Agent", client: "Client", user: "Utilisateur",
         };
         const priority = ["admin", "comptable", "gestionnaire", "agent", "user", "client"];
         const userRoles = (roles ?? []).map((r) => r.role as string);
@@ -99,8 +97,40 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
           signature_url: prof?.signature_url ?? null,
         });
       }
+
+      // Charger la facture si édition
+      if (editId) {
+        const { data: inv } = await supabase.from("service_invoices").select("*").eq("id", editId).maybeSingle();
+        const { data: its } = await supabase.from("service_invoice_items").select("*").eq("invoice_id", editId).order("position");
+        if (inv) {
+          setClientId(inv.client_id);
+          setInvoiceDate(inv.invoice_date);
+          setDueDate(inv.due_date ?? "");
+          setCurrency(inv.currency as Currency);
+          setDiscountRate(Number(inv.discount_rate));
+          setTaxRate(Number(inv.tax_rate));
+          setEarlyPaymentDiscountRate(Number(inv.early_payment_discount_rate));
+          setNotes(inv.notes ?? "");
+          setSelectedPaymentIds((inv.payment_method_ids ?? []) as string[]);
+          const pd = (inv.payment_details ?? {}) as typeof DEFAULT_PAYMENT;
+          setPayment({ ...DEFAULT_PAYMENT, ...pd });
+          prevCurrencyRef.current = inv.currency as Currency;
+        }
+        if (its && its.length > 0) {
+          setItems(its.map((x) => ({
+            catalog_id: x.catalog_id, description: x.description, subtitle: x.subtitle ?? "",
+            quantity: Number(x.quantity), unit: x.unit, unit_price: Number(x.unit_price), discount_rate: Number(x.discount_rate),
+          })));
+        }
+      } else {
+        // reset propre quand on ouvre en création
+        setClientId(""); setInvoiceDate(new Date().toISOString().slice(0, 10)); setDueDate("");
+        setCurrency("GNF"); setDiscountRate(0); setTaxRate(18); setEarlyPaymentDiscountRate(0);
+        setNotes(""); setSelectedPaymentIds([]); setPayment({ ...DEFAULT_PAYMENT });
+        setItems([{ description: "", quantity: 1, unit: "unité", unit_price: 0, discount_rate: 0 }]);
+      }
     })();
-  }, [open, user]);
+  }, [open, user, editId]);
 
   const subtotal = items.reduce((s, i) => s + lineTotal(i), 0);
   const discountAmount = subtotal * (discountRate / 100);
