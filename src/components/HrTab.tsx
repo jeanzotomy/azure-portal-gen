@@ -1,0 +1,344 @@
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuthSession } from "@/hooks/use-auth-session";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/hooks/use-toast";
+import { Briefcase, Plus, Pencil, Trash2, FileText, Download, Calendar, MapPin, RefreshCw } from "lucide-react";
+import { format } from "date-fns";
+
+type JobStatus = "brouillon" | "publiee" | "fermee";
+type ContractType = "CDI" | "CDD" | "Stage" | "Freelance" | "Alternance";
+type AppStatus = "nouvelle" | "en_revue" | "entretien" | "acceptee" | "refusee";
+
+interface JobPosting {
+  id: string;
+  title: string;
+  department: string | null;
+  location: string;
+  contract_type: ContractType;
+  description: string;
+  closing_date: string | null;
+  status: JobStatus;
+  created_at: string;
+}
+
+interface JobApplication {
+  id: string;
+  job_id: string;
+  full_name: string;
+  email: string;
+  phone: string | null;
+  linkedin_url: string | null;
+  portfolio_url: string | null;
+  years_experience: number | null;
+  salary_expectation: string | null;
+  cv_path: string;
+  cover_letter_path: string | null;
+  status: AppStatus;
+  notes: string | null;
+  created_at: string;
+}
+
+const STATUS_COLORS: Record<JobStatus, string> = {
+  brouillon: "bg-muted text-muted-foreground",
+  publiee: "bg-green-500/10 text-green-600",
+  fermee: "bg-destructive/10 text-destructive",
+};
+
+const APP_STATUS_LABELS: Record<AppStatus, string> = {
+  nouvelle: "Nouvelle",
+  en_revue: "En revue",
+  entretien: "Entretien",
+  acceptee: "Acceptée",
+  refusee: "Refusée",
+};
+
+const APP_STATUS_COLORS: Record<AppStatus, string> = {
+  nouvelle: "bg-blue-500/10 text-blue-600",
+  en_revue: "bg-amber-500/10 text-amber-600",
+  entretien: "bg-purple-500/10 text-purple-600",
+  acceptee: "bg-green-500/10 text-green-600",
+  refusee: "bg-destructive/10 text-destructive",
+};
+
+export default function HrTab() {
+  const { user } = useAuthSession();
+  const { toast } = useToast();
+  const [jobs, setJobs] = useState<JobPosting[]>([]);
+  const [applications, setApplications] = useState<JobApplication[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editing, setEditing] = useState<JobPosting | null>(null);
+  const [form, setForm] = useState({
+    title: "",
+    department: "",
+    location: "",
+    contract_type: "CDI" as ContractType,
+    description: "",
+    closing_date: "",
+    status: "brouillon" as JobStatus,
+  });
+
+  const load = async () => {
+    setLoading(true);
+    const [jobsRes, appsRes] = await Promise.all([
+      supabase.from("job_postings").select("*").order("created_at", { ascending: false }),
+      supabase.from("job_applications").select("*").order("created_at", { ascending: false }),
+    ]);
+    if (jobsRes.data) setJobs(jobsRes.data as JobPosting[]);
+    if (appsRes.data) setApplications(appsRes.data as JobApplication[]);
+    setLoading(false);
+  };
+
+  useEffect(() => { load(); }, []);
+
+  const openNew = () => {
+    setEditing(null);
+    setForm({ title: "", department: "", location: "", contract_type: "CDI", description: "", closing_date: "", status: "brouillon" });
+    setDialogOpen(true);
+  };
+
+  const openEdit = (job: JobPosting) => {
+    setEditing(job);
+    setForm({
+      title: job.title,
+      department: job.department || "",
+      location: job.location,
+      contract_type: job.contract_type,
+      description: job.description,
+      closing_date: job.closing_date || "",
+      status: job.status,
+    });
+    setDialogOpen(true);
+  };
+
+  const handleSave = async () => {
+    if (!user) return;
+    if (!form.title.trim() || !form.location.trim() || !form.description.trim()) {
+      toast({ title: "Champs requis", description: "Titre, lieu et description sont obligatoires.", variant: "destructive" });
+      return;
+    }
+    const payload = {
+      title: form.title.trim(),
+      department: form.department.trim() || null,
+      location: form.location.trim(),
+      contract_type: form.contract_type,
+      description: form.description.trim(),
+      closing_date: form.closing_date || null,
+      status: form.status,
+    };
+    const res = editing
+      ? await supabase.from("job_postings").update(payload).eq("id", editing.id)
+      : await supabase.from("job_postings").insert({ ...payload, created_by: user.id });
+    if (res.error) {
+      toast({ title: "Erreur", description: res.error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: editing ? "Offre modifiée" : "Offre créée" });
+    setDialogOpen(false);
+    load();
+  };
+
+  const handleDelete = async (id: string) => {
+    if (!confirm("Supprimer cette offre et toutes ses candidatures ?")) return;
+    const { error } = await supabase.from("job_postings").delete().eq("id", id);
+    if (error) {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Offre supprimée" });
+    load();
+  };
+
+  const updateAppStatus = async (id: string, status: AppStatus) => {
+    const { error } = await supabase.from("job_applications").update({ status }).eq("id", id);
+    if (error) {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      return;
+    }
+    load();
+  };
+
+  const downloadFile = async (path: string) => {
+    const { data, error } = await supabase.storage.from("cv-applications").createSignedUrl(path, 60);
+    if (error || !data) {
+      toast({ title: "Erreur", description: "Impossible de télécharger le fichier", variant: "destructive" });
+      return;
+    }
+    window.open(data.signedUrl, "_blank");
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex items-center justify-between flex-wrap gap-3">
+        <div>
+          <h1 className="text-2xl font-bold flex items-center gap-2"><Briefcase className="text-primary" /> Recrutement RH</h1>
+          <p className="text-sm text-muted-foreground">Gérez les offres d'emploi et les candidatures.</p>
+        </div>
+        <div className="flex gap-2">
+          <Button variant="outline" size="sm" onClick={load}><RefreshCw size={14} /> Actualiser</Button>
+          <Button size="sm" onClick={openNew}><Plus size={14} /> Nouvelle offre</Button>
+        </div>
+      </div>
+
+      <Tabs defaultValue="jobs">
+        <TabsList>
+          <TabsTrigger value="jobs">Offres ({jobs.length})</TabsTrigger>
+          <TabsTrigger value="applications">Candidatures ({applications.length})</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="jobs" className="space-y-3 mt-4">
+          {loading && <p className="text-sm text-muted-foreground">Chargement...</p>}
+          {!loading && jobs.length === 0 && (
+            <Card><CardContent className="p-8 text-center text-muted-foreground">Aucune offre. Créez la première !</CardContent></Card>
+          )}
+          {jobs.map((job) => {
+            const appCount = applications.filter((a) => a.job_id === job.id).length;
+            return (
+              <Card key={job.id}>
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between gap-3 flex-wrap">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="font-semibold">{job.title}</h3>
+                        <Badge className={STATUS_COLORS[job.status]}>{job.status}</Badge>
+                        <Badge variant="outline">{job.contract_type}</Badge>
+                        {appCount > 0 && <Badge variant="secondary">{appCount} candidature{appCount > 1 ? "s" : ""}</Badge>}
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1 flex items-center gap-3 flex-wrap">
+                        <span className="flex items-center gap-1"><MapPin size={12} /> {job.location}</span>
+                        {job.department && <span>{job.department}</span>}
+                        {job.closing_date && <span className="flex items-center gap-1"><Calendar size={12} /> Clôture {format(new Date(job.closing_date), "dd/MM/yyyy")}</span>}
+                      </div>
+                      <p className="text-sm mt-2 line-clamp-2 text-muted-foreground">{job.description}</p>
+                    </div>
+                    <div className="flex gap-1">
+                      <Button variant="ghost" size="sm" onClick={() => openEdit(job)}><Pencil size={14} /></Button>
+                      <Button variant="ghost" size="sm" onClick={() => handleDelete(job.id)} className="text-destructive"><Trash2 size={14} /></Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </TabsContent>
+
+        <TabsContent value="applications" className="space-y-3 mt-4">
+          {loading && <p className="text-sm text-muted-foreground">Chargement...</p>}
+          {!loading && applications.length === 0 && (
+            <Card><CardContent className="p-8 text-center text-muted-foreground">Aucune candidature reçue.</CardContent></Card>
+          )}
+          {applications.map((app) => {
+            const job = jobs.find((j) => j.id === app.job_id);
+            return (
+              <Card key={app.id}>
+                <CardContent className="p-4 space-y-2">
+                  <div className="flex items-start justify-between gap-3 flex-wrap">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <h3 className="font-semibold">{app.full_name}</h3>
+                        <Badge className={APP_STATUS_COLORS[app.status]}>{APP_STATUS_LABELS[app.status]}</Badge>
+                      </div>
+                      <p className="text-xs text-muted-foreground mt-0.5">
+                        Pour : <span className="font-medium">{job?.title || "Offre supprimée"}</span> · {format(new Date(app.created_at), "dd/MM/yyyy HH:mm")}
+                      </p>
+                      <div className="text-sm mt-2 grid sm:grid-cols-2 gap-x-4 gap-y-1">
+                        <span>📧 {app.email}</span>
+                        {app.phone && <span>📞 {app.phone}</span>}
+                        {app.years_experience !== null && <span>💼 {app.years_experience} ans d'expérience</span>}
+                        {app.salary_expectation && <span>💰 {app.salary_expectation}</span>}
+                        {app.linkedin_url && <a href={app.linkedin_url} target="_blank" rel="noreferrer" className="text-primary hover:underline truncate">🔗 LinkedIn</a>}
+                        {app.portfolio_url && <a href={app.portfolio_url} target="_blank" rel="noreferrer" className="text-primary hover:underline truncate">🌐 Portfolio</a>}
+                      </div>
+                    </div>
+                    <Select value={app.status} onValueChange={(v) => updateAppStatus(app.id, v as AppStatus)}>
+                      <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
+                      <SelectContent>
+                        {(Object.keys(APP_STATUS_LABELS) as AppStatus[]).map((s) => (
+                          <SelectItem key={s} value={s}>{APP_STATUS_LABELS[s]}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div className="flex gap-2 flex-wrap pt-2 border-t">
+                    <Button variant="outline" size="sm" onClick={() => downloadFile(app.cv_path)}><FileText size={14} /> CV</Button>
+                    {app.cover_letter_path && (
+                      <Button variant="outline" size="sm" onClick={() => downloadFile(app.cover_letter_path!)}><Download size={14} /> Lettre de motivation</Button>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </TabsContent>
+      </Tabs>
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader className="bg-gradient-to-r from-primary to-[#007aa3] text-primary-foreground -m-6 mb-2 p-6 rounded-t-lg">
+            <DialogTitle className="text-primary-foreground">{editing ? "Modifier l'offre" : "Nouvelle offre d'emploi"}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
+            <div>
+              <label className="text-sm font-medium">Titre du poste *</label>
+              <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Ex: Ingénieur Cloud DevOps" />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-sm font-medium">Département</label>
+                <Input value={form.department} onChange={(e) => setForm({ ...form, department: e.target.value })} placeholder="Ex: Ingénierie" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Lieu *</label>
+                <Input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="Ex: Conakry / Remote" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-sm font-medium">Type de contrat *</label>
+                <Select value={form.contract_type} onValueChange={(v) => setForm({ ...form, contract_type: v as ContractType })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {(["CDI", "CDD", "Stage", "Freelance", "Alternance"] as ContractType[]).map((c) => (
+                      <SelectItem key={c} value={c}>{c}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium">Date de clôture</label>
+                <Input type="date" value={form.closing_date} onChange={(e) => setForm({ ...form, closing_date: e.target.value })} />
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Description *</label>
+              <Textarea rows={6} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Missions, profil recherché, compétences requises..." />
+            </div>
+            <div>
+              <label className="text-sm font-medium">Statut *</label>
+              <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as JobStatus })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="brouillon">Brouillon (non visible)</SelectItem>
+                  <SelectItem value="publiee">Publiée (visible sur Carrières)</SelectItem>
+                  <SelectItem value="fermee">Fermée</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>Annuler</Button>
+            <Button onClick={handleSave}>{editing ? "Enregistrer" : "Créer"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
