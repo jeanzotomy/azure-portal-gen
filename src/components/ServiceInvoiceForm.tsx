@@ -43,6 +43,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
   const [taxRate, setTaxRate] = useState(18);
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
+  const [outputFormat, setOutputFormat] = useState<"pdf" | "docx" | "both">("both");
   const pdfRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -165,10 +166,12 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
       const itemsPayload = items.map((it, i) => ({ invoice_id: inv.id, position: i + 1, catalog_id: it.catalog_id ?? null, description: it.description, subtitle: it.subtitle ?? null, quantity: it.quantity, unit: it.unit, unit_price: it.unit_price, discount_rate: it.discount_rate ?? 0, total: lineTotal(it) }));
       await supabase.from("service_invoice_items").insert(itemsPayload);
 
-      // Generate PDF + DOCX
+      // Generate documents according to chosen format
       await new Promise((r) => setTimeout(r, 100));
-      const pdfBlob = pdfRef.current ? await generateInvoicePDFBlob(pdfRef.current) : null;
-      const docxBlob = await generateInvoiceDocxBlob(buildPdfData(inv.invoice_number ?? ""));
+      const wantPdf = outputFormat === "pdf" || outputFormat === "both";
+      const wantDocx = outputFormat === "docx" || outputFormat === "both";
+      const pdfBlob = wantPdf && pdfRef.current ? await generateInvoicePDFBlob(pdfRef.current) : null;
+      const docxBlob = wantDocx ? await generateInvoiceDocxBlob(buildPdfData(inv.invoice_number ?? "")) : null;
       const safeNum = sanitizeName(inv.invoice_number ?? "facture");
       const safeClient = sanitizeName(selectedClient.client_name);
 
@@ -178,16 +181,19 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
         const up = await uploadToSharePoint(selectedClient.client_name, `${safeNum}_${safeClient}.pdf`, pdfBlob, "application/pdf");
         if (up) { updates.sharepoint_pdf_id = up.id; updates.sharepoint_url = up.webUrl; updates.pdf_generated_at = new Date().toISOString(); }
       }
-      const up2 = await uploadToSharePoint(selectedClient.client_name, `${safeNum}_${safeClient}.docx`, docxBlob, "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
-      if (up2) { updates.sharepoint_docx_id = up2.id; updates.docx_generated_at = new Date().toISOString(); if (!updates.sharepoint_url) updates.sharepoint_url = up2.webUrl; }
+      if (docxBlob) {
+        const up2 = await uploadToSharePoint(selectedClient.client_name, `${safeNum}_${safeClient}.docx`, docxBlob, "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+        if (up2) { updates.sharepoint_docx_id = up2.id; updates.docx_generated_at = new Date().toISOString(); if (!updates.sharepoint_url) updates.sharepoint_url = up2.webUrl; }
+      }
 
       if (Object.keys(updates).length) await supabase.from("service_invoices").update(updates).eq("id", inv.id);
 
       // Local download
       if (pdfBlob) saveAs(pdfBlob, `${safeNum}_${safeClient}.pdf`);
-      saveAs(docxBlob, `${safeNum}_${safeClient}.docx`);
+      if (docxBlob) saveAs(docxBlob, `${safeNum}_${safeClient}.docx`);
 
-      toast({ title: "Facture créée", description: `${inv.invoice_number} • ${updates.sharepoint_url ? "Stockée dans SharePoint" : "Téléchargée localement"}` });
+      const formatLabel = outputFormat === "both" ? "PDF + Word" : outputFormat === "pdf" ? "PDF" : "Word";
+      toast({ title: "Facture créée", description: `${inv.invoice_number} • ${formatLabel} • ${updates.sharepoint_url ? "Stockée dans SharePoint" : "Téléchargée localement"}` });
       onSaved();
       onOpenChange(false);
       // Reset
@@ -363,13 +369,24 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
           {selectedClient && <InvoicePDFTemplate ref={pdfRef} data={buildPdfData("APERÇU")} />}
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="flex-col sm:flex-row sm:items-center gap-2">
+          <div className="flex items-center gap-2 sm:mr-auto">
+            <label className="text-xs font-medium text-muted-foreground">Format :</label>
+            <Select value={outputFormat} onValueChange={(v) => setOutputFormat(v as "pdf" | "docx" | "both")}>
+              <SelectTrigger className="h-9 w-[160px]"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="pdf">PDF uniquement</SelectItem>
+                <SelectItem value="docx">Word uniquement</SelectItem>
+                <SelectItem value="both">PDF + Word</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>Annuler</Button>
           <Button variant="secondary" onClick={() => void handleSave("brouillon")} disabled={saving}>
             <FileType2 size={14} className="mr-1" /> Enregistrer brouillon
           </Button>
           <Button onClick={() => void handleSave("emise")} disabled={saving}>
-            <FileText size={14} className="mr-1" /> {saving ? "Génération..." : "Émettre & Générer PDF + Word"}
+            <FileText size={14} className="mr-1" /> {saving ? "Génération..." : `Émettre & Générer ${outputFormat === "both" ? "PDF + Word" : outputFormat === "pdf" ? "PDF" : "Word"}`}
           </Button>
         </DialogFooter>
       </DialogContent>
