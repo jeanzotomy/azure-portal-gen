@@ -612,8 +612,8 @@ export default function HrTab() {
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl">
-          <DialogHeader className="bg-gradient-to-r from-primary to-[#007aa3] text-primary-foreground -m-6 mb-2 p-6 rounded-t-lg">
-            <DialogTitle className="text-primary-foreground">{editing ? "Modifier l'offre" : "Nouvelle offre d'emploi"}</DialogTitle>
+          <DialogHeader>
+            <DialogTitle className="text-white">{editing ? "Modifier l'offre" : "Nouvelle offre d'emploi"}</DialogTitle>
           </DialogHeader>
           <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
             <div>
