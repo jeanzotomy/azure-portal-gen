@@ -8,13 +8,14 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
-import { Plus, Trash2, FileText, FileType2, RefreshCw, CalendarIcon } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Plus, Trash2, FileText, FileType2, RefreshCw, CalendarIcon, CreditCard, Building2, Smartphone, Banknote, PiggyBank } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
-import { InvoicePDFTemplate, type InvoicePDFData } from "@/components/InvoicePDFTemplate";
+import { InvoicePDFTemplate, type InvoicePDFData, type InvoicePaymentMethodEntry } from "@/components/InvoicePDFTemplate";
 import { generateInvoicePDFBlob, generateInvoiceDocxBlob, sanitizeName } from "@/lib/invoice-generator";
 import { saveAs } from "file-saver";
 import { useExchangeRates, type Currency } from "@/hooks/use-exchange-rates";
@@ -22,6 +23,11 @@ import { useExchangeRates, type Currency } from "@/hooks/use-exchange-rates";
 interface SClient { id: string; client_name: string; nif: string | null; rccm: string | null; address_line: string | null; city: string | null; country: string | null; phone: string | null; email: string | null; contact_person: string | null; }
 interface CatItem { id: string; name: string; description: string | null; default_unit_price: number; default_currency: Currency; default_unit: string; active: boolean; }
 interface LineItem { catalog_id?: string | null; description: string; subtitle?: string; quantity: number; unit: string; unit_price: number; discount_rate?: number; }
+interface PMRow {
+  id: string; label: string; type: "virement" | "mobile_money" | "especes" | "cheque" | "depot" | "autre";
+  currency: Currency; bank: string | null; iban: string | null; swift: string | null;
+  account_holder: string | null; mobile_number: string | null; instructions: string | null; active: boolean; position: number;
+}
 
 const lineTotal = (it: LineItem) => {
   const gross = (it.quantity || 0) * (it.unit_price || 0);
@@ -31,12 +37,21 @@ const lineTotal = (it: LineItem) => {
 const UNIT_OPTIONS = ["unité", "heure", "jour", "mois", "année", "forfait"] as const;
 const DEFAULT_PAYMENT = { bank: "", iban: "", swift: "", mobile_money: "+224 626 441 150", reference: "" };
 
-export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { open: boolean; onOpenChange: (v: boolean) => void; onSaved: () => void; }) {
+const PM_TYPE_ICONS: Record<PMRow["type"], typeof CreditCard> = {
+  virement: Building2, mobile_money: Smartphone, especes: Banknote, cheque: FileText, depot: PiggyBank, autre: CreditCard,
+};
+const PM_TYPE_LABELS: Record<PMRow["type"], string> = {
+  virement: "Virement", mobile_money: "Mobile Money", especes: "Espèces", cheque: "Chèque", depot: "Dépôt", autre: "Autre",
+};
+
+export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId }: { open: boolean; onOpenChange: (v: boolean) => void; onSaved: () => void; editId?: string | null; }) {
   const { user } = useAuthSession();
   const { toast } = useToast();
   const { rates, loading: ratesLoading, refresh: refreshRates, convert } = useExchangeRates();
   const [clients, setClients] = useState<SClient[]>([]);
   const [catalog, setCatalog] = useState<CatItem[]>([]);
+  const [paymentMethods, setPaymentMethods] = useState<PMRow[]>([]);
+  const [selectedPaymentIds, setSelectedPaymentIds] = useState<string[]>([]);
   const [clientId, setClientId] = useState<string>("");
   const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().slice(0, 10));
   const [dueDate, setDueDate] = useState("");
