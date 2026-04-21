@@ -144,6 +144,37 @@ export default function HrTab() {
     load();
   };
 
+  const [editingDeptId, setEditingDeptId] = useState<string | null>(null);
+  const [editDeptName, setEditDeptName] = useState("");
+  const [editDeptDesc, setEditDeptDesc] = useState("");
+
+  const startEditDepartment = (d: Department) => {
+    setEditingDeptId(d.id);
+    setEditDeptName(d.name);
+    setEditDeptDesc(d.description || "");
+  };
+
+  const cancelEditDepartment = () => {
+    setEditingDeptId(null);
+    setEditDeptName("");
+    setEditDeptDesc("");
+  };
+
+  const handleUpdateDepartment = async () => {
+    if (!editingDeptId || !editDeptName.trim()) return;
+    const { error } = await supabase
+      .from("departments")
+      .update({ name: editDeptName.trim(), description: editDeptDesc.trim() || null })
+      .eq("id", editingDeptId);
+    if (error) {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Département modifié" });
+    cancelEditDepartment();
+    load();
+  };
+
   const openNew = () => {
     setEditing(null);
     setForm({ title: "", department: "", location: "", contract_type: "CDI", description: "", closing_date: "", status: "brouillon", sector: "", start_date: "", salary_range: "" });
