@@ -43,6 +43,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
   const [taxRate, setTaxRate] = useState(18);
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
+  const [outputFormat, setOutputFormat] = useState<"pdf" | "docx" | "both">("both");
   const pdfRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
