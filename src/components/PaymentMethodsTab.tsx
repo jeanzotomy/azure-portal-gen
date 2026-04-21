@@ -178,15 +178,15 @@ export default function PaymentMethodsTab() {
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader className="bg-gradient-to-r from-primary to-[#007aa3] text-primary-foreground -m-6 mb-4 p-6 rounded-t-lg">
-            <DialogTitle className="text-primary-foreground flex items-center gap-2">
+        <DialogContent className="w-[calc(100vw-1rem)] sm:w-auto max-w-2xl max-h-[92vh] overflow-y-auto p-3 sm:p-6">
+          <DialogHeader className="bg-gradient-to-r from-primary to-[#007aa3] text-primary-foreground -m-3 sm:-m-6 mb-4 p-4 sm:p-6 rounded-t-lg">
+            <DialogTitle className="text-primary-foreground flex items-center gap-2 text-base sm:text-lg">
               <CreditCard size={20} /> {editing?.id ? "Modifier" : "Nouveau"} mode de paiement
             </DialogTitle>
           </DialogHeader>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div className="col-span-2">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="sm:col-span-2">
               <Label>Libellé *</Label>
               <Input value={editing?.label ?? ""} onChange={(e) => setEditing({ ...editing, label: e.target.value })} placeholder="Ex: Virement Ecobank GNF" />
             </div>
@@ -234,19 +234,19 @@ export default function PaymentMethodsTab() {
               <Label>Ordre d'affichage</Label>
               <Input type="number" value={editing?.position ?? 0} onChange={(e) => setEditing({ ...editing, position: Number(e.target.value) })} />
             </div>
-            <div className="col-span-2">
+            <div className="sm:col-span-2">
               <Label>Instructions / Référence</Label>
               <Textarea rows={2} value={editing?.instructions ?? ""} onChange={(e) => setEditing({ ...editing, instructions: e.target.value })} placeholder="Ex: Mentionner le numéro de facture en référence" />
             </div>
-            <div className="col-span-2 flex items-center gap-2">
+            <div className="sm:col-span-2 flex items-center gap-2">
               <Switch checked={editing?.active ?? true} onCheckedChange={(v) => setEditing({ ...editing, active: v })} />
               <Label className="cursor-pointer">Mode actif (proposé dans les factures)</Label>
             </div>
           </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setOpen(false)}>Annuler</Button>
-            <Button onClick={() => void save()}>Enregistrer</Button>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
+            <Button variant="outline" onClick={() => setOpen(false)} className="w-full sm:w-auto">Annuler</Button>
+            <Button onClick={() => void save()} className="w-full sm:w-auto">Enregistrer</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

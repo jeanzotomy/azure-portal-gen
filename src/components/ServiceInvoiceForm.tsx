@@ -207,9 +207,9 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[92vh] overflow-y-auto">
+      <DialogContent className="w-[calc(100vw-1rem)] sm:w-auto max-w-5xl max-h-[92vh] overflow-y-auto p-3 sm:p-6">
         <DialogHeader>
-          <DialogTitle>Nouvelle facture</DialogTitle>
+          <DialogTitle className="text-base sm:text-lg">Nouvelle facture</DialogTitle>
         </DialogHeader>
 
         <div className="grid grid-cols-12 gap-3">
@@ -252,20 +252,20 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
         </div>
 
         {/* Bandeau taux de change */}
-        <div className="flex items-center justify-between gap-2 text-xs bg-muted/40 border rounded-md px-3 py-2">
-          <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs bg-muted/40 border rounded-md px-3 py-2">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 min-w-0">
             <span className="font-semibold">Taux de change (live) :</span>
             {rates?.rates ? (
               <>
                 <span>1 USD ≈ {new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(rates.rates.GNF ?? 0)} GNF</span>
                 <span>1 EUR ≈ {new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(((rates.rates.GNF ?? 0) / (rates.rates.EUR ?? 1)))} GNF</span>
-                <span className="text-muted-foreground">· Conversion auto à chaque changement de devise</span>
+                <span className="hidden md:inline text-muted-foreground">· Conversion auto à chaque changement de devise</span>
               </>
             ) : (
               <span className="text-muted-foreground">{ratesLoading ? "Chargement..." : "Taux indisponibles (mode secours)"}</span>
             )}
           </div>
-          <Button size="sm" variant="ghost" onClick={() => void refreshRates(true)} disabled={ratesLoading}>
+          <Button size="sm" variant="ghost" onClick={() => void refreshRates(true)} disabled={ratesLoading} className="self-end sm:self-auto">
             <RefreshCw size={12} className={ratesLoading ? "animate-spin" : ""} />
           </Button>
         </div>
@@ -303,10 +303,12 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
                 <div className="col-span-12">
                   <Input placeholder="Sous-titre / précisions (italique)" value={it.subtitle ?? ""} onChange={(e) => updateItem(idx, { subtitle: e.target.value })} />
                 </div>
-                <div className="col-span-3 md:col-span-1">
+                <div className="col-span-6 md:col-span-1">
+                  <label className="text-[10px] uppercase text-muted-foreground md:hidden">Qté</label>
                   <Input type="number" min={0} placeholder="Qté" value={it.quantity} onChange={(e) => updateItem(idx, { quantity: Number(e.target.value) })} />
                 </div>
-                <div className="col-span-4 md:col-span-2">
+                <div className="col-span-6 md:col-span-2">
+                  <label className="text-[10px] uppercase text-muted-foreground md:hidden">Unité</label>
                   <Select value={it.unit} onValueChange={(v) => updateItem(idx, { unit: v })}>
                     <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
                     <SelectContent>
@@ -314,19 +316,21 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
                     </SelectContent>
                   </Select>
                 </div>
-                <div className="col-span-5 md:col-span-3">
+                <div className="col-span-7 md:col-span-3">
+                  <label className="text-[10px] uppercase text-muted-foreground md:hidden">Prix unitaire</label>
                   <Input type="number" min={0} placeholder="Prix unitaire" value={it.unit_price} onChange={(e) => updateItem(idx, { unit_price: Number(e.target.value) })} />
                 </div>
-                <div className="col-span-6 md:col-span-2">
+                <div className="col-span-5 md:col-span-2">
+                  <label className="text-[10px] uppercase text-muted-foreground md:hidden">Remise</label>
                   <div className="relative">
                     <Input type="number" min={0} max={100} placeholder="Remise" value={it.discount_rate ?? 0} onChange={(e) => updateItem(idx, { discount_rate: Number(e.target.value) })} />
                     <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">%</span>
                   </div>
                 </div>
-                <div className="col-span-12 md:col-span-3 flex items-center justify-end text-sm font-semibold">
+                <div className="col-span-9 md:col-span-3 flex items-center md:justify-end text-sm font-semibold">
                   Total : {new Intl.NumberFormat("fr-FR").format(lineTotal(it))} {currency}
                 </div>
-                <div className="col-span-12 md:col-span-1 flex items-center justify-end">
+                <div className="col-span-3 md:col-span-1 flex items-center justify-end">
                   <Button size="icon" variant="ghost" onClick={() => removeLine(idx)} disabled={items.length === 1}><Trash2 size={14} className="text-destructive" /></Button>
                 </div>
               </div>
@@ -370,10 +374,10 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
         </div>
 
         <DialogFooter className="flex-col sm:flex-row sm:items-center gap-2">
-          <div className="flex items-center gap-2 sm:mr-auto">
-            <label className="text-xs font-medium text-muted-foreground">Format :</label>
+          <div className="flex items-center gap-2 sm:mr-auto w-full sm:w-auto">
+            <label className="text-xs font-medium text-muted-foreground shrink-0">Format :</label>
             <Select value={outputFormat} onValueChange={(v) => setOutputFormat(v as "pdf" | "docx" | "both")}>
-              <SelectTrigger className="h-9 w-[160px]"><SelectValue /></SelectTrigger>
+              <SelectTrigger className="h-9 w-full sm:w-[160px]"><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="pdf">PDF uniquement</SelectItem>
                 <SelectItem value="docx">Word uniquement</SelectItem>
@@ -381,12 +385,12 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
               </SelectContent>
             </Select>
           </div>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>Annuler</Button>
-          <Button variant="secondary" onClick={() => void handleSave("brouillon")} disabled={saving}>
-            <FileType2 size={14} className="mr-1" /> Enregistrer brouillon
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving} className="w-full sm:w-auto">Annuler</Button>
+          <Button variant="secondary" onClick={() => void handleSave("brouillon")} disabled={saving} className="w-full sm:w-auto">
+            <FileType2 size={14} className="mr-1" /> <span className="truncate">Enregistrer brouillon</span>
           </Button>
-          <Button onClick={() => void handleSave("emise")} disabled={saving}>
-            <FileText size={14} className="mr-1" /> {saving ? "Génération..." : `Émettre & Générer ${outputFormat === "both" ? "PDF + Word" : outputFormat === "pdf" ? "PDF" : "Word"}`}
+          <Button onClick={() => void handleSave("emise")} disabled={saving} className="w-full sm:w-auto">
+            <FileText size={14} className="mr-1" /> <span className="truncate">{saving ? "Génération..." : `Émettre & Générer ${outputFormat === "both" ? "PDF + Word" : outputFormat === "pdf" ? "PDF" : "Word"}`}</span>
           </Button>
         </DialogFooter>
       </DialogContent>
