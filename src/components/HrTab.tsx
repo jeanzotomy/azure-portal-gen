@@ -582,6 +582,60 @@ export default function HrTab() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={sectorDialogOpen} onOpenChange={setSectorDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader className="bg-gradient-to-r from-primary to-[#007aa3] text-primary-foreground -m-6 mb-2 p-6 rounded-t-lg">
+            <DialogTitle className="text-primary-foreground flex items-center gap-2"><Briefcase size={18} /> Gérer les secteurs</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2 p-3 rounded-lg border bg-muted/30">
+              <p className="text-sm font-medium">Ajouter un secteur</p>
+              <Input value={newSectorName} onChange={(e) => setNewSectorName(e.target.value)} placeholder="Nom (ex: Technologies Cloud)" />
+              <Input value={newSectorDesc} onChange={(e) => setNewSectorDesc(e.target.value)} placeholder="Description (optionnel)" />
+              <Button size="sm" onClick={handleAddSector} disabled={!newSectorName.trim()}>
+                <Plus size={14} /> Ajouter
+              </Button>
+            </div>
+            <div className="space-y-1 max-h-64 overflow-y-auto">
+              {sectors.length === 0 ? (
+                <p className="text-sm text-muted-foreground text-center py-4">Aucun secteur.</p>
+              ) : sectors.map((s) => (
+                <div key={s.id} className="p-2 rounded border hover:bg-muted/50">
+                  {editingSectorId === s.id ? (
+                    <div className="space-y-2">
+                      <Input value={editSectorName} onChange={(e) => setEditSectorName(e.target.value)} placeholder="Nom" />
+                      <Input value={editSectorDesc} onChange={(e) => setEditSectorDesc(e.target.value)} placeholder="Description (optionnel)" />
+                      <div className="flex gap-2">
+                        <Button size="sm" onClick={handleUpdateSector} disabled={!editSectorName.trim()}>Enregistrer</Button>
+                        <Button size="sm" variant="outline" onClick={cancelEditSector}>Annuler</Button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between gap-2">
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium truncate">{s.name}</p>
+                        {s.description && <p className="text-xs text-muted-foreground truncate">{s.description}</p>}
+                      </div>
+                      <div className="flex gap-1 shrink-0">
+                        <Button variant="ghost" size="sm" onClick={() => startEditSector(s)}>
+                          <Pencil size={14} />
+                        </Button>
+                        <Button variant="ghost" size="sm" onClick={() => handleDeleteSector(s.id)} className="text-destructive">
+                          <X size={14} />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setSectorDialogOpen(false)}>Fermer</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
