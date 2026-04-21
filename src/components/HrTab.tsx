@@ -333,7 +333,18 @@ export default function HrTab() {
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="text-sm font-medium">Département</label>
-                <Input value={form.department} onChange={(e) => setForm({ ...form, department: e.target.value })} placeholder="Ex: Ingénierie" />
+                <Select value={form.department || "__none__"} onValueChange={(v) => setForm({ ...form, department: v === "__none__" ? "" : v })}>
+                  <SelectTrigger><SelectValue placeholder="Sélectionner..." /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="__none__">— Aucun —</SelectItem>
+                    {departments.map((d) => (
+                      <SelectItem key={d.id} value={d.name}>{d.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {departments.length === 0 && (
+                  <p className="text-xs text-muted-foreground mt-1">Aucun département. <button type="button" className="text-primary hover:underline" onClick={() => setDeptDialogOpen(true)}>Créer</button></p>
+                )}
               </div>
               <div>
                 <label className="text-sm font-medium">Lieu *</label>
