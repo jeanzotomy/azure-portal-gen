@@ -84,16 +84,17 @@ export function ProfileSignatureDialog({ open, onOpenChange }: Props) {
 
         <div className="p-4 sm:p-6 space-y-3">
 
-        <SignaturePad initialImage={currentUrl} onSave={handleSave} saving={saving} />
+          <SignaturePad initialImage={currentUrl} onSave={handleSave} saving={saving} />
 
-        {currentUrl && (
-          <div className="flex items-center justify-between border-t pt-3">
-            <span className="text-xs text-muted-foreground">Signature actuelle enregistrée</span>
-            <Button type="button" variant="ghost" size="sm" onClick={handleDelete} disabled={saving} className="text-destructive">
-              <Trash2 size={14} className="mr-1" /> Supprimer
-            </Button>
-          </div>
-        )}
+          {currentUrl && (
+            <div className="flex items-center justify-between border-t pt-3">
+              <span className="text-xs text-muted-foreground">Signature actuelle enregistrée</span>
+              <Button type="button" variant="ghost" size="sm" onClick={handleDelete} disabled={saving} className="text-destructive">
+                <Trash2 size={14} className="mr-1" /> Supprimer
+              </Button>
+            </div>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );
