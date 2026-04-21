@@ -265,16 +265,38 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
 
         <div className="space-y-4 max-h-[65vh] overflow-y-auto px-6 py-4">
           <SectionTitle icon={User} title="Identité" />
+          {(lockedFields.first_name || lockedFields.last_name || lockedFields.phone) && (
+            <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/40 border border-border rounded-md px-3 py-2">
+              <Lock size={12} className="shrink-0 text-primary" />
+              <span>Ces informations proviennent de votre profil. Pour les modifier, mettez à jour votre profil dans l'espace client.</span>
+            </div>
+          )}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="text-sm font-medium">Nom <span className="text-destructive">*</span></label>
-              <Input className={fieldClass("last_name")} value={form.last_name} onChange={(e) => update("last_name", e.target.value)} />
-              <ErrMsg k="last_name" />
+              <label className="text-sm font-medium flex items-center gap-1">
+                Prénom <span className="text-destructive">*</span>
+                {lockedFields.first_name && <Lock size={11} className="text-muted-foreground" />}
+              </label>
+              <Input
+                className={`${fieldClass("first_name")} ${lockedFields.first_name ? "bg-muted cursor-not-allowed" : ""}`}
+                value={form.first_name}
+                onChange={(e) => update("first_name", e.target.value)}
+                readOnly={lockedFields.first_name}
+              />
+              <ErrMsg k="first_name" />
             </div>
             <div>
-              <label className="text-sm font-medium">Prénom <span className="text-destructive">*</span></label>
-              <Input className={fieldClass("first_name")} value={form.first_name} onChange={(e) => update("first_name", e.target.value)} />
-              <ErrMsg k="first_name" />
+              <label className="text-sm font-medium flex items-center gap-1">
+                Nom <span className="text-destructive">*</span>
+                {lockedFields.last_name && <Lock size={11} className="text-muted-foreground" />}
+              </label>
+              <Input
+                className={`${fieldClass("last_name")} ${lockedFields.last_name ? "bg-muted cursor-not-allowed" : ""}`}
+                value={form.last_name}
+                onChange={(e) => update("last_name", e.target.value)}
+                readOnly={lockedFields.last_name}
+              />
+              <ErrMsg k="last_name" />
             </div>
           </div>
 
@@ -286,8 +308,17 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
               <ErrMsg k="email" />
             </div>
             <div>
-              <label className="text-sm font-medium">Téléphone</label>
-              <Input placeholder="+224 ..." value={form.phone} onChange={(e) => update("phone", e.target.value)} />
+              <label className="text-sm font-medium flex items-center gap-1">
+                Téléphone
+                {lockedFields.phone && <Lock size={11} className="text-muted-foreground" />}
+              </label>
+              <Input
+                placeholder="+224 ..."
+                className={lockedFields.phone ? "bg-muted cursor-not-allowed" : ""}
+                value={form.phone}
+                onChange={(e) => update("phone", e.target.value)}
+                readOnly={lockedFields.phone}
+              />
             </div>
           </div>
 
