@@ -190,6 +190,60 @@ export default function HrTab() {
     load();
   };
 
+  const handleAddSector = async () => {
+    if (!user || !newSectorName.trim()) return;
+    const { error } = await (supabase as any).from("sectors").insert({
+      name: newSectorName.trim(),
+      description: newSectorDesc.trim() || null,
+      created_by: user.id,
+    });
+    if (error) {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Secteur ajouté" });
+    setNewSectorName("");
+    setNewSectorDesc("");
+    load();
+  };
+
+  const handleDeleteSector = async (id: string) => {
+    if (!confirm("Supprimer ce secteur ?")) return;
+    const { error } = await (supabase as any).from("sectors").delete().eq("id", id);
+    if (error) {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      return;
+    }
+    load();
+  };
+
+  const startEditSector = (s: Sector) => {
+    setEditingSectorId(s.id);
+    setEditSectorName(s.name);
+    setEditSectorDesc(s.description || "");
+  };
+
+  const cancelEditSector = () => {
+    setEditingSectorId(null);
+    setEditSectorName("");
+    setEditSectorDesc("");
+  };
+
+  const handleUpdateSector = async () => {
+    if (!editingSectorId || !editSectorName.trim()) return;
+    const { error } = await (supabase as any)
+      .from("sectors")
+      .update({ name: editSectorName.trim(), description: editSectorDesc.trim() || null })
+      .eq("id", editingSectorId);
+    if (error) {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      return;
+    }
+    toast({ title: "Secteur modifié" });
+    cancelEditSector();
+    load();
+  };
+
   const openNew = () => {
     setEditing(null);
     setForm({ title: "", department: "", location: "", contract_type: "CDI", description: "", closing_date: "", status: "brouillon", sector: "", start_date: "", salary_range: "" });
