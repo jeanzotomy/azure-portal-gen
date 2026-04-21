@@ -11,7 +11,8 @@ import { Switch } from "@/components/ui/switch";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Pencil, Trash2, CreditCard, RefreshCw, Building2, Smartphone, Banknote, FileText, PiggyBank } from "lucide-react";
+import { Plus, Pencil, Trash2, CreditCard, RefreshCw, Building2, Smartphone, Banknote, FileText, PiggyBank, Info, User, Hash, Globe } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 type PaymentType = "virement" | "mobile_money" | "especes" | "cheque" | "depot" | "autre";
 type Currency = "GNF" | "USD" | "EUR";
