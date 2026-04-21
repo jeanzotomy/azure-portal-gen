@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
+import { FormDialogHeader, formDialogContentClass } from "@/components/FormDialogHeader";
 import { Plus, Pencil, Trash2, Search, Building2, RefreshCw, User, FileText, MapPin, Phone, Mail, StickyNote, Hash } from "lucide-react";
 import { Label } from "@/components/ui/label";
 
@@ -210,16 +211,13 @@ export default function ServiceClientsTab() {
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="w-[calc(100vw-1rem)] sm:w-auto max-w-3xl max-h-[92vh] overflow-y-auto p-0 gap-0 [&>button]:text-white [&>button]:opacity-90 [&>button]:hover:opacity-100">
-          <DialogHeader className="bg-gradient-to-r from-primary to-[#007aa3] text-white px-4 sm:px-6 py-4 rounded-t-lg pr-12">
-            <DialogTitle className="text-white flex items-center gap-2 text-base sm:text-lg">
-              <Building2 size={20} className="shrink-0" />
-              {editing ? "Modifier le client" : "Nouveau client facturable"}
-            </DialogTitle>
-            <p className="text-xs text-white/80 mt-1">
-              {editing ? "Mettez à jour les informations du client." : "Renseignez les informations pour facturer ce client."}
-            </p>
-          </DialogHeader>
+        <DialogContent className={`w-[calc(100vw-1rem)] sm:w-auto max-w-3xl max-h-[92vh] overflow-y-auto ${formDialogContentClass}`}>
+          <FormDialogHeader
+            icon={Building2}
+            title={editing ? "Modifier le client" : "Nouveau client facturable"}
+            subtitle={editing ? "Mettez à jour les informations du client." : "Renseignez les informations pour facturer ce client."}
+            badges={[]}
+          />
 
           <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
             <section className="space-y-3">

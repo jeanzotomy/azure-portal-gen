@@ -12,8 +12,9 @@ import {
   ChevronRight, Download, FolderPlus, AlertCircle, Search, ArrowUpDown,
 } from "lucide-react";
 import {
-  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+  Dialog, DialogContent, DialogFooter,
 } from "@/components/ui/dialog";
+import { FormDialogHeader, formDialogContentClass } from "@/components/FormDialogHeader";
 
 interface DriveItem {
   id: string;
@@ -435,10 +436,13 @@ export default function SharePointBrowser() {
       })()}
 
       <Dialog open={showNewFolder} onOpenChange={setShowNewFolder}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>{t("sharepoint.newFolder")}</DialogTitle>
-          </DialogHeader>
+        <DialogContent className={formDialogContentClass}>
+          <FormDialogHeader
+            icon={FolderPlus}
+            title={t("sharepoint.newFolder")}
+            badges={[]}
+          />
+          <div className="p-4 sm:p-6 space-y-3">
           <Input
             placeholder={t("sharepoint.folderNamePlaceholder")}
             value={newFolderName}
@@ -449,6 +453,7 @@ export default function SharePointBrowser() {
             <Button variant="outline" onClick={() => setShowNewFolder(false)}>{t("sharepoint.cancel")}</Button>
             <Button onClick={createFolder} disabled={!newFolderName}>{t("sharepoint.create")}</Button>
           </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

@@ -8,7 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogFooter } from "@/components/ui/dialog";
+import { FormDialogHeader, formDialogContentClass } from "@/components/FormDialogHeader";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Pencil, Trash2, CreditCard, RefreshCw, Building2, Smartphone, Banknote, FileText, PiggyBank, Info, User, Hash, Globe } from "lucide-react";
@@ -205,13 +206,13 @@ export default function PaymentMethodsTab() {
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="w-[calc(100vw-1rem)] sm:w-auto max-w-2xl max-h-[92vh] overflow-y-auto p-0 gap-0 [&>button]:text-white [&>button]:opacity-90 [&>button]:hover:opacity-100 [&>button]:top-4 [&>button]:right-4">
-          <DialogHeader className="bg-gradient-to-r from-primary to-[#007aa3] text-primary-foreground px-4 sm:px-6 py-4 rounded-t-lg pr-14">
-            <DialogTitle className="text-primary-foreground flex items-center gap-2 text-base sm:text-lg">
-              <CreditCard size={20} className="shrink-0" />
-              <span className="truncate">{editing?.id ? "Modifier" : "Nouveau"} mode de paiement</span>
-            </DialogTitle>
-          </DialogHeader>
+        <DialogContent className={`w-[calc(100vw-1rem)] sm:w-auto max-w-2xl max-h-[92vh] overflow-y-auto ${formDialogContentClass}`}>
+          <FormDialogHeader
+            icon={CreditCard}
+            title={editing?.id ? "Modifier le mode de paiement" : "Nouveau mode de paiement"}
+            subtitle="Configurez les coordonnées affichées sur vos factures."
+            badges={[]}
+          />
 
           <div className="p-4 sm:p-6 space-y-5">
             {/* Bandeau d'aide contextuelle */}
