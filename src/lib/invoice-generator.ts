@@ -233,7 +233,7 @@ export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blo
                 : []),
             ],
           }),
-          cell(String(item.quantity), { align: AlignmentType.CENTER, width: colWidths[2] }),
+          cell(`${item.quantity}${item.unit && item.unit !== "unité" ? ` ${item.unit}` : ""}`, { align: AlignmentType.CENTER, width: colWidths[2] }),
           cell(formatCurrency(item.unit_price, data.currency), { align: AlignmentType.RIGHT, width: colWidths[3] }),
           cell(formatCurrency(item.total, data.currency), { align: AlignmentType.RIGHT, bold: true, width: colWidths[4] }),
         ],

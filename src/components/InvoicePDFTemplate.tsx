@@ -6,6 +6,7 @@ export interface InvoiceItemData {
   description: string;
   subtitle?: string | null;
   quantity: number;
+  unit?: string | null;
   unit_price: number;
   total: number;
 }
@@ -219,7 +220,7 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
                   )}
                 </td>
                 <td style={{ padding: "10px 8px", textAlign: "center", verticalAlign: "top" }}>
-                  {item.quantity}
+                  {item.quantity}{item.unit && item.unit !== "unité" ? ` ${item.unit}` : ""}
                 </td>
                 <td style={{ padding: "10px 8px", textAlign: "right", verticalAlign: "top" }}>
                   {formatCurrency(item.unit_price, data.currency)}
