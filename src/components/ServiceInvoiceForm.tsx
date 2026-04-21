@@ -112,7 +112,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
       email: selectedClient?.email ?? null,
     },
     payment_details: payment,
-    items: items.map((it, i) => ({ position: i + 1, description: it.description, subtitle: it.subtitle ?? null, quantity: it.quantity, unit_price: it.unit_price, total: it.quantity * it.unit_price })),
+    items: items.map((it, i) => ({ position: i + 1, description: it.description, subtitle: it.subtitle ?? null, quantity: it.quantity, unit: it.unit, unit_price: it.unit_price, total: it.quantity * it.unit_price })),
     subtotal, discount_rate: discountRate, discount_amount: discountAmount, tax_rate: taxRate, tax_amount: taxAmount, total, notes: notes || null,
   });
 
@@ -150,7 +150,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
       }).select().single();
       if (error || !inv) throw new Error(error?.message ?? "Insert failed");
 
-      const itemsPayload = items.map((it, i) => ({ invoice_id: inv.id, position: i + 1, catalog_id: it.catalog_id ?? null, description: it.description, subtitle: it.subtitle ?? null, quantity: it.quantity, unit_price: it.unit_price, total: it.quantity * it.unit_price }));
+      const itemsPayload = items.map((it, i) => ({ invoice_id: inv.id, position: i + 1, catalog_id: it.catalog_id ?? null, description: it.description, subtitle: it.subtitle ?? null, quantity: it.quantity, unit: it.unit, unit_price: it.unit_price, total: it.quantity * it.unit_price }));
       await supabase.from("service_invoice_items").insert(itemsPayload);
 
       // Generate PDF + DOCX
@@ -179,7 +179,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
       onSaved();
       onOpenChange(false);
       // Reset
-      setClientId(""); setDueDate(""); setItems([{ description: "", quantity: 1, unit_price: 0 }]); setNotes(""); setDiscountRate(0); setPayment({ ...DEFAULT_PAYMENT });
+      setClientId(""); setDueDate(""); setItems([{ description: "", quantity: 1, unit: "unité", unit_price: 0 }]); setNotes(""); setDiscountRate(0); setPayment({ ...DEFAULT_PAYMENT });
     } catch (e) {
       toast({ title: "Erreur", description: e instanceof Error ? e.message : "Erreur inconnue", variant: "destructive" });
     } finally {
