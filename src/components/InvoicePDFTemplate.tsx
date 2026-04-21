@@ -8,6 +8,7 @@ export interface InvoiceItemData {
   quantity: number;
   unit?: string | null;
   unit_price: number;
+  discount_rate?: number;
   total: number;
 }
 
@@ -42,6 +43,8 @@ export interface InvoicePDFData {
   discount_amount: number;
   tax_rate: number;
   tax_amount: number;
+  early_payment_discount_rate?: number;
+  early_payment_discount_amount?: number;
   total: number;
   notes?: string | null;
 }
@@ -201,8 +204,9 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
               <th style={{ padding: "8px", textAlign: "left", width: "30px", fontWeight: 700 }}>#</th>
               <th style={{ padding: "8px", textAlign: "left", fontWeight: 700 }}>DESCRIPTION</th>
               <th style={{ padding: "8px", textAlign: "center", width: "50px", fontWeight: 700 }}>QTÉ</th>
-              <th style={{ padding: "8px", textAlign: "right", width: "120px", fontWeight: 700 }}>PRIX UNIT.</th>
-              <th style={{ padding: "8px", textAlign: "right", width: "130px", fontWeight: 700 }}>TOTAL</th>
+              <th style={{ padding: "8px", textAlign: "right", width: "100px", fontWeight: 700 }}>PRIX UNIT.</th>
+              <th style={{ padding: "8px", textAlign: "center", width: "55px", fontWeight: 700 }}>REMISE</th>
+              <th style={{ padding: "8px", textAlign: "right", width: "120px", fontWeight: 700 }}>TOTAL</th>
             </tr>
           </thead>
           <tbody>
@@ -224,6 +228,9 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
                 </td>
                 <td style={{ padding: "10px 8px", textAlign: "right", verticalAlign: "top" }}>
                   {formatCurrency(item.unit_price, data.currency)}
+                </td>
+                <td style={{ padding: "10px 8px", textAlign: "center", verticalAlign: "top", color: item.discount_rate ? "#DC2626" : "#9CA3AF" }}>
+                  {item.discount_rate ? `−${item.discount_rate}%` : "—"}
                 </td>
                 <td style={{ padding: "10px 8px", textAlign: "right", fontWeight: 700, verticalAlign: "top" }}>
                   {formatCurrency(item.total, data.currency)}
@@ -276,6 +283,21 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
               <span>TVA ({data.tax_rate}%)</span>
               <span>{formatCurrency(data.tax_amount, data.currency)}</span>
             </div>
+            {!!data.early_payment_discount_rate && data.early_payment_discount_rate > 0 && (
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  padding: "6px 0",
+                  fontSize: "11px",
+                  borderTop: "1px solid #fff",
+                  color: "#DC2626",
+                }}
+              >
+                <span>Escompte paiement anticipé ({data.early_payment_discount_rate}%)</span>
+                <span>— {formatCurrency(data.early_payment_discount_amount ?? 0, data.currency)}</span>
+              </div>
+            )}
             <div
               style={{
                 background: cyan,
@@ -288,7 +310,7 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
                 fontWeight: 800,
               }}
             >
-              <span>TOTAL TTC</span>
+              <span>NET À PAYER</span>
               <span>{formatCurrency(data.total, data.currency)}</span>
             </div>
           </div>

@@ -103,7 +103,7 @@ const noBorder = {
 /** Génère un Blob .docx. */
 export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blob> {
   const tableWidth = 9360;
-  const colWidths = [600, 4660, 700, 1700, 1700];
+  const colWidths = [500, 4060, 700, 1500, 900, 1700];
 
   // En-tête (logo placé via texte/branding simple — Word ne charge pas l'image facilement sans assets binaires)
   const headerTable = new Table({
@@ -214,7 +214,8 @@ export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blo
       cell("DESCRIPTION", { fill: CYAN, color: "FFFFFF", bold: true, width: colWidths[1] }),
       cell("QTÉ", { fill: CYAN, color: "FFFFFF", bold: true, align: AlignmentType.CENTER, width: colWidths[2] }),
       cell("PRIX UNIT.", { fill: CYAN, color: "FFFFFF", bold: true, align: AlignmentType.RIGHT, width: colWidths[3] }),
-      cell("TOTAL", { fill: CYAN, color: "FFFFFF", bold: true, align: AlignmentType.RIGHT, width: colWidths[4] }),
+      cell("REMISE", { fill: CYAN, color: "FFFFFF", bold: true, align: AlignmentType.CENTER, width: colWidths[4] }),
+      cell("TOTAL", { fill: CYAN, color: "FFFFFF", bold: true, align: AlignmentType.RIGHT, width: colWidths[5] }),
     ],
   });
 
@@ -235,7 +236,8 @@ export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blo
           }),
           cell(`${item.quantity}${item.unit && item.unit !== "unité" ? ` ${item.unit}` : ""}`, { align: AlignmentType.CENTER, width: colWidths[2] }),
           cell(formatCurrency(item.unit_price, data.currency), { align: AlignmentType.RIGHT, width: colWidths[3] }),
-          cell(formatCurrency(item.total, data.currency), { align: AlignmentType.RIGHT, bold: true, width: colWidths[4] }),
+          cell(item.discount_rate ? `−${item.discount_rate}%` : "—", { align: AlignmentType.CENTER, width: colWidths[4] }),
+          cell(formatCurrency(item.total, data.currency), { align: AlignmentType.RIGHT, bold: true, width: colWidths[5] }),
         ],
       })
   );
@@ -276,13 +278,13 @@ export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blo
                   new TextRun({ text: formatCurrency(data.subtotal, data.currency), bold: true, size: 18, font: "Arial" }),
                 ],
               }),
-              new Paragraph({
+              ...(data.discount_rate > 0 ? [new Paragraph({
                 alignment: AlignmentType.RIGHT,
                 children: [
-                  new TextRun({ text: `Remise (${data.discount_rate}%) : `, size: 18, font: "Arial" }),
-                  new TextRun({ text: `— ${formatCurrency(data.discount_amount, data.currency)}`, size: 18, font: "Arial" }),
+                  new TextRun({ text: `Remise globale (${data.discount_rate}%) : `, size: 18, font: "Arial", color: "DC2626" }),
+                  new TextRun({ text: `— ${formatCurrency(data.discount_amount, data.currency)}`, size: 18, font: "Arial", color: "DC2626" }),
                 ],
-              }),
+              })] : []),
               new Paragraph({
                 alignment: AlignmentType.RIGHT,
                 children: [
@@ -290,12 +292,19 @@ export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blo
                   new TextRun({ text: formatCurrency(data.tax_amount, data.currency), size: 18, font: "Arial" }),
                 ],
               }),
+              ...(data.early_payment_discount_rate && data.early_payment_discount_rate > 0 ? [new Paragraph({
+                alignment: AlignmentType.RIGHT,
+                children: [
+                  new TextRun({ text: `Escompte paiement anticipé (${data.early_payment_discount_rate}%) : `, size: 18, font: "Arial", color: "DC2626" }),
+                  new TextRun({ text: `— ${formatCurrency(data.early_payment_discount_amount ?? 0, data.currency)}`, size: 18, font: "Arial", color: "DC2626" }),
+                ],
+              })] : []),
               new Paragraph({
                 alignment: AlignmentType.RIGHT,
                 spacing: { before: 200 },
                 shading: { fill: CYAN, type: ShadingType.CLEAR, color: "auto" },
                 children: [
-                  new TextRun({ text: "TOTAL TTC : ", bold: true, size: 24, color: "FFFFFF", font: "Arial" }),
+                  new TextRun({ text: "NET À PAYER : ", bold: true, size: 24, color: "FFFFFF", font: "Arial" }),
                   new TextRun({ text: formatCurrency(data.total, data.currency), bold: true, size: 24, color: "FFFFFF", font: "Arial" }),
                 ],
               }),

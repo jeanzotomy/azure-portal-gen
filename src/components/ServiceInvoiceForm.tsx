@@ -16,7 +16,12 @@ import { useExchangeRates, type Currency } from "@/hooks/use-exchange-rates";
 
 interface SClient { id: string; client_name: string; nif: string | null; rccm: string | null; address_line: string | null; city: string | null; country: string | null; phone: string | null; email: string | null; contact_person: string | null; }
 interface CatItem { id: string; name: string; description: string | null; default_unit_price: number; default_currency: Currency; default_unit: string; active: boolean; }
-interface LineItem { catalog_id?: string | null; description: string; subtitle?: string; quantity: number; unit: string; unit_price: number; }
+interface LineItem { catalog_id?: string | null; description: string; subtitle?: string; quantity: number; unit: string; unit_price: number; discount_rate?: number; }
+
+const lineTotal = (it: LineItem) => {
+  const gross = (it.quantity || 0) * (it.unit_price || 0);
+  return gross * (1 - (it.discount_rate || 0) / 100);
+};
 
 const UNIT_OPTIONS = ["unité", "heure", "jour", "mois", "année", "forfait"] as const;
 const DEFAULT_PAYMENT = { bank: "", iban: "", swift: "", mobile_money: "+224 626 441 150", reference: "" };
@@ -32,8 +37,9 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
   const [dueDate, setDueDate] = useState("");
   const [currency, setCurrency] = useState<Currency>("GNF");
   const [payment, setPayment] = useState({ ...DEFAULT_PAYMENT });
-  const [items, setItems] = useState<LineItem[]>([{ description: "", quantity: 1, unit: "unité", unit_price: 0 }]);
+  const [items, setItems] = useState<LineItem[]>([{ description: "", quantity: 1, unit: "unité", unit_price: 0, discount_rate: 0 }]);
   const [discountRate, setDiscountRate] = useState(0);
+  const [earlyPaymentDiscountRate, setEarlyPaymentDiscountRate] = useState(0);
   const [taxRate, setTaxRate] = useState(18);
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
@@ -51,11 +57,13 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
     })();
   }, [open]);
 
-  const subtotal = items.reduce((s, i) => s + (i.quantity || 0) * (i.unit_price || 0), 0);
+  const subtotal = items.reduce((s, i) => s + lineTotal(i), 0);
   const discountAmount = subtotal * (discountRate / 100);
   const taxBase = subtotal - discountAmount;
   const taxAmount = taxBase * (taxRate / 100);
-  const total = taxBase + taxAmount;
+  const totalBeforeEarly = taxBase + taxAmount;
+  const earlyPaymentDiscountAmount = totalBeforeEarly * (earlyPaymentDiscountRate / 100);
+  const total = totalBeforeEarly - earlyPaymentDiscountAmount;
 
   const selectedClient = clients.find((c) => c.id === clientId);
 
@@ -77,7 +85,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
     });
   };
 
-  const addLine = () => setItems((p) => [...p, { description: "", quantity: 1, unit: "unité", unit_price: 0 }]);
+  const addLine = () => setItems((p) => [...p, { description: "", quantity: 1, unit: "unité", unit_price: 0, discount_rate: 0 }]);
   const removeLine = (idx: number) => setItems((p) => p.filter((_, i) => i !== idx));
 
   // Conversion automatique des prix unitaires quand la devise change
@@ -112,8 +120,10 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
       email: selectedClient?.email ?? null,
     },
     payment_details: payment,
-    items: items.map((it, i) => ({ position: i + 1, description: it.description, subtitle: it.subtitle ?? null, quantity: it.quantity, unit: it.unit, unit_price: it.unit_price, total: it.quantity * it.unit_price })),
-    subtotal, discount_rate: discountRate, discount_amount: discountAmount, tax_rate: taxRate, tax_amount: taxAmount, total, notes: notes || null,
+    items: items.map((it, i) => ({ position: i + 1, description: it.description, subtitle: it.subtitle ?? null, quantity: it.quantity, unit: it.unit, unit_price: it.unit_price, discount_rate: it.discount_rate ?? 0, total: lineTotal(it) })),
+    subtotal, discount_rate: discountRate, discount_amount: discountAmount, tax_rate: taxRate, tax_amount: taxAmount,
+    early_payment_discount_rate: earlyPaymentDiscountRate, early_payment_discount_amount: earlyPaymentDiscountAmount,
+    total, notes: notes || null,
   });
 
   const uploadToSharePoint = async (clientName: string, fileName: string, blob: Blob, contentType: string) => {
@@ -146,11 +156,13 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
       const { data: inv, error } = await supabase.from("service_invoices").insert({
         client_id: clientId, invoice_date: invoiceDate, due_date: dueDate || null, currency,
         payment_details: payment as never, subtotal, discount_rate: discountRate, discount_amount: discountAmount,
-        tax_rate: taxRate, tax_amount: taxAmount, total, notes: notes || null, status, created_by: user.id,
+        tax_rate: taxRate, tax_amount: taxAmount,
+        early_payment_discount_rate: earlyPaymentDiscountRate, early_payment_discount_amount: earlyPaymentDiscountAmount,
+        total, notes: notes || null, status, created_by: user.id,
       }).select().single();
       if (error || !inv) throw new Error(error?.message ?? "Insert failed");
 
-      const itemsPayload = items.map((it, i) => ({ invoice_id: inv.id, position: i + 1, catalog_id: it.catalog_id ?? null, description: it.description, subtitle: it.subtitle ?? null, quantity: it.quantity, unit: it.unit, unit_price: it.unit_price, total: it.quantity * it.unit_price }));
+      const itemsPayload = items.map((it, i) => ({ invoice_id: inv.id, position: i + 1, catalog_id: it.catalog_id ?? null, description: it.description, subtitle: it.subtitle ?? null, quantity: it.quantity, unit: it.unit, unit_price: it.unit_price, discount_rate: it.discount_rate ?? 0, total: lineTotal(it) }));
       await supabase.from("service_invoice_items").insert(itemsPayload);
 
       // Generate PDF + DOCX
@@ -179,7 +191,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
       onSaved();
       onOpenChange(false);
       // Reset
-      setClientId(""); setDueDate(""); setItems([{ description: "", quantity: 1, unit: "unité", unit_price: 0 }]); setNotes(""); setDiscountRate(0); setPayment({ ...DEFAULT_PAYMENT });
+      setClientId(""); setDueDate(""); setItems([{ description: "", quantity: 1, unit: "unité", unit_price: 0, discount_rate: 0 }]); setNotes(""); setDiscountRate(0); setEarlyPaymentDiscountRate(0); setPayment({ ...DEFAULT_PAYMENT });
     } catch (e) {
       toast({ title: "Erreur", description: e instanceof Error ? e.message : "Erreur inconnue", variant: "destructive" });
     } finally {
@@ -299,8 +311,14 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
                 <div className="col-span-5 md:col-span-3">
                   <Input type="number" min={0} placeholder="Prix unitaire" value={it.unit_price} onChange={(e) => updateItem(idx, { unit_price: Number(e.target.value) })} />
                 </div>
-                <div className="col-span-12 md:col-span-5 flex items-center justify-end text-sm font-semibold">
-                  Total : {new Intl.NumberFormat("fr-FR").format((it.quantity || 0) * (it.unit_price || 0))} {currency}
+                <div className="col-span-6 md:col-span-2">
+                  <div className="relative">
+                    <Input type="number" min={0} max={100} placeholder="Remise" value={it.discount_rate ?? 0} onChange={(e) => updateItem(idx, { discount_rate: Number(e.target.value) })} />
+                    <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">%</span>
+                  </div>
+                </div>
+                <div className="col-span-12 md:col-span-3 flex items-center justify-end text-sm font-semibold">
+                  Total : {new Intl.NumberFormat("fr-FR").format(lineTotal(it))} {currency}
                 </div>
                 <div className="col-span-12 md:col-span-1 flex items-center justify-end">
                   <Button size="icon" variant="ghost" onClick={() => removeLine(idx)} disabled={items.length === 1}><Trash2 size={14} className="text-destructive" /></Button>
@@ -317,16 +335,25 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
           </div>
           <div className="space-y-2 bg-muted/30 p-3 rounded-md">
             <div className="grid grid-cols-2 gap-2 items-center">
-              <label className="text-xs">Remise (%)</label>
+              <label className="text-xs">Remise globale (%)</label>
               <Input type="number" min={0} max={100} value={discountRate} onChange={(e) => setDiscountRate(Number(e.target.value))} />
               <label className="text-xs">TVA (%)</label>
               <Input type="number" min={0} max={100} value={taxRate} onChange={(e) => setTaxRate(Number(e.target.value))} />
+              <label className="text-xs" title="Réduction accordée pour paiement anticipé, déduite après TVA">
+                Escompte paiement (%)
+              </label>
+              <Input type="number" min={0} max={100} value={earlyPaymentDiscountRate} onChange={(e) => setEarlyPaymentDiscountRate(Number(e.target.value))} />
             </div>
             <div className="border-t pt-2 text-sm space-y-1">
               <div className="flex justify-between"><span>Sous-total</span><span>{new Intl.NumberFormat("fr-FR").format(subtotal)} {currency}</span></div>
-              <div className="flex justify-between"><span>Remise</span><span>— {new Intl.NumberFormat("fr-FR").format(discountAmount)} {currency}</span></div>
-              <div className="flex justify-between"><span>TVA</span><span>{new Intl.NumberFormat("fr-FR").format(taxAmount)} {currency}</span></div>
-              <div className="flex justify-between font-bold text-base border-t pt-1"><span>TOTAL TTC</span><span>{new Intl.NumberFormat("fr-FR").format(total)} {currency}</span></div>
+              {discountRate > 0 && (
+                <div className="flex justify-between text-destructive"><span>Remise globale ({discountRate}%)</span><span>— {new Intl.NumberFormat("fr-FR").format(discountAmount)} {currency}</span></div>
+              )}
+              <div className="flex justify-between"><span>TVA ({taxRate}%)</span><span>{new Intl.NumberFormat("fr-FR").format(taxAmount)} {currency}</span></div>
+              {earlyPaymentDiscountRate > 0 && (
+                <div className="flex justify-between text-destructive"><span>Escompte ({earlyPaymentDiscountRate}%)</span><span>— {new Intl.NumberFormat("fr-FR").format(earlyPaymentDiscountAmount)} {currency}</span></div>
+              )}
+              <div className="flex justify-between font-bold text-base border-t pt-1"><span>NET À PAYER</span><span>{new Intl.NumberFormat("fr-FR").format(total)} {currency}</span></div>
             </div>
           </div>
         </div>
