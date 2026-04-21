@@ -406,6 +406,7 @@ function AdminContent() {
     { id: "service-clients", icon: Briefcase, label: "Clients services" },
     { id: "service-catalog", icon: BookOpen, label: "Catalogue services" },
     { id: "service-invoices", icon: Receipt, label: "Facturation services" },
+    { id: "payment-methods", icon: CreditCard, label: "Modes de paiement" },
     { id: "tickets", icon: LifeBuoy, label: t("admin.tickets") },
     { id: "contacts", icon: MessageSquare, label: t("admin.contacts") },
     { id: "users", icon: Users, label: t("admin.users") },
