@@ -89,6 +89,8 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
   const { toast } = useToast();
   const [submitting, setSubmitting] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const [profileLoaded, setProfileLoaded] = useState(false);
+  const [lockedFields, setLockedFields] = useState({ first_name: false, last_name: false, phone: false });
   const [form, setForm] = useState({
     first_name: "",
     last_name: "",
@@ -102,6 +104,40 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
   });
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [letterFile, setLetterFile] = useState<File | null>(null);
+
+  // Préremplir depuis le profil utilisateur
+  useEffect(() => {
+    if (!user || !open || profileLoaded) return;
+    supabase
+      .from("profiles")
+      .select("first_name, last_name, full_name, phone")
+      .eq("user_id", user.id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (!data) { setProfileLoaded(true); return; }
+        const d = data as any;
+        let first = (d.first_name || "").trim();
+        let last = (d.last_name || "").trim();
+        if ((!first || !last) && d.full_name) {
+          const parts = String(d.full_name).trim().split(/\s+/);
+          if (!first) first = parts.shift() || "";
+          if (!last) last = parts.join(" ");
+        }
+        const phone = (d.phone || "").trim();
+        setForm((f) => ({
+          ...f,
+          first_name: first || f.first_name,
+          last_name: last || f.last_name,
+          phone: phone || f.phone,
+        }));
+        setLockedFields({
+          first_name: !!first,
+          last_name: !!last,
+          phone: !!phone,
+        });
+        setProfileLoaded(true);
+      });
+  }, [user, open, profileLoaded]);
 
   const update = (k: keyof typeof form, v: string) => {
     setForm((f) => ({ ...f, [k]: v }));
