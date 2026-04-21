@@ -731,8 +731,8 @@ export default function HrTab() {
 
       <Dialog open={deptDialogOpen} onOpenChange={setDeptDialogOpen}>
         <DialogContent className="max-w-lg">
-          <DialogHeader className="bg-gradient-to-r from-primary to-[#007aa3] text-primary-foreground -m-6 mb-2 p-6 rounded-t-lg">
-            <DialogTitle className="text-primary-foreground flex items-center gap-2"><Building2 size={18} /> Gérer les départements</DialogTitle>
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2"><Building2 size={18} /> Gérer les départements</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2 p-3 rounded-lg border bg-muted/30">
