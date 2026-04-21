@@ -919,6 +919,7 @@ function ProjectsTab({ user }: { user: SupaUser }) {
               <Send size={16} className="mr-2" /> {submitting ? "Envoi en cours..." : editingProject ? "Enregistrer les modifications" : "Soumettre le projet"}
             </Button>
           </form>
+          </div>
         </DialogContent>
       </Dialog>
 
