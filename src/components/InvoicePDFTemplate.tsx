@@ -204,8 +204,9 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
               <th style={{ padding: "8px", textAlign: "left", width: "30px", fontWeight: 700 }}>#</th>
               <th style={{ padding: "8px", textAlign: "left", fontWeight: 700 }}>DESCRIPTION</th>
               <th style={{ padding: "8px", textAlign: "center", width: "50px", fontWeight: 700 }}>QTÉ</th>
-              <th style={{ padding: "8px", textAlign: "right", width: "120px", fontWeight: 700 }}>PRIX UNIT.</th>
-              <th style={{ padding: "8px", textAlign: "right", width: "130px", fontWeight: 700 }}>TOTAL</th>
+              <th style={{ padding: "8px", textAlign: "right", width: "100px", fontWeight: 700 }}>PRIX UNIT.</th>
+              <th style={{ padding: "8px", textAlign: "center", width: "55px", fontWeight: 700 }}>REMISE</th>
+              <th style={{ padding: "8px", textAlign: "right", width: "120px", fontWeight: 700 }}>TOTAL</th>
             </tr>
           </thead>
           <tbody>
@@ -227,6 +228,9 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
                 </td>
                 <td style={{ padding: "10px 8px", textAlign: "right", verticalAlign: "top" }}>
                   {formatCurrency(item.unit_price, data.currency)}
+                </td>
+                <td style={{ padding: "10px 8px", textAlign: "center", verticalAlign: "top", color: item.discount_rate ? "#DC2626" : "#9CA3AF" }}>
+                  {item.discount_rate ? `−${item.discount_rate}%` : "—"}
                 </td>
                 <td style={{ padding: "10px 8px", textAlign: "right", fontWeight: 700, verticalAlign: "top" }}>
                   {formatCurrency(item.total, data.currency)}
