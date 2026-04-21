@@ -178,9 +178,9 @@ export default function PaymentMethodsTab() {
       </div>
 
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader className="bg-gradient-to-r from-primary to-[#007aa3] text-primary-foreground -m-6 mb-4 p-6 rounded-t-lg">
-            <DialogTitle className="text-primary-foreground flex items-center gap-2">
+        <DialogContent className="w-[calc(100vw-1rem)] sm:w-auto max-w-2xl max-h-[92vh] overflow-y-auto p-3 sm:p-6">
+          <DialogHeader className="bg-gradient-to-r from-primary to-[#007aa3] text-primary-foreground -m-3 sm:-m-6 mb-4 p-4 sm:p-6 rounded-t-lg">
+            <DialogTitle className="text-primary-foreground flex items-center gap-2 text-base sm:text-lg">
               <CreditCard size={20} /> {editing?.id ? "Modifier" : "Nouveau"} mode de paiement
             </DialogTitle>
           </DialogHeader>
