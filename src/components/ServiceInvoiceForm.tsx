@@ -222,7 +222,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
           </div>
           <div className="col-span-12 md:col-span-2">
             <label className="text-xs font-medium">Devise</label>
-            <Select value={currency} onValueChange={(v) => setCurrency(v as "GNF" | "USD" | "EUR")}>
+            <Select value={currency} onValueChange={(v) => setCurrency(v as Currency)}>
               <SelectTrigger><SelectValue /></SelectTrigger>
               <SelectContent>
                 <SelectItem value="GNF">GNF</SelectItem>
@@ -231,6 +231,25 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
               </SelectContent>
             </Select>
           </div>
+        </div>
+
+        {/* Bandeau taux de change */}
+        <div className="flex items-center justify-between gap-2 text-xs bg-muted/40 border rounded-md px-3 py-2">
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="font-semibold">Taux de change (live) :</span>
+            {rates?.rates ? (
+              <>
+                <span>1 USD ≈ {new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(rates.rates.GNF ?? 0)} GNF</span>
+                <span>1 EUR ≈ {new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(((rates.rates.GNF ?? 0) / (rates.rates.EUR ?? 1)))} GNF</span>
+                <span className="text-muted-foreground">· Conversion auto à chaque changement de devise</span>
+              </>
+            ) : (
+              <span className="text-muted-foreground">{ratesLoading ? "Chargement..." : "Taux indisponibles (mode secours)"}</span>
+            )}
+          </div>
+          <Button size="sm" variant="ghost" onClick={() => void refreshRates(true)} disabled={ratesLoading}>
+            <RefreshCw size={12} className={ratesLoading ? "animate-spin" : ""} />
+          </Button>
         </div>
 
         <div className="border rounded-md p-3 space-y-2">
@@ -266,16 +285,24 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
                 <div className="col-span-12">
                   <Input placeholder="Sous-titre / précisions (italique)" value={it.subtitle ?? ""} onChange={(e) => updateItem(idx, { subtitle: e.target.value })} />
                 </div>
-                <div className="col-span-3 md:col-span-2">
+                <div className="col-span-3 md:col-span-1">
                   <Input type="number" min={0} placeholder="Qté" value={it.quantity} onChange={(e) => updateItem(idx, { quantity: Number(e.target.value) })} />
+                </div>
+                <div className="col-span-4 md:col-span-2">
+                  <Select value={it.unit} onValueChange={(v) => updateItem(idx, { unit: v })}>
+                    <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {UNIT_OPTIONS.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <div className="col-span-5 md:col-span-3">
                   <Input type="number" min={0} placeholder="Prix unitaire" value={it.unit_price} onChange={(e) => updateItem(idx, { unit_price: Number(e.target.value) })} />
                 </div>
-                <div className="col-span-3 md:col-span-5 flex items-center text-sm font-semibold">
+                <div className="col-span-12 md:col-span-5 flex items-center justify-end text-sm font-semibold">
                   Total : {new Intl.NumberFormat("fr-FR").format((it.quantity || 0) * (it.unit_price || 0))} {currency}
                 </div>
-                <div className="col-span-1 flex items-center justify-end">
+                <div className="col-span-12 md:col-span-1 flex items-center justify-end">
                   <Button size="icon" variant="ghost" onClick={() => removeLine(idx)} disabled={items.length === 1}><Trash2 size={14} className="text-destructive" /></Button>
                 </div>
               </div>
