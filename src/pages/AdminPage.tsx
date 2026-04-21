@@ -367,7 +367,7 @@ function AdminContent() {
             <div className="flex items-center gap-3">
               <SidebarTrigger />
               <h2 className="text-sm font-semibold text-card-foreground hidden sm:block">
-                {gestionnaireNavItems.find((n) => n.id === gestionnaireTab)?.label}
+                {[...gestionnaireNavItems, ...gestionnaireServicesGroup].find((n) => n.id === gestionnaireTab)?.label}
               </h2>
             </div>
             <div className="flex items-center gap-2">
@@ -388,6 +388,10 @@ function AdminContent() {
             {gestionnaireTab === "contacts" && <AdminContacts />}
             {gestionnaireTab === "sharepoint" && <SharePointTab readOnly />}
             {gestionnaireTab === "hr" && <HrTab />}
+            {gestionnaireTab === "service-clients" && <ServiceClientsTab />}
+            {gestionnaireTab === "service-catalog" && <ServiceCatalogTab />}
+            {gestionnaireTab === "service-invoices" && <ServiceInvoicesTab />}
+            {gestionnaireTab === "payment-methods" && <PaymentMethodsTab />}
           </main>
         </div>
       </div>
