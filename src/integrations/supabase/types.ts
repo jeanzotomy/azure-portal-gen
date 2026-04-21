@@ -455,6 +455,7 @@ export type Database = {
           catalog_id: string | null
           created_at: string
           description: string
+          discount_rate: number
           id: string
           invoice_id: string
           position: number
@@ -468,6 +469,7 @@ export type Database = {
           catalog_id?: string | null
           created_at?: string
           description: string
+          discount_rate?: number
           id?: string
           invoice_id: string
           position?: number
@@ -481,6 +483,7 @@ export type Database = {
           catalog_id?: string | null
           created_at?: string
           description?: string
+          discount_rate?: number
           id?: string
           invoice_id?: string
           position?: number
@@ -517,6 +520,8 @@ export type Database = {
           discount_rate: number
           docx_generated_at: string | null
           due_date: string | null
+          early_payment_discount_amount: number
+          early_payment_discount_rate: number
           id: string
           invoice_date: string
           invoice_number: string | null
@@ -543,6 +548,8 @@ export type Database = {
           discount_rate?: number
           docx_generated_at?: string | null
           due_date?: string | null
+          early_payment_discount_amount?: number
+          early_payment_discount_rate?: number
           id?: string
           invoice_date?: string
           invoice_number?: string | null
@@ -569,6 +576,8 @@ export type Database = {
           discount_rate?: number
           docx_generated_at?: string | null
           due_date?: string | null
+          early_payment_discount_amount?: number
+          early_payment_discount_rate?: number
           id?: string
           invoice_date?: string
           invoice_number?: string | null
