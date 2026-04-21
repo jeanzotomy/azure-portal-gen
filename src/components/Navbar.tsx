@@ -46,7 +46,7 @@ export function Navbar() {
   const firstName = fullName.split(" ")[0];
 
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-background/85 backdrop-blur-md border-b border-border/40 shadow-sm">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-[hsl(215_35%_12%)]/95 backdrop-blur-md border-b border-white/10 shadow-sm">
       <div className="container flex items-center justify-between h-16">
         <Link to="/" className="flex items-center gap-2">
           <img src={logo} alt="CloudMature" className="h-12 w-auto max-w-[190px]" />
