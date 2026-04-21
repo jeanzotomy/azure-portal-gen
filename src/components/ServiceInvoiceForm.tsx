@@ -37,8 +37,9 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
   const [dueDate, setDueDate] = useState("");
   const [currency, setCurrency] = useState<Currency>("GNF");
   const [payment, setPayment] = useState({ ...DEFAULT_PAYMENT });
-  const [items, setItems] = useState<LineItem[]>([{ description: "", quantity: 1, unit: "unité", unit_price: 0 }]);
+  const [items, setItems] = useState<LineItem[]>([{ description: "", quantity: 1, unit: "unité", unit_price: 0, discount_rate: 0 }]);
   const [discountRate, setDiscountRate] = useState(0);
+  const [earlyPaymentDiscountRate, setEarlyPaymentDiscountRate] = useState(0);
   const [taxRate, setTaxRate] = useState(18);
   const [notes, setNotes] = useState("");
   const [saving, setSaving] = useState(false);
