@@ -72,26 +72,29 @@ export function ProfileSignatureDialog({ open, onOpenChange }: Props) {
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-xl">
-        <DialogHeader className="bg-gradient-to-r from-primary to-[#007aa3] text-primary-foreground -m-6 mb-4 p-6 rounded-t-lg">
-          <DialogTitle className="text-primary-foreground flex items-center gap-2">
-            <PenLine size={20} /> Ma signature
+      <DialogContent className="w-[calc(100vw-1rem)] sm:w-auto max-w-xl p-0 gap-0 [&>button]:text-white [&>button]:opacity-90 [&>button]:hover:opacity-100">
+        <DialogHeader className="bg-gradient-to-r from-primary to-[#007aa3] text-primary-foreground px-4 sm:px-6 py-4 rounded-t-lg pr-12">
+          <DialogTitle className="text-primary-foreground flex items-center gap-2 text-base sm:text-lg">
+            <PenLine size={20} className="shrink-0" /> Ma signature
           </DialogTitle>
-          <DialogDescription className="text-primary-foreground/80">
+          <DialogDescription className="text-primary-foreground/80 text-xs sm:text-sm">
             Dessinez votre signature ci-dessous. Elle apparaîtra automatiquement sur les factures que vous émettez.
           </DialogDescription>
         </DialogHeader>
 
-        <SignaturePad initialImage={currentUrl} onSave={handleSave} saving={saving} />
+        <div className="p-4 sm:p-6 space-y-3">
 
-        {currentUrl && (
-          <div className="flex items-center justify-between border-t pt-3">
-            <span className="text-xs text-muted-foreground">Signature actuelle enregistrée</span>
-            <Button type="button" variant="ghost" size="sm" onClick={handleDelete} disabled={saving} className="text-destructive">
-              <Trash2 size={14} className="mr-1" /> Supprimer
-            </Button>
-          </div>
-        )}
+          <SignaturePad initialImage={currentUrl} onSave={handleSave} saving={saving} />
+
+          {currentUrl && (
+            <div className="flex items-center justify-between border-t pt-3">
+              <span className="text-xs text-muted-foreground">Signature actuelle enregistrée</span>
+              <Button type="button" variant="ghost" size="sm" onClick={handleDelete} disabled={saving} className="text-destructive">
+                <Trash2 size={14} className="mr-1" /> Supprimer
+              </Button>
+            </div>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );

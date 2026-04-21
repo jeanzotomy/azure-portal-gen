@@ -210,10 +210,10 @@ export default function ServiceClientsTab() {
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-3xl max-h-[92vh] overflow-y-auto p-0 gap-0">
-          <DialogHeader className="bg-gradient-to-r from-primary to-[#007aa3] text-white px-6 py-4 rounded-t-lg">
-            <DialogTitle className="text-white flex items-center gap-2 text-lg">
-              <Building2 size={20} />
+        <DialogContent className="w-[calc(100vw-1rem)] sm:w-auto max-w-3xl max-h-[92vh] overflow-y-auto p-0 gap-0 [&>button]:text-white [&>button]:opacity-90 [&>button]:hover:opacity-100">
+          <DialogHeader className="bg-gradient-to-r from-primary to-[#007aa3] text-white px-4 sm:px-6 py-4 rounded-t-lg pr-12">
+            <DialogTitle className="text-white flex items-center gap-2 text-base sm:text-lg">
+              <Building2 size={20} className="shrink-0" />
               {editing ? "Modifier le client" : "Nouveau client facturable"}
             </DialogTitle>
             <p className="text-xs text-white/80 mt-1">
@@ -221,7 +221,7 @@ export default function ServiceClientsTab() {
             </p>
           </DialogHeader>
 
-          <div className="p-6 space-y-6">
+          <div className="p-4 sm:p-6 space-y-4 sm:space-y-6">
             <section className="space-y-3">
               <div className="flex items-center gap-2 text-sm font-semibold text-primary border-b pb-1">
                 <User size={16} /> Identité
