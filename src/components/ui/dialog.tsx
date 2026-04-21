@@ -42,17 +42,25 @@ const DialogContent = React.forwardRef<
       {...props}
     >
       {children}
-      <DialogPrimitive.Close className="absolute right-3 top-3 rounded-full bg-destructive p-1.5 text-destructive-foreground ring-offset-background transition-all hover:bg-destructive hover:text-destructive-foreground focus:outline-none focus:ring-2 focus:ring-destructive focus:ring-offset-2 disabled:pointer-events-none">
-        <X className="h-4 w-4" />
-        <span className="sr-only">Close</span>
-      </DialogPrimitive.Close>
     </DialogPrimitive.Content>
   </DialogPortal>
 ));
 DialogContent.displayName = DialogPrimitive.Content.displayName;
 
-const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div className={cn("flex flex-col space-y-1.5 text-center sm:text-left -mx-6 -mt-6 px-6 py-4 mb-2 rounded-t-lg bg-gradient-to-r from-[#0099cc] to-[#007aa3] text-white border-b border-[#007aa3]/30", className)} {...props} />
+const DialogHeader = ({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
+  <div
+    className={cn(
+      "relative flex flex-col space-y-1.5 text-center sm:text-left -mx-6 -mt-6 px-6 py-4 pr-14 mb-2 rounded-t-lg bg-gradient-to-r from-[#0099cc] to-[#007aa3] text-white border-b border-[#007aa3]/30",
+      className,
+    )}
+    {...props}
+  >
+    {children}
+    <DialogPrimitive.Close className="absolute right-3 top-1/2 -translate-y-1/2 rounded-full bg-white/15 hover:bg-white/25 p-1.5 text-white ring-offset-background transition-all focus:outline-none focus:ring-2 focus:ring-white/50 focus:ring-offset-0 disabled:pointer-events-none backdrop-blur-sm">
+      <X className="h-4 w-4" />
+      <span className="sr-only">Close</span>
+    </DialogPrimitive.Close>
+  </div>
 );
 DialogHeader.displayName = "DialogHeader";
 
