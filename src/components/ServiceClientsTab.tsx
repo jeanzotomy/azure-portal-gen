@@ -369,7 +369,7 @@ export default function ServiceClientsTab() {
             </section>
           </div>
 
-          <DialogFooter className="border-t bg-muted/30 px-6 py-3 rounded-b-lg">
+          <DialogFooter className="border-t bg-muted/30 -mx-6 -mb-6 px-6 py-4">
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Annuler</Button>
             <Button onClick={() => void save()} disabled={saving} className="bg-primary hover:bg-primary/90">
               {saving ? "Enregistrement..." : editing ? "Mettre à jour" : "Enregistrer le client"}
