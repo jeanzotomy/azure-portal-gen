@@ -53,7 +53,7 @@ function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser
   const { t } = useTranslation();
 
   const servicesGroup = [
-    { id: "service-clients" as const, icon: Briefcase, label: "Clients services" },
+    { id: "service-clients" as const, icon: Briefcase, label: "Clients facturables" },
     { id: "service-catalog" as const, icon: BookOpen, label: "Catalogue services" },
     { id: "service-invoices" as const, icon: Receipt, label: "Facturation services" },
     { id: "payment-methods" as const, icon: CreditCard, label: "Modes de paiement" },
@@ -440,7 +440,7 @@ function AdminContent() {
   }
 
   const adminServicesGroup: { id: AdminTab; icon: typeof LayoutDashboard; label: string }[] = [
-    { id: "service-clients", icon: Briefcase, label: "Clients services" },
+    { id: "service-clients", icon: Briefcase, label: "Clients facturables" },
     { id: "service-catalog", icon: BookOpen, label: "Catalogue services" },
     { id: "service-invoices", icon: Receipt, label: "Facturation services" },
     { id: "payment-methods", icon: CreditCard, label: "Modes de paiement" },
