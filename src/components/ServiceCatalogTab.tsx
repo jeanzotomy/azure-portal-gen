@@ -17,15 +17,19 @@ interface CatalogService {
   description: string | null;
   default_unit_price: number;
   default_currency: "GNF" | "USD" | "EUR";
+  default_unit: string;
   active: boolean;
   created_at: string;
 }
+
+const UNIT_OPTIONS = ["unité", "heure", "jour", "mois", "année", "forfait"] as const;
 
 const empty: Partial<CatalogService> = {
   name: "",
   description: "",
   default_unit_price: 0,
   default_currency: "GNF",
+  default_unit: "unité",
   active: true,
 };
 
@@ -79,6 +83,7 @@ export default function ServiceCatalogTab() {
           description: form.description || null,
           default_unit_price: form.default_unit_price ?? 0,
           default_currency: form.default_currency ?? "GNF",
+          default_unit: form.default_unit ?? "unité",
           active: form.active ?? true,
         })
         .eq("id", editing.id);
@@ -94,6 +99,7 @@ export default function ServiceCatalogTab() {
         description: form.description || null,
         default_unit_price: form.default_unit_price ?? 0,
         default_currency: form.default_currency ?? "GNF",
+        default_unit: form.default_unit ?? "unité",
         active: form.active ?? true,
         created_by: user.id,
       });
@@ -161,8 +167,9 @@ export default function ServiceCatalogTab() {
                     <Button size="icon" variant="ghost" onClick={() => void remove(s.id)}><Trash2 size={14} className="text-destructive" /></Button>
                   </div>
                 </div>
-                <div className="text-xs flex gap-2 items-center">
+                <div className="text-xs flex gap-2 items-center flex-wrap">
                   <span className="font-medium">{new Intl.NumberFormat("fr-FR").format(s.default_unit_price)} {s.default_currency}</span>
+                  <span className="text-muted-foreground">/ {s.default_unit}</span>
                   {!s.active && <span className="text-muted-foreground">· Inactif</span>}
                 </div>
               </CardContent>
@@ -185,7 +192,7 @@ export default function ServiceCatalogTab() {
               <label className="text-xs font-medium">Description (sous-titre italique)</label>
               <Textarea rows={2} value={form.description ?? ""} onChange={(e) => setForm({ ...form, description: e.target.value })} />
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-3 gap-3">
               <div>
                 <label className="text-xs font-medium">Prix unitaire par défaut</label>
                 <Input type="number" min={0} value={form.default_unit_price ?? 0} onChange={(e) => setForm({ ...form, default_unit_price: Number(e.target.value) })} />
@@ -198,6 +205,15 @@ export default function ServiceCatalogTab() {
                     <SelectItem value="GNF">GNF</SelectItem>
                     <SelectItem value="USD">USD</SelectItem>
                     <SelectItem value="EUR">EUR</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-xs font-medium">Unité par défaut</label>
+                <Select value={form.default_unit ?? "unité"} onValueChange={(v) => setForm({ ...form, default_unit: v })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    {UNIT_OPTIONS.map((u) => <SelectItem key={u} value={u}>{u}</SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
