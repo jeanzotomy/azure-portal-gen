@@ -50,7 +50,7 @@ DialogContent.displayName = DialogPrimitive.Content.displayName;
 const DialogHeader = ({ className, children, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     className={cn(
-      "relative flex flex-col gap-1 text-left -mx-6 -mt-6 px-6 py-5 pr-16 mb-4 rounded-t-lg bg-gradient-to-r from-[#0099cc] to-[#007aa3] text-white border-b border-[#007aa3]/30 shadow-sm",
+      "relative flex flex-col gap-1.5 text-left -mx-6 -mt-6 px-6 py-5 pr-16 mb-4 bg-gradient-to-r from-[#0099cc] to-[#007aa3] text-white border-b border-[#007aa3]/30 shadow-sm",
       className,
     )}
     {...props}
