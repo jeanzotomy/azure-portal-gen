@@ -36,6 +36,7 @@ export default function ServiceInvoicesTab() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [formOpen, setFormOpen] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
 
   const load = async () => {
     setLoading(true);
