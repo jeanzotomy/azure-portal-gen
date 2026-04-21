@@ -42,6 +42,7 @@ import { NotificationBell } from "@/components/NotificationBell";
 import PaymentMethodsTab from "@/components/PaymentMethodsTab";
 import HrTab from "@/components/HrTab";
 import { ProfileSignatureDialog } from "@/components/ProfileSignatureDialog";
+import { FormDialogHeader, formDialogContentClass } from "@/components/FormDialogHeader";
 
 type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts" | "sharepoint" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods" | "hr";
 type AgentTab = "dashboard" | "tickets" | "contacts";
