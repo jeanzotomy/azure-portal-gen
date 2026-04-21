@@ -49,6 +49,7 @@ export interface InvoicePDFData {
     contact_person?: string | null;
   };
   payment_details: InvoicePaymentDetails;
+  payment_methods?: InvoicePaymentMethodEntry[];
   items: InvoiceItemData[];
   subtotal: number;
   discount_rate: number;
