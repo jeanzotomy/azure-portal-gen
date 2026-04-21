@@ -498,7 +498,73 @@ export default function HrTab() {
           {!loading && applications.length === 0 && (
             <Card><CardContent className="p-8 text-center text-muted-foreground">Aucune candidature reçue.</CardContent></Card>
           )}
-          {applications.map((app) => {
+          {!loading && applications.length > 0 && (() => {
+            const filteredApps = applications.filter((a) => {
+              const job = jobs.find((j) => j.id === a.job_id);
+              const q = appSearch.trim().toLowerCase();
+              if (q) {
+                const haystack = [a.full_name, a.email, a.phone, job?.title, job?.location].filter(Boolean).join(" ").toLowerCase();
+                if (!haystack.includes(q)) return false;
+              }
+              if (appStatusFilter !== "all" && a.status !== appStatusFilter) return false;
+              if (appJobFilter !== "all" && a.job_id !== appJobFilter) return false;
+              return true;
+            });
+            const hasAppFilters = !!appSearch || appStatusFilter !== "all" || appJobFilter !== "all";
+            const resetAppFilters = () => { setAppSearch(""); setAppStatusFilter("all"); setAppJobFilter("all"); };
+            const jobsWithApps = jobs.filter((j) => applications.some((a) => a.job_id === j.id));
+            return (
+              <div className="p-3 rounded-xl border bg-card/50 backdrop-blur-sm space-y-2.5">
+                <div className="relative">
+                  <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <Input placeholder="Rechercher un candidat (nom, email, offre)..." value={appSearch} onChange={(e) => setAppSearch(e.target.value)} className="pl-9 pr-9 h-9" />
+                  {appSearch && (
+                    <button type="button" onClick={() => setAppSearch("")} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"><X size={14} /></button>
+                  )}
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <Select value={appStatusFilter} onValueChange={setAppStatusFilter}>
+                    <SelectTrigger className="h-9"><SelectValue placeholder="Statut" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tous les statuts</SelectItem>
+                      {(Object.keys(APP_STATUS_LABELS) as AppStatus[]).map((s) => (
+                        <SelectItem key={s} value={s}>{APP_STATUS_LABELS[s]}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <Select value={appJobFilter} onValueChange={setAppJobFilter}>
+                    <SelectTrigger className="h-9"><SelectValue placeholder="Offre" /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Toutes les offres</SelectItem>
+                      {jobsWithApps.map((j) => <SelectItem key={j.id} value={j.id}>{j.title}</SelectItem>)}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="flex items-center justify-between text-xs text-muted-foreground">
+                  <span>{filteredApps.length} sur {applications.length}</span>
+                  {hasAppFilters && (
+                    <button type="button" onClick={resetAppFilters} className="text-primary hover:underline font-medium">Réinitialiser</button>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
+          {(() => {
+            const filteredApps = applications.filter((a) => {
+              const job = jobs.find((j) => j.id === a.job_id);
+              const q = appSearch.trim().toLowerCase();
+              if (q) {
+                const haystack = [a.full_name, a.email, a.phone, job?.title, job?.location].filter(Boolean).join(" ").toLowerCase();
+                if (!haystack.includes(q)) return false;
+              }
+              if (appStatusFilter !== "all" && a.status !== appStatusFilter) return false;
+              if (appJobFilter !== "all" && a.job_id !== appJobFilter) return false;
+              return true;
+            });
+            if (!loading && applications.length > 0 && filteredApps.length === 0) {
+              return <Card><CardContent className="p-8 text-center text-muted-foreground text-sm">Aucune candidature ne correspond aux filtres.</CardContent></Card>;
+            }
+            return filteredApps.map((app) => {
             const job = jobs.find((j) => j.id === app.job_id);
             return (
               <Card key={app.id}>
