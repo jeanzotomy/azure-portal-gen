@@ -57,11 +57,13 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
     })();
   }, [open]);
 
-  const subtotal = items.reduce((s, i) => s + (i.quantity || 0) * (i.unit_price || 0), 0);
+  const subtotal = items.reduce((s, i) => s + lineTotal(i), 0);
   const discountAmount = subtotal * (discountRate / 100);
   const taxBase = subtotal - discountAmount;
   const taxAmount = taxBase * (taxRate / 100);
-  const total = taxBase + taxAmount;
+  const totalBeforeEarly = taxBase + taxAmount;
+  const earlyPaymentDiscountAmount = totalBeforeEarly * (earlyPaymentDiscountRate / 100);
+  const total = totalBeforeEarly - earlyPaymentDiscountAmount;
 
   const selectedClient = clients.find((c) => c.id === clientId);
 
