@@ -304,6 +304,9 @@ export type Database = {
           description: string
           id: string
           location: string
+          salary_range: string | null
+          sector: string | null
+          start_date: string | null
           status: Database["public"]["Enums"]["job_status"]
           title: string
           updated_at: string
@@ -317,6 +320,9 @@ export type Database = {
           description: string
           id?: string
           location: string
+          salary_range?: string | null
+          sector?: string | null
+          start_date?: string | null
           status?: Database["public"]["Enums"]["job_status"]
           title: string
           updated_at?: string
@@ -330,6 +336,9 @@ export type Database = {
           description?: string
           id?: string
           location?: string
+          salary_range?: string | null
+          sector?: string | null
+          start_date?: string | null
           status?: Database["public"]["Enums"]["job_status"]
           title?: string
           updated_at?: string
