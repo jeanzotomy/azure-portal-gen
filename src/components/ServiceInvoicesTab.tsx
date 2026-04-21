@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Plus, Search, ExternalLink, RefreshCw, Receipt, Trash2, FileText } from "lucide-react";
+import { Plus, Search, ExternalLink, RefreshCw, Receipt, Trash2, FileText, Pencil } from "lucide-react";
 import ServiceInvoiceForm from "@/components/ServiceInvoiceForm";
 
 interface InvoiceRow {
