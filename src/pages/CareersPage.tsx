@@ -8,10 +8,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { JobApplicationDialog } from "@/components/JobApplicationDialog";
-import { Briefcase, MapPin, Calendar, Clock, ChevronDown, ChevronUp, Share2, Linkedin, Facebook, Mail, Link2, MessageCircle } from "lucide-react";
+import { Briefcase, MapPin, Calendar, Clock, ChevronDown, ChevronUp, Share2, Linkedin, Facebook, Mail, Link2, MessageCircle, Search, X } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface JobPosting {
   id: string;
@@ -37,7 +39,42 @@ export default function CareersPage() {
   const [selected, setSelected] = useState<JobPosting | null>(null);
   const [applyOpen, setApplyOpen] = useState(false);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const [search, setSearch] = useState("");
+  const [contractFilter, setContractFilter] = useState<string>("all");
+  const [departmentFilter, setDepartmentFilter] = useState<string>("all");
+  const [locationFilter, setLocationFilter] = useState<string>("all");
+  const [sectorFilter, setSectorFilter] = useState<string>("all");
   const { toast } = useToast();
+
+  const uniqueValues = (key: keyof JobPosting) =>
+    Array.from(new Set(jobs.map((j) => j[key]).filter((v): v is string => !!v && typeof v === "string"))).sort();
+  const departments = uniqueValues("department");
+  const locations = uniqueValues("location");
+  const sectors = uniqueValues("sector");
+  const contractTypes = uniqueValues("contract_type");
+
+  const filteredJobs = jobs.filter((job) => {
+    const q = search.trim().toLowerCase();
+    if (q) {
+      const haystack = [job.title, job.description, job.department, job.location, job.sector]
+        .filter(Boolean).join(" ").toLowerCase();
+      if (!haystack.includes(q)) return false;
+    }
+    if (contractFilter !== "all" && job.contract_type !== contractFilter) return false;
+    if (departmentFilter !== "all" && job.department !== departmentFilter) return false;
+    if (locationFilter !== "all" && job.location !== locationFilter) return false;
+    if (sectorFilter !== "all" && job.sector !== sectorFilter) return false;
+    return true;
+  });
+
+  const hasActiveFilters = !!search || contractFilter !== "all" || departmentFilter !== "all" || locationFilter !== "all" || sectorFilter !== "all";
+  const resetFilters = () => {
+    setSearch("");
+    setContractFilter("all");
+    setDepartmentFilter("all");
+    setLocationFilter("all");
+    setSectorFilter("all");
+  };
 
   const toggleExpand = (id: string) => setExpanded((p) => ({ ...p, [id]: !p[id] }));
 
