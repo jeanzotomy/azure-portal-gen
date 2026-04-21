@@ -103,7 +103,7 @@ const noBorder = {
 /** Génère un Blob .docx. */
 export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blob> {
   const tableWidth = 9360;
-  const colWidths = [600, 4660, 700, 1700, 1700];
+  const colWidths = [500, 4060, 700, 1500, 900, 1700];
 
   // En-tête (logo placé via texte/branding simple — Word ne charge pas l'image facilement sans assets binaires)
   const headerTable = new Table({
