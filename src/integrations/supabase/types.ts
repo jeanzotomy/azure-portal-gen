@@ -650,6 +650,7 @@ export type Database = {
           sharepoint_folder_id: string | null
           sharepoint_folder_url: string | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
           address_line?: string | null
@@ -668,6 +669,7 @@ export type Database = {
           sharepoint_folder_id?: string | null
           sharepoint_folder_url?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
           address_line?: string | null
@@ -686,6 +688,7 @@ export type Database = {
           sharepoint_folder_id?: string | null
           sharepoint_folder_url?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Relationships: []
       }

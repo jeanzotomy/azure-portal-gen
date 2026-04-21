@@ -1981,7 +1981,18 @@ function AdminUsers() {
   const [editingUser, setEditingUser] = useState<any | null>(null);
   const [editForm, setEditForm] = useState({ full_name: "", company: "", phone: "", country: "", city: "", address_line: "", timezone: "" });
   const [editSaving, setEditSaving] = useState(false);
+  const [billableLinks, setBillableLinks] = useState<Record<string, { id: string; client_name: string }>>({});
   const { toast } = useToast();
+
+  const loadBillableLinks = async () => {
+    const { data } = await supabase
+      .from("service_clients")
+      .select("id, client_name, user_id")
+      .not("user_id", "is", null);
+    const map: Record<string, { id: string; client_name: string }> = {};
+    (data || []).forEach((c: any) => { if (c.user_id) map[c.user_id] = { id: c.id, client_name: c.client_name }; });
+    setBillableLinks(map);
+  };
 
   const load = async () => {
     const { data: profs } = await supabase.from("profiles").select("*").order("created_at", { ascending: false });
@@ -2013,7 +2024,7 @@ function AdminUsers() {
     setMfaStatus(mfaMap);
   };
 
-  useEffect(() => { load(); }, []);
+  useEffect(() => { load(); void loadBillableLinks(); }, []);
 
   const handleInviteSingle = async () => {
     if (!inviteEmail) return;
@@ -2170,17 +2181,19 @@ function AdminUsers() {
       return;
     }
     const email = mfaStatus[p.user_id]?.email || null;
-    // Check duplicates by email or client_name
-    const { data: existing } = await supabase
+
+    // Priority check: existing link via user_id
+    const { data: linked } = await supabase
       .from("service_clients")
       .select("id, client_name")
-      .or(email ? `email.eq.${email},client_name.eq.${(p.company || p.full_name).replace(/,/g, " ")}` : `client_name.eq.${(p.company || p.full_name).replace(/,/g, " ")}`)
+      .eq("user_id", p.user_id)
       .limit(1);
-    if (existing && existing.length > 0) {
-      toast({ title: "Déjà existant", description: `Un client facturable existe déjà : ${existing[0].client_name}.`, variant: "destructive" });
+    if (linked && linked.length > 0) {
+      toast({ title: "Déjà client facturable", description: `Cet utilisateur est déjà lié au client : ${linked[0].client_name}.` });
       return;
     }
-    if (!window.confirm(`Créer un client facturable à partir du profil de "${p.full_name || p.company}" ?`)) return;
+
+    if (!window.confirm(`Créer un client facturable à partir du profil de "${p.full_name || p.company}" ?\n\nLe client sera automatiquement lié à ce compte utilisateur.`)) return;
     const { data: { user: currentUser } } = await supabase.auth.getUser();
     if (!currentUser) return;
     const { error } = await supabase.from("service_clients").insert({
@@ -2191,12 +2204,14 @@ function AdminUsers() {
       country: p.country || "Guinée",
       phone: p.phone || null,
       email,
+      user_id: p.user_id,
       created_by: currentUser.id,
     });
     if (error) {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
     } else {
-      toast({ title: "Client facturable créé", description: `${p.full_name || p.company} est maintenant un client facturable.` });
+      toast({ title: "Client facturable créé", description: `${p.full_name || p.company} est maintenant un client facturable lié à son compte.` });
+      void loadBillableLinks();
     }
   };
 
@@ -2328,13 +2343,23 @@ function AdminUsers() {
                     >
                       <Pencil size={16} />
                     </button>
-                    <button
-                      onClick={() => promoteToBillableClient(p)}
-                      title="Convertir en client facturable"
-                      className="p-1.5 rounded-lg bg-muted text-muted-foreground hover:bg-teal-500/10 hover:text-teal-600 transition-colors"
-                    >
-                      <Receipt size={16} />
-                    </button>
+                    {billableLinks[p.user_id] ? (
+                      <button
+                        disabled
+                        title={`Déjà client facturable : ${billableLinks[p.user_id].client_name}`}
+                        className="p-1.5 rounded-lg bg-teal-500/15 text-teal-600 cursor-default"
+                      >
+                        <Receipt size={16} />
+                      </button>
+                    ) : (
+                      <button
+                        onClick={() => promoteToBillableClient(p)}
+                        title="Définir comme client facturable"
+                        className="p-1.5 rounded-lg bg-muted text-muted-foreground hover:bg-teal-500/10 hover:text-teal-600 transition-colors"
+                      >
+                        <Receipt size={16} />
+                      </button>
+                    )}
                     <button
                       onClick={() => toggleBlock(p.user_id, !!p.blocked)}
                       title={p.blocked ? "Débloquer" : "Bloquer"}
