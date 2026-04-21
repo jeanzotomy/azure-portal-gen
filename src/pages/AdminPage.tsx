@@ -45,13 +45,16 @@ type AgentTab = "dashboard" | "tickets" | "contacts";
 type GestionnaireTab = "dashboard" | "projects" | "sharepoint" | "tickets" | "contacts";
 
 function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser; collapsed: boolean; handleLogout: () => void }) {
-  const [tab, setTab] = useState<"projects" | "sharepoint">("projects");
+  const [tab, setTab] = useState<"projects" | "sharepoint" | "service-clients" | "service-catalog" | "service-invoices">("projects");
   const navigate = useNavigate();
   const { t } = useTranslation();
 
   const navItems = [
     { id: "projects" as const, icon: FolderOpen, label: t("admin.projects") },
     { id: "sharepoint" as const, icon: HardDrive, label: "SharePoint" },
+    { id: "service-clients" as const, icon: Briefcase, label: "Clients services" },
+    { id: "service-catalog" as const, icon: BookOpen, label: "Catalogue services" },
+    { id: "service-invoices" as const, icon: Receipt, label: "Facturation services" },
   ];
 
   return (
