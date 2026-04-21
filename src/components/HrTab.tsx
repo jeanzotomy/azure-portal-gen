@@ -26,6 +26,9 @@ interface JobPosting {
   description: string;
   closing_date: string | null;
   status: JobStatus;
+  sector: string | null;
+  start_date: string | null;
+  salary_range: string | null;
   created_at: string;
 }
 
