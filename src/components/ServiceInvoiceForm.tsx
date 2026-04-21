@@ -85,7 +85,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
     });
   };
 
-  const addLine = () => setItems((p) => [...p, { description: "", quantity: 1, unit: "unité", unit_price: 0 }]);
+  const addLine = () => setItems((p) => [...p, { description: "", quantity: 1, unit: "unité", unit_price: 0, discount_rate: 0 }]);
   const removeLine = (idx: number) => setItems((p) => p.filter((_, i) => i !== idx));
 
   // Conversion automatique des prix unitaires quand la devise change
