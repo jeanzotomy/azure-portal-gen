@@ -475,9 +475,13 @@ function AdminContent() {
               <Shield size={12} /> Admin
             </span>
             <NotificationBell role="admin" onNavigate={(target) => setTab(target as AdminTab)} />
-            <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
+            <button
+              onClick={() => setSignatureOpen(true)}
+              title="Ma signature"
+              className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold cursor-pointer hover:opacity-80 transition-opacity"
+            >
               {(user.user_metadata?.full_name || user.email || "A").charAt(0).toUpperCase()}
-            </div>
+            </button>
           </div>
         </header>
         <PortalInfoBar />
@@ -492,8 +496,10 @@ function AdminContent() {
           {tab === "service-clients" && <ServiceClientsTab />}
           {tab === "service-catalog" && <ServiceCatalogTab />}
           {tab === "service-invoices" && <ServiceInvoicesTab />}
+          {tab === "payment-methods" && <PaymentMethodsTab />}
         </main>
       </div>
+      <ProfileSignatureDialog open={signatureOpen} onOpenChange={setSignatureOpen} />
     </div>
   );
 }
