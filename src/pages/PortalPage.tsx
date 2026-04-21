@@ -40,8 +40,9 @@ import { PieChart as RePieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area
 import type { User as SupaUser } from "@supabase/supabase-js";
 import { PortalInfoBar } from "@/components/PortalInfoBar";
 import { NotificationBell } from "@/components/NotificationBell";
+import ApplicationsTab from "@/components/ApplicationsTab";
 
-type Tab = "dashboard" | "projects" | "tickets" | "profile";
+type Tab = "dashboard" | "projects" | "tickets" | "applications" | "profile";
 
 function PortalContent() {
   const { user, ready } = useAuthSession();
