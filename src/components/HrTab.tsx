@@ -26,6 +26,9 @@ interface JobPosting {
   description: string;
   closing_date: string | null;
   status: JobStatus;
+  sector: string | null;
+  start_date: string | null;
+  salary_range: string | null;
   created_at: string;
 }
 
@@ -94,6 +97,9 @@ export default function HrTab() {
     description: "",
     closing_date: "",
     status: "brouillon" as JobStatus,
+    sector: "",
+    start_date: "",
+    salary_range: "",
   });
 
   const load = async () => {
@@ -140,7 +146,7 @@ export default function HrTab() {
 
   const openNew = () => {
     setEditing(null);
-    setForm({ title: "", department: "", location: "", contract_type: "CDI", description: "", closing_date: "", status: "brouillon" });
+    setForm({ title: "", department: "", location: "", contract_type: "CDI", description: "", closing_date: "", status: "brouillon", sector: "", start_date: "", salary_range: "" });
     setDialogOpen(true);
   };
 
@@ -154,6 +160,9 @@ export default function HrTab() {
       description: job.description,
       closing_date: job.closing_date || "",
       status: job.status,
+      sector: job.sector || "",
+      start_date: job.start_date || "",
+      salary_range: job.salary_range || "",
     });
     setDialogOpen(true);
   };
@@ -172,6 +181,9 @@ export default function HrTab() {
       description: form.description.trim(),
       closing_date: form.closing_date || null,
       status: form.status,
+      sector: form.sector.trim() || null,
+      start_date: form.start_date.trim() || null,
+      salary_range: form.salary_range.trim() || null,
     };
     const res = editing
       ? await supabase.from("job_postings").update(payload).eq("id", editing.id)
@@ -367,6 +379,20 @@ export default function HrTab() {
                 <label className="text-sm font-medium">Date de clôture</label>
                 <Input type="date" value={form.closing_date} onChange={(e) => setForm({ ...form, closing_date: e.target.value })} />
               </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="text-sm font-medium">Secteur</label>
+                <Input value={form.sector} onChange={(e) => setForm({ ...form, sector: e.target.value })} placeholder="Ex: Technologies Cloud & Transformation Numérique" />
+              </div>
+              <div>
+                <label className="text-sm font-medium">Date de prise de poste</label>
+                <Input value={form.start_date} onChange={(e) => setForm({ ...form, start_date: e.target.value })} placeholder="Ex: Dès que possible" />
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-medium">Rémunération</label>
+              <Input value={form.salary_range} onChange={(e) => setForm({ ...form, salary_range: e.target.value })} placeholder="Ex: Selon profil et expérience — package attractif" />
             </div>
             <div>
               <label className="text-sm font-medium">Description *</label>
