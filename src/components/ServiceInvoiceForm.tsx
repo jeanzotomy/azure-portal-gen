@@ -252,20 +252,20 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
         </div>
 
         {/* Bandeau taux de change */}
-        <div className="flex items-center justify-between gap-2 text-xs bg-muted/40 border rounded-md px-3 py-2">
-          <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs bg-muted/40 border rounded-md px-3 py-2">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 min-w-0">
             <span className="font-semibold">Taux de change (live) :</span>
             {rates?.rates ? (
               <>
                 <span>1 USD ≈ {new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(rates.rates.GNF ?? 0)} GNF</span>
                 <span>1 EUR ≈ {new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(((rates.rates.GNF ?? 0) / (rates.rates.EUR ?? 1)))} GNF</span>
-                <span className="text-muted-foreground">· Conversion auto à chaque changement de devise</span>
+                <span className="hidden md:inline text-muted-foreground">· Conversion auto à chaque changement de devise</span>
               </>
             ) : (
               <span className="text-muted-foreground">{ratesLoading ? "Chargement..." : "Taux indisponibles (mode secours)"}</span>
             )}
           </div>
-          <Button size="sm" variant="ghost" onClick={() => void refreshRates(true)} disabled={ratesLoading}>
+          <Button size="sm" variant="ghost" onClick={() => void refreshRates(true)} disabled={ratesLoading} className="self-end sm:self-auto">
             <RefreshCw size={12} className={ratesLoading ? "animate-spin" : ""} />
           </Button>
         </div>
