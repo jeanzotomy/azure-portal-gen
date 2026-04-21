@@ -8,8 +8,10 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { JobApplicationDialog } from "@/components/JobApplicationDialog";
-import { Briefcase, MapPin, Calendar, Clock, ChevronDown, ChevronUp } from "lucide-react";
+import { Briefcase, MapPin, Calendar, Clock, ChevronDown, ChevronUp, Share2, Linkedin, Facebook, Mail, Link2, MessageCircle } from "lucide-react";
 import { format } from "date-fns";
+import { useToast } from "@/hooks/use-toast";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 
 interface JobPosting {
   id: string;
@@ -35,8 +37,37 @@ export default function CareersPage() {
   const [selected, setSelected] = useState<JobPosting | null>(null);
   const [applyOpen, setApplyOpen] = useState(false);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+  const { toast } = useToast();
 
   const toggleExpand = (id: string) => setExpanded((p) => ({ ...p, [id]: !p[id] }));
+
+  const buildShareUrl = (job: JobPosting) =>
+    `${window.location.origin}/careers?job=${job.id}`;
+
+  const buildShareText = (job: JobPosting) =>
+    `Offre d'emploi chez Cloud Mature : ${job.title} (${job.contract_type}) — ${job.location}`;
+
+  const shareTo = (network: "linkedin" | "facebook" | "x" | "whatsapp" | "email", job: JobPosting) => {
+    const url = encodeURIComponent(buildShareUrl(job));
+    const text = encodeURIComponent(buildShareText(job));
+    const map: Record<typeof network, string> = {
+      linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${url}`,
+      facebook: `https://www.facebook.com/sharer/sharer.php?u=${url}`,
+      x: `https://twitter.com/intent/tweet?url=${url}&text=${text}`,
+      whatsapp: `https://wa.me/?text=${text}%20${url}`,
+      email: `mailto:?subject=${text}&body=${text}%0A%0A${url}`,
+    };
+    window.open(map[network], "_blank", "noopener,noreferrer");
+  };
+
+  const copyLink = async (job: JobPosting) => {
+    try {
+      await navigator.clipboard.writeText(buildShareUrl(job));
+      toast({ title: "Lien copié", description: "Le lien de l'offre est dans le presse-papier." });
+    } catch {
+      toast({ title: "Erreur", description: "Impossible de copier le lien.", variant: "destructive" });
+    }
+  };
 
   useEffect(() => {
     document.title = "Carrières — CloudMature";
@@ -132,9 +163,39 @@ export default function CareersPage() {
                         </button>
                       )}
                     </div>
-                    <Button onClick={() => handleApply(job)} className="gradient-primary text-primary-foreground border-0 shrink-0">
-                      Postuler
-                    </Button>
+                    <div className="flex flex-col gap-2 shrink-0">
+                      <Button onClick={() => handleApply(job)} className="gradient-primary text-primary-foreground border-0">
+                        Postuler
+                      </Button>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="outline" size="sm" className="gap-1.5">
+                            <Share2 size={14} /> Partager
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-48">
+                          <DropdownMenuItem onClick={() => shareTo("linkedin", job)}>
+                            <Linkedin size={14} className="mr-2 text-[#0A66C2]" /> LinkedIn
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => shareTo("whatsapp", job)}>
+                            <MessageCircle size={14} className="mr-2 text-[#25D366]" /> WhatsApp
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => shareTo("facebook", job)}>
+                            <Facebook size={14} className="mr-2 text-[#1877F2]" /> Facebook
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => shareTo("x", job)}>
+                            <span className="mr-2 font-bold text-foreground w-3.5 text-center">𝕏</span> X (Twitter)
+                          </DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => shareTo("email", job)}>
+                            <Mail size={14} className="mr-2" /> Email
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem onClick={() => copyLink(job)}>
+                            <Link2 size={14} className="mr-2" /> Copier le lien
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
