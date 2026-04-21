@@ -143,7 +143,7 @@ export default function HrTab() {
 
   const openNew = () => {
     setEditing(null);
-    setForm({ title: "", department: "", location: "", contract_type: "CDI", description: "", closing_date: "", status: "brouillon" });
+    setForm({ title: "", department: "", location: "", contract_type: "CDI", description: "", closing_date: "", status: "brouillon", sector: "", start_date: "", salary_range: "" });
     setDialogOpen(true);
   };
 
@@ -157,6 +157,9 @@ export default function HrTab() {
       description: job.description,
       closing_date: job.closing_date || "",
       status: job.status,
+      sector: job.sector || "",
+      start_date: job.start_date || "",
+      salary_range: job.salary_range || "",
     });
     setDialogOpen(true);
   };
@@ -175,6 +178,9 @@ export default function HrTab() {
       description: form.description.trim(),
       closing_date: form.closing_date || null,
       status: form.status,
+      sector: form.sector.trim() || null,
+      start_date: form.start_date.trim() || null,
+      salary_range: form.salary_range.trim() || null,
     };
     const res = editing
       ? await supabase.from("job_postings").update(payload).eq("id", editing.id)
