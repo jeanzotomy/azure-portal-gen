@@ -2283,7 +2283,12 @@ function AdminUsers() {
                       <Pencil size={16} />
                     </button>
                     <button
-                      onClick={() => toggleBlock(p.user_id, !!p.blocked)}
+                      onClick={() => promoteToBillableClient(p)}
+                      title="Convertir en client facturable"
+                      className="p-1.5 rounded-lg bg-muted text-muted-foreground hover:bg-teal-500/10 hover:text-teal-600 transition-colors"
+                    >
+                      <Receipt size={16} />
+                    </button>
                       title={p.blocked ? "Débloquer" : "Bloquer"}
                       className={`p-1.5 rounded-lg transition-colors ${p.blocked ? "bg-destructive/10 text-destructive hover:bg-destructive/20" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
                     >
