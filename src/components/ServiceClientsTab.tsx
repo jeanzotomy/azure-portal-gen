@@ -1,0 +1,266 @@
+import { useEffect, useState } from "react";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuthSession } from "@/hooks/use-auth-session";
+import { useToast } from "@/hooks/use-toast";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import { Card, CardContent } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Plus, Pencil, Trash2, Search, Building2, RefreshCw } from "lucide-react";
+
+interface ServiceClient {
+  id: string;
+  client_name: string;
+  contact_person: string | null;
+  nif: string | null;
+  rccm: string | null;
+  address_line: string | null;
+  city: string | null;
+  country: string | null;
+  phone: string | null;
+  email: string | null;
+  notes: string | null;
+  created_at: string;
+}
+
+const empty: Partial<ServiceClient> = {
+  client_name: "",
+  contact_person: "",
+  nif: "",
+  rccm: "",
+  address_line: "",
+  city: "",
+  country: "Guinée",
+  phone: "",
+  email: "",
+  notes: "",
+};
+
+export default function ServiceClientsTab() {
+  const { user } = useAuthSession();
+  const { toast } = useToast();
+  const [clients, setClients] = useState<ServiceClient[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [editing, setEditing] = useState<ServiceClient | null>(null);
+  const [form, setForm] = useState<Partial<ServiceClient>>(empty);
+  const [saving, setSaving] = useState(false);
+
+  const load = async () => {
+    setLoading(true);
+    const { data, error } = await supabase
+      .from("service_clients")
+      .select("*")
+      .order("client_name", { ascending: true });
+    if (error) {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    } else {
+      setClients(data ?? []);
+    }
+    setLoading(false);
+  };
+
+  useEffect(() => {
+    void load();
+  }, []);
+
+  const openCreate = () => {
+    setEditing(null);
+    setForm(empty);
+    setDialogOpen(true);
+  };
+
+  const openEdit = (c: ServiceClient) => {
+    setEditing(c);
+    setForm(c);
+    setDialogOpen(true);
+  };
+
+  const save = async () => {
+    if (!user) return;
+    if (!form.client_name?.trim()) {
+      toast({ title: "Nom requis", description: "Le nom du client est obligatoire.", variant: "destructive" });
+      return;
+    }
+    setSaving(true);
+    if (editing) {
+      const { error } = await supabase
+        .from("service_clients")
+        .update({
+          client_name: form.client_name,
+          contact_person: form.contact_person || null,
+          nif: form.nif || null,
+          rccm: form.rccm || null,
+          address_line: form.address_line || null,
+          city: form.city || null,
+          country: form.country || null,
+          phone: form.phone || null,
+          email: form.email || null,
+          notes: form.notes || null,
+        })
+        .eq("id", editing.id);
+      if (error) {
+        toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      } else {
+        toast({ title: "Client modifié" });
+        setDialogOpen(false);
+        void load();
+      }
+    } else {
+      const { error } = await supabase.from("service_clients").insert({
+        client_name: form.client_name!,
+        contact_person: form.contact_person || null,
+        nif: form.nif || null,
+        rccm: form.rccm || null,
+        address_line: form.address_line || null,
+        city: form.city || null,
+        country: form.country || null,
+        phone: form.phone || null,
+        email: form.email || null,
+        notes: form.notes || null,
+        created_by: user.id,
+      });
+      if (error) {
+        toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      } else {
+        toast({ title: "Client ajouté" });
+        setDialogOpen(false);
+        void load();
+      }
+    }
+    setSaving(false);
+  };
+
+  const remove = async (id: string) => {
+    if (!confirm("Supprimer ce client ? Les factures associées seront conservées si elles existent.")) return;
+    const { error } = await supabase.from("service_clients").delete().eq("id", id);
+    if (error) {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    } else {
+      toast({ title: "Client supprimé" });
+      void load();
+    }
+  };
+
+  const filtered = clients.filter((c) =>
+    c.client_name.toLowerCase().includes(search.toLowerCase()) ||
+    (c.email ?? "").toLowerCase().includes(search.toLowerCase()) ||
+    (c.nif ?? "").toLowerCase().includes(search.toLowerCase())
+  );
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between gap-3 flex-wrap">
+        <div>
+          <h1 className="text-2xl font-bold">Clients facturables</h1>
+          <p className="text-sm text-muted-foreground">Gérez les clients pour lesquels vous générez des factures de service.</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="sm" onClick={() => void load()}>
+            <RefreshCw size={14} className="mr-1" /> Actualiser
+          </Button>
+          <Button size="sm" onClick={openCreate}>
+            <Plus size={14} className="mr-1" /> Nouveau client
+          </Button>
+        </div>
+      </div>
+
+      <div className="relative max-w-md">
+        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+        <Input placeholder="Rechercher par nom, email, NIF..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+      </div>
+
+      {loading ? (
+        <p className="text-sm text-muted-foreground">Chargement...</p>
+      ) : filtered.length === 0 ? (
+        <Card>
+          <CardContent className="p-8 text-center text-muted-foreground">
+            <Building2 size={36} className="mx-auto mb-2 opacity-40" />
+            Aucun client trouvé. Cliquez sur "Nouveau client" pour commencer.
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          {filtered.map((c) => (
+            <Card key={c.id}>
+              <CardContent className="p-4 space-y-2">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <div className="font-semibold">{c.client_name}</div>
+                    {c.contact_person && <div className="text-xs text-muted-foreground">{c.contact_person}</div>}
+                  </div>
+                  <div className="flex gap-1">
+                    <Button size="icon" variant="ghost" onClick={() => openEdit(c)}><Pencil size={14} /></Button>
+                    <Button size="icon" variant="ghost" onClick={() => void remove(c.id)}><Trash2 size={14} className="text-destructive" /></Button>
+                  </div>
+                </div>
+                <div className="text-xs text-muted-foreground space-y-0.5">
+                  {c.email && <div>📧 {c.email}</div>}
+                  {c.phone && <div>📞 {c.phone}</div>}
+                  {c.nif && <div>NIF : {c.nif}</div>}
+                  {c.city && <div>📍 {c.city}{c.country ? `, ${c.country}` : ""}</div>}
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{editing ? "Modifier le client" : "Nouveau client facturable"}</DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="col-span-2">
+              <label className="text-xs font-medium">Nom du client / société *</label>
+              <Input value={form.client_name ?? ""} onChange={(e) => setForm({ ...form, client_name: e.target.value })} />
+            </div>
+            <div className="col-span-2">
+              <label className="text-xs font-medium">Personne de contact</label>
+              <Input value={form.contact_person ?? ""} onChange={(e) => setForm({ ...form, contact_person: e.target.value })} />
+            </div>
+            <div>
+              <label className="text-xs font-medium">NIF</label>
+              <Input value={form.nif ?? ""} onChange={(e) => setForm({ ...form, nif: e.target.value })} />
+            </div>
+            <div>
+              <label className="text-xs font-medium">N°RCCM</label>
+              <Input value={form.rccm ?? ""} onChange={(e) => setForm({ ...form, rccm: e.target.value })} />
+            </div>
+            <div className="col-span-2">
+              <label className="text-xs font-medium">Adresse</label>
+              <Input value={form.address_line ?? ""} onChange={(e) => setForm({ ...form, address_line: e.target.value })} />
+            </div>
+            <div>
+              <label className="text-xs font-medium">Ville</label>
+              <Input value={form.city ?? ""} onChange={(e) => setForm({ ...form, city: e.target.value })} />
+            </div>
+            <div>
+              <label className="text-xs font-medium">Pays</label>
+              <Input value={form.country ?? ""} onChange={(e) => setForm({ ...form, country: e.target.value })} />
+            </div>
+            <div>
+              <label className="text-xs font-medium">Téléphone</label>
+              <Input value={form.phone ?? ""} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+            </div>
+            <div>
+              <label className="text-xs font-medium">Email</label>
+              <Input type="email" value={form.email ?? ""} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+            </div>
+            <div className="col-span-2">
+              <label className="text-xs font-medium">Notes</label>
+              <Textarea rows={2} value={form.notes ?? ""} onChange={(e) => setForm({ ...form, notes: e.target.value })} />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>Annuler</Button>
+            <Button onClick={() => void save()} disabled={saving}>{saving ? "Enregistrement..." : "Enregistrer"}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
