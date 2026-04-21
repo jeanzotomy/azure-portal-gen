@@ -316,6 +316,58 @@ export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blo
     ],
   });
 
+  // Bloc signature/émetteur
+  let signatureImage: ArrayBuffer | null = null;
+  if (data.issuer?.signature_url) {
+    try {
+      const res = await fetch(data.issuer.signature_url);
+      if (res.ok) signatureImage = await res.arrayBuffer();
+    } catch { /* ignore */ }
+  }
+
+  const issuerParagraphs: Paragraph[] = [];
+  if (data.issuer && (data.issuer.full_name || data.issuer.signature_url)) {
+    issuerParagraphs.push(
+      new Paragraph({
+        alignment: AlignmentType.RIGHT,
+        spacing: { before: 400 },
+        children: [new TextRun({ text: "Émis par", size: 16, color: "6B7280", font: "Arial" })],
+      })
+    );
+    if (signatureImage) {
+      issuerParagraphs.push(
+        new Paragraph({
+          alignment: AlignmentType.RIGHT,
+          children: [
+            new ImageRun({
+              data: signatureImage,
+              transformation: { width: 160, height: 60 },
+              type: "png",
+            }),
+          ],
+        })
+      );
+    }
+    issuerParagraphs.push(
+      new Paragraph({
+        alignment: AlignmentType.RIGHT,
+        children: [new TextRun({ text: "_______________________________", size: 16, color: "0B1F33", font: "Arial" })],
+      }),
+      new Paragraph({
+        alignment: AlignmentType.RIGHT,
+        children: [new TextRun({ text: data.issuer.full_name || "—", bold: true, size: 22, color: NAVY, font: "Arial" })],
+      })
+    );
+    if (data.issuer.role) {
+      issuerParagraphs.push(
+        new Paragraph({
+          alignment: AlignmentType.RIGHT,
+          children: [new TextRun({ text: data.issuer.role, size: 18, color: CYAN, bold: true, font: "Arial" })],
+        })
+      );
+    }
+  }
+
   const doc = new Document({
     styles: {
       default: { document: { run: { font: "Arial", size: 20 } } },
@@ -336,6 +388,7 @@ export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blo
           itemsTable,
           new Paragraph({ children: [new TextRun("")], spacing: { after: 200 } }),
           totalsTable,
+          ...issuerParagraphs,
           new Paragraph({
             alignment: AlignmentType.CENTER,
             spacing: { before: 400 },
