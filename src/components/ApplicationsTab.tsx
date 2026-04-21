@@ -60,6 +60,9 @@ export default function ApplicationsTab({ user }: { user: SupaUser }) {
   const [apps, setApps] = useState<Application[]>([]);
   const [jobs, setJobs] = useState<Record<string, Job>>({});
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [contractFilter, setContractFilter] = useState<string>("all");
 
   const load = async () => {
     setLoading(true);
