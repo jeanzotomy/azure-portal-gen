@@ -1962,6 +1962,8 @@ function AdminContacts() {
 
 /* ─── Users Management ─── */
 function AdminUsers() {
+  const { isAdmin, isGestionnaire } = useUserRoles();
+  const canPromoteBillable = isAdmin || isGestionnaire;
   const [profilesList, setProfilesList] = useState<any[]>([]);
   const [userRoles, setUserRoles] = useState<Record<string, string[]>>({});
   const [search, setSearch] = useState("");
