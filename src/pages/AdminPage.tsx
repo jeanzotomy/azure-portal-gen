@@ -45,7 +45,7 @@ import { ProfileSignatureDialog } from "@/components/ProfileSignatureDialog";
 
 type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts" | "sharepoint" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods" | "hr";
 type AgentTab = "dashboard" | "tickets" | "contacts";
-type GestionnaireTab = "dashboard" | "projects" | "sharepoint" | "tickets" | "contacts" | "hr";
+type GestionnaireTab = "dashboard" | "projects" | "sharepoint" | "tickets" | "contacts" | "hr" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods";
 
 function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser; collapsed: boolean; handleLogout: () => void }) {
   const [tab, setTab] = useState<"projects" | "sharepoint" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods">("projects");
@@ -194,6 +194,7 @@ function AdminContent() {
   const [assignedProjectsCount, setAssignedProjectsCount] = useState(0);
   const [signatureOpen, setSignatureOpen] = useState(false);
   const [adminServicesOpen, setAdminServicesOpen] = useState(true);
+  const [gestionnaireServicesOpen, setGestionnaireServicesOpen] = useState(true);
   const { t } = useTranslation();
 
   useEffect(() => {
@@ -272,6 +273,14 @@ function AdminContent() {
       { id: "hr", icon: Briefcase, label: "Recrutement" },
     ];
 
+    const gestionnaireServicesGroup: { id: GestionnaireTab; icon: typeof LayoutDashboard; label: string }[] = [
+      { id: "service-clients", icon: Briefcase, label: "Clients facturables" },
+      { id: "service-catalog", icon: BookOpen, label: "Catalogue services" },
+      { id: "service-invoices", icon: Receipt, label: "Facturation services" },
+      { id: "payment-methods", icon: CreditCard, label: "Méthodes de paiement" },
+    ];
+    const isGestionnaireServicesTab = gestionnaireServicesGroup.some((s) => s.id === gestionnaireTab);
+
     return (
       <div className="min-h-screen flex w-full bg-background">
         <Sidebar collapsible="icon" className="border-r border-sidebar-border">
@@ -310,6 +319,33 @@ function AdminContent() {
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   ))}
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      onClick={() => {
+                        setGestionnaireServicesOpen((v) => !v);
+                        if (!isGestionnaireServicesTab) setGestionnaireTab("service-clients");
+                      }}
+                      isActive={isGestionnaireServicesTab}
+                      tooltip="Services aux clients"
+                      className="gap-3"
+                    >
+                      <Briefcase size={18} />
+                      <span className="flex-1 text-left">Services aux clients</span>
+                      {gestionnaireServicesOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                    </SidebarMenuButton>
+                    {gestionnaireServicesOpen && (
+                      <SidebarMenuSub>
+                        {gestionnaireServicesGroup.map((s) => (
+                          <SidebarMenuSubItem key={s.id}>
+                            <SidebarMenuSubButton onClick={() => setGestionnaireTab(s.id)} isActive={gestionnaireTab === s.id} className="gap-2 cursor-pointer">
+                              <s.icon size={14} />
+                              <span>{s.label}</span>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
+                      </SidebarMenuSub>
+                    )}
+                  </SidebarMenuItem>
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
@@ -331,7 +367,7 @@ function AdminContent() {
             <div className="flex items-center gap-3">
               <SidebarTrigger />
               <h2 className="text-sm font-semibold text-card-foreground hidden sm:block">
-                {gestionnaireNavItems.find((n) => n.id === gestionnaireTab)?.label}
+                {[...gestionnaireNavItems, ...gestionnaireServicesGroup].find((n) => n.id === gestionnaireTab)?.label}
               </h2>
             </div>
             <div className="flex items-center gap-2">
@@ -352,6 +388,10 @@ function AdminContent() {
             {gestionnaireTab === "contacts" && <AdminContacts />}
             {gestionnaireTab === "sharepoint" && <SharePointTab readOnly />}
             {gestionnaireTab === "hr" && <HrTab />}
+            {gestionnaireTab === "service-clients" && <ServiceClientsTab />}
+            {gestionnaireTab === "service-catalog" && <ServiceCatalogTab />}
+            {gestionnaireTab === "service-invoices" && <ServiceInvoicesTab />}
+            {gestionnaireTab === "payment-methods" && <PaymentMethodsTab />}
           </main>
         </div>
       </div>
