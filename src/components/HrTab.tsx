@@ -489,7 +489,8 @@ export default function HrTab() {
                 </CardContent>
               </Card>
             );
-          })}
+          });
+          })()}
         </TabsContent>
 
         <TabsContent value="applications" className="space-y-3 mt-4">
