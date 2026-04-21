@@ -302,9 +302,6 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
             <ErrMsg k="cover_letter_text" />
           </div>
 
-          <Badge variant="secondary" className="gap-1.5 font-normal">
-            <Cloud size={12} /> Documents stockés en sécurité sur SharePoint
-          </Badge>
         </div>
 
         <DialogFooter className="px-6 py-4 border-t bg-muted/30">
