@@ -57,42 +57,7 @@ function PortalContent() {
   const collapsed = state === "collapsed";
   const { t, locale } = useTranslation();
 
-  useEffect(() => {
-    if (ready && !user) {
-      navigate("/auth");
-    }
-  }, [ready, user, navigate]);
-
-  useEffect(() => {
-    let active = true;
-
-    const checkBlocked = async () => {
-      if (!user) return;
-
-      const { data } = await supabase
-        .from("profiles")
-        .select("blocked, deleted_at")
-        .eq("user_id", user.id)
-        .maybeSingle();
-
-      if (!active) return;
-
-      if (data?.blocked || (data as { deleted_at?: string | null } | null)?.deleted_at) {
-        await supabase.auth.signOut();
-        navigate(data?.blocked ? "/auth?blocked=1" : "/auth?deleted=1");
-      }
-    };
-
-    void checkBlocked();
-
-    return () => {
-      active = false;
-    };
-  }, [user, navigate]);
-
-  useEffect(() => {
-    if (mfaVerified === false && ready && user) navigate("/mfa");
-  }, [mfaVerified, ready, user, navigate]);
+  // Auth/MFA/blocked checks are handled upstream by <AuthGuard>. We can rely on `user` being non-null.
 
   useEffect(() => {
     if (!user) return;
@@ -117,17 +82,6 @@ function PortalContent() {
     void checkProfile();
   }, [user]);
 
-  if (!ready || mfaVerified === null) return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-4">
-      <div className="w-10 h-10 border-4 border-primary/30 border-t-primary rounded-full animate-spin" />
-      <p className="text-muted-foreground text-sm">{t("portal.loading")}</p>
-      {mfaTimedOut && (
-        <Button variant="outline" size="sm" onClick={() => window.location.reload()}>
-          {t("portal.retry") || "Réessayer"}
-        </Button>
-      )}
-    </div>
-  );
   if (!user) return null;
 
   const handleLogout = async () => {

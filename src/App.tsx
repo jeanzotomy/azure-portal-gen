@@ -15,6 +15,7 @@ import PrivacyPage from "./pages/PrivacyPage.tsx";
 import TermsPage from "./pages/TermsPage.tsx";
 import CareersPage from "./pages/CareersPage.tsx";
 import NotFound from "./pages/NotFound.tsx";
+import { AuthGuard } from "./components/AuthGuard";
 
 const ScrollToTopOnNavigate = () => {
   const { pathname } = useLocation();
@@ -34,11 +35,11 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/auth" element={<AuthPage />} />
-          <Route path="/portal" element={<PortalPage />} />
+          <Route path="/portal" element={<AuthGuard><PortalPage /></AuthGuard>} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route path="/mfa" element={<MfaPage />} />
           <Route path="/install" element={<InstallPage />} />
-          <Route path="/admin" element={<AdminPage />} />
+          <Route path="/admin" element={<AuthGuard requireRoles={["admin","agent","comptable","gestionnaire"]} fallbackRoute="/portal"><AdminPage /></AuthGuard>} />
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/careers" element={<CareersPage />} />
