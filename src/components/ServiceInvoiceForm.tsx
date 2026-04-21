@@ -56,8 +56,31 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved }: { op
       ]);
       setClients(cls ?? []);
       setCatalog(cat ?? []);
+      // Charger le profil + rôle de l'émetteur
+      if (user) {
+        const [{ data: prof }, { data: roles }] = await Promise.all([
+          supabase.from("profiles").select("full_name, signature_url").eq("user_id", user.id).maybeSingle(),
+          supabase.from("user_roles").select("role").eq("user_id", user.id),
+        ]);
+        const roleLabels: Record<string, string> = {
+          admin: "Administrateur",
+          comptable: "Comptable",
+          gestionnaire: "Gestionnaire de projet",
+          agent: "Agent",
+          client: "Client",
+          user: "Utilisateur",
+        };
+        const priority = ["admin", "comptable", "gestionnaire", "agent", "user", "client"];
+        const userRoles = (roles ?? []).map((r) => r.role as string);
+        const primary = priority.find((r) => userRoles.includes(r)) ?? userRoles[0] ?? null;
+        setIssuer({
+          full_name: prof?.full_name ?? null,
+          role: primary ? (roleLabels[primary] ?? primary) : null,
+          signature_url: prof?.signature_url ?? null,
+        });
+      }
     })();
-  }, [open]);
+  }, [open, user]);
 
   const subtotal = items.reduce((s, i) => s + lineTotal(i), 0);
   const discountAmount = subtotal * (discountRate / 100);
