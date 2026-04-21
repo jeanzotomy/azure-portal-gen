@@ -2289,6 +2289,8 @@ function AdminUsers() {
                     >
                       <Receipt size={16} />
                     </button>
+                    <button
+                      onClick={() => toggleBlock(p.user_id, !!p.blocked)}
                       title={p.blocked ? "Débloquer" : "Bloquer"}
                       className={`p-1.5 rounded-lg transition-colors ${p.blocked ? "bg-destructive/10 text-destructive hover:bg-destructive/20" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
                     >
