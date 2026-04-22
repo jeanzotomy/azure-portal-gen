@@ -245,7 +245,7 @@ export type Database = {
           salary_expectation: string | null
           status: Database["public"]["Enums"]["application_status"]
           updated_at: string
-          user_id: string
+          user_id: string | null
           years_experience: number | null
         }
         Insert: {
@@ -263,7 +263,7 @@ export type Database = {
           salary_expectation?: string | null
           status?: Database["public"]["Enums"]["application_status"]
           updated_at?: string
-          user_id: string
+          user_id?: string | null
           years_experience?: number | null
         }
         Update: {
@@ -281,7 +281,7 @@ export type Database = {
           salary_expectation?: string | null
           status?: Database["public"]["Enums"]["application_status"]
           updated_at?: string
-          user_id?: string
+          user_id?: string | null
           years_experience?: number | null
         }
         Relationships: [
