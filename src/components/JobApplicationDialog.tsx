@@ -24,7 +24,7 @@ const sanitize = (s: string) =>
   s.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
     .replace(/[<>:"/\\|?*]/g, "")
     .replace(/\s+/g, "-")
-    .trim();
+    .trim() || "anon";
 
 const schema = z.object({
   first_name: z.string().trim().min(2, "Min. 2 caractères").max(50),
@@ -105,7 +105,7 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [letterFile, setLetterFile] = useState<File | null>(null);
 
-  // Préremplir depuis le profil utilisateur
+  // Préremplir depuis le profil utilisateur (uniquement si connecté)
   useEffect(() => {
     if (!user || !open || profileLoaded) return;
     supabase
@@ -128,6 +128,7 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
           ...f,
           first_name: first || f.first_name,
           last_name: last || f.last_name,
+          email: f.email || user.email || "",
           phone: phone || f.phone,
         }));
         setLockedFields({
@@ -144,42 +145,27 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
     if (errors[k]) setErrors((e) => { const n = { ...e }; delete n[k]; return n; });
   };
 
-  const uploadToSharePoint = async (file: File, folderPath: string, fileName: string): Promise<string | null> => {
+  // Upload to public Supabase Storage bucket — works for anonymous users
+  const uploadFile = async (file: File, fileName: string): Promise<string | null> => {
     if (file.size > MAX_FILE) {
       toast({ title: "Fichier trop volumineux", description: `${file.name} dépasse 5 Mo.`, variant: "destructive" });
       return null;
     }
-    const { data: cfg, error: cfgErr } = await supabase
-      .from("sharepoint_config")
-      .select("site_id, drive_id")
-      .limit(1)
-      .maybeSingle();
-    if (cfgErr || !cfg) {
-      toast({ title: "SharePoint non configuré", description: "Contactez l'administrateur.", variant: "destructive" });
+    // Folder: 'public/<jobId>/<lastname>-<firstname>-<timestamp>/<fileName>' for anonymous users
+    // Or 'public/<jobId>/<userId-or-anon>/<fileName>'
+    const folder = user?.id || "anon";
+    const path = `public/${jobId}/${folder}/${Date.now()}-${fileName}`;
+    const { data, error } = await supabase.storage
+      .from("cv-applications")
+      .upload(path, file, { contentType: file.type || "application/octet-stream", upsert: false });
+    if (error) {
+      toast({ title: "Erreur d'envoi", description: error.message, variant: "destructive" });
       return null;
     }
-    const filePath = `${folderPath}/${fileName}`;
-    const { data: { session } } = await supabase.auth.getSession();
-    const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
-    const url = `https://${projectId}.supabase.co/functions/v1/sharepoint-proxy?action=upload-file&siteId=${encodeURIComponent(cfg.site_id)}&driveId=${encodeURIComponent(cfg.drive_id || "")}&filePath=${encodeURIComponent(filePath)}`;
-    const res = await fetch(url, {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${session?.access_token}`,
-        "Content-Type": file.type || "application/octet-stream",
-      },
-      body: file,
-    });
-    if (!res.ok) {
-      const err = await res.text();
-      toast({ title: "Erreur SharePoint", description: err.substring(0, 200), variant: "destructive" });
-      return null;
-    }
-    return filePath;
+    return data.path;
   };
 
   const handleSubmit = async () => {
-    if (!user) return;
     const parsed = schema.safeParse(form);
     if (!parsed.success) {
       const errs: Record<string, string> = {};
@@ -195,20 +181,18 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
 
     setSubmitting(true);
     const fullName = `${form.first_name.trim()} ${form.last_name.trim()}`;
-    const folderName = `Candidat-${sanitize(form.last_name)}-${sanitize(form.first_name)}-${jobId.substring(0, 8)}`;
-    const folderPath = `Candidatures/${folderName}`;
-    const ts = Date.now();
-    const cvExt = cvFile.name.split(".").pop();
-    const cvPath = await uploadToSharePoint(cvFile, folderPath, `CV-${ts}.${cvExt}`);
+    const baseName = `${sanitize(form.last_name)}-${sanitize(form.first_name)}`;
+    const cvExt = cvFile.name.split(".").pop() || "pdf";
+    const cvPath = await uploadFile(cvFile, `CV-${baseName}.${cvExt}`);
     if (!cvPath) { setSubmitting(false); return; }
     let letterPath: string | null = null;
     if (letterFile) {
-      const lExt = letterFile.name.split(".").pop();
-      letterPath = await uploadToSharePoint(letterFile, folderPath, `Lettre-${ts}.${lExt}`);
+      const lExt = letterFile.name.split(".").pop() || "pdf";
+      letterPath = await uploadFile(letterFile, `Lettre-${baseName}.${lExt}`);
     }
     const { error } = await supabase.from("job_applications").insert({
       job_id: jobId,
-      user_id: user.id,
+      user_id: user?.id ?? null,
       full_name: fullName,
       email: form.email.trim(),
       phone: form.phone.trim() || null,
@@ -220,15 +204,22 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
       cover_letter_path: letterPath,
       notes: form.cover_letter_text?.trim() || null,
     });
-    setsubmittingDone();
-
-    function setsubmittingDone() { setSubmitting(false); }
+    setSubmitting(false);
 
     if (error) {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
       return;
     }
     toast({ title: "✓ Candidature envoyée", description: "Nous vous recontacterons rapidement." });
+    // Reset form for potential next application
+    setForm({
+      first_name: "", last_name: "", email: user?.email || "", phone: "",
+      linkedin_url: "", portfolio_url: "", years_experience: "",
+      salary_expectation: "", cover_letter_text: "",
+    });
+    setCvFile(null);
+    setLetterFile(null);
+    setProfileLoaded(false);
     onOpenChange(false);
   };
 
@@ -239,7 +230,6 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl p-0 gap-0 overflow-hidden [&>button]:bg-white/15 [&>button]:hover:bg-white/25 [&>button]:text-primary-foreground [&>button]:opacity-100 [&>button]:rounded-full [&>button]:p-1.5 [&>button]:top-4 [&>button]:right-4 [&>button>svg]:h-4 [&>button>svg]:w-4">
         <DialogHeader className="relative bg-gradient-to-br from-primary via-primary to-[#005f80] text-primary-foreground p-6 overflow-hidden">
-          {/* Decorative blobs */}
           <div className="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-white/10 blur-2xl pointer-events-none" />
           <div className="absolute -bottom-16 -left-8 w-44 h-44 rounded-full bg-white/10 blur-3xl pointer-events-none" />
           <div className="relative flex items-start gap-4">
@@ -253,7 +243,7 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
               <p className="text-primary-foreground/85 text-sm font-normal mt-0.5 truncate">{jobTitle}</p>
               <div className="flex flex-wrap items-center gap-1.5 mt-2.5">
                 <Badge className="bg-white/15 hover:bg-white/20 text-primary-foreground border border-white/20 backdrop-blur-sm gap-1 font-normal">
-                  <CheckCircle2 size={11} /> Réponse sous 7 jours
+                  <CheckCircle2 size={11} /> Sans inscription
                 </Badge>
                 <Badge className="bg-white/15 hover:bg-white/20 text-primary-foreground border border-white/20 backdrop-blur-sm gap-1 font-normal">
                   <Cloud size={11} /> Données sécurisées
