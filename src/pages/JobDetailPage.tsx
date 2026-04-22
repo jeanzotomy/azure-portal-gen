@@ -152,12 +152,18 @@ export default function JobDetailPage() {
   }, [job]);
 
   const shareUrl = job ? `${window.location.origin}/careers/${job.id}` : "";
+  // Bots get per-job OG tags via the edge function; humans are redirected
+  // back to the SPA. We use this URL when sharing externally so previews
+  // show the offer's title/description instead of the site default.
+  const socialShareUrl = job
+    ? `https://zwzazxebufydnaxezngx.supabase.co/functions/v1/job-share?id=${job.id}`
+    : "";
   const shareText = job
     ? `Offre d'emploi chez Cloud Mature : ${job.title} (${job.contract_type}) — ${job.location}`
     : "";
 
   const shareTo = (network: "linkedin" | "facebook" | "x" | "whatsapp" | "email") => {
-    const url = encodeURIComponent(shareUrl);
+    const url = encodeURIComponent(socialShareUrl);
     const text = encodeURIComponent(shareText);
     const map: Record<typeof network, string> = {
       linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${url}`,
