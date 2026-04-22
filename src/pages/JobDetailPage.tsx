@@ -93,6 +93,37 @@ export default function JobDetailPage() {
     })();
   }, [jobId, slug, navigate]);
 
+  // Synchronous metadata fallback derived from the URL slug.
+  // Runs immediately on mount (before the job fetch resolves) so social
+  // crawlers and quick share previews don't catch the default site OG
+  // tags during the brief loading window.
+  useEffect(() => {
+    if (!slug) return;
+    const readable = slug
+      .replace(/-?[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i, "")
+      .replace(/-+/g, " ")
+      .trim();
+    if (!readable) return;
+    const pretty = readable
+      .split(" ")
+      .map((w) => (w ? w[0].toUpperCase() + w.slice(1) : w))
+      .join(" ");
+    const fallbackTitle = `${pretty} | CloudMature`;
+    const fallbackDesc = `Offre d'emploi chez CloudMature : ${pretty}. Postulez en ligne, sans inscription.`;
+    const fallbackUrl = `https://cloudmature.com/careers/${slug}`;
+
+    document.title = fallbackTitle;
+    setMeta('meta[name="description"]', "content", fallbackDesc);
+    setMeta('link[rel="canonical"]', "href", fallbackUrl);
+    setMeta('meta[property="og:title"]', "content", fallbackTitle);
+    setMeta('meta[property="og:description"]', "content", fallbackDesc);
+    setMeta('meta[property="og:url"]', "content", fallbackUrl);
+    setMeta('meta[property="og:type"]', "content", "article");
+    setMeta('meta[name="twitter:title"]', "content", fallbackTitle);
+    setMeta('meta[name="twitter:description"]', "content", fallbackDesc);
+  }, [slug]);
+
+
   // Dynamic SEO + Open Graph for social sharing
   useEffect(() => {
     if (!job) return;
