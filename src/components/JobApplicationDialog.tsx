@@ -228,7 +228,7 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl p-0 gap-0 overflow-hidden [&>button]:bg-white/15 [&>button]:hover:bg-white/25 [&>button]:text-primary-foreground [&>button]:opacity-100 [&>button]:rounded-full [&>button]:p-1.5 [&>button]:top-5 [&>button]:right-5 [&>button>svg]:h-4 [&>button>svg]:w-4">
+      <DialogContent className="max-w-3xl p-0 gap-0 overflow-hidden [&>button]:bg-white/15 [&>button]:hover:bg-white/25 [&>button]:text-primary-foreground [&>button]:opacity-100 [&>button]:rounded-full [&>button]:p-2 [&>button]:top-4 [&>button]:right-4 [&>button>svg]:h-5 [&>button>svg]:w-5">
         <DialogHeader className="relative bg-gradient-to-br from-primary via-primary to-[#005f80] text-primary-foreground px-7 py-7 pr-16 overflow-hidden">
           <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-white/10 blur-2xl pointer-events-none" />
           <div className="absolute -bottom-16 -left-8 w-52 h-52 rounded-full bg-white/10 blur-3xl pointer-events-none" />
