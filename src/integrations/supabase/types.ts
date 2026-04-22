@@ -1045,6 +1045,33 @@ export type Database = {
       generate_project_number: { Args: never; Returns: string }
       generate_service_invoice_number: { Args: never; Returns: string }
       generate_ticket_number: { Args: never; Returns: string }
+      get_job_by_slug: {
+        Args: { _slug: string }
+        Returns: {
+          closing_date: string | null
+          contract_duration: string | null
+          contract_type: Database["public"]["Enums"]["contract_type"]
+          created_at: string
+          created_by: string
+          department: string | null
+          description: string
+          id: string
+          location: string
+          renewable: boolean
+          salary_range: string | null
+          sector: string | null
+          start_date: string | null
+          status: Database["public"]["Enums"]["job_status"]
+          title: string
+          updated_at: string
+        }[]
+        SetofOptions: {
+          from: "*"
+          to: "job_postings"
+          isOneToOne: false
+          isSetofReturn: true
+        }
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -1069,6 +1096,7 @@ export type Database = {
           read_ct: number
         }[]
       }
+      slugify_text: { Args: { input: string }; Returns: string }
       update_own_profile:
         | {
             Args: { _company?: string; _full_name?: string; _phone?: string }
