@@ -216,7 +216,7 @@ export default function JobDetailPage() {
   // back to the SPA. We use this URL when sharing externally so previews
   // show the offer's title/description instead of the site default.
   const socialShareUrl = job
-    ? `https://zwzazxebufydnaxezngx.supabase.co/functions/v1/job-share?slug=${slugify(job.title)}-${job.id}`
+    ? `https://zwzazxebufydnaxezngx.supabase.co/functions/v1/job-share?slug=${slugify(job.title)}`
     : "";
   const shareText = job
     ? `Offre d'emploi chez Cloud Mature : ${job.title} (${job.contract_type}) — ${job.location}`
