@@ -6,7 +6,7 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { JobApplicationDialog } from "@/components/JobApplicationDialog";
+// JobApplicationDialog moved to JobDetailPage
 import { Briefcase, MapPin, Calendar, Clock, ChevronDown, ChevronUp, Share2, Linkedin, Facebook, Mail, Link2, MessageCircle, Search, X } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
@@ -74,7 +74,7 @@ export default function CareersPage() {
   const toggleExpand = (id: string) => setExpanded((p) => ({ ...p, [id]: !p[id] }));
 
   const buildShareUrl = (job: JobPosting) =>
-    `${window.location.origin}/careers?job=${job.id}`;
+    `${window.location.origin}/careers/${job.id}`;
 
   const buildShareText = (job: JobPosting) =>
     `Offre d'emploi chez Cloud Mature : ${job.title} (${job.contract_type}) — ${job.location}`;
@@ -114,14 +114,7 @@ export default function CareersPage() {
     })();
   }, []);
 
-  const handleApply = (job: JobPosting) => {
-    if (!user) {
-      navigate("/auth?redirect=/careers");
-      return;
-    }
-    setSelected(job);
-    setApplyOpen(true);
-  };
+  // Application is now handled on the dedicated job detail page (/careers/:id)
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -227,12 +220,17 @@ export default function CareersPage() {
 
           <div className="space-y-4">
             {filteredJobs.map((job) => (
-              <Card key={job.id} className="hover:shadow-md transition-shadow">
+              <Card key={job.id} className="hover:shadow-md hover:border-primary/40 transition-all group">
                 <CardContent className="p-6">
                   <div className="flex items-start justify-between gap-4 flex-wrap">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap mb-2">
-                        <h3 className="text-xl font-semibold">{job.title}</h3>
+                        <Link
+                          to={`/careers/${job.id}`}
+                          className="text-xl font-semibold hover:text-primary transition-colors"
+                        >
+                          {job.title}
+                        </Link>
                         <Badge variant="outline">
                           {job.contract_type}
                           {job.contract_type === "CDD" && job.contract_duration ? ` · ${job.contract_duration}` : ""}
@@ -269,12 +267,14 @@ export default function CareersPage() {
                       )}
                     </div>
                     <div className="flex flex-col gap-2 shrink-0">
-                      <Button onClick={() => handleApply(job)} className="gradient-primary text-primary-foreground border-0">
-                        Postuler
-                      </Button>
+                      <Link to={`/careers/${job.id}`}>
+                        <Button className="gradient-primary text-primary-foreground border-0 w-full">
+                          Voir & Postuler
+                        </Button>
+                      </Link>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="outline" size="sm" className="gap-1.5">
+                          <Button variant="outline" size="sm" className="gap-1.5 w-full">
                             <Share2 size={14} /> Partager
                           </Button>
                         </DropdownMenuTrigger>
@@ -307,22 +307,14 @@ export default function CareersPage() {
             ))}
           </div>
 
-          {!user && jobs.length > 0 && (
+          {jobs.length > 0 && (
             <p className="text-center text-xs text-muted-foreground mt-6">
-              Vous devez être connecté pour postuler. <Link to="/auth" className="text-primary hover:underline">Créer un compte</Link>
+              Postulez en quelques clics, sans inscription requise.
             </p>
           )}
         </div>
       </main>
       <Footer />
-      {selected && (
-        <JobApplicationDialog
-          open={applyOpen}
-          onOpenChange={(v) => { setApplyOpen(v); if (!v) setSelected(null); }}
-          jobId={selected.id}
-          jobTitle={selected.title}
-        />
-      )}
     </div>
   );
 }
