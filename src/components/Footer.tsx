@@ -1,4 +1,5 @@
 import logo from "@/assets/logo.png";
+import datadogLogo from "@/assets/datadog-logo.png";
 import { useTranslation } from "@/i18n/LanguageContext";
 import { Link } from "react-router-dom";
 
