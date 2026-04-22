@@ -31,12 +31,8 @@ interface JobPosting {
 }
 
 export default function CareersPage() {
-  const { user } = useAuthSession();
-  const navigate = useNavigate();
   const [jobs, setJobs] = useState<JobPosting[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState<JobPosting | null>(null);
-  const [applyOpen, setApplyOpen] = useState(false);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
   const [search, setSearch] = useState("");
   const [contractFilter, setContractFilter] = useState<string>("all");
