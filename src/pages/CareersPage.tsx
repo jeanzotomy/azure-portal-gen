@@ -257,13 +257,12 @@ export default function CareersPage() {
                       <h4 className="text-sm font-semibold mb-1 text-foreground">Description du poste</h4>
                       <p className={`text-sm text-foreground/80 whitespace-pre-line ${expanded[job.id] ? "" : "line-clamp-4"}`}>{job.description}</p>
                       {job.description.length > 200 && (
-                        <button
-                          type="button"
-                          onClick={() => toggleExpand(job.id)}
+                        <Link
+                          to={`/careers/${job.id}`}
                           className="mt-1 text-xs font-medium text-primary hover:underline inline-flex items-center gap-1"
                         >
-                          {expanded[job.id] ? (<>Réduire <ChevronUp size={12} /></>) : (<>Lire tout <ChevronDown size={12} /></>)}
-                        </button>
+                          Lire tout <ChevronDown size={12} />
+                        </Link>
                       )}
                     </div>
                     <div className="flex flex-col gap-2 shrink-0">
