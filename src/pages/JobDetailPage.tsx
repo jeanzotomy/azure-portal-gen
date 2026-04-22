@@ -11,6 +11,7 @@ import { Briefcase, MapPin, Calendar, Clock, Share2, Linkedin, Facebook, Mail, L
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { extractJobId, jobPath, slugify } from "@/lib/slug";
 
 interface JobPosting {
   id: string;
