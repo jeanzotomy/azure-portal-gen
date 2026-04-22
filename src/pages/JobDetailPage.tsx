@@ -96,7 +96,8 @@ export default function JobDetailPage() {
   // Dynamic SEO + Open Graph for social sharing
   useEffect(() => {
     if (!job) return;
-    const url = `https://cloudmature.com/careers/${job.id}`;
+    const path = jobPath(job.id, job.title);
+    const url = `https://cloudmature.com${path}`;
     const title = `${job.title} — ${job.contract_type} · ${job.location} | CloudMature`;
     const desc = (job.description || "")
       .replace(/\s+/g, " ")
