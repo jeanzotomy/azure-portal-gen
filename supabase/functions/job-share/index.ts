@@ -73,26 +73,34 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   const url = new URL(req.url);
-  // Accept ?id=xxx OR path suffix /job-share/<id>
+  // Accept ?id=<uuid>, ?slug=<title-uuid>, or path suffix /job-share/<slug-or-uuid>
   const idParam = url.searchParams.get("id");
-  const pathId = url.pathname.split("/").filter(Boolean).pop();
-  const id =
-    idParam ||
-    (pathId && pathId !== "job-share" && /^[0-9a-f-]{10,}$/i.test(pathId) ? pathId : null);
+  const slugParam = url.searchParams.get("slug");
+  const pathRaw = url.pathname.split("/").filter(Boolean).pop() || "";
+  const pathCandidate = pathRaw && pathRaw !== "job-share" ? pathRaw : "";
 
-  const targetUrl = id ? `${SITE_URL}/careers/${id}` : `${SITE_URL}/careers`;
+  const UUID_RE = /([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i;
+  const fromSlug = (s: string | null) => {
+    if (!s) return null;
+    const m = s.match(UUID_RE);
+    return m ? m[1] : null;
+  };
+  const id = idParam || fromSlug(slugParam) || fromSlug(pathCandidate);
+
+  const slugify = (t: string) =>
+    (t || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/['’`]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 80);
+
+  let targetUrl = `${SITE_URL}/careers`;
   const ua = req.headers.get("user-agent") || "";
   const isBot = BOT_REGEX.test(ua);
 
-  // Real users → redirect to the SPA page
-  if (!isBot) {
-    return new Response(null, {
-      status: 302,
-      headers: { ...corsHeaders, Location: targetUrl },
-    });
-  }
-
-  // Bot → fetch job and return OpenGraph HTML
   let title = "Offres d'emploi | CloudMature";
   let description =
     "Découvrez les offres d'emploi de CloudMature — Cloud, DevOps et IA à Conakry, Guinée.";
@@ -108,15 +116,28 @@ Deno.serve(async (req) => {
         .maybeSingle();
 
       if (job) {
+        const slug = slugify(job.title);
+        targetUrl = `${SITE_URL}/careers/${slug ? `${slug}-${id}` : id}`;
         title = `${job.title} — ${job.contract_type} · ${job.location} | CloudMature`;
         const cleaned = (job.description || "").replace(/\s+/g, " ").trim();
         description = cleaned
           ? cleaned.slice(0, 200) + (cleaned.length > 200 ? "…" : "")
           : `Offre d'emploi chez CloudMature : ${job.title} (${job.contract_type}) — ${job.location}.`;
+      } else {
+        targetUrl = `${SITE_URL}/careers/${id}`;
       }
     } catch (e) {
       console.error("job-share error", e);
+      targetUrl = `${SITE_URL}/careers/${id}`;
     }
+  }
+
+  // Real users → redirect to the SPA page (now with slug)
+  if (!isBot) {
+    return new Response(null, {
+      status: 302,
+      headers: { ...corsHeaders, Location: targetUrl },
+    });
   }
 
   const html = buildHtml({

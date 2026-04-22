@@ -11,6 +11,7 @@ import { Briefcase, MapPin, Calendar, Clock, Share2, Linkedin, Facebook, Mail, L
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
+import { extractJobId, jobPath, slugify } from "@/lib/slug";
 
 interface JobPosting {
   id: string;
@@ -54,7 +55,7 @@ const DEFAULT_META = {
 };
 
 export default function JobDetailPage() {
-  const { id } = useParams<{ id: string }>();
+  const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [job, setJob] = useState<JobPosting | null>(null);
   const [loading, setLoading] = useState(true);
@@ -62,13 +63,19 @@ export default function JobDetailPage() {
   const [applyOpen, setApplyOpen] = useState(false);
   const { toast } = useToast();
 
+  const jobId = extractJobId(slug);
+
   useEffect(() => {
-    if (!id) return;
+    if (!jobId) {
+      setNotFound(true);
+      setLoading(false);
+      return;
+    }
     (async () => {
       const { data, error } = await supabase
         .from("job_postings")
         .select("*")
-        .eq("id", id)
+        .eq("id", jobId)
         .eq("status", "publiee")
         .maybeSingle();
       if (error || !data) {
@@ -78,13 +85,19 @@ export default function JobDetailPage() {
       }
       setJob(data as JobPosting);
       setLoading(false);
+      // If user landed via plain UUID or outdated slug, normalise the URL.
+      const expected = jobPath(data.id, (data as any).title);
+      if (slug !== expected.replace("/careers/", "")) {
+        navigate(expected, { replace: true });
+      }
     })();
-  }, [id]);
+  }, [jobId, slug, navigate]);
 
   // Dynamic SEO + Open Graph for social sharing
   useEffect(() => {
     if (!job) return;
-    const url = `https://cloudmature.com/careers/${job.id}`;
+    const path = jobPath(job.id, job.title);
+    const url = `https://cloudmature.com${path}`;
     const title = `${job.title} — ${job.contract_type} · ${job.location} | CloudMature`;
     const desc = (job.description || "")
       .replace(/\s+/g, " ")
@@ -151,12 +164,12 @@ export default function JobDetailPage() {
     };
   }, [job]);
 
-  const shareUrl = job ? `${window.location.origin}/careers/${job.id}` : "";
+  const shareUrl = job ? `${window.location.origin}${jobPath(job.id, job.title)}` : "";
   // Bots get per-job OG tags via the edge function; humans are redirected
   // back to the SPA. We use this URL when sharing externally so previews
   // show the offer's title/description instead of the site default.
   const socialShareUrl = job
-    ? `https://zwzazxebufydnaxezngx.supabase.co/functions/v1/job-share?id=${job.id}`
+    ? `https://zwzazxebufydnaxezngx.supabase.co/functions/v1/job-share?slug=${slugify(job.title)}-${job.id}`
     : "";
   const shareText = job
     ? `Offre d'emploi chez Cloud Mature : ${job.title} (${job.contract_type}) — ${job.location}`

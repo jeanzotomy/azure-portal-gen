@@ -13,6 +13,7 @@ import { useToast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { jobPath } from "@/lib/slug";
 
 interface JobPosting {
   id: string;
@@ -74,7 +75,7 @@ export default function CareersPage() {
   const toggleExpand = (id: string) => setExpanded((p) => ({ ...p, [id]: !p[id] }));
 
   const buildShareUrl = (job: JobPosting) =>
-    `${window.location.origin}/careers/${job.id}`;
+    `${window.location.origin}${jobPath(job.id, job.title)}`;
 
   const buildShareText = (job: JobPosting) =>
     `Offre d'emploi chez Cloud Mature : ${job.title} (${job.contract_type}) — ${job.location}`;
@@ -226,7 +227,7 @@ export default function CareersPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap mb-2">
                         <Link
-                          to={`/careers/${job.id}`}
+                          to={jobPath(job.id, job.title)}
                           className="text-xl font-semibold hover:text-primary transition-colors"
                         >
                           {job.title}
@@ -258,7 +259,7 @@ export default function CareersPage() {
                       <p className={`text-sm text-foreground/80 whitespace-pre-line ${expanded[job.id] ? "" : "line-clamp-4"}`}>{job.description}</p>
                       {job.description.length > 200 && (
                         <Link
-                          to={`/careers/${job.id}`}
+                          to={jobPath(job.id, job.title)}
                           className="mt-1 text-xs font-medium text-primary hover:underline inline-flex items-center gap-1"
                         >
                           Lire tout <ChevronDown size={12} />
@@ -266,7 +267,7 @@ export default function CareersPage() {
                       )}
                     </div>
                     <div className="flex flex-col gap-2 shrink-0">
-                      <Link to={`/careers/${job.id}`}>
+                      <Link to={jobPath(job.id, job.title)}>
                         <Button className="gradient-primary text-primary-foreground border-0 w-full">
                           Voir & Postuler
                         </Button>
