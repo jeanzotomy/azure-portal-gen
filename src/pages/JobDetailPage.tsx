@@ -177,8 +177,8 @@ export default function JobDetailPage() {
 
   const copyLink = async () => {
     try {
-      await navigator.clipboard.writeText(shareUrl);
-      toast({ title: "Lien copié", description: "Le lien de l'offre est dans le presse-papier." });
+      await navigator.clipboard.writeText(socialShareUrl);
+      toast({ title: "Lien copié", description: "Le lien de partage est dans le presse-papier." });
     } catch {
       toast({ title: "Erreur", description: "Impossible de copier le lien.", variant: "destructive" });
     }
