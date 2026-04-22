@@ -267,7 +267,7 @@ export default function CareersPage() {
                       )}
                     </div>
                     <div className="flex flex-col gap-2 shrink-0">
-                      <Link to={`/careers/${job.id}`}>
+                      <Link to={jobPath(job.id, job.title)}>
                         <Button className="gradient-primary text-primary-foreground border-0 w-full">
                           Voir & Postuler
                         </Button>
