@@ -1,4 +1,5 @@
 import logo from "@/assets/logo.png";
+import datadogLogo from "@/assets/datadog-logo.png";
 import { useTranslation } from "@/i18n/LanguageContext";
 import { Link } from "react-router-dom";
 
@@ -13,9 +14,6 @@ export function Footer() {
             <img src={logo} alt="CloudMature" className="h-12 w-auto max-w-[190px]" />
           </div>
           <div className="flex flex-col items-center gap-3">
-            <span className="text-xs uppercase tracking-widest text-secondary-foreground/50">
-              {t("footer.partners") || "Nos partenaires"}
-            </span>
             <div className="flex items-center gap-6 md:gap-8 flex-wrap justify-center">
               <img
                 src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg"
@@ -30,10 +28,10 @@ export function Footer() {
                 className="h-6 md:h-7 w-auto opacity-70 hover:opacity-100 transition-opacity grayscale hover:grayscale-0"
               />
               <img
-                src="https://upload.wikimedia.org/wikipedia/commons/6/64/Datadog_logo.svg"
+                src={datadogLogo}
                 alt="Datadog"
                 loading="lazy"
-                className="h-6 md:h-7 w-auto opacity-70 hover:opacity-100 transition-opacity grayscale hover:grayscale-0"
+                className="h-8 md:h-9 w-auto opacity-70 hover:opacity-100 transition-opacity grayscale hover:grayscale-0"
               />
             </div>
           </div>
