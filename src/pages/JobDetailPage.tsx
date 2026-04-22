@@ -164,12 +164,12 @@ export default function JobDetailPage() {
     };
   }, [job]);
 
-  const shareUrl = job ? `${window.location.origin}/careers/${job.id}` : "";
+  const shareUrl = job ? `${window.location.origin}${jobPath(job.id, job.title)}` : "";
   // Bots get per-job OG tags via the edge function; humans are redirected
   // back to the SPA. We use this URL when sharing externally so previews
   // show the offer's title/description instead of the site default.
   const socialShareUrl = job
-    ? `https://zwzazxebufydnaxezngx.supabase.co/functions/v1/job-share?id=${job.id}`
+    ? `https://zwzazxebufydnaxezngx.supabase.co/functions/v1/job-share?slug=${slugify(job.title)}-${job.id}`
     : "";
   const shareText = job
     ? `Offre d'emploi chez Cloud Mature : ${job.title} (${job.contract_type}) — ${job.location}`
