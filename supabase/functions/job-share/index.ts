@@ -101,15 +101,6 @@ Deno.serve(async (req) => {
   const ua = req.headers.get("user-agent") || "";
   const isBot = BOT_REGEX.test(ua);
 
-  // Real users → redirect to the SPA page
-  if (!isBot) {
-    return new Response(null, {
-      status: 302,
-      headers: { ...corsHeaders, Location: targetUrl },
-    });
-  }
-
-  // Bot → fetch job and return OpenGraph HTML
   let title = "Offres d'emploi | CloudMature";
   let description =
     "Découvrez les offres d'emploi de CloudMature — Cloud, DevOps et IA à Conakry, Guinée.";
@@ -125,15 +116,28 @@ Deno.serve(async (req) => {
         .maybeSingle();
 
       if (job) {
+        const slug = slugify(job.title);
+        targetUrl = `${SITE_URL}/careers/${slug ? `${slug}-${id}` : id}`;
         title = `${job.title} — ${job.contract_type} · ${job.location} | CloudMature`;
         const cleaned = (job.description || "").replace(/\s+/g, " ").trim();
         description = cleaned
           ? cleaned.slice(0, 200) + (cleaned.length > 200 ? "…" : "")
           : `Offre d'emploi chez CloudMature : ${job.title} (${job.contract_type}) — ${job.location}.`;
+      } else {
+        targetUrl = `${SITE_URL}/careers/${id}`;
       }
     } catch (e) {
       console.error("job-share error", e);
+      targetUrl = `${SITE_URL}/careers/${id}`;
     }
+  }
+
+  // Real users → redirect to the SPA page (now with slug)
+  if (!isBot) {
+    return new Response(null, {
+      status: 302,
+      headers: { ...corsHeaders, Location: targetUrl },
+    });
   }
 
   const html = buildHtml({
