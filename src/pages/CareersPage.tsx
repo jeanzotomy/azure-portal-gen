@@ -75,7 +75,7 @@ export default function CareersPage() {
   const toggleExpand = (id: string) => setExpanded((p) => ({ ...p, [id]: !p[id] }));
 
   const buildShareUrl = (job: JobPosting) =>
-    `${window.location.origin}/careers/${job.id}`;
+    `${window.location.origin}${jobPath(job.id, job.title)}`;
 
   const buildShareText = (job: JobPosting) =>
     `Offre d'emploi chez Cloud Mature : ${job.title} (${job.contract_type}) — ${job.location}`;
