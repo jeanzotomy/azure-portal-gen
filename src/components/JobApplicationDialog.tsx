@@ -228,25 +228,25 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl p-0 gap-0 overflow-hidden [&>button]:bg-white/15 [&>button]:hover:bg-white/25 [&>button]:text-primary-foreground [&>button]:opacity-100 [&>button]:rounded-full [&>button]:p-1.5 [&>button]:top-4 [&>button]:right-4 [&>button>svg]:h-4 [&>button>svg]:w-4">
-        <DialogHeader className="relative bg-gradient-to-br from-primary via-primary to-[#005f80] text-primary-foreground p-6 overflow-hidden">
-          <div className="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-white/10 blur-2xl pointer-events-none" />
-          <div className="absolute -bottom-16 -left-8 w-44 h-44 rounded-full bg-white/10 blur-3xl pointer-events-none" />
-          <div className="relative flex items-start gap-4">
-            <div className="shrink-0 h-12 w-12 rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center shadow-lg">
-              <Briefcase size={22} className="text-primary-foreground" />
+      <DialogContent className="max-w-3xl p-0 gap-0 overflow-hidden [&>button]:bg-white/15 [&>button]:hover:bg-white/25 [&>button]:text-primary-foreground [&>button]:opacity-100 [&>button]:rounded-full [&>button]:p-1.5 [&>button]:top-5 [&>button]:right-5 [&>button>svg]:h-4 [&>button>svg]:w-4">
+        <DialogHeader className="relative bg-gradient-to-br from-primary via-primary to-[#005f80] text-primary-foreground px-7 py-7 pr-16 overflow-hidden">
+          <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-white/10 blur-2xl pointer-events-none" />
+          <div className="absolute -bottom-16 -left-8 w-52 h-52 rounded-full bg-white/10 blur-3xl pointer-events-none" />
+          <div className="relative flex items-start gap-5">
+            <div className="shrink-0 h-14 w-14 rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center shadow-lg">
+              <Briefcase size={26} className="text-primary-foreground" />
             </div>
             <div className="flex-1 min-w-0">
-              <DialogTitle className="text-primary-foreground text-xl font-bold leading-tight">
+              <DialogTitle className="text-primary-foreground text-2xl font-bold leading-tight">
                 Postuler à cette offre
               </DialogTitle>
-              <p className="text-primary-foreground/85 text-sm font-normal mt-0.5 truncate">{jobTitle}</p>
-              <div className="flex flex-wrap items-center gap-1.5 mt-2.5">
-                <Badge className="bg-white/15 hover:bg-white/20 text-primary-foreground border border-white/20 backdrop-blur-sm gap-1 font-normal">
-                  <CheckCircle2 size={11} /> Sans inscription
+              <p className="text-primary-foreground/90 text-base font-normal mt-1 break-words">{jobTitle}</p>
+              <div className="flex flex-wrap items-center gap-2 mt-3">
+                <Badge className="bg-white/15 hover:bg-white/20 text-primary-foreground border border-white/20 backdrop-blur-sm gap-1.5 font-normal px-2.5 py-1">
+                  <CheckCircle2 size={12} /> Sans inscription
                 </Badge>
-                <Badge className="bg-white/15 hover:bg-white/20 text-primary-foreground border border-white/20 backdrop-blur-sm gap-1 font-normal">
-                  <Cloud size={11} /> Données sécurisées
+                <Badge className="bg-white/15 hover:bg-white/20 text-primary-foreground border border-white/20 backdrop-blur-sm gap-1.5 font-normal px-2.5 py-1">
+                  <Cloud size={12} /> Données sécurisées
                 </Badge>
               </div>
             </div>
