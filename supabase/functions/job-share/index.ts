@@ -73,19 +73,22 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   const url = new URL(req.url);
-  // Accept ?id=<uuid>, ?slug=<title-uuid>, or path suffix /job-share/<slug-or-uuid>
+  // Accept ?id=<uuid>, ?slug=<title> (or legacy <title-uuid>),
+  // or path suffix /job-share/<slug-or-uuid>
   const idParam = url.searchParams.get("id");
   const slugParam = url.searchParams.get("slug");
   const pathRaw = url.pathname.split("/").filter(Boolean).pop() || "";
   const pathCandidate = pathRaw && pathRaw !== "job-share" ? pathRaw : "";
 
   const UUID_RE = /([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i;
-  const fromSlug = (s: string | null) => {
+  const fromUuid = (s: string | null) => {
     if (!s) return null;
     const m = s.match(UUID_RE);
     return m ? m[1] : null;
   };
-  const id = idParam || fromSlug(slugParam) || fromSlug(pathCandidate);
+  const id = idParam || fromUuid(slugParam) || fromUuid(pathCandidate);
+  // Title-only slug candidate (no embedded UUID)
+  const titleSlug = !id ? (slugParam || pathCandidate || "") : "";
 
   const slugify = (t: string) =>
     (t || "")
@@ -105,31 +108,40 @@ Deno.serve(async (req) => {
   let description =
     "Découvrez les offres d'emploi de CloudMature — Cloud, DevOps et IA à Conakry, Guinée.";
 
-  if (id) {
-    try {
-      const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-      const { data: job } = await supabase
+  try {
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let job: any = null;
+
+    if (id) {
+      const { data } = await supabase
         .from("job_postings")
-        .select("title, contract_type, location, description")
+        .select("id, title, contract_type, location, description")
         .eq("id", id)
         .eq("status", "publiee")
         .maybeSingle();
-
-      if (job) {
-        const slug = slugify(job.title);
-        targetUrl = `${SITE_URL}/careers/${slug ? `${slug}-${id}` : id}`;
-        title = `${job.title} — ${job.contract_type} · ${job.location} | CloudMature`;
-        const cleaned = (job.description || "").replace(/\s+/g, " ").trim();
-        description = cleaned
-          ? cleaned.slice(0, 200) + (cleaned.length > 200 ? "…" : "")
-          : `Offre d'emploi chez CloudMature : ${job.title} (${job.contract_type}) — ${job.location}.`;
-      } else {
-        targetUrl = `${SITE_URL}/careers/${id}`;
-      }
-    } catch (e) {
-      console.error("job-share error", e);
-      targetUrl = `${SITE_URL}/careers/${id}`;
+      job = data;
+    } else if (titleSlug) {
+      const { data } = await supabase.rpc("get_job_by_slug", { _slug: titleSlug });
+      job = Array.isArray(data) ? data[0] : data;
     }
+
+    if (job) {
+      const slug = slugify(job.title);
+      targetUrl = `${SITE_URL}/careers/${slug || job.id}`;
+      title = `${job.title} — ${job.contract_type} · ${job.location} | CloudMature`;
+      const cleaned = (job.description || "").replace(/\s+/g, " ").trim();
+      description = cleaned
+        ? cleaned.slice(0, 200) + (cleaned.length > 200 ? "…" : "")
+        : `Offre d'emploi chez CloudMature : ${job.title} (${job.contract_type}) — ${job.location}.`;
+    } else if (id) {
+      targetUrl = `${SITE_URL}/careers/${id}`;
+    } else if (titleSlug) {
+      targetUrl = `${SITE_URL}/careers/${titleSlug}`;
+    }
+  } catch (e) {
+    console.error("job-share error", e);
+    if (id) targetUrl = `${SITE_URL}/careers/${id}`;
+    else if (titleSlug) targetUrl = `${SITE_URL}/careers/${titleSlug}`;
   }
 
   // Real users → redirect to the SPA page (now with slug)
