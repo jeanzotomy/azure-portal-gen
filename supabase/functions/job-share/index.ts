@@ -73,14 +73,31 @@ Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   const url = new URL(req.url);
-  // Accept ?id=xxx OR path suffix /job-share/<id>
+  // Accept ?id=<uuid>, ?slug=<title-uuid>, or path suffix /job-share/<slug-or-uuid>
   const idParam = url.searchParams.get("id");
-  const pathId = url.pathname.split("/").filter(Boolean).pop();
-  const id =
-    idParam ||
-    (pathId && pathId !== "job-share" && /^[0-9a-f-]{10,}$/i.test(pathId) ? pathId : null);
+  const slugParam = url.searchParams.get("slug");
+  const pathRaw = url.pathname.split("/").filter(Boolean).pop() || "";
+  const pathCandidate = pathRaw && pathRaw !== "job-share" ? pathRaw : "";
 
-  const targetUrl = id ? `${SITE_URL}/careers/${id}` : `${SITE_URL}/careers`;
+  const UUID_RE = /([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i;
+  const fromSlug = (s: string | null) => {
+    if (!s) return null;
+    const m = s.match(UUID_RE);
+    return m ? m[1] : null;
+  };
+  const id = idParam || fromSlug(slugParam) || fromSlug(pathCandidate);
+
+  const slugify = (t: string) =>
+    (t || "")
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase()
+      .replace(/['’`]/g, "")
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "")
+      .slice(0, 80);
+
+  let targetUrl = `${SITE_URL}/careers`;
   const ua = req.headers.get("user-agent") || "";
   const isBot = BOT_REGEX.test(ua);
 
