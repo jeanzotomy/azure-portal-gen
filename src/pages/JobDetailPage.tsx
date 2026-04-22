@@ -55,7 +55,7 @@ const DEFAULT_META = {
 };
 
 export default function JobDetailPage() {
-  const { id } = useParams<{ id: string }>();
+  const { slug } = useParams<{ slug: string }>();
   const navigate = useNavigate();
   const [job, setJob] = useState<JobPosting | null>(null);
   const [loading, setLoading] = useState(true);
@@ -63,13 +63,19 @@ export default function JobDetailPage() {
   const [applyOpen, setApplyOpen] = useState(false);
   const { toast } = useToast();
 
+  const jobId = extractJobId(slug);
+
   useEffect(() => {
-    if (!id) return;
+    if (!jobId) {
+      setNotFound(true);
+      setLoading(false);
+      return;
+    }
     (async () => {
       const { data, error } = await supabase
         .from("job_postings")
         .select("*")
-        .eq("id", id)
+        .eq("id", jobId)
         .eq("status", "publiee")
         .maybeSingle();
       if (error || !data) {
@@ -79,8 +85,13 @@ export default function JobDetailPage() {
       }
       setJob(data as JobPosting);
       setLoading(false);
+      // If user landed via plain UUID or outdated slug, normalise the URL.
+      const expected = jobPath(data.id, (data as any).title);
+      if (slug !== expected.replace("/careers/", "")) {
+        navigate(expected, { replace: true });
+      }
     })();
-  }, [id]);
+  }, [jobId, slug, navigate]);
 
   // Dynamic SEO + Open Graph for social sharing
   useEffect(() => {
