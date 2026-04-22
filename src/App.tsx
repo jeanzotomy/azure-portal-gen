@@ -44,7 +44,7 @@ const App = () => (
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/careers" element={<CareersPage />} />
-          <Route path="/careers/:id" element={<JobDetailPage />} />
+          <Route path="/careers/:slug" element={<JobDetailPage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
