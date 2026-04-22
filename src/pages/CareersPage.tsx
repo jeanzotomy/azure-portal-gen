@@ -227,7 +227,7 @@ export default function CareersPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap mb-2">
                         <Link
-                          to={`/careers/${job.id}`}
+                          to={jobPath(job.id, job.title)}
                           className="text-xl font-semibold hover:text-primary transition-colors"
                         >
                           {job.title}
