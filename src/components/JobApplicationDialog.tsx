@@ -321,7 +321,7 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
             </div>
             <div>
               <label className="text-sm font-medium">Prétention salariale</label>
-              <Input placeholder="Ex: 15M GNF / mois" value={form.salary_expectation} onChange={(e) => update("salary_expectation", e.target.value)} />
+              <Input placeholder="Ex: 1M GNF/mois" value={form.salary_expectation} onChange={(e) => update("salary_expectation", e.target.value)} />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
