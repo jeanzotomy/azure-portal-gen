@@ -63,35 +63,51 @@ export default function JobDetailPage() {
   const [applyOpen, setApplyOpen] = useState(false);
   const { toast } = useToast();
 
-  const jobId = extractJobId(slug);
+  // Try first to interpret the URL param as an UUID (legacy links such as
+  // `/careers/<uuid>` or `/careers/<slug>-<uuid>`). Otherwise we treat the
+  // whole param as a title-slug and resolve it server-side.
+  const legacyId = extractJobId(slug);
 
   useEffect(() => {
-    if (!jobId) {
+    if (!slug) {
       setNotFound(true);
       setLoading(false);
       return;
     }
     (async () => {
-      const { data, error } = await supabase
-        .from("job_postings")
-        .select("*")
-        .eq("id", jobId)
-        .eq("status", "publiee")
-        .maybeSingle();
-      if (error || !data) {
+      let data: any = null;
+
+      if (legacyId) {
+        // Legacy: lookup by UUID
+        const res = await supabase
+          .from("job_postings")
+          .select("*")
+          .eq("id", legacyId)
+          .eq("status", "publiee")
+          .maybeSingle();
+        data = res.data;
+      } else {
+        // New: lookup by slugified title via RPC
+        const res = await supabase.rpc("get_job_by_slug", { _slug: slug });
+        data = Array.isArray(res.data) ? res.data[0] : res.data;
+      }
+
+      if (!data) {
         setNotFound(true);
         setLoading(false);
         return;
       }
       setJob(data as JobPosting);
       setLoading(false);
-      // If user landed via plain UUID or outdated slug, normalise the URL.
-      const expected = jobPath(data.id, (data as any).title);
-      if (slug !== expected.replace("/careers/", "")) {
+
+      // Normalise URL to the canonical title-only slug
+      const expected = jobPath(data.id, data.title);
+      if (`/careers/${slug}` !== expected) {
         navigate(expected, { replace: true });
       }
     })();
-  }, [jobId, slug, navigate]);
+  }, [slug, legacyId, navigate]);
+
 
   // Synchronous metadata fallback derived from the URL slug.
   // Runs immediately on mount (before the job fetch resolves) so social
@@ -200,7 +216,7 @@ export default function JobDetailPage() {
   // back to the SPA. We use this URL when sharing externally so previews
   // show the offer's title/description instead of the site default.
   const socialShareUrl = job
-    ? `https://zwzazxebufydnaxezngx.supabase.co/functions/v1/job-share?slug=${slugify(job.title)}-${job.id}`
+    ? `https://zwzazxebufydnaxezngx.supabase.co/functions/v1/job-share?slug=${slugify(job.title)}`
     : "";
   const shareText = job
     ? `Offre d'emploi chez Cloud Mature : ${job.title} (${job.contract_type}) — ${job.location}`
