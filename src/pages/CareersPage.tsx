@@ -259,7 +259,7 @@ export default function CareersPage() {
                       <p className={`text-sm text-foreground/80 whitespace-pre-line ${expanded[job.id] ? "" : "line-clamp-4"}`}>{job.description}</p>
                       {job.description.length > 200 && (
                         <Link
-                          to={`/careers/${job.id}`}
+                          to={jobPath(job.id, job.title)}
                           className="mt-1 text-xs font-medium text-primary hover:underline inline-flex items-center gap-1"
                         >
                           Lire tout <ChevronDown size={12} />
