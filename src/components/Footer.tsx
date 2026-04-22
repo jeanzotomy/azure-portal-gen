@@ -12,6 +12,31 @@ export function Footer() {
           <div className="flex items-center gap-2">
             <img src={logo} alt="CloudMature" className="h-12 w-auto max-w-[190px]" />
           </div>
+          <div className="flex flex-col items-center gap-3">
+            <span className="text-xs uppercase tracking-widest text-secondary-foreground/50">
+              {t("footer.partners") || "Nos partenaires"}
+            </span>
+            <div className="flex items-center gap-6 md:gap-8 flex-wrap justify-center">
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/4/44/Microsoft_logo.svg"
+                alt="Microsoft"
+                loading="lazy"
+                className="h-6 md:h-7 w-auto opacity-70 hover:opacity-100 transition-opacity grayscale hover:grayscale-0"
+              />
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/2/2f/Google_2015_logo.svg"
+                alt="Google"
+                loading="lazy"
+                className="h-6 md:h-7 w-auto opacity-70 hover:opacity-100 transition-opacity grayscale hover:grayscale-0"
+              />
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/6/64/Datadog_logo.svg"
+                alt="Datadog"
+                loading="lazy"
+                className="h-6 md:h-7 w-auto opacity-70 hover:opacity-100 transition-opacity grayscale hover:grayscale-0"
+              />
+            </div>
+          </div>
           <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full glass text-sm font-medium tracking-wide border border-cyan-glow/30 shadow-[0_0_15px_hsl(195_100%_40%/0.15)]">
             <span className="text-cyan-glow">{t("hero.badge.consulting")}</span>
             <span className="text-secondary-foreground/40">·</span>
