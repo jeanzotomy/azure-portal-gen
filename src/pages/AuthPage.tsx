@@ -18,6 +18,7 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [searchParams] = useSearchParams();
   const isBlocked = searchParams.get("blocked") === "1";
+  const isWelcome = searchParams.get("welcome") === "1";
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useTranslation();
@@ -125,6 +126,15 @@ export default function AuthPage() {
               >
                 {t("auth.signup")}
               </button>
+            </div>
+          )}
+
+          {isWelcome && (
+            <div className="mb-4 rounded-xl bg-primary/15 border border-primary/30 p-4 text-sm text-primary-foreground">
+              <p className="font-semibold">🎉 Félicitations pour votre candidature !</p>
+              <p className="text-xs mt-1 text-primary-foreground/80">
+                Créez votre mot de passe ci-dessous pour finaliser votre intégration à CloudMature et accéder à votre portail.
+              </p>
             </div>
           )}
 

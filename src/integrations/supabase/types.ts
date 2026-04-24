@@ -237,6 +237,7 @@ export type Database = {
           email: string
           full_name: string
           id: string
+          interview_message: string | null
           job_id: string
           linkedin_url: string | null
           notes: string | null
@@ -255,6 +256,7 @@ export type Database = {
           email: string
           full_name: string
           id?: string
+          interview_message?: string | null
           job_id: string
           linkedin_url?: string | null
           notes?: string | null
@@ -273,6 +275,7 @@ export type Database = {
           email?: string
           full_name?: string
           id?: string
+          interview_message?: string | null
           job_id?: string
           linkedin_url?: string | null
           notes?: string | null
