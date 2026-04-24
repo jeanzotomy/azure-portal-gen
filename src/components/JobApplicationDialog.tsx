@@ -190,6 +190,26 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
       const lExt = letterFile.name.split(".").pop() || "pdf";
       letterPath = await uploadFile(letterFile, `Lettre-${baseName}.${lExt}`);
     }
+
+    // Push files to SharePoint (best-effort, non-blocking for the application save)
+    let sharepointFolderUrl: string | null = null;
+    try {
+      const fd = new FormData();
+      fd.append("jobId", jobId);
+      fd.append("firstName", form.first_name.trim());
+      fd.append("lastName", form.last_name.trim());
+      fd.append("cv", cvFile);
+      if (letterFile) fd.append("letter", letterFile);
+      const { data: spData, error: spError } = await supabase.functions.invoke("upload-application-files", { body: fd });
+      if (spError) {
+        console.warn("SharePoint upload failed:", spError);
+      } else if (spData?.folder?.webUrl) {
+        sharepointFolderUrl = spData.folder.webUrl;
+      }
+    } catch (e) {
+      console.warn("SharePoint upload exception:", e);
+    }
+
     const { error } = await supabase.from("job_applications").insert({
       job_id: jobId,
       user_id: user?.id ?? null,
@@ -202,7 +222,10 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
       salary_expectation: form.salary_expectation.trim() || null,
       cv_path: cvPath,
       cover_letter_path: letterPath,
-      notes: form.cover_letter_text?.trim() || null,
+      notes: [
+        form.cover_letter_text?.trim() || null,
+        sharepointFolderUrl ? `SharePoint: ${sharepointFolderUrl}` : null,
+      ].filter(Boolean).join("\n\n") || null,
     });
     setSubmitting(false);
 
