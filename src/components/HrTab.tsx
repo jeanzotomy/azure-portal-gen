@@ -352,6 +352,31 @@ export default function HrTab() {
     window.open(data.signedUrl, "_blank");
   };
 
+  const extractSharePointUrl = (notes: string | null): string | null => {
+    if (!notes) return null;
+    const match = notes.match(/https?:\/\/[^\s)]+/i);
+    return match ? match[0] : null;
+  };
+
+  const handleDeleteSharePointFolder = async (app: JobApplication) => {
+    if (!confirm(`Supprimer le dossier SharePoint et tous les fichiers de ${app.full_name} ?`)) return;
+    const parts = app.full_name.trim().split(/\s+/);
+    const firstName = parts[0] || "";
+    const lastName = parts.slice(1).join(" ") || parts[0] || "";
+    const { data, error } = await supabase.functions.invoke("upload-application-files", {
+      body: { action: "delete", firstName, lastName, jobId: app.job_id },
+    });
+    if (error || (data as any)?.error) {
+      toast({ title: "Erreur", description: error?.message || (data as any)?.error || "Suppression échouée", variant: "destructive" });
+      return;
+    }
+    // Clear the SharePoint URL from notes
+    const newNotes = (app.notes || "").replace(/https?:\/\/[^\s)]+/gi, "").trim() || null;
+    await supabase.from("job_applications").update({ notes: newNotes }).eq("id", app.id);
+    toast({ title: "Dossier SharePoint supprimé" });
+    load();
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
