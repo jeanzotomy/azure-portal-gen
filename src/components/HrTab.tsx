@@ -455,6 +455,7 @@ export default function HrTab() {
         <TabsList>
           <TabsTrigger value="jobs">Offres ({jobs.length})</TabsTrigger>
           <TabsTrigger value="applications">Candidatures ({applications.length})</TabsTrigger>
+          <TabsTrigger value="email-log"><Mail size={14} className="mr-1" />Historique des envois</TabsTrigger>
         </TabsList>
 
         <TabsContent value="jobs" className="space-y-3 mt-4">
