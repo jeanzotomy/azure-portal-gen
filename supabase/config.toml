@@ -7,3 +7,5 @@ project_id = "zwzazxebufydnaxezngx"
     verify_jwt = true
   [functions.job-share]
     verify_jwt = false
+  [functions.upload-application-files]
+    verify_jwt = false
