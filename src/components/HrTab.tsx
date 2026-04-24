@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthSession } from "@/hooks/use-auth-session";
+import { useUserRoles } from "@/hooks/use-admin";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Briefcase, Plus, Pencil, Trash2, FileText, Download, Calendar, MapPin, RefreshCw, Building2, X, Search } from "lucide-react";
+import { Briefcase, Plus, Pencil, Trash2, FileText, Download, Calendar, MapPin, RefreshCw, Building2, X, Search, FolderOpen, FolderX } from "lucide-react";
 import { format } from "date-fns";
 
 type JobStatus = "brouillon" | "publiee" | "fermee";
