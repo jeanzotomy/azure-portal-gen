@@ -95,29 +95,26 @@ Deno.serve(async (req) => {
         })
     }
 
-    // Invoke send-transactional-email
-    const sendRes = await fetch(`${supabaseUrl}/functions/v1/send-transactional-email`, {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${serviceKey}`,
-        'Content-Type': 'application/json',
-        'apikey': serviceKey,
+    // Invoke send-transactional-email via Supabase client (handles auth correctly)
+    const { data: sendData, error: sendErr } = await supabase.functions.invoke(
+      'send-transactional-email',
+      {
+        body: {
+          templateName,
+          recipientEmail: app.email,
+          idempotencyKey: `app-status-${app.id}-${status}`,
+          templateData,
+        },
       },
-      body: JSON.stringify({
-        templateName,
-        recipientEmail: app.email,
-        idempotencyKey: `app-status-${app.id}-${status}`,
-        templateData,
-      }),
-    })
+    )
 
-    const sendBody = await sendRes.text()
-    if (!sendRes.ok) {
-      console.error('send-transactional-email failed', { status: sendRes.status, body: sendBody })
-      return new Response(JSON.stringify({ error: 'Email send failed', detail: sendBody }), {
+    if (sendErr) {
+      console.error('send-transactional-email failed', sendErr)
+      return new Response(JSON.stringify({ error: 'Email send failed', detail: String(sendErr) }), {
         status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
+    console.log('Email queued', { templateName, recipient: app.email, sendData })
 
     return new Response(JSON.stringify({ success: true, templateName }), {
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
