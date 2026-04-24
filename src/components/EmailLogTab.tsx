@@ -101,6 +101,49 @@ export default function EmailLogTab() {
     setApplications((data as any) || []);
   };
 
+  const handleDelete = async () => {
+    if (!toDelete) return;
+    setDeleting(true);
+    const { error, count } = await supabase
+      .from("email_send_log")
+      .delete({ count: "exact" })
+      .eq("id", toDelete.id);
+
+    if (error) {
+      const msg = error.message || "Erreur inconnue";
+      const hint = /row-level security|permission|policy/i.test(msg)
+        ? " (permissions insuffisantes — rôle admin ou gestionnaire requis)"
+        : "";
+      toast({
+        title: "Échec de la suppression",
+        description: `${msg}${hint}`,
+        variant: "destructive",
+      });
+      setDeleting(false);
+      return;
+    }
+
+    if (!count || count === 0) {
+      toast({
+        title: "Aucune ligne supprimée",
+        description: "L'entrée n'existe plus ou vous n'avez pas la permission de la supprimer.",
+        variant: "destructive",
+      });
+      setDeleting(false);
+      setToDelete(null);
+      void load();
+      return;
+    }
+
+    setRows((prev) => prev.filter((r) => r.id !== toDelete.id));
+    toast({
+      title: "Entrée supprimée",
+      description: `Envoi à ${toDelete.recipient_email} retiré de l'historique.`,
+    });
+    setDeleting(false);
+    setToDelete(null);
+  };
+
   useEffect(() => {
     load();
     loadApplications();
