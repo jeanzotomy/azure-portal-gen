@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthSession } from "@/hooks/use-auth-session";
+import { useUserRoles } from "@/hooks/use-admin";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Briefcase, Plus, Pencil, Trash2, FileText, Download, Calendar, MapPin, RefreshCw, Building2, X, Search } from "lucide-react";
+import { Briefcase, Plus, Pencil, Trash2, FileText, Download, Calendar, MapPin, RefreshCw, Building2, X, Search, FolderOpen, FolderX } from "lucide-react";
 import { format } from "date-fns";
 
 type JobStatus = "brouillon" | "publiee" | "fermee";
@@ -87,6 +88,7 @@ interface Sector {
 
 export default function HrTab() {
   const { user } = useAuthSession();
+  const { isAdmin } = useUserRoles();
   const { toast } = useToast();
   const [jobs, setJobs] = useState<JobPosting[]>([]);
   const [applications, setApplications] = useState<JobApplication[]>([]);
@@ -350,6 +352,31 @@ export default function HrTab() {
     window.open(data.signedUrl, "_blank");
   };
 
+  const extractSharePointUrl = (notes: string | null): string | null => {
+    if (!notes) return null;
+    const match = notes.match(/https?:\/\/[^\s)]+/i);
+    return match ? match[0] : null;
+  };
+
+  const handleDeleteSharePointFolder = async (app: JobApplication) => {
+    if (!confirm(`Supprimer le dossier SharePoint et tous les fichiers de ${app.full_name} ?`)) return;
+    const parts = app.full_name.trim().split(/\s+/);
+    const firstName = parts[0] || "";
+    const lastName = parts.slice(1).join(" ") || parts[0] || "";
+    const { data, error } = await supabase.functions.invoke("upload-application-files", {
+      body: { action: "delete", firstName, lastName, jobId: app.job_id },
+    });
+    if (error || (data as any)?.error) {
+      toast({ title: "Erreur", description: error?.message || (data as any)?.error || "Suppression échouée", variant: "destructive" });
+      return;
+    }
+    // Clear the SharePoint URL from notes
+    const newNotes = (app.notes || "").replace(/https?:\/\/[^\s)]+/gi, "").trim() || null;
+    await supabase.from("job_applications").update({ notes: newNotes }).eq("id", app.id);
+    toast({ title: "Dossier SharePoint supprimé" });
+    load();
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
@@ -596,12 +623,27 @@ export default function HrTab() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="flex gap-2 flex-wrap pt-2 border-t">
-                    <Button variant="outline" size="sm" onClick={() => downloadFile(app.cv_path)}><FileText size={14} /> CV</Button>
-                    {app.cover_letter_path && (
-                      <Button variant="outline" size="sm" onClick={() => downloadFile(app.cover_letter_path!)}><Download size={14} /> Lettre de motivation</Button>
-                    )}
-                  </div>
+                  {(() => {
+                    const spUrl = extractSharePointUrl(app.notes);
+                    return (
+                      <div className="flex gap-2 flex-wrap pt-2 border-t">
+                        <Button variant="outline" size="sm" onClick={() => downloadFile(app.cv_path)}><FileText size={14} /> CV</Button>
+                        {app.cover_letter_path && (
+                          <Button variant="outline" size="sm" onClick={() => downloadFile(app.cover_letter_path!)}><Download size={14} /> Lettre de motivation</Button>
+                        )}
+                        {spUrl && (
+                          <Button variant="outline" size="sm" onClick={() => window.open(spUrl, "_blank")}>
+                            <FolderOpen size={14} /> Ouvrir dossier SharePoint
+                          </Button>
+                        )}
+                        {spUrl && isAdmin && (
+                          <Button variant="destructive" size="sm" onClick={() => handleDeleteSharePointFolder(app)}>
+                            <FolderX size={14} /> Supprimer dossier
+                          </Button>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </CardContent>
               </Card>
             );
