@@ -295,10 +295,10 @@ export default function EmailLogTab() {
               </thead>
               <tbody>
                 {loading && (
-                  <tr><td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">Chargement...</td></tr>
+                  <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">Chargement...</td></tr>
                 )}
                 {!loading && filtered.length === 0 && (
-                  <tr><td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">Aucun envoi trouvé.</td></tr>
+                  <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">Aucun envoi trouvé.</td></tr>
                 )}
                 {!loading && filtered.map((r) => (
                   <tr key={r.id} className="border-t border-border hover:bg-muted/30">
