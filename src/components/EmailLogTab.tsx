@@ -16,6 +16,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 import { RefreshCw, Search, Download, CheckCircle2, XCircle, Mail, Clock, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
@@ -101,13 +102,19 @@ export default function EmailLogTab() {
     setApplications((data as any) || []);
   };
 
-  const handleDelete = async () => {
-    if (!toDelete) return;
+  const performDelete = async (target: EmailLogRow) => {
     setDeleting(true);
     const { error, count } = await supabase
       .from("email_send_log")
       .delete({ count: "exact" })
-      .eq("id", toDelete.id);
+      .eq("id", target.id);
+    setDeleting(false);
+
+    const retryAction = (
+      <ToastAction altText="Réessayer la suppression" onClick={() => { void performDelete(target); }}>
+        Réessayer
+      </ToastAction>
+    );
 
     if (error) {
       const msg = error.message || "Erreur inconnue";
@@ -118,8 +125,8 @@ export default function EmailLogTab() {
         title: "Échec de la suppression",
         description: `${msg}${hint}`,
         variant: "destructive",
+        action: retryAction,
       });
-      setDeleting(false);
       return;
     }
 
@@ -128,20 +135,23 @@ export default function EmailLogTab() {
         title: "Aucune ligne supprimée",
         description: "L'entrée n'existe plus ou vous n'avez pas la permission de la supprimer.",
         variant: "destructive",
+        action: retryAction,
       });
-      setDeleting(false);
-      setToDelete(null);
-      void load();
+      setToDelete((cur) => (cur?.id === target.id ? null : cur));
+      setRows((prev) => prev.filter((r) => r.id !== target.id));
       return;
     }
 
-    setRows((prev) => prev.filter((r) => r.id !== toDelete.id));
+    setRows((prev) => prev.filter((r) => r.id !== target.id));
     toast({
       title: "Entrée supprimée",
-      description: `Envoi à ${toDelete.recipient_email} retiré de l'historique.`,
+      description: `Envoi à ${target.recipient_email} retiré de l'historique.`,
     });
-    setDeleting(false);
-    setToDelete(null);
+    setToDelete((cur) => (cur?.id === target.id ? null : cur));
+  };
+
+  const handleDelete = () => {
+    if (toDelete) void performDelete(toDelete);
   };
 
   useEffect(() => {
