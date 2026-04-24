@@ -322,6 +322,17 @@ export default function EmailLogTab() {
                         </span>
                       )}
                     </td>
+                    <td className="px-4 py-2 whitespace-nowrap text-right">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                        onClick={() => setToDelete(r)}
+                        aria-label="Supprimer"
+                      >
+                        <Trash2 size={14} />
+                      </Button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
