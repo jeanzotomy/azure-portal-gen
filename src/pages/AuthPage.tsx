@@ -129,6 +129,15 @@ export default function AuthPage() {
             </div>
           )}
 
+          {isWelcome && (
+            <div className="mb-4 rounded-xl bg-primary/15 border border-primary/30 p-4 text-sm text-primary-foreground">
+              <p className="font-semibold">🎉 Félicitations pour votre candidature !</p>
+              <p className="text-xs mt-1 text-primary-foreground/80">
+                Créez votre mot de passe ci-dessous pour finaliser votre intégration à CloudMature et accéder à votre portail.
+              </p>
+            </div>
+          )}
+
           {isBlocked && (
             <div className="mb-4 flex items-center gap-3 rounded-xl bg-destructive/10 border border-destructive/30 p-4 text-sm text-destructive">
               <ShieldBan size={20} className="flex-shrink-0" />
