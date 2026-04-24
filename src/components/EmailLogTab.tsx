@@ -75,6 +75,8 @@ export default function EmailLogTab() {
   const [search, setSearch] = useState("");
   const [toDelete, setToDelete] = useState<EmailLogRow | null>(null);
   const [deleting, setDeleting] = useState(false);
+
+  const load = async () => {
     setLoading(true);
     const { data, error } = await supabase
       .from("email_send_log")
