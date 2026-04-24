@@ -81,7 +81,7 @@ serve(async (req) => {
     // === DELETE action (JSON body) ===
     if (contentType.includes("application/json")) {
       const body = await req.json().catch(() => ({}));
-      if (body.action !== "delete") {
+      if (body.action !== "delete" && body.action !== "get_or_create") {
         return new Response(JSON.stringify({ error: "Unknown action" }), {
           status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
