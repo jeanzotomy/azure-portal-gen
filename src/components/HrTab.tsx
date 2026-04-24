@@ -689,12 +689,10 @@ export default function HrTab() {
                         {app.cover_letter_path && (
                           <Button variant="outline" size="sm" onClick={() => downloadFile(app.cover_letter_path!)}><Download size={14} /> Lettre de motivation</Button>
                         )}
-                        {spUrl && (
-                          <Button variant="outline" size="sm" onClick={() => window.open(spUrl, "_blank")}>
-                            <FolderOpen size={14} /> Ouvrir dossier SharePoint
-                          </Button>
-                        )}
-                        {spUrl && isAdmin && (
+                        <Button variant="outline" size="sm" onClick={() => handleOpenSharePointFolder(app)}>
+                          <FolderOpen size={14} /> Ouvrir dossier SharePoint
+                        </Button>
+                        {isAdmin && (
                           <Button variant="destructive" size="sm" onClick={() => handleDeleteSharePointFolder(app)}>
                             <FolderX size={14} /> Supprimer dossier
                           </Button>
