@@ -290,6 +290,7 @@ export default function EmailLogTab() {
                   <th className="text-left px-4 py-2 font-medium">Statut</th>
                   <th className="text-left px-4 py-2 font-medium">Poste</th>
                   <th className="text-left px-4 py-2 font-medium">Détails</th>
+                  <th className="text-right px-4 py-2 font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody>
