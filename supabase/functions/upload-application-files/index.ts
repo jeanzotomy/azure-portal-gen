@@ -76,6 +76,88 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
   try {
+    const contentType = req.headers.get("content-type") || "";
+
+    // === DELETE action (JSON body) ===
+    if (contentType.includes("application/json")) {
+      const body = await req.json().catch(() => ({}));
+      if (body.action !== "delete") {
+        return new Response(JSON.stringify({ error: "Unknown action" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      // Require authenticated admin caller
+      const authHeader = req.headers.get("Authorization") || "";
+      const jwt = authHeader.replace("Bearer ", "");
+      if (!jwt) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const adminClient = createClient(
+        Deno.env.get("SUPABASE_URL")!,
+        Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+      );
+      const { data: userData, error: userErr } = await adminClient.auth.getUser(jwt);
+      if (userErr || !userData.user) {
+        return new Response(JSON.stringify({ error: "Unauthorized" }), {
+          status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      const { data: roleRow } = await adminClient
+        .from("user_roles")
+        .select("role")
+        .eq("user_id", userData.user.id)
+        .eq("role", "admin")
+        .maybeSingle();
+      if (!roleRow) {
+        return new Response(JSON.stringify({ error: "Forbidden: admin only" }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const firstName = sanitize(String(body.firstName || ""));
+      const lastName = sanitize(String(body.lastName || ""));
+      const jobId = String(body.jobId || "").trim();
+      if (!firstName || !lastName || !jobId) {
+        return new Response(JSON.stringify({ error: "firstName, lastName, jobId required" }), {
+          status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const { data: cfg } = await adminClient
+        .from("sharepoint_config")
+        .select("site_id, drive_id")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (!cfg?.site_id || !cfg?.drive_id) {
+        return new Response(JSON.stringify({ error: "SharePoint not configured" }), {
+          status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+
+      const token = await getGraphToken();
+      const folderName = `${firstName}-${lastName}-${jobId.substring(0, 8)}`;
+      const folderPath = `Candidatures/${folderName}`;
+      const delUrl = `${GRAPH_BASE}/sites/${cfg.site_id}/drives/${cfg.drive_id}/root:/${folderPath}`;
+      const delRes = await fetch(delUrl, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!delRes.ok && delRes.status !== 404) {
+        const errText = await delRes.text();
+        return new Response(JSON.stringify({ error: `Delete failed [${delRes.status}]: ${errText}` }), {
+          status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      return new Response(JSON.stringify({ success: true, deleted: folderName }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+    // === UPLOAD action (multipart) ===
     const formData = await req.formData();
     const jobId = String(formData.get("jobId") || "").trim();
     const firstName = sanitize(String(formData.get("firstName") || ""));
