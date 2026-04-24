@@ -88,6 +88,7 @@ interface Sector {
 
 export default function HrTab() {
   const { user } = useAuthSession();
+  const { isAdmin } = useUserRoles();
   const { toast } = useToast();
   const [jobs, setJobs] = useState<JobPosting[]>([]);
   const [applications, setApplications] = useState<JobApplication[]>([]);
