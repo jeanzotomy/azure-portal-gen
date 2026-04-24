@@ -413,6 +413,28 @@ export default function HrTab() {
     load();
   };
 
+  const handleOpenSharePointFolder = async (app: JobApplication) => {
+    const existing = extractSharePointUrl(app.notes);
+    if (existing) { window.open(existing, "_blank"); return; }
+    const parts = app.full_name.trim().split(/\s+/);
+    const firstName = parts[0] || "";
+    const lastName = parts.slice(1).join(" ") || parts[0] || "";
+    toast({ title: "Ouverture du dossier SharePoint…" });
+    const { data, error } = await supabase.functions.invoke("upload-application-files", {
+      body: { action: "get_or_create", firstName, lastName, jobId: app.job_id },
+    });
+    const webUrl = (data as any)?.folder?.webUrl;
+    if (error || (data as any)?.error || !webUrl) {
+      toast({ title: "Erreur", description: error?.message || (data as any)?.error || "Dossier introuvable", variant: "destructive" });
+      return;
+    }
+    // Persist the URL in notes for future fast access
+    const newNotes = [(app.notes || "").trim(), `SharePoint: ${webUrl}`].filter(Boolean).join("\n\n");
+    await supabase.from("job_applications").update({ notes: newNotes }).eq("id", app.id);
+    window.open(webUrl, "_blank");
+    load();
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
@@ -667,12 +689,10 @@ export default function HrTab() {
                         {app.cover_letter_path && (
                           <Button variant="outline" size="sm" onClick={() => downloadFile(app.cover_letter_path!)}><Download size={14} /> Lettre de motivation</Button>
                         )}
-                        {spUrl && (
-                          <Button variant="outline" size="sm" onClick={() => window.open(spUrl, "_blank")}>
-                            <FolderOpen size={14} /> Ouvrir dossier SharePoint
-                          </Button>
-                        )}
-                        {spUrl && isAdmin && (
+                        <Button variant="outline" size="sm" onClick={() => handleOpenSharePointFolder(app)}>
+                          <FolderOpen size={14} /> Ouvrir dossier SharePoint
+                        </Button>
+                        {isAdmin && (
                           <Button variant="destructive" size="sm" onClick={() => handleDeleteSharePointFolder(app)}>
                             <FolderX size={14} /> Supprimer dossier
                           </Button>
