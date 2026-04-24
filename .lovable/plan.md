@@ -1,50 +1,60 @@
+# 📧 Notifications candidature + Invitation portail (magic link)
 
+## 🎯 Objectif
+Quand l'admin change le statut d'une candidature, le candidat reçoit automatiquement un email français adapté. Si "acceptée" → magic link 1-clic pour activer son compte client.
 
-## Pourquoi `lovable.app` apparaît au partage
+---
 
-Quand vous partagez le site sur les réseaux sociaux (LinkedIn, Facebook, WhatsApp, X…), ces plateformes affichent l'URL **canonique** déclarée dans le HTML. Or dans `index.html`, la balise canonique pointe encore vers le sous-domaine de prévisualisation Lovable :
+## 1️⃣ Infrastructure email transactionnelle
+- Scaffold du système email transactionnel Lovable (réutilise le domaine `notify.cloudmature.com` déjà configuré)
+- Crée la fonction `send-transactional-email` + page `/unsubscribe` + registry de templates
 
-```html
-<link rel="canonical" href="https://azure-portal-gen.lovable.app/" />
-```
+## 2️⃣ Migration SQL
+- **Ajout colonne** `interview_message TEXT` à `job_applications` (message custom pour l'email d'entretien)
+- **Trigger** `on_application_status_change` sur `job_applications`:
+  - Se déclenche `AFTER UPDATE` quand `OLD.status IS DISTINCT FROM NEW.status`
+  - Appelle l'edge function `notify-application-status` en async via `pg_net.http_post` avec service-role key (stockée dans Vault)
 
-Comme votre domaine officiel est désormais **cloudmature.com** (déjà connecté), cette balise envoie un signal contradictoire — résultat : les aperçus sociaux et Google indexent `azure-portal-gen.lovable.app` au lieu de `cloudmature.com`.
+## 3️⃣ Edge Function `notify-application-status` (nouvelle)
+- Reçoit `application_id` + `new_status`
+- Récupère candidature complète + offre d'emploi (titre, département)
+- Branche selon le statut :
+  - `en_revue` → invoke `send-transactional-email` template `application-en-revue`
+  - `entretien` → template `application-entretien` + `interview_message`
+  - `acceptee` → génère magic link via `auth.admin.generateLink({ type: 'invite', email, options: { redirectTo: '/auth?welcome=1' } })` → template `application-acceptee` avec bouton magic link
+  - `refusee` → template `application-refusee`
+- Idempotency key : `app-status-{id}-{status}`
 
-Il manque aussi les balises `og:url` et `og:site_name`, qui aident les réseaux sociaux à afficher correctement le nom du site source.
+## 4️⃣ Templates React Email (4 fichiers, brand CloudMature navy/cyan)
+- `application-en-revue.tsx` — "Votre candidature pour [poste] est en cours d'examen"
+- `application-entretien.tsx` — "Invitation à un entretien" + message custom de l'admin (date/visio/lieu)
+- `application-acceptee.tsx` — 🎉 "Félicitations" + bouton "Activer mon compte CloudMature" (magic link)
+- `application-refusee.tsx` — Message courtois en français
+- Tous : 100% français, fond blanc, header logo CloudMature, couleur primaire #0099cc
 
-## Correctifs à appliquer dans `index.html`
+## 5️⃣ UI Admin — `HrTab.tsx`
+- **Statut → `entretien`** : ouvre un petit dialog demandant le message personnalisé (date, lieu/visio, instructions) **avant** de valider la mise à jour
+- **Autres statuts** : changement direct + toast *"Statut mis à jour. Le candidat sera notifié par email."*
+- **Indicateur visuel** : badge "📧 Notifié" à côté de chaque candidature (lecture rapide depuis `email_send_log` filtré par `recipient_email`)
 
-1. **Mettre à jour la balise canonique** vers le domaine officiel :
-   ```html
-   <link rel="canonical" href="https://cloudmature.com/" />
-   ```
+## 6️⃣ Page d'accueil candidat accepté — `AuthPage.tsx`
+- Détecte query param `?welcome=1`
+- Affiche un bandeau de bienvenue : *"🎉 Félicitations pour votre candidature ! Créez votre mot de passe pour finaliser votre intégration à CloudMature."*
 
-2. **Ajouter `og:url`** (URL officielle affichée par Facebook/LinkedIn/WhatsApp) :
-   ```html
-   <meta property="og:url" content="https://cloudmature.com/" />
-   ```
+## 7️⃣ Sécurité & traçabilité
+- Trigger uniquement si `OLD.status IS DISTINCT FROM NEW.status` → pas de spam
+- Idempotency keys → pas de doublon si l'admin change 2× rapidement
+- Suppression list email respectée automatiquement (système Lovable)
+- Tous les envois loggués dans `email_send_log` (visible côté admin)
+- Magic link expiration : 7 jours (réglage Supabase auth)
 
-3. **Ajouter `og:site_name`** (nom de marque affiché sous le titre) :
-   ```html
-   <meta property="og:site_name" content="CloudMature" />
-   ```
+---
 
-4. **Ajouter `twitter:domain`** pour que X affiche `cloudmature.com` :
-   ```html
-   <meta name="twitter:domain" content="cloudmature.com" />
-   ```
+## ✅ Résultat attendu pour le candidat
 
-## Après le déploiement
-
-Les caches sociaux conservent l'ancienne version pendant plusieurs jours. Pour forcer la mise à jour immédiate après publication :
-
-- **Facebook / WhatsApp / Instagram** : passer l'URL dans le [Facebook Sharing Debugger](https://developers.facebook.com/tools/debug/) → cliquer **« Scrape Again »**.
-- **LinkedIn** : utiliser le [Post Inspector](https://www.linkedin.com/post-inspector/).
-- **X (Twitter)** : le cache se rafraîchit automatiquement après quelques heures.
-
-## Fichier modifié
-
-- `index.html` (4 lignes ajoutées/modifiées dans `<head>`)
-
-Aucune modification de code applicatif, base de données ou configuration backend n'est nécessaire.
-
+| Statut admin | Email reçu |
+|---|---|
+| `en_revue` | "Votre candidature pour [Poste] est en cours d'examen" |
+| `entretien` | "Nous souhaitons vous rencontrer" + message custom admin |
+| `acceptee` | "🎉 Félicitations" + bouton magic link → activation compte |
+| `refusee` | Message courtois et professionnel |
