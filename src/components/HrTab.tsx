@@ -11,8 +11,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Briefcase, Plus, Pencil, Trash2, FileText, Download, Calendar, MapPin, RefreshCw, Building2, X, Search, FolderOpen, FolderX } from "lucide-react";
+import { Briefcase, Plus, Pencil, Trash2, FileText, Download, Calendar, MapPin, RefreshCw, Building2, X, Search, FolderOpen, FolderX, Mail } from "lucide-react";
 import { format } from "date-fns";
+import EmailLogTab from "./EmailLogTab";
 
 type JobStatus = "brouillon" | "publiee" | "fermee";
 type ContractType = "CDI" | "CDD" | "Stage" | "Freelance" | "Alternance";
@@ -454,6 +455,7 @@ export default function HrTab() {
         <TabsList>
           <TabsTrigger value="jobs">Offres ({jobs.length})</TabsTrigger>
           <TabsTrigger value="applications">Candidatures ({applications.length})</TabsTrigger>
+          <TabsTrigger value="email-log"><Mail size={14} className="mr-1" />Historique des envois</TabsTrigger>
         </TabsList>
 
         <TabsContent value="jobs" className="space-y-3 mt-4">
@@ -705,6 +707,10 @@ export default function HrTab() {
             );
           });
           })()}
+        </TabsContent>
+
+        <TabsContent value="email-log" className="mt-4">
+          <EmailLogTab />
         </TabsContent>
       </Tabs>
 
