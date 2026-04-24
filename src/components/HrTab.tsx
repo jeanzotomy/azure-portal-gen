@@ -623,12 +623,27 @@ export default function HrTab() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="flex gap-2 flex-wrap pt-2 border-t">
-                    <Button variant="outline" size="sm" onClick={() => downloadFile(app.cv_path)}><FileText size={14} /> CV</Button>
-                    {app.cover_letter_path && (
-                      <Button variant="outline" size="sm" onClick={() => downloadFile(app.cover_letter_path!)}><Download size={14} /> Lettre de motivation</Button>
-                    )}
-                  </div>
+                  {(() => {
+                    const spUrl = extractSharePointUrl(app.notes);
+                    return (
+                      <div className="flex gap-2 flex-wrap pt-2 border-t">
+                        <Button variant="outline" size="sm" onClick={() => downloadFile(app.cv_path)}><FileText size={14} /> CV</Button>
+                        {app.cover_letter_path && (
+                          <Button variant="outline" size="sm" onClick={() => downloadFile(app.cover_letter_path!)}><Download size={14} /> Lettre de motivation</Button>
+                        )}
+                        {spUrl && (
+                          <Button variant="outline" size="sm" onClick={() => window.open(spUrl, "_blank")}>
+                            <FolderOpen size={14} /> Ouvrir dossier SharePoint
+                          </Button>
+                        )}
+                        {spUrl && isAdmin && (
+                          <Button variant="destructive" size="sm" onClick={() => handleDeleteSharePointFolder(app)}>
+                            <FolderX size={14} /> Supprimer dossier
+                          </Button>
+                        )}
+                      </div>
+                    );
+                  })()}
                 </CardContent>
               </Card>
             );
