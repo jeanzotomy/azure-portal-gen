@@ -18,6 +18,7 @@ export default function AuthPage() {
   const [loading, setLoading] = useState(false);
   const [searchParams] = useSearchParams();
   const isBlocked = searchParams.get("blocked") === "1";
+  const isWelcome = searchParams.get("welcome") === "1";
   const navigate = useNavigate();
   const { toast } = useToast();
   const { t } = useTranslation();
