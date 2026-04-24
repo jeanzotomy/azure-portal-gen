@@ -340,6 +340,29 @@ export default function EmailLogTab() {
           </div>
         </CardContent>
       </Card>
+
+      <AlertDialog open={!!toDelete} onOpenChange={(o) => !o && !deleting && setToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer cette entrée ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette action est irréversible. L'entrée d'historique pour{" "}
+              <span className="font-medium text-foreground">{toDelete?.recipient_email}</span>{" "}
+              ({toDelete?.template_name}) sera définitivement supprimée.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); void handleDelete(); }}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? "Suppression..." : "Supprimer"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
