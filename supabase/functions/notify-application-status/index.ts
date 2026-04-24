@@ -1,4 +1,7 @@
 import { createClient } from 'npm:@supabase/supabase-js@2'
+import * as React from 'npm:react@18.3.1'
+import { render } from 'npm:@react-email/render@0.0.17'
+import { TEMPLATES } from '../_shared/transactional-email-templates/registry.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -6,6 +9,38 @@ const corsHeaders = {
 }
 
 const SITE_URL = 'https://cloudmature.com'
+const FROM_ADDRESS = 'rh@cloudmature.com'
+const OUTLOOK_GATEWAY = 'https://connector-gateway.lovable.dev/microsoft_outlook'
+
+async function sendViaOutlook(to: string, subject: string, html: string) {
+  const lovableKey = Deno.env.get('LOVABLE_API_KEY')
+  const outlookKey = Deno.env.get('MICROSOFT_OUTLOOK_API_KEY')
+  if (!lovableKey) throw new Error('LOVABLE_API_KEY missing')
+  if (!outlookKey) throw new Error('MICROSOFT_OUTLOOK_API_KEY missing')
+
+  const res = await fetch(`${OUTLOOK_GATEWAY}/me/sendMail`, {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${lovableKey}`,
+      'X-Connection-Api-Key': outlookKey,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      message: {
+        subject,
+        body: { contentType: 'HTML', content: html },
+        from: { emailAddress: { address: FROM_ADDRESS } },
+        toRecipients: [{ emailAddress: { address: to } }],
+      },
+      saveToSentItems: true,
+    }),
+  })
+
+  if (!res.ok) {
+    const text = await res.text()
+    throw new Error(`Outlook sendMail failed [${res.status}]: ${text}`)
+  }
+}
 
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response(null, { headers: corsHeaders })
@@ -23,7 +58,6 @@ Deno.serve(async (req) => {
       })
     }
 
-    // Fetch application + job
     const { data: app, error: appErr } = await supabase
       .from('job_applications')
       .select('id, full_name, email, status, job_id, interview_message')
@@ -63,7 +97,6 @@ Deno.serve(async (req) => {
         break
       case 'acceptee': {
         templateName = 'application-acceptee'
-        // Generate magic link via admin API (invite type creates user if needed)
         let activationUrl = `${SITE_URL}/auth?welcome=1`
         try {
           const { data: linkData, error: linkErr } = await supabase.auth.admin.generateLink({
@@ -74,7 +107,6 @@ Deno.serve(async (req) => {
           if (!linkErr && linkData?.properties?.action_link) {
             activationUrl = linkData.properties.action_link
           } else if (linkErr) {
-            // User might already exist — try magiclink instead
             const { data: ml } = await supabase.auth.admin.generateLink({
               type: 'magiclink',
               email: app.email,
@@ -89,34 +121,48 @@ Deno.serve(async (req) => {
         break
       }
       default:
-        // 'nouvelle' or anything else: no email
         return new Response(JSON.stringify({ skipped: true, status }), {
           status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         })
     }
 
-    // Invoke send-transactional-email via Supabase client (handles auth correctly)
-    const { data: sendData, error: sendErr } = await supabase.functions.invoke(
-      'send-transactional-email',
-      {
-        body: {
-          templateName,
-          recipientEmail: app.email,
-          idempotencyKey: `app-status-${app.id}-${status}`,
-          templateData,
-        },
-      },
-    )
-
-    if (sendErr) {
-      console.error('send-transactional-email failed', sendErr)
-      return new Response(JSON.stringify({ error: 'Email send failed', detail: String(sendErr) }), {
+    const entry = TEMPLATES[templateName]
+    if (!entry) {
+      return new Response(JSON.stringify({ error: `Template ${templateName} not found` }), {
         status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
     }
-    console.log('Email queued', { templateName, recipient: app.email, sendData })
 
-    return new Response(JSON.stringify({ success: true, templateName }), {
+    const subject = typeof entry.subject === 'function' ? entry.subject(templateData) : entry.subject
+    const html = await render(React.createElement(entry.component, templateData))
+
+    try {
+      await sendViaOutlook(app.email, subject, html)
+    } catch (e) {
+      console.error('Outlook send failed', e)
+      // Log failure
+      await supabase.from('email_send_log').insert({
+        recipient_email: app.email,
+        template_name: templateName,
+        status: 'failed',
+        error_message: String(e),
+        metadata: { provider: 'outlook', application_id: app.id, status },
+      })
+      return new Response(JSON.stringify({ error: 'Email send failed', detail: String(e) }), {
+        status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      })
+    }
+
+    await supabase.from('email_send_log').insert({
+      recipient_email: app.email,
+      template_name: templateName,
+      status: 'sent',
+      metadata: { provider: 'outlook', application_id: app.id, status },
+    })
+
+    console.log('Email sent via Outlook', { templateName, recipient: app.email })
+
+    return new Response(JSON.stringify({ success: true, templateName, provider: 'outlook' }), {
       status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   } catch (err) {
