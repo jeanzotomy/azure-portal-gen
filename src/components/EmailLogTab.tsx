@@ -5,8 +5,18 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-import { RefreshCw, Search, Download, CheckCircle2, XCircle, Mail, Clock } from "lucide-react";
+import { RefreshCw, Search, Download, CheckCircle2, XCircle, Mail, Clock, Trash2 } from "lucide-react";
 import { format } from "date-fns";
 import { fr } from "date-fns/locale";
 
@@ -63,6 +73,8 @@ export default function EmailLogTab() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [applicationFilter, setApplicationFilter] = useState<string>("all");
   const [search, setSearch] = useState("");
+  const [toDelete, setToDelete] = useState<EmailLogRow | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   const load = async () => {
     setLoading(true);
@@ -87,6 +99,49 @@ export default function EmailLogTab() {
       .order("created_at", { ascending: false })
       .limit(500);
     setApplications((data as any) || []);
+  };
+
+  const handleDelete = async () => {
+    if (!toDelete) return;
+    setDeleting(true);
+    const { error, count } = await supabase
+      .from("email_send_log")
+      .delete({ count: "exact" })
+      .eq("id", toDelete.id);
+
+    if (error) {
+      const msg = error.message || "Erreur inconnue";
+      const hint = /row-level security|permission|policy/i.test(msg)
+        ? " (permissions insuffisantes — rôle admin ou gestionnaire requis)"
+        : "";
+      toast({
+        title: "Échec de la suppression",
+        description: `${msg}${hint}`,
+        variant: "destructive",
+      });
+      setDeleting(false);
+      return;
+    }
+
+    if (!count || count === 0) {
+      toast({
+        title: "Aucune ligne supprimée",
+        description: "L'entrée n'existe plus ou vous n'avez pas la permission de la supprimer.",
+        variant: "destructive",
+      });
+      setDeleting(false);
+      setToDelete(null);
+      void load();
+      return;
+    }
+
+    setRows((prev) => prev.filter((r) => r.id !== toDelete.id));
+    toast({
+      title: "Entrée supprimée",
+      description: `Envoi à ${toDelete.recipient_email} retiré de l'historique.`,
+    });
+    setDeleting(false);
+    setToDelete(null);
   };
 
   useEffect(() => {
@@ -235,14 +290,15 @@ export default function EmailLogTab() {
                   <th className="text-left px-4 py-2 font-medium">Statut</th>
                   <th className="text-left px-4 py-2 font-medium">Poste</th>
                   <th className="text-left px-4 py-2 font-medium">Détails</th>
+                  <th className="text-right px-4 py-2 font-medium">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {loading && (
-                  <tr><td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">Chargement...</td></tr>
+                  <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">Chargement...</td></tr>
                 )}
                 {!loading && filtered.length === 0 && (
-                  <tr><td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">Aucun envoi trouvé.</td></tr>
+                  <tr><td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">Aucun envoi trouvé.</td></tr>
                 )}
                 {!loading && filtered.map((r) => (
                   <tr key={r.id} className="border-t border-border hover:bg-muted/30">
@@ -266,6 +322,17 @@ export default function EmailLogTab() {
                         </span>
                       )}
                     </td>
+                    <td className="px-4 py-2 whitespace-nowrap text-right">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                        onClick={() => setToDelete(r)}
+                        aria-label="Supprimer"
+                      >
+                        <Trash2 size={14} />
+                      </Button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -273,6 +340,29 @@ export default function EmailLogTab() {
           </div>
         </CardContent>
       </Card>
+
+      <AlertDialog open={!!toDelete} onOpenChange={(o) => !o && !deleting && setToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Supprimer cette entrée ?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Cette action est irréversible. L'entrée d'historique pour{" "}
+              <span className="font-medium text-foreground">{toDelete?.recipient_email}</span>{" "}
+              ({toDelete?.template_name}) sera définitivement supprimée.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => { e.preventDefault(); void handleDelete(); }}
+              disabled={deleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {deleting ? "Suppression..." : "Supprimer"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
