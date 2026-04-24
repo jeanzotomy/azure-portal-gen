@@ -708,6 +708,10 @@ export default function HrTab() {
           });
           })()}
         </TabsContent>
+
+        <TabsContent value="email-log" className="mt-4">
+          <EmailLogTab />
+        </TabsContent>
       </Tabs>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
