@@ -105,14 +105,21 @@ serve(async (req) => {
           status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      const { data: roleRow } = await adminClient
+      const { data: roleRows } = await adminClient
         .from("user_roles")
         .select("role")
-        .eq("user_id", userData.user.id)
-        .eq("role", "admin")
-        .maybeSingle();
-      if (!roleRow) {
+        .eq("user_id", userData.user.id);
+      const roles = (roleRows || []).map((r) => r.role);
+      const isAdmin = roles.includes("admin");
+      const isStaff = isAdmin || roles.includes("gestionnaire") || roles.includes("agent");
+
+      if (body.action === "delete" && !isAdmin) {
         return new Response(JSON.stringify({ error: "Forbidden: admin only" }), {
+          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      if (body.action === "get_or_create" && !isStaff) {
+        return new Response(JSON.stringify({ error: "Forbidden" }), {
           status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
@@ -140,6 +147,17 @@ serve(async (req) => {
 
       const token = await getGraphToken();
       const folderName = `${firstName}-${lastName}-${jobId.substring(0, 8)}`;
+
+      if (body.action === "get_or_create") {
+        await ensureFolder(token, cfg.site_id, cfg.drive_id, "", "Candidatures");
+        const folder = await ensureFolder(token, cfg.site_id, cfg.drive_id, "Candidatures", folderName);
+        return new Response(JSON.stringify({
+          success: true,
+          folder: { name: folderName, webUrl: folder.webUrl, id: folder.id },
+        }), { headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+
+      // delete
       const folderPath = `Candidatures/${folderName}`;
       const delUrl = `${GRAPH_BASE}/sites/${cfg.site_id}/drives/${cfg.drive_id}/root:/${folderPath}`;
       const delRes = await fetch(delUrl, {
