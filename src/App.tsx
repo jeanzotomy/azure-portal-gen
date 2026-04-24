@@ -15,6 +15,7 @@ import PrivacyPage from "./pages/PrivacyPage.tsx";
 import TermsPage from "./pages/TermsPage.tsx";
 import CareersPage from "./pages/CareersPage.tsx";
 import JobDetailPage from "./pages/JobDetailPage.tsx";
+import UnsubscribePage from "./pages/UnsubscribePage.tsx";
 import NotFound from "./pages/NotFound.tsx";
 import { AuthGuard } from "./components/AuthGuard";
 
@@ -45,6 +46,7 @@ const App = () => (
           <Route path="/terms" element={<TermsPage />} />
           <Route path="/careers" element={<CareersPage />} />
           <Route path="/careers/:slug" element={<JobDetailPage />} />
+          <Route path="/unsubscribe" element={<UnsubscribePage />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
