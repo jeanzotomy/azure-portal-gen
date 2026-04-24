@@ -434,6 +434,8 @@ export default function HrTab() {
     window.open(webUrl, "_blank");
     load();
   };
+
+  return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
