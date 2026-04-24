@@ -914,6 +914,35 @@ export default function HrTab() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={interviewDialogOpen} onOpenChange={setInterviewDialogOpen}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-white flex items-center gap-2"><Calendar size={18} /> Inviter à un entretien</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3">
+            {interviewApp && (
+              <p className="text-sm text-muted-foreground">
+                Candidat : <span className="font-semibold text-foreground">{interviewApp.full_name}</span> ({interviewApp.email})
+              </p>
+            )}
+            <div>
+              <label className="text-sm font-medium">Message d'invitation *</label>
+              <Textarea
+                rows={5}
+                value={interviewMessage}
+                onChange={(e) => setInterviewMessage(e.target.value)}
+                placeholder="Ex: Entretien prévu le mardi 30 avril 2026 à 10h00 (GMT) en visioconférence Microsoft Teams. Le lien vous sera envoyé 24h avant."
+              />
+              <p className="text-xs text-muted-foreground mt-1">Précisez la date, l'heure, le lieu ou le lien visio. Ce message sera inclus dans l'email.</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setInterviewDialogOpen(false)}>Annuler</Button>
+            <Button onClick={confirmInterview}>Envoyer l'invitation</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
