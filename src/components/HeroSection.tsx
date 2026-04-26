@@ -2,7 +2,7 @@ import { ArrowRight, Cloud, Shield, TrendingUp, UserPlus, Smartphone } from "luc
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import heroPerson from "@/assets/hero-person.png";
+import heroPerson from "@/assets/hero-person.webp";
 import { useTranslation } from "@/i18n/LanguageContext";
 
 export function HeroSection() {

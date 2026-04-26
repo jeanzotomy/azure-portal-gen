@@ -1,5 +1,5 @@
 import { Monitor, KeyRound, Server, Blocks, ArrowUpRight, ShieldCheck, Headphones, BrainCircuit } from "lucide-react";
-import servicesImage from "@/assets/two-business-woman-cafe-2.jpg";
+import servicesImage from "@/assets/two-business-woman-cafe-2.webp";
 import { useTranslation } from "@/i18n/LanguageContext";
 
 const icons = [Monitor, KeyRound, Server, Blocks, ArrowUpRight, ShieldCheck, Headphones, BrainCircuit];
