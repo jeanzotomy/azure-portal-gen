@@ -24,9 +24,10 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    const { phone, purpose, user_id } = await req.json();
+    const { phone: rawPhone, purpose, user_id } = await req.json();
+    const phone = typeof rawPhone === "string" ? rawPhone.replace(/[\s\-().]/g, "") : "";
 
-    if (!phone || typeof phone !== "string" || !/^\+[1-9]\d{6,14}$/.test(phone)) {
+    if (!phone || !/^\+[1-9]\d{6,14}$/.test(phone)) {
       return new Response(JSON.stringify({ error: "Invalid phone number (E.164 format required)" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
