@@ -1,11 +1,12 @@
 import { useRef, useState } from "react";
-import { Volume2, VolumeX } from "lucide-react";
+import { Volume2, VolumeX, Play } from "lucide-react";
 
 const YOUTUBE_VIDEO_ID = "DSVNKPM68-E";
 
 export function HeroScreenCarousel() {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const [muted, setMuted] = useState(true);
+  const [activated, setActivated] = useState(false);
 
   const toggleSound = () => {
     const iframe = iframeRef.current;
@@ -36,24 +37,50 @@ export function HeroScreenCarousel() {
 
         {/* Screen area */}
         <div className="relative bg-secondary overflow-hidden aspect-[16/9] rounded-b-lg border-x-4 border-b-4 border-secondary">
-          <iframe
-            ref={iframeRef}
-            src={`https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}?autoplay=1&mute=1&loop=1&playlist=${YOUTUBE_VIDEO_ID}&controls=0&modestbranding=1&rel=0&playsinline=1&enablejsapi=1`}
-            title="CloudMature Présentation"
-            allow="autoplay; encrypted-media; picture-in-picture"
-            allowFullScreen
-            loading="lazy"
-            className="absolute inset-0 w-full h-full border-0"
-          />
+          {activated ? (
+            <>
+              <iframe
+                ref={iframeRef}
+                src={`https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}?autoplay=1&mute=1&loop=1&playlist=${YOUTUBE_VIDEO_ID}&controls=0&modestbranding=1&rel=0&playsinline=1&enablejsapi=1`}
+                title="CloudMature Présentation"
+                allow="autoplay; encrypted-media; picture-in-picture"
+                allowFullScreen
+                loading="lazy"
+                className="absolute inset-0 w-full h-full border-0"
+              />
 
-          {/* Sound toggle button */}
-          <button
-            onClick={toggleSound}
-            aria-label={muted ? "Activer le son" : "Couper le son"}
-            className="absolute bottom-4 right-4 z-10 bg-secondary/80 backdrop-blur-sm hover:bg-primary/90 text-primary-foreground p-2.5 rounded-full border border-primary/30 transition-all duration-300 hover:scale-110"
-          >
-            {muted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
-          </button>
+              {/* Sound toggle button */}
+              <button
+                onClick={toggleSound}
+                aria-label={muted ? "Activer le son" : "Couper le son"}
+                className="absolute bottom-4 right-4 z-10 bg-secondary/80 backdrop-blur-sm hover:bg-primary/90 text-primary-foreground p-2.5 rounded-full border border-primary/30 transition-all duration-300 hover:scale-110"
+              >
+                {muted ? <VolumeX className="w-5 h-5" /> : <Volume2 className="w-5 h-5" />}
+              </button>
+            </>
+          ) : (
+            <button
+              type="button"
+              onClick={() => setActivated(true)}
+              aria-label="Lire la vidéo de présentation CloudMature"
+              className="absolute inset-0 w-full h-full group cursor-pointer"
+            >
+              {/* Lightweight thumbnail facade — no YouTube JS loaded until clicked */}
+              <img
+                src={`https://i.ytimg.com/vi/${YOUTUBE_VIDEO_ID}/hqdefault.jpg`}
+                alt="CloudMature Présentation"
+                loading="lazy"
+                decoding="async"
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors" />
+              <div className="absolute inset-0 flex items-center justify-center">
+                <div className="bg-primary/90 text-primary-foreground rounded-full p-5 group-hover:scale-110 transition-transform shadow-lg">
+                  <Play className="w-8 h-8 fill-current" />
+                </div>
+              </div>
+            </button>
+          )}
         </div>
 
         {/* Monitor stand */}
