@@ -42,6 +42,7 @@ export function HeroScreenCarousel() {
             title="CloudMature Présentation"
             allow="autoplay; encrypted-media; picture-in-picture"
             allowFullScreen
+            loading="lazy"
             className="absolute inset-0 w-full h-full border-0"
           />
 
