@@ -106,7 +106,7 @@ export function HeroSection() {
                 <item.icon size={16} className="text-primary-foreground" />
               </div>
               <div>
-                <h3 className="font-semibold text-sm text-primary-foreground">{item.title}</h3>
+                <h2 className="font-semibold text-sm text-primary-foreground">{item.title}</h2>
                 <p className="text-xs text-secondary-foreground/60">{item.desc}</p>
               </div>
             </div>
