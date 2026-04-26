@@ -71,7 +71,7 @@ export function HeroSection() {
                 <UserPlus size={18} className="mr-2" /> {t("hero.become")}
               </Button>
               <Link to="/install" className="w-full sm:w-auto">
-                <Button size="lg" variant="outline" className="border-cyan-glow/40 text-cyan-glow hover:bg-cyan-glow/10 w-full sm:w-auto">
+                <Button size="lg" variant="outline" className="border-primary/50 text-primary hover:bg-primary/10 w-full sm:w-auto">
                   <Smartphone size={18} className="mr-2" /> {t("install.navButton")}
                 </Button>
               </Link>
