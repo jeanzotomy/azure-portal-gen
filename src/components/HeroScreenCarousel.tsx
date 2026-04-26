@@ -41,7 +41,7 @@ export function HeroScreenCarousel() {
             <>
               <iframe
                 ref={iframeRef}
-                src={`https://www.youtube.com/embed/${YOUTUBE_VIDEO_ID}?autoplay=1&mute=1&loop=1&playlist=${YOUTUBE_VIDEO_ID}&controls=0&modestbranding=1&rel=0&playsinline=1&enablejsapi=1`}
+                src={`https://www.youtube-nocookie.com/embed/${YOUTUBE_VIDEO_ID}?autoplay=1&mute=1&loop=1&playlist=${YOUTUBE_VIDEO_ID}&controls=0&modestbranding=1&rel=0&playsinline=1&enablejsapi=1`}
                 title="CloudMature Présentation"
                 allow="autoplay; encrypted-media; picture-in-picture"
                 allowFullScreen
