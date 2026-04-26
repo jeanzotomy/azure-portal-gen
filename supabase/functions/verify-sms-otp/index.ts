@@ -16,7 +16,12 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
     );
 
-    const { phone, code, purpose } = await req.json();
+    const { phone: rawPhone, code, purpose } = await req.json();
+    // Normalize phone the same way send-sms-otp does (strip spaces/dashes/parens/dots)
+    // but preserve "email:" prefix used for email-MFA fallback.
+    const phone = typeof rawPhone === "string"
+      ? (rawPhone.startsWith("email:") ? rawPhone : rawPhone.replace(/[\s\-().]/g, ""))
+      : "";
 
     if (!phone || !code || !purpose) {
       return new Response(JSON.stringify({ error: "Missing phone, code, or purpose" }), {
