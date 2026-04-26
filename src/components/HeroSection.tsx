@@ -8,9 +8,16 @@ import { useTranslation } from "@/i18n/LanguageContext";
 export function HeroSection() {
   const { t } = useTranslation();
   const words: string[] = t("hero.words");
-  const [visibleCount, setVisibleCount] = useState(0);
+  // Start fully visible to avoid delaying LCP; sequential reveal only triggers
+  // on language change so first paint shows the H1 immediately.
+  const [visibleCount, setVisibleCount] = useState(words.length);
+  const [hasMounted, setHasMounted] = useState(false);
 
   useEffect(() => {
+    if (!hasMounted) {
+      setHasMounted(true);
+      return;
+    }
     setVisibleCount(0);
     const timers = words.map((_, i) =>
       setTimeout(() => setVisibleCount(i + 1), 400 + i * 500)
