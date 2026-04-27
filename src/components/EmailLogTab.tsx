@@ -287,8 +287,8 @@ export default function EmailLogTab() {
         </Select>
       </div>
 
-      {/* Table */}
-      <Card>
+      {/* Table (desktop) */}
+      <Card className="hidden md:block">
         <CardContent className="p-0">
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
@@ -350,6 +350,50 @@ export default function EmailLogTab() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Cards (mobile) */}
+      <div className="md:hidden space-y-2">
+        {loading && (
+          <Card><CardContent className="p-4 text-center text-sm text-muted-foreground">Chargement...</CardContent></Card>
+        )}
+        {!loading && filtered.length === 0 && (
+          <Card><CardContent className="p-4 text-center text-sm text-muted-foreground">Aucun envoi trouvé.</CardContent></Card>
+        )}
+        {!loading && filtered.map((r) => (
+          <Card key={r.id}>
+            <CardContent className="p-3 space-y-2">
+              <div className="flex items-start justify-between gap-2">
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-medium truncate">{r.recipient_email}</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {format(new Date(r.created_at), "dd MMM yyyy HH:mm", { locale: fr })}
+                  </p>
+                </div>
+                {statusBadge(r.status)}
+              </div>
+              <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
+                <span><span className="text-muted-foreground">Template:</span> {r.template_name}</span>
+                {r.metadata?.job_title && (
+                  <span><span className="text-muted-foreground">Poste:</span> {r.metadata.job_title}</span>
+                )}
+              </div>
+              {r.error_message && (
+                <p className="text-xs text-red-600 break-words">{r.error_message}</p>
+              )}
+              <div className="flex justify-end pt-1 border-t border-border">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+                  onClick={() => setToDelete(r)}
+                >
+                  <Trash2 size={14} className="mr-1" /> Supprimer
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
 
       <AlertDialog open={!!toDelete} onOpenChange={(o) => !o && !deleting && setToDelete(null)}>
         <AlertDialogContent>
