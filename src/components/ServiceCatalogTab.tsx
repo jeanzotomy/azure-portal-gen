@@ -179,7 +179,7 @@ export default function ServiceCatalogTab() {
       )}
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto w-[95vw] sm:w-auto">
           <DialogHeader>
             <DialogTitle>{editing ? "Modifier le service" : "Nouveau service"}</DialogTitle>
           </DialogHeader>
