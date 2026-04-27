@@ -760,7 +760,7 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
               <Input value={formDescription} onChange={e => setFormDescription(e.target.value)} required />
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label className="text-sm font-medium">Montant HT *</label>
                 <Input type="number" step="0.01" value={formAmount} onChange={e => setFormAmount(e.target.value)} required />

@@ -192,7 +192,7 @@ export default function ServiceCatalogTab() {
               <label className="text-xs font-medium">Description (sous-titre italique)</label>
               <Textarea rows={2} value={form.description ?? ""} onChange={(e) => setForm({ ...form, description: e.target.value })} />
             </div>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label className="text-xs font-medium">Prix unitaire par défaut</label>
                 <Input type="number" min={0} value={form.default_unit_price ?? 0} onChange={(e) => setForm({ ...form, default_unit_price: Number(e.target.value) })} />
