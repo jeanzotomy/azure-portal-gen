@@ -8,6 +8,12 @@ const fr = {
     contact: "Contact",
     portal: "Portail Client",
   },
+  mobileNav: {
+    home: "Accueil",
+    projects: "Projets",
+    applications: "Candidatures",
+    profile: "Profil",
+  },
   about: {
     badge: "À propos",
     title: "Qui sommes-nous,",

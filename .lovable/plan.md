@@ -1,60 +1,37 @@
-# 📧 Notifications candidature + Invitation portail (magic link)
+## Objectif
 
-## 🎯 Objectif
-Quand l'admin change le statut d'une candidature, le candidat reçoit automatiquement un email français adapté. Si "acceptée" → magic link 1-clic pour activer son compte client.
+Sur mobile uniquement, ajouter une **barre de navigation fixe en bas de l'écran** (style application native) avec 4 raccourcis : Accueil, Projets, Candidatures, Profil. Le menu hamburger en haut reste inchangé. Sur tablette et desktop (≥ md), rien ne change : la navbar actuelle reste telle quelle.
 
----
+## Comportement
 
-## 1️⃣ Infrastructure email transactionnelle
-- Scaffold du système email transactionnel Lovable (réutilise le domaine `notify.cloudmature.com` déjà configuré)
-- Crée la fonction `send-transactional-email` + page `/unsubscribe` + registry de templates
+- Visible uniquement sur mobile (`md:hidden`)
+- Fixée en bas de l'écran (`fixed bottom-0`), au-dessus de tout contenu (`z-40`, sous la navbar `z-50`)
+- 4 onglets avec icône + label court :
+  - **Accueil** (`Home`) → `/`
+  - **Projets** (`FolderKanban`) → `/portal` (onglet projets) ou `/auth` si non connecté
+  - **Candidatures** (`Briefcase`) → `/portal` (onglet candidatures) ou `/careers` si non connecté
+  - **Profil** (`User`) → `/portal` (onglet profil) ou `/auth` si non connecté
+- L'onglet actif est mis en évidence avec la couleur primaire (cyan)
+- Style glassmorphism cohérent avec l'identité visuelle (fond semi-transparent, blur, bordure haute subtile)
+- Bouton "ScrollToTop" repositionné légèrement plus haut sur mobile pour ne pas chevaucher la bottom nav
 
-## 2️⃣ Migration SQL
-- **Ajout colonne** `interview_message TEXT` à `job_applications` (message custom pour l'email d'entretien)
-- **Trigger** `on_application_status_change` sur `job_applications`:
-  - Se déclenche `AFTER UPDATE` quand `OLD.status IS DISTINCT FROM NEW.status`
-  - Appelle l'edge function `notify-application-status` en async via `pg_net.http_post` avec service-role key (stockée dans Vault)
+## Détails techniques
 
-## 3️⃣ Edge Function `notify-application-status` (nouvelle)
-- Reçoit `application_id` + `new_status`
-- Récupère candidature complète + offre d'emploi (titre, département)
-- Branche selon le statut :
-  - `en_revue` → invoke `send-transactional-email` template `application-en-revue`
-  - `entretien` → template `application-entretien` + `interview_message`
-  - `acceptee` → génère magic link via `auth.admin.generateLink({ type: 'invite', email, options: { redirectTo: '/auth?welcome=1' } })` → template `application-acceptee` avec bouton magic link
-  - `refusee` → template `application-refusee`
-- Idempotency key : `app-status-{id}-{status}`
+**Nouveau composant** : `src/components/MobileBottomNav.tsx`
+- Utilise `useLocation` + `useAuthSession`
+- Détermine l'onglet actif selon `pathname` et `location.hash`/`location.search` (paramètre `?tab=`)
+- Pour les liens vers le portail avec onglet spécifique, utilise `/portal?tab=projects|applications|profile`
 
-## 4️⃣ Templates React Email (4 fichiers, brand CloudMature navy/cyan)
-- `application-en-revue.tsx` — "Votre candidature pour [poste] est en cours d'examen"
-- `application-entretien.tsx` — "Invitation à un entretien" + message custom de l'admin (date/visio/lieu)
-- `application-acceptee.tsx` — 🎉 "Félicitations" + bouton "Activer mon compte CloudMature" (magic link)
-- `application-refusee.tsx` — Message courtois en français
-- Tous : 100% français, fond blanc, header logo CloudMature, couleur primaire #0099cc
+**Modifications** :
+1. `src/components/MobileBottomNav.tsx` (nouveau) — composant bottom nav
+2. `src/App.tsx` — montage global du `<MobileBottomNav />` dans `BrowserRouter` (après `ScrollToTop`)
+3. `src/components/ScrollToTop.tsx` — ajuster `bottom-6` → `bottom-24 md:bottom-6` pour éviter le chevauchement sur mobile
+4. `src/i18n/fr.ts` et `src/i18n/en.ts` — ajouter les clés `mobileNav.home`, `mobileNav.projects`, `mobileNav.applications`, `mobileNav.profile`
+5. `src/pages/PortalPage.tsx` — vérifier que l'onglet actif peut être pré-sélectionné via le query param `?tab=` (lecture au montage)
+6. Ajouter un padding-bottom global (`pb-20 md:pb-0`) sur les pages principales OU sur `<body>` via `index.css` pour que le contenu ne soit pas masqué par la bottom nav
 
-## 5️⃣ UI Admin — `HrTab.tsx`
-- **Statut → `entretien`** : ouvre un petit dialog demandant le message personnalisé (date, lieu/visio, instructions) **avant** de valider la mise à jour
-- **Autres statuts** : changement direct + toast *"Statut mis à jour. Le candidat sera notifié par email."*
-- **Indicateur visuel** : badge "📧 Notifié" à côté de chaque candidature (lecture rapide depuis `email_send_log` filtré par `recipient_email`)
+## Hors scope
 
-## 6️⃣ Page d'accueil candidat accepté — `AuthPage.tsx`
-- Détecte query param `?welcome=1`
-- Affiche un bandeau de bienvenue : *"🎉 Félicitations pour votre candidature ! Créez votre mot de passe pour finaliser votre intégration à CloudMature."*
-
-## 7️⃣ Sécurité & traçabilité
-- Trigger uniquement si `OLD.status IS DISTINCT FROM NEW.status` → pas de spam
-- Idempotency keys → pas de doublon si l'admin change 2× rapidement
-- Suppression list email respectée automatiquement (système Lovable)
-- Tous les envois loggués dans `email_send_log` (visible côté admin)
-- Magic link expiration : 7 jours (réglage Supabase auth)
-
----
-
-## ✅ Résultat attendu pour le candidat
-
-| Statut admin | Email reçu |
-|---|---|
-| `en_revue` | "Votre candidature pour [Poste] est en cours d'examen" |
-| `entretien` | "Nous souhaitons vous rencontrer" + message custom admin |
-| `acceptee` | "🎉 Félicitations" + bouton magic link → activation compte |
-| `refusee` | Message courtois et professionnel |
+- Aucun changement sur le menu desktop (≥ 768px)
+- Aucun changement sur le menu hamburger mobile existant (il reste accessible en haut)
+- Aucune modification des routes ou de la logique d'authentification
