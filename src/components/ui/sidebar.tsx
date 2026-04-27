@@ -599,8 +599,19 @@ const SidebarMenuSubButton = React.forwardRef<
     size?: "sm" | "md";
     isActive?: boolean;
   }
->(({ asChild = false, size = "md", isActive, className, ...props }, ref) => {
+>(({ asChild = false, size = "md", isActive, className, onClick, ...props }, ref) => {
   const Comp = asChild ? Slot : "a";
+  const { isMobile, setOpenMobile } = useSidebar();
+
+  const handleClick = React.useCallback(
+    (e: React.MouseEvent<HTMLAnchorElement>) => {
+      onClick?.(e);
+      if (isMobile && !e.defaultPrevented) {
+        setOpenMobile(false);
+      }
+    },
+    [isMobile, onClick, setOpenMobile],
+  );
 
   return (
     <Comp
@@ -616,6 +627,7 @@ const SidebarMenuSubButton = React.forwardRef<
         "group-data-[collapsible=icon]:hidden",
         className,
       )}
+      onClick={handleClick}
       {...props}
     />
   );
