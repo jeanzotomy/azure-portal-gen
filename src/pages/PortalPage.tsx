@@ -177,7 +177,7 @@ function PortalContent() {
         </header>
         <PortalInfoBar />
 
-        <main className="flex-1 p-3 sm:p-6 overflow-auto">
+        <main className="flex-1 p-3 sm:p-6 pb-[calc(80px+env(safe-area-inset-bottom))] md:pb-6 overflow-auto">
           {profileIncomplete && (
             <Alert className="mb-4 border-warning bg-warning/10">
               <Info className="h-4 w-4 text-warning" />

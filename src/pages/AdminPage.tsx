@@ -167,7 +167,7 @@ function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser
           </div>
         </header>
         <PortalInfoBar />
-        <main className="flex-1 p-6 overflow-auto">
+        <main className="flex-1 p-6 pb-[calc(80px+env(safe-area-inset-bottom))] md:pb-6 overflow-auto">
           {tab === "projects" && <AdminProjectsInner readOnly />}
           {tab === "sharepoint" && <SharePointTab readOnly={false} />}
           {tab === "service-clients" && <ServiceClientsTab />}
@@ -368,7 +368,7 @@ function AdminContent() {
             </div>
           </header>
           <PortalInfoBar />
-          <main className="flex-1 p-6 overflow-auto">
+          <main className="flex-1 p-6 pb-[calc(80px+env(safe-area-inset-bottom))] md:pb-6 overflow-auto">
             {gestionnaireTab === "dashboard" && <AdminDashboard />}
             {gestionnaireTab === "projects" && <AdminProjects assignedCount={assignedProjectsCount} />}
             {gestionnaireTab === "tickets" && <AdminTickets />}
@@ -460,7 +460,7 @@ function AdminContent() {
             </div>
           </header>
           <PortalInfoBar />
-          <main className="flex-1 p-6 overflow-auto">
+          <main className="flex-1 p-6 pb-[calc(80px+env(safe-area-inset-bottom))] md:pb-6 overflow-auto">
             {agentTab === "dashboard" && <AgentDashboard user={user} />}
             {agentTab === "tickets" && <AdminTickets />}
             {agentTab === "contacts" && <AdminContacts />}
@@ -596,7 +596,7 @@ function AdminContent() {
         </header>
         <PortalInfoBar />
 
-        <main className="flex-1 p-6 overflow-auto">
+        <main className="flex-1 p-6 pb-[calc(80px+env(safe-area-inset-bottom))] md:pb-6 overflow-auto">
           {tab === "dashboard" && <AdminDashboard />}
           {tab === "projects" && <AdminProjects />}
           {tab === "tickets" && <AdminTickets />}
