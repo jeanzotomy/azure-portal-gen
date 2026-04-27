@@ -1443,7 +1443,7 @@ function AdminProjectsInner({ readOnly = false, assignedCount }: { readOnly?: bo
               <label className="text-sm font-medium text-card-foreground">Description</label>
               <Textarea value={editDescription} onChange={(e) => setEditDescription(e.target.value)} rows={3} className="mt-1" />
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="text-sm font-medium text-card-foreground">Budget</label>
                 <Input value={editBudget} onChange={(e) => setEditBudget(e.target.value)} placeholder="Ex: 5000" className="mt-1" />

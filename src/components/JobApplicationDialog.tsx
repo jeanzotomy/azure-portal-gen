@@ -284,7 +284,7 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
               <span>Ces informations proviennent de votre profil. Pour les modifier, mettez à jour votre profil dans l'espace client.</span>
             </div>
           )}
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="text-sm font-medium flex items-center gap-1">
                 Prénom <span className="text-destructive">*</span>
@@ -314,7 +314,7 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
           </div>
 
           <SectionTitle icon={Mail} title="Contact" />
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="text-sm font-medium">Email <span className="text-destructive">*</span></label>
               <Input type="email" className={fieldClass("email")} value={form.email} onChange={(e) => update("email", e.target.value)} />
@@ -336,7 +336,7 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
           </div>
 
           <SectionTitle icon={Briefcase} title="Profil professionnel" />
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="text-sm font-medium">Années d'expérience</label>
               <Input type="number" min="0" max="60" className={fieldClass("years_experience")} value={form.years_experience} onChange={(e) => update("years_experience", e.target.value)} />
@@ -347,7 +347,7 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
               <Input placeholder="Ex: 1M GNF/mois" value={form.salary_expectation} onChange={(e) => update("salary_expectation", e.target.value)} />
             </div>
           </div>
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label className="text-sm font-medium">LinkedIn</label>
               <Input placeholder="https://linkedin.com/in/..." className={fieldClass("linkedin_url")} value={form.linkedin_url} onChange={(e) => update("linkedin_url", e.target.value)} />
@@ -361,7 +361,7 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
           </div>
 
           <SectionTitle icon={FileText} title="Documents" />
-          <div className="grid grid-cols-2 gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <FileDrop file={cvFile} onChange={setCvFile} onClear={() => setCvFile(null)} label="CV" required />
             <FileDrop file={letterFile} onChange={setLetterFile} onClear={() => setLetterFile(null)} label="Lettre de motivation" />
           </div>
