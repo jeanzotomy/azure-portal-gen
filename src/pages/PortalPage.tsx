@@ -111,7 +111,7 @@ function PortalContent() {
 
   return (
     <div className="min-h-screen flex w-full bg-background">
-      <Sidebar collapsible="icon" className="border-r border-sidebar-border">
+      <Sidebar collapsible="icon" className="hidden md:flex border-r border-sidebar-border">
         <SidebarContent className="bg-sidebar">
           <div className="px-4 py-5 border-b border-sidebar-border">
             <Link to="/" className="flex items-center gap-2">
@@ -156,7 +156,7 @@ function PortalContent() {
       </Sidebar>
 
       <div className="flex-1 flex flex-col min-h-screen">
-        <header className="h-14 flex items-center justify-between border-b border-border bg-card px-4">
+        <header className="h-14 hidden md:flex items-center justify-between border-b border-border bg-card px-4">
           <div className="flex items-center gap-3">
             <SidebarTrigger />
             <h2 className="text-sm font-semibold text-card-foreground hidden sm:block">
@@ -171,6 +171,18 @@ function PortalContent() {
             )}
             <NotificationBell role="client" onNavigate={(target) => setTab(target as Tab)} />
             <button onClick={() => setTab("profile")} className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold cursor-pointer hover:opacity-80 transition-opacity" title={t("portal.profile")}>
+              {(user.user_metadata?.full_name || user.email || "U").charAt(0).toUpperCase()}
+            </button>
+          </div>
+        </header>
+        {/* Mobile header: simple title + notifications, no sidebar trigger */}
+        <header className="h-14 md:hidden flex items-center justify-between border-b border-border bg-card px-4">
+          <h2 className="text-base font-semibold text-card-foreground truncate">
+            {navItems.find(n => n.id === tab)?.label}
+          </h2>
+          <div className="flex items-center gap-2">
+            <NotificationBell role="client" onNavigate={(target) => setTab(target as Tab)} />
+            <button onClick={() => setTab("profile")} className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold" title={t("portal.profile")}>
               {(user.user_metadata?.full_name || user.email || "U").charAt(0).toUpperCase()}
             </button>
           </div>
