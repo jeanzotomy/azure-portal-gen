@@ -49,7 +49,7 @@ export function Navbar() {
     <nav className="fixed top-0 left-0 right-0 z-50 navbar-dark">
       <div className="container flex items-center justify-between h-16">
         <Link to="/" className="flex items-center gap-2">
-          <img src={logo} alt="CloudMature" width={220} height={48} className="h-12 w-auto brightness-[1.15] contrast-[1.1]" />
+          <img src={logo} alt="CloudMature" width={220} height={48} fetchPriority="high" decoding="async" className="h-12 w-auto brightness-[1.15] contrast-[1.1]" />
         </Link>
 
         {/* Desktop */}
