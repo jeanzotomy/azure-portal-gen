@@ -222,24 +222,24 @@ export default function CareersPage() {
           <div className="space-y-4">
             {filteredJobs.map((job) => (
               <Card key={job.id} className="hover:shadow-md hover:border-primary/40 transition-all group">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between gap-4 flex-wrap">
+                <CardContent className="p-4 sm:p-6">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap mb-2">
                         <Link
                           to={jobPath(job.id, job.title)}
-                          className="text-xl font-semibold hover:text-primary transition-colors"
+                          className="text-base sm:text-xl font-semibold hover:text-primary transition-colors break-words"
                         >
                           {job.title}
                         </Link>
-                        <Badge variant="outline">
+                        <Badge variant="outline" className="text-[11px] sm:text-xs">
                           {job.contract_type}
                           {job.contract_type === "CDD" && job.contract_duration ? ` · ${job.contract_duration}` : ""}
                           {job.contract_type === "CDD" && job.renewable ? " · renouvelable" : ""}
                         </Badge>
-                        {job.department && <Badge variant="secondary">{job.department}</Badge>}
+                        {job.department && <Badge variant="secondary" className="text-[11px] sm:text-xs">{job.department}</Badge>}
                       </div>
-                      <div className="flex flex-wrap gap-4 text-sm text-muted-foreground mb-3">
+                      <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-xs sm:text-sm text-muted-foreground mb-3">
                         <span className="flex items-center gap-1"><MapPin size={14} /> {job.location}</span>
                         <span className="flex items-center gap-1"><Clock size={14} /> Publié le {format(new Date(job.created_at), "dd/MM/yyyy")}</span>
                         {job.closing_date && (
@@ -249,14 +249,14 @@ export default function CareersPage() {
                         )}
                       </div>
                       {(job.sector || job.start_date || job.salary_range) && (
-                        <div className="grid sm:grid-cols-3 gap-2 text-xs mb-3 p-3 rounded-lg bg-muted/40 border">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5 sm:gap-2 text-xs mb-3 p-2.5 sm:p-3 rounded-lg bg-muted/40 border">
                           {job.sector && <div><span className="font-semibold text-foreground">Secteur :</span> <span className="text-muted-foreground">{job.sector}</span></div>}
                           {job.start_date && <div><span className="font-semibold text-foreground">Prise de poste :</span> <span className="text-muted-foreground">{job.start_date}</span></div>}
                           {job.salary_range && <div><span className="font-semibold text-foreground">Rémunération :</span> <span className="text-muted-foreground">{job.salary_range}</span></div>}
                         </div>
                       )}
                       <h4 className="text-sm font-semibold mb-1 text-foreground">Description du poste</h4>
-                      <p className={`text-sm text-foreground/80 whitespace-pre-line ${expanded[job.id] ? "" : "line-clamp-4"}`}>{job.description}</p>
+                      <p className={`text-sm text-foreground/80 whitespace-pre-line ${expanded[job.id] ? "" : "line-clamp-3 sm:line-clamp-4"}`}>{job.description}</p>
                       {job.description.length > 200 && (
                         <Link
                           to={jobPath(job.id, job.title)}
@@ -266,15 +266,15 @@ export default function CareersPage() {
                         </Link>
                       )}
                     </div>
-                    <div className="flex flex-col gap-2 shrink-0">
-                      <Link to={jobPath(job.id, job.title)}>
+                    <div className="flex flex-row sm:flex-col gap-2 sm:shrink-0 sm:w-40">
+                      <Link to={jobPath(job.id, job.title)} className="flex-1 sm:flex-none">
                         <Button className="gradient-primary text-primary-foreground border-0 w-full">
                           Voir & Postuler
                         </Button>
                       </Link>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button variant="outline" size="sm" className="gap-1.5 w-full">
+                          <Button variant="outline" size="sm" className="gap-1.5 w-full h-10 sm:h-9">
                             <Share2 size={14} /> Partager
                           </Button>
                         </DropdownMenuTrigger>
