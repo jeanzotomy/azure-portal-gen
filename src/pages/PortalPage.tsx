@@ -111,7 +111,7 @@ function PortalContent() {
 
   return (
     <div className="min-h-screen flex w-full bg-background">
-      <Sidebar collapsible="icon" className="border-r border-sidebar-border">
+      <Sidebar collapsible="icon" className="hidden md:flex border-r border-sidebar-border">
         <SidebarContent className="bg-sidebar">
           <div className="px-4 py-5 border-b border-sidebar-border">
             <Link to="/" className="flex items-center gap-2">
