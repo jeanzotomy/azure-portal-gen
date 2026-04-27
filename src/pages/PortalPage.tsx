@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -47,7 +47,9 @@ type Tab = "dashboard" | "projects" | "tickets" | "applications" | "profile";
 
 function PortalContent() {
   const { user, ready } = useAuthSession();
-  const [tab, setTab] = useState<Tab>("dashboard");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialTab = (searchParams.get("tab") as Tab) || "dashboard";
+  const [tab, setTab] = useState<Tab>(initialTab);
   const [profileIncomplete, setProfileIncomplete] = useState(false);
   const [daysLeft, setDaysLeft] = useState<number | null>(null);
   const navigate = useNavigate();
@@ -58,6 +60,15 @@ function PortalContent() {
   const { t, locale } = useTranslation();
 
   // Auth/MFA/blocked checks are handled upstream by <AuthGuard>. We can rely on `user` being non-null.
+
+  // Sync tab when URL ?tab= changes (e.g. from MobileBottomNav while already on /portal)
+  useEffect(() => {
+    const urlTab = searchParams.get("tab") as Tab | null;
+    const valid: Tab[] = ["dashboard", "projects", "tickets", "applications", "profile"];
+    if (urlTab && valid.includes(urlTab) && urlTab !== tab) {
+      setTab(urlTab);
+    }
+  }, [searchParams, tab]);
 
   useEffect(() => {
     if (!user) return;
