@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
 import { AuthGuard } from "./components/AuthGuard";
+import { ScrollToTop } from "./components/ScrollToTop";
 
 // Lazy-load non-landing routes to drastically reduce initial JS bundle
 // (improves Total Blocking Time and LCP). The landing page (Index) stays
@@ -55,6 +56,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
+        <ScrollToTop />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
