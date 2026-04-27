@@ -167,7 +167,7 @@ function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser
           </div>
         </header>
         <PortalInfoBar />
-        <main className="flex-1 p-6 pb-[calc(80px+env(safe-area-inset-bottom))] md:pb-6 overflow-auto">
+        <main className="flex-1 p-3 sm:p-6 pb-[calc(80px+env(safe-area-inset-bottom))] md:pb-6 overflow-auto">
           {tab === "projects" && <AdminProjectsInner readOnly />}
           {tab === "sharepoint" && <SharePointTab readOnly={false} />}
           {tab === "service-clients" && <ServiceClientsTab />}
@@ -368,7 +368,7 @@ function AdminContent() {
             </div>
           </header>
           <PortalInfoBar />
-          <main className="flex-1 p-6 pb-[calc(80px+env(safe-area-inset-bottom))] md:pb-6 overflow-auto">
+          <main className="flex-1 p-3 sm:p-6 pb-[calc(80px+env(safe-area-inset-bottom))] md:pb-6 overflow-auto">
             {gestionnaireTab === "dashboard" && <AdminDashboard />}
             {gestionnaireTab === "projects" && <AdminProjects assignedCount={assignedProjectsCount} />}
             {gestionnaireTab === "tickets" && <AdminTickets />}
@@ -460,7 +460,7 @@ function AdminContent() {
             </div>
           </header>
           <PortalInfoBar />
-          <main className="flex-1 p-6 pb-[calc(80px+env(safe-area-inset-bottom))] md:pb-6 overflow-auto">
+          <main className="flex-1 p-3 sm:p-6 pb-[calc(80px+env(safe-area-inset-bottom))] md:pb-6 overflow-auto">
             {agentTab === "dashboard" && <AgentDashboard user={user} />}
             {agentTab === "tickets" && <AdminTickets />}
             {agentTab === "contacts" && <AdminContacts />}
@@ -596,7 +596,7 @@ function AdminContent() {
         </header>
         <PortalInfoBar />
 
-        <main className="flex-1 p-6 pb-[calc(80px+env(safe-area-inset-bottom))] md:pb-6 overflow-auto">
+        <main className="flex-1 p-3 sm:p-6 pb-[calc(80px+env(safe-area-inset-bottom))] md:pb-6 overflow-auto">
           {tab === "dashboard" && <AdminDashboard />}
           {tab === "projects" && <AdminProjects />}
           {tab === "tickets" && <AdminTickets />}
@@ -1252,7 +1252,7 @@ function AdminProjectsInner({ readOnly = false, assignedCount }: { readOnly?: bo
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
         {[
           { label: "Total projets", value: totalProjects, helper: "Vue globale" },
           { label: "En cours", value: activeProjects, helper: "Suivi actif" },
@@ -1309,7 +1309,7 @@ function AdminProjectsInner({ readOnly = false, assignedCount }: { readOnly?: bo
         </div>
       </div>
 
-      <div className="grid gap-5 md:grid-cols-2">
+      <div className="grid gap-4 sm:gap-5 grid-cols-1 md:grid-cols-2">
         {filtered.map((p) => {
           const sc = statusConfig[p.status] || statusConfig.en_cours;
           const pc = priorityConfig[p.priority] || priorityConfig.normal;
@@ -1443,7 +1443,7 @@ function AdminProjectsInner({ readOnly = false, assignedCount }: { readOnly?: bo
               <label className="text-sm font-medium text-card-foreground">Description</label>
               <Textarea value={editDescription} onChange={(e) => setEditDescription(e.target.value)} rows={3} className="mt-1" />
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="text-sm font-medium text-card-foreground">Budget</label>
                 <Input value={editBudget} onChange={(e) => setEditBudget(e.target.value)} placeholder="Ex: 5000" className="mt-1" />

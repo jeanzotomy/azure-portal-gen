@@ -715,7 +715,7 @@ export default function HrTab() {
       </Tabs>
 
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-2xl">
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-auto">
           <DialogHeader>
             <DialogTitle className="text-white">{editing ? "Modifier l'offre" : "Nouvelle offre d'emploi"}</DialogTitle>
           </DialogHeader>
@@ -724,7 +724,7 @@ export default function HrTab() {
               <label className="text-sm font-medium">Titre du poste *</label>
               <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Ex: Ingénieur Cloud DevOps" />
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="text-sm font-medium">Département</label>
                 <Select value={form.department || "__none__"} onValueChange={(v) => setForm({ ...form, department: v === "__none__" ? "" : v })}>
@@ -745,7 +745,7 @@ export default function HrTab() {
                 <Input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="Ex: Conakry / Remote" />
               </div>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="text-sm font-medium">Type de contrat *</label>
                 <Select value={form.contract_type} onValueChange={(v) => setForm({ ...form, contract_type: v as ContractType })}>
@@ -785,7 +785,7 @@ export default function HrTab() {
                 </div>
               </div>
             )}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="text-sm font-medium">Secteur</label>
                 <Select value={form.sector || "__none__"} onValueChange={(v) => setForm({ ...form, sector: v === "__none__" ? "" : v })}>
@@ -834,7 +834,7 @@ export default function HrTab() {
       </Dialog>
 
       <Dialog open={deptDialogOpen} onOpenChange={setDeptDialogOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto w-[95vw] sm:w-auto">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2"><Building2 size={18} /> Gérer les départements</DialogTitle>
           </DialogHeader>
@@ -888,7 +888,7 @@ export default function HrTab() {
       </Dialog>
 
       <Dialog open={sectorDialogOpen} onOpenChange={setSectorDialogOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto w-[95vw] sm:w-auto">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2"><Briefcase size={18} /> Gérer les secteurs</DialogTitle>
           </DialogHeader>
@@ -942,7 +942,7 @@ export default function HrTab() {
       </Dialog>
 
       <Dialog open={interviewDialogOpen} onOpenChange={setInterviewDialogOpen}>
-        <DialogContent className="max-w-lg">
+        <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto w-[95vw] sm:w-auto">
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2"><Calendar size={18} /> Inviter à un entretien</DialogTitle>
           </DialogHeader>

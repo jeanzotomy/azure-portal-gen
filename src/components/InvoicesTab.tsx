@@ -683,7 +683,7 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
 
           {/* Form fields */}
           <div className="space-y-3">
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="text-sm font-medium">Projet *</label>
                 <Select value={formProjectId} onValueChange={setFormProjectId}>
@@ -718,7 +718,7 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
               })()}
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="text-sm font-medium">Type</label>
                 <Select value={formType} onValueChange={(v: "facture" | "recu") => setFormType(v)}>
@@ -744,7 +744,7 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="text-sm font-medium">N° Facture *</label>
                 <Input value={formInvoiceNumber} onChange={e => setFormInvoiceNumber(e.target.value)} required />
@@ -760,7 +760,7 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
               <Input value={formDescription} onChange={e => setFormDescription(e.target.value)} required />
             </div>
 
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label className="text-sm font-medium">Montant HT *</label>
                 <Input type="number" step="0.01" value={formAmount} onChange={e => setFormAmount(e.target.value)} required />
@@ -775,7 +775,7 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="text-sm font-medium">Date facture *</label>
                 <Input type="date" value={formInvoiceDate} onChange={e => setFormInvoiceDate(e.target.value)} required />

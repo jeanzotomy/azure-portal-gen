@@ -227,7 +227,7 @@ export default function ServiceClientsTab() {
               <div className="flex items-center gap-2 text-sm font-semibold text-primary border-b pb-1">
                 <User size={16} /> Identité
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="col-span-2">
                   <Label className="text-xs font-medium flex items-center gap-1">
                     <Building2 size={12} /> Nom du client / société <span className="text-destructive">*</span>
@@ -257,7 +257,7 @@ export default function ServiceClientsTab() {
               <div className="flex items-center gap-2 text-sm font-semibold text-primary border-b pb-1">
                 <FileText size={16} /> Informations légales
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label className="text-xs font-medium flex items-center gap-1">
                     <Hash size={12} /> NIF
@@ -287,7 +287,7 @@ export default function ServiceClientsTab() {
               <div className="flex items-center gap-2 text-sm font-semibold text-primary border-b pb-1">
                 <MapPin size={16} /> Adresse
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div className="col-span-2">
                   <Label className="text-xs font-medium">Adresse complète</Label>
                   <Input
@@ -329,7 +329,7 @@ export default function ServiceClientsTab() {
               <div className="flex items-center gap-2 text-sm font-semibold text-primary border-b pb-1">
                 <Phone size={16} /> Coordonnées
               </div>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <Label className="text-xs font-medium flex items-center gap-1">
                     <Phone size={12} /> Téléphone

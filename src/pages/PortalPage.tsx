@@ -758,7 +758,7 @@ function ProjectsTab({ user }: { user: SupaUser }) {
 
       {projects.length > 0 && (
         <>
-          <div className="grid gap-4 md:grid-cols-4">
+          <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
             {[
               { label: "Total projets", value: totalProjects, helper: "Tous vos projets" },
               { label: "En cours", value: activeProjects, helper: "Travail actif" },
@@ -890,7 +890,7 @@ function ProjectsTab({ user }: { user: SupaUser }) {
           <p className="text-sm text-muted-foreground/60 mt-1">Soumettez votre premier projet ci-dessus.</p>
         </div>
       ) : (
-        <div className="grid gap-5 md:grid-cols-2">
+        <div className="grid gap-4 sm:gap-5 grid-cols-1 md:grid-cols-2">
           {filteredProjects.map((p) => {
             const sc = statusConfig[p.status] || statusConfig.en_cours;
             const priorityConfig: Record<string, { label: string; color: string; bg: string }> = {
