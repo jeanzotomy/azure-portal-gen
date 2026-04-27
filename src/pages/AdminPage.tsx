@@ -1252,7 +1252,7 @@ function AdminProjectsInner({ readOnly = false, assignedCount }: { readOnly?: bo
         </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-4">
+      <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
         {[
           { label: "Total projets", value: totalProjects, helper: "Vue globale" },
           { label: "En cours", value: activeProjects, helper: "Suivi actif" },
@@ -1309,7 +1309,7 @@ function AdminProjectsInner({ readOnly = false, assignedCount }: { readOnly?: bo
         </div>
       </div>
 
-      <div className="grid gap-5 md:grid-cols-2">
+      <div className="grid gap-4 sm:gap-5 grid-cols-1 md:grid-cols-2">
         {filtered.map((p) => {
           const sc = statusConfig[p.status] || statusConfig.en_cours;
           const pc = priorityConfig[p.priority] || priorityConfig.normal;
