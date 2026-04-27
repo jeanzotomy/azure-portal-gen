@@ -67,33 +67,44 @@ export function MobileBottomNav() {
 
   return (
     <nav
-      className="md:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-border/40 bg-background/85 backdrop-blur-xl shadow-[0_-4px_20px_-4px_rgba(0,0,0,0.15)]"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-border/40 bg-background/90 backdrop-blur-xl shadow-[0_-8px_24px_-8px_rgba(0,0,0,0.18)]"
       style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
       aria-label="Navigation mobile"
     >
-      <ul className="grid grid-cols-4">
+      <ul className="grid grid-cols-4 px-2 pt-2 pb-3">
         {items.map((item) => {
           const active = item.isActive(location.pathname, location.search);
           const Icon = item.icon;
           return (
-            <li key={item.id}>
+            <li key={item.id} className="flex">
               <Link
                 to={item.to}
                 onClick={(e) => handleClick(e, item)}
                 className={cn(
-                  "flex flex-col items-center justify-center gap-0.5 py-2 px-1 text-[10px] font-medium transition-colors",
+                  "group relative flex-1 flex flex-col items-center justify-center gap-1.5 py-1.5 px-1 rounded-xl text-[11px] font-medium transition-all duration-200",
                   active
                     ? "text-primary"
-                    : "text-muted-foreground hover:text-foreground"
+                    : "text-muted-foreground hover:text-foreground active:scale-95"
                 )}
                 aria-current={active ? "page" : undefined}
               >
-                <Icon
-                  size={20}
-                  className={cn("transition-transform", active && "scale-110")}
-                  strokeWidth={active ? 2.4 : 2}
-                />
-                <span className="truncate max-w-full leading-tight">{item.label}</span>
+                <span
+                  className={cn(
+                    "flex items-center justify-center w-11 h-7 rounded-full transition-all duration-200",
+                    active
+                      ? "bg-primary/15 shadow-sm"
+                      : "group-hover:bg-muted/60"
+                  )}
+                >
+                  <Icon
+                    size={20}
+                    className={cn("transition-transform duration-200", active && "scale-110")}
+                    strokeWidth={active ? 2.4 : 2}
+                  />
+                </span>
+                <span className="truncate max-w-full leading-none tracking-tight">
+                  {item.label}
+                </span>
               </Link>
             </li>
           );
