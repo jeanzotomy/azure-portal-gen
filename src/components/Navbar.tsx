@@ -104,12 +104,12 @@ export function Navbar() {
 
         {/* Mobile hamburger */}
         <button
-          className="md:hidden text-foreground"
+          className="md:hidden p-2 rounded-lg text-white bg-white/10 hover:bg-white/20 border border-white/20 transition-colors"
           onClick={() => setOpen(!open)}
           aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
           aria-expanded={open}
         >
-          {open ? <X size={24} /> : <Menu size={24} />}
+          {open ? <X size={22} /> : <Menu size={22} />}
         </button>
       </div>
 
