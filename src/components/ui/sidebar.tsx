@@ -440,9 +440,21 @@ const SidebarMenuButton = React.forwardRef<
     isActive?: boolean;
     tooltip?: string | React.ComponentProps<typeof TooltipContent>;
   } & VariantProps<typeof sidebarMenuButtonVariants>
->(({ asChild = false, isActive = false, variant = "default", size = "default", tooltip, className, ...props }, ref) => {
+>(({ asChild = false, isActive = false, variant = "default", size = "default", tooltip, className, onClick, ...props }, ref) => {
   const Comp = asChild ? Slot : "button";
-  const { isMobile, state } = useSidebar();
+  const { isMobile, state, setOpenMobile } = useSidebar();
+
+  const handleClick = React.useCallback(
+    (e: React.MouseEvent<HTMLButtonElement>) => {
+      onClick?.(e);
+      // Auto-close mobile sidebar (Sheet) after navigation so the user sees the page.
+      // Opt-out via data-keep-mobile-open="true" on the button.
+      if (isMobile && !e.defaultPrevented && (e.currentTarget as HTMLElement).dataset.keepMobileOpen !== "true") {
+        setOpenMobile(false);
+      }
+    },
+    [isMobile, onClick, setOpenMobile],
+  );
 
   const button = (
     <Comp
@@ -451,6 +463,7 @@ const SidebarMenuButton = React.forwardRef<
       data-size={size}
       data-active={isActive}
       className={cn(sidebarMenuButtonVariants({ variant, size }), className)}
+      onClick={handleClick}
       {...props}
     />
   );
@@ -586,8 +599,19 @@ const SidebarMenuSubButton = React.forwardRef<
     size?: "sm" | "md";
     isActive?: boolean;
   }
->(({ asChild = false, size = "md", isActive, className, ...props }, ref) => {
+>(({ asChild = false, size = "md", isActive, className, onClick, ...props }, ref) => {
   const Comp = asChild ? Slot : "a";
+  const { isMobile, setOpenMobile } = useSidebar();
+
+  const handleClick = React.useCallback(
+    (e: React.MouseEvent<HTMLAnchorElement>) => {
+      onClick?.(e);
+      if (isMobile && !e.defaultPrevented) {
+        setOpenMobile(false);
+      }
+    },
+    [isMobile, onClick, setOpenMobile],
+  );
 
   return (
     <Comp
@@ -603,6 +627,7 @@ const SidebarMenuSubButton = React.forwardRef<
         "group-data-[collapsible=icon]:hidden",
         className,
       )}
+      onClick={handleClick}
       {...props}
     />
   );

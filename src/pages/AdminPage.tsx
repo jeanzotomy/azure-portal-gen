@@ -108,7 +108,7 @@ function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser
                       if (!isServicesTab) setTab("service-clients");
                     }}
                     isActive={isServicesTab}
-                    tooltip="Services aux clients"
+                    tooltip="Services aux clients" data-keep-mobile-open="true"
                     className="gap-3"
                   >
                     <Briefcase size={18} />
@@ -313,7 +313,7 @@ function AdminContent() {
                         if (!isGestionnaireServicesTab) setGestionnaireTab("service-clients");
                       }}
                       isActive={isGestionnaireServicesTab}
-                      tooltip="Services aux clients"
+                      tooltip="Services aux clients" data-keep-mobile-open="true"
                       className="gap-3"
                     >
                       <Briefcase size={18} />
@@ -521,7 +521,7 @@ function AdminContent() {
                       if (!isAdminServicesTab) setTab("service-clients");
                     }}
                     isActive={isAdminServicesTab}
-                    tooltip="Services aux clients"
+                    tooltip="Services aux clients" data-keep-mobile-open="true"
                     className="gap-3"
                   >
                     <Briefcase size={18} />
