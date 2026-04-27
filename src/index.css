@@ -90,6 +90,12 @@
     @apply bg-background text-foreground font-sans;
     font-family: 'Inter', sans-serif;
   }
+  /* Reserve space for the mobile bottom navigation so content isn't hidden behind it */
+  @media (max-width: 767px) {
+    body {
+      padding-bottom: calc(64px + env(safe-area-inset-bottom));
+    }
+  }
 }
 
 @layer utilities {
