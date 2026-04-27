@@ -9,7 +9,7 @@ import { IndustriesSection } from "@/components/IndustriesSection";
 import { WhyUsSection } from "@/components/WhyUsSection";
 import { ContactSection } from "@/components/ContactSection";
 import { Footer } from "@/components/Footer";
-import { ScrollToTop } from "@/components/ScrollToTop";
+
 
 const Index = () => {
   const location = useLocation();
@@ -37,7 +37,6 @@ const Index = () => {
     <WhyUsSection />
     <ContactSection />
     <Footer />
-    <ScrollToTop />
   </div>
   );
 };

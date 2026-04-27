@@ -1,7 +1,7 @@
 import { useTranslation } from "@/i18n/LanguageContext";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { ScrollToTop } from "@/components/ScrollToTop";
+
 import { Shield } from "lucide-react";
 
 export default function PrivacyPage() {
@@ -10,7 +10,7 @@ export default function PrivacyPage() {
 
   return (
     <div className="min-h-screen bg-background">
-      <ScrollToTop />
+      
       <Navbar />
       <main className="container py-28 max-w-3xl mx-auto">
         <div className="flex items-center gap-3 mb-8">
