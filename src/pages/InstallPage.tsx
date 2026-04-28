@@ -27,7 +27,7 @@ export default function InstallPage() {
         {/* iOS */}
         <section className="rounded-xl glass p-5 sm:p-6 space-y-4">
           <h2 className="text-lg sm:text-xl font-semibold text-primary-foreground flex items-center gap-2">
-            <img src={iconIphone} alt="iPhone" loading="lazy" width={28} height={28} className="w-7 h-7 object-contain" />
+            <img src={iconIphone} alt="iPhone" loading="lazy" width={56} height={56} className="w-14 h-14 object-contain" />
             iPhone / iPad (Safari)
           </h2>
           <ol className="space-y-4 text-secondary-foreground/80 text-sm">
@@ -55,7 +55,7 @@ export default function InstallPage() {
         {/* Android */}
         <section className="rounded-xl glass p-5 sm:p-6 space-y-4">
           <h2 className="text-lg sm:text-xl font-semibold text-primary-foreground flex items-center gap-2">
-            <img src={iconAndroid} alt="Android" loading="lazy" width={28} height={28} className="w-7 h-7 object-contain" />
+            <img src={iconAndroid} alt="Android" loading="lazy" width={56} height={56} className="w-14 h-14 object-contain" />
             Android (Chrome)
           </h2>
           <ol className="space-y-4 text-secondary-foreground/80 text-sm">
