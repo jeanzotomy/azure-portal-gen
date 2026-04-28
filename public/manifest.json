@@ -2,7 +2,7 @@
   "name": "CloudMature – Portail Client",
   "short_name": "CloudMature",
   "description": "Firme de consultation TI spécialisée en Cloud",
-  "start_url": "/portal",
+  "start_url": "/",
   "display": "standalone",
   "background_color": "#0a0f1e",
   "theme_color": "#0a0f1e",
