@@ -27,7 +27,7 @@ export default function InstallPage() {
         {/* iOS */}
         <section className="rounded-xl glass p-5 sm:p-6 space-y-4">
           <h2 className="text-lg sm:text-xl font-semibold text-primary-foreground flex items-center gap-2">
-            <img src={iconIphone} alt="iPhone" loading="lazy" width={80} height={80} className="w-20 h-20 object-contain drop-shadow-lg" />
+            <img src={iconIphone} alt="iPhone" loading="lazy" width={80} height={80} className="w-20 h-20 object-contain drop-shadow-lg -ml-2 mr-1" />
             iPhone / iPad (Safari)
           </h2>
           <ol className="space-y-4 text-secondary-foreground/80 text-sm">
