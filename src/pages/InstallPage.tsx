@@ -2,6 +2,8 @@ import { useTranslation } from "@/i18n/LanguageContext";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Share, MoreVertical, PlusSquare, Download, Smartphone } from "lucide-react";
+import iconIphone from "@/assets/icon-iphone.png";
+import iconAndroid from "@/assets/icon-android.png";
 
 export default function InstallPage() {
   const { t } = useTranslation();
@@ -25,7 +27,8 @@ export default function InstallPage() {
         {/* iOS */}
         <section className="rounded-xl glass p-5 sm:p-6 space-y-4">
           <h2 className="text-lg sm:text-xl font-semibold text-primary-foreground flex items-center gap-2">
-            🍎 iPhone / iPad (Safari)
+            <img src={iconIphone} alt="iPhone" loading="lazy" width={28} height={28} className="w-7 h-7 object-contain" />
+            iPhone / iPad (Safari)
           </h2>
           <ol className="space-y-4 text-secondary-foreground/80 text-sm">
             <li className="flex items-start gap-3">
@@ -52,7 +55,8 @@ export default function InstallPage() {
         {/* Android */}
         <section className="rounded-xl glass p-5 sm:p-6 space-y-4">
           <h2 className="text-lg sm:text-xl font-semibold text-primary-foreground flex items-center gap-2">
-            🤖 Android (Chrome)
+            <img src={iconAndroid} alt="Android" loading="lazy" width={28} height={28} className="w-7 h-7 object-contain" />
+            Android (Chrome)
           </h2>
           <ol className="space-y-4 text-secondary-foreground/80 text-sm">
             <li className="flex items-start gap-3">
