@@ -1,8 +1,10 @@
 {
-  "name": "CloudMature – Portail Client",
+  "id": "/?v=2",
+  "name": "CloudMature",
   "short_name": "CloudMature",
   "description": "Firme de consultation TI spécialisée en Cloud",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#0a0f1e",
   "theme_color": "#0a0f1e",
