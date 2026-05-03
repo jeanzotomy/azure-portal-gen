@@ -415,7 +415,22 @@ export type Database = {
           process_id?: string
           training_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_assigned_trainings_process_id_fkey"
+            columns: ["process_id"]
+            isOneToOne: false
+            referencedRelation: "onboarding_processes"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "onboarding_assigned_trainings_training_id_fkey"
+            columns: ["training_id"]
+            isOneToOne: false
+            referencedRelation: "trainings"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       onboarding_contracts: {
         Row: {
