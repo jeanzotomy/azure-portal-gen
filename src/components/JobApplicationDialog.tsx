@@ -105,6 +105,28 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
   });
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [letterFile, setLetterFile] = useState<File | null>(null);
+  const [existingApp, setExistingApp] = useState<{ tracking_id: string | null; status: string } | null>(null);
+
+  // Detect existing application for this job (by user or by email)
+  useEffect(() => {
+    if (!open) { setExistingApp(null); return; }
+    const email = (user?.email || form.email || "").trim();
+    if (!user?.id && !email) return;
+    (async () => {
+      let q = supabase
+        .from("job_applications")
+        .select("tracking_id, status")
+        .eq("job_id", jobId)
+        .limit(1);
+      q = user?.id ? q.eq("user_id", user.id) : q.ilike("email", email);
+      const { data } = await q;
+      if (data && data.length > 0) {
+        setExistingApp({ tracking_id: data[0].tracking_id, status: data[0].status });
+      } else {
+        setExistingApp(null);
+      }
+    })();
+  }, [open, jobId, user?.id, user?.email, form.email]);
 
   // Préremplir depuis le profil utilisateur (uniquement si connecté)
   useEffect(() => {
