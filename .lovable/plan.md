@@ -1,37 +1,39 @@
-## Objectif
+## Diagnostic
 
-Sur mobile uniquement, ajouter une **barre de navigation fixe en bas de l'écran** (style application native) avec 4 raccourcis : Accueil, Projets, Candidatures, Profil. Le menu hamburger en haut reste inchangé. Sur tablette et desktop (≥ md), rien ne change : la navbar actuelle reste telle quelle.
+L'onglet **Mes candidatures** filtre sur `job_applications.user_id = auth.uid()`. Or quand un visiteur postule sans être connecté (ou via un autre compte), `user_id` reste `NULL`. La candidature existe bien en base mais n'est pas rattachée au compte → l'onglet apparaît vide.
 
-## Comportement
+Exemple en base : `memthem@gmail.com` a une candidature **acceptée** mais `user_id = NULL`. Si cette personne se crée ensuite un compte avec le même email, sa candidature ne lui est jamais rattachée.
 
-- Visible uniquement sur mobile (`md:hidden`)
-- Fixée en bas de l'écran (`fixed bottom-0`), au-dessus de tout contenu (`z-40`, sous la navbar `z-50`)
-- 4 onglets avec icône + label court :
-  - **Accueil** (`Home`) → `/`
-  - **Projets** (`FolderKanban`) → `/portal` (onglet projets) ou `/auth` si non connecté
-  - **Candidatures** (`Briefcase`) → `/portal` (onglet candidatures) ou `/careers` si non connecté
-  - **Profil** (`User`) → `/portal` (onglet profil) ou `/auth` si non connecté
-- L'onglet actif est mis en évidence avec la couleur primaire (cyan)
-- Style glassmorphism cohérent avec l'identité visuelle (fond semi-transparent, blur, bordure haute subtile)
-- Bouton "ScrollToTop" repositionné légèrement plus haut sur mobile pour ne pas chevaucher la bottom nav
+## Solution
 
-## Détails techniques
+### 1. Rattachement rétroactif (migration SQL)
+Mettre à jour toutes les `job_applications` où `user_id IS NULL` mais dont l'`email` correspond à un utilisateur existant dans `auth.users`. Idem pour `onboarding_processes` (même problème potentiel via `candidate_email`).
 
-**Nouveau composant** : `src/components/MobileBottomNav.tsx`
-- Utilise `useLocation` + `useAuthSession`
-- Détermine l'onglet actif selon `pathname` et `location.hash`/`location.search` (paramètre `?tab=`)
-- Pour les liens vers le portail avec onglet spécifique, utilise `/portal?tab=projects|applications|profile`
+### 2. Rattachement automatique futur (trigger)
+Créer un trigger sur `auth.users` (AFTER INSERT) — ou étendre le trigger `handle_new_user` existant — qui :
+- met à jour `job_applications.user_id` pour toutes les lignes où `email = NEW.email AND user_id IS NULL`
+- fait pareil sur `onboarding_processes` (`candidate_email`)
 
-**Modifications** :
-1. `src/components/MobileBottomNav.tsx` (nouveau) — composant bottom nav
-2. `src/App.tsx` — montage global du `<MobileBottomNav />` dans `BrowserRouter` (après `ScrollToTop`)
-3. `src/components/ScrollToTop.tsx` — ajuster `bottom-6` → `bottom-24 md:bottom-6` pour éviter le chevauchement sur mobile
-4. `src/i18n/fr.ts` et `src/i18n/en.ts` — ajouter les clés `mobileNav.home`, `mobileNav.projects`, `mobileNav.applications`, `mobileNav.profile`
-5. `src/pages/PortalPage.tsx` — vérifier que l'onglet actif peut être pré-sélectionné via le query param `?tab=` (lecture au montage)
-6. Ajouter un padding-bottom global (`pb-20 md:pb-0`) sur les pages principales OU sur `<body>` via `index.css` pour que le contenu ne soit pas masqué par la bottom nav
+Ainsi, dès qu'un candidat crée son compte (via le lien d'invitation onboarding ou spontanément), ses candidatures et son dossier d'onboarding lui sont automatiquement rattachés.
 
-## Hors scope
+### 3. Filet de sécurité côté UI (`ApplicationsTab.tsx`)
+Modifier la requête de chargement pour inclure aussi les candidatures où `email = user.email AND user_id IS NULL` :
+```ts
+.or(`user_id.eq.${user.id},and(user_id.is.null,email.eq.${user.email})`)
+```
+Et au passage, faire un UPDATE pour rattacher définitivement ces lignes (équivalent à ce que fait déjà `OnboardingPage` avec `candidate_email`).
 
-- Aucun changement sur le menu desktop (≥ 768px)
-- Aucun changement sur le menu hamburger mobile existant (il reste accessible en haut)
-- Aucune modification des routes ou de la logique d'authentification
+### 4. RLS
+Ajouter une politique SELECT sur `job_applications` autorisant un user à voir les candidatures dont l'`email` correspond à son email auth, même si `user_id` est NULL — sinon le filet UI ne fonctionnera pas tant que le trigger n'a pas tourné.
+
+## Résultat attendu
+
+- L'utilisateur `memthem@gmail.com` (et tous les autres dans le même cas) verront immédiatement leur candidature acceptée dans l'onglet.
+- Tout nouveau candidat qui crée son compte après avoir postulé verra automatiquement ses candidatures.
+- Les futures invitations onboarding fonctionneront sans étape manuelle de rattachement.
+
+## Fichiers touchés
+
+- **Nouvelle migration SQL** : backfill `user_id` + trigger `link_applications_on_signup` sur `auth.users`
+- **`src/components/ApplicationsTab.tsx`** : requête élargie (user_id OR email match) + auto-link
+- **Migration RLS** : politique SELECT additionnelle sur `job_applications` pour matching par email auth
