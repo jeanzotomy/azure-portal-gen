@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Briefcase, Plus, Pencil, Trash2, FileText, Download, Calendar, MapPin, RefreshCw, Building2, X, Search, FolderOpen, FolderX, Mail } from "lucide-react";
 import { format } from "date-fns";
 import EmailLogTab from "./EmailLogTab";
+import OnboardingAdminTab from "./OnboardingAdminTab";
 
 type JobStatus = "brouillon" | "publiee" | "fermee";
 type ContractType = "CDI" | "CDD" | "Stage" | "Freelance" | "Alternance";
