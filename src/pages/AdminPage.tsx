@@ -26,7 +26,7 @@ import {
   AlertCircle, Bell, ChevronDown, ChevronUp, MessageSquare, Search, Send, UserCog,
   Flag, DollarSign, Calendar, Filter, TrendingUp, Activity, BarChart3, PieChart, ShieldBan, ShieldCheck, Trash2, RefreshCw,
   Smartphone, Phone, X, UserCheck, UserPlus, Upload, FileSpreadsheet, Pencil,
-  LayoutGrid, List as ListIcon, Table as TableIcon, MapPin, Mail,
+  LayoutGrid, List as ListIcon, Table as TableIcon, MapPin, Mail, Download,
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { HardDrive } from "lucide-react";
@@ -1995,6 +1995,25 @@ function AdminUsers() {
   });
   const [visibleCount, setVisibleCount] = useState<number>(24);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  const [exportOpen, setExportOpen] = useState(false);
+  const EXPORT_COLUMNS = [
+    { key: "full_name", label: "Nom" },
+    { key: "email", label: "Email" },
+    { key: "company", label: "Entreprise" },
+    { key: "phone", label: "Téléphone" },
+    { key: "role", label: "Rôle" },
+    { key: "country", label: "Pays" },
+    { key: "city", label: "Ville" },
+    { key: "address_line", label: "Adresse" },
+    { key: "timezone", label: "Fuseau horaire" },
+    { key: "status", label: "Statut" },
+    { key: "mfa", label: "MFA" },
+    { key: "billable", label: "Facturable" },
+    { key: "billable_client", label: "Client facturable" },
+    { key: "created_at", label: "Créé le" },
+  ] as const;
+  const [exportCols, setExportCols] = useState<string[]>(["full_name", "email", "role", "status", "mfa"]);
+  const [exportFormat, setExportFormat] = useState<"csv" | "xlsx">("csv");
   const { toast } = useToast();
 
   // Sync filter state -> URL
@@ -2443,6 +2462,9 @@ function AdminUsers() {
           </Button>
           <Button variant="outline" size="sm" onClick={load} className="gap-1.5">
             <RefreshCw size={14} /> Actualiser
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setExportOpen(true)} className="gap-1.5" title="Exporter les résultats filtrés">
+            <Download size={14} /> Exporter
           </Button>
           <select
             value={pageSize}
@@ -3189,6 +3211,104 @@ function AdminUsers() {
               </DialogFooter>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+      {/* Export Dialog */}
+      <Dialog open={exportOpen} onOpenChange={setExportOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><Download size={18} /> Exporter les utilisateurs</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              {filtered.length} utilisateur{filtered.length > 1 ? "s" : ""} à exporter (selon les filtres actifs).
+            </p>
+            <div>
+              <div className="flex items-center justify-between mb-2">
+                <label className="text-sm font-semibold">Colonnes</label>
+                <div className="flex gap-2 text-xs">
+                  <button type="button" onClick={() => setExportCols(EXPORT_COLUMNS.map(c => c.key))} className="text-primary hover:underline">Tout</button>
+                  <span className="text-muted-foreground">·</span>
+                  <button type="button" onClick={() => setExportCols([])} className="text-muted-foreground hover:underline">Aucun</button>
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-2 max-h-64 overflow-y-auto p-2 rounded-lg border border-border/50 bg-muted/30">
+                {EXPORT_COLUMNS.map((c) => {
+                  const checked = exportCols.includes(c.key);
+                  return (
+                    <label key={c.key} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-muted/60 rounded px-1.5 py-1">
+                      <input type="checkbox" checked={checked} onChange={(e) => {
+                        setExportCols((prev) => e.target.checked ? [...prev, c.key] : prev.filter(k => k !== c.key));
+                      }} />
+                      {c.label}
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+            <div>
+              <label className="text-sm font-semibold mb-2 block">Format</label>
+              <div className="flex gap-2">
+                {(["csv", "xlsx"] as const).map((f) => (
+                  <button key={f} type="button" onClick={() => setExportFormat(f)}
+                    className={`flex-1 px-3 py-2 rounded-lg text-sm border transition-colors ${exportFormat === f ? "bg-primary text-primary-foreground border-primary" : "bg-card border-border hover:bg-muted"}`}>
+                    {f.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+              {exportFormat === "xlsx" && (
+                <p className="text-xs text-muted-foreground mt-1">Fichier .xls compatible Excel (format SpreadsheetML).</p>
+              )}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setExportOpen(false)}>Annuler</Button>
+            <Button
+              disabled={exportCols.length === 0 || filtered.length === 0}
+              onClick={() => {
+                const getValue = (p: any, key: string): string => {
+                  const roles = userRoles[p.user_id] || ["client"];
+                  const enrolled = !!mfaStatus[p.user_id]?.enrolled;
+                  const status = p.deleted_at ? "Supprimé" : p.blocked ? "Bloqué" : "Actif";
+                  switch (key) {
+                    case "email": return mfaStatus[p.user_id]?.email || "";
+                    case "role": return getCurrentRole(roles);
+                    case "status": return status;
+                    case "mfa": return enrolled ? "Activé" : "Inactif";
+                    case "billable": return billableLinks[p.user_id] ? "Oui" : "Non";
+                    case "billable_client": return billableLinks[p.user_id]?.client_name || "";
+                    case "created_at": return p.created_at ? new Date(p.created_at).toISOString() : "";
+                    default: return p[key] ?? "";
+                  }
+                };
+                const headers = exportCols.map((k) => EXPORT_COLUMNS.find(c => c.key === k)?.label || k);
+                const rows = filtered.map((p) => exportCols.map((k) => String(getValue(p, k) ?? "")));
+                const ts = new Date().toISOString().slice(0, 10);
+                if (exportFormat === "csv") {
+                  const escape = (v: string) => `"${v.replace(/"/g, '""')}"`;
+                  const csv = "\uFEFF" + [headers, ...rows].map((r) => r.map(escape).join(",")).join("\n");
+                  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url; a.download = `utilisateurs-${ts}.csv`; a.click();
+                  URL.revokeObjectURL(url);
+                } else {
+                  const esc = (v: string) => v.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+                  const trh = "<Row>" + headers.map(h => `<Cell><Data ss:Type="String">${esc(h)}</Data></Cell>`).join("") + "</Row>";
+                  const trs = rows.map(r => "<Row>" + r.map(c => `<Cell><Data ss:Type="String">${esc(c)}</Data></Cell>`).join("") + "</Row>").join("");
+                  const xml = `<?xml version="1.0"?><?mso-application progid="Excel.Sheet"?><Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet" xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet"><Worksheet ss:Name="Utilisateurs"><Table>${trh}${trs}</Table></Worksheet></Workbook>`;
+                  const blob = new Blob([xml], { type: "application/vnd.ms-excel" });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement("a");
+                  a.href = url; a.download = `utilisateurs-${ts}.xls`; a.click();
+                  URL.revokeObjectURL(url);
+                }
+                toast({ title: "Export généré", description: `${filtered.length} ligne(s) exportée(s).` });
+                setExportOpen(false);
+              }}
+              className="gap-1.5"
+            ><Download size={14} /> Exporter</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
