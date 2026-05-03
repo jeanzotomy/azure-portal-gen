@@ -180,6 +180,31 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
     }
 
     setSubmitting(true);
+
+    // Prevent duplicate applications to the same job
+    {
+      let dupQuery = supabase
+        .from("job_applications")
+        .select("id, tracking_id", { count: "exact", head: false })
+        .eq("job_id", jobId)
+        .limit(1);
+      dupQuery = user?.id
+        ? dupQuery.eq("user_id", user.id)
+        : dupQuery.ilike("email", form.email.trim());
+      const { data: existing } = await dupQuery;
+      if (existing && existing.length > 0) {
+        setSubmitting(false);
+        toast({
+          title: "Candidature déjà envoyée",
+          description: existing[0].tracking_id
+            ? `Vous avez déjà postulé à cette offre (suivi : ${existing[0].tracking_id}).`
+            : "Vous avez déjà postulé à cette offre.",
+          variant: "destructive",
+        });
+        return;
+      }
+    }
+
     const fullName = `${form.first_name.trim()} ${form.last_name.trim()}`;
     const baseName = `${sanitize(form.last_name)}-${sanitize(form.first_name)}`;
     const cvExt = cvFile.name.split(".").pop() || "pdf";
