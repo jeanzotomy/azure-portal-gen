@@ -22,6 +22,8 @@ interface Training {
   duration_minutes: number | null;
   category: string | null;
   target_job_titles: string[];
+  departments: string[];
+  sectors: string[];
   active: boolean;
 }
 
@@ -33,7 +35,16 @@ interface CandidateRow {
   assigned: { id: string; training_id: string; completed_at: string | null }[];
 }
 
-const empty = { title: "", description: "", url: "", duration_minutes: "", category: "", target_job_titles: "", active: true };
+const empty = {
+  title: "",
+  description: "",
+  url: "",
+  duration_minutes: "",
+  duration_minutes_typed: "",
+  departments: [] as string[],
+  sectors: [] as string[],
+  active: true,
+};
 
 export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean }) {
   const [trainings, setTrainings] = useState<Training[]>([]);
