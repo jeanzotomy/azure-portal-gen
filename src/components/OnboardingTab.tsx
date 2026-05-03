@@ -58,14 +58,16 @@ export default function OnboardingTab({ user }: { user: SupaUser }) {
     if (!proc) { setProcess(null); setLoading(false); return; }
     setProcess(proc as any);
 
-    const [{ data: stepsData }, { data: docsData }, { data: contractData }] = await Promise.all([
+    const [{ data: stepsData }, { data: docsData }, { data: contractData }, { data: trainingsData }] = await Promise.all([
       supabase.from("onboarding_steps").select("*").eq("process_id", proc.id).order("step_order"),
       supabase.from("onboarding_documents").select("*").eq("process_id", proc.id).order("uploaded_at", { ascending: false }),
       supabase.from("onboarding_contracts").select("*").eq("process_id", proc.id).order("uploaded_at", { ascending: false }).limit(1).maybeSingle(),
+      supabase.from("onboarding_assigned_trainings").select("id, training_id, completed_at, training:trainings(title, description, url, duration_minutes, category)").eq("process_id", proc.id),
     ]);
     setSteps((stepsData || []) as any);
     setDocs((docsData || []) as any);
     setContract((contractData || null) as any);
+    setTrainings((trainingsData || []) as any);
     setLoading(false);
   }, [user]);
 
