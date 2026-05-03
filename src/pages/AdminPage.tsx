@@ -2199,26 +2199,33 @@ function AdminUsers() {
       return;
     }
 
-    if (!window.confirm(`Créer un client facturable à partir du profil de "${p.full_name || p.company}" ?\n\nLe client sera automatiquement lié à ce compte utilisateur.`)) return;
-    const { data: { user: currentUser } } = await supabase.auth.getUser();
-    if (!currentUser) return;
-    const { error } = await supabase.from("service_clients").insert({
-      client_name: p.company || p.full_name,
-      contact_person: p.company ? p.full_name : null,
-      address_line: p.address_line || null,
-      city: p.city || null,
-      country: p.country || "Guinée",
-      phone: p.phone || null,
-      email,
-      user_id: p.user_id,
-      created_by: currentUser.id,
+    setConfirmDialog({
+      open: true,
+      title: "Créer un client facturable ?",
+      description: `Un client facturable sera créé à partir du profil de "${p.full_name || p.company}" et automatiquement lié à ce compte utilisateur.`,
+      confirmLabel: "Créer le client",
+      onConfirm: async () => {
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        if (!currentUser) return;
+        const { error } = await supabase.from("service_clients").insert({
+          client_name: p.company || p.full_name,
+          contact_person: p.company ? p.full_name : null,
+          address_line: p.address_line || null,
+          city: p.city || null,
+          country: p.country || "Guinée",
+          phone: p.phone || null,
+          email,
+          user_id: p.user_id,
+          created_by: currentUser.id,
+        });
+        if (error) {
+          toast({ title: "Erreur", description: error.message, variant: "destructive" });
+        } else {
+          toast({ title: "Client facturable créé", description: `${p.full_name || p.company} est maintenant un client facturable lié à son compte.` });
+          void loadBillableLinks();
+        }
+      },
     });
-    if (error) {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Client facturable créé", description: `${p.full_name || p.company} est maintenant un client facturable lié à son compte.` });
-      void loadBillableLinks();
-    }
   };
 
   const openEditUser = (p: any) => {
