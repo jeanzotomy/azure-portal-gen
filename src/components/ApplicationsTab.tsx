@@ -134,7 +134,7 @@ export default function ApplicationsTab({ user }: { user: SupaUser }) {
           <p className="text-sm text-muted-foreground">Suivez l'état de vos candidatures aux offres d'emploi.</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={load}>
+          <Button variant="outline" size="sm" onClick={() => load(true)}>
             <RefreshCw size={14} /> Actualiser
           </Button>
           <Link to="/careers">
