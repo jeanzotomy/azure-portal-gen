@@ -93,11 +93,7 @@ export default function ApplicationTrackingPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <Helmet>
-        <title>Suivi de candidature | CloudMature</title>
-        <meta name="description" content="Suivez l'état de votre candidature CloudMature en temps réel." />
-        <link rel="canonical" href={`https://cloudmature.com/candidature${paramId ? `/${paramId}` : ""}`} />
-      </Helmet>
+      <Navbar />
       <Navbar />
       <main className="flex-1 container mx-auto px-4 py-12 max-w-3xl">
         <div className="text-center mb-8">
