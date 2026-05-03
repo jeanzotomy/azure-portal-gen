@@ -4,7 +4,10 @@ import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import {
   FileSignature, Sparkles, Loader2, Download, RefreshCw, FileUp, CheckCircle2, Clock, Search, Briefcase,
@@ -17,9 +20,44 @@ interface Row {
   candidate_email: string;
   job_id: string | null;
   job_title: string | null;
+  job_contract_type?: string | null;
+  job_location?: string | null;
+  job_salary?: string | null;
+  job_duration?: string | null;
+  job_start_date?: string | null;
   accepted_at: string;
   contract: { id: string; contract_file_path: string; contract_file_name: string; signed_at: string | null } | null;
 }
+
+interface FormState {
+  job_title: string;
+  contract_type: string;
+  start_date: string;
+  end_date: string;
+  duration: string;
+  trial_period: string;
+  salary: string;
+  salary_currency: string;
+  benefits: string;
+  location: string;
+  weekly_hours: string;
+  leave_days: string;
+  notice_period: string;
+  department: string;
+  manager_name: string;
+  candidate_address: string;
+  candidate_id_number: string;
+  candidate_birth: string;
+  custom_clauses: string;
+}
+
+const emptyForm: FormState = {
+  job_title: "", contract_type: "CDI", start_date: "", end_date: "", duration: "",
+  trial_period: "3 mois", salary: "", salary_currency: "GNF", benefits: "",
+  location: "Conakry, Guinée", weekly_hours: "40 heures", leave_days: "30 jours ouvrables / an",
+  notice_period: "1 mois (employés) / 3 mois (cadres)", department: "", manager_name: "",
+  candidate_address: "", candidate_id_number: "", candidate_birth: "", custom_clauses: "",
+};
 
 export default function ContractsTab({ readOnly = false }: { readOnly?: boolean }) {
   const [rows, setRows] = useState<Row[]>([]);
@@ -27,6 +65,8 @@ export default function ContractsTab({ readOnly = false }: { readOnly?: boolean 
   const [busy, setBusy] = useState<string | null>(null);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [openRow, setOpenRow] = useState<Row | null>(null);
+  const [form, setForm] = useState<FormState>(emptyForm);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -41,33 +81,63 @@ export default function ContractsTab({ readOnly = false }: { readOnly?: boolean 
 
     const [{ data: contracts }, { data: jobs }] = await Promise.all([
       supabase.from("onboarding_contracts").select("id, process_id, contract_file_path, contract_file_name, signed_at").in("process_id", procIds),
-      jobIds.length ? supabase.from("job_postings").select("id, title").in("id", jobIds) : Promise.resolve({ data: [] as any }),
+      jobIds.length ? supabase.from("job_postings").select("id, title, contract_type, location, salary_range, contract_duration, start_date").in("id", jobIds) : Promise.resolve({ data: [] as any }),
     ]);
 
     const contractByProc = new Map((contracts || []).map(c => [c.process_id, c]));
-    const jobById = new Map<string, string>((jobs || []).map((j: any) => [j.id as string, j.title as string]));
+    const jobById = new Map<string, any>((jobs || []).map((j: any) => [j.id, j]));
 
-    setRows(procs.map(p => ({
-      process_id: p.id,
-      application_id: p.application_id,
-      candidate_name: p.candidate_name,
-      candidate_email: p.candidate_email,
-      job_id: p.job_id,
-      job_title: p.job_id ? jobById.get(p.job_id) || null : null,
-      accepted_at: p.created_at,
-      contract: contractByProc.get(p.id) as any || null,
-    })));
+    setRows(procs.map(p => {
+      const job = p.job_id ? jobById.get(p.job_id) : null;
+      return {
+        process_id: p.id,
+        application_id: p.application_id,
+        candidate_name: p.candidate_name,
+        candidate_email: p.candidate_email,
+        job_id: p.job_id,
+        job_title: job?.title || null,
+        job_contract_type: job?.contract_type || null,
+        job_location: job?.location || null,
+        job_salary: job?.salary_range || null,
+        job_duration: job?.contract_duration || null,
+        job_start_date: job?.start_date || null,
+        accepted_at: p.created_at,
+        contract: contractByProc.get(p.id) as any || null,
+      };
+    }));
     setLoading(false);
   }, []);
 
   useEffect(() => { load(); }, [load]);
 
-  const generate = async (processId: string) => {
-    setBusy(processId);
+  const openGenerate = (r: Row) => {
+    setOpenRow(r);
+    setForm({
+      ...emptyForm,
+      job_title: r.job_title || "",
+      contract_type: r.job_contract_type || "CDI",
+      location: r.job_location || "Conakry, Guinée",
+      salary: r.job_salary || "",
+      duration: r.job_duration || "",
+      start_date: r.job_start_date || "",
+    });
+  };
+
+  const submitGenerate = async () => {
+    if (!openRow) return;
+    if (!form.job_title.trim()) return toast.error("Intitulé du poste requis");
+    if (!form.salary.trim()) return toast.error("Salaire requis");
+    if (!form.start_date.trim()) return toast.error("Date de début requise");
+    if (form.contract_type === "CDD" && !form.end_date.trim()) return toast.error("Date de fin requise pour un CDD");
+
+    setBusy(openRow.process_id);
     try {
-      const { data, error } = await supabase.functions.invoke("generate-contract", { body: { process_id: processId } });
+      const { data, error } = await supabase.functions.invoke("generate-contract", {
+        body: { process_id: openRow.process_id, ...form },
+      });
       if (error || (data as any)?.error) throw new Error(error?.message || (data as any)?.error);
       toast.success("Contrat généré et déposé dans SharePoint");
+      setOpenRow(null);
       load();
     } catch (e: any) { toast.error(e.message); } finally { setBusy(null); }
   };
@@ -119,6 +189,8 @@ export default function ContractsTab({ readOnly = false }: { readOnly?: boolean 
     if (statusFilter === "signed" && !r.contract?.signed_at) return false;
     return true;
   });
+
+  const set = (k: keyof FormState) => (v: string) => setForm(f => ({ ...f, [k]: v }));
 
   return (
     <div className="space-y-4">
@@ -178,10 +250,10 @@ export default function ContractsTab({ readOnly = false }: { readOnly?: boolean 
                     )}
                     {!readOnly && !r.contract && (
                       <>
-                        <Button size="sm" onClick={() => generate(r.process_id)} disabled={busy === r.process_id}
+                        <Button size="sm" onClick={() => openGenerate(r)} disabled={busy === r.process_id}
                           className="bg-gradient-to-r from-primary to-[#007aa3]">
                           {busy === r.process_id ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Sparkles className="h-4 w-4 mr-1" />}
-                          Générer auto
+                          Générer
                         </Button>
                         <label>
                           <input type="file" accept=".pdf" className="hidden" disabled={busy === r.process_id}
@@ -199,6 +271,94 @@ export default function ContractsTab({ readOnly = false }: { readOnly?: boolean 
           ))}
         </div>
       )}
+
+      <Dialog open={!!openRow} onOpenChange={(v) => !v && setOpenRow(null)}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="bg-gradient-to-r from-primary to-[#007aa3] -m-6 mb-2 p-6 rounded-t-lg">
+            <DialogTitle className="text-white">Générer le contrat - {openRow?.candidate_name}</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-5 pt-2">
+            <section>
+              <h4 className="font-semibold text-sm mb-2 text-primary">Poste & Contrat</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <div><Label>Intitulé du poste *</Label><Input value={form.job_title} onChange={e => set("job_title")(e.target.value)} /></div>
+                <div>
+                  <Label>Type de contrat *</Label>
+                  <Select value={form.contract_type} onValueChange={set("contract_type")}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="CDI">CDI</SelectItem>
+                      <SelectItem value="CDD">CDD</SelectItem>
+                      <SelectItem value="Stage">Stage</SelectItem>
+                      <SelectItem value="Freelance">Freelance / Prestation</SelectItem>
+                      <SelectItem value="Apprentissage">Apprentissage</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div><Label>Département</Label><Input value={form.department} onChange={e => set("department")(e.target.value)} placeholder="Cloud & DevOps" /></div>
+                <div><Label>Manager / N+1</Label><Input value={form.manager_name} onChange={e => set("manager_name")(e.target.value)} /></div>
+                <div><Label>Lieu de travail</Label><Input value={form.location} onChange={e => set("location")(e.target.value)} /></div>
+                <div><Label>Heures hebdomadaires</Label><Input value={form.weekly_hours} onChange={e => set("weekly_hours")(e.target.value)} /></div>
+              </div>
+            </section>
+
+            <section>
+              <h4 className="font-semibold text-sm mb-2 text-primary">Dates & Durée</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div><Label>Date de début *</Label><Input type="date" value={form.start_date} onChange={e => set("start_date")(e.target.value)} /></div>
+                <div><Label>Date de fin {form.contract_type === "CDD" && "*"}</Label><Input type="date" value={form.end_date} onChange={e => set("end_date")(e.target.value)} /></div>
+                <div><Label>Durée (texte)</Label><Input value={form.duration} onChange={e => set("duration")(e.target.value)} placeholder="6 mois renouvelable" /></div>
+                <div><Label>Période d'essai</Label><Input value={form.trial_period} onChange={e => set("trial_period")(e.target.value)} /></div>
+                <div><Label>Préavis</Label><Input value={form.notice_period} onChange={e => set("notice_period")(e.target.value)} /></div>
+                <div><Label>Congés payés</Label><Input value={form.leave_days} onChange={e => set("leave_days")(e.target.value)} /></div>
+              </div>
+            </section>
+
+            <section>
+              <h4 className="font-semibold text-sm mb-2 text-primary">Rémunération</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div className="md:col-span-2"><Label>Salaire brut mensuel *</Label><Input value={form.salary} onChange={e => set("salary")(e.target.value)} placeholder="5 000 000" /></div>
+                <div>
+                  <Label>Devise</Label>
+                  <Select value={form.salary_currency} onValueChange={set("salary_currency")}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="GNF">GNF</SelectItem>
+                      <SelectItem value="EUR">EUR</SelectItem>
+                      <SelectItem value="USD">USD</SelectItem>
+                      <SelectItem value="XOF">XOF</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="md:col-span-3"><Label>Avantages (transport, logement, primes...)</Label><Textarea rows={2} value={form.benefits} onChange={e => set("benefits")(e.target.value)} /></div>
+              </div>
+            </section>
+
+            <section>
+              <h4 className="font-semibold text-sm mb-2 text-primary">Identité du salarié (optionnel)</h4>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div><Label>N° pièce d'identité</Label><Input value={form.candidate_id_number} onChange={e => set("candidate_id_number")(e.target.value)} /></div>
+                <div><Label>Date de naissance</Label><Input type="date" value={form.candidate_birth} onChange={e => set("candidate_birth")(e.target.value)} /></div>
+                <div><Label>Adresse</Label><Input value={form.candidate_address} onChange={e => set("candidate_address")(e.target.value)} /></div>
+              </div>
+            </section>
+
+            <section>
+              <h4 className="font-semibold text-sm mb-2 text-primary">Clauses particulières (optionnel)</h4>
+              <Textarea rows={3} value={form.custom_clauses} onChange={e => set("custom_clauses")(e.target.value)} placeholder="Mobilité, télétravail, non-concurrence post-contractuelle..." />
+            </section>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setOpenRow(null)}>Annuler</Button>
+            <Button onClick={submitGenerate} disabled={busy === openRow?.process_id} className="bg-gradient-to-r from-primary to-[#007aa3]">
+              {busy === openRow?.process_id ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Sparkles className="h-4 w-4 mr-1" />}
+              Générer le contrat
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
