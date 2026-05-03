@@ -73,6 +73,35 @@ export default function OnboardingTab({ user }: { user: SupaUser }) {
     setContract((contractData || null) as any);
     setTrainings((trainingsData || []) as any);
     setLoading(false);
+
+    // Vérifier l'accessibilité réelle du fichier contrat (signed URL)
+    if (contractData?.contract_file_path) {
+      setContractChecking(true);
+      try {
+        const { data: signed, error: sErr } = await supabase.storage
+          .from("onboarding-files")
+          .createSignedUrl(contractData.contract_file_path, 60);
+        if (sErr || !signed?.signedUrl) {
+          setContractStatus({
+            ok: false,
+            reason: "Fichier introuvable dans le stockage sécurisé.",
+            solution: "Contactez le service RH pour qu'il régénère votre contrat.",
+          });
+        } else {
+          setContractStatus({ ok: true });
+        }
+      } catch {
+        setContractStatus({
+          ok: false,
+          reason: "Impossible de vérifier l'accès au fichier.",
+          solution: "Vérifiez votre connexion internet puis cliquez sur Actualiser.",
+        });
+      } finally {
+        setContractChecking(false);
+      }
+    } else {
+      setContractStatus(null);
+    }
   }, [user]);
 
   useEffect(() => { load(); }, [load]);
