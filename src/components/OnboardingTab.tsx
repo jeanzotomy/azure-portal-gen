@@ -240,42 +240,86 @@ export default function OnboardingTab({ user }: { user: SupaUser }) {
         </div>
       </div>
 
-      {/* Section Contrat – mise en avant */}
+      {/* Section Contrat – mise en avant + état d'accessibilité */}
       {(() => {
         const contractStep = steps.find(s => s.step_key === "contract");
         if (!contractStep) return null;
         const signed = !!contract?.signed_at;
+        const accessible = contract && contractStatus?.ok !== false;
+        const inaccessible = contract && contractStatus?.ok === false;
+
+        let badgeLabel = "En préparation";
+        let badgeClass = "bg-amber-500";
+        let title = "Contrat en cours de préparation";
+        let description = "Le service RH prépare votre contrat. Vous serez notifié(e) dès qu'il sera disponible.";
+        let cardClass = "border-amber-200 bg-amber-50/40";
+        let iconBg = "bg-amber-400 text-white";
+
+        if (signed) {
+          badgeLabel = "Signé"; badgeClass = "bg-emerald-500";
+          title = "Votre contrat est signé ✅";
+          description = `Signé le ${new Date(contract!.signed_at!).toLocaleDateString("fr-FR")}. Vous pouvez le télécharger à tout moment.`;
+          cardClass = "border-emerald-300 bg-emerald-50/40";
+          iconBg = "bg-emerald-500 text-white";
+        } else if (contractChecking) {
+          badgeLabel = "Vérification…"; badgeClass = "bg-slate-500";
+          title = "Vérification de l'accès au contrat";
+          description = "Nous vérifions que votre contrat est bien accessible…";
+          cardClass = "border-slate-200 bg-slate-50/40";
+          iconBg = "bg-slate-400 text-white";
+        } else if (inaccessible) {
+          badgeLabel = "Indisponible"; badgeClass = "bg-red-500";
+          title = "Contrat momentanément indisponible";
+          description = contractStatus?.reason || "Le fichier ne peut pas être ouvert pour le moment.";
+          cardClass = "border-red-300 bg-red-50/40";
+          iconBg = "bg-red-500 text-white";
+        } else if (accessible) {
+          badgeLabel = "Téléchargement disponible"; badgeClass = "bg-primary";
+          title = "Votre contrat est prêt à signer";
+          description = "Téléchargez votre contrat, lisez-le attentivement, puis signez électroniquement.";
+          cardClass = "border-primary/40 bg-gradient-to-br from-primary/5 via-white to-cyan-50 shadow-lg";
+          iconBg = "bg-primary text-white";
+        }
+
         return (
-          <Card className={`overflow-hidden border-2 ${signed ? "border-emerald-300 bg-emerald-50/40" : contract ? "border-primary/40 bg-gradient-to-br from-primary/5 via-white to-cyan-50 shadow-lg" : "border-amber-200 bg-amber-50/40"}`}>
+          <Card className={`overflow-hidden border-2 ${cardClass}`}>
             <div className="p-6 flex flex-col md:flex-row md:items-center gap-4">
-              <div className={`flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center ${signed ? "bg-emerald-500 text-white" : contract ? "bg-primary text-white" : "bg-amber-400 text-white"}`}>
-                <FileSignature className="h-7 w-7" />
+              <div className={`flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center ${iconBg}`}>
+                {inaccessible ? <XCircle className="h-7 w-7" /> : contractChecking ? <Loader2 className="h-7 w-7 animate-spin" /> : <FileSignature className="h-7 w-7" />}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <Badge className={signed ? "bg-emerald-500" : contract ? "bg-primary" : "bg-amber-500"}>
-                    {signed ? "Signé" : contract ? "Action requise" : "En préparation"}
-                  </Badge>
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                  <Badge className={badgeClass}>{badgeLabel}</Badge>
                   <span className="text-xs text-muted-foreground font-mono">Contrat de travail</span>
+                  {contract?.contract_file_name && (
+                    <span className="text-xs text-muted-foreground truncate max-w-[200px]">· {contract.contract_file_name}</span>
+                  )}
                 </div>
-                <h2 className="text-xl font-bold">
-                  {signed ? "Votre contrat est signé ✅" : contract ? "Votre contrat est prêt à signer" : "Contrat en cours de préparation"}
-                </h2>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {signed
-                    ? `Signé le ${new Date(contract!.signed_at!).toLocaleDateString("fr-FR")}.`
-                    : contract
-                      ? "Téléchargez votre contrat, lisez-le attentivement, puis signez électroniquement ci-dessous."
-                      : "Le service RH prépare votre contrat. Vous serez notifié(e) dès qu'il sera disponible."}
-                </p>
+                <h2 className="text-xl font-bold">{title}</h2>
+                <p className="text-sm text-muted-foreground mt-1">{description}</p>
+                {inaccessible && contractStatus?.solution && (
+                  <div className="mt-3 flex items-start gap-2 text-sm bg-white/70 border border-red-200 rounded-md p-3">
+                    <ShieldAlert className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <span className="font-semibold text-red-700">Que faire&nbsp;?</span>{" "}
+                      <span className="text-red-900">{contractStatus.solution}</span>
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="flex flex-col sm:flex-row gap-2 md:flex-shrink-0">
                 {contract && (
-                  <Button variant="outline" onClick={downloadContract}>
-                    <Download className="h-4 w-4 mr-2" /> Télécharger
+                  <Button variant="outline" onClick={downloadContract} disabled={downloading || contractChecking}>
+                    {downloading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
+                    {downloading ? "Téléchargement…" : "Télécharger"}
                   </Button>
                 )}
-                {contract && !signed && (
+                {inaccessible && (
+                  <Button variant="outline" onClick={load}>
+                    <RefreshCw className="h-4 w-4 mr-2" /> Réessayer
+                  </Button>
+                )}
+                {accessible && !signed && (
                   <Button className="bg-gradient-to-r from-primary to-[#007aa3]" onClick={() => setActiveStepId(contractStep.id)}>
                     <FileSignature className="h-4 w-4 mr-2" /> Démarrer la signature
                   </Button>
