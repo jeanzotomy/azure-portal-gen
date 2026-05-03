@@ -38,9 +38,12 @@ export default function OnboardingTab({ user }: { user: SupaUser }) {
   const [steps, setSteps] = useState<Step[]>([]);
   const [docs, setDocs] = useState<Doc[]>([]);
   const [contract, setContract] = useState<Contract | null>(null);
+  const [contractStatus, setContractStatus] = useState<{ ok: boolean; reason?: string; solution?: string } | null>(null);
+  const [contractChecking, setContractChecking] = useState(false);
   const [trainings, setTrainings] = useState<AssignedTraining[]>([]);
   const [activeStepId, setActiveStepId] = useState<string | null>(null);
   const [uploading, setUploading] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
