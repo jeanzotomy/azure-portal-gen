@@ -23,7 +23,7 @@ const DOC_LABELS: Record<string, string> = {
   diplome: "Diplômes", photo_casier: "Photo + Casier", contrat_signe: "Contrat signé", autre: "Autre",
 };
 
-export default function OnboardingAdminTab() {
+export default function OnboardingAdminTab({ readOnly = false }: { readOnly?: boolean } = {}) {
   const [loading, setLoading] = useState(true);
   const [processes, setProcesses] = useState<Process[]>([]);
   const [selected, setSelected] = useState<Process | null>(null);
@@ -156,7 +156,7 @@ export default function OnboardingAdminTab() {
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge variant={s.status === "valide" ? "default" : "outline"} className="text-xs">{s.status}</Badge>
-                      {s.status !== "valide" && (
+                      {!readOnly && s.status !== "valide" && (
                         <Button size="sm" variant="outline" onClick={() => updateStep(s.id, "valide")}>
                           <CheckCircle2 className="h-3 w-3" />
                         </Button>
@@ -185,6 +185,8 @@ export default function OnboardingAdminTab() {
                     <Badge variant="outline">En attente de signature</Badge>
                   )}
                 </Card>
+              ) : readOnly ? (
+                <p className="text-xs text-muted-foreground">Aucun contrat déposé.</p>
               ) : (
                 <label className="block">
                   <input type="file" accept=".pdf" className="hidden" disabled={uploadingContract}
@@ -212,12 +214,12 @@ export default function OnboardingAdminTab() {
                       </div>
                       <Badge variant={d.status === "valide" ? "default" : d.status === "refuse" ? "destructive" : "outline"} className="text-xs">{d.status}</Badge>
                       <Button size="sm" variant="ghost" onClick={() => downloadFile(d.file_path)}><Eye className="h-3 w-3" /></Button>
-                      {d.status !== "valide" && (
+                      {!readOnly && d.status !== "valide" && (
                         <Button size="sm" variant="outline" onClick={() => reviewDoc(d.id, "valide")}>
                           <CheckCircle2 className="h-3 w-3" />
                         </Button>
                       )}
-                      {d.status !== "refuse" && (
+                      {!readOnly && d.status !== "refuse" && (
                         <Button size="sm" variant="outline" onClick={() => {
                           const r = prompt("Raison du refus ?");
                           if (r) reviewDoc(d.id, "refuse", r);

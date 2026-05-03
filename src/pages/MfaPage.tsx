@@ -30,6 +30,8 @@ export default function MfaPage() {
     const roleList = (roles || []).map(r => r.role);
     if (roleList.includes("admin") || roleList.includes("agent") || roleList.includes("gestionnaire") || roleList.includes("comptable")) {
       navigate("/admin");
+    } else if (roleList.includes("hr")) {
+      navigate("/rh");
     } else if (roleList.includes("onboarding")) {
       navigate("/onboarding");
     } else {

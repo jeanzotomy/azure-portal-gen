@@ -88,7 +88,7 @@ interface Sector {
   description: string | null;
 }
 
-export default function HrTab() {
+export default function HrTab({ onboardingReadOnly = false }: { onboardingReadOnly?: boolean } = {}) {
   const { user } = useAuthSession();
   const { isAdmin } = useUserRoles();
   const { toast } = useToast();
@@ -712,7 +712,7 @@ export default function HrTab() {
         </TabsContent>
 
         <TabsContent value="onboarding" className="mt-4">
-          <OnboardingAdminTab />
+          <OnboardingAdminTab readOnly={onboardingReadOnly} />
         </TabsContent>
 
         <TabsContent value="email-log" className="mt-4">

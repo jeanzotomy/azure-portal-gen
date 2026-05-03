@@ -2151,11 +2151,12 @@ function AdminUsers() {
     setChangingRole(userId);
     const { error: delError } = await supabase.from("user_roles").delete().eq("user_id", userId);
     if (delError) { toast({ title: "Erreur", description: delError.message, variant: "destructive" }); setChangingRole(null); return; }
-    const rolesToInsert: { user_id: string; role: "admin" | "agent" | "client" | "comptable" | "gestionnaire" }[] = [{ user_id: userId, role: "client" }];
+    const rolesToInsert: { user_id: string; role: "admin" | "agent" | "client" | "comptable" | "gestionnaire" | "hr" }[] = [{ user_id: userId, role: "client" }];
     if (role === "admin") rolesToInsert.push({ user_id: userId, role: "admin" });
     else if (role === "agent") rolesToInsert.push({ user_id: userId, role: "agent" });
     else if (role === "comptable") rolesToInsert.push({ user_id: userId, role: "comptable" });
     else if (role === "gestionnaire") rolesToInsert.push({ user_id: userId, role: "gestionnaire" });
+    else if (role === "hr") rolesToInsert.push({ user_id: userId, role: "hr" });
     const { error } = await supabase.from("user_roles").insert(rolesToInsert);
     if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
     else toast({ title: "Rôle mis à jour!", description: `Rôle changé en ${role}.` });
@@ -2283,10 +2284,11 @@ function AdminUsers() {
     if (roles.includes("gestionnaire")) return { label: "Gestionnaire", color: "bg-blue-500/10 text-blue-500 border-blue-500/20" };
     if (roles.includes("agent")) return { label: "Agent", color: "bg-orange-500/10 text-orange-500 border-orange-500/20" };
     if (roles.includes("comptable")) return { label: "Comptable", color: "bg-teal-500/10 text-teal-500 border-teal-500/20" };
+    if (roles.includes("hr")) return { label: "RH", color: "bg-pink-500/10 text-pink-500 border-pink-500/20" };
     return { label: "Client", color: "bg-muted text-muted-foreground border-border" };
   };
 
-  const getCurrentRole = (roles: string[]) => roles.includes("admin") ? "admin" : roles.includes("gestionnaire") ? "gestionnaire" : roles.includes("agent") ? "agent" : roles.includes("comptable") ? "comptable" : "client";
+  const getCurrentRole = (roles: string[]) => roles.includes("admin") ? "admin" : roles.includes("gestionnaire") ? "gestionnaire" : roles.includes("agent") ? "agent" : roles.includes("comptable") ? "comptable" : roles.includes("hr") ? "hr" : "client";
 
   const filtered = profilesList.filter(p => {
     const term = search.toLowerCase();
@@ -2318,12 +2320,13 @@ function AdminUsers() {
     { value: "comptable", label: "Comptable" },
     { value: "gestionnaire", label: "Gestionnaire" },
     { value: "agent", label: "Agent" },
+    { value: "hr", label: "RH" },
     { value: "admin", label: "Admin" },
   ];
 
   const roleFilterButtons = [
     { v: "all", l: "Tous" }, { v: "client", l: "Client" }, { v: "comptable", l: "Comptable" },
-    { v: "gestionnaire", l: "Gestionnaire" }, { v: "agent", l: "Agent" }, { v: "admin", l: "Admin" },
+    { v: "gestionnaire", l: "Gestionnaire" }, { v: "agent", l: "Agent" }, { v: "hr", l: "RH" }, { v: "admin", l: "Admin" },
   ];
 
   const renderEmail = (uid: string) => mfaStatus[uid]?.email || "—";
@@ -2956,6 +2959,7 @@ function AdminUsers() {
                     <SelectItem value="comptable">Comptable</SelectItem>
                     <SelectItem value="gestionnaire">Gestionnaire</SelectItem>
                     <SelectItem value="agent">Agent</SelectItem>
+                    <SelectItem value="hr">RH</SelectItem>
                     <SelectItem value="admin">Admin</SelectItem>
                   </SelectContent>
                 </Select>
@@ -2977,7 +2981,7 @@ function AdminUsers() {
                 <code className="text-xs text-muted-foreground block">email,nom,role</code>
                 <code className="text-xs text-muted-foreground block">jean@exemple.com,Jean Dupont,client</code>
                 <code className="text-xs text-muted-foreground block">marie@exemple.com,Marie Martin,agent</code>
-                <p className="text-xs text-muted-foreground mt-2">Rôles : client, comptable, gestionnaire, agent, admin</p>
+                <p className="text-xs text-muted-foreground mt-2">Rôles : client, comptable, gestionnaire, agent, hr, admin</p>
               </div>
 
               <label className="cursor-pointer">

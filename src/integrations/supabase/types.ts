@@ -1396,6 +1396,7 @@ export type Database = {
         | "comptable"
         | "gestionnaire"
         | "onboarding"
+        | "hr"
       application_status:
         | "nouvelle"
         | "en_revue"
@@ -1569,6 +1570,7 @@ export const Constants = {
         "comptable",
         "gestionnaire",
         "onboarding",
+        "hr",
       ],
       application_status: [
         "nouvelle",
