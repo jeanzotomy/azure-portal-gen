@@ -8,7 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, User, Mail, Briefcase, FileText, CheckCircle2, X, Loader2, Cloud, Lock } from "lucide-react";
+import { Upload, User, Mail, Briefcase, FileText, CheckCircle2, X, Loader2, Cloud, Lock, Eye } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface Props {
   open: boolean;
@@ -104,6 +105,28 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
   });
   const [cvFile, setCvFile] = useState<File | null>(null);
   const [letterFile, setLetterFile] = useState<File | null>(null);
+  const [existingApp, setExistingApp] = useState<{ tracking_id: string | null; status: string } | null>(null);
+
+  // Detect existing application for this job (by user or by email)
+  useEffect(() => {
+    if (!open) { setExistingApp(null); return; }
+    const email = (user?.email || form.email || "").trim();
+    if (!user?.id && !email) return;
+    (async () => {
+      let q = supabase
+        .from("job_applications")
+        .select("tracking_id, status")
+        .eq("job_id", jobId)
+        .limit(1);
+      q = user?.id ? q.eq("user_id", user.id) : q.ilike("email", email);
+      const { data } = await q;
+      if (data && data.length > 0) {
+        setExistingApp({ tracking_id: data[0].tracking_id, status: data[0].status });
+      } else {
+        setExistingApp(null);
+      }
+    })();
+  }, [open, jobId, user?.id, user?.email, form.email]);
 
   // Préremplir depuis le profil utilisateur (uniquement si connecté)
   useEffect(() => {
@@ -289,7 +312,7 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl p-0 gap-0 overflow-hidden [&>button]:bg-white/15 [&>button]:hover:bg-white/25 [&>button]:text-primary-foreground [&>button]:opacity-100 [&>button]:rounded-full [&>button]:p-2 [&>button]:top-4 [&>button]:right-4 [&>button>svg]:h-5 [&>button>svg]:w-5">
+      <DialogContent className="max-w-3xl p-0 gap-0 overflow-hidden flex flex-col max-h-[90vh] [&>button]:bg-white/15 [&>button]:hover:bg-white/25 [&>button]:text-primary-foreground [&>button]:opacity-100 [&>button]:rounded-full [&>button]:p-2 [&>button]:top-4 [&>button]:right-4 [&>button>svg]:h-5 [&>button>svg]:w-5">
         <DialogHeader className="relative bg-gradient-to-br from-primary via-primary to-[#005f80] text-primary-foreground px-7 py-7 pr-16 overflow-hidden">
           <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-white/10 blur-2xl pointer-events-none" />
           <div className="absolute -bottom-16 -left-8 w-52 h-52 rounded-full bg-white/10 blur-3xl pointer-events-none" />
@@ -314,7 +337,22 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
           </div>
         </DialogHeader>
 
-        <div className="space-y-4 max-h-[65vh] overflow-y-auto px-6 py-4">
+        <div className="flex-1 min-h-0 overflow-y-auto px-6 py-4 space-y-4">
+          {existingApp && (
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-md border border-primary/30 bg-primary/5 px-4 py-3">
+              <div className="text-sm">
+                <p className="font-medium text-foreground">Vous avez déjà postulé à cette offre.</p>
+                {existingApp.tracking_id && (
+                  <p className="text-xs text-muted-foreground mt-0.5">Numéro de suivi : <span className="font-mono">{existingApp.tracking_id}</span></p>
+                )}
+              </div>
+              <Button asChild size="sm" variant="default">
+                <Link to={existingApp.tracking_id ? `/candidature/${existingApp.tracking_id}` : "/candidature"} onClick={() => onOpenChange(false)}>
+                  <Eye size={14} className="mr-1.5" /> Voir ma candidature
+                </Link>
+              </Button>
+            </div>
+          )}
           <SectionTitle icon={User} title="Identité" />
           {(lockedFields.first_name || lockedFields.last_name || lockedFields.phone) && (
             <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/40 border border-border rounded-md px-3 py-2">
@@ -422,7 +460,7 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
 
         </div>
 
-        <DialogFooter className="px-6 py-4 border-t bg-muted/30">
+        <DialogFooter className="shrink-0 px-6 py-4 border-t bg-muted/30">
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>Annuler</Button>
           <Button onClick={handleSubmit} disabled={submitting} className="min-w-[180px]">
             {submitting ? (<><Loader2 size={14} className="mr-2 animate-spin" /> Envoi en cours…</>) : "Envoyer ma candidature"}
