@@ -192,13 +192,13 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
                     <div className="flex items-center gap-2 flex-wrap mb-1">
                       <h4 className="font-semibold">{t.title}</h4>
                       {!t.active && <Badge variant="outline">Inactif</Badge>}
-                      {t.category && <Badge variant="secondary">{t.category}</Badge>}
                       {t.duration_minutes && <Badge variant="outline" className="text-xs">{t.duration_minutes} min</Badge>}
                     </div>
                     {t.description && <p className="text-sm text-muted-foreground line-clamp-2">{t.description}</p>}
-                    {t.target_job_titles.length > 0 && (
+                    {(t.departments?.length > 0 || t.sectors?.length > 0) && (
                       <div className="flex flex-wrap gap-1 mt-2">
-                        {t.target_job_titles.map(jt => <Badge key={jt} variant="outline" className="text-xs">{jt}</Badge>)}
+                        {(t.departments || []).map(d => <Badge key={`d-${d}`} variant="secondary" className="text-xs">{d}</Badge>)}
+                        {(t.sectors || []).map(s => <Badge key={`s-${s}`} variant="outline" className="text-xs">{s}</Badge>)}
                       </div>
                     )}
                     <a href={t.url} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline inline-flex items-center gap-1 mt-2">
