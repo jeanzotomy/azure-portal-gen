@@ -8,7 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { useToast } from "@/hooks/use-toast";
-import { Upload, User, Mail, Briefcase, FileText, CheckCircle2, X, Loader2, Cloud, Lock } from "lucide-react";
+import { Upload, User, Mail, Briefcase, FileText, CheckCircle2, X, Loader2, Cloud, Lock, Eye } from "lucide-react";
+import { Link } from "react-router-dom";
 
 interface Props {
   open: boolean;
