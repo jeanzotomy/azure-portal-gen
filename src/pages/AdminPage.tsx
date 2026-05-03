@@ -2981,7 +2981,7 @@ function AdminUsers() {
                 <code className="text-xs text-muted-foreground block">email,nom,role</code>
                 <code className="text-xs text-muted-foreground block">jean@exemple.com,Jean Dupont,client</code>
                 <code className="text-xs text-muted-foreground block">marie@exemple.com,Marie Martin,agent</code>
-                <p className="text-xs text-muted-foreground mt-2">Rôles : client, comptable, gestionnaire, agent, admin</p>
+                <p className="text-xs text-muted-foreground mt-2">Rôles : client, comptable, gestionnaire, agent, hr, admin</p>
               </div>
 
               <label className="cursor-pointer">
