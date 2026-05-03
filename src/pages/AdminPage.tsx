@@ -2578,6 +2578,19 @@ function AdminUsers() {
         </div>
       )}
 
+      {filtered.length > 0 && hasMore && (
+        <div ref={loadMoreRef} className="flex justify-center py-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setVisibleCount((c) => Math.min(c + pageSize, filtered.length))}
+            className="gap-1.5"
+          >
+            Charger plus ({filtered.length - visibleCount} restant{filtered.length - visibleCount > 1 ? "s" : ""})
+          </Button>
+        </div>
+      )}
+
       {/* MFA Management Dialog */}
       {mfaDialogUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50" onClick={() => setMfaDialogUser(null)}>
