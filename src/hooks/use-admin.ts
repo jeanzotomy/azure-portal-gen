@@ -83,8 +83,9 @@ export function useUserRoles() {
   const isAgent = roles.includes("agent");
   const isComptable = roles.includes("comptable");
   const isGestionnaire = roles.includes("gestionnaire");
+  const isHr = roles.includes("hr");
 
-  return { roles, isAdmin, isAgent, isComptable, isGestionnaire, loading: !ready || loading };
+  return { roles, isAdmin, isAgent, isComptable, isGestionnaire, isHr, loading: !ready || loading };
 }
 
 /** @deprecated Use useUserRoles instead */
