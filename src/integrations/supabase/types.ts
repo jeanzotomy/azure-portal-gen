@@ -1307,6 +1307,7 @@ export type Database = {
         Args: { _application_id: string }
         Returns: string
       }
+      current_user_email: { Args: never; Returns: string }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean

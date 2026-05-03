@@ -6,8 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Briefcase, RefreshCw, Calendar, MapPin, ExternalLink, Search, X } from "lucide-react";
+import { Briefcase, RefreshCw, Calendar, MapPin, ExternalLink, Search, X, Link2 } from "lucide-react";
 import { format } from "date-fns";
+import { toast } from "sonner";
 import type { User as SupaUser } from "@supabase/supabase-js";
 
 type AppStatus = "nouvelle" | "en_revue" | "entretien" | "acceptee" | "refusee";
@@ -63,11 +64,12 @@ export default function ApplicationsTab({ user }: { user: SupaUser }) {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [contractFilter, setContractFilter] = useState<string>("all");
+  const [linkedCount, setLinkedCount] = useState(0);
+  const hasLoadedRef = useState({ done: false })[0];
 
-  const load = async () => {
+  const load = async (manual = false) => {
     setLoading(true);
     const email = user.email || "";
-    // Match by user_id OR by email (covers candidatures submitted before account creation)
     const { data: appsData } = await supabase
       .from("job_applications")
       .select("id, job_id, full_name, email, user_id, status, created_at, years_experience, salary_expectation")
@@ -75,13 +77,21 @@ export default function ApplicationsTab({ user }: { user: SupaUser }) {
       .order("created_at", { ascending: false });
 
     const applications = (appsData || []) as (Application & { user_id: string | null })[];
-    setApps(applications);
 
     // Auto-link orphan applications to this user
     const orphanIds = applications.filter((a) => !a.user_id).map((a) => a.id);
     if (orphanIds.length > 0) {
       await supabase.from("job_applications").update({ user_id: user.id }).in("id", orphanIds);
+      setLinkedCount((c) => c + orphanIds.length);
+      toast.success(
+        `${orphanIds.length} candidature${orphanIds.length > 1 ? "s" : ""} rattachée${orphanIds.length > 1 ? "s" : ""} à votre compte`,
+        { description: "Vos anciennes candidatures sont désormais liées à votre profil.", icon: "🔗" }
+      );
+    } else if (manual) {
+      toast.success("Liste à jour", { description: "Aucune nouvelle candidature à rattacher." });
     }
+
+    setApps(applications);
 
     if (applications.length > 0) {
       const jobIds = Array.from(new Set(applications.map((a) => a.job_id)));
@@ -94,9 +104,10 @@ export default function ApplicationsTab({ user }: { user: SupaUser }) {
       setJobs(map);
     }
     setLoading(false);
+    hasLoadedRef.done = true;
   };
 
-  useEffect(() => { load(); }, [user.id]);
+  useEffect(() => { load(false); }, [user.id]);
 
   const filteredApps = apps.filter((a) => {
     const job = jobs[a.job_id];
@@ -123,7 +134,7 @@ export default function ApplicationsTab({ user }: { user: SupaUser }) {
           <p className="text-sm text-muted-foreground">Suivez l'état de vos candidatures aux offres d'emploi.</p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" onClick={load}>
+          <Button variant="outline" size="sm" onClick={() => load(true)}>
             <RefreshCw size={14} /> Actualiser
           </Button>
           <Link to="/careers">
@@ -133,6 +144,15 @@ export default function ApplicationsTab({ user }: { user: SupaUser }) {
           </Link>
         </div>
       </div>
+
+      {linkedCount > 0 && (
+        <div className="flex items-center gap-2 p-3 rounded-lg border border-emerald-500/20 bg-emerald-500/10 text-emerald-700 text-sm">
+          <Link2 size={16} className="flex-shrink-0" />
+          <span>
+            <strong>{linkedCount}</strong> candidature{linkedCount > 1 ? "s ont été rattachées" : " a été rattachée"} à votre compte automatiquement.
+          </span>
+        </div>
+      )}
 
       {loading && <p className="text-sm text-muted-foreground">Chargement...</p>}
 
