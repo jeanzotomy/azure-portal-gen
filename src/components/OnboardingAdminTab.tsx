@@ -84,7 +84,24 @@ export default function OnboardingAdminTab({ readOnly = false }: { readOnly?: bo
         process_id: selected.id, contract_file_name: file.name, contract_file_path: path, uploaded_by: user!.id,
       });
       if (error) throw error;
+      // Push to SharePoint
+      supabase.functions.invoke("sync-onboarding-file", {
+        body: { process_id: selected.id, storage_path: path, file_name: file.name, kind: "contract" },
+      }).catch(() => { /* silent */ });
       toast.success("Contrat déposé");
+      refreshDetail();
+    } catch (e: any) { toast.error(e.message); } finally { setUploadingContract(false); }
+  };
+
+  const generateContract = async () => {
+    if (!selected) return;
+    setUploadingContract(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-contract", {
+        body: { process_id: selected.id },
+      });
+      if (error || (data as any)?.error) throw new Error(error?.message || (data as any)?.error);
+      toast.success("Contrat généré et déposé dans SharePoint");
       refreshDetail();
     } catch (e: any) { toast.error(e.message); } finally { setUploadingContract(false); }
   };
