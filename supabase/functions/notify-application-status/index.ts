@@ -28,12 +28,36 @@ function wrap(title: string, bodyHtml: string): string {
 </body></html>`
 }
 
+function trackingBlock(trackingId?: string): string {
+  if (!trackingId) return ''
+  const url = `${SITE_URL}/candidature/${encodeURIComponent(trackingId)}`
+  return `
+    <div style="background:#f5fafd;border:1px solid #bae6fd;border-radius:10px;padding:14px 18px;margin:0 0 20px;">
+      <p style="font-size:12px;color:#64748b;margin:0 0 4px;text-transform:uppercase;letter-spacing:.5px;font-weight:600;">Numéro de suivi</p>
+      <p style="font-size:18px;color:#0099cc;margin:0 0 10px;font-weight:700;letter-spacing:1px;">${escapeHtml(trackingId)}</p>
+      <a href="${url}" style="display:inline-block;background:#0099cc;color:#fff;padding:9px 16px;border-radius:8px;text-decoration:none;font-weight:600;font-size:13px;">Suivre ma candidature</a>
+    </div>`
+}
+
 function buildEmail(
-  status: 'en_revue' | 'entretien' | 'acceptee' | 'refusee',
-  data: { candidateName?: string; jobTitle?: string; interviewMessage?: string; activationUrl?: string },
+  status: 'received' | 'en_revue' | 'entretien' | 'acceptee' | 'refusee',
+  data: { candidateName?: string; jobTitle?: string; interviewMessage?: string; activationUrl?: string; trackingId?: string },
 ): { subject: string; html: string } {
   const name = escapeHtml(data.candidateName || '')
   const job = escapeHtml(data.jobTitle || 'le poste')
+  const tracking = trackingBlock(data.trackingId)
+
+  if (status === 'received') {
+    const subject = `Nous avons bien reçu votre candidature — ${data.jobTitle || 'CloudMature'}`
+    const html = wrap(subject, `
+      <h1 style="font-size:22px;color:#161f2e;margin:0 0 20px;">Candidature bien reçue 🎯</h1>
+      <p style="font-size:14px;color:#4a5568;line-height:1.6;margin:0 0 16px;">Bonjour ${name},</p>
+      <p style="font-size:14px;color:#4a5568;line-height:1.6;margin:0 0 16px;">Merci pour votre candidature au poste de <strong>${job}</strong>. Nous l'avons bien reçue et notre équipe RH va l'examiner dans les meilleurs délais.</p>
+      ${tracking}
+      <p style="font-size:13px;color:#64748b;line-height:1.6;margin:0 0 16px;">Conservez ce numéro : il vous permettra de consulter à tout moment l'état d'avancement de votre dossier.</p>
+    `)
+    return { subject, html }
+  }
 
   if (status === 'en_revue') {
     const subject = `Votre candidature pour ${data.jobTitle || 'le poste'} est en cours d'examen`
@@ -42,6 +66,7 @@ function buildEmail(
       <p style="font-size:14px;color:#4a5568;line-height:1.6;margin:0 0 16px;">Bonjour ${name},</p>
       <p style="font-size:14px;color:#4a5568;line-height:1.6;margin:0 0 16px;">Nous vous remercions de l'intérêt que vous portez à ${SITE_NAME}. Votre candidature pour le poste de <strong>${job}</strong> a bien été reçue et est actuellement en cours d'examen par notre équipe RH.</p>
       <p style="font-size:14px;color:#4a5568;line-height:1.6;margin:0 0 16px;">Nous reviendrons vers vous dans les meilleurs délais avec la suite du processus.</p>
+      ${tracking}
     `)
     return { subject, html }
   }
@@ -57,6 +82,7 @@ function buildEmail(
       <p style="font-size:14px;color:#4a5568;line-height:1.6;margin:0 0 16px;">Bonjour ${name},</p>
       <p style="font-size:14px;color:#4a5568;line-height:1.6;margin:0 0 16px;">Suite à l'examen de votre candidature pour le poste de <strong>${job}</strong>, nous avons le plaisir de vous inviter à un entretien.</p>
       ${msgBlock}
+      ${tracking}
     `)
     return { subject, html }
   }
@@ -69,6 +95,7 @@ function buildEmail(
       <p style="font-size:14px;color:#4a5568;line-height:1.6;margin:0 0 16px;">Nous vous remercions sincèrement pour l'intérêt que vous avez porté à ${SITE_NAME} et pour le temps consacré à votre candidature au poste de <strong>${job}</strong>.</p>
       <p style="font-size:14px;color:#4a5568;line-height:1.6;margin:0 0 16px;">Après une étude attentive de votre profil, nous sommes au regret de ne pouvoir donner une suite favorable à votre candidature.</p>
       <p style="font-size:14px;color:#4a5568;line-height:1.6;margin:0 0 16px;">Nous vous souhaitons plein succès dans la poursuite de vos projets professionnels.</p>
+      ${tracking}
     `)
     return { subject, html }
   }
@@ -126,6 +153,7 @@ Deno.serve(async (req) => {
   try {
     const body = await req.json()
     const applicationId: string = body.application_id || body.applicationId
+    const event: string | undefined = body.event
     if (!applicationId) {
       return new Response(JSON.stringify({ error: 'application_id required' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -134,7 +162,7 @@ Deno.serve(async (req) => {
 
     const { data: app, error: appErr } = await supabase
       .from('job_applications')
-      .select('id, full_name, email, status, job_id, interview_message')
+      .select('id, full_name, email, status, job_id, interview_message, tracking_id')
       .eq('id', applicationId)
       .maybeSingle()
 
@@ -154,14 +182,20 @@ Deno.serve(async (req) => {
     const jobTitle = job?.title || 'le poste'
     const status = app.status as 'nouvelle' | 'en_revue' | 'entretien' | 'acceptee' | 'refusee'
 
-    if (status === 'nouvelle') {
+    // Map event/status to email type
+    let emailType: 'received' | 'en_revue' | 'entretien' | 'acceptee' | 'refusee' | null = null
+    if (event === 'created') {
+      emailType = 'received'
+    } else if (status === 'nouvelle') {
       return new Response(JSON.stringify({ skipped: true, status }), {
         status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
+    } else {
+      emailType = status as any
     }
 
     let activationUrl: string | undefined
-    if (status === 'acceptee') {
+    if (emailType === 'acceptee') {
       activationUrl = `${SITE_URL}/auth?welcome=1`
       try {
         const { data: linkData, error: linkErr } = await supabase.auth.admin.generateLink({
@@ -184,12 +218,13 @@ Deno.serve(async (req) => {
       }
     }
 
-    const templateName = `application-${status.replace('_', '-')}`
-    const { subject, html } = buildEmail(status as any, {
+    const templateName = emailType === 'received' ? 'application-received' : `application-${emailType.replace('_', '-')}`
+    const { subject, html } = buildEmail(emailType, {
       candidateName: app.full_name,
       jobTitle,
       interviewMessage: app.interview_message || undefined,
       activationUrl,
+      trackingId: app.tracking_id || undefined,
     })
 
     try {

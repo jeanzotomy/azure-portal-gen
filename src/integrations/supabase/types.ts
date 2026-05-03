@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      application_tracking_otp: {
+        Row: {
+          attempts: number
+          code: string
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          used: boolean
+        }
+        Insert: {
+          attempts?: number
+          code: string
+          created_at?: string
+          email: string
+          expires_at?: string
+          id?: string
+          used?: boolean
+        }
+        Update: {
+          attempts?: number
+          code?: string
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          used?: boolean
+        }
+        Relationships: []
+      }
       contact_requests: {
         Row: {
           company: string | null
@@ -245,6 +275,7 @@ export type Database = {
           portfolio_url: string | null
           salary_expectation: string | null
           status: Database["public"]["Enums"]["application_status"]
+          tracking_id: string | null
           updated_at: string
           user_id: string | null
           years_experience: number | null
@@ -264,6 +295,7 @@ export type Database = {
           portfolio_url?: string | null
           salary_expectation?: string | null
           status?: Database["public"]["Enums"]["application_status"]
+          tracking_id?: string | null
           updated_at?: string
           user_id?: string | null
           years_experience?: number | null
@@ -283,6 +315,7 @@ export type Database = {
           portfolio_url?: string | null
           salary_expectation?: string | null
           status?: Database["public"]["Enums"]["application_status"]
+          tracking_id?: string | null
           updated_at?: string
           user_id?: string | null
           years_experience?: number | null
@@ -1045,6 +1078,7 @@ export type Database = {
         Args: { payload: Json; queue_name: string }
         Returns: number
       }
+      generate_application_tracking_id: { Args: never; Returns: string }
       generate_project_number: { Args: never; Returns: string }
       generate_service_invoice_number: { Args: never; Returns: string }
       generate_ticket_number: { Args: never; Returns: string }

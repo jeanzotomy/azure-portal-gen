@@ -210,7 +210,7 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
       console.warn("SharePoint upload exception:", e);
     }
 
-    const { error } = await supabase.from("job_applications").insert({
+    const { data: inserted, error } = await supabase.from("job_applications").insert({
       job_id: jobId,
       user_id: user?.id ?? null,
       full_name: fullName,
@@ -226,14 +226,20 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
         form.cover_letter_text?.trim() || null,
         sharepointFolderUrl ? `SharePoint: ${sharepointFolderUrl}` : null,
       ].filter(Boolean).join("\n\n") || null,
-    });
+    }).select("tracking_id").maybeSingle();
     setSubmitting(false);
 
     if (error) {
       toast({ title: "Erreur", description: error.message, variant: "destructive" });
       return;
     }
-    toast({ title: "✓ Candidature envoyée", description: "Nous vous recontacterons rapidement." });
+    const trackId = inserted?.tracking_id;
+    toast({
+      title: "✓ Candidature envoyée",
+      description: trackId
+        ? `Numéro de suivi : ${trackId}. Un email de confirmation vous a été envoyé.`
+        : "Nous vous recontacterons rapidement.",
+    });
     // Reset form for potential next application
     setForm({
       first_name: "", last_name: "", email: user?.email || "", phone: "",
