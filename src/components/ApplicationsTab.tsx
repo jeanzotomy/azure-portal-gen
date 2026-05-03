@@ -66,14 +66,22 @@ export default function ApplicationsTab({ user }: { user: SupaUser }) {
 
   const load = async () => {
     setLoading(true);
+    const email = user.email || "";
+    // Match by user_id OR by email (covers candidatures submitted before account creation)
     const { data: appsData } = await supabase
       .from("job_applications")
-      .select("id, job_id, full_name, email, status, created_at, years_experience, salary_expectation")
-      .eq("user_id", user.id)
+      .select("id, job_id, full_name, email, user_id, status, created_at, years_experience, salary_expectation")
+      .or(`user_id.eq.${user.id}${email ? `,email.eq.${email}` : ""}`)
       .order("created_at", { ascending: false });
 
-    const applications = (appsData || []) as Application[];
+    const applications = (appsData || []) as (Application & { user_id: string | null })[];
     setApps(applications);
+
+    // Auto-link orphan applications to this user
+    const orphanIds = applications.filter((a) => !a.user_id).map((a) => a.id);
+    if (orphanIds.length > 0) {
+      await supabase.from("job_applications").update({ user_id: user.id }).in("id", orphanIds);
+    }
 
     if (applications.length > 0) {
       const jobIds = Array.from(new Set(applications.map((a) => a.job_id)));
