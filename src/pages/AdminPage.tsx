@@ -1995,6 +1995,25 @@ function AdminUsers() {
   });
   const [visibleCount, setVisibleCount] = useState<number>(24);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
+  const [exportOpen, setExportOpen] = useState(false);
+  const EXPORT_COLUMNS = [
+    { key: "full_name", label: "Nom" },
+    { key: "email", label: "Email" },
+    { key: "company", label: "Entreprise" },
+    { key: "phone", label: "Téléphone" },
+    { key: "role", label: "Rôle" },
+    { key: "country", label: "Pays" },
+    { key: "city", label: "Ville" },
+    { key: "address_line", label: "Adresse" },
+    { key: "timezone", label: "Fuseau horaire" },
+    { key: "status", label: "Statut" },
+    { key: "mfa", label: "MFA" },
+    { key: "billable", label: "Facturable" },
+    { key: "billable_client", label: "Client facturable" },
+    { key: "created_at", label: "Créé le" },
+  ] as const;
+  const [exportCols, setExportCols] = useState<string[]>(["full_name", "email", "role", "status", "mfa"]);
+  const [exportFormat, setExportFormat] = useState<"csv" | "xlsx">("csv");
   const { toast } = useToast();
 
   // Sync filter state -> URL
