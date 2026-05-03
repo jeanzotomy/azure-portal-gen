@@ -454,7 +454,7 @@ export default function HrTab({ onboardingReadOnly = false }: { onboardingReadOn
         </div>
       </div>
 
-      <Tabs defaultValue="recruitment">
+      <Tabs defaultValue={defaultTab || "recruitment"}>
         <TabsList className="flex flex-wrap h-auto">
           <TabsTrigger value="recruitment"><Briefcase size={14} className="mr-1" />Recrutement</TabsTrigger>
           <TabsTrigger value="contracts"><FileSignature size={14} className="mr-1" />Génération contrat</TabsTrigger>
