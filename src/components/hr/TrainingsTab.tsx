@@ -54,14 +54,20 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
   const [form, setForm] = useState(empty);
   const [assignTarget, setAssignTarget] = useState<CandidateRow | null>(null);
   const [assignSel, setAssignSel] = useState<Set<string>>(new Set());
+  const [departmentsList, setDepartmentsList] = useState<string[]>([]);
+  const [sectorsList, setSectorsList] = useState<string[]>([]);
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [{ data: trs }, { data: procs }] = await Promise.all([
+    const [{ data: trs }, { data: procs }, { data: deps }, { data: secs }] = await Promise.all([
       supabase.from("trainings").select("*").order("created_at", { ascending: false }),
       supabase.from("onboarding_processes").select("id, candidate_name, candidate_email, job_id, created_at").order("created_at", { ascending: false }),
+      supabase.from("departments").select("name").order("name"),
+      supabase.from("sectors").select("name").order("name"),
     ]);
     setTrainings((trs || []) as Training[]);
+    setDepartmentsList(((deps || []) as { name: string }[]).map(d => d.name));
+    setSectorsList(((secs || []) as { name: string }[]).map(s => s.name));
 
     const procIds = (procs || []).map(p => p.id);
     const jobIds = Array.from(new Set((procs || []).map(p => p.job_id).filter(Boolean) as string[]));
