@@ -90,7 +90,7 @@ interface Sector {
   description: string | null;
 }
 
-export default function HrTab({ onboardingReadOnly = false }: { onboardingReadOnly?: boolean } = {}) {
+export default function HrTab({ onboardingReadOnly = false, defaultTab }: { onboardingReadOnly?: boolean; defaultTab?: "recruitment" | "contracts" | "trainings" | "onboarding" } = {}) {
   const { user } = useAuthSession();
   const { isAdmin } = useUserRoles();
   const { toast } = useToast();
