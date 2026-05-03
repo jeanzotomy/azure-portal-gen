@@ -28,12 +28,36 @@ function wrap(title: string, bodyHtml: string): string {
 </body></html>`
 }
 
+function trackingBlock(trackingId?: string): string {
+  if (!trackingId) return ''
+  const url = `${SITE_URL}/candidature/${encodeURIComponent(trackingId)}`
+  return `
+    <div style="background:#f5fafd;border:1px solid #bae6fd;border-radius:10px;padding:14px 18px;margin:0 0 20px;">
+      <p style="font-size:12px;color:#64748b;margin:0 0 4px;text-transform:uppercase;letter-spacing:.5px;font-weight:600;">Numéro de suivi</p>
+      <p style="font-size:18px;color:#0099cc;margin:0 0 10px;font-weight:700;letter-spacing:1px;">${escapeHtml(trackingId)}</p>
+      <a href="${url}" style="display:inline-block;background:#0099cc;color:#fff;padding:9px 16px;border-radius:8px;text-decoration:none;font-weight:600;font-size:13px;">Suivre ma candidature</a>
+    </div>`
+}
+
 function buildEmail(
-  status: 'en_revue' | 'entretien' | 'acceptee' | 'refusee',
-  data: { candidateName?: string; jobTitle?: string; interviewMessage?: string; activationUrl?: string },
+  status: 'received' | 'en_revue' | 'entretien' | 'acceptee' | 'refusee',
+  data: { candidateName?: string; jobTitle?: string; interviewMessage?: string; activationUrl?: string; trackingId?: string },
 ): { subject: string; html: string } {
   const name = escapeHtml(data.candidateName || '')
   const job = escapeHtml(data.jobTitle || 'le poste')
+  const tracking = trackingBlock(data.trackingId)
+
+  if (status === 'received') {
+    const subject = `Nous avons bien reçu votre candidature — ${data.jobTitle || 'CloudMature'}`
+    const html = wrap(subject, `
+      <h1 style="font-size:22px;color:#161f2e;margin:0 0 20px;">Candidature bien reçue 🎯</h1>
+      <p style="font-size:14px;color:#4a5568;line-height:1.6;margin:0 0 16px;">Bonjour ${name},</p>
+      <p style="font-size:14px;color:#4a5568;line-height:1.6;margin:0 0 16px;">Merci pour votre candidature au poste de <strong>${job}</strong>. Nous l'avons bien reçue et notre équipe RH va l'examiner dans les meilleurs délais.</p>
+      ${tracking}
+      <p style="font-size:13px;color:#64748b;line-height:1.6;margin:0 0 16px;">Conservez ce numéro : il vous permettra de consulter à tout moment l'état d'avancement de votre dossier.</p>
+    `)
+    return { subject, html }
+  }
 
   if (status === 'en_revue') {
     const subject = `Votre candidature pour ${data.jobTitle || 'le poste'} est en cours d'examen`
