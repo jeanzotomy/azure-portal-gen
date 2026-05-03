@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Briefcase, Plus, Pencil, Trash2, FileText, Download, Calendar, MapPin, RefreshCw, Building2, X, Search, FolderOpen, FolderX, Mail } from "lucide-react";
 import { format } from "date-fns";
 import EmailLogTab from "./EmailLogTab";
+import OnboardingAdminTab from "./OnboardingAdminTab";
 
 type JobStatus = "brouillon" | "publiee" | "fermee";
 type ContractType = "CDI" | "CDD" | "Stage" | "Freelance" | "Alternance";
@@ -455,6 +456,7 @@ export default function HrTab() {
         <TabsList>
           <TabsTrigger value="jobs">Offres ({jobs.length})</TabsTrigger>
           <TabsTrigger value="applications">Candidatures ({applications.length})</TabsTrigger>
+          <TabsTrigger value="onboarding">Onboarding</TabsTrigger>
           <TabsTrigger value="email-log"><Mail size={14} className="mr-1" />Historique des envois</TabsTrigger>
         </TabsList>
 
@@ -707,6 +709,10 @@ export default function HrTab() {
             );
           });
           })()}
+        </TabsContent>
+
+        <TabsContent value="onboarding" className="mt-4">
+          <OnboardingAdminTab />
         </TabsContent>
 
         <TabsContent value="email-log" className="mt-4">

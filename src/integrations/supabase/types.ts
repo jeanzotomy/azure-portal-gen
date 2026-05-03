@@ -387,6 +387,239 @@ export type Database = {
         }
         Relationships: []
       }
+      onboarding_contracts: {
+        Row: {
+          contract_file_name: string
+          contract_file_path: string
+          id: string
+          notes: string | null
+          process_id: string
+          signature_url: string | null
+          signed_at: string | null
+          signed_pdf_path: string | null
+          uploaded_at: string
+          uploaded_by: string
+        }
+        Insert: {
+          contract_file_name: string
+          contract_file_path: string
+          id?: string
+          notes?: string | null
+          process_id: string
+          signature_url?: string | null
+          signed_at?: string | null
+          signed_pdf_path?: string | null
+          uploaded_at?: string
+          uploaded_by: string
+        }
+        Update: {
+          contract_file_name?: string
+          contract_file_path?: string
+          id?: string
+          notes?: string | null
+          process_id?: string
+          signature_url?: string | null
+          signed_at?: string | null
+          signed_pdf_path?: string | null
+          uploaded_at?: string
+          uploaded_by?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_contracts_process_id_fkey"
+            columns: ["process_id"]
+            isOneToOne: false
+            referencedRelation: "onboarding_processes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      onboarding_documents: {
+        Row: {
+          doc_type: Database["public"]["Enums"]["onboarding_doc_type"]
+          file_name: string
+          file_path: string
+          file_size: number | null
+          id: string
+          mime_type: string | null
+          process_id: string
+          rejection_reason: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: Database["public"]["Enums"]["onboarding_step_status"]
+          uploaded_at: string
+        }
+        Insert: {
+          doc_type: Database["public"]["Enums"]["onboarding_doc_type"]
+          file_name: string
+          file_path: string
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          process_id: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["onboarding_step_status"]
+          uploaded_at?: string
+        }
+        Update: {
+          doc_type?: Database["public"]["Enums"]["onboarding_doc_type"]
+          file_name?: string
+          file_path?: string
+          file_size?: number | null
+          id?: string
+          mime_type?: string | null
+          process_id?: string
+          rejection_reason?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: Database["public"]["Enums"]["onboarding_step_status"]
+          uploaded_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_documents_process_id_fkey"
+            columns: ["process_id"]
+            isOneToOne: false
+            referencedRelation: "onboarding_processes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      onboarding_messages: {
+        Row: {
+          created_at: string
+          id: string
+          is_admin: boolean
+          message: string
+          process_id: string
+          sender_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_admin?: boolean
+          message: string
+          process_id: string
+          sender_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_admin?: boolean
+          message?: string
+          process_id?: string
+          sender_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_messages_process_id_fkey"
+            columns: ["process_id"]
+            isOneToOne: false
+            referencedRelation: "onboarding_processes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      onboarding_processes: {
+        Row: {
+          application_id: string
+          candidate_email: string
+          candidate_name: string
+          completed_at: string | null
+          created_at: string
+          current_step: number
+          id: string
+          invited_at: string
+          job_id: string | null
+          start_date: string | null
+          status: Database["public"]["Enums"]["onboarding_status"]
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          application_id: string
+          candidate_email: string
+          candidate_name: string
+          completed_at?: string | null
+          created_at?: string
+          current_step?: number
+          id?: string
+          invited_at?: string
+          job_id?: string | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["onboarding_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          application_id?: string
+          candidate_email?: string
+          candidate_name?: string
+          completed_at?: string | null
+          created_at?: string
+          current_step?: number
+          id?: string
+          invited_at?: string
+          job_id?: string | null
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["onboarding_status"]
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
+      onboarding_steps: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          data: Json | null
+          description: string | null
+          id: string
+          process_id: string
+          status: Database["public"]["Enums"]["onboarding_step_status"]
+          step_key: string
+          step_order: number
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          data?: Json | null
+          description?: string | null
+          id?: string
+          process_id: string
+          status?: Database["public"]["Enums"]["onboarding_step_status"]
+          step_key: string
+          step_order: number
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          data?: Json | null
+          description?: string | null
+          id?: string
+          process_id?: string
+          status?: Database["public"]["Enums"]["onboarding_step_status"]
+          step_key?: string
+          step_order?: number
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "onboarding_steps_process_id_fkey"
+            columns: ["process_id"]
+            isOneToOne: false
+            referencedRelation: "onboarding_processes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       payment_methods: {
         Row: {
           account_holder: string | null
@@ -1070,6 +1303,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      create_onboarding_for_application: {
+        Args: { _application_id: string }
+        Returns: string
+      }
       delete_email: {
         Args: { message_id: number; queue_name: string }
         Returns: boolean
@@ -1158,6 +1395,7 @@ export type Database = {
         | "client"
         | "comptable"
         | "gestionnaire"
+        | "onboarding"
       application_status:
         | "nouvelle"
         | "en_revue"
@@ -1169,6 +1407,20 @@ export type Database = {
       invoice_status: "en_attente" | "validee" | "non_conforme"
       invoice_type: "facture" | "recu"
       job_status: "brouillon" | "publiee" | "fermee"
+      onboarding_doc_type:
+        | "cni"
+        | "rib"
+        | "diplome"
+        | "photo_casier"
+        | "contrat_signe"
+        | "autre"
+      onboarding_status: "en_cours" | "complete" | "abandonne"
+      onboarding_step_status:
+        | "a_faire"
+        | "en_cours"
+        | "en_revision"
+        | "valide"
+        | "refuse"
       payment_method_type:
         | "virement"
         | "mobile_money"
@@ -1316,6 +1568,7 @@ export const Constants = {
         "client",
         "comptable",
         "gestionnaire",
+        "onboarding",
       ],
       application_status: [
         "nouvelle",
@@ -1329,6 +1582,22 @@ export const Constants = {
       invoice_status: ["en_attente", "validee", "non_conforme"],
       invoice_type: ["facture", "recu"],
       job_status: ["brouillon", "publiee", "fermee"],
+      onboarding_doc_type: [
+        "cni",
+        "rib",
+        "diplome",
+        "photo_casier",
+        "contrat_signe",
+        "autre",
+      ],
+      onboarding_status: ["en_cours", "complete", "abandonne"],
+      onboarding_step_status: [
+        "a_faire",
+        "en_cours",
+        "en_revision",
+        "valide",
+        "refuse",
+      ],
       payment_method_type: [
         "virement",
         "mobile_money",
