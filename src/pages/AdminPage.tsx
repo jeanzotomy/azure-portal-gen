@@ -1980,7 +1980,15 @@ function AdminUsers() {
   }>({ open: false, title: "", description: "", onConfirm: () => {} });
   const [editSaving, setEditSaving] = useState(false);
   const [billableLinks, setBillableLinks] = useState<Record<string, { id: string; client_name: string }>>({});
+  const [pageSize, setPageSize] = useState<number>(24);
+  const [visibleCount, setVisibleCount] = useState<number>(24);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const { toast } = useToast();
+
+  // Reset pagination on filter/search/view change
+  useEffect(() => {
+    setVisibleCount(pageSize);
+  }, [search, roleFilter, statusFilter, mfaFilter, billableFilter, viewMode, pageSize]);
 
   const loadBillableLinks = async () => {
     const { data } = await supabase
