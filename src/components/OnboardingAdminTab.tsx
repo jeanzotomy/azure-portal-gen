@@ -23,7 +23,7 @@ const DOC_LABELS: Record<string, string> = {
   diplome: "Diplômes", photo_casier: "Photo + Casier", contrat_signe: "Contrat signé", autre: "Autre",
 };
 
-export default function OnboardingAdminTab() {
+export default function OnboardingAdminTab({ readOnly = false }: { readOnly?: boolean } = {}) {
   const [loading, setLoading] = useState(true);
   const [processes, setProcesses] = useState<Process[]>([]);
   const [selected, setSelected] = useState<Process | null>(null);
