@@ -11,10 +11,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Briefcase, Plus, Pencil, Trash2, FileText, Download, Calendar, MapPin, RefreshCw, Building2, X, Search, FolderOpen, FolderX, Mail } from "lucide-react";
+import { Briefcase, Plus, Pencil, Trash2, FileText, Download, Calendar, MapPin, RefreshCw, Building2, X, Search, FolderOpen, FolderX, Mail, FileSignature, GraduationCap, Users } from "lucide-react";
 import { format } from "date-fns";
 import EmailLogTab from "./EmailLogTab";
 import OnboardingAdminTab from "./OnboardingAdminTab";
+import ContractsTab from "./hr/ContractsTab";
+import TrainingsTab from "./hr/TrainingsTab";
 
 type JobStatus = "brouillon" | "publiee" | "fermee";
 type ContractType = "CDI" | "CDD" | "Stage" | "Freelance" | "Alternance";
@@ -441,10 +443,10 @@ export default function HrTab({ onboardingReadOnly = false }: { onboardingReadOn
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2"><Briefcase className="text-primary" /> Recrutement RH</h1>
-          <p className="text-sm text-muted-foreground">Gérez les offres d'emploi et les candidatures.</p>
+          <h1 className="text-2xl font-bold flex items-center gap-2"><Briefcase className="text-primary" /> Ressources Humaines</h1>
+          <p className="text-sm text-muted-foreground">Recrutement, contrats, formations et onboarding.</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Button variant="outline" size="sm" onClick={load}><RefreshCw size={14} /> Actualiser</Button>
           <Button variant="outline" size="sm" onClick={() => setDeptDialogOpen(true)}><Building2 size={14} /> Départements</Button>
           <Button variant="outline" size="sm" onClick={() => setSectorDialogOpen(true)}><Briefcase size={14} /> Secteurs</Button>
@@ -452,13 +454,21 @@ export default function HrTab({ onboardingReadOnly = false }: { onboardingReadOn
         </div>
       </div>
 
-      <Tabs defaultValue="jobs">
-        <TabsList>
-          <TabsTrigger value="jobs">Offres ({jobs.length})</TabsTrigger>
-          <TabsTrigger value="applications">Candidatures ({applications.length})</TabsTrigger>
-          <TabsTrigger value="onboarding">Onboarding</TabsTrigger>
-          <TabsTrigger value="email-log"><Mail size={14} className="mr-1" />Historique des envois</TabsTrigger>
+      <Tabs defaultValue="recruitment">
+        <TabsList className="flex flex-wrap h-auto">
+          <TabsTrigger value="recruitment"><Briefcase size={14} className="mr-1" />Recrutement</TabsTrigger>
+          <TabsTrigger value="contracts"><FileSignature size={14} className="mr-1" />Génération contrat</TabsTrigger>
+          <TabsTrigger value="trainings"><GraduationCap size={14} className="mr-1" />Formations</TabsTrigger>
+          <TabsTrigger value="onboarding"><Users size={14} className="mr-1" />Onboarding</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="recruitment" className="mt-4">
+          <Tabs defaultValue="jobs">
+            <TabsList>
+              <TabsTrigger value="jobs">Offres ({jobs.length})</TabsTrigger>
+              <TabsTrigger value="applications">Candidatures ({applications.length})</TabsTrigger>
+              <TabsTrigger value="email-log"><Mail size={14} className="mr-1" />Historique des envois</TabsTrigger>
+            </TabsList>
 
         <TabsContent value="jobs" className="space-y-3 mt-4">
           {loading && <p className="text-sm text-muted-foreground">Chargement...</p>}
@@ -711,12 +721,22 @@ export default function HrTab({ onboardingReadOnly = false }: { onboardingReadOn
           })()}
         </TabsContent>
 
-        <TabsContent value="onboarding" className="mt-4">
-          <OnboardingAdminTab readOnly={onboardingReadOnly} />
+            <TabsContent value="email-log" className="mt-4">
+              <EmailLogTab />
+            </TabsContent>
+          </Tabs>
         </TabsContent>
 
-        <TabsContent value="email-log" className="mt-4">
-          <EmailLogTab />
+        <TabsContent value="contracts" className="mt-4">
+          <ContractsTab readOnly={onboardingReadOnly} />
+        </TabsContent>
+
+        <TabsContent value="trainings" className="mt-4">
+          <TrainingsTab readOnly={onboardingReadOnly} />
+        </TabsContent>
+
+        <TabsContent value="onboarding" className="mt-4">
+          <OnboardingAdminTab readOnly={onboardingReadOnly} />
         </TabsContent>
       </Tabs>
 
