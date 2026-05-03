@@ -50,7 +50,7 @@ import { getDialCode, applyDialCode } from "@/lib/country-dial-codes";
 
 type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts" | "sharepoint" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods" | "hr" | "hr-recruitment" | "hr-contracts" | "hr-onboarding" | "hr-trainings";
 type AgentTab = "dashboard" | "tickets" | "contacts";
-type GestionnaireTab = "dashboard" | "projects" | "sharepoint" | "tickets" | "contacts" | "hr" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods";
+type GestionnaireTab = "dashboard" | "projects" | "sharepoint" | "tickets" | "contacts" | "hr" | "hr-recruitment" | "hr-contracts" | "hr-onboarding" | "hr-trainings" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods";
 
 function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser; collapsed: boolean; handleLogout: () => void }) {
   const [tab, setTab] = useState<"projects" | "sharepoint" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods">("projects");
@@ -200,6 +200,7 @@ function AdminContent() {
   const [signatureOpen, setSignatureOpen] = useState(false);
   const [adminServicesOpen, setAdminServicesOpen] = useState(true);
   const [gestionnaireServicesOpen, setGestionnaireServicesOpen] = useState(true);
+  const [gestionnaireHrOpen, setGestionnaireHrOpen] = useState(true);
   const { t } = useTranslation();
 
   // Auto-open services submenu when a services tab is active. Must run before any early return to keep hook order stable.
@@ -209,6 +210,9 @@ function AdminContent() {
   const isGestionnaireServicesTab = GESTIONNAIRE_SERVICES_TABS.includes(gestionnaireTab);
   useEffect(() => { if (isAdminServicesTab) setAdminServicesOpen(true); }, [isAdminServicesTab]);
   useEffect(() => { if (isGestionnaireServicesTab) setGestionnaireServicesOpen(true); }, [isGestionnaireServicesTab]);
+  const GESTIONNAIRE_HR_TABS_GLOBAL: GestionnaireTab[] = ["hr", "hr-recruitment", "hr-contracts", "hr-onboarding", "hr-trainings"];
+  const isGestionnaireHrTabGlobal = GESTIONNAIRE_HR_TABS_GLOBAL.includes(gestionnaireTab);
+  useEffect(() => { if (isGestionnaireHrTabGlobal) setGestionnaireHrOpen(true); }, [isGestionnaireHrTabGlobal]);
 
   useEffect(() => {
     const fetchUnreplied = async () => {
@@ -261,7 +265,6 @@ function AdminContent() {
       { id: "sharepoint", icon: HardDrive, label: "SharePoint" },
       { id: "tickets", icon: LifeBuoy, label: t("admin.tickets") },
       { id: "contacts", icon: MessageSquare, label: t("admin.contacts") },
-      { id: "hr", icon: Briefcase, label: "Recrutement" },
     ];
 
     const gestionnaireServicesGroup: { id: GestionnaireTab; icon: typeof LayoutDashboard; label: string }[] = [
@@ -270,7 +273,16 @@ function AdminContent() {
       { id: "service-invoices", icon: Receipt, label: "Facturation services" },
       { id: "payment-methods", icon: CreditCard, label: "Méthodes de paiement" },
     ];
-    
+
+    const gestionnaireHrGroup: { id: GestionnaireTab; icon: typeof LayoutDashboard; label: string }[] = [
+      { id: "hr-recruitment", icon: Briefcase, label: "Recrutement" },
+      { id: "hr-contracts", icon: FileSignature, label: "Générer le contrat" },
+      { id: "hr-onboarding", icon: Users, label: "Onboarding" },
+      { id: "hr-trainings", icon: GraduationCap, label: "Formation" },
+    ];
+    const GESTIONNAIRE_HR_TABS: GestionnaireTab[] = ["hr", "hr-recruitment", "hr-contracts", "hr-onboarding", "hr-trainings"];
+    const isGestionnaireHrTab = GESTIONNAIRE_HR_TABS.includes(gestionnaireTab);
+
 
     return (
       <div className="min-h-screen flex w-full bg-background">
@@ -337,6 +349,33 @@ function AdminContent() {
                       </SidebarMenuSub>
                     )}
                   </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      onClick={() => {
+                        setGestionnaireHrOpen((v) => !v);
+                        if (!isGestionnaireHrTab) setGestionnaireTab("hr-recruitment");
+                      }}
+                      isActive={isGestionnaireHrTab}
+                      tooltip="RH" data-keep-mobile-open="true"
+                      className="gap-3"
+                    >
+                      <HrIcon size={18} />
+                      <span className="flex-1 text-left">RH</span>
+                      {gestionnaireHrOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                    </SidebarMenuButton>
+                    {gestionnaireHrOpen && (
+                      <SidebarMenuSub>
+                        {gestionnaireHrGroup.map((s) => (
+                          <SidebarMenuSubItem key={s.id}>
+                            <SidebarMenuSubButton onClick={() => setGestionnaireTab(s.id)} isActive={gestionnaireTab === s.id} className="gap-2 cursor-pointer">
+                              <s.icon size={14} />
+                              <span>{s.label}</span>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
+                      </SidebarMenuSub>
+                    )}
+                  </SidebarMenuItem>
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
@@ -358,7 +397,7 @@ function AdminContent() {
             <div className="flex items-center gap-3">
               <SidebarTrigger />
               <h2 className="text-sm font-semibold text-card-foreground hidden sm:block">
-                {[...gestionnaireNavItems, ...gestionnaireServicesGroup].find((n) => n.id === gestionnaireTab)?.label}
+                {[...gestionnaireNavItems, ...gestionnaireServicesGroup, ...gestionnaireHrGroup].find((n) => n.id === gestionnaireTab)?.label}
               </h2>
             </div>
             <div className="flex items-center gap-2">
@@ -379,6 +418,10 @@ function AdminContent() {
             {gestionnaireTab === "contacts" && <AdminContacts />}
             {gestionnaireTab === "sharepoint" && <SharePointTab readOnly />}
             {gestionnaireTab === "hr" && <HrTab />}
+            {gestionnaireTab === "hr-recruitment" && <HrTab defaultTab="recruitment" />}
+            {gestionnaireTab === "hr-contracts" && <HrTab defaultTab="contracts" />}
+            {gestionnaireTab === "hr-onboarding" && <HrTab defaultTab="onboarding" />}
+            {gestionnaireTab === "hr-trainings" && <HrTab defaultTab="trainings" />}
             {gestionnaireTab === "service-clients" && <ServiceClientsTab />}
             {gestionnaireTab === "service-catalog" && <ServiceCatalogTab />}
             {gestionnaireTab === "service-invoices" && <ServiceInvoicesTab />}
