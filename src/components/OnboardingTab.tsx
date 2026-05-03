@@ -271,11 +271,17 @@ export default function OnboardingTab({ user }: { user: SupaUser }) {
                     step={step}
                     contract={contract}
                     docs={docs}
+                    trainings={trainings}
                     uploading={uploading}
                     onUploadDoc={handleDocUpload}
                     onSignContract={handleContractSign}
                     onDownloadContract={downloadContract}
                     onMarkDone={() => updateStepStatus(step.id, "valide")}
+                    onMarkTrainingDone={async (id: string) => {
+                      const { error } = await supabase.from("onboarding_assigned_trainings")
+                        .update({ completed_at: new Date().toISOString() }).eq("id", id);
+                      if (error) toast.error(error.message); else { toast.success("Formation marquée comme suivie"); load(); }
+                    }}
                   />
                 </div>
               )}
