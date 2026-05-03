@@ -176,7 +176,56 @@ export default function OnboardingPage() {
         </div>
       </div>
 
-      <div className="max-w-5xl mx-auto px-6 py-10">
+      <div className="max-w-5xl mx-auto px-6 py-10 space-y-6">
+        {/* Section Contrat – mise en avant */}
+        {(() => {
+          const contractStep = steps.find(s => s.step_key === "contract");
+          if (!contractStep) return null;
+          const signed = !!contract?.signed_at;
+          return (
+            <Card className={`overflow-hidden border-2 ${signed ? "border-emerald-300 bg-emerald-50/40" : contract ? "border-primary/40 bg-gradient-to-br from-primary/5 via-white to-cyan-50 shadow-lg" : "border-amber-200 bg-amber-50/40"}`}>
+              <div className="p-6 flex flex-col md:flex-row md:items-center gap-4">
+                <div className={`flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center ${signed ? "bg-emerald-500 text-white" : contract ? "bg-primary text-white" : "bg-amber-400 text-white"}`}>
+                  <FileSignature className="h-7 w-7" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Badge className={signed ? "bg-emerald-500" : contract ? "bg-primary" : "bg-amber-500"}>
+                      {signed ? "Signé" : contract ? "Action requise" : "En préparation"}
+                    </Badge>
+                    <span className="text-xs text-muted-foreground font-mono">Contrat de travail</span>
+                  </div>
+                  <h2 className="text-xl font-bold">
+                    {signed ? "Votre contrat est signé ✅" : contract ? "Votre contrat est prêt à signer" : "Contrat en cours de préparation"}
+                  </h2>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {signed
+                      ? `Signé le ${new Date(contract!.signed_at!).toLocaleDateString("fr-FR")}. Vous pouvez le télécharger à tout moment.`
+                      : contract
+                        ? "Téléchargez votre contrat, lisez-le attentivement, puis signez électroniquement ci-dessous."
+                        : "Le service RH dépose votre contrat. Vous serez notifié(e) dès qu'il sera disponible."}
+                  </p>
+                </div>
+                <div className="flex flex-col sm:flex-row gap-2 md:flex-shrink-0">
+                  {contract && (
+                    <Button variant="outline" onClick={downloadContract}>
+                      <Download className="h-4 w-4 mr-2" /> Télécharger
+                    </Button>
+                  )}
+                  {contract && !signed && (
+                    <Button
+                      className="bg-gradient-to-r from-primary to-[#007aa3]"
+                      onClick={() => setActiveStepId(contractStep.id)}
+                    >
+                      <FileSignature className="h-4 w-4 mr-2" /> Démarrer la signature
+                    </Button>
+                  )}
+                </div>
+              </div>
+            </Card>
+          );
+        })()}
+
         <div className="space-y-4">
           {steps.map((step, idx) => {
             const Icon = STEP_ICONS[step.step_key] || Circle;
