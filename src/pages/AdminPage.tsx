@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import adminLogo from "@/assets/cloudmature-logo.png";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRoles } from "@/hooks/use-admin";
 import { useMfaCheck, clearSmsMfaVerified } from "@/hooks/use-mfa";
