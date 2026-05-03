@@ -205,14 +205,20 @@ export default function OnboardingAdminTab({ readOnly = false }: { readOnly?: bo
               ) : readOnly ? (
                 <p className="text-xs text-muted-foreground">Aucun contrat déposé.</p>
               ) : (
-                <label className="block">
-                  <input type="file" accept=".pdf" className="hidden" disabled={uploadingContract}
-                    onChange={(e) => e.target.files?.[0] && uploadContract(e.target.files[0])} />
-                  <span className="inline-flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md text-sm cursor-pointer hover:bg-primary/90">
-                    {uploadingContract ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileUp className="h-4 w-4" />}
-                    Déposer le contrat (PDF)
-                  </span>
-                </label>
+                <div className="space-y-2">
+                  <Button onClick={generateContract} disabled={uploadingContract} className="bg-gradient-to-r from-primary to-[#007aa3]">
+                    {uploadingContract ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
+                    Générer le contrat automatiquement
+                  </Button>
+                  <div className="text-xs text-muted-foreground">ou déposer un PDF :</div>
+                  <label className="block">
+                    <input type="file" accept=".pdf" className="hidden" disabled={uploadingContract}
+                      onChange={(e) => e.target.files?.[0] && uploadContract(e.target.files[0])} />
+                    <span className="inline-flex items-center gap-2 px-4 py-2 bg-muted text-foreground rounded-md text-sm cursor-pointer hover:bg-muted/80 border">
+                      <FileUp className="h-4 w-4" /> Déposer un contrat (PDF)
+                    </span>
+                  </label>
+                </div>
               )}
             </section>
 
