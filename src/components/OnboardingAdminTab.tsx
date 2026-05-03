@@ -185,6 +185,8 @@ export default function OnboardingAdminTab({ readOnly = false }: { readOnly?: bo
                     <Badge variant="outline">En attente de signature</Badge>
                   )}
                 </Card>
+              ) : readOnly ? (
+                <p className="text-xs text-muted-foreground">Aucun contrat déposé.</p>
               ) : (
                 <label className="block">
                   <input type="file" accept=".pdf" className="hidden" disabled={uploadingContract}
