@@ -2380,7 +2380,15 @@ function AdminUsers() {
           <Button variant="outline" size="sm" onClick={load} className="gap-1.5">
             <RefreshCw size={14} /> Actualiser
           </Button>
-          <span className="text-sm text-muted-foreground">{filtered.length}/{profilesList.length} utilisateur(s)</span>
+          <select
+            value={pageSize}
+            onChange={(e) => setPageSize(Number(e.target.value))}
+            className="text-xs border border-border rounded-lg px-2 py-1.5 bg-card text-card-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+            title="Utilisateurs par page"
+          >
+            {[12, 24, 48, 100].map((n) => <option key={n} value={n}>{n}/page</option>)}
+          </select>
+          <span className="text-sm text-muted-foreground">{Math.min(visibleCount, filtered.length)}/{filtered.length} affichés · {profilesList.length} total</span>
         </div>
       </div>
 
