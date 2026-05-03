@@ -337,7 +337,22 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
           </div>
         </DialogHeader>
 
-        <div className="space-y-4 max-h-[65vh] overflow-y-auto px-6 py-4">
+        <div className="flex-1 min-h-0 overflow-y-auto px-6 py-4 space-y-4">
+          {existingApp && (
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-md border border-primary/30 bg-primary/5 px-4 py-3">
+              <div className="text-sm">
+                <p className="font-medium text-foreground">Vous avez déjà postulé à cette offre.</p>
+                {existingApp.tracking_id && (
+                  <p className="text-xs text-muted-foreground mt-0.5">Numéro de suivi : <span className="font-mono">{existingApp.tracking_id}</span></p>
+                )}
+              </div>
+              <Button asChild size="sm" variant="default">
+                <Link to={existingApp.tracking_id ? `/candidature/${existingApp.tracking_id}` : "/candidature"} onClick={() => onOpenChange(false)}>
+                  <Eye size={14} className="mr-1.5" /> Voir ma candidature
+                </Link>
+              </Button>
+            </div>
+          )}
           <SectionTitle icon={User} title="Identité" />
           {(lockedFields.first_name || lockedFields.last_name || lockedFields.phone) && (
             <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/40 border border-border rounded-md px-3 py-2">
