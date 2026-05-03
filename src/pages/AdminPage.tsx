@@ -481,6 +481,17 @@ function AdminContent() {
     { id: "payment-methods", icon: CreditCard, label: "Modes de paiement" },
   ];
 
+  const hrGroup: { id: AdminTab; icon: typeof LayoutDashboard; label: string }[] = [
+    { id: "hr-recruitment", icon: Briefcase, label: "Recrutement" },
+    { id: "hr-contracts", icon: FileSignature, label: "Générer le contrat" },
+    { id: "hr-onboarding", icon: Users, label: "Onboarding" },
+    { id: "hr-trainings", icon: GraduationCap, label: "Formation" },
+  ];
+  const HR_TABS: AdminTab[] = ["hr", "hr-recruitment", "hr-contracts", "hr-onboarding", "hr-trainings"];
+  const isHrTab = HR_TABS.includes(tab);
+  const [hrOpen, setHrOpen] = useState(true);
+  useEffect(() => { if (isHrTab) setHrOpen(true); }, [isHrTab]);
+
   const allNavItems: { id: AdminTab; icon: typeof LayoutDashboard; label: string }[] = [
     { id: "dashboard", icon: LayoutDashboard, label: t("admin.overview") },
     { id: "projects", icon: FolderOpen, label: t("admin.projects") },
@@ -488,7 +499,6 @@ function AdminContent() {
     { id: "tickets", icon: LifeBuoy, label: t("admin.tickets") },
     { id: "contacts", icon: MessageSquare, label: t("admin.contacts") },
     { id: "users", icon: Users, label: t("admin.users") },
-    { id: "hr", icon: Briefcase, label: "Recrutement" },
   ];
 
 
