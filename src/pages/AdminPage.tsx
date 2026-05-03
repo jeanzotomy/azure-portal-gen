@@ -2284,10 +2284,11 @@ function AdminUsers() {
     if (roles.includes("gestionnaire")) return { label: "Gestionnaire", color: "bg-blue-500/10 text-blue-500 border-blue-500/20" };
     if (roles.includes("agent")) return { label: "Agent", color: "bg-orange-500/10 text-orange-500 border-orange-500/20" };
     if (roles.includes("comptable")) return { label: "Comptable", color: "bg-teal-500/10 text-teal-500 border-teal-500/20" };
+    if (roles.includes("hr")) return { label: "RH", color: "bg-pink-500/10 text-pink-500 border-pink-500/20" };
     return { label: "Client", color: "bg-muted text-muted-foreground border-border" };
   };
 
-  const getCurrentRole = (roles: string[]) => roles.includes("admin") ? "admin" : roles.includes("gestionnaire") ? "gestionnaire" : roles.includes("agent") ? "agent" : roles.includes("comptable") ? "comptable" : "client";
+  const getCurrentRole = (roles: string[]) => roles.includes("admin") ? "admin" : roles.includes("gestionnaire") ? "gestionnaire" : roles.includes("agent") ? "agent" : roles.includes("comptable") ? "comptable" : roles.includes("hr") ? "hr" : "client";
 
   const filtered = profilesList.filter(p => {
     const term = search.toLowerCase();
