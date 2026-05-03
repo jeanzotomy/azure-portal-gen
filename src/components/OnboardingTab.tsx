@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import {
   CheckCircle2, Circle, Clock, FileSignature, FileUp, GraduationCap,
   Laptop, Users, PartyPopper, Sparkles, Download, Loader2, AlertCircle, RefreshCw, Lock,
+  XCircle, ShieldAlert,
 } from "lucide-react";
 import { SignaturePad } from "@/components/SignaturePad";
 import type { User as SupaUser } from "@supabase/supabase-js";
