@@ -29,6 +29,7 @@ interface Process { id: string; candidate_name: string; candidate_email: string;
 interface Step { id: string; step_order: number; step_key: string; title: string; description: string; status: string; data: any; }
 interface Doc { id: string; doc_type: string; file_name: string; file_path: string; status: string; uploaded_at: string; }
 interface Contract { id: string; contract_file_path: string; contract_file_name: string; signed_at: string | null; signature_url: string | null; }
+interface AssignedTraining { id: string; training_id: string; completed_at: string | null; training: { title: string; description: string | null; url: string; duration_minutes: number | null; category: string | null } | null; }
 
 export default function OnboardingTab({ user }: { user: SupaUser }) {
   const [loading, setLoading] = useState(true);
