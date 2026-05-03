@@ -349,6 +349,32 @@ function AdminContent() {
                       </SidebarMenuSub>
                     )}
                   </SidebarMenuItem>
+                  <SidebarMenuItem>
+                    <SidebarMenuButton
+                      onClick={() => {
+                        setGestionnaireHrOpen((v) => !v);
+                        if (!isGestionnaireHrTab) setGestionnaireTab("hr-recruitment");
+                      }}
+                      isActive={isGestionnaireHrTab}
+                      tooltip="RH" data-keep-mobile-open="true"
+                      className="gap-3"
+                    >
+                      <HrIcon size={18} />
+                      <span className="flex-1 text-left">RH</span>
+                      {gestionnaireHrOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                    </SidebarMenuButton>
+                    {gestionnaireHrOpen && (
+                      <SidebarMenuSub>
+                        {gestionnaireHrGroup.map((s) => (
+                          <SidebarMenuSubItem key={s.id}>
+                            <SidebarMenuSubButton onClick={() => setGestionnaireTab(s.id)} isActive={gestionnaireTab === s.id} className="gap-2 cursor-pointer">
+                              <s.icon size={14} />
+                              <span>{s.label}</span>
+                            </SidebarMenuSubButton>
+                          </SidebarMenuSubItem>
+                        ))}
+                      </SidebarMenuSub>
+                    )}
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
