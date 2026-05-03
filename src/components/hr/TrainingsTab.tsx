@@ -320,7 +320,7 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
               <p className="text-sm text-muted-foreground">Aucune formation active disponible.</p>
             ) : trainings.filter(t => t.active).map(t => {
               const checked = assignSel.has(t.id);
-              const isSuggested = assignTarget?.job_title && t.target_job_titles.some(jt =>
+              const isSuggested = assignTarget?.job_title && (t.target_job_titles || []).some(jt =>
                 assignTarget.job_title!.toLowerCase().includes(jt.toLowerCase()) || jt.toLowerCase().includes(assignTarget.job_title!.toLowerCase())
               );
               return (
