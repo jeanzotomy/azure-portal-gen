@@ -2429,41 +2429,84 @@ function AdminUsers() {
       <div className="bg-card rounded-xl p-4 shadow-card border border-border/50 space-y-3">
         <div className="relative">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <Input placeholder="Rechercher par nom, email, téléphone ou entreprise..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+          <Input placeholder="Rechercher par nom, email, téléphone ou entreprise..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 pr-9" />
+          {search && (
+            <button onClick={() => setSearch("")} title="Effacer la recherche"
+              className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-md hover:bg-muted text-muted-foreground">
+              <X size={14} />
+            </button>
+          )}
         </div>
         <div className="flex flex-wrap gap-2 items-center">
           <span className="text-xs font-medium text-muted-foreground flex items-center gap-1"><Filter size={12} /> Rôle :</span>
-          {roleFilterButtons.map((f) => (
-            <button key={f.v} onClick={() => setRoleFilter(f.v)}
-              className={`text-xs px-3 py-1.5 rounded-full transition-colors ${roleFilter === f.v ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
-            >{f.l}</button>
-          ))}
+          {roleFilterButtons.map((f) => {
+            const n = countWith({ role: f.v });
+            const active = roleFilter === f.v;
+            return (
+              <button key={f.v} onClick={() => setRoleFilter(f.v)} disabled={n === 0 && !active}
+                className={`text-xs px-3 py-1.5 rounded-full transition-colors flex items-center gap-1.5 ${active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"} ${n === 0 && !active ? "opacity-40 cursor-not-allowed" : ""}`}
+              >{f.l}<span className={`text-[10px] px-1.5 rounded-full ${active ? "bg-primary-foreground/20" : "bg-background/60"}`}>{n}</span></button>
+            );
+          })}
         </div>
         <div className="flex flex-wrap gap-2 items-center">
           <span className="text-xs font-medium text-muted-foreground">Statut :</span>
-          {[{ v: "all", l: "Tous" }, { v: "active", l: "Actifs" }, { v: "blocked", l: "Bloqués" }, { v: "deleted", l: "Supprimés" }].map(f => (
-            <button key={f.v} onClick={() => setStatusFilter(f.v as any)}
-              className={`text-xs px-3 py-1.5 rounded-full transition-colors ${statusFilter === f.v ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
-            >{f.l}</button>
-          ))}
+          {[{ v: "all", l: "Tous" }, { v: "active", l: "Actifs" }, { v: "blocked", l: "Bloqués" }, { v: "deleted", l: "Supprimés" }].map(f => {
+            const n = countWith({ status: f.v });
+            const active = statusFilter === f.v;
+            return (
+              <button key={f.v} onClick={() => setStatusFilter(f.v as any)} disabled={n === 0 && !active}
+                className={`text-xs px-3 py-1.5 rounded-full transition-colors flex items-center gap-1.5 ${active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"} ${n === 0 && !active ? "opacity-40 cursor-not-allowed" : ""}`}
+              >{f.l}<span className={`text-[10px] px-1.5 rounded-full ${active ? "bg-primary-foreground/20" : "bg-background/60"}`}>{n}</span></button>
+            );
+          })}
           <span className="text-xs font-medium text-muted-foreground ml-2">MFA :</span>
-          {[{ v: "all", l: "Tous" }, { v: "enrolled", l: "Activé" }, { v: "none", l: "Inactif" }].map(f => (
-            <button key={f.v} onClick={() => setMfaFilter(f.v as any)}
-              className={`text-xs px-3 py-1.5 rounded-full transition-colors ${mfaFilter === f.v ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
-            >{f.l}</button>
-          ))}
+          {[{ v: "all", l: "Tous" }, { v: "enrolled", l: "Activé" }, { v: "none", l: "Inactif" }].map(f => {
+            const n = countWith({ mfa: f.v });
+            const active = mfaFilter === f.v;
+            return (
+              <button key={f.v} onClick={() => setMfaFilter(f.v as any)} disabled={n === 0 && !active}
+                className={`text-xs px-3 py-1.5 rounded-full transition-colors flex items-center gap-1.5 ${active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"} ${n === 0 && !active ? "opacity-40 cursor-not-allowed" : ""}`}
+              >{f.l}<span className={`text-[10px] px-1.5 rounded-full ${active ? "bg-primary-foreground/20" : "bg-background/60"}`}>{n}</span></button>
+            );
+          })}
           <span className="text-xs font-medium text-muted-foreground ml-2">Facturable :</span>
-          {[{ v: "all", l: "Tous" }, { v: "yes", l: "Oui" }, { v: "no", l: "Non" }].map(f => (
-            <button key={f.v} onClick={() => setBillableFilter(f.v as any)}
-              className={`text-xs px-3 py-1.5 rounded-full transition-colors ${billableFilter === f.v ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
-            >{f.l}</button>
-          ))}
-          {(roleFilter !== "all" || statusFilter !== "all" || mfaFilter !== "all" || billableFilter !== "all" || search) && (
-            <button onClick={() => { setRoleFilter("all"); setStatusFilter("all"); setMfaFilter("all"); setBillableFilter("all"); setSearch(""); }}
-              className="text-xs px-3 py-1.5 rounded-full bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors flex items-center gap-1">
-              <X size={10} /> Réinitialiser
-            </button>
-          )}
+          {[{ v: "all", l: "Tous" }, { v: "yes", l: "Oui" }, { v: "no", l: "Non" }].map(f => {
+            const n = countWith({ billable: f.v });
+            const active = billableFilter === f.v;
+            return (
+              <button key={f.v} onClick={() => setBillableFilter(f.v as any)} disabled={n === 0 && !active}
+                className={`text-xs px-3 py-1.5 rounded-full transition-colors flex items-center gap-1.5 ${active ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"} ${n === 0 && !active ? "opacity-40 cursor-not-allowed" : ""}`}
+              >{f.l}<span className={`text-[10px] px-1.5 rounded-full ${active ? "bg-primary-foreground/20" : "bg-background/60"}`}>{n}</span></button>
+            );
+          })}
+        </div>
+
+        <div className="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-border/50">
+          <div className="flex flex-wrap items-center gap-1.5 text-xs">
+            <span className="font-semibold text-foreground">{filtered.length}</span>
+            <span className="text-muted-foreground">résultat{filtered.length > 1 ? "s" : ""} sur {profilesList.length}</span>
+            {hasActiveFilters && (
+              <>
+                <span className="text-muted-foreground">·</span>
+                <span className="text-muted-foreground">Filtres :</span>
+                {search && <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">« {search} »</span>}
+                {roleFilter !== "all" && <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">Rôle: {roleFilterButtons.find(r => r.v === roleFilter)?.l}</span>}
+                {statusFilter !== "all" && <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">Statut: {statusFilter}</span>}
+                {mfaFilter !== "all" && <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">MFA: {mfaFilter === "enrolled" ? "Activé" : "Inactif"}</span>}
+                {billableFilter !== "all" && <span className="px-2 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20">Facturable: {billableFilter === "yes" ? "Oui" : "Non"}</span>}
+              </>
+            )}
+          </div>
+          <Button
+            size="sm"
+            variant={hasActiveFilters ? "destructive" : "outline"}
+            onClick={resetFilters}
+            disabled={!hasActiveFilters}
+            className="gap-1.5 h-8"
+          >
+            <X size={12} /> Réinitialiser les filtres
+          </Button>
         </div>
       </div>
 
