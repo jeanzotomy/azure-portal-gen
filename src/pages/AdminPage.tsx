@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import adminLogo from "@/assets/cloudmature-logo.png";
 import { useNavigate, Link } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
@@ -1980,7 +1980,15 @@ function AdminUsers() {
   }>({ open: false, title: "", description: "", onConfirm: () => {} });
   const [editSaving, setEditSaving] = useState(false);
   const [billableLinks, setBillableLinks] = useState<Record<string, { id: string; client_name: string }>>({});
+  const [pageSize, setPageSize] = useState<number>(24);
+  const [visibleCount, setVisibleCount] = useState<number>(24);
+  const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const { toast } = useToast();
+
+  // Reset pagination on filter/search/view change
+  useEffect(() => {
+    setVisibleCount(pageSize);
+  }, [search, roleFilter, statusFilter, mfaFilter, billableFilter, viewMode, pageSize]);
 
   const loadBillableLinks = async () => {
     const { data } = await supabase
@@ -2315,6 +2323,22 @@ function AdminUsers() {
     return matchesSearch && matchesRole && matchesStatus && matchesMfa && matchesBillable;
   });
 
+  const visible = filtered.slice(0, visibleCount);
+  const hasMore = visibleCount < filtered.length;
+
+  useEffect(() => {
+    if (!hasMore) return;
+    const el = loadMoreRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver((entries) => {
+      if (entries[0]?.isIntersecting) {
+        setVisibleCount((c) => Math.min(c + pageSize, filtered.length));
+      }
+    }, { rootMargin: "200px" });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [hasMore, pageSize, filtered.length]);
+
   const roleOptions = [
     { value: "client", label: "Client" },
     { value: "comptable", label: "Comptable" },
@@ -2356,7 +2380,15 @@ function AdminUsers() {
           <Button variant="outline" size="sm" onClick={load} className="gap-1.5">
             <RefreshCw size={14} /> Actualiser
           </Button>
-          <span className="text-sm text-muted-foreground">{filtered.length}/{profilesList.length} utilisateur(s)</span>
+          <select
+            value={pageSize}
+            onChange={(e) => setPageSize(Number(e.target.value))}
+            className="text-xs border border-border rounded-lg px-2 py-1.5 bg-card text-card-foreground focus:outline-none focus:ring-2 focus:ring-primary/50"
+            title="Utilisateurs par page"
+          >
+            {[12, 24, 48, 100].map((n) => <option key={n} value={n}>{n}/page</option>)}
+          </select>
+          <span className="text-sm text-muted-foreground">{Math.min(visibleCount, filtered.length)}/{filtered.length} affichés · {profilesList.length} total</span>
         </div>
       </div>
 
@@ -2408,7 +2440,7 @@ function AdminUsers() {
         </div>
       ) : viewMode === "cards" ? (
         <div className="grid gap-4 md:grid-cols-2">
-          {filtered.map((p) => {
+          {visible.map((p) => {
             const roles = userRoles[p.user_id] || ["client"];
             const badge = getRoleBadge(roles);
             const currentRole = getCurrentRole(roles);
@@ -2482,7 +2514,7 @@ function AdminUsers() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map(p => {
+              {visible.map(p => {
                 const roles = userRoles[p.user_id] || ["client"];
                 const badge = getRoleBadge(roles);
                 const enrolled = !!mfaStatus[p.user_id]?.enrolled;
@@ -2520,7 +2552,7 @@ function AdminUsers() {
         </div>
       ) : (
         <div className="bg-card rounded-xl border border-border/50 divide-y divide-border/50 overflow-hidden shadow-card">
-          {filtered.map(p => {
+          {visible.map(p => {
             const roles = userRoles[p.user_id] || ["client"];
             const badge = getRoleBadge(roles);
             const enrolled = !!mfaStatus[p.user_id]?.enrolled;
@@ -2543,6 +2575,19 @@ function AdminUsers() {
               </button>
             );
           })}
+        </div>
+      )}
+
+      {filtered.length > 0 && hasMore && (
+        <div ref={loadMoreRef} className="flex justify-center py-4">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setVisibleCount((c) => Math.min(c + pageSize, filtered.length))}
+            className="gap-1.5"
+          >
+            Charger plus ({filtered.length - visibleCount} restant{filtered.length - visibleCount > 1 ? "s" : ""})
+          </Button>
         </div>
       )}
 
