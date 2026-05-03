@@ -106,6 +106,58 @@ export default function OnboardingTab({ user }: { user: SupaUser }) {
 
   useEffect(() => { load(); }, [load]);
 
+  // Notification quand le contrat passe de "En préparation/Indisponible" → "Téléchargement disponible"
+  const prevContractReadyRef = useRef<boolean | null>(null);
+  const notifiedKeyRef = useRef<string | null>(null);
+  useEffect(() => {
+    const isReady = !!(contract && contractStatus?.ok === true && !contract.signed_at);
+    const prev = prevContractReadyRef.current;
+    if (prev === false && isReady && contract) {
+      const key = `contract_ready_${contract.id}`;
+      const alreadyNotified = (() => {
+        try { return sessionStorage.getItem(key) === "1"; } catch { return false; }
+      })();
+      if (notifiedKeyRef.current !== key && !alreadyNotified) {
+        notifiedKeyRef.current = key;
+        try { sessionStorage.setItem(key, "1"); } catch {}
+        toast.success("Votre contrat est prêt !", {
+          description: "Le téléchargement est désormais disponible. Vous pouvez le signer.",
+          duration: 10000,
+          action: {
+            label: "Télécharger",
+            onClick: () => downloadContract(),
+          },
+        });
+        if (typeof window !== "undefined" && "Notification" in window) {
+          const showBrowserNotif = () => {
+            try {
+              new Notification("Contrat disponible", {
+                body: "Votre contrat est prêt à être téléchargé et signé.",
+                icon: "/favicon.ico",
+              });
+            } catch {}
+          };
+          if (Notification.permission === "granted") showBrowserNotif();
+          else if (Notification.permission !== "denied") {
+            Notification.requestPermission().then((p) => { if (p === "granted") showBrowserNotif(); });
+          }
+        }
+      }
+    }
+    if (contract) prevContractReadyRef.current = isReady;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [contract, contractStatus]);
+
+  // Polling automatique tant que le contrat n'est pas disponible/signé
+  useEffect(() => {
+    if (!process) return;
+    const needsPoll = !contract || (contractStatus?.ok === false) || (contract && !contractStatus);
+    if (!needsPoll) return;
+    const id = setInterval(() => { load(); }, 20000);
+    return () => clearInterval(id);
+  }, [process, contract, contractStatus, load]);
+
+
   const completedCount = steps.filter(s => s.status === "valide").length;
   const progressPct = steps.length ? Math.round((completedCount / steps.length) * 100) : 0;
 
