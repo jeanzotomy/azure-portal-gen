@@ -382,20 +382,48 @@ function StepContent({ step, contract, docs, trainings = [], uploading, onUpload
     </div>
   );
 
-  if (step.step_key === "training") return (
-    <div className="space-y-4">
-      <p className="text-sm">📚 Modules de formation interne (à venir).</p>
-      <div className="grid sm:grid-cols-2 gap-3">
-        {["Sécurité IT", "Outils internes", "Culture CloudMature", "RGPD & confidentialité"].map(m => (
-          <div key={m} className="p-4 bg-white rounded-lg border flex items-center justify-between">
-            <span className="text-sm font-medium">{m}</span>
-            <Badge variant="outline">Bientôt</Badge>
+  if (step.step_key === "training") {
+    const allDone = trainings.length > 0 && trainings.every((t: any) => t.completed_at);
+    return (
+      <div className="space-y-4">
+        {trainings.length === 0 ? (
+          <div className="p-6 bg-white rounded-lg border text-center text-sm text-muted-foreground">
+            <GraduationCap className="h-8 w-8 mx-auto mb-2 opacity-50" />
+            Aucune formation assignée pour le moment. Le service RH vous attribuera vos modules dès que possible.
           </div>
-        ))}
+        ) : (
+          <div className="space-y-2">
+            {trainings.map((t: any) => (
+              <div key={t.id} className="p-4 bg-white rounded-lg border flex items-start gap-3">
+                <div className={`flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center ${t.completed_at ? "bg-emerald-100 text-emerald-600" : "bg-primary/10 text-primary"}`}>
+                  {t.completed_at ? <CheckCircle2 className="h-5 w-5" /> : <GraduationCap className="h-5 w-5" />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-medium text-sm">{t.training?.title}</span>
+                    {t.training?.duration_minutes && <Badge variant="outline" className="text-[10px]">{t.training.duration_minutes} min</Badge>}
+                    {t.training?.category && <Badge variant="secondary" className="text-[10px]">{t.training.category}</Badge>}
+                  </div>
+                  {t.training?.description && <p className="text-xs text-muted-foreground mt-1">{t.training.description}</p>}
+                  <a href={t.training?.url} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline inline-flex items-center gap-1 mt-2">
+                    <Download className="h-3 w-3" />Ouvrir la formation
+                  </a>
+                </div>
+                {!t.completed_at && (
+                  <Button size="sm" variant="outline" onClick={() => onMarkTrainingDone(t.id)}>
+                    <CheckCircle2 className="h-4 w-4 mr-1" />Suivie
+                  </Button>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+        {allDone && step.status !== "valide" && (
+          <Button onClick={onMarkDone}>Valider l'étape formation</Button>
+        )}
       </div>
-      {step.status !== "valide" && <Button variant="outline" onClick={onMarkDone}>Marquer comme vu</Button>}
-    </div>
-  );
+    );
+  }
 
   if (step.step_key === "it_account") return (
     <div className="space-y-3">
