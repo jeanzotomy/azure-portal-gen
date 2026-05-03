@@ -45,7 +45,7 @@ export default function ContractsTab({ readOnly = false }: { readOnly?: boolean 
     ]);
 
     const contractByProc = new Map((contracts || []).map(c => [c.process_id, c]));
-    const jobById = new Map((jobs || []).map((j: any) => [j.id, j.title]));
+    const jobById = new Map<string, string>((jobs || []).map((j: any) => [j.id as string, j.title as string]));
 
     setRows(procs.map(p => ({
       process_id: p.id,
