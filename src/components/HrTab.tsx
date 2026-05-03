@@ -90,7 +90,7 @@ interface Sector {
   description: string | null;
 }
 
-export default function HrTab({ onboardingReadOnly = false }: { onboardingReadOnly?: boolean } = {}) {
+export default function HrTab({ onboardingReadOnly = false, defaultTab }: { onboardingReadOnly?: boolean; defaultTab?: "recruitment" | "contracts" | "trainings" | "onboarding" } = {}) {
   const { user } = useAuthSession();
   const { isAdmin } = useUserRoles();
   const { toast } = useToast();
@@ -454,7 +454,7 @@ export default function HrTab({ onboardingReadOnly = false }: { onboardingReadOn
         </div>
       </div>
 
-      <Tabs defaultValue="recruitment">
+      <Tabs defaultValue={defaultTab || "recruitment"}>
         <TabsList className="flex flex-wrap h-auto">
           <TabsTrigger value="recruitment"><Briefcase size={14} className="mr-1" />Recrutement</TabsTrigger>
           <TabsTrigger value="contracts"><FileSignature size={14} className="mr-1" />Génération contrat</TabsTrigger>

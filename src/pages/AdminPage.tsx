@@ -29,7 +29,7 @@ import {
   LayoutGrid, List as ListIcon, Table as TableIcon, MapPin, Mail, Download,
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { HardDrive } from "lucide-react";
+import { HardDrive, FileSignature, GraduationCap, UserCog as HrIcon } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -48,7 +48,7 @@ import HrTab from "@/components/HrTab";
 import { ProfileSignatureDialog } from "@/components/ProfileSignatureDialog";
 import { getDialCode, applyDialCode } from "@/lib/country-dial-codes";
 
-type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts" | "sharepoint" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods" | "hr";
+type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts" | "sharepoint" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods" | "hr" | "hr-recruitment" | "hr-contracts" | "hr-onboarding" | "hr-trainings";
 type AgentTab = "dashboard" | "tickets" | "contacts";
 type GestionnaireTab = "dashboard" | "projects" | "sharepoint" | "tickets" | "contacts" | "hr" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods";
 
@@ -481,6 +481,17 @@ function AdminContent() {
     { id: "payment-methods", icon: CreditCard, label: "Modes de paiement" },
   ];
 
+  const hrGroup: { id: AdminTab; icon: typeof LayoutDashboard; label: string }[] = [
+    { id: "hr-recruitment", icon: Briefcase, label: "Recrutement" },
+    { id: "hr-contracts", icon: FileSignature, label: "Générer le contrat" },
+    { id: "hr-onboarding", icon: Users, label: "Onboarding" },
+    { id: "hr-trainings", icon: GraduationCap, label: "Formation" },
+  ];
+  const HR_TABS: AdminTab[] = ["hr", "hr-recruitment", "hr-contracts", "hr-onboarding", "hr-trainings"];
+  const isHrTab = HR_TABS.includes(tab);
+  const [hrOpen, setHrOpen] = useState(true);
+  useEffect(() => { if (isHrTab) setHrOpen(true); }, [isHrTab]);
+
   const allNavItems: { id: AdminTab; icon: typeof LayoutDashboard; label: string }[] = [
     { id: "dashboard", icon: LayoutDashboard, label: t("admin.overview") },
     { id: "projects", icon: FolderOpen, label: t("admin.projects") },
@@ -488,7 +499,6 @@ function AdminContent() {
     { id: "tickets", icon: LifeBuoy, label: t("admin.tickets") },
     { id: "contacts", icon: MessageSquare, label: t("admin.contacts") },
     { id: "users", icon: Users, label: t("admin.users") },
-    { id: "hr", icon: Briefcase, label: "Recrutement" },
   ];
 
 
@@ -560,6 +570,33 @@ function AdminContent() {
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    onClick={() => {
+                      setHrOpen((v) => !v);
+                      if (!isHrTab) setTab("hr-recruitment");
+                    }}
+                    isActive={isHrTab}
+                    tooltip="RH" data-keep-mobile-open="true"
+                    className="gap-3"
+                  >
+                    <HrIcon size={18} />
+                    <span className="flex-1 text-left">RH</span>
+                    {hrOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                  </SidebarMenuButton>
+                  {hrOpen && (
+                    <SidebarMenuSub>
+                      {hrGroup.map((s) => (
+                        <SidebarMenuSubItem key={s.id}>
+                          <SidebarMenuSubButton onClick={() => setTab(s.id)} isActive={tab === s.id} className="gap-2 cursor-pointer">
+                            <s.icon size={14} />
+                            <span>{s.label}</span>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  )}
+                </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -581,7 +618,7 @@ function AdminContent() {
           <div className="flex items-center gap-3">
             <SidebarTrigger />
             <h2 className="text-sm font-semibold text-card-foreground hidden sm:block">
-              {[...allNavItems, ...adminServicesGroup].find((n) => n.id === tab)?.label}
+              {[...allNavItems, ...adminServicesGroup, ...hrGroup].find((n) => n.id === tab)?.label}
             </h2>
           </div>
           <div className="flex items-center gap-2">
@@ -612,6 +649,10 @@ function AdminContent() {
           {tab === "service-invoices" && <ServiceInvoicesTab />}
           {tab === "payment-methods" && <PaymentMethodsTab />}
           {tab === "hr" && <HrTab />}
+          {tab === "hr-recruitment" && <HrTab defaultTab="recruitment" />}
+          {tab === "hr-contracts" && <HrTab defaultTab="contracts" />}
+          {tab === "hr-onboarding" && <HrTab defaultTab="onboarding" />}
+          {tab === "hr-trainings" && <HrTab defaultTab="trainings" />}
         </main>
       </div>
       <ProfileSignatureDialog open={signatureOpen} onOpenChange={setSignatureOpen} />
