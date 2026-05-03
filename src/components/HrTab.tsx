@@ -710,6 +710,10 @@ export default function HrTab() {
           })()}
         </TabsContent>
 
+        <TabsContent value="onboarding" className="mt-4">
+          <OnboardingAdminTab />
+        </TabsContent>
+
         <TabsContent value="email-log" className="mt-4">
           <EmailLogTab />
         </TabsContent>
