@@ -28,8 +28,10 @@ export default function MfaPage() {
   const redirectByRole = async (userId: string) => {
     const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", userId);
     const roleList = (roles || []).map(r => r.role);
-    if (roleList.includes("admin") || roleList.includes("agent")) {
+    if (roleList.includes("admin") || roleList.includes("agent") || roleList.includes("gestionnaire") || roleList.includes("comptable")) {
       navigate("/admin");
+    } else if (roleList.includes("onboarding")) {
+      navigate("/onboarding");
     } else {
       navigate("/portal");
     }
