@@ -460,7 +460,7 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
 
         </div>
 
-        <DialogFooter className="px-6 py-4 border-t bg-muted/30">
+        <DialogFooter className="shrink-0 px-6 py-4 border-t bg-muted/30">
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>Annuler</Button>
           <Button onClick={handleSubmit} disabled={submitting} className="min-w-[180px]">
             {submitting ? (<><Loader2 size={14} className="mr-2 animate-spin" /> Envoi en cours…</>) : "Envoyer ma candidature"}
