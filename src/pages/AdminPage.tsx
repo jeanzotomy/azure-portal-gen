@@ -2640,9 +2640,16 @@ function AdminUsers() {
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Pencil size={18} /> Modifier le profil — {editForm.full_name || "Utilisateur"}
+              <Pencil size={18} /> Gérer l'utilisateur — {editForm.full_name || "Utilisateur"}
             </DialogTitle>
           </DialogHeader>
+          <Tabs defaultValue="profile" className="mt-2">
+            <TabsList className="grid grid-cols-3 w-full">
+              <TabsTrigger value="profile" className="gap-1.5"><Pencil size={13} /> Profil</TabsTrigger>
+              <TabsTrigger value="security" className="gap-1.5"><Shield size={13} /> Sécurité &amp; MFA</TabsTrigger>
+              <TabsTrigger value="danger" className="gap-1.5 data-[state=active]:text-destructive"><AlertCircle size={13} /> Zone danger</TabsTrigger>
+            </TabsList>
+            <TabsContent value="profile" className="mt-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
               <label className="text-sm font-medium text-muted-foreground">Email (non modifiable)</label>
@@ -2757,15 +2764,138 @@ function AdminUsers() {
               </select>
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="mt-4">
             <Button variant="outline" onClick={() => setEditingUser(null)}>Annuler</Button>
             <Button onClick={handleSaveProfile} disabled={editSaving} className="gap-1.5">
               {editSaving ? <RefreshCw size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
               {editSaving ? "Sauvegarde..." : "Sauvegarder"}
             </Button>
           </DialogFooter>
+            </TabsContent>
+
+            <TabsContent value="security" className="mt-4 space-y-4">
+              {editingUser && (() => {
+                const status = mfaStatus[editingUser.user_id];
+                return (
+                  <>
+                    <div className="bg-muted/30 rounded-lg p-4">
+                      <h4 className="text-sm font-semibold mb-2 flex items-center gap-2"><Smartphone size={14} /> Authenticator (TOTP)</h4>
+                      {status?.factors?.filter((f: any) => f.type === "totp").length > 0 ? (
+                        <div className="space-y-2">
+                          {status.factors.filter((f: any) => f.type === "totp").map((f: any) => (
+                            <div key={f.id} className="flex items-center justify-between bg-card rounded-md p-3 border border-border/30">
+                              <div>
+                                <p className="text-sm font-medium">{f.friendly_name || "Authenticator"}</p>
+                                <p className="text-xs text-muted-foreground">Ajouté le {new Date(f.created_at).toLocaleDateString("fr-FR")}</p>
+                              </div>
+                              <Button size="sm" variant="destructive" className="h-7 text-xs"
+                                disabled={mfaLoading === editingUser.user_id}
+                                onClick={() => disableFactor(editingUser.user_id, f.id, "totp")}>
+                                Désactiver
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (<p className="text-xs text-muted-foreground italic">Aucun authenticator configuré</p>)}
+                    </div>
+
+                    <div className="bg-muted/30 rounded-lg p-4">
+                      <h4 className="text-sm font-semibold mb-2 flex items-center gap-2"><Phone size={14} /> SMS</h4>
+                      {status?.has_phone ? (
+                        <div className="flex items-center justify-between bg-card rounded-md p-3 border border-border/30">
+                          <div>
+                            <p className="text-sm font-medium">Éligible</p>
+                            <p className="text-xs text-muted-foreground">📱 {status.phone}</p>
+                          </div>
+                          <span className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary font-medium">Disponible</span>
+                        </div>
+                      ) : (<p className="text-xs text-muted-foreground italic">Aucun numéro de téléphone configuré</p>)}
+                    </div>
+
+                    {status?.enrolled && (
+                      <Button variant="destructive" size="sm" className="w-full"
+                        disabled={mfaLoading === editingUser.user_id}
+                        onClick={() => disableMfa(editingUser.user_id, editingUser.full_name || "cet utilisateur")}>
+                        <Shield size={14} className="mr-2" /> Réinitialiser tout le MFA
+                      </Button>
+                    )}
+                  </>
+                );
+              })()}
+            </TabsContent>
+
+            <TabsContent value="danger" className="mt-4 space-y-3">
+              {editingUser && (
+                <>
+                  {canPromoteBillable && (
+                    billableLinks[editingUser.user_id] ? (
+                      <div className="flex items-center justify-between p-4 bg-teal-500/10 border border-teal-500/30 rounded-lg">
+                        <div>
+                          <p className="text-sm font-medium flex items-center gap-2"><Receipt size={14} className="text-teal-600" /> Client facturable</p>
+                          <p className="text-xs text-muted-foreground">Lié à : {billableLinks[editingUser.user_id].client_name}</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between p-4 bg-card border border-border rounded-lg">
+                        <div>
+                          <p className="text-sm font-medium">Définir comme client facturable</p>
+                          <p className="text-xs text-muted-foreground">Crée un client lié au compte pour la facturation.</p>
+                        </div>
+                        <Button size="sm" variant="outline" onClick={() => promoteToBillableClient(editingUser)} className="gap-1.5">
+                          <Receipt size={13} /> Créer
+                        </Button>
+                      </div>
+                    )
+                  )}
+
+                  <div className="flex items-center justify-between p-4 bg-card border border-border rounded-lg">
+                    <div>
+                      <p className="text-sm font-medium">{editingUser.blocked ? "Débloquer le compte" : "Bloquer le compte"}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {editingUser.blocked ? "L'utilisateur pourra à nouveau se connecter." : "L'utilisateur ne pourra plus accéder à son espace."}
+                      </p>
+                    </div>
+                    <Button size="sm" variant={editingUser.blocked ? "default" : "outline"}
+                      className={editingUser.blocked ? "" : "border-destructive/40 text-destructive hover:bg-destructive/10"}
+                      onClick={() => toggleBlock(editingUser.user_id, !!editingUser.blocked)}>
+                      {editingUser.blocked ? <><ShieldCheck size={13} className="mr-1.5" /> Débloquer</> : <><ShieldBan size={13} className="mr-1.5" /> Bloquer</>}
+                    </Button>
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 bg-destructive/5 border border-destructive/30 rounded-lg">
+                    <div>
+                      <p className="text-sm font-medium text-destructive">Supprimer définitivement</p>
+                      <p className="text-xs text-muted-foreground">Action irréversible : profil, rôles et données associées effacés.</p>
+                    </div>
+                    <Button size="sm" variant="destructive"
+                      onClick={() => deleteUser(editingUser.user_id, editingUser.full_name || "cet utilisateur")}>
+                      <Trash2 size={13} className="mr-1.5" /> Supprimer
+                    </Button>
+                  </div>
+                </>
+              )}
+            </TabsContent>
+          </Tabs>
         </DialogContent>
       </Dialog>
+
+      {/* Confirmation dialog (replaces window.confirm) */}
+      <AlertDialog open={confirmDialog.open} onOpenChange={(o) => setConfirmDialog(prev => ({ ...prev, open: o }))}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{confirmDialog.title}</AlertDialogTitle>
+            <AlertDialogDescription>{confirmDialog.description}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              className={confirmDialog.destructive ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : ""}
+              onClick={() => { confirmDialog.onConfirm(); setConfirmDialog(prev => ({ ...prev, open: false })); }}>
+              {confirmDialog.confirmLabel || "Confirmer"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Invite Users Dialog */}
       <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
