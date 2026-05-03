@@ -86,9 +86,12 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
   const openEdit = (t: Training) => {
     setEditing(t);
     setForm({
-      title: t.title, description: t.description || "", url: t.url,
+      title: t.title,
+      description: t.description || "",
+      url: t.url,
       duration_minutes: t.duration_minutes?.toString() || "",
-      category: t.category || "", target_job_titles: t.target_job_titles.join(", "),
+      departments: t.departments || [],
+      sectors: t.sectors || [],
       active: t.active,
     });
     setDialogOpen(true);
@@ -102,8 +105,8 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
       description: form.description.trim() || null,
       url: form.url.trim(),
       duration_minutes: form.duration_minutes ? parseInt(form.duration_minutes) : null,
-      category: form.category.trim() || null,
-      target_job_titles: form.target_job_titles.split(",").map(s => s.trim()).filter(Boolean),
+      departments: form.departments,
+      sectors: form.sectors,
       active: form.active,
     };
     const res = editing
