@@ -1970,6 +1970,14 @@ function AdminUsers() {
   const [importResults, setImportResults] = useState<{ email: string; success: boolean; error?: string }[] | null>(null);
   const [editingUser, setEditingUser] = useState<any | null>(null);
   const [editForm, setEditForm] = useState({ full_name: "", company: "", phone: "", country: "", city: "", address_line: "", timezone: "" });
+  const [viewMode, setViewMode] = useState<"cards" | "table" | "list">("cards");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "blocked" | "deleted">("all");
+  const [mfaFilter, setMfaFilter] = useState<"all" | "enrolled" | "none">("all");
+  const [billableFilter, setBillableFilter] = useState<"all" | "yes" | "no">("all");
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean; title: string; description: string;
+    confirmLabel?: string; destructive?: boolean; onConfirm: () => void;
+  }>({ open: false, title: "", description: "", onConfirm: () => {} });
   const [editSaving, setEditSaving] = useState(false);
   const [billableLinks, setBillableLinks] = useState<Record<string, { id: string; client_name: string }>>({});
   const { toast } = useToast();
