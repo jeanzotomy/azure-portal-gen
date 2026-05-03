@@ -261,7 +261,6 @@ function AdminContent() {
       { id: "sharepoint", icon: HardDrive, label: "SharePoint" },
       { id: "tickets", icon: LifeBuoy, label: t("admin.tickets") },
       { id: "contacts", icon: MessageSquare, label: t("admin.contacts") },
-      { id: "hr", icon: Briefcase, label: "Recrutement" },
     ];
 
     const gestionnaireServicesGroup: { id: GestionnaireTab; icon: typeof LayoutDashboard; label: string }[] = [
@@ -270,7 +269,16 @@ function AdminContent() {
       { id: "service-invoices", icon: Receipt, label: "Facturation services" },
       { id: "payment-methods", icon: CreditCard, label: "Méthodes de paiement" },
     ];
-    
+
+    const gestionnaireHrGroup: { id: GestionnaireTab; icon: typeof LayoutDashboard; label: string }[] = [
+      { id: "hr-recruitment", icon: Briefcase, label: "Recrutement" },
+      { id: "hr-contracts", icon: FileSignature, label: "Générer le contrat" },
+      { id: "hr-onboarding", icon: Users, label: "Onboarding" },
+      { id: "hr-trainings", icon: GraduationCap, label: "Formation" },
+    ];
+    const GESTIONNAIRE_HR_TABS: GestionnaireTab[] = ["hr", "hr-recruitment", "hr-contracts", "hr-onboarding", "hr-trainings"];
+    const isGestionnaireHrTab = GESTIONNAIRE_HR_TABS.includes(gestionnaireTab);
+
 
     return (
       <div className="min-h-screen flex w-full bg-background">
