@@ -2323,6 +2323,22 @@ function AdminUsers() {
     return matchesSearch && matchesRole && matchesStatus && matchesMfa && matchesBillable;
   });
 
+  const visible = filtered.slice(0, visibleCount);
+  const hasMore = visibleCount < filtered.length;
+
+  useEffect(() => {
+    if (!hasMore) return;
+    const el = loadMoreRef.current;
+    if (!el) return;
+    const obs = new IntersectionObserver((entries) => {
+      if (entries[0]?.isIntersecting) {
+        setVisibleCount((c) => Math.min(c + pageSize, filtered.length));
+      }
+    }, { rootMargin: "200px" });
+    obs.observe(el);
+    return () => obs.disconnect();
+  }, [hasMore, pageSize, filtered.length]);
+
   const roleOptions = [
     { value: "client", label: "Client" },
     { value: "comptable", label: "Comptable" },
