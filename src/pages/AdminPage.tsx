@@ -2463,6 +2463,9 @@ function AdminUsers() {
           <Button variant="outline" size="sm" onClick={load} className="gap-1.5">
             <RefreshCw size={14} /> Actualiser
           </Button>
+          <Button variant="outline" size="sm" onClick={() => setExportOpen(true)} className="gap-1.5" title="Exporter les résultats filtrés">
+            <Download size={14} /> Exporter
+          </Button>
           <select
             value={pageSize}
             onChange={(e) => setPageSize(Number(e.target.value))}
