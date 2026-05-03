@@ -60,6 +60,7 @@ const App = () => (
             <Route path="/candidature/:trackingId" element={<ApplicationTrackingPage />} />
             <Route path="/candidature" element={<ApplicationTrackingPage />} />
             <Route path="/onboarding" element={<AuthGuard><OnboardingPage /></AuthGuard>} />
+            <Route path="/rh" element={<AuthGuard requireRoles={["hr"]} fallbackRoute="/portal"><HrPortalPage /></AuthGuard>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
