@@ -351,3 +351,46 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
     </div>
   );
 }
+
+function MultiCheckField({
+  label, options, selected, onChange, emptyHint,
+}: {
+  label: string;
+  options: string[];
+  selected: string[];
+  onChange: (next: string[]) => void;
+  emptyHint?: string;
+}) {
+  const toggle = (name: string, checked: boolean) => {
+    const set = new Set(selected);
+    if (checked) set.add(name); else set.delete(name);
+    onChange([...set]);
+  };
+  return (
+    <div>
+      <Label>{label}</Label>
+      {options.length === 0 ? (
+        <p className="text-xs text-muted-foreground mt-1">{emptyHint || "Aucune option disponible."}</p>
+      ) : (
+        <div className="mt-2 max-h-36 overflow-y-auto border rounded-md p-2 grid grid-cols-2 gap-1">
+          {options.map((name) => {
+            const checked = selected.includes(name);
+            return (
+              <label key={name} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-muted/40 rounded px-1 py-0.5">
+                <Checkbox checked={checked} onCheckedChange={(v) => toggle(name, !!v)} />
+                <span className="truncate">{name}</span>
+              </label>
+            );
+          })}
+        </div>
+      )}
+      {selected.length > 0 && (
+        <div className="flex flex-wrap gap-1 mt-2">
+          {selected.map((s) => (
+            <Badge key={s} variant="secondary" className="text-xs">{s}</Badge>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
