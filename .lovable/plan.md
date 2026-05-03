@@ -1,39 +1,67 @@
-## Diagnostic
+## Objectif
 
-L'onglet **Mes candidatures** filtre sur `job_applications.user_id = auth.uid()`. Or quand un visiteur postule sans être connecté (ou via un autre compte), `user_id` reste `NULL`. La candidature existe bien en base mais n'est pas rattachée au compte → l'onglet apparaît vide.
+Restructurer l'onglet **RH** (présent dans le portail Admin et dans le portail RH `/rh`) pour regrouper toutes les actions RH dans une vue cohérente avec 4 sous-onglets :
 
-Exemple en base : `memthem@gmail.com` a une candidature **acceptée** mais `user_id = NULL`. Si cette personne se crée ensuite un compte avec le même email, sa candidature ne lui est jamais rattachée.
+1. **Recrutement** – offres + candidatures (existant)
+2. **Contrats** – génération PDF auto + assignation aux candidats acceptés
+3. **Formations** – bibliothèque de liens de formation, assignation aux candidats par poste
+4. **Onboarding** – suivi des dossiers (existant)
 
-## Solution
+## Sous-onglet 1 — Recrutement
 
-### 1. Rattachement rétroactif (migration SQL)
-Mettre à jour toutes les `job_applications` où `user_id IS NULL` mais dont l'`email` correspond à un utilisateur existant dans `auth.users`. Idem pour `onboarding_processes` (même problème potentiel via `candidate_email`).
+Reprend tel quel le contenu actuel des onglets « Offres » + « Candidatures » de `HrTab.tsx` (les deux fusionnés dans une seule vue avec un sélecteur interne, ou conservés en deux sections empilées). L'historique d'envoi d'emails reste accessible via un bouton dans le header.
 
-### 2. Rattachement automatique futur (trigger)
-Créer un trigger sur `auth.users` (AFTER INSERT) — ou étendre le trigger `handle_new_user` existant — qui :
-- met à jour `job_applications.user_id` pour toutes les lignes où `email = NEW.email AND user_id IS NULL`
-- fait pareil sur `onboarding_processes` (`candidate_email`)
+## Sous-onglet 2 — Contrats (nouveau)
 
-Ainsi, dès qu'un candidat crée son compte (via le lien d'invitation onboarding ou spontanément), ses candidatures et son dossier d'onboarding lui sont automatiquement rattachés.
+Liste de **tous les candidats au statut « Acceptée »** (jointure `job_applications` ↔ `onboarding_processes` ↔ `onboarding_contracts`). Chaque ligne affiche :
 
-### 3. Filet de sécurité côté UI (`ApplicationsTab.tsx`)
-Modifier la requête de chargement pour inclure aussi les candidatures où `email = user.email AND user_id IS NULL` :
-```ts
-.or(`user_id.eq.${user.id},and(user_id.is.null,email.eq.${user.email})`)
-```
-Et au passage, faire un UPDATE pour rattacher définitivement ces lignes (équivalent à ce que fait déjà `OnboardingPage` avec `candidate_email`).
+- Nom + email du candidat, poste, date d'acceptation
+- Statut du contrat : *Non généré* / *Généré, en attente de signature* / *Signé le …*
+- Actions :
+  - **Générer le contrat automatiquement** (appelle l'edge function existante `generate-contract` → PDF auto + dépôt SharePoint + insertion `onboarding_contracts`)
+  - **Déposer manuellement un PDF** (fallback existant)
+  - **Télécharger** / **Voir la signature**
+  - **Régénérer** (si non signé)
 
-### 4. RLS
-Ajouter une politique SELECT sur `job_applications` autorisant un user à voir les candidatures dont l'`email` correspond à son email auth, même si `user_id` est NULL — sinon le filet UI ne fonctionnera pas tant que le trigger n'a pas tourné.
+Filtres : recherche, statut contrat, poste.
 
-## Résultat attendu
+## Sous-onglet 3 — Formations (nouveau)
 
-- L'utilisateur `memthem@gmail.com` (et tous les autres dans le même cas) verront immédiatement leur candidature acceptée dans l'onglet.
-- Tout nouveau candidat qui crée son compte après avoir postulé verra automatiquement ses candidatures.
-- Les futures invitations onboarding fonctionneront sans étape manuelle de rattachement.
+Deux sections :
 
-## Fichiers touchés
+**A. Bibliothèque de formations**
+- CRUD sur une nouvelle table `trainings` : titre, description, URL (lien externe Udemy/YouTube/SharePoint…), durée estimée, catégorie, postes ciblés (multi-sélection sur `job_postings.title` libre), actif/inactif.
+- Bouton « Ajouter une formation » + édition inline.
 
-- **Nouvelle migration SQL** : backfill `user_id` + trigger `link_applications_on_signup` sur `auth.users`
-- **`src/components/ApplicationsTab.tsx`** : requête élargie (user_id OR email match) + auto-link
-- **Migration RLS** : politique SELECT additionnelle sur `job_applications` pour matching par email auth
+**B. Assignation aux candidats**
+- Liste des candidats acceptés (même source que sous-onglet Contrats).
+- Pour chaque candidat : voir les formations déjà assignées, badges « Suggérées pour son poste » (matching automatique sur le titre du poste), bouton « Assigner » qui ouvre un dialog de sélection multiple.
+- Les formations assignées s'affichent ensuite côté candidat dans son portail Onboarding (étape « Formation & Quiz »).
+
+## Sous-onglet 4 — Onboarding
+
+Reprend `OnboardingAdminTab` actuel (suivi détaillé : étapes, documents candidat, messages, signature). On garde le mode `readOnly` pour le portail RH si besoin.
+
+## Modifications base de données
+
+Nouvelle table **`trainings`** :
+- `title`, `description`, `url`, `duration_minutes`, `category`, `target_job_titles` (text[]), `active`, `created_by`
+- RLS : Admin/Gestionnaire/HR gèrent ; tout authentifié peut lire les actifs.
+
+Nouvelle table **`onboarding_assigned_trainings`** :
+- `process_id` (→ `onboarding_processes`), `training_id` (→ `trainings`), `assigned_by`, `assigned_at`, `completed_at`, `notes`
+- RLS : RH/Admin/Gestionnaire CRUD ; le candidat propriétaire du `process_id` peut lire et mettre `completed_at`.
+
+## Modifications côté candidat (portail `/portal` → Mon onboarding)
+
+L'étape « Formation & Quiz » affiche désormais la liste des formations assignées (titre, durée, lien externe, bouton « Marquer comme suivie »). Si aucune formation assignée, message d'attente.
+
+## Fichiers impactés
+
+- `src/components/HrTab.tsx` — refonte des `TabsList` en 4 sous-onglets : `recruitment`, `contracts`, `trainings`, `onboarding`. Extraction du contenu existant (offres + candidatures) dans un sous-composant `RecruitmentSection`.
+- `src/components/hr/ContractsTab.tsx` — nouveau, basé sur la logique `generateContract` déjà présente dans `OnboardingAdminTab`.
+- `src/components/hr/TrainingsTab.tsx` — nouveau (CRUD bibliothèque + assignation).
+- `src/components/OnboardingTab.tsx` — afficher les formations assignées dans l'étape `training`.
+- Migration SQL : tables `trainings` + `onboarding_assigned_trainings` + RLS.
+
+Aucune modification des routes : l'onglet « RH » reste accessible via les portails Admin (`/admin`) et RH (`/rh`) déjà en place.

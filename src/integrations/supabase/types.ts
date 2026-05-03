@@ -387,6 +387,36 @@ export type Database = {
         }
         Relationships: []
       }
+      onboarding_assigned_trainings: {
+        Row: {
+          assigned_at: string
+          assigned_by: string
+          completed_at: string | null
+          id: string
+          notes: string | null
+          process_id: string
+          training_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by: string
+          completed_at?: string | null
+          id?: string
+          notes?: string | null
+          process_id: string
+          training_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string
+          completed_at?: string | null
+          id?: string
+          notes?: string | null
+          process_id?: string
+          training_id?: string
+        }
+        Relationships: []
+      }
       onboarding_contracts: {
         Row: {
           contract_file_name: string
@@ -1276,6 +1306,48 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      trainings: {
+        Row: {
+          active: boolean
+          category: string | null
+          created_at: string
+          created_by: string
+          description: string | null
+          duration_minutes: number | null
+          id: string
+          target_job_titles: string[]
+          title: string
+          updated_at: string
+          url: string
+        }
+        Insert: {
+          active?: boolean
+          category?: string | null
+          created_at?: string
+          created_by: string
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          target_job_titles?: string[]
+          title: string
+          updated_at?: string
+          url: string
+        }
+        Update: {
+          active?: boolean
+          category?: string | null
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          duration_minutes?: number | null
+          id?: string
+          target_job_titles?: string[]
+          title?: string
+          updated_at?: string
+          url?: string
+        }
+        Relationships: []
       }
       user_roles: {
         Row: {
