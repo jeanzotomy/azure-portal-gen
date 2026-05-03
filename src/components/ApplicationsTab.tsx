@@ -6,8 +6,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Briefcase, RefreshCw, Calendar, MapPin, ExternalLink, Search, X } from "lucide-react";
+import { Briefcase, RefreshCw, Calendar, MapPin, ExternalLink, Search, X, Link2 } from "lucide-react";
 import { format } from "date-fns";
+import { toast } from "sonner";
 import type { User as SupaUser } from "@supabase/supabase-js";
 
 type AppStatus = "nouvelle" | "en_revue" | "entretien" | "acceptee" | "refusee";
