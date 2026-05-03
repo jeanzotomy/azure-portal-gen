@@ -255,7 +255,14 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
     setSubmitting(false);
 
     if (error) {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      const isDup = (error as any)?.code === "23505" || /duplicate|unique/i.test(error.message);
+      toast({
+        title: isDup ? "Candidature déjà envoyée" : "Erreur",
+        description: isDup
+          ? "Vous avez déjà postulé à cette offre."
+          : error.message,
+        variant: "destructive",
+      });
       return;
     }
     const trackId = inserted?.tracking_id;
