@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { Loader2, FileUp, CheckCircle2, XCircle, Eye, Users, Clock } from "lucide-react";
+import { Loader2, FileUp, CheckCircle2, XCircle, Eye, Users, Clock, Sparkles, ExternalLink } from "lucide-react";
 
 interface Process {
   id: string; candidate_name: string; candidate_email: string; status: string;
