@@ -1989,10 +1989,31 @@ function AdminUsers() {
   }>({ open: false, title: "", description: "", onConfirm: () => {} });
   const [editSaving, setEditSaving] = useState(false);
   const [billableLinks, setBillableLinks] = useState<Record<string, { id: string; client_name: string }>>({});
-  const [pageSize, setPageSize] = useState<number>(24);
+  const [pageSize, setPageSize] = useState<number>(() => {
+    const v = parseInt(searchParams.get("size") || "", 10);
+    return [12, 24, 48, 100].includes(v) ? v : 24;
+  });
   const [visibleCount, setVisibleCount] = useState<number>(24);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const { toast } = useToast();
+
+  // Sync filter state -> URL
+  useEffect(() => {
+    const next = new URLSearchParams(searchParams);
+    const setOrDel = (k: string, v: string, def: string) => {
+      if (v && v !== def) next.set(k, v); else next.delete(k);
+    };
+    setOrDel("q", search, "");
+    setOrDel("role", roleFilter, "all");
+    setOrDel("status", statusFilter, "all");
+    setOrDel("mfa", mfaFilter, "all");
+    setOrDel("billable", billableFilter, "all");
+    setOrDel("view", viewMode, "cards");
+    setOrDel("size", String(pageSize), "24");
+    if (next.toString() !== searchParams.toString()) {
+      setSearchParams(next, { replace: true });
+    }
+  }, [search, roleFilter, statusFilter, mfaFilter, billableFilter, viewMode, pageSize]);
 
   // Reset pagination on filter/search/view change
   useEffect(() => {
