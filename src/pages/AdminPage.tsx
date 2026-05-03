@@ -2959,6 +2959,7 @@ function AdminUsers() {
                     <SelectItem value="comptable">Comptable</SelectItem>
                     <SelectItem value="gestionnaire">Gestionnaire</SelectItem>
                     <SelectItem value="agent">Agent</SelectItem>
+                    <SelectItem value="hr">RH</SelectItem>
                     <SelectItem value="admin">Admin</SelectItem>
                   </SelectContent>
                 </Select>
