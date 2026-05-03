@@ -161,7 +161,7 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
   const suggestedFor = (jobTitle: string | null) => {
     if (!jobTitle) return [];
     const j = jobTitle.toLowerCase();
-    return trainings.filter(t => t.active && t.target_job_titles.some(tj => j.includes(tj.toLowerCase()) || tj.toLowerCase().includes(j)));
+    return trainings.filter(t => t.active && (t.target_job_titles || []).some(tj => j.includes(tj.toLowerCase()) || tj.toLowerCase().includes(j)));
   };
 
   return (
