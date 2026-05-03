@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthSession } from "@/hooks/use-auth-session";
 
-export type AppRole = "admin" | "agent" | "client" | "comptable" | "gestionnaire";
+export type AppRole = "admin" | "agent" | "client" | "comptable" | "gestionnaire" | "hr" | "onboarding";
 
 const roleCache = new Map<string, AppRole[]>();
 
