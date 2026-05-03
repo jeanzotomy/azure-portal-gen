@@ -570,6 +570,33 @@ function AdminContent() {
                     </SidebarMenuButton>
                   </SidebarMenuItem>
                 ))}
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    onClick={() => {
+                      setHrOpen((v) => !v);
+                      if (!isHrTab) setTab("hr-recruitment");
+                    }}
+                    isActive={isHrTab}
+                    tooltip="RH" data-keep-mobile-open="true"
+                    className="gap-3"
+                  >
+                    <HrIcon size={18} />
+                    <span className="flex-1 text-left">RH</span>
+                    {hrOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                  </SidebarMenuButton>
+                  {hrOpen && (
+                    <SidebarMenuSub>
+                      {hrGroup.map((s) => (
+                        <SidebarMenuSubItem key={s.id}>
+                          <SidebarMenuSubButton onClick={() => setTab(s.id)} isActive={tab === s.id} className="gap-2 cursor-pointer">
+                            <s.icon size={14} />
+                            <span>{s.label}</span>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  )}
+                </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
