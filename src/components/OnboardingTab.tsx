@@ -293,7 +293,7 @@ export default function OnboardingTab({ user }: { user: SupaUser }) {
   );
 }
 
-function StepContent({ step, contract, docs, uploading, onUploadDoc, onSignContract, onDownloadContract, onMarkDone }: any) {
+function StepContent({ step, contract, docs, trainings = [], uploading, onUploadDoc, onSignContract, onDownloadContract, onMarkDone, onMarkTrainingDone }: any) {
   if (step.step_key === "welcome") return (
     <div className="space-y-4">
       <p className="text-sm">🎬 Découvrez l'équipe, nos valeurs et votre rôle dans cette aventure.</p>
