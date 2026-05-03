@@ -2163,14 +2163,22 @@ function AdminUsers() {
   };
 
   const deleteUser = async (userId: string, userName: string) => {
-    if (!window.confirm(`Êtes-vous sûr de vouloir supprimer définitivement le compte de "${userName}" ? Cette action est irréversible.`)) return;
-    const { data, error } = await supabase.functions.invoke("delete-user", { body: { user_id: userId } });
-    if (error || data?.error) {
-      toast({ title: "Erreur", description: data?.error || error?.message || "Impossible de supprimer l'utilisateur.", variant: "destructive" });
-    } else {
-      toast({ title: "Compte supprimé", description: `Le compte de "${userName}" a été supprimé définitivement.` });
-      load();
-    }
+    setConfirmDialog({
+      open: true,
+      title: "Supprimer définitivement le compte ?",
+      description: `Vous êtes sur le point de supprimer le compte de "${userName}". Cette action est irréversible : profil, rôles et données associées seront effacés.`,
+      confirmLabel: "Supprimer définitivement",
+      destructive: true,
+      onConfirm: async () => {
+        const { data, error } = await supabase.functions.invoke("delete-user", { body: { user_id: userId } });
+        if (error || data?.error) {
+          toast({ title: "Erreur", description: data?.error || error?.message || "Impossible de supprimer l'utilisateur.", variant: "destructive" });
+        } else {
+          toast({ title: "Compte supprimé", description: `Le compte de "${userName}" a été supprimé définitivement.` });
+          load();
+        }
+      },
+    });
   };
 
   const promoteToBillableClient = async (p: any) => {
