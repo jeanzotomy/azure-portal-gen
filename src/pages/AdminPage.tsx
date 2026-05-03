@@ -210,6 +210,9 @@ function AdminContent() {
   const isGestionnaireServicesTab = GESTIONNAIRE_SERVICES_TABS.includes(gestionnaireTab);
   useEffect(() => { if (isAdminServicesTab) setAdminServicesOpen(true); }, [isAdminServicesTab]);
   useEffect(() => { if (isGestionnaireServicesTab) setGestionnaireServicesOpen(true); }, [isGestionnaireServicesTab]);
+  const GESTIONNAIRE_HR_TABS_GLOBAL: GestionnaireTab[] = ["hr", "hr-recruitment", "hr-contracts", "hr-onboarding", "hr-trainings"];
+  const isGestionnaireHrTabGlobal = GESTIONNAIRE_HR_TABS_GLOBAL.includes(gestionnaireTab);
+  useEffect(() => { if (isGestionnaireHrTabGlobal) setGestionnaireHrOpen(true); }, [isGestionnaireHrTabGlobal]);
 
   useEffect(() => {
     const fetchUnreplied = async () => {
