@@ -19,3 +19,5 @@ project_id = "zwzazxebufydnaxezngx"
     verify_jwt = false
   [functions.notify-application-status]
     verify_jwt = false
+  [functions.application-tracking]
+    verify_jwt = false
