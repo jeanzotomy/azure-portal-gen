@@ -29,7 +29,7 @@ import {
   LayoutGrid, List as ListIcon, Table as TableIcon, MapPin, Mail, Download,
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { HardDrive, Briefcase, BookOpen, Receipt, CreditCard, FileSignature, GraduationCap, UserCog as HrIcon } from "lucide-react";
+import { HardDrive, FileSignature, GraduationCap, UserCog as HrIcon } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
