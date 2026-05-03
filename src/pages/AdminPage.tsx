@@ -649,6 +649,10 @@ function AdminContent() {
           {tab === "service-invoices" && <ServiceInvoicesTab />}
           {tab === "payment-methods" && <PaymentMethodsTab />}
           {tab === "hr" && <HrTab />}
+          {tab === "hr-recruitment" && <HrTab defaultTab="recruitment" />}
+          {tab === "hr-contracts" && <HrTab defaultTab="contracts" />}
+          {tab === "hr-onboarding" && <HrTab defaultTab="onboarding" />}
+          {tab === "hr-trainings" && <HrTab defaultTab="trainings" />}
         </main>
       </div>
       <ProfileSignatureDialog open={signatureOpen} onOpenChange={setSignatureOpen} />
