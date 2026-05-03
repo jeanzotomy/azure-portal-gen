@@ -37,6 +37,7 @@ export default function OnboardingTab({ user }: { user: SupaUser }) {
   const [steps, setSteps] = useState<Step[]>([]);
   const [docs, setDocs] = useState<Doc[]>([]);
   const [contract, setContract] = useState<Contract | null>(null);
+  const [trainings, setTrainings] = useState<AssignedTraining[]>([]);
   const [activeStepId, setActiveStepId] = useState<string | null>(null);
   const [uploading, setUploading] = useState<string | null>(null);
 
