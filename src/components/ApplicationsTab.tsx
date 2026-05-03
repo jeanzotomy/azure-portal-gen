@@ -269,7 +269,7 @@ export default function ApplicationsTab({ user }: { user: SupaUser }) {
                         <span>Démarrer formations</span>
                       </div>
                     </div>
-                    <Link to="/onboarding">
+                    <Link to="/portal?tab=onboarding">
                       <Button className="w-full bg-gradient-to-r from-primary to-[#007aa3] hover:opacity-90">
                         Accéder à mon onboarding <ArrowRight size={16} />
                       </Button>

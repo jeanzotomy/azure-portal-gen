@@ -32,7 +32,7 @@ import logo from "@/assets/cloudmature-logo.png";
 import {
   LayoutDashboard, FolderOpen, LifeBuoy, User, LogOut, Send, Clock, CheckCircle2, AlertCircle,
   Menu, Bell, Search, Filter, Upload, X, FileText, DollarSign, Calendar, Cpu, Flag, Pencil, Shield,
-  Activity, TrendingUp, Plus, Trash2, Info, RefreshCw, UserCheck, Briefcase,
+  Activity, TrendingUp, Plus, Trash2, Info, RefreshCw, UserCheck, Briefcase, Sparkles,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -41,9 +41,10 @@ import type { User as SupaUser } from "@supabase/supabase-js";
 import { PortalInfoBar } from "@/components/PortalInfoBar";
 import { NotificationBell } from "@/components/NotificationBell";
 import ApplicationsTab from "@/components/ApplicationsTab";
+import OnboardingTab from "@/components/OnboardingTab";
 import { getDialCode, applyDialCode } from "@/lib/country-dial-codes";
 
-type Tab = "dashboard" | "projects" | "tickets" | "applications" | "profile";
+type Tab = "dashboard" | "projects" | "tickets" | "applications" | "onboarding" | "profile";
 
 function PortalContent() {
   const { user, ready } = useAuthSession();
@@ -53,7 +54,7 @@ function PortalContent() {
   const [profileIncomplete, setProfileIncomplete] = useState(false);
   const [daysLeft, setDaysLeft] = useState<number | null>(null);
   const navigate = useNavigate();
-  const { isAdmin, isAgent, isComptable, isGestionnaire } = useUserRoles();
+  const { isAdmin, isAgent, isComptable, isGestionnaire, isOnboarding } = useUserRoles();
   const { mfaVerified, timedOut: mfaTimedOut } = useMfaCheck();
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
@@ -64,7 +65,7 @@ function PortalContent() {
   // Sync tab when URL ?tab= changes (e.g. from MobileBottomNav while already on /portal)
   useEffect(() => {
     const urlTab = searchParams.get("tab") as Tab | null;
-    const valid: Tab[] = ["dashboard", "projects", "tickets", "applications", "profile"];
+    const valid: Tab[] = ["dashboard", "projects", "tickets", "applications", "onboarding", "profile"];
     if (urlTab && valid.includes(urlTab) && urlTab !== tab) {
       setTab(urlTab);
     }
@@ -106,6 +107,7 @@ function PortalContent() {
     { id: "projects", icon: FolderOpen, label: t("portal.projects") },
     { id: "tickets", icon: LifeBuoy, label: t("portal.support") },
     { id: "applications", icon: Briefcase, label: "Mes candidatures" },
+    ...(isOnboarding ? [{ id: "onboarding" as Tab, icon: Sparkles, label: "Mon onboarding" }] : []),
     { id: "profile", icon: User, label: t("portal.profile") },
   ];
 
@@ -195,6 +197,7 @@ function PortalContent() {
           {tab === "projects" && <ProjectsTab user={user} />}
           {tab === "tickets" && <TicketsTab user={user} />}
           {tab === "applications" && <ApplicationsTab user={user} />}
+          {tab === "onboarding" && <OnboardingTab user={user} />}
           {tab === "profile" && <ProfileTab user={user} />}
         </main>
       </div>
