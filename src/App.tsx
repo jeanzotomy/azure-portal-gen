@@ -55,6 +55,8 @@ const App = () => (
             <Route path="/careers" element={<CareersPage />} />
             <Route path="/careers/:slug" element={<JobDetailPage />} />
             <Route path="/unsubscribe" element={<UnsubscribePage />} />
+            <Route path="/candidature/:trackingId" element={<ApplicationTrackingPage />} />
+            <Route path="/candidature" element={<ApplicationTrackingPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
