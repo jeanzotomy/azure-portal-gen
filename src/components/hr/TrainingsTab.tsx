@@ -21,7 +21,9 @@ interface Training {
   url: string;
   duration_minutes: number | null;
   category: string | null;
-  target_job_titles: string[];
+  target_job_titles?: string[];
+  departments: string[];
+  sectors: string[];
   active: boolean;
 }
 
@@ -33,7 +35,15 @@ interface CandidateRow {
   assigned: { id: string; training_id: string; completed_at: string | null }[];
 }
 
-const empty = { title: "", description: "", url: "", duration_minutes: "", category: "", target_job_titles: "", active: true };
+const empty = {
+  title: "",
+  description: "",
+  url: "",
+  duration_minutes: "",
+  departments: [] as string[],
+  sectors: [] as string[],
+  active: true,
+};
 
 export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean }) {
   const [trainings, setTrainings] = useState<Training[]>([]);
@@ -44,14 +54,20 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
   const [form, setForm] = useState(empty);
   const [assignTarget, setAssignTarget] = useState<CandidateRow | null>(null);
   const [assignSel, setAssignSel] = useState<Set<string>>(new Set());
+  const [departmentsList, setDepartmentsList] = useState<string[]>([]);
+  const [sectorsList, setSectorsList] = useState<string[]>([]);
 
   const load = useCallback(async () => {
     setLoading(true);
-    const [{ data: trs }, { data: procs }] = await Promise.all([
+    const [{ data: trs }, { data: procs }, { data: deps }, { data: secs }] = await Promise.all([
       supabase.from("trainings").select("*").order("created_at", { ascending: false }),
       supabase.from("onboarding_processes").select("id, candidate_name, candidate_email, job_id, created_at").order("created_at", { ascending: false }),
+      supabase.from("departments").select("name").order("name"),
+      supabase.from("sectors").select("name").order("name"),
     ]);
     setTrainings((trs || []) as Training[]);
+    setDepartmentsList(((deps || []) as { name: string }[]).map(d => d.name));
+    setSectorsList(((secs || []) as { name: string }[]).map(s => s.name));
 
     const procIds = (procs || []).map(p => p.id);
     const jobIds = Array.from(new Set((procs || []).map(p => p.job_id).filter(Boolean) as string[]));
@@ -76,9 +92,12 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
   const openEdit = (t: Training) => {
     setEditing(t);
     setForm({
-      title: t.title, description: t.description || "", url: t.url,
+      title: t.title,
+      description: t.description || "",
+      url: t.url,
       duration_minutes: t.duration_minutes?.toString() || "",
-      category: t.category || "", target_job_titles: t.target_job_titles.join(", "),
+      departments: t.departments || [],
+      sectors: t.sectors || [],
       active: t.active,
     });
     setDialogOpen(true);
@@ -92,8 +111,8 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
       description: form.description.trim() || null,
       url: form.url.trim(),
       duration_minutes: form.duration_minutes ? parseInt(form.duration_minutes) : null,
-      category: form.category.trim() || null,
-      target_job_titles: form.target_job_titles.split(",").map(s => s.trim()).filter(Boolean),
+      departments: form.departments,
+      sectors: form.sectors,
       active: form.active,
     };
     const res = editing
@@ -142,7 +161,7 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
   const suggestedFor = (jobTitle: string | null) => {
     if (!jobTitle) return [];
     const j = jobTitle.toLowerCase();
-    return trainings.filter(t => t.active && t.target_job_titles.some(tj => j.includes(tj.toLowerCase()) || tj.toLowerCase().includes(j)));
+    return trainings.filter(t => t.active && (t.target_job_titles || []).some(tj => j.includes(tj.toLowerCase()) || tj.toLowerCase().includes(j)));
   };
 
   return (
@@ -173,13 +192,13 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
                     <div className="flex items-center gap-2 flex-wrap mb-1">
                       <h4 className="font-semibold">{t.title}</h4>
                       {!t.active && <Badge variant="outline">Inactif</Badge>}
-                      {t.category && <Badge variant="secondary">{t.category}</Badge>}
                       {t.duration_minutes && <Badge variant="outline" className="text-xs">{t.duration_minutes} min</Badge>}
                     </div>
                     {t.description && <p className="text-sm text-muted-foreground line-clamp-2">{t.description}</p>}
-                    {t.target_job_titles.length > 0 && (
+                    {(t.departments?.length > 0 || t.sectors?.length > 0) && (
                       <div className="flex flex-wrap gap-1 mt-2">
-                        {t.target_job_titles.map(jt => <Badge key={jt} variant="outline" className="text-xs">{jt}</Badge>)}
+                        {(t.departments || []).map(d => <Badge key={`d-${d}`} variant="secondary" className="text-xs">{d}</Badge>)}
+                        {(t.sectors || []).map(s => <Badge key={`s-${s}`} variant="outline" className="text-xs">{s}</Badge>)}
                       </div>
                     )}
                     <a href={t.url} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline inline-flex items-center gap-1 mt-2">
@@ -259,14 +278,24 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
             <div><Label>Titre *</Label><Input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} /></div>
             <div><Label>URL (lien externe) *</Label><Input value={form.url} onChange={e => setForm({ ...form, url: e.target.value })} placeholder="https://..." /></div>
             <div><Label>Description</Label><Textarea rows={3} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} /></div>
-            <div className="grid grid-cols-2 gap-3">
-              <div><Label>Catégorie</Label><Input value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} placeholder="Sécurité, DevOps..." /></div>
-              <div><Label>Durée (min)</Label><Input type="number" value={form.duration_minutes} onChange={e => setForm({ ...form, duration_minutes: e.target.value })} /></div>
-            </div>
             <div>
-              <Label>Postes ciblés (séparés par des virgules)</Label>
-              <Input value={form.target_job_titles} onChange={e => setForm({ ...form, target_job_titles: e.target.value })} placeholder="Développeur, DevOps, Cloud Engineer..." />
+              <Label>Durée (min)</Label>
+              <Input type="number" value={form.duration_minutes} onChange={e => setForm({ ...form, duration_minutes: e.target.value })} />
             </div>
+            <MultiCheckField
+              label="Départements"
+              options={departmentsList}
+              selected={form.departments}
+              onChange={(next) => setForm({ ...form, departments: next })}
+              emptyHint="Aucun département. Créez-les depuis l'onglet Recrutement."
+            />
+            <MultiCheckField
+              label="Secteurs"
+              options={sectorsList}
+              selected={form.sectors}
+              onChange={(next) => setForm({ ...form, sectors: next })}
+              emptyHint="Aucun secteur. Créez-les depuis l'onglet Recrutement."
+            />
             <div className="flex items-center gap-2">
               <Switch checked={form.active} onCheckedChange={v => setForm({ ...form, active: v })} />
               <Label>Actif</Label>
@@ -291,7 +320,7 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
               <p className="text-sm text-muted-foreground">Aucune formation active disponible.</p>
             ) : trainings.filter(t => t.active).map(t => {
               const checked = assignSel.has(t.id);
-              const isSuggested = assignTarget?.job_title && t.target_job_titles.some(jt =>
+              const isSuggested = assignTarget?.job_title && (t.target_job_titles || []).some(jt =>
                 assignTarget.job_title!.toLowerCase().includes(jt.toLowerCase()) || jt.toLowerCase().includes(assignTarget.job_title!.toLowerCase())
               );
               return (
@@ -319,6 +348,49 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+function MultiCheckField({
+  label, options, selected, onChange, emptyHint,
+}: {
+  label: string;
+  options: string[];
+  selected: string[];
+  onChange: (next: string[]) => void;
+  emptyHint?: string;
+}) {
+  const toggle = (name: string, checked: boolean) => {
+    const set = new Set(selected);
+    if (checked) set.add(name); else set.delete(name);
+    onChange([...set]);
+  };
+  return (
+    <div>
+      <Label>{label}</Label>
+      {options.length === 0 ? (
+        <p className="text-xs text-muted-foreground mt-1">{emptyHint || "Aucune option disponible."}</p>
+      ) : (
+        <div className="mt-2 max-h-36 overflow-y-auto border rounded-md p-2 grid grid-cols-2 gap-1">
+          {options.map((name) => {
+            const checked = selected.includes(name);
+            return (
+              <label key={name} className="flex items-center gap-2 text-sm cursor-pointer hover:bg-muted/40 rounded px-1 py-0.5">
+                <Checkbox checked={checked} onCheckedChange={(v) => toggle(name, !!v)} />
+                <span className="truncate">{name}</span>
+              </label>
+            );
+          })}
+        </div>
+      )}
+      {selected.length > 0 && (
+        <div className="flex flex-wrap gap-1 mt-2">
+          {selected.map((s) => (
+            <Badge key={s} variant="secondary" className="text-xs">{s}</Badge>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

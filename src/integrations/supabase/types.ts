@@ -1313,9 +1313,11 @@ export type Database = {
           category: string | null
           created_at: string
           created_by: string
+          departments: string[]
           description: string | null
           duration_minutes: number | null
           id: string
+          sectors: string[]
           target_job_titles: string[]
           title: string
           updated_at: string
@@ -1326,9 +1328,11 @@ export type Database = {
           category?: string | null
           created_at?: string
           created_by: string
+          departments?: string[]
           description?: string | null
           duration_minutes?: number | null
           id?: string
+          sectors?: string[]
           target_job_titles?: string[]
           title: string
           updated_at?: string
@@ -1339,9 +1343,11 @@ export type Database = {
           category?: string | null
           created_at?: string
           created_by?: string
+          departments?: string[]
           description?: string | null
           duration_minutes?: number | null
           id?: string
+          sectors?: string[]
           target_job_titles?: string[]
           title?: string
           updated_at?: string
