@@ -95,6 +95,7 @@ function buildEmail(
       <p style="font-size:14px;color:#4a5568;line-height:1.6;margin:0 0 16px;">Nous vous remercions sincèrement pour l'intérêt que vous avez porté à ${SITE_NAME} et pour le temps consacré à votre candidature au poste de <strong>${job}</strong>.</p>
       <p style="font-size:14px;color:#4a5568;line-height:1.6;margin:0 0 16px;">Après une étude attentive de votre profil, nous sommes au regret de ne pouvoir donner une suite favorable à votre candidature.</p>
       <p style="font-size:14px;color:#4a5568;line-height:1.6;margin:0 0 16px;">Nous vous souhaitons plein succès dans la poursuite de vos projets professionnels.</p>
+      ${tracking}
     `)
     return { subject, html }
   }
