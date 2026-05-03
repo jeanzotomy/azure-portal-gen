@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import {
   CheckCircle2, Circle, Clock, FileSignature, FileUp, GraduationCap,
   Laptop, Users, PartyPopper, Sparkles, Download, Loader2, AlertCircle, RefreshCw, Lock,
+  XCircle, ShieldAlert,
 } from "lucide-react";
 import { SignaturePad } from "@/components/SignaturePad";
 import type { User as SupaUser } from "@supabase/supabase-js";
@@ -37,9 +38,12 @@ export default function OnboardingTab({ user }: { user: SupaUser }) {
   const [steps, setSteps] = useState<Step[]>([]);
   const [docs, setDocs] = useState<Doc[]>([]);
   const [contract, setContract] = useState<Contract | null>(null);
+  const [contractStatus, setContractStatus] = useState<{ ok: boolean; reason?: string; solution?: string } | null>(null);
+  const [contractChecking, setContractChecking] = useState(false);
   const [trainings, setTrainings] = useState<AssignedTraining[]>([]);
   const [activeStepId, setActiveStepId] = useState<string | null>(null);
   const [uploading, setUploading] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -69,6 +73,35 @@ export default function OnboardingTab({ user }: { user: SupaUser }) {
     setContract((contractData || null) as any);
     setTrainings((trainingsData || []) as any);
     setLoading(false);
+
+    // Vérifier l'accessibilité réelle du fichier contrat (signed URL)
+    if (contractData?.contract_file_path) {
+      setContractChecking(true);
+      try {
+        const { data: signed, error: sErr } = await supabase.storage
+          .from("onboarding-files")
+          .createSignedUrl(contractData.contract_file_path, 60);
+        if (sErr || !signed?.signedUrl) {
+          setContractStatus({
+            ok: false,
+            reason: "Fichier introuvable dans le stockage sécurisé.",
+            solution: "Contactez le service RH pour qu'il régénère votre contrat.",
+          });
+        } else {
+          setContractStatus({ ok: true });
+        }
+      } catch {
+        setContractStatus({
+          ok: false,
+          reason: "Impossible de vérifier l'accès au fichier.",
+          solution: "Vérifiez votre connexion internet puis cliquez sur Actualiser.",
+        });
+      } finally {
+        setContractChecking(false);
+      }
+    } else {
+      setContractStatus(null);
+    }
   }, [user]);
 
   useEffect(() => { load(); }, [load]);
@@ -129,9 +162,10 @@ export default function OnboardingTab({ user }: { user: SupaUser }) {
 
   const downloadContract = async () => {
     if (!contract) return;
+    setDownloading(true);
     try {
       const { data, error } = await supabase.storage.from("onboarding-files").download(contract.contract_file_path);
-      if (error || !data) throw error || new Error("Téléchargement impossible");
+      if (error || !data) throw error || new Error("not_found");
       const url = URL.createObjectURL(data);
       const a = document.createElement("a");
       a.href = url;
@@ -140,8 +174,29 @@ export default function OnboardingTab({ user }: { user: SupaUser }) {
       a.click();
       a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setContractStatus({ ok: true });
+      toast.success("Contrat téléchargé");
     } catch (e: any) {
-      toast.error(e.message || "Téléchargement impossible. Désactivez votre bloqueur de publicités et réessayez.");
+      const msg = (e?.message || "").toLowerCase();
+      let reason = "Erreur inconnue lors du téléchargement.";
+      let solution = "Réessayez dans quelques instants ou contactez le RH.";
+      if (msg.includes("not_found") || msg.includes("not found") || msg.includes("object")) {
+        reason = "Le fichier du contrat est introuvable sur le serveur.";
+        solution = "Demandez au RH de régénérer le contrat depuis le portail admin.";
+      } else if (msg.includes("network") || msg.includes("failed to fetch")) {
+        reason = "Problème de connexion réseau.";
+        solution = "Vérifiez votre connexion internet puis réessayez.";
+      } else if (msg.includes("permission") || msg.includes("denied") || msg.includes("unauthorized")) {
+        reason = "Vous n'êtes pas autorisé(e) à accéder à ce fichier.";
+        solution = "Reconnectez-vous puis réessayez. Si le problème persiste, contactez le RH.";
+      } else if (msg.includes("blocked")) {
+        reason = "Téléchargement bloqué par votre navigateur ou une extension.";
+        solution = "Désactivez les bloqueurs de publicités/popups, puis réessayez.";
+      }
+      setContractStatus({ ok: false, reason, solution });
+      toast.error(reason);
+    } finally {
+      setDownloading(false);
     }
   };
 
@@ -185,42 +240,86 @@ export default function OnboardingTab({ user }: { user: SupaUser }) {
         </div>
       </div>
 
-      {/* Section Contrat – mise en avant */}
+      {/* Section Contrat – mise en avant + état d'accessibilité */}
       {(() => {
         const contractStep = steps.find(s => s.step_key === "contract");
         if (!contractStep) return null;
         const signed = !!contract?.signed_at;
+        const accessible = contract && contractStatus?.ok !== false;
+        const inaccessible = contract && contractStatus?.ok === false;
+
+        let badgeLabel = "En préparation";
+        let badgeClass = "bg-amber-500";
+        let title = "Contrat en cours de préparation";
+        let description = "Le service RH prépare votre contrat. Vous serez notifié(e) dès qu'il sera disponible.";
+        let cardClass = "border-amber-200 bg-amber-50/40";
+        let iconBg = "bg-amber-400 text-white";
+
+        if (signed) {
+          badgeLabel = "Signé"; badgeClass = "bg-emerald-500";
+          title = "Votre contrat est signé ✅";
+          description = `Signé le ${new Date(contract!.signed_at!).toLocaleDateString("fr-FR")}. Vous pouvez le télécharger à tout moment.`;
+          cardClass = "border-emerald-300 bg-emerald-50/40";
+          iconBg = "bg-emerald-500 text-white";
+        } else if (contractChecking) {
+          badgeLabel = "Vérification…"; badgeClass = "bg-slate-500";
+          title = "Vérification de l'accès au contrat";
+          description = "Nous vérifions que votre contrat est bien accessible…";
+          cardClass = "border-slate-200 bg-slate-50/40";
+          iconBg = "bg-slate-400 text-white";
+        } else if (inaccessible) {
+          badgeLabel = "Indisponible"; badgeClass = "bg-red-500";
+          title = "Contrat momentanément indisponible";
+          description = contractStatus?.reason || "Le fichier ne peut pas être ouvert pour le moment.";
+          cardClass = "border-red-300 bg-red-50/40";
+          iconBg = "bg-red-500 text-white";
+        } else if (accessible) {
+          badgeLabel = "Téléchargement disponible"; badgeClass = "bg-primary";
+          title = "Votre contrat est prêt à signer";
+          description = "Téléchargez votre contrat, lisez-le attentivement, puis signez électroniquement.";
+          cardClass = "border-primary/40 bg-gradient-to-br from-primary/5 via-white to-cyan-50 shadow-lg";
+          iconBg = "bg-primary text-white";
+        }
+
         return (
-          <Card className={`overflow-hidden border-2 ${signed ? "border-emerald-300 bg-emerald-50/40" : contract ? "border-primary/40 bg-gradient-to-br from-primary/5 via-white to-cyan-50 shadow-lg" : "border-amber-200 bg-amber-50/40"}`}>
+          <Card className={`overflow-hidden border-2 ${cardClass}`}>
             <div className="p-6 flex flex-col md:flex-row md:items-center gap-4">
-              <div className={`flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center ${signed ? "bg-emerald-500 text-white" : contract ? "bg-primary text-white" : "bg-amber-400 text-white"}`}>
-                <FileSignature className="h-7 w-7" />
+              <div className={`flex-shrink-0 w-14 h-14 rounded-full flex items-center justify-center ${iconBg}`}>
+                {inaccessible ? <XCircle className="h-7 w-7" /> : contractChecking ? <Loader2 className="h-7 w-7 animate-spin" /> : <FileSignature className="h-7 w-7" />}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2 mb-1">
-                  <Badge className={signed ? "bg-emerald-500" : contract ? "bg-primary" : "bg-amber-500"}>
-                    {signed ? "Signé" : contract ? "Action requise" : "En préparation"}
-                  </Badge>
+                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                  <Badge className={badgeClass}>{badgeLabel}</Badge>
                   <span className="text-xs text-muted-foreground font-mono">Contrat de travail</span>
+                  {contract?.contract_file_name && (
+                    <span className="text-xs text-muted-foreground truncate max-w-[200px]">· {contract.contract_file_name}</span>
+                  )}
                 </div>
-                <h2 className="text-xl font-bold">
-                  {signed ? "Votre contrat est signé ✅" : contract ? "Votre contrat est prêt à signer" : "Contrat en cours de préparation"}
-                </h2>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {signed
-                    ? `Signé le ${new Date(contract!.signed_at!).toLocaleDateString("fr-FR")}.`
-                    : contract
-                      ? "Téléchargez votre contrat, lisez-le attentivement, puis signez électroniquement ci-dessous."
-                      : "Le service RH prépare votre contrat. Vous serez notifié(e) dès qu'il sera disponible."}
-                </p>
+                <h2 className="text-xl font-bold">{title}</h2>
+                <p className="text-sm text-muted-foreground mt-1">{description}</p>
+                {inaccessible && contractStatus?.solution && (
+                  <div className="mt-3 flex items-start gap-2 text-sm bg-white/70 border border-red-200 rounded-md p-3">
+                    <ShieldAlert className="h-4 w-4 text-red-600 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <span className="font-semibold text-red-700">Que faire&nbsp;?</span>{" "}
+                      <span className="text-red-900">{contractStatus.solution}</span>
+                    </div>
+                  </div>
+                )}
               </div>
               <div className="flex flex-col sm:flex-row gap-2 md:flex-shrink-0">
                 {contract && (
-                  <Button variant="outline" onClick={downloadContract}>
-                    <Download className="h-4 w-4 mr-2" /> Télécharger
+                  <Button variant="outline" onClick={downloadContract} disabled={downloading || contractChecking}>
+                    {downloading ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Download className="h-4 w-4 mr-2" />}
+                    {downloading ? "Téléchargement…" : "Télécharger"}
                   </Button>
                 )}
-                {contract && !signed && (
+                {inaccessible && (
+                  <Button variant="outline" onClick={load}>
+                    <RefreshCw className="h-4 w-4 mr-2" /> Réessayer
+                  </Button>
+                )}
+                {accessible && !signed && (
                   <Button className="bg-gradient-to-r from-primary to-[#007aa3]" onClick={() => setActiveStepId(contractStep.id)}>
                     <FileSignature className="h-4 w-4 mr-2" /> Démarrer la signature
                   </Button>
