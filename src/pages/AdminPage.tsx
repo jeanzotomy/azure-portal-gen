@@ -1954,8 +1954,9 @@ function AdminUsers() {
   const canPromoteBillable = isAdmin || isGestionnaire;
   const [profilesList, setProfilesList] = useState<any[]>([]);
   const [userRoles, setUserRoles] = useState<Record<string, string[]>>({});
-  const [search, setSearch] = useState("");
-  const [roleFilter, setRoleFilter] = useState("all");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [search, setSearch] = useState(() => searchParams.get("q") || "");
+  const [roleFilter, setRoleFilter] = useState(() => searchParams.get("role") || "all");
   const [changingRole, setChangingRole] = useState<string | null>(null);
   const [mfaStatus, setMfaStatus] = useState<Record<string, { enrolled: boolean; factors: any[]; has_phone: boolean; phone: string | null; email?: string | null }>>({});
   const [mfaLoading, setMfaLoading] = useState<string | null>(null);
@@ -1970,10 +1971,18 @@ function AdminUsers() {
   const [importResults, setImportResults] = useState<{ email: string; success: boolean; error?: string }[] | null>(null);
   const [editingUser, setEditingUser] = useState<any | null>(null);
   const [editForm, setEditForm] = useState({ full_name: "", company: "", phone: "", country: "", city: "", address_line: "", timezone: "" });
-  const [viewMode, setViewMode] = useState<"cards" | "table" | "list">("cards");
-  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "blocked" | "deleted">("all");
-  const [mfaFilter, setMfaFilter] = useState<"all" | "enrolled" | "none">("all");
-  const [billableFilter, setBillableFilter] = useState<"all" | "yes" | "no">("all");
+  const [viewMode, setViewMode] = useState<"cards" | "table" | "list">(() => {
+    const v = searchParams.get("view"); return v === "table" || v === "list" ? v : "cards";
+  });
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "blocked" | "deleted">(() => {
+    const v = searchParams.get("status"); return (["active","blocked","deleted"].includes(v || "") ? v : "all") as any;
+  });
+  const [mfaFilter, setMfaFilter] = useState<"all" | "enrolled" | "none">(() => {
+    const v = searchParams.get("mfa"); return (["enrolled","none"].includes(v || "") ? v : "all") as any;
+  });
+  const [billableFilter, setBillableFilter] = useState<"all" | "yes" | "no">(() => {
+    const v = searchParams.get("billable"); return (["yes","no"].includes(v || "") ? v : "all") as any;
+  });
   const [confirmDialog, setConfirmDialog] = useState<{
     open: boolean; title: string; description: string;
     confirmLabel?: string; destructive?: boolean; onConfirm: () => void;
