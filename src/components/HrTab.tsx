@@ -712,7 +712,7 @@ export default function HrTab({ onboardingReadOnly = false }: { onboardingReadOn
         </TabsContent>
 
         <TabsContent value="onboarding" className="mt-4">
-          <OnboardingAdminTab />
+          <OnboardingAdminTab readOnly={onboardingReadOnly} />
         </TabsContent>
 
         <TabsContent value="email-log" className="mt-4">
