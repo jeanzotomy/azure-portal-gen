@@ -21,7 +21,7 @@ interface Training {
   url: string;
   duration_minutes: number | null;
   category: string | null;
-  target_job_titles: string[];
+  target_job_titles?: string[];
   departments: string[];
   sectors: string[];
   active: boolean;
