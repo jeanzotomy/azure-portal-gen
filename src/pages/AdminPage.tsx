@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import adminLogo from "@/assets/cloudmature-logo.png";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate, Link, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRoles } from "@/hooks/use-admin";
 import { useMfaCheck, clearSmsMfaVerified } from "@/hooks/use-mfa";
@@ -1954,8 +1954,9 @@ function AdminUsers() {
   const canPromoteBillable = isAdmin || isGestionnaire;
   const [profilesList, setProfilesList] = useState<any[]>([]);
   const [userRoles, setUserRoles] = useState<Record<string, string[]>>({});
-  const [search, setSearch] = useState("");
-  const [roleFilter, setRoleFilter] = useState("all");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [search, setSearch] = useState(() => searchParams.get("q") || "");
+  const [roleFilter, setRoleFilter] = useState(() => searchParams.get("role") || "all");
   const [changingRole, setChangingRole] = useState<string | null>(null);
   const [mfaStatus, setMfaStatus] = useState<Record<string, { enrolled: boolean; factors: any[]; has_phone: boolean; phone: string | null; email?: string | null }>>({});
   const [mfaLoading, setMfaLoading] = useState<string | null>(null);
@@ -1970,20 +1971,49 @@ function AdminUsers() {
   const [importResults, setImportResults] = useState<{ email: string; success: boolean; error?: string }[] | null>(null);
   const [editingUser, setEditingUser] = useState<any | null>(null);
   const [editForm, setEditForm] = useState({ full_name: "", company: "", phone: "", country: "", city: "", address_line: "", timezone: "" });
-  const [viewMode, setViewMode] = useState<"cards" | "table" | "list">("cards");
-  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "blocked" | "deleted">("all");
-  const [mfaFilter, setMfaFilter] = useState<"all" | "enrolled" | "none">("all");
-  const [billableFilter, setBillableFilter] = useState<"all" | "yes" | "no">("all");
+  const [viewMode, setViewMode] = useState<"cards" | "table" | "list">(() => {
+    const v = searchParams.get("view"); return v === "table" || v === "list" ? v : "cards";
+  });
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "blocked" | "deleted">(() => {
+    const v = searchParams.get("status"); return (["active","blocked","deleted"].includes(v || "") ? v : "all") as any;
+  });
+  const [mfaFilter, setMfaFilter] = useState<"all" | "enrolled" | "none">(() => {
+    const v = searchParams.get("mfa"); return (["enrolled","none"].includes(v || "") ? v : "all") as any;
+  });
+  const [billableFilter, setBillableFilter] = useState<"all" | "yes" | "no">(() => {
+    const v = searchParams.get("billable"); return (["yes","no"].includes(v || "") ? v : "all") as any;
+  });
   const [confirmDialog, setConfirmDialog] = useState<{
     open: boolean; title: string; description: string;
     confirmLabel?: string; destructive?: boolean; onConfirm: () => void;
   }>({ open: false, title: "", description: "", onConfirm: () => {} });
   const [editSaving, setEditSaving] = useState(false);
   const [billableLinks, setBillableLinks] = useState<Record<string, { id: string; client_name: string }>>({});
-  const [pageSize, setPageSize] = useState<number>(24);
+  const [pageSize, setPageSize] = useState<number>(() => {
+    const v = parseInt(searchParams.get("size") || "", 10);
+    return [12, 24, 48, 100].includes(v) ? v : 24;
+  });
   const [visibleCount, setVisibleCount] = useState<number>(24);
   const loadMoreRef = useRef<HTMLDivElement | null>(null);
   const { toast } = useToast();
+
+  // Sync filter state -> URL
+  useEffect(() => {
+    const next = new URLSearchParams(searchParams);
+    const setOrDel = (k: string, v: string, def: string) => {
+      if (v && v !== def) next.set(k, v); else next.delete(k);
+    };
+    setOrDel("q", search, "");
+    setOrDel("role", roleFilter, "all");
+    setOrDel("status", statusFilter, "all");
+    setOrDel("mfa", mfaFilter, "all");
+    setOrDel("billable", billableFilter, "all");
+    setOrDel("view", viewMode, "cards");
+    setOrDel("size", String(pageSize), "24");
+    if (next.toString() !== searchParams.toString()) {
+      setSearchParams(next, { replace: true });
+    }
+  }, [search, roleFilter, statusFilter, mfaFilter, billableFilter, viewMode, pageSize]);
 
   // Reset pagination on filter/search/view change
   useEffect(() => {
