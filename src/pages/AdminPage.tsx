@@ -2320,12 +2320,13 @@ function AdminUsers() {
     { value: "comptable", label: "Comptable" },
     { value: "gestionnaire", label: "Gestionnaire" },
     { value: "agent", label: "Agent" },
+    { value: "hr", label: "RH" },
     { value: "admin", label: "Admin" },
   ];
 
   const roleFilterButtons = [
     { v: "all", l: "Tous" }, { v: "client", l: "Client" }, { v: "comptable", l: "Comptable" },
-    { v: "gestionnaire", l: "Gestionnaire" }, { v: "agent", l: "Agent" }, { v: "admin", l: "Admin" },
+    { v: "gestionnaire", l: "Gestionnaire" }, { v: "agent", l: "Agent" }, { v: "hr", l: "RH" }, { v: "admin", l: "Admin" },
   ];
 
   const renderEmail = (uid: string) => mfaStatus[uid]?.email || "—";
