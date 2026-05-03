@@ -247,6 +247,36 @@ export default function ApplicationsTab({ user }: { user: SupaUser }) {
                   {STATUS_DESCRIPTIONS[app.status]}
                 </div>
 
+                {app.status === "acceptee" && (
+                  <div className="mt-3 p-4 rounded-lg border-2 border-emerald-500/30 bg-gradient-to-br from-emerald-50 via-white to-cyan-50 space-y-3">
+                    <div className="flex items-center gap-2 text-emerald-700 font-semibold">
+                      <Sparkles size={18} /> Votre intégration commence !
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Accédez à votre espace d'onboarding pour signer votre contrat, déposer vos documents administratifs et démarrer vos formations.
+                    </p>
+                    <div className="grid grid-cols-3 gap-2 text-[11px] text-muted-foreground">
+                      <div className="flex flex-col items-center gap-1 p-2 rounded-md bg-white/60 border">
+                        <FileSignature size={16} className="text-primary" />
+                        <span>Signer le contrat</span>
+                      </div>
+                      <div className="flex flex-col items-center gap-1 p-2 rounded-md bg-white/60 border">
+                        <FileUp size={16} className="text-primary" />
+                        <span>Téléverser docs</span>
+                      </div>
+                      <div className="flex flex-col items-center gap-1 p-2 rounded-md bg-white/60 border">
+                        <GraduationCap size={16} className="text-primary" />
+                        <span>Démarrer formations</span>
+                      </div>
+                    </div>
+                    <Link to="/onboarding">
+                      <Button className="w-full bg-gradient-to-r from-primary to-[#007aa3] hover:opacity-90">
+                        Accéder à mon onboarding <ArrowRight size={16} />
+                      </Button>
+                    </Link>
+                  </div>
+                )}
+
                 {(app.years_experience !== null || app.salary_expectation) && (
                   <div className="mt-3 pt-3 border-t flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
                     {app.years_experience !== null && <span>💼 {app.years_experience} ans d'expérience</span>}
