@@ -82,6 +82,7 @@ function buildEmail(
       <p style="font-size:14px;color:#4a5568;line-height:1.6;margin:0 0 16px;">Bonjour ${name},</p>
       <p style="font-size:14px;color:#4a5568;line-height:1.6;margin:0 0 16px;">Suite à l'examen de votre candidature pour le poste de <strong>${job}</strong>, nous avons le plaisir de vous inviter à un entretien.</p>
       ${msgBlock}
+      ${tracking}
     `)
     return { subject, html }
   }
