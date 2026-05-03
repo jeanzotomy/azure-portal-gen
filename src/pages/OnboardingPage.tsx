@@ -87,7 +87,7 @@ export default function OnboardingPage() {
   const progressPct = steps.length ? Math.round((completedCount / steps.length) * 100) : 0;
 
   const updateStepStatus = async (stepId: string, status: string) => {
-    const { error } = await supabase.from("onboarding_steps").update({ status, completed_at: status === "valide" ? new Date().toISOString() : null }).eq("id", stepId);
+    const { error } = await supabase.from("onboarding_steps").update({ status: status as any, completed_at: status === "valide" ? new Date().toISOString() : null }).eq("id", stepId);
     if (error) return toast.error(error.message);
     toast.success("Étape mise à jour");
     load();
