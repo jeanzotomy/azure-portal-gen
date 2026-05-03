@@ -156,7 +156,7 @@ export default function OnboardingAdminTab({ readOnly = false }: { readOnly?: bo
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge variant={s.status === "valide" ? "default" : "outline"} className="text-xs">{s.status}</Badge>
-                      {s.status !== "valide" && (
+                      {!readOnly && s.status !== "valide" && (
                         <Button size="sm" variant="outline" onClick={() => updateStep(s.id, "valide")}>
                           <CheckCircle2 className="h-3 w-3" />
                         </Button>
