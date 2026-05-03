@@ -2326,6 +2326,40 @@ function AdminUsers() {
   const visible = filtered.slice(0, visibleCount);
   const hasMore = visibleCount < filtered.length;
 
+  // Count helper: applies all filters EXCEPT the one we're previewing for `dimension`
+  const countWith = (overrides: { role?: string; status?: string; mfa?: string; billable?: string }) => {
+    const r = overrides.role ?? roleFilter;
+    const s = overrides.status ?? statusFilter;
+    const m = overrides.mfa ?? mfaFilter;
+    const b = overrides.billable ?? billableFilter;
+    const term = search.toLowerCase();
+    return profilesList.reduce((acc, p) => {
+      const email = (mfaStatus[p.user_id]?.email || "").toLowerCase();
+      const matchesSearch = !term ||
+        (p.full_name || "").toLowerCase().includes(term) ||
+        (p.company || "").toLowerCase().includes(term) ||
+        (p.phone || "").toLowerCase().includes(term) ||
+        email.includes(term);
+      if (!matchesSearch) return acc;
+      const roles = userRoles[p.user_id] || ["client"];
+      const currentRole = getCurrentRole(roles);
+      if (r !== "all" && currentRole !== r) return acc;
+      const statusOk = s === "all"
+        || (s === "active" && !p.blocked && !p.deleted_at)
+        || (s === "blocked" && p.blocked)
+        || (s === "deleted" && p.deleted_at);
+      if (!statusOk) return acc;
+      const enrolled = !!mfaStatus[p.user_id]?.enrolled;
+      if (m !== "all" && (m === "enrolled" ? !enrolled : enrolled)) return acc;
+      const bill = !!billableLinks[p.user_id];
+      if (b !== "all" && (b === "yes" ? !bill : bill)) return acc;
+      return acc + 1;
+    }, 0);
+  };
+
+  const hasActiveFilters = roleFilter !== "all" || statusFilter !== "all" || mfaFilter !== "all" || billableFilter !== "all" || !!search;
+  const resetFilters = () => { setRoleFilter("all"); setStatusFilter("all"); setMfaFilter("all"); setBillableFilter("all"); setSearch(""); };
+
   useEffect(() => {
     if (!hasMore) return;
     const el = loadMoreRef.current;
