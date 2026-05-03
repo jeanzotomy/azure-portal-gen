@@ -418,6 +418,10 @@ function AdminContent() {
             {gestionnaireTab === "contacts" && <AdminContacts />}
             {gestionnaireTab === "sharepoint" && <SharePointTab readOnly />}
             {gestionnaireTab === "hr" && <HrTab />}
+            {gestionnaireTab === "hr-recruitment" && <HrTab defaultTab="recruitment" />}
+            {gestionnaireTab === "hr-contracts" && <HrTab defaultTab="contracts" />}
+            {gestionnaireTab === "hr-onboarding" && <HrTab defaultTab="onboarding" />}
+            {gestionnaireTab === "hr-trainings" && <HrTab defaultTab="trainings" />}
             {gestionnaireTab === "service-clients" && <ServiceClientsTab />}
             {gestionnaireTab === "service-catalog" && <ServiceCatalogTab />}
             {gestionnaireTab === "service-invoices" && <ServiceInvoicesTab />}
