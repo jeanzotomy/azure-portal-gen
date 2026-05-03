@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import {
   CheckCircle2, Circle, Clock, FileSignature, FileUp, GraduationCap,
-  Laptop, Users, PartyPopper, Sparkles, Download, Loader2, AlertCircle, RefreshCw,
+  Laptop, Users, PartyPopper, Sparkles, Download, Loader2, AlertCircle, RefreshCw, Lock,
 } from "lucide-react";
 import { SignaturePad } from "@/components/SignaturePad";
 import type { User as SupaUser } from "@supabase/supabase-js";
@@ -222,33 +222,46 @@ export default function OnboardingTab({ user }: { user: SupaUser }) {
           const isActive = activeStepId === step.id;
           const isDone = step.status === "valide";
           const isReview = step.status === "en_revision";
+          const contractSigned = !!contract?.signed_at;
+          // Lock all steps except welcome & contract until contract is signed
+          const isLocked = !contractSigned && step.step_key !== "welcome" && step.step_key !== "contract";
           return (
-            <Card key={step.id} className={`overflow-hidden transition-all ${isActive ? "ring-2 ring-primary shadow-lg" : ""}`}>
+            <Card key={step.id} className={`overflow-hidden transition-all ${isActive ? "ring-2 ring-primary shadow-lg" : ""} ${isLocked ? "opacity-60" : ""}`}>
               <button
-                onClick={() => setActiveStepId(isActive ? null : step.id)}
+                onClick={() => {
+                  if (isLocked) {
+                    toast.info("Veuillez d'abord signer votre contrat pour débloquer cette étape.");
+                    return;
+                  }
+                  setActiveStepId(isActive ? null : step.id);
+                }}
                 className="w-full flex items-center gap-4 p-5 text-left hover:bg-muted/30 transition"
               >
                 <div className={`relative flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center ${
+                  isLocked ? "bg-muted text-muted-foreground" :
                   isDone ? "bg-emerald-100 text-emerald-600" :
                   isReview ? "bg-amber-100 text-amber-600" :
                   "bg-primary/10 text-primary"
                 }`}>
-                  {isDone ? <CheckCircle2 className="h-6 w-6" /> : <Icon className="h-6 w-6" />}
+                  {isLocked ? <Lock className="h-6 w-6" /> : isDone ? <CheckCircle2 className="h-6 w-6" /> : <Icon className="h-6 w-6" />}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="text-xs text-muted-foreground font-mono">Étape {idx + 1}</span>
-                    {isDone && <Badge className="bg-emerald-500">Validé</Badge>}
-                    {isReview && <Badge className="bg-amber-500">En révision</Badge>}
-                    {step.status === "a_faire" && <Badge variant="outline">À faire</Badge>}
-                    {step.status === "refuse" && <Badge variant="destructive">À refaire</Badge>}
+                    {isLocked && <Badge variant="outline" className="border-amber-400 text-amber-700"><Lock className="h-3 w-3 mr-1" />Verrouillé</Badge>}
+                    {!isLocked && isDone && <Badge className="bg-emerald-500">Validé</Badge>}
+                    {!isLocked && isReview && <Badge className="bg-amber-500">En révision</Badge>}
+                    {!isLocked && step.status === "a_faire" && <Badge variant="outline">À faire</Badge>}
+                    {!isLocked && step.status === "refuse" && <Badge variant="destructive">À refaire</Badge>}
                   </div>
                   <h3 className="font-semibold text-lg">{step.title}</h3>
-                  <p className="text-sm text-muted-foreground">{step.description}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {isLocked ? "Disponible après la signature du contrat." : step.description}
+                  </p>
                 </div>
               </button>
 
-              {isActive && (
+              {isActive && !isLocked && (
                 <div className="border-t bg-muted/20 p-6">
                   <StepContent
                     step={step}
