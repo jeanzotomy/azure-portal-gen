@@ -26,10 +26,14 @@ import {
   AlertCircle, Bell, ChevronDown, ChevronUp, MessageSquare, Search, Send, UserCog,
   Flag, DollarSign, Calendar, Filter, TrendingUp, Activity, BarChart3, PieChart, ShieldBan, ShieldCheck, Trash2, RefreshCw,
   Smartphone, Phone, X, UserCheck, UserPlus, Upload, FileSpreadsheet, Pencil,
+  LayoutGrid, List as ListIcon, Table as TableIcon, MapPin, Mail,
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { HardDrive } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import SharePointTab from "@/components/SharePointTab";
 import ServiceClientsTab from "@/components/ServiceClientsTab";
 import ServiceCatalogTab from "@/components/ServiceCatalogTab";
