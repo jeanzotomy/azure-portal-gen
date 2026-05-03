@@ -2440,7 +2440,7 @@ function AdminUsers() {
         </div>
       ) : viewMode === "cards" ? (
         <div className="grid gap-4 md:grid-cols-2">
-          {filtered.map((p) => {
+          {visible.map((p) => {
             const roles = userRoles[p.user_id] || ["client"];
             const badge = getRoleBadge(roles);
             const currentRole = getCurrentRole(roles);
@@ -2514,7 +2514,7 @@ function AdminUsers() {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {filtered.map(p => {
+              {visible.map(p => {
                 const roles = userRoles[p.user_id] || ["client"];
                 const badge = getRoleBadge(roles);
                 const enrolled = !!mfaStatus[p.user_id]?.enrolled;
@@ -2552,7 +2552,7 @@ function AdminUsers() {
         </div>
       ) : (
         <div className="bg-card rounded-xl border border-border/50 divide-y divide-border/50 overflow-hidden shadow-card">
-          {filtered.map(p => {
+          {visible.map(p => {
             const roles = userRoles[p.user_id] || ["client"];
             const badge = getRoleBadge(roles);
             const enrolled = !!mfaStatus[p.user_id]?.enrolled;
