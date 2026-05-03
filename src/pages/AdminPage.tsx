@@ -375,6 +375,7 @@ function AdminContent() {
                         ))}
                       </SidebarMenuSub>
                     )}
+                  </SidebarMenuItem>
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
