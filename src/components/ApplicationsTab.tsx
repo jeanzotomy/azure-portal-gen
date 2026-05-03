@@ -64,11 +64,12 @@ export default function ApplicationsTab({ user }: { user: SupaUser }) {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [contractFilter, setContractFilter] = useState<string>("all");
+  const [linkedCount, setLinkedCount] = useState(0);
+  const hasLoadedRef = useState({ done: false })[0];
 
-  const load = async () => {
+  const load = async (manual = false) => {
     setLoading(true);
     const email = user.email || "";
-    // Match by user_id OR by email (covers candidatures submitted before account creation)
     const { data: appsData } = await supabase
       .from("job_applications")
       .select("id, job_id, full_name, email, user_id, status, created_at, years_experience, salary_expectation")
@@ -76,13 +77,21 @@ export default function ApplicationsTab({ user }: { user: SupaUser }) {
       .order("created_at", { ascending: false });
 
     const applications = (appsData || []) as (Application & { user_id: string | null })[];
-    setApps(applications);
 
     // Auto-link orphan applications to this user
     const orphanIds = applications.filter((a) => !a.user_id).map((a) => a.id);
     if (orphanIds.length > 0) {
       await supabase.from("job_applications").update({ user_id: user.id }).in("id", orphanIds);
+      setLinkedCount((c) => c + orphanIds.length);
+      toast.success(
+        `${orphanIds.length} candidature${orphanIds.length > 1 ? "s" : ""} rattachée${orphanIds.length > 1 ? "s" : ""} à votre compte`,
+        { description: "Vos anciennes candidatures sont désormais liées à votre profil.", icon: "🔗" }
+      );
+    } else if (manual) {
+      toast.success("Liste à jour", { description: "Aucune nouvelle candidature à rattacher." });
     }
+
+    setApps(applications);
 
     if (applications.length > 0) {
       const jobIds = Array.from(new Set(applications.map((a) => a.job_id)));
@@ -95,9 +104,10 @@ export default function ApplicationsTab({ user }: { user: SupaUser }) {
       setJobs(map);
     }
     setLoading(false);
+    hasLoadedRef.done = true;
   };
 
-  useEffect(() => { load(); }, [user.id]);
+  useEffect(() => { load(false); }, [user.id]);
 
   const filteredApps = apps.filter((a) => {
     const job = jobs[a.job_id];
