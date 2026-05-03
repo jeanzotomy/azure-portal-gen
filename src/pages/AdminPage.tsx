@@ -26,10 +26,14 @@ import {
   AlertCircle, Bell, ChevronDown, ChevronUp, MessageSquare, Search, Send, UserCog,
   Flag, DollarSign, Calendar, Filter, TrendingUp, Activity, BarChart3, PieChart, ShieldBan, ShieldCheck, Trash2, RefreshCw,
   Smartphone, Phone, X, UserCheck, UserPlus, Upload, FileSpreadsheet, Pencil,
+  LayoutGrid, List as ListIcon, Table as TableIcon, MapPin, Mail,
 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { HardDrive } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import SharePointTab from "@/components/SharePointTab";
 import ServiceClientsTab from "@/components/ServiceClientsTab";
 import ServiceCatalogTab from "@/components/ServiceCatalogTab";
@@ -1966,6 +1970,14 @@ function AdminUsers() {
   const [importResults, setImportResults] = useState<{ email: string; success: boolean; error?: string }[] | null>(null);
   const [editingUser, setEditingUser] = useState<any | null>(null);
   const [editForm, setEditForm] = useState({ full_name: "", company: "", phone: "", country: "", city: "", address_line: "", timezone: "" });
+  const [viewMode, setViewMode] = useState<"cards" | "table" | "list">("cards");
+  const [statusFilter, setStatusFilter] = useState<"all" | "active" | "blocked" | "deleted">("all");
+  const [mfaFilter, setMfaFilter] = useState<"all" | "enrolled" | "none">("all");
+  const [billableFilter, setBillableFilter] = useState<"all" | "yes" | "no">("all");
+  const [confirmDialog, setConfirmDialog] = useState<{
+    open: boolean; title: string; description: string;
+    confirmLabel?: string; destructive?: boolean; onConfirm: () => void;
+  }>({ open: false, title: "", description: "", onConfirm: () => {} });
   const [editSaving, setEditSaving] = useState(false);
   const [billableLinks, setBillableLinks] = useState<Record<string, { id: string; client_name: string }>>({});
   const { toast } = useToast();
@@ -2082,42 +2094,57 @@ function AdminUsers() {
   };
 
   const disableMfa = async (userId: string, userName: string) => {
-    if (!window.confirm(`Désactiver tout le MFA pour "${userName}" ? L'utilisateur devra le reconfigurer.`)) return;
-    setMfaLoading(userId);
-    const { data, error } = await supabase.functions.invoke("manage-user-mfa", { body: { user_id: userId, action: "unenroll" } });
-    if (error || data?.error) {
-      toast({ title: "Erreur", description: data?.error || error?.message || "Impossible de désactiver le MFA.", variant: "destructive" });
-    } else {
-      toast({ title: "MFA désactivé", description: `Tout le MFA de "${userName}" a été réinitialisé.` });
-      setMfaStatus(prev => ({ ...prev, [userId]: { ...prev[userId], enrolled: false, factors: [] } }));
-      setMfaDialogUser(null);
-    }
-    setMfaLoading(null);
+    setConfirmDialog({
+      open: true,
+      title: "Réinitialiser tout le MFA ?",
+      description: `Tous les facteurs MFA de "${userName}" seront supprimés. L'utilisateur devra reconfigurer la double authentification.`,
+      confirmLabel: "Réinitialiser",
+      destructive: true,
+      onConfirm: async () => {
+        setMfaLoading(userId);
+        const { data, error } = await supabase.functions.invoke("manage-user-mfa", { body: { user_id: userId, action: "unenroll" } });
+        if (error || data?.error) {
+          toast({ title: "Erreur", description: data?.error || error?.message || "Impossible de désactiver le MFA.", variant: "destructive" });
+        } else {
+          toast({ title: "MFA désactivé", description: `Tout le MFA de "${userName}" a été réinitialisé.` });
+          setMfaStatus(prev => ({ ...prev, [userId]: { ...prev[userId], enrolled: false, factors: [] } }));
+          setMfaDialogUser(null);
+        }
+        setMfaLoading(null);
+      },
+    });
   };
 
   const disableFactor = async (userId: string, factorId: string, factorType: string) => {
-    if (!window.confirm(`Désactiver le facteur ${factorType === "totp" ? "Authenticator" : factorType} ?`)) return;
-    setMfaLoading(userId);
-    const { data, error } = await supabase.functions.invoke("manage-user-mfa", { body: { user_id: userId, action: "unenroll_factor", factor_id: factorId } });
-    if (error || data?.error) {
-      toast({ title: "Erreur", description: data?.error || error?.message || "Impossible de désactiver ce facteur.", variant: "destructive" });
-    } else {
-      toast({ title: "Facteur désactivé", description: `Le facteur ${factorType === "totp" ? "Authenticator" : factorType} a été supprimé.` });
-      // Refresh MFA status for this user
-      try {
-        const { data: refreshed } = await supabase.functions.invoke("manage-user-mfa", { body: { user_id: userId, action: "list" } });
-        setMfaStatus(prev => ({
-          ...prev,
-          [userId]: {
-            enrolled: !!refreshed?.enrolled,
-            factors: refreshed?.factors || [],
-            has_phone: !!refreshed?.has_phone,
-            phone: refreshed?.phone || null,
-          },
-        }));
-      } catch { /* ignore */ }
-    }
-    setMfaLoading(null);
+    setConfirmDialog({
+      open: true,
+      title: `Désactiver le facteur ${factorType === "totp" ? "Authenticator" : factorType} ?`,
+      description: "Ce facteur d'authentification sera retiré du compte.",
+      confirmLabel: "Désactiver",
+      destructive: true,
+      onConfirm: async () => {
+        setMfaLoading(userId);
+        const { data, error } = await supabase.functions.invoke("manage-user-mfa", { body: { user_id: userId, action: "unenroll_factor", factor_id: factorId } });
+        if (error || data?.error) {
+          toast({ title: "Erreur", description: data?.error || error?.message || "Impossible de désactiver ce facteur.", variant: "destructive" });
+        } else {
+          toast({ title: "Facteur désactivé", description: `Le facteur ${factorType === "totp" ? "Authenticator" : factorType} a été supprimé.` });
+          try {
+            const { data: refreshed } = await supabase.functions.invoke("manage-user-mfa", { body: { user_id: userId, action: "list" } });
+            setMfaStatus(prev => ({
+              ...prev,
+              [userId]: {
+                enrolled: !!refreshed?.enrolled,
+                factors: refreshed?.factors || [],
+                has_phone: !!refreshed?.has_phone,
+                phone: refreshed?.phone || null,
+              },
+            }));
+          } catch { /* ignore */ }
+        }
+        setMfaLoading(null);
+      },
+    });
   };
 
   const assignRole = async (userId: string, role: string) => {
@@ -2151,14 +2178,22 @@ function AdminUsers() {
   };
 
   const deleteUser = async (userId: string, userName: string) => {
-    if (!window.confirm(`Êtes-vous sûr de vouloir supprimer définitivement le compte de "${userName}" ? Cette action est irréversible.`)) return;
-    const { data, error } = await supabase.functions.invoke("delete-user", { body: { user_id: userId } });
-    if (error || data?.error) {
-      toast({ title: "Erreur", description: data?.error || error?.message || "Impossible de supprimer l'utilisateur.", variant: "destructive" });
-    } else {
-      toast({ title: "Compte supprimé", description: `Le compte de "${userName}" a été supprimé définitivement.` });
-      load();
-    }
+    setConfirmDialog({
+      open: true,
+      title: "Supprimer définitivement le compte ?",
+      description: `Vous êtes sur le point de supprimer le compte de "${userName}". Cette action est irréversible : profil, rôles et données associées seront effacés.`,
+      confirmLabel: "Supprimer définitivement",
+      destructive: true,
+      onConfirm: async () => {
+        const { data, error } = await supabase.functions.invoke("delete-user", { body: { user_id: userId } });
+        if (error || data?.error) {
+          toast({ title: "Erreur", description: data?.error || error?.message || "Impossible de supprimer l'utilisateur.", variant: "destructive" });
+        } else {
+          toast({ title: "Compte supprimé", description: `Le compte de "${userName}" a été supprimé définitivement.` });
+          load();
+        }
+      },
+    });
   };
 
   const promoteToBillableClient = async (p: any) => {
@@ -2179,26 +2214,33 @@ function AdminUsers() {
       return;
     }
 
-    if (!window.confirm(`Créer un client facturable à partir du profil de "${p.full_name || p.company}" ?\n\nLe client sera automatiquement lié à ce compte utilisateur.`)) return;
-    const { data: { user: currentUser } } = await supabase.auth.getUser();
-    if (!currentUser) return;
-    const { error } = await supabase.from("service_clients").insert({
-      client_name: p.company || p.full_name,
-      contact_person: p.company ? p.full_name : null,
-      address_line: p.address_line || null,
-      city: p.city || null,
-      country: p.country || "Guinée",
-      phone: p.phone || null,
-      email,
-      user_id: p.user_id,
-      created_by: currentUser.id,
+    setConfirmDialog({
+      open: true,
+      title: "Créer un client facturable ?",
+      description: `Un client facturable sera créé à partir du profil de "${p.full_name || p.company}" et automatiquement lié à ce compte utilisateur.`,
+      confirmLabel: "Créer le client",
+      onConfirm: async () => {
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        if (!currentUser) return;
+        const { error } = await supabase.from("service_clients").insert({
+          client_name: p.company || p.full_name,
+          contact_person: p.company ? p.full_name : null,
+          address_line: p.address_line || null,
+          city: p.city || null,
+          country: p.country || "Guinée",
+          phone: p.phone || null,
+          email,
+          user_id: p.user_id,
+          created_by: currentUser.id,
+        });
+        if (error) {
+          toast({ title: "Erreur", description: error.message, variant: "destructive" });
+        } else {
+          toast({ title: "Client facturable créé", description: `${p.full_name || p.company} est maintenant un client facturable lié à son compte.` });
+          void loadBillableLinks();
+        }
+      },
     });
-    if (error) {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
-    } else {
-      toast({ title: "Client facturable créé", description: `${p.full_name || p.company} est maintenant un client facturable lié à son compte.` });
-      void loadBillableLinks();
-    }
   };
 
   const openEditUser = (p: any) => {
@@ -2247,12 +2289,28 @@ function AdminUsers() {
   const getCurrentRole = (roles: string[]) => roles.includes("admin") ? "admin" : roles.includes("gestionnaire") ? "gestionnaire" : roles.includes("agent") ? "agent" : roles.includes("comptable") ? "comptable" : "client";
 
   const filtered = profilesList.filter(p => {
-    const matchesSearch = (p.full_name || "").toLowerCase().includes(search.toLowerCase()) ||
-      (p.company || "").toLowerCase().includes(search.toLowerCase());
+    const term = search.toLowerCase();
+    const email = (mfaStatus[p.user_id]?.email || "").toLowerCase();
+    const matchesSearch = !term ||
+      (p.full_name || "").toLowerCase().includes(term) ||
+      (p.company || "").toLowerCase().includes(term) ||
+      (p.phone || "").toLowerCase().includes(term) ||
+      email.includes(term);
     const roles = userRoles[p.user_id] || ["client"];
     const currentRole = getCurrentRole(roles);
     const matchesRole = roleFilter === "all" || currentRole === roleFilter;
-    return matchesSearch && matchesRole;
+    const matchesStatus =
+      statusFilter === "all" ||
+      (statusFilter === "active" && !p.blocked && !p.deleted_at) ||
+      (statusFilter === "blocked" && p.blocked) ||
+      (statusFilter === "deleted" && p.deleted_at);
+    const enrolled = !!mfaStatus[p.user_id]?.enrolled;
+    const matchesMfa = mfaFilter === "all" || (mfaFilter === "enrolled" ? enrolled : !enrolled);
+    const matchesBillable =
+      billableFilter === "all" ||
+      (billableFilter === "yes" && billableLinks[p.user_id]) ||
+      (billableFilter === "no" && !billableLinks[p.user_id]);
+    return matchesSearch && matchesRole && matchesStatus && matchesMfa && matchesBillable;
   });
 
   const roleOptions = [
@@ -2263,11 +2321,32 @@ function AdminUsers() {
     { value: "admin", label: "Admin" },
   ];
 
+  const roleFilterButtons = [
+    { v: "all", l: "Tous" }, { v: "client", l: "Client" }, { v: "comptable", l: "Comptable" },
+    { v: "gestionnaire", l: "Gestionnaire" }, { v: "agent", l: "Agent" }, { v: "admin", l: "Admin" },
+  ];
+
+  const renderEmail = (uid: string) => mfaStatus[uid]?.email || "—";
+
   return (
     <div className="space-y-6 animate-fade-up">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-3">
         <h1 className="text-2xl font-bold text-foreground">Utilisateurs</h1>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-1 bg-muted rounded-lg p-1">
+            <button onClick={() => setViewMode("cards")} title="Cartes"
+              className={`p-1.5 rounded-md transition-colors ${viewMode === "cards" ? "bg-card shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"}`}>
+              <LayoutGrid size={14} />
+            </button>
+            <button onClick={() => setViewMode("table")} title="Tableau"
+              className={`p-1.5 rounded-md transition-colors ${viewMode === "table" ? "bg-card shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"}`}>
+              <TableIcon size={14} />
+            </button>
+            <button onClick={() => setViewMode("list")} title="Liste"
+              className={`p-1.5 rounded-md transition-colors ${viewMode === "list" ? "bg-card shadow-sm text-primary" : "text-muted-foreground hover:text-foreground"}`}>
+              <ListIcon size={14} />
+            </button>
+          </div>
           <Button size="sm" className="gap-1.5" onClick={() => { setShowInviteDialog(true); setInviteMode("single"); setCsvUsers([]); setImportResults(null); }}>
             <UserPlus size={14} /> Inviter
           </Button>
@@ -2281,133 +2360,188 @@ function AdminUsers() {
       <div className="bg-card rounded-xl p-4 shadow-card border border-border/50 space-y-3">
         <div className="relative">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <Input placeholder="Rechercher par nom ou entreprise..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+          <Input placeholder="Rechercher par nom, email, téléphone ou entreprise..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
         </div>
         <div className="flex flex-wrap gap-2 items-center">
           <span className="text-xs font-medium text-muted-foreground flex items-center gap-1"><Filter size={12} /> Rôle :</span>
-          {[{ v: "all", l: "Tous" }, { v: "client", l: "Client" }, { v: "agent", l: "Agent" }, { v: "admin", l: "Admin" }].map((f) => (
+          {roleFilterButtons.map((f) => (
             <button key={f.v} onClick={() => setRoleFilter(f.v)}
               className={`text-xs px-3 py-1.5 rounded-full transition-colors ${roleFilter === f.v ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
             >{f.l}</button>
           ))}
         </div>
+        <div className="flex flex-wrap gap-2 items-center">
+          <span className="text-xs font-medium text-muted-foreground">Statut :</span>
+          {[{ v: "all", l: "Tous" }, { v: "active", l: "Actifs" }, { v: "blocked", l: "Bloqués" }, { v: "deleted", l: "Supprimés" }].map(f => (
+            <button key={f.v} onClick={() => setStatusFilter(f.v as any)}
+              className={`text-xs px-3 py-1.5 rounded-full transition-colors ${statusFilter === f.v ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
+            >{f.l}</button>
+          ))}
+          <span className="text-xs font-medium text-muted-foreground ml-2">MFA :</span>
+          {[{ v: "all", l: "Tous" }, { v: "enrolled", l: "Activé" }, { v: "none", l: "Inactif" }].map(f => (
+            <button key={f.v} onClick={() => setMfaFilter(f.v as any)}
+              className={`text-xs px-3 py-1.5 rounded-full transition-colors ${mfaFilter === f.v ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
+            >{f.l}</button>
+          ))}
+          <span className="text-xs font-medium text-muted-foreground ml-2">Facturable :</span>
+          {[{ v: "all", l: "Tous" }, { v: "yes", l: "Oui" }, { v: "no", l: "Non" }].map(f => (
+            <button key={f.v} onClick={() => setBillableFilter(f.v as any)}
+              className={`text-xs px-3 py-1.5 rounded-full transition-colors ${billableFilter === f.v ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
+            >{f.l}</button>
+          ))}
+          {(roleFilter !== "all" || statusFilter !== "all" || mfaFilter !== "all" || billableFilter !== "all" || search) && (
+            <button onClick={() => { setRoleFilter("all"); setStatusFilter("all"); setMfaFilter("all"); setBillableFilter("all"); setSearch(""); }}
+              className="text-xs px-3 py-1.5 rounded-full bg-destructive/10 text-destructive hover:bg-destructive/20 transition-colors flex items-center gap-1">
+              <X size={10} /> Réinitialiser
+            </button>
+          )}
+        </div>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        {filtered.map((p) => {
-          const roles = userRoles[p.user_id] || ["client"];
-          const badge = getRoleBadge(roles);
-          const currentRole = getCurrentRole(roles);
+      {filtered.length === 0 ? (
+        <div className="text-center py-12 bg-card rounded-xl border border-border/50">
+          <Users className="h-10 w-10 mx-auto text-muted-foreground/40 mb-2" />
+          <p className="text-muted-foreground text-sm">Aucun utilisateur trouvé.</p>
+        </div>
+      ) : viewMode === "cards" ? (
+        <div className="grid gap-4 md:grid-cols-2">
+          {filtered.map((p) => {
+            const roles = userRoles[p.user_id] || ["client"];
+            const badge = getRoleBadge(roles);
+            const currentRole = getCurrentRole(roles);
+            const enrolled = !!mfaStatus[p.user_id]?.enrolled;
 
-          return (
-            <div key={p.id} className="group bg-card rounded-2xl p-5 shadow-card border border-border/50 hover:shadow-card-hover hover:border-primary/30 transition-all duration-300">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-lg font-bold flex-shrink-0">
+            return (
+              <div key={p.id} className={`group bg-card rounded-2xl p-5 shadow-card border transition-all duration-300 hover:shadow-card-hover hover:border-primary/30 ${p.blocked ? "border-destructive/30 bg-destructive/5" : "border-border/50"}`}>
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-lg font-bold flex-shrink-0">
+                    {(p.full_name || "?").charAt(0).toUpperCase()}
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 mb-0.5 flex-wrap">
+                      <p className="font-bold text-card-foreground">{p.full_name || "Non renseigné"}</p>
+                      <span className={`text-[11px] px-2 py-0.5 rounded-full font-semibold border ${badge.color}`}>{badge.label}</span>
+                      {enrolled && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 flex items-center gap-1"><Shield size={9} /> MFA</span>}
+                      {billableLinks[p.user_id] && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-teal-500/10 text-teal-600 border border-teal-500/20 flex items-center gap-1"><Receipt size={9} /> Facturable</span>}
+                      {p.blocked && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-destructive/10 text-destructive border border-destructive/20 flex items-center gap-1"><ShieldBan size={9} /> Bloqué</span>}
+                    </div>
+                    <div className="flex flex-wrap gap-x-3 gap-y-0.5">
+                      {mfaStatus[p.user_id]?.email && <span className="text-xs text-muted-foreground flex items-center gap-1"><Mail size={11} /> {mfaStatus[p.user_id].email}</span>}
+                      {p.company && <span className="text-xs text-muted-foreground">🏢 {p.company}</span>}
+                      {p.phone && <span className="text-xs text-muted-foreground">📱 {p.phone}</span>}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center justify-between mt-4 pt-3 border-t border-border/30">
+                  <p className="text-[11px] text-muted-foreground/60">
+                    Inscrit le {new Date(p.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <Button size="sm" variant="outline" className="h-8 gap-1.5" onClick={() => openEditUser(p)}>
+                      <Pencil size={13} /> Gérer
+                    </Button>
+                    <div className="flex items-center gap-1.5">
+                      <UserCog size={14} className="text-muted-foreground" />
+                      <select value={currentRole} onChange={(e) => assignRole(p.user_id, e.target.value)}
+                        disabled={changingRole === p.user_id}
+                        className="text-xs border border-border rounded-lg px-2 py-1.5 bg-card text-card-foreground focus:outline-none focus:ring-2 focus:ring-primary/50">
+                        {roleOptions.map((opt) => (<option key={opt.value} value={opt.value}>{opt.label}</option>))}
+                      </select>
+                    </div>
+                  </div>
+                </div>
+                {(p as any).deleted_at && (
+                  <div className="mt-2 flex items-center justify-between">
+                    <span className="flex items-center gap-1.5 text-xs text-destructive font-medium">
+                      <Trash2 size={12} /> Supprimé le {new Date((p as any).deleted_at).toLocaleDateString("fr-FR")}
+                    </span>
+                    <Button size="sm" variant="outline" className="h-6 text-xs" onClick={() => restoreProfile(p.user_id)}>
+                      Restaurer
+                    </Button>
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      ) : viewMode === "table" ? (
+        <div className="bg-card rounded-xl border border-border/50 overflow-hidden shadow-card">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Utilisateur</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead>Entreprise</TableHead>
+                <TableHead>Rôle</TableHead>
+                <TableHead>Statut</TableHead>
+                <TableHead>MFA</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filtered.map(p => {
+                const roles = userRoles[p.user_id] || ["client"];
+                const badge = getRoleBadge(roles);
+                const enrolled = !!mfaStatus[p.user_id]?.enrolled;
+                return (
+                  <TableRow key={p.id} className={p.blocked ? "bg-destructive/5" : ""}>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-sm font-bold flex-shrink-0">
+                          {(p.full_name || "?").charAt(0).toUpperCase()}
+                        </div>
+                        <span className="font-medium">{p.full_name || "—"}</span>
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-xs text-muted-foreground">{renderEmail(p.user_id)}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">{p.company || "—"}</TableCell>
+                    <TableCell><span className={`text-[11px] px-2 py-0.5 rounded-full font-semibold border ${badge.color}`}>{badge.label}</span></TableCell>
+                    <TableCell>
+                      {p.deleted_at ? <span className="text-xs text-destructive">Supprimé</span>
+                        : p.blocked ? <span className="text-xs text-destructive flex items-center gap-1"><ShieldBan size={11} />Bloqué</span>
+                        : <span className="text-xs text-emerald-600 flex items-center gap-1"><ShieldCheck size={11} />Actif</span>}
+                    </TableCell>
+                    <TableCell>
+                      {enrolled ? <Shield size={14} className="text-emerald-600" /> : <span className="text-xs text-muted-foreground/40">—</span>}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Button size="sm" variant="outline" className="h-7 gap-1" onClick={() => openEditUser(p)}>
+                        <Pencil size={12} /> Gérer
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </div>
+      ) : (
+        <div className="bg-card rounded-xl border border-border/50 divide-y divide-border/50 overflow-hidden shadow-card">
+          {filtered.map(p => {
+            const roles = userRoles[p.user_id] || ["client"];
+            const badge = getRoleBadge(roles);
+            const enrolled = !!mfaStatus[p.user_id]?.enrolled;
+            return (
+              <button key={p.id} onClick={() => openEditUser(p)} className="w-full flex items-center gap-3 p-3 hover:bg-muted/40 transition text-left">
+                <div className="w-9 h-9 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-sm font-bold flex-shrink-0">
                   {(p.full_name || "?").charAt(0).toUpperCase()}
                 </div>
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 mb-0.5">
-                    <p className="font-bold text-card-foreground">{p.full_name || "Non renseigné"}</p>
-                    <span className={`text-[11px] px-2 py-0.5 rounded-full font-semibold border ${badge.color}`}>{badge.label}</span>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 flex-wrap">
+                    <span className="font-medium text-sm">{p.full_name || "Non renseigné"}</span>
+                    <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold border ${badge.color}`}>{badge.label}</span>
+                    {enrolled && <Shield size={11} className="text-emerald-600" />}
+                    {billableLinks[p.user_id] && <Receipt size={11} className="text-teal-600" />}
+                    {p.blocked && <ShieldBan size={11} className="text-destructive" />}
                   </div>
-                  <div className="flex flex-wrap gap-x-3 gap-y-0.5">
-                    {mfaStatus[p.user_id]?.email && <span className="text-xs text-muted-foreground">✉️ {mfaStatus[p.user_id].email}</span>}
-                    {p.company && <span className="text-xs text-muted-foreground">🏢 {p.company}</span>}
-                    {p.phone && <span className="text-xs text-muted-foreground">📱 {p.phone}</span>}
-                  </div>
+                  <div className="text-xs text-muted-foreground truncate">{renderEmail(p.user_id)}{p.company ? ` · ${p.company}` : ""}</div>
                 </div>
-              </div>
-              <div className="flex items-center justify-between mt-4 pt-3 border-t border-border/30">
-                <p className="text-[11px] text-muted-foreground/50">
-                  Inscrit le {new Date(p.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
-                </p>
-                  <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => openEditUser(p)}
-                      title="Modifier le profil"
-                      className="p-1.5 rounded-lg bg-muted text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
-                    >
-                      <Pencil size={16} />
-                    </button>
-                    {canPromoteBillable && (billableLinks[p.user_id] ? (
-                      <button
-                        disabled
-                        title={`Déjà client facturable : ${billableLinks[p.user_id].client_name}`}
-                        className="p-1.5 rounded-lg bg-teal-500/15 text-teal-600 cursor-default"
-                      >
-                        <Receipt size={16} />
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => promoteToBillableClient(p)}
-                        title="Définir comme client facturable"
-                        className="p-1.5 rounded-lg bg-muted text-muted-foreground hover:bg-teal-500/10 hover:text-teal-600 transition-colors"
-                      >
-                        <Receipt size={16} />
-                      </button>
-                    ))}
-                    <button
-                      onClick={() => toggleBlock(p.user_id, !!p.blocked)}
-                      title={p.blocked ? "Débloquer" : "Bloquer"}
-                      className={`p-1.5 rounded-lg transition-colors ${p.blocked ? "bg-destructive/10 text-destructive hover:bg-destructive/20" : "bg-muted text-muted-foreground hover:bg-muted/80"}`}
-                    >
-                      {p.blocked ? <ShieldBan size={16} /> : <ShieldCheck size={16} />}
-                    </button>
-                    <button
-                      onClick={() => deleteUser(p.user_id, p.full_name || "cet utilisateur")}
-                      title="Supprimer le compte"
-                      className="p-1.5 rounded-lg bg-muted text-muted-foreground hover:bg-destructive/10 hover:text-destructive transition-colors"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                    {mfaStatus[p.user_id]?.enrolled ? (
-                      <button
-                        onClick={() => setMfaDialogUser(p)}
-                        disabled={mfaLoading === p.user_id}
-                        title="Gérer MFA"
-                        className="p-1.5 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors"
-                      >
-                        <Shield size={16} />
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => setMfaDialogUser(p)}
-                        title="Voir statut MFA"
-                        className="p-1.5 rounded-lg bg-muted text-muted-foreground/40 hover:bg-muted/80 transition-colors"
-                      >
-                        <Shield size={16} />
-                      </button>
-                    )}
-                  <div className="flex items-center gap-1.5">
-                    <UserCog size={14} className="text-muted-foreground" />
-                    <select value={currentRole} onChange={(e) => assignRole(p.user_id, e.target.value)}
-                      disabled={changingRole === p.user_id}
-                      className="text-xs border border-border rounded-lg px-2 py-1.5 bg-card text-card-foreground focus:outline-none focus:ring-2 focus:ring-primary/50">
-                      {roleOptions.map((opt) => (<option key={opt.value} value={opt.value}>{opt.label}</option>))}
-                    </select>
-                  </div>
-                </div>
-              </div>
-              {p.blocked && (
-                <div className="mt-2 flex items-center gap-1.5 text-xs text-destructive font-medium">
-                  <ShieldBan size={12} /> Compte bloqué
-                </div>
-              )}
-              {(p as any).deleted_at && (
-                <div className="mt-2 flex items-center justify-between">
-                  <span className="flex items-center gap-1.5 text-xs text-destructive font-medium">
-                    <Trash2 size={12} /> Compte supprimé le {new Date((p as any).deleted_at).toLocaleDateString("fr-FR")}
-                  </span>
-                  <Button size="sm" variant="outline" className="h-6 text-xs" onClick={() => restoreProfile(p.user_id)}>
-                    Restaurer
-                  </Button>
-                </div>
-              )}
-            </div>
-          );
-        })}
-      </div>
-      {filtered.length === 0 && <p className="text-center text-muted-foreground py-8">Aucun utilisateur trouvé.</p>}
+                <Pencil size={14} className="text-muted-foreground/50" />
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {/* MFA Management Dialog */}
       {mfaDialogUser && (
@@ -2506,9 +2640,16 @@ function AdminUsers() {
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Pencil size={18} /> Modifier le profil — {editForm.full_name || "Utilisateur"}
+              <Pencil size={18} /> Gérer l'utilisateur — {editForm.full_name || "Utilisateur"}
             </DialogTitle>
           </DialogHeader>
+          <Tabs defaultValue="profile" className="mt-2">
+            <TabsList className="grid grid-cols-3 w-full">
+              <TabsTrigger value="profile" className="gap-1.5"><Pencil size={13} /> Profil</TabsTrigger>
+              <TabsTrigger value="security" className="gap-1.5"><Shield size={13} /> Sécurité &amp; MFA</TabsTrigger>
+              <TabsTrigger value="danger" className="gap-1.5 data-[state=active]:text-destructive"><AlertCircle size={13} /> Zone danger</TabsTrigger>
+            </TabsList>
+            <TabsContent value="profile" className="mt-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
               <label className="text-sm font-medium text-muted-foreground">Email (non modifiable)</label>
@@ -2623,15 +2764,138 @@ function AdminUsers() {
               </select>
             </div>
           </div>
-          <DialogFooter>
+          <DialogFooter className="mt-4">
             <Button variant="outline" onClick={() => setEditingUser(null)}>Annuler</Button>
             <Button onClick={handleSaveProfile} disabled={editSaving} className="gap-1.5">
               {editSaving ? <RefreshCw size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
               {editSaving ? "Sauvegarde..." : "Sauvegarder"}
             </Button>
           </DialogFooter>
+            </TabsContent>
+
+            <TabsContent value="security" className="mt-4 space-y-4">
+              {editingUser && (() => {
+                const status = mfaStatus[editingUser.user_id];
+                return (
+                  <>
+                    <div className="bg-muted/30 rounded-lg p-4">
+                      <h4 className="text-sm font-semibold mb-2 flex items-center gap-2"><Smartphone size={14} /> Authenticator (TOTP)</h4>
+                      {status?.factors?.filter((f: any) => f.type === "totp").length > 0 ? (
+                        <div className="space-y-2">
+                          {status.factors.filter((f: any) => f.type === "totp").map((f: any) => (
+                            <div key={f.id} className="flex items-center justify-between bg-card rounded-md p-3 border border-border/30">
+                              <div>
+                                <p className="text-sm font-medium">{f.friendly_name || "Authenticator"}</p>
+                                <p className="text-xs text-muted-foreground">Ajouté le {new Date(f.created_at).toLocaleDateString("fr-FR")}</p>
+                              </div>
+                              <Button size="sm" variant="destructive" className="h-7 text-xs"
+                                disabled={mfaLoading === editingUser.user_id}
+                                onClick={() => disableFactor(editingUser.user_id, f.id, "totp")}>
+                                Désactiver
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (<p className="text-xs text-muted-foreground italic">Aucun authenticator configuré</p>)}
+                    </div>
+
+                    <div className="bg-muted/30 rounded-lg p-4">
+                      <h4 className="text-sm font-semibold mb-2 flex items-center gap-2"><Phone size={14} /> SMS</h4>
+                      {status?.has_phone ? (
+                        <div className="flex items-center justify-between bg-card rounded-md p-3 border border-border/30">
+                          <div>
+                            <p className="text-sm font-medium">Éligible</p>
+                            <p className="text-xs text-muted-foreground">📱 {status.phone}</p>
+                          </div>
+                          <span className="text-xs px-2 py-1 rounded-full bg-primary/10 text-primary font-medium">Disponible</span>
+                        </div>
+                      ) : (<p className="text-xs text-muted-foreground italic">Aucun numéro de téléphone configuré</p>)}
+                    </div>
+
+                    {status?.enrolled && (
+                      <Button variant="destructive" size="sm" className="w-full"
+                        disabled={mfaLoading === editingUser.user_id}
+                        onClick={() => disableMfa(editingUser.user_id, editingUser.full_name || "cet utilisateur")}>
+                        <Shield size={14} className="mr-2" /> Réinitialiser tout le MFA
+                      </Button>
+                    )}
+                  </>
+                );
+              })()}
+            </TabsContent>
+
+            <TabsContent value="danger" className="mt-4 space-y-3">
+              {editingUser && (
+                <>
+                  {canPromoteBillable && (
+                    billableLinks[editingUser.user_id] ? (
+                      <div className="flex items-center justify-between p-4 bg-teal-500/10 border border-teal-500/30 rounded-lg">
+                        <div>
+                          <p className="text-sm font-medium flex items-center gap-2"><Receipt size={14} className="text-teal-600" /> Client facturable</p>
+                          <p className="text-xs text-muted-foreground">Lié à : {billableLinks[editingUser.user_id].client_name}</p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between p-4 bg-card border border-border rounded-lg">
+                        <div>
+                          <p className="text-sm font-medium">Définir comme client facturable</p>
+                          <p className="text-xs text-muted-foreground">Crée un client lié au compte pour la facturation.</p>
+                        </div>
+                        <Button size="sm" variant="outline" onClick={() => promoteToBillableClient(editingUser)} className="gap-1.5">
+                          <Receipt size={13} /> Créer
+                        </Button>
+                      </div>
+                    )
+                  )}
+
+                  <div className="flex items-center justify-between p-4 bg-card border border-border rounded-lg">
+                    <div>
+                      <p className="text-sm font-medium">{editingUser.blocked ? "Débloquer le compte" : "Bloquer le compte"}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {editingUser.blocked ? "L'utilisateur pourra à nouveau se connecter." : "L'utilisateur ne pourra plus accéder à son espace."}
+                      </p>
+                    </div>
+                    <Button size="sm" variant={editingUser.blocked ? "default" : "outline"}
+                      className={editingUser.blocked ? "" : "border-destructive/40 text-destructive hover:bg-destructive/10"}
+                      onClick={() => toggleBlock(editingUser.user_id, !!editingUser.blocked)}>
+                      {editingUser.blocked ? <><ShieldCheck size={13} className="mr-1.5" /> Débloquer</> : <><ShieldBan size={13} className="mr-1.5" /> Bloquer</>}
+                    </Button>
+                  </div>
+
+                  <div className="flex items-center justify-between p-4 bg-destructive/5 border border-destructive/30 rounded-lg">
+                    <div>
+                      <p className="text-sm font-medium text-destructive">Supprimer définitivement</p>
+                      <p className="text-xs text-muted-foreground">Action irréversible : profil, rôles et données associées effacés.</p>
+                    </div>
+                    <Button size="sm" variant="destructive"
+                      onClick={() => deleteUser(editingUser.user_id, editingUser.full_name || "cet utilisateur")}>
+                      <Trash2 size={13} className="mr-1.5" /> Supprimer
+                    </Button>
+                  </div>
+                </>
+              )}
+            </TabsContent>
+          </Tabs>
         </DialogContent>
       </Dialog>
+
+      {/* Confirmation dialog (replaces window.confirm) */}
+      <AlertDialog open={confirmDialog.open} onOpenChange={(o) => setConfirmDialog(prev => ({ ...prev, open: o }))}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{confirmDialog.title}</AlertDialogTitle>
+            <AlertDialogDescription>{confirmDialog.description}</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Annuler</AlertDialogCancel>
+            <AlertDialogAction
+              className={confirmDialog.destructive ? "bg-destructive text-destructive-foreground hover:bg-destructive/90" : ""}
+              onClick={() => { confirmDialog.onConfirm(); setConfirmDialog(prev => ({ ...prev, open: false })); }}>
+              {confirmDialog.confirmLabel || "Confirmer"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Invite Users Dialog */}
       <Dialog open={showInviteDialog} onOpenChange={setShowInviteDialog}>
