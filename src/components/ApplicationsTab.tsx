@@ -145,6 +145,15 @@ export default function ApplicationsTab({ user }: { user: SupaUser }) {
         </div>
       </div>
 
+      {linkedCount > 0 && (
+        <div className="flex items-center gap-2 p-3 rounded-lg border border-emerald-500/20 bg-emerald-500/10 text-emerald-700 text-sm">
+          <Link2 size={16} className="flex-shrink-0" />
+          <span>
+            <strong>{linkedCount}</strong> candidature{linkedCount > 1 ? "s ont été rattachées" : " a été rattachée"} à votre compte automatiquement.
+          </span>
+        </div>
+      )}
+
       {loading && <p className="text-sm text-muted-foreground">Chargement...</p>}
 
       {!loading && apps.length === 0 && (
