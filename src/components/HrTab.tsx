@@ -88,7 +88,7 @@ interface Sector {
   description: string | null;
 }
 
-export default function HrTab() {
+export default function HrTab({ onboardingReadOnly = false }: { onboardingReadOnly?: boolean } = {}) {
   const { user } = useAuthSession();
   const { isAdmin } = useUserRoles();
   const { toast } = useToast();
