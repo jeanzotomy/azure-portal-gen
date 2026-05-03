@@ -166,108 +166,113 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
   };
 
   return (
-    <div className="space-y-6">
-      {/* Library */}
-      <section className="space-y-3">
-        <div className="flex items-center justify-between gap-3 flex-wrap">
-          <div className="flex items-center gap-2">
-            <GraduationCap className="h-5 w-5 text-primary" />
-            <h3 className="font-semibold">Bibliothèque de formations ({trainings.length})</h3>
-          </div>
-          <div className="flex gap-2">
-            <Button size="sm" variant="outline" onClick={load}><RefreshCw className="h-4 w-4 mr-1" />Actualiser</Button>
-            {!readOnly && <Button size="sm" onClick={openNew}><Plus className="h-4 w-4 mr-1" />Ajouter</Button>}
-          </div>
-        </div>
+    <div className="space-y-4">
+      <Tabs defaultValue="library">
+        <TabsList>
+          <TabsTrigger value="library"><GraduationCap className="h-4 w-4 mr-1" />Bibliothèque de formation</TabsTrigger>
+          <TabsTrigger value="assign"><Users className="h-4 w-4 mr-1" />Assignation aux candidats</TabsTrigger>
+        </TabsList>
 
-        {loading ? (
-          <div className="flex justify-center py-6"><Loader2 className="h-5 w-5 animate-spin" /></div>
-        ) : trainings.length === 0 ? (
-          <Card className="p-8 text-center text-sm text-muted-foreground">Aucune formation. Ajoutez votre premier lien.</Card>
-        ) : (
-          <div className="grid gap-3 md:grid-cols-2">
-            {trainings.map(t => (
-              <Card key={t.id} className={`p-4 ${!t.active ? "opacity-60" : ""}`}>
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-2 flex-wrap mb-1">
-                      <h4 className="font-semibold">{t.title}</h4>
-                      {!t.active && <Badge variant="outline">Inactif</Badge>}
-                      {t.duration_minutes && <Badge variant="outline" className="text-xs">{t.duration_minutes} min</Badge>}
-                    </div>
-                    {t.description && <p className="text-sm text-muted-foreground line-clamp-2">{t.description}</p>}
-                    {(t.departments?.length > 0 || t.sectors?.length > 0) && (
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {(t.departments || []).map(d => <Badge key={`d-${d}`} variant="secondary" className="text-xs">{d}</Badge>)}
-                        {(t.sectors || []).map(s => <Badge key={`s-${s}`} variant="outline" className="text-xs">{s}</Badge>)}
-                      </div>
-                    )}
-                    <a href={t.url} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline inline-flex items-center gap-1 mt-2">
-                      <ExternalLink className="h-3 w-3" />{t.url}
-                    </a>
-                  </div>
-                  {!readOnly && (
-                    <div className="flex flex-col gap-1">
-                      <Button size="icon" variant="ghost" onClick={() => openEdit(t)}><Pencil className="h-4 w-4" /></Button>
-                      <Button size="icon" variant="ghost" onClick={() => remove(t.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
-                    </div>
-                  )}
-                </div>
-              </Card>
-            ))}
+        <TabsContent value="library" className="space-y-3">
+          <div className="flex items-center justify-between gap-3 flex-wrap">
+            <div className="flex items-center gap-2">
+              <GraduationCap className="h-5 w-5 text-primary" />
+              <h3 className="font-semibold">Bibliothèque de formations ({trainings.length})</h3>
+            </div>
+            <div className="flex gap-2">
+              <Button size="sm" variant="outline" onClick={load}><RefreshCw className="h-4 w-4 mr-1" />Actualiser</Button>
+              {!readOnly && <Button size="sm" onClick={openNew}><Plus className="h-4 w-4 mr-1" />Ajouter</Button>}
+            </div>
           </div>
-        )}
-      </section>
 
-      {/* Assignments */}
-      <section className="space-y-3">
-        <div className="flex items-center gap-2">
-          <Users className="h-5 w-5 text-primary" />
-          <h3 className="font-semibold">Assignation aux candidats ({candidates.length})</h3>
-        </div>
-        {candidates.length === 0 ? (
-          <Card className="p-8 text-center text-sm text-muted-foreground">Aucun candidat en onboarding.</Card>
-        ) : (
-          <div className="grid gap-3">
-            {candidates.map(c => {
-              const suggested = suggestedFor(c.job_title);
-              return (
-                <Card key={c.process_id} className="p-4">
-                  <div className="flex items-start gap-3 flex-wrap">
-                    <div className="flex-1 min-w-[220px]">
-                      <div className="font-semibold">{c.candidate_name}</div>
-                      <div className="text-xs text-muted-foreground">{c.candidate_email} · {c.job_title || "Poste inconnu"}</div>
-                      <div className="flex flex-wrap gap-1 mt-2">
-                        {c.assigned.length === 0 && <span className="text-xs text-muted-foreground">Aucune formation assignée</span>}
-                        {c.assigned.map(a => {
-                          const t = trainings.find(x => x.id === a.training_id);
-                          return (
-                            <Badge key={a.id} variant={a.completed_at ? "default" : "outline"} className={a.completed_at ? "bg-emerald-500" : ""}>
-                              {a.completed_at ? <CheckCircle2 className="h-3 w-3 mr-1" /> : <Clock className="h-3 w-3 mr-1" />}
-                              {t?.title || "Formation"}
-                            </Badge>
-                          );
-                        })}
+          {loading ? (
+            <div className="flex justify-center py-6"><Loader2 className="h-5 w-5 animate-spin" /></div>
+          ) : trainings.length === 0 ? (
+            <Card className="p-8 text-center text-sm text-muted-foreground">Aucune formation. Ajoutez votre premier lien.</Card>
+          ) : (
+            <div className="grid gap-3 md:grid-cols-2">
+              {trainings.map(t => (
+                <Card key={t.id} className={`p-4 ${!t.active ? "opacity-60" : ""}`}>
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap mb-1">
+                        <h4 className="font-semibold">{t.title}</h4>
+                        {!t.active && <Badge variant="outline">Inactif</Badge>}
+                        {t.duration_minutes && <Badge variant="outline" className="text-xs">{t.duration_minutes} min</Badge>}
                       </div>
-                      {suggested.length > 0 && (
-                        <div className="text-xs text-muted-foreground mt-2 flex items-center gap-1 flex-wrap">
-                          <Sparkles className="h-3 w-3 text-amber-500" />
-                          Suggérées : {suggested.map(s => s.title).join(", ")}
+                      {t.description && <p className="text-sm text-muted-foreground line-clamp-2">{t.description}</p>}
+                      {(t.departments?.length > 0 || t.sectors?.length > 0) && (
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {(t.departments || []).map(d => <Badge key={`d-${d}`} variant="secondary" className="text-xs">{d}</Badge>)}
+                          {(t.sectors || []).map(s => <Badge key={`s-${s}`} variant="outline" className="text-xs">{s}</Badge>)}
                         </div>
                       )}
+                      <a href={t.url} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline inline-flex items-center gap-1 mt-2">
+                        <ExternalLink className="h-3 w-3" />{t.url}
+                      </a>
                     </div>
                     {!readOnly && (
-                      <Button size="sm" variant="outline" onClick={() => openAssign(c)}>
-                        <Plus className="h-4 w-4 mr-1" />Assigner
-                      </Button>
+                      <div className="flex flex-col gap-1">
+                        <Button size="icon" variant="ghost" onClick={() => openEdit(t)}><Pencil className="h-4 w-4" /></Button>
+                        <Button size="icon" variant="ghost" onClick={() => remove(t.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                      </div>
                     )}
                   </div>
                 </Card>
-              );
-            })}
+              ))}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="assign" className="space-y-3">
+          <div className="flex items-center gap-2">
+            <Users className="h-5 w-5 text-primary" />
+            <h3 className="font-semibold">Assignation aux candidats ({candidates.length})</h3>
           </div>
-        )}
-      </section>
+          {candidates.length === 0 ? (
+            <Card className="p-8 text-center text-sm text-muted-foreground">Aucun candidat en onboarding.</Card>
+          ) : (
+            <div className="grid gap-3">
+              {candidates.map(c => {
+                const suggested = suggestedFor(c.job_title);
+                return (
+                  <Card key={c.process_id} className="p-4">
+                    <div className="flex items-start gap-3 flex-wrap">
+                      <div className="flex-1 min-w-[220px]">
+                        <div className="font-semibold">{c.candidate_name}</div>
+                        <div className="text-xs text-muted-foreground">{c.candidate_email} · {c.job_title || "Poste inconnu"}</div>
+                        <div className="flex flex-wrap gap-1 mt-2">
+                          {c.assigned.length === 0 && <span className="text-xs text-muted-foreground">Aucune formation assignée</span>}
+                          {c.assigned.map(a => {
+                            const t = trainings.find(x => x.id === a.training_id);
+                            return (
+                              <Badge key={a.id} variant={a.completed_at ? "default" : "outline"} className={a.completed_at ? "bg-emerald-500" : ""}>
+                                {a.completed_at ? <CheckCircle2 className="h-3 w-3 mr-1" /> : <Clock className="h-3 w-3 mr-1" />}
+                                {t?.title || "Formation"}
+                              </Badge>
+                            );
+                          })}
+                        </div>
+                        {suggested.length > 0 && (
+                          <div className="text-xs text-muted-foreground mt-2 flex items-center gap-1 flex-wrap">
+                            <Sparkles className="h-3 w-3 text-amber-500" />
+                            Suggérées : {suggested.map(s => s.title).join(", ")}
+                          </div>
+                        )}
+                      </div>
+                      {!readOnly && (
+                        <Button size="sm" variant="outline" onClick={() => openAssign(c)}>
+                          <Plus className="h-4 w-4 mr-1" />Assigner
+                        </Button>
+                      )}
+                    </div>
+                  </Card>
+                );
+              })}
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
 
       {/* Form dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
