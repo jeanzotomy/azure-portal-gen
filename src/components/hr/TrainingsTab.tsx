@@ -40,7 +40,6 @@ const empty = {
   description: "",
   url: "",
   duration_minutes: "",
-  duration_minutes_typed: "",
   departments: [] as string[],
   sectors: [] as string[],
   active: true,
