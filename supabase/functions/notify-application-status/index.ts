@@ -153,6 +153,7 @@ Deno.serve(async (req) => {
   try {
     const body = await req.json()
     const applicationId: string = body.application_id || body.applicationId
+    const event: string | undefined = body.event
     if (!applicationId) {
       return new Response(JSON.stringify({ error: 'application_id required' }), {
         status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -161,7 +162,7 @@ Deno.serve(async (req) => {
 
     const { data: app, error: appErr } = await supabase
       .from('job_applications')
-      .select('id, full_name, email, status, job_id, interview_message')
+      .select('id, full_name, email, status, job_id, interview_message, tracking_id')
       .eq('id', applicationId)
       .maybeSingle()
 
@@ -181,14 +182,20 @@ Deno.serve(async (req) => {
     const jobTitle = job?.title || 'le poste'
     const status = app.status as 'nouvelle' | 'en_revue' | 'entretien' | 'acceptee' | 'refusee'
 
-    if (status === 'nouvelle') {
+    // Map event/status to email type
+    let emailType: 'received' | 'en_revue' | 'entretien' | 'acceptee' | 'refusee' | null = null
+    if (event === 'created') {
+      emailType = 'received'
+    } else if (status === 'nouvelle') {
       return new Response(JSON.stringify({ skipped: true, status }), {
         status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       })
+    } else {
+      emailType = status as any
     }
 
     let activationUrl: string | undefined
-    if (status === 'acceptee') {
+    if (emailType === 'acceptee') {
       activationUrl = `${SITE_URL}/auth?welcome=1`
       try {
         const { data: linkData, error: linkErr } = await supabase.auth.admin.generateLink({
@@ -211,12 +218,13 @@ Deno.serve(async (req) => {
       }
     }
 
-    const templateName = `application-${status.replace('_', '-')}`
-    const { subject, html } = buildEmail(status as any, {
+    const templateName = emailType === 'received' ? 'application-received' : `application-${emailType.replace('_', '-')}`
+    const { subject, html } = buildEmail(emailType, {
       candidateName: app.full_name,
       jobTitle,
       interviewMessage: app.interview_message || undefined,
       activationUrl,
+      trackingId: app.tracking_id || undefined,
     })
 
     try {
