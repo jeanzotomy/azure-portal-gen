@@ -162,9 +162,10 @@ export default function OnboardingTab({ user }: { user: SupaUser }) {
 
   const downloadContract = async () => {
     if (!contract) return;
+    setDownloading(true);
     try {
       const { data, error } = await supabase.storage.from("onboarding-files").download(contract.contract_file_path);
-      if (error || !data) throw error || new Error("Téléchargement impossible");
+      if (error || !data) throw error || new Error("not_found");
       const url = URL.createObjectURL(data);
       const a = document.createElement("a");
       a.href = url;
@@ -173,8 +174,29 @@ export default function OnboardingTab({ user }: { user: SupaUser }) {
       a.click();
       a.remove();
       setTimeout(() => URL.revokeObjectURL(url), 1000);
+      setContractStatus({ ok: true });
+      toast.success("Contrat téléchargé");
     } catch (e: any) {
-      toast.error(e.message || "Téléchargement impossible. Désactivez votre bloqueur de publicités et réessayez.");
+      const msg = (e?.message || "").toLowerCase();
+      let reason = "Erreur inconnue lors du téléchargement.";
+      let solution = "Réessayez dans quelques instants ou contactez le RH.";
+      if (msg.includes("not_found") || msg.includes("not found") || msg.includes("object")) {
+        reason = "Le fichier du contrat est introuvable sur le serveur.";
+        solution = "Demandez au RH de régénérer le contrat depuis le portail admin.";
+      } else if (msg.includes("network") || msg.includes("failed to fetch")) {
+        reason = "Problème de connexion réseau.";
+        solution = "Vérifiez votre connexion internet puis réessayez.";
+      } else if (msg.includes("permission") || msg.includes("denied") || msg.includes("unauthorized")) {
+        reason = "Vous n'êtes pas autorisé(e) à accéder à ce fichier.";
+        solution = "Reconnectez-vous puis réessayez. Si le problème persiste, contactez le RH.";
+      } else if (msg.includes("blocked")) {
+        reason = "Téléchargement bloqué par votre navigateur ou une extension.";
+        solution = "Désactivez les bloqueurs de publicités/popups, puis réessayez.";
+      }
+      setContractStatus({ ok: false, reason, solution });
+      toast.error(reason);
+    } finally {
+      setDownloading(false);
     }
   };
 
