@@ -278,14 +278,24 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
             <div><Label>Titre *</Label><Input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} /></div>
             <div><Label>URL (lien externe) *</Label><Input value={form.url} onChange={e => setForm({ ...form, url: e.target.value })} placeholder="https://..." /></div>
             <div><Label>Description</Label><Textarea rows={3} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} /></div>
-            <div className="grid grid-cols-2 gap-3">
-              <div><Label>Catégorie</Label><Input value={form.category} onChange={e => setForm({ ...form, category: e.target.value })} placeholder="Sécurité, DevOps..." /></div>
-              <div><Label>Durée (min)</Label><Input type="number" value={form.duration_minutes} onChange={e => setForm({ ...form, duration_minutes: e.target.value })} /></div>
-            </div>
             <div>
-              <Label>Postes ciblés (séparés par des virgules)</Label>
-              <Input value={form.target_job_titles} onChange={e => setForm({ ...form, target_job_titles: e.target.value })} placeholder="Développeur, DevOps, Cloud Engineer..." />
+              <Label>Durée (min)</Label>
+              <Input type="number" value={form.duration_minutes} onChange={e => setForm({ ...form, duration_minutes: e.target.value })} />
             </div>
+            <MultiCheckField
+              label="Départements"
+              options={departmentsList}
+              selected={form.departments}
+              onChange={(next) => setForm({ ...form, departments: next })}
+              emptyHint="Aucun département. Créez-les depuis l'onglet Recrutement."
+            />
+            <MultiCheckField
+              label="Secteurs"
+              options={sectorsList}
+              selected={form.sectors}
+              onChange={(next) => setForm({ ...form, sectors: next })}
+              emptyHint="Aucun secteur. Créez-les depuis l'onglet Recrutement."
+            />
             <div className="flex items-center gap-2">
               <Switch checked={form.active} onCheckedChange={v => setForm({ ...form, active: v })} />
               <Label>Actif</Label>
