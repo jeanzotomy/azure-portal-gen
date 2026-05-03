@@ -214,12 +214,12 @@ export default function OnboardingAdminTab({ readOnly = false }: { readOnly?: bo
                       </div>
                       <Badge variant={d.status === "valide" ? "default" : d.status === "refuse" ? "destructive" : "outline"} className="text-xs">{d.status}</Badge>
                       <Button size="sm" variant="ghost" onClick={() => downloadFile(d.file_path)}><Eye className="h-3 w-3" /></Button>
-                      {d.status !== "valide" && (
+                      {!readOnly && d.status !== "valide" && (
                         <Button size="sm" variant="outline" onClick={() => reviewDoc(d.id, "valide")}>
                           <CheckCircle2 className="h-3 w-3" />
                         </Button>
                       )}
-                      {d.status !== "refuse" && (
+                      {!readOnly && d.status !== "refuse" && (
                         <Button size="sm" variant="outline" onClick={() => {
                           const r = prompt("Raison du refus ?");
                           if (r) reviewDoc(d.id, "refuse", r);
