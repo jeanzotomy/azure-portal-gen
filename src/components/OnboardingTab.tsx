@@ -129,9 +129,20 @@ export default function OnboardingTab({ user }: { user: SupaUser }) {
 
   const downloadContract = async () => {
     if (!contract) return;
-    const { data, error } = await supabase.storage.from("onboarding-files").createSignedUrl(contract.contract_file_path, 300);
-    if (error) return toast.error(error.message);
-    window.open(data.signedUrl, "_blank");
+    try {
+      const { data, error } = await supabase.storage.from("onboarding-files").download(contract.contract_file_path);
+      if (error || !data) throw error || new Error("Téléchargement impossible");
+      const url = URL.createObjectURL(data);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = contract.contract_file_name || "contrat.pdf";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (e: any) {
+      toast.error(e.message || "Téléchargement impossible. Désactivez votre bloqueur de publicités et réessayez.");
+    }
   };
 
   if (loading) return (
