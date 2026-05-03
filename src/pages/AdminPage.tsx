@@ -200,6 +200,7 @@ function AdminContent() {
   const [signatureOpen, setSignatureOpen] = useState(false);
   const [adminServicesOpen, setAdminServicesOpen] = useState(true);
   const [gestionnaireServicesOpen, setGestionnaireServicesOpen] = useState(true);
+  const [gestionnaireHrOpen, setGestionnaireHrOpen] = useState(true);
   const { t } = useTranslation();
 
   // Auto-open services submenu when a services tab is active. Must run before any early return to keep hook order stable.
