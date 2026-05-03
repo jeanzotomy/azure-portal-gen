@@ -66,6 +66,7 @@ function buildEmail(
       <p style="font-size:14px;color:#4a5568;line-height:1.6;margin:0 0 16px;">Bonjour ${name},</p>
       <p style="font-size:14px;color:#4a5568;line-height:1.6;margin:0 0 16px;">Nous vous remercions de l'intérêt que vous portez à ${SITE_NAME}. Votre candidature pour le poste de <strong>${job}</strong> a bien été reçue et est actuellement en cours d'examen par notre équipe RH.</p>
       <p style="font-size:14px;color:#4a5568;line-height:1.6;margin:0 0 16px;">Nous reviendrons vers vous dans les meilleurs délais avec la suite du processus.</p>
+      ${tracking}
     `)
     return { subject, html }
   }
