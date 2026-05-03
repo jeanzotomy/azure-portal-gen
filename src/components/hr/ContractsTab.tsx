@@ -93,9 +93,20 @@ export default function ContractsTab({ readOnly = false }: { readOnly?: boolean 
   };
 
   const download = async (path: string) => {
-    const { data, error } = await supabase.storage.from("onboarding-files").createSignedUrl(path, 300);
-    if (error) return toast.error(error.message);
-    window.open(data.signedUrl, "_blank");
+    try {
+      const { data, error } = await supabase.storage.from("onboarding-files").download(path);
+      if (error || !data) throw error || new Error("Téléchargement impossible");
+      const url = URL.createObjectURL(data);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = path.split("/").pop() || "contrat.pdf";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (e: any) {
+      toast.error(e.message || "Téléchargement impossible (bloqueur de pub ?)");
+    }
   };
 
   const filtered = rows.filter(r => {
