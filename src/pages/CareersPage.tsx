@@ -33,6 +33,12 @@ interface JobPosting {
 }
 
 export default function CareersPage() {
+  useSeo({
+    title: "Carrières — Offres d'emploi Tech | CloudMature",
+    description:
+      "Découvrez les offres d'emploi CloudMature à Conakry : Cloud, DevOps, IA. Postulez en ligne, sans inscription requise.",
+    path: "/careers",
+  });
   const [jobs, setJobs] = useState<JobPosting[]>([]);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
