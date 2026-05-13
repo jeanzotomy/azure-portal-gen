@@ -1,12 +1,19 @@
 import { useTranslation } from "@/i18n/LanguageContext";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { useSeo } from "@/hooks/use-seo";
 
 import { FileText } from "lucide-react";
 
 export default function TermsPage() {
   const { t } = useTranslation();
   const sections = t("terms.sections") as Array<{ title: string; content: string }>;
+  useSeo({
+    title: "Conditions d'utilisation | CloudMature",
+    description:
+      "Conditions générales d'utilisation des services CloudMature : droits, obligations et modalités d'usage de notre plateforme.",
+    path: "/terms",
+  });
 
   return (
     <div className="min-h-screen bg-background">
