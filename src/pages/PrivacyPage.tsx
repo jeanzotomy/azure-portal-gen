@@ -1,12 +1,19 @@
 import { useTranslation } from "@/i18n/LanguageContext";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
+import { useSeo } from "@/hooks/use-seo";
 
 import { Shield } from "lucide-react";
 
 export default function PrivacyPage() {
   const { t } = useTranslation();
   const sections = t("privacy.sections") as Array<{ title: string; content: string }>;
+  useSeo({
+    title: "Politique de confidentialité | CloudMature",
+    description:
+      "Politique de confidentialité de CloudMature : collecte, utilisation et protection des données personnelles conformément au RGPD.",
+    path: "/privacy",
+  });
 
   return (
     <div className="min-h-screen bg-background">
