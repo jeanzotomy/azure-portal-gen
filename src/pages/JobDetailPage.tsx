@@ -149,9 +149,9 @@ export default function JobDetailPage() {
     const desc = (job.description || "")
       .replace(/\s+/g, " ")
       .trim()
-      .slice(0, 200);
+      .slice(0, 160);
     const description = desc
-      ? `${desc}${desc.length === 200 ? "…" : ""}`
+      ? `${desc}${desc.length === 160 ? "…" : ""}`
       : `Offre d'emploi chez CloudMature : ${job.title} (${job.contract_type}) — ${job.location}.`;
 
     document.title = title;
