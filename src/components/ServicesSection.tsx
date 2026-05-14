@@ -1,8 +1,8 @@
-import { Monitor, KeyRound, Server, Blocks, ArrowUpRight, ShieldCheck, Headphones, BrainCircuit } from "lucide-react";
+import { Cloud, Code2, Server, Blocks, ArrowUpRight, ShieldCheck, Headphones, BrainCircuit } from "lucide-react";
 import servicesImage from "@/assets/two-business-woman-cafe-2.webp";
 import { useTranslation } from "@/i18n/LanguageContext";
 
-const icons = [Monitor, KeyRound, Server, Blocks, ArrowUpRight, ShieldCheck, Headphones, BrainCircuit];
+const icons = [Cloud, Code2, Server, Blocks, ArrowUpRight, ShieldCheck, Headphones, BrainCircuit];
 
 function ServiceCard({ s }: { s: { title: string; desc: string; icon: typeof Monitor } }) {
   return (
