@@ -11,7 +11,7 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "predev": "tsx scripts/generate-sitemap.ts",
+    "predev": "bun scripts/generate-sitemap.ts",
     "prebuild": "bun scripts/generate-sitemap.ts"
   },
   "dependencies": {
