@@ -1,0 +1,18 @@
+# CloudMature
+
+> CloudMature — Cabinet de conseil en technologies basé à Conakry, Guinée. Spécialisé en Cloud (Azure, AWS, GCP), DevOps, Intelligence Artificielle et transformation digitale pour entreprises africaines et internationales.
+
+CloudMature accompagne les organisations dans leur modernisation IT : migration cloud, automatisation DevOps, mise en place d'infrastructures sécurisées, intégration d'IA et formation des équipes. Site bilingue français / anglais.
+
+## Pages
+
+- [Accueil](/): Présentation des services Cloud, DevOps et IA de CloudMature.
+- [Carrières](/careers): Offres d'emploi tech ouvertes chez CloudMature.
+- [Politique de confidentialité](/privacy): Traitement des données personnelles et cookies.
+- [Conditions d'utilisation](/terms): Conditions générales d'utilisation du site.
+- [Installation PWA](/install): Instructions pour installer l'application mobile CloudMature.
+
+## Optional
+
+- [Suivi de candidature](/candidature): Portail de suivi pour candidats ayant postulé.
+- [Sitemap XML](/sitemap.xml): Liste exhaustive des URLs publiques.
