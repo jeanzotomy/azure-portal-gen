@@ -9,8 +9,14 @@ import { Cloud, ArrowLeft, Mail, ShieldBan } from "lucide-react";
 import favicon from "@/assets/cloudmature-logo.png";
 import { useTranslation } from "@/i18n/LanguageContext";
 import { cn } from "@/lib/utils";
+import { useSeo } from "@/hooks/use-seo";
 
 export default function AuthPage() {
+  useSeo({
+    title: "Connexion | CloudMature",
+    description: "Connectez-vous à votre espace client CloudMature pour gérer vos projets Cloud, DevOps et IA en toute sécurité.",
+    path: "/auth",
+  });
   const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
