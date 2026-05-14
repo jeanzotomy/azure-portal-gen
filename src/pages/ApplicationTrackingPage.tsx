@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Loader2, CheckCircle2, Clock, MessageSquare, XCircle, Search, Mail, ShieldCheck, Briefcase, MapPin, Calendar } from "lucide-react";
+import { useSeo } from "@/hooks/use-seo";
 
 type Status = "nouvelle" | "en_revue" | "entretien" | "acceptee" | "refusee";
 
