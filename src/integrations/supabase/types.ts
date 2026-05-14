@@ -907,6 +907,51 @@ export type Database = {
         }
         Relationships: []
       }
+      seo_snapshots: {
+        Row: {
+          captured_at: string
+          clicks: number
+          created_at: string
+          ctr: number
+          errors_count: number
+          id: string
+          impressions: number
+          indexed_count: number
+          metrics: Json
+          position: number
+          site_url: string
+          sitemap_warnings: number
+        }
+        Insert: {
+          captured_at?: string
+          clicks?: number
+          created_at?: string
+          ctr?: number
+          errors_count?: number
+          id?: string
+          impressions?: number
+          indexed_count?: number
+          metrics?: Json
+          position?: number
+          site_url?: string
+          sitemap_warnings?: number
+        }
+        Update: {
+          captured_at?: string
+          clicks?: number
+          created_at?: string
+          ctr?: number
+          errors_count?: number
+          id?: string
+          impressions?: number
+          indexed_count?: number
+          metrics?: Json
+          position?: number
+          site_url?: string
+          sitemap_warnings?: number
+        }
+        Relationships: []
+      }
       service_catalog: {
         Row: {
           active: boolean
