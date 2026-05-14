@@ -41,6 +41,11 @@ export default function ApplicationTrackingPage() {
   const { trackingId: paramId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  useSeo({
+    title: "Suivi de candidature | CloudMature",
+    description: "Consultez l'état d'avancement de votre candidature CloudMature : réception, revue, entretien et décision finale.",
+    path: "/candidature",
+  });
 
   const [trackingId, setTrackingId] = useState(paramId?.toUpperCase() || "");
   const [email, setEmail] = useState("");
