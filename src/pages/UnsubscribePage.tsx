@@ -4,6 +4,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Loader2, MailX, CheckCircle2, XCircle } from "lucide-react";
+import { useSeo } from "@/hooks/use-seo";
 
 const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
 const SUPABASE_ANON_KEY = import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string;
@@ -14,6 +15,11 @@ export default function UnsubscribePage() {
   const [params] = useSearchParams();
   const token = params.get("token");
   const [state, setState] = useState<State>("loading");
+  useSeo({
+    title: "Désabonnement aux emails | CloudMature",
+    description: "Confirmez votre désabonnement aux communications email de CloudMature en un clic.",
+    path: "/unsubscribe",
+  });
 
   useEffect(() => {
     if (!token) { setState("invalid"); return; }
