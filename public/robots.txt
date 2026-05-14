@@ -17,5 +17,9 @@ Disallow: /admin
 Disallow: /auth
 Disallow: /mfa
 Disallow: /reset-password
+Disallow: /rh
+Disallow: /onboarding
+Disallow: /unsubscribe
+Disallow: /candidature
 
-Sitemap: https://azure-portal-gen.lovable.app/sitemap.xml
+Sitemap: https://cloudmature.com/sitemap.xml
