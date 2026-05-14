@@ -4,9 +4,15 @@ import { Footer } from "@/components/Footer";
 import { Share, MoreVertical, PlusSquare, Download, Smartphone } from "lucide-react";
 import iconIphone from "@/assets/icon-iphone.png";
 import iconAndroid from "@/assets/icon-android.png";
+import { useSeo } from "@/hooks/use-seo";
 
 export default function InstallPage() {
   const { t } = useTranslation();
+  useSeo({
+    title: "Installer l'application CloudMature sur mobile",
+    description: "Guide d'installation de l'application CloudMature en PWA sur iPhone et Android pour un accès rapide à votre portail.",
+    path: "/install",
+  });
 
   return (
     <div className="min-h-screen flex flex-col gradient-hero">

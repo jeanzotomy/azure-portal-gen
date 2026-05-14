@@ -9,8 +9,14 @@ import { Cloud, ArrowLeft, Mail, ShieldBan } from "lucide-react";
 import favicon from "@/assets/cloudmature-logo.png";
 import { useTranslation } from "@/i18n/LanguageContext";
 import { cn } from "@/lib/utils";
+import { useSeo } from "@/hooks/use-seo";
 
 export default function AuthPage() {
+  useSeo({
+    title: "Connexion | CloudMature",
+    description: "Connectez-vous à votre espace client CloudMature pour gérer vos projets Cloud, DevOps et IA en toute sécurité.",
+    path: "/auth",
+  });
   const [mode, setMode] = useState<"login" | "signup" | "forgot">("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -171,7 +177,7 @@ export default function AuthPage() {
                   <div className="w-full border-t border-border/30" />
                 </div>
                 <div className="relative flex justify-center text-xs">
-                  <span className="bg-transparent px-2 text-secondary-foreground/40">{t("auth.or")}</span>
+                  <span className="bg-transparent px-2 text-secondary-foreground/70">{t("auth.or")}</span>
                 </div>
               </div>
             </>
@@ -181,13 +187,13 @@ export default function AuthPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {mode === "signup" && (
               <Input placeholder={t("auth.fullName")} required value={fullName} onChange={(e) => setFullName(e.target.value)}
-                className="bg-secondary/30 border-border/30 text-primary-foreground placeholder:text-secondary-foreground/40" />
+                className="bg-secondary/30 border-border/30 text-primary-foreground placeholder:text-secondary-foreground/70" />
             )}
             <Input type="email" placeholder={t("auth.email")} required value={email} onChange={(e) => setEmail(e.target.value)}
-              className="bg-secondary/30 border-border/30 text-primary-foreground placeholder:text-secondary-foreground/40" />
+              className="bg-secondary/30 border-border/30 text-primary-foreground placeholder:text-secondary-foreground/70" />
             {mode !== "forgot" && (
               <Input type="password" placeholder={t("auth.password")} required value={password} onChange={(e) => setPassword(e.target.value)}
-                className="bg-secondary/30 border-border/30 text-primary-foreground placeholder:text-secondary-foreground/40" />
+                className="bg-secondary/30 border-border/30 text-primary-foreground placeholder:text-secondary-foreground/70" />
             )}
             <Button type="submit" className="w-full gradient-primary text-primary-foreground border-0" disabled={loading}>
               {mode === "forgot" ? (

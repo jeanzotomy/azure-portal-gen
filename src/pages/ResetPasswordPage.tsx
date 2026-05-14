@@ -75,10 +75,10 @@ export default function ResetPasswordPage() {
           <form onSubmit={handleSubmit} className="space-y-4">
             <Input type="password" placeholder={t("resetPassword.newPassword")} required value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="bg-secondary/30 border-border/30 text-primary-foreground placeholder:text-secondary-foreground/40" />
+              className="bg-secondary/30 border-border/30 text-primary-foreground placeholder:text-secondary-foreground/70" />
             <Input type="password" placeholder={t("resetPassword.confirmPassword")} required value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="bg-secondary/30 border-border/30 text-primary-foreground placeholder:text-secondary-foreground/40" />
+              className="bg-secondary/30 border-border/30 text-primary-foreground placeholder:text-secondary-foreground/70" />
             <Button type="submit" className="w-full gradient-primary text-primary-foreground border-0" disabled={loading}>
               <Lock size={16} className="mr-2" /> {loading ? t("resetPassword.updating") : t("resetPassword.update")}
             </Button>

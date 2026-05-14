@@ -9,6 +9,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
 import { Loader2, CheckCircle2, Clock, MessageSquare, XCircle, Search, Mail, ShieldCheck, Briefcase, MapPin, Calendar } from "lucide-react";
+import { useSeo } from "@/hooks/use-seo";
 
 type Status = "nouvelle" | "en_revue" | "entretien" | "acceptee" | "refusee";
 
@@ -40,6 +41,11 @@ export default function ApplicationTrackingPage() {
   const { trackingId: paramId } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  useSeo({
+    title: "Suivi de candidature | CloudMature",
+    description: "Consultez l'état d'avancement de votre candidature CloudMature : réception, revue, entretien et décision finale.",
+    path: "/candidature",
+  });
 
   const [trackingId, setTrackingId] = useState(paramId?.toUpperCase() || "");
   const [email, setEmail] = useState("");
