@@ -88,11 +88,11 @@ export function ContactSection() {
               />
               <div className="absolute bottom-3 left-3 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-background/80 backdrop-blur-md text-xs font-medium tracking-wide border border-border/40 shadow-sm">
                 <span className="text-foreground">{t("hero.badge.consulting")}</span>
-                <span className="text-foreground/40">·</span>
+                <span aria-hidden="true" className="text-foreground/70">·</span>
                 <span className="text-foreground">{t("hero.badge.cloud")}</span>
-                <span className="text-foreground/40">·</span>
+                <span aria-hidden="true" className="text-foreground/70">·</span>
                 <span className="text-foreground">{t("hero.badge.devops")}</span>
-                <span className="text-foreground/40">·</span>
+                <span aria-hidden="true" className="text-foreground/70">·</span>
                 <span className="text-foreground font-semibold">{t("hero.badge.ai")}</span>
               </div>
             </div>
