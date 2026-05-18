@@ -172,14 +172,21 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab }: { onbo
     load();
   };
 
-  const handleDeleteDepartment = async (id: string) => {
-    if (!confirm("Supprimer ce département ?")) return;
-    const { error } = await supabase.from("departments").delete().eq("id", id);
-    if (error) {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
-      return;
-    }
-    load();
+  const handleDeleteDepartment = (id: string) => {
+    confirm({
+      title: "Supprimer ce département ?",
+      description: "Cette action est définitive.",
+      variant: "destructive",
+      confirmLabel: "Supprimer",
+      onConfirm: async () => {
+        const { error } = await supabase.from("departments").delete().eq("id", id);
+        if (error) {
+          toast({ title: "Erreur", description: error.message, variant: "destructive" });
+          return;
+        }
+        load();
+      },
+    });
   };
 
   const [editingDeptId, setEditingDeptId] = useState<string | null>(null);
