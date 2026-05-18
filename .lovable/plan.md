@@ -1,36 +1,128 @@
-## Diagnostic
+# Déploiement Azure depuis Git — Impact sur tes connecteurs
 
-L'onglet **SEO** (`/admin`) appelle l'edge function `gsc-dashboard` qui retourne immédiatement `Failed to send a request to the Edge Function`. Vérifications effectuées :
+## TL;DR
 
-- Le fichier `supabase/functions/gsc-dashboard/index.ts` existe bien dans le projet.
-- Aucune ligne de log n'est présente pour cette fonction côté Lovable Cloud → la fonction **n'est jamais invoquée** (elle n'est pas déployée, ou son boot échoue avant tout log).
-- Les secrets requis (`LOVABLE_API_KEY`, `GOOGLE_SEARCH_CONSOLE_API_KEY`) sont bien configurés.
-- Les CORS, l'auth et la logique paraissent corrects à la lecture du code.
+Ton repo Git contient **le code**, mais **pas les secrets ni l'infrastructure** Lovable Cloud. Si tu déploies tel quel sur Azure sans rien d'autre, l'app **ne fonctionnera pas** : pas de DB, pas d'auth, pas de connecteurs.
 
-La cause la plus probable est donc un **déploiement manquant ou échoué** de la fonction (cas classique quand la fonction a été créée mais jamais redéployée après un changement de runtime).
+Recommandation : **Frontend sur Azure Static Web Apps + backend qui reste sur Lovable Cloud**. C'est le chemin avec 90% du gain pour 10% de l'effort. Migration complète possible plus tard.
 
-## Plan d'action
+---
 
-1. **Redéployer** la fonction `gsc-dashboard` via l'outil de déploiement Supabase.
-2. **Tester** immédiatement la fonction avec un appel POST `{ "action": "live" }` en tant qu'admin connecté pour vérifier qu'elle répond avec un 200 et non un 500.
-3. **Si le déploiement échoue** (lockfile, import incompatible) :
-   - Supprimer un éventuel `deno.lock` parasite.
-   - Remplacer l'import `https://esm.sh/@supabase/supabase-js@2.45.0` par le specifier recommandé `npm:@supabase/supabase-js@2` (plus stable sur le runtime edge actuel).
-   - Aligner les CORS sur le pattern recommandé (`import { corsHeaders } from 'npm:@supabase/supabase-js@2/cors'`) si nécessaire.
-4. **Si la fonction répond 5xx** après redéploiement :
-   - Lire les logs (`gsc-dashboard`) pour identifier la cause exacte (auth, secret, appel Google).
-   - Corriger en conséquence (ex. secret manquant côté connector, format de réponse du gateway).
-5. **Valider** dans l'UI en cliquant "Actualiser" sur l'onglet SEO : les KPIs et le graphique 28 jours doivent se peupler.
+## Ce qui est dans Git vs ce qui n'y est pas
 
-## Détails techniques
+**Présent dans Git :**
+- Code React/Vite (`src/`)
+- Code Edge Functions (`supabase/functions/*`)
+- Migrations SQL (`supabase/migrations/`)
+- `supabase/config.toml`
+- Références aux env vars (`Deno.env.get(...)`, `import.meta.env.VITE_*`)
 
-- Aucune modification de schéma de base, ni de RLS, ni de table.
-- Aucune modification du composant `SeoTab.tsx` n'est prévue — il appelle déjà correctement `supabase.functions.invoke("gsc-dashboard", ...)`.
-- Modification de code uniquement si l'étape 3 ou 4 le révèle nécessaire (et alors uniquement dans `supabase/functions/gsc-dashboard/index.ts`).
-- Aucun nouveau secret requis.
+**Absent (vit côté Lovable Cloud) :**
+- Tous les secrets : `LOVABLE_API_KEY`, `GOOGLE_SEARCH_CONSOLE_API_KEY`, `AZURE_TENANT_ID/CLIENT_ID/CLIENT_SECRET`, `TWILIO_*`, etc.
+- La base Postgres + données + RLS exécutées
+- L'auth Supabase (utilisateurs, sessions, OAuth Google configuré)
+- Le storage (buckets, fichiers)
+- Le routage vers `connector-gateway.lovable.dev`
 
-## Hors périmètre
+---
 
-- Refonte du dashboard SEO.
-- Ajout de nouvelles métriques GSC.
-- Configuration du connector Google Search Console (déjà en place).
+## Comportement par connecteur après déploiement Azure
+
+| Connecteur | Type | Sur Azure (sans Lovable) |
+|---|---|---|
+| **Azure AD / SharePoint** (`sharepoint-proxy`) | Tes credentials Azure directs | ✅ Marche partout, recopier `AZURE_*` |
+| **Twilio SMS** (MFA) | Clé API directe | ✅ Marche, recopier les clés |
+| **Resend / Email** | Clé API directe | ✅ Marche, recopier la clé |
+| **Google Search Console** (`gsc-dashboard`) | Via gateway Lovable | ❌ Cassé — nécessite `LOVABLE_API_KEY` + connexion liée |
+| **Lovable AI Gateway** (si utilisé) | Via gateway Lovable | ❌ Cassé — à remplacer par OpenAI/Gemini direct |
+| **Google OAuth signin** (`@lovable.dev/cloud-auth-js`) | Via Lovable Auth | ❌ Cassé — à remplacer par Supabase OAuth natif |
+| **DB Postgres + RLS + triggers** | Lovable Cloud (Supabase managé) | ❌ Aucune DB côté Azure tant que rien n'est recréé |
+
+---
+
+## Plan recommandé — Architecture hybride
+
+```text
+       ┌──────────────────────────┐
+       │  Azure Static Web Apps   │  ← build Vite déployé via GitHub Actions
+       │   (cloudmature.com)      │
+       └────────────┬─────────────┘
+                    │ HTTPS
+                    ▼
+       ┌──────────────────────────┐
+       │   Lovable Cloud backend  │
+       │  - Supabase DB + Auth    │
+       │  - Edge Functions        │
+       │  - Connecteurs (GSC...)  │
+       │  - Storage               │
+       └──────────────────────────┘
+```
+
+**Avantages :**
+- Connecteurs gateway (GSC, AI) continuent de marcher sans refonte
+- Custom domain `cloudmature.com` géré par Azure (CDN + SSL gratuit)
+- CI/CD automatique via GitHub Actions
+- Aucun secret à migrer
+- Tu peux toujours éditer dans Lovable, les changes sync via Git
+
+**À faire (étapes haut niveau) :**
+
+1. **Vérifier les origines CORS autorisées** dans les Edge Functions (déjà `*` partout → OK)
+2. **Créer une Azure Static Web App** liée au repo GitHub
+3. **Configurer le build** : framework Vite, output `dist/`, app location `/`
+4. **Ajouter les env vars publiques** côté Azure (Build Configuration) :
+   - `VITE_SUPABASE_URL` = `https://zwzazxebufydnaxezngx.supabase.co`
+   - `VITE_SUPABASE_PUBLISHABLE_KEY` = la clé anon publique
+   - `VITE_SUPABASE_PROJECT_ID` = `zwzazxebufydnaxezngx`
+5. **Configurer le SPA fallback** (`staticwebapp.config.json` à la racine) pour que React Router gère les deep links
+6. **Pointer `cloudmature.com`** vers le Static Web App Azure (DNS) au lieu de Lovable
+7. **Reconfigurer Google OAuth** côté Supabase : ajouter l'URL Azure dans les Redirect URLs autorisées
+8. **Tester** : auth, MFA, SharePoint, GSC, notifications, paiements
+
+---
+
+## Si plus tard tu veux la migration complète
+
+À prévoir comme chantier séparé (non couvert ici) :
+- Self-hosting Supabase sur Azure Container Apps OU bascule vers Azure Database for PostgreSQL + Azure Functions (Deno → Node)
+- Remplacer `gsc-dashboard` par appel direct GSC avec service account Google
+- Remplacer `@lovable.dev/cloud-auth-js` par flux OAuth Supabase natif
+- Réécrire toutes les RLS et triggers dans la nouvelle DB
+- Migrer données via `pg_dump` / `pg_restore`
+- Reconfigurer le hook `auth-email-hook` côté nouveau Supabase
+
+C'est 2-4 semaines de travail vs 1 journée pour le scénario hybride.
+
+---
+
+## Détails techniques (pour ton équipe technique)
+
+**Fichier à créer : `staticwebapp.config.json`**
+```json
+{
+  "navigationFallback": {
+    "rewrite": "/index.html",
+    "exclude": ["/assets/*", "/*.{css,js,svg,png,jpg,webp,ico,xml,txt,json}"]
+  },
+  "globalHeaders": {
+    "Cache-Control": "no-cache"
+  }
+}
+```
+
+**GitHub Actions workflow** : Azure Static Web Apps génère automatiquement `.github/workflows/azure-static-web-apps-*.yml` lors de la création de la ressource. Vérifier `app_build_command: "npm run build"` et `output_location: "dist"`.
+
+**Variables d'env côté Azure** : Settings → Configuration → Application settings (préfixe `VITE_` pour qu'elles soient injectées au build).
+
+**DNS pour `cloudmature.com`** :
+- Type `CNAME` : `www` → `<azure-swa-hostname>.azurestaticapps.net`
+- Type `TXT` : validation domaine (fourni par Azure)
+- Apex (`@`) : utiliser `ALIAS`/`ANAME` si supporté, sinon redirection 301 vers `www`
+
+**Aucun changement nécessaire** dans les Edge Functions, les migrations, le code React, ou les secrets Lovable.
+
+---
+
+## Question
+
+Confirmes-tu cette approche hybride ? Si oui, je peux préparer le `staticwebapp.config.json` et documenter la procédure DNS exacte pour `cloudmature.com`.
