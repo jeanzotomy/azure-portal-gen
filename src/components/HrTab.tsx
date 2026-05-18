@@ -97,6 +97,7 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab }: { onbo
   const { user } = useAuthSession();
   const { isAdmin } = useUserRoles();
   const { toast } = useToast();
+  const { confirm, dialog: confirmDialog } = useConfirm();
   const [jobs, setJobs] = useState<JobPosting[]>([]);
   const [applications, setApplications] = useState<JobApplication[]>([]);
   const [departments, setDepartments] = useState<Department[]>([]);
