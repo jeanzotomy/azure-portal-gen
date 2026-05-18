@@ -237,14 +237,21 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab }: { onbo
     load();
   };
 
-  const handleDeleteSector = async (id: string) => {
-    if (!confirm("Supprimer ce secteur ?")) return;
-    const { error } = await (supabase as any).from("sectors").delete().eq("id", id);
-    if (error) {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
-      return;
-    }
-    load();
+  const handleDeleteSector = (id: string) => {
+    confirm({
+      title: "Supprimer ce secteur ?",
+      description: "Cette action est définitive.",
+      variant: "destructive",
+      confirmLabel: "Supprimer",
+      onConfirm: async () => {
+        const { error } = await (supabase as any).from("sectors").delete().eq("id", id);
+        if (error) {
+          toast({ title: "Erreur", description: error.message, variant: "destructive" });
+          return;
+        }
+        load();
+      },
+    });
   };
 
   const startEditSector = (s: Sector) => {
