@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
  * FormSection — glassmorphism card to group related form fields.
  * Used to refactor long forms into clear, accessible sections.
  */
-interface FormSectionProps extends React.HTMLAttributes<HTMLElement> {
+interface FormSectionProps extends Omit<React.HTMLAttributes<HTMLElement>, "title"> {
   title?: React.ReactNode;
   description?: React.ReactNode;
   icon?: React.ReactNode;
