@@ -338,15 +338,22 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab }: { onbo
     load();
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm("Supprimer cette offre et toutes ses candidatures ?")) return;
-    const { error } = await supabase.from("job_postings").delete().eq("id", id);
-    if (error) {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
-      return;
-    }
-    toast({ title: "Offre supprimée" });
-    load();
+  const handleDelete = (id: string) => {
+    confirm({
+      title: "Supprimer cette offre ?",
+      description: "Toutes les candidatures liées seront également supprimées.",
+      variant: "destructive",
+      confirmLabel: "Supprimer",
+      onConfirm: async () => {
+        const { error } = await supabase.from("job_postings").delete().eq("id", id);
+        if (error) {
+          toast({ title: "Erreur", description: error.message, variant: "destructive" });
+          return;
+        }
+        toast({ title: "Offre supprimée" });
+        load();
+      },
+    });
   };
 
   const updateJobStatus = async (id: string, status: JobStatus) => {
