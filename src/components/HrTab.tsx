@@ -771,78 +771,134 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab }: { onbo
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-auto">
           <DialogHeader>
-            <DialogTitle className="text-white">{editing ? "Modifier l'offre" : "Nouvelle offre d'emploi"}</DialogTitle>
+            <DialogTitle className="text-white flex items-center gap-2">
+              <Briefcase size={18} />
+              {editing ? "Modifier l'offre" : "Nouvelle offre d'emploi"}
+            </DialogTitle>
           </DialogHeader>
-          <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1">
-            <div>
-              <label className="text-sm font-medium">Titre du poste *</label>
-              <Input value={form.title} onChange={(e) => setForm({ ...form, title: e.target.value })} placeholder="Ex: Ingénieur Cloud DevOps" />
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="text-sm font-medium">Département</label>
-                <Select value={form.department || "__none__"} onValueChange={(v) => setForm({ ...form, department: v === "__none__" ? "" : v })}>
-                  <SelectTrigger><SelectValue placeholder="Sélectionner..." /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="__none__">— Aucun —</SelectItem>
-                    {departments.map((d) => (
-                      <SelectItem key={d.id} value={d.name}>{d.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {departments.length === 0 && (
-                  <p className="text-xs text-muted-foreground mt-1">Aucun département. <button type="button" className="text-primary hover:underline" onClick={() => setDeptDialogOpen(true)}>Créer</button></p>
-                )}
+          <div className="space-y-5 max-h-[60vh] overflow-y-auto pr-1 pt-1">
+            <FormSection
+              icon={<FileText size={16} />}
+              title="Informations générales"
+              description="Titre, localisation et type de contrat."
+            >
+              <div className="space-y-2">
+                <Label htmlFor="job-title" required>Titre du poste</Label>
+                <Input
+                  id="job-title"
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                  placeholder="Ex: Ingénieur Cloud DevOps"
+                />
               </div>
-              <div>
-                <label className="text-sm font-medium">Lieu *</label>
-                <Input value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} placeholder="Ex: Conakry / Remote" />
-              </div>
-            </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="text-sm font-medium">Type de contrat *</label>
-                <Select value={form.contract_type} onValueChange={(v) => setForm({ ...form, contract_type: v as ContractType })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {(["CDI", "CDD", "Stage", "Freelance", "Alternance"] as ContractType[]).map((c) => (
-                      <SelectItem key={c} value={c}>{c}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <label className="text-sm font-medium">Date de clôture</label>
-                <Input type="date" value={form.closing_date} onChange={(e) => setForm({ ...form, closing_date: e.target.value })} />
-              </div>
-            </div>
-            {form.contract_type === "CDD" && (
-              <div className="grid grid-cols-2 gap-3 p-3 rounded-lg border bg-muted/30">
-                <div>
-                  <label className="text-sm font-medium">Durée du CDD *</label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Département</Label>
+                  <Select
+                    value={form.department || "__none__"}
+                    onValueChange={(v) => setForm({ ...form, department: v === "__none__" ? "" : v })}
+                  >
+                    <SelectTrigger><SelectValue placeholder="Sélectionner..." /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="__none__">— Aucun —</SelectItem>
+                      {departments.map((d) => (
+                        <SelectItem key={d.id} value={d.name}>{d.name}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  {departments.length === 0 && (
+                    <p className="text-xs text-muted-foreground">
+                      Aucun département.{" "}
+                      <button type="button" className="text-primary hover:underline" onClick={() => setDeptDialogOpen(true)}>
+                        Créer
+                      </button>
+                    </p>
+                  )}
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="job-location" required>Lieu</Label>
                   <Input
-                    value={form.contract_duration}
-                    onChange={(e) => setForm({ ...form, contract_duration: e.target.value })}
-                    placeholder="Ex: 6 mois, 1 an, 24 mois"
+                    id="job-location"
+                    value={form.location}
+                    onChange={(e) => setForm({ ...form, location: e.target.value })}
+                    placeholder="Ex: Conakry / Remote"
                   />
                 </div>
-                <div className="flex items-end">
-                  <label className="flex items-center gap-2 text-sm font-medium cursor-pointer select-none">
-                    <input
-                      type="checkbox"
-                      checked={form.renewable}
-                      onChange={(e) => setForm({ ...form, renewable: e.target.checked })}
-                      className="h-4 w-4 rounded border-input accent-primary"
-                    />
-                    Contrat renouvelable
-                  </label>
+              </div>
+            </FormSection>
+
+            <FormSection
+              icon={<Calendar size={16} />}
+              title="Contrat & calendrier"
+              description="Type, durée et dates clés."
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label required>Type de contrat</Label>
+                  <Select value={form.contract_type} onValueChange={(v) => setForm({ ...form, contract_type: v as ContractType })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {(["CDI", "CDD", "Stage", "Freelance", "Alternance"] as ContractType[]).map((c) => (
+                        <SelectItem key={c} value={c}>{c}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="job-closing">Date de clôture</Label>
+                  <Input
+                    id="job-closing"
+                    type="date"
+                    value={form.closing_date}
+                    onChange={(e) => setForm({ ...form, closing_date: e.target.value })}
+                  />
                 </div>
               </div>
-            )}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div>
-                <label className="text-sm font-medium">Secteur</label>
-                <Select value={form.sector || "__none__"} onValueChange={(v) => setForm({ ...form, sector: v === "__none__" ? "" : v })}>
+              {form.contract_type === "CDD" && (
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 p-4 rounded-lg border border-primary/20 bg-primary/5 backdrop-blur-sm">
+                  <div className="space-y-2">
+                    <Label htmlFor="job-duration" required>Durée du CDD</Label>
+                    <Input
+                      id="job-duration"
+                      value={form.contract_duration}
+                      onChange={(e) => setForm({ ...form, contract_duration: e.target.value })}
+                      placeholder="Ex: 6 mois, 1 an, 24 mois"
+                    />
+                  </div>
+                  <div className="flex items-end">
+                    <label className="flex items-center gap-2 text-sm font-medium cursor-pointer select-none">
+                      <input
+                        type="checkbox"
+                        checked={form.renewable}
+                        onChange={(e) => setForm({ ...form, renewable: e.target.checked })}
+                        className="h-4 w-4 rounded border-input accent-primary"
+                      />
+                      Contrat renouvelable
+                    </label>
+                  </div>
+                </div>
+              )}
+              <div className="space-y-2">
+                <Label htmlFor="job-start">Date de prise de poste</Label>
+                <Input
+                  id="job-start"
+                  value={form.start_date}
+                  onChange={(e) => setForm({ ...form, start_date: e.target.value })}
+                  placeholder="Ex: Dès que possible"
+                />
+              </div>
+            </FormSection>
+
+            <FormSection
+              icon={<Building2 size={16} />}
+              title="Secteur & rémunération"
+            >
+              <div className="space-y-2">
+                <Label>Secteur</Label>
+                <Select
+                  value={form.sector || "__none__"}
+                  onValueChange={(v) => setForm({ ...form, sector: v === "__none__" ? "" : v })}
+                >
                   <SelectTrigger><SelectValue placeholder="Sélectionner..." /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="__none__">— Aucun —</SelectItem>
@@ -852,37 +908,61 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab }: { onbo
                   </SelectContent>
                 </Select>
                 {sectors.length === 0 && (
-                  <p className="text-xs text-muted-foreground mt-1">Aucun secteur. <button type="button" className="text-primary hover:underline" onClick={() => setSectorDialogOpen(true)}>Créer</button></p>
+                  <p className="text-xs text-muted-foreground">
+                    Aucun secteur.{" "}
+                    <button type="button" className="text-primary hover:underline" onClick={() => setSectorDialogOpen(true)}>
+                      Créer
+                    </button>
+                  </p>
                 )}
               </div>
-              <div>
-                <label className="text-sm font-medium">Date de prise de poste</label>
-                <Input value={form.start_date} onChange={(e) => setForm({ ...form, start_date: e.target.value })} placeholder="Ex: Dès que possible" />
+              <div className="space-y-2">
+                <Label htmlFor="job-salary">Rémunération</Label>
+                <Input
+                  id="job-salary"
+                  value={form.salary_range}
+                  onChange={(e) => setForm({ ...form, salary_range: e.target.value })}
+                  placeholder="Ex: Selon profil et expérience — package attractif"
+                />
               </div>
-            </div>
-            <div>
-              <label className="text-sm font-medium">Rémunération</label>
-              <Input value={form.salary_range} onChange={(e) => setForm({ ...form, salary_range: e.target.value })} placeholder="Ex: Selon profil et expérience — package attractif" />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Description *</label>
-              <Textarea rows={6} value={form.description} onChange={(e) => setForm({ ...form, description: e.target.value })} placeholder="Missions, profil recherché, compétences requises..." />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Statut *</label>
-              <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as JobStatus })}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="brouillon">Brouillon (non visible)</SelectItem>
-                  <SelectItem value="publiee">Publiée (visible sur Carrières)</SelectItem>
-                  <SelectItem value="fermee">Fermée</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
+            </FormSection>
+
+            <FormSection
+              icon={<FileText size={16} />}
+              title="Description & publication"
+              description="Détails du poste et visibilité."
+            >
+              <div className="space-y-2">
+                <Label htmlFor="job-desc" required>Description</Label>
+                <Textarea
+                  id="job-desc"
+                  rows={6}
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                  placeholder="Missions, profil recherché, compétences requises..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label required>Statut</Label>
+                <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as JobStatus })}>
+                  <SelectTrigger><SelectValue /></SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="brouillon">Brouillon (non visible)</SelectItem>
+                    <SelectItem value="publiee">Publiée (visible sur Carrières)</SelectItem>
+                    <SelectItem value="fermee">Fermée</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </FormSection>
           </div>
-          <DialogFooter>
+          <DialogFooter className="gap-2 pt-2">
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Annuler</Button>
-            <Button onClick={handleSave}>{editing ? "Enregistrer" : "Créer"}</Button>
+            <Button
+              onClick={handleSave}
+              className="bg-gradient-to-r from-primary to-[#007aa3] text-white shadow-sm hover:opacity-95"
+            >
+              {editing ? "Enregistrer" : "Créer l'offre"}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
