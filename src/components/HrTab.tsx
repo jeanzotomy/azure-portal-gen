@@ -1142,29 +1142,48 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab }: { onbo
           <DialogHeader>
             <DialogTitle className="text-white flex items-center gap-2"><Calendar size={18} /> Inviter à un entretien</DialogTitle>
           </DialogHeader>
-          <div className="space-y-3">
+          <div className="space-y-4 pt-1">
             {interviewApp && (
-              <p className="text-sm text-muted-foreground">
-                Candidat : <span className="font-semibold text-foreground">{interviewApp.full_name}</span> ({interviewApp.email})
-              </p>
+              <div className="flex items-center gap-3 p-3 rounded-lg border border-border/60 bg-card/60 backdrop-blur-sm">
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-primary to-[#007aa3] text-white text-sm font-semibold">
+                  {interviewApp.full_name.charAt(0).toUpperCase()}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-sm font-semibold truncate">{interviewApp.full_name}</p>
+                  <p className="text-xs text-muted-foreground truncate">{interviewApp.email}</p>
+                </div>
+              </div>
             )}
-            <div>
-              <label className="text-sm font-medium">Message d'invitation *</label>
-              <Textarea
-                rows={5}
-                value={interviewMessage}
-                onChange={(e) => setInterviewMessage(e.target.value)}
-                placeholder="Ex: Entretien prévu le mardi 30 avril 2026 à 10h00 (GMT) en visioconférence Microsoft Teams. Le lien vous sera envoyé 24h avant."
-              />
-              <p className="text-xs text-muted-foreground mt-1">Précisez la date, l'heure, le lieu ou le lien visio. Ce message sera inclus dans l'email.</p>
-            </div>
+            <FormSection
+              icon={<Mail size={16} />}
+              title="Message d'invitation"
+              description="Précisez la date, l'heure, le lieu ou le lien visio."
+            >
+              <div className="space-y-2">
+                <Label htmlFor="interview-msg" required>Contenu de l'email</Label>
+                <Textarea
+                  id="interview-msg"
+                  rows={5}
+                  value={interviewMessage}
+                  onChange={(e) => setInterviewMessage(e.target.value)}
+                  placeholder="Ex: Entretien prévu le mardi 30 avril 2026 à 10h00 (GMT) en visioconférence Microsoft Teams. Le lien vous sera envoyé 24h avant."
+                />
+              </div>
+            </FormSection>
           </div>
-          <DialogFooter>
+          <DialogFooter className="gap-2 pt-2">
             <Button variant="outline" onClick={() => setInterviewDialogOpen(false)}>Annuler</Button>
-            <Button onClick={confirmInterview}>Envoyer l'invitation</Button>
+            <Button
+              onClick={confirmInterview}
+              className="bg-gradient-to-r from-primary to-[#007aa3] text-white shadow-sm hover:opacity-95"
+            >
+              <Mail size={14} /> Envoyer l'invitation
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {confirmDialog}
     </div>
   );
 }
