@@ -423,23 +423,29 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab }: { onbo
     return match ? match[0] : null;
   };
 
-  const handleDeleteSharePointFolder = async (app: JobApplication) => {
-    if (!confirm(`Supprimer le dossier SharePoint et tous les fichiers de ${app.full_name} ?`)) return;
-    const parts = app.full_name.trim().split(/\s+/);
-    const firstName = parts[0] || "";
-    const lastName = parts.slice(1).join(" ") || parts[0] || "";
-    const { data, error } = await supabase.functions.invoke("upload-application-files", {
-      body: { action: "delete", firstName, lastName, jobId: app.job_id },
+  const handleDeleteSharePointFolder = (app: JobApplication) => {
+    confirm({
+      title: "Supprimer le dossier SharePoint ?",
+      description: `Tous les fichiers de ${app.full_name} seront définitivement supprimés.`,
+      variant: "destructive",
+      confirmLabel: "Supprimer",
+      onConfirm: async () => {
+        const parts = app.full_name.trim().split(/\s+/);
+        const firstName = parts[0] || "";
+        const lastName = parts.slice(1).join(" ") || parts[0] || "";
+        const { data, error } = await supabase.functions.invoke("upload-application-files", {
+          body: { action: "delete", firstName, lastName, jobId: app.job_id },
+        });
+        if (error || (data as any)?.error) {
+          toast({ title: "Erreur", description: error?.message || (data as any)?.error || "Suppression échouée", variant: "destructive" });
+          return;
+        }
+        const newNotes = (app.notes || "").replace(/https?:\/\/[^\s)]+/gi, "").trim() || null;
+        await supabase.from("job_applications").update({ notes: newNotes }).eq("id", app.id);
+        toast({ title: "Dossier SharePoint supprimé" });
+        load();
+      },
     });
-    if (error || (data as any)?.error) {
-      toast({ title: "Erreur", description: error?.message || (data as any)?.error || "Suppression échouée", variant: "destructive" });
-      return;
-    }
-    // Clear the SharePoint URL from notes
-    const newNotes = (app.notes || "").replace(/https?:\/\/[^\s)]+/gi, "").trim() || null;
-    await supabase.from("job_applications").update({ notes: newNotes }).eq("id", app.id);
-    toast({ title: "Dossier SharePoint supprimé" });
-    load();
   };
 
   const handleOpenSharePointFolder = async (app: JobApplication) => {
