@@ -258,37 +258,42 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
       console.warn("SharePoint upload exception:", e);
     }
 
-    const { data: inserted, error } = await supabase.from("job_applications").insert({
-      job_id: jobId,
-      user_id: user?.id ?? null,
-      full_name: fullName,
-      email: form.email.trim(),
-      phone: form.phone.trim() || null,
-      linkedin_url: form.linkedin_url.trim() || null,
-      portfolio_url: form.portfolio_url.trim() || null,
-      years_experience: form.years_experience ? parseInt(form.years_experience) : null,
-      salary_expectation: form.salary_expectation.trim() || null,
-      cv_path: cvPath,
-      cover_letter_path: letterPath,
-      notes: [
+    const { data: rpcData, error } = await supabase.rpc("submit_job_application", {
+      p_job_id: jobId,
+      p_full_name: fullName,
+      p_email: form.email.trim(),
+      p_cv_path: cvPath,
+      p_user_id: user?.id ?? null,
+      p_phone: form.phone.trim() || null,
+      p_linkedin_url: form.linkedin_url.trim() || null,
+      p_portfolio_url: form.portfolio_url.trim() || null,
+      p_years_experience: form.years_experience ? parseInt(form.years_experience) : null,
+      p_salary_expectation: form.salary_expectation.trim() || null,
+      p_cover_letter_path: letterPath,
+      p_notes: [
         form.cover_letter_text?.trim() || null,
         sharepointFolderUrl ? `SharePoint: ${sharepointFolderUrl}` : null,
       ].filter(Boolean).join("\n\n") || null,
-    }).select("tracking_id").maybeSingle();
+    });
     setSubmitting(false);
 
     if (error) {
-      const isDup = (error as any)?.code === "23505" || /duplicate|unique/i.test(error.message);
-      toast({
-        title: isDup ? "Candidature déjà envoyée" : "Erreur",
-        description: isDup
-          ? "Vous avez déjà postulé à cette offre."
-          : error.message,
-        variant: "destructive",
-      });
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
       return;
     }
-    const trackId = inserted?.tracking_id;
+    const row = Array.isArray(rpcData) ? rpcData[0] : rpcData;
+    const trackId = row?.tracking_id as string | undefined;
+    if (row?.already_exists) {
+      toast({
+        title: "Candidature déjà envoyée",
+        description: trackId
+          ? `Vous avez déjà postulé à cette offre (suivi : ${trackId}).`
+          : "Vous avez déjà postulé à cette offre.",
+        variant: "destructive",
+      });
+      onOpenChange(false);
+      return;
+    }
     toast({
       title: "✓ Candidature envoyée",
       description: trackId
