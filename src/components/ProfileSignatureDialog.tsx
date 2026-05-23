@@ -6,6 +6,7 @@ import { useToast } from "@/hooks/use-toast";
 import { SignaturePad } from "@/components/SignaturePad";
 import { PenLine, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { resolveSignatureUrl } from "@/lib/signatures";
 
 interface Props {
   open: boolean;
@@ -13,21 +14,25 @@ interface Props {
 }
 
 /**
- * Dialog "Ma signature" pour admin/comptable.
- * Sauvegarde dans bucket `signatures/{user_id}/signature.png`
- * et met à jour `profiles.signature_url`.
+ * Dialog "Ma signature".
+ * Sauvegarde dans le bucket privé `signatures/{user_id}/signature.png`
+ * et stocke le chemin storage dans `profiles.signature_url`.
+ * L'affichage utilise un signed URL temporaire.
  */
 export function ProfileSignatureDialog({ open, onOpenChange }: Props) {
   const { user } = useAuthSession();
   const { toast } = useToast();
   const [currentUrl, setCurrentUrl] = useState<string | null>(null);
+  const [hasSignature, setHasSignature] = useState(false);
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
     if (!open || !user) return;
     void (async () => {
       const { data } = await supabase.from("profiles").select("signature_url").eq("user_id", user.id).maybeSingle();
-      setCurrentUrl(data?.signature_url ?? null);
+      setHasSignature(!!data?.signature_url);
+      const signed = await resolveSignatureUrl(data?.signature_url);
+      setCurrentUrl(signed);
     })();
   }, [open, user]);
 
@@ -42,11 +47,11 @@ export function ProfileSignatureDialog({ open, onOpenChange }: Props) {
         cacheControl: "0",
       });
       if (upErr) throw upErr;
-      const { data: pub } = supabase.storage.from("signatures").getPublicUrl(path);
-      const url = `${pub.publicUrl}?v=${Date.now()}`;
-      const { error: updErr } = await supabase.from("profiles").update({ signature_url: url }).eq("user_id", user.id);
+      const { error: updErr } = await supabase.from("profiles").update({ signature_url: path }).eq("user_id", user.id);
       if (updErr) throw updErr;
-      setCurrentUrl(url);
+      const signed = await resolveSignatureUrl(path);
+      setCurrentUrl(signed);
+      setHasSignature(true);
       toast({ title: "Signature enregistrée", description: "Elle sera apposée sur vos prochaines factures." });
     } catch (e) {
       toast({ title: "Erreur", description: e instanceof Error ? e.message : "Échec de l'enregistrement", variant: "destructive" });
@@ -62,6 +67,7 @@ export function ProfileSignatureDialog({ open, onOpenChange }: Props) {
       await supabase.storage.from("signatures").remove([`${user.id}/signature.png`]);
       await supabase.from("profiles").update({ signature_url: null }).eq("user_id", user.id);
       setCurrentUrl(null);
+      setHasSignature(false);
       toast({ title: "Signature supprimée" });
     } catch (e) {
       toast({ title: "Erreur", description: e instanceof Error ? e.message : "Erreur", variant: "destructive" });
@@ -86,7 +92,7 @@ export function ProfileSignatureDialog({ open, onOpenChange }: Props) {
 
           <SignaturePad initialImage={currentUrl} onSave={handleSave} saving={saving} />
 
-          {currentUrl && (
+          {hasSignature && (
             <div className="flex items-center justify-between border-t pt-3">
               <span className="text-xs text-muted-foreground">Signature actuelle enregistrée</span>
               <Button type="button" variant="ghost" size="sm" onClick={handleDelete} disabled={saving} className="text-destructive">
