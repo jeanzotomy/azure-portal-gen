@@ -91,10 +91,12 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
         const priority = ["admin", "comptable", "gestionnaire", "agent", "user", "client"];
         const userRoles = (roles ?? []).map((r) => r.role as string);
         const primary = priority.find((r) => userRoles.includes(r)) ?? userRoles[0] ?? null;
+        const { resolveSignatureUrl } = await import("@/lib/signatures");
+        const signedSig = await resolveSignatureUrl(prof?.signature_url);
         setIssuer({
           full_name: prof?.full_name ?? null,
           role: primary ? (roleLabels[primary] ?? primary) : null,
-          signature_url: prof?.signature_url ?? null,
+          signature_url: signedSig,
         });
       }
 
