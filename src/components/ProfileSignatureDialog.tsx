@@ -92,7 +92,7 @@ export function ProfileSignatureDialog({ open, onOpenChange }: Props) {
 
           <SignaturePad initialImage={currentUrl} onSave={handleSave} saving={saving} />
 
-          {currentUrl && (
+          {hasSignature && (
             <div className="flex items-center justify-between border-t pt-3">
               <span className="text-xs text-muted-foreground">Signature actuelle enregistrée</span>
               <Button type="button" variant="ghost" size="sm" onClick={handleDelete} disabled={saving} className="text-destructive">
