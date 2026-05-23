@@ -1510,6 +1510,27 @@ export type Database = {
         }[]
       }
       slugify_text: { Args: { input: string }; Returns: string }
+      submit_job_application: {
+        Args: {
+          p_cover_letter_path?: string
+          p_cv_path: string
+          p_email: string
+          p_full_name: string
+          p_job_id: string
+          p_linkedin_url?: string
+          p_notes?: string
+          p_phone?: string
+          p_portfolio_url?: string
+          p_salary_expectation?: string
+          p_user_id?: string
+          p_years_experience?: number
+        }
+        Returns: {
+          already_exists: boolean
+          id: string
+          tracking_id: string
+        }[]
+      }
       update_own_profile:
         | {
             Args: { _company?: string; _full_name?: string; _phone?: string }
