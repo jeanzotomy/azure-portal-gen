@@ -1229,3 +1229,85 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab }: { onbo
     </div>
   );
 }
+
+const RECO_LABELS: Record<string, { label: string; cls: string; icon: any }> = {
+  fortement_recommande: { label: "Fortement recommandé", cls: "bg-emerald-500/10 text-emerald-700 border-emerald-500/30", icon: ThumbsUp },
+  recommande: { label: "Recommandé", cls: "bg-green-500/10 text-green-700 border-green-500/30", icon: ThumbsUp },
+  a_considerer: { label: "À considérer", cls: "bg-amber-500/10 text-amber-700 border-amber-500/30", icon: AlertCircle },
+  non_recommande: { label: "Non recommandé", cls: "bg-destructive/10 text-destructive border-destructive/30", icon: ThumbsDown },
+};
+
+function AiAnalysisBlock({ app }: { app: JobApplication }) {
+  if (app.ai_status === "processing") {
+    return (
+      <div className="mt-3 p-3 rounded-lg border bg-muted/40 flex items-center gap-2 text-sm text-muted-foreground">
+        <Loader2 size={14} className="animate-spin text-primary" /> Analyse du CV en cours…
+      </div>
+    );
+  }
+  if (app.ai_status === "error") {
+    return (
+      <div className="mt-3 p-3 rounded-lg border border-destructive/30 bg-destructive/5 text-sm text-destructive flex items-start gap-2">
+        <AlertCircle size={14} className="mt-0.5 shrink-0" />
+        <span>Analyse échouée : {app.ai_error || "erreur inconnue"}</span>
+      </div>
+    );
+  }
+  if (!app.ai_analyzed_at) return null;
+  const reco = app.ai_recommendation ? RECO_LABELS[app.ai_recommendation] : null;
+  const RecoIcon = reco?.icon || Sparkles;
+  return (
+    <div className="mt-3 p-4 rounded-lg border bg-gradient-to-br from-primary/5 via-card to-card space-y-3">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="flex items-center gap-2 text-sm font-semibold">
+          <Sparkles size={14} className="text-primary" /> Analyse IA du CV
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          {typeof app.ai_match_percentage === "number" && (
+            <Badge variant="outline" className="gap-1">
+              <TrendingUp size={11} /> Match : {app.ai_match_percentage}%
+            </Badge>
+          )}
+          {typeof app.ai_score === "number" && (
+            <Badge variant="outline">Score CV : {app.ai_score}/100</Badge>
+          )}
+          {reco && (
+            <Badge className={reco.cls + " border gap-1"}>
+              <RecoIcon size={11} /> {reco.label}
+            </Badge>
+          )}
+        </div>
+      </div>
+      {app.ai_summary && <p className="text-sm leading-relaxed">{app.ai_summary}</p>}
+      {Array.isArray(app.ai_skills) && app.ai_skills.length > 0 && (
+        <div className="flex flex-wrap gap-1">
+          {app.ai_skills.map((s, i) => (
+            <Badge key={i} variant="secondary" className="text-[10px] font-normal">{s}</Badge>
+          ))}
+        </div>
+      )}
+      <div className="grid sm:grid-cols-2 gap-3">
+        {Array.isArray(app.ai_strengths) && app.ai_strengths.length > 0 && (
+          <div>
+            <div className="text-xs font-semibold text-emerald-700 mb-1 flex items-center gap-1"><ThumbsUp size={11} /> Points forts</div>
+            <ul className="text-xs space-y-0.5 list-disc list-inside text-foreground/80">
+              {app.ai_strengths.map((s, i) => <li key={i}>{s}</li>)}
+            </ul>
+          </div>
+        )}
+        {Array.isArray(app.ai_weaknesses) && app.ai_weaknesses.length > 0 && (
+          <div>
+            <div className="text-xs font-semibold text-amber-700 mb-1 flex items-center gap-1"><AlertCircle size={11} /> Points d'attention</div>
+            <ul className="text-xs space-y-0.5 list-disc list-inside text-foreground/80">
+              {app.ai_weaknesses.map((s, i) => <li key={i}>{s}</li>)}
+            </ul>
+          </div>
+        )}
+      </div>
+      {app.ai_analyzed_at && (
+        <p className="text-[10px] text-muted-foreground">Analysé le {format(new Date(app.ai_analyzed_at), "dd/MM/yyyy HH:mm")}</p>
+      )}
+    </div>
+  );
+}
+
