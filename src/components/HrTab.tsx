@@ -761,6 +761,16 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab }: { onbo
                         <Button variant="outline" size="sm" onClick={() => handleOpenSharePointFolder(app)}>
                           <FolderOpen size={14} /> Ouvrir dossier SharePoint
                         </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => analyzeCv(app)}
+                          disabled={analyzingIds.has(app.id) || app.ai_status === "processing"}
+                        >
+                          {analyzingIds.has(app.id) || app.ai_status === "processing"
+                            ? <><Loader2 size={14} className="animate-spin" /> Analyse…</>
+                            : <><Sparkles size={14} /> {app.ai_analyzed_at ? "Réanalyser CV" : "Analyser CV"}</>}
+                        </Button>
                         {isAdmin && (
                           <Button variant="destructive" size="sm" onClick={() => handleDeleteSharePointFolder(app)}>
                             <FolderX size={14} /> Supprimer dossier
@@ -768,6 +778,11 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab }: { onbo
                         )}
                       </div>
                     );
+                  })()}
+                  {(app.ai_analyzed_at || app.ai_status === "processing" || app.ai_status === "error") && (
+                    <AiAnalysisBlock app={app} />
+                  )}
+
                   })()}
                 </CardContent>
               </Card>
