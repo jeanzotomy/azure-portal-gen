@@ -261,6 +261,17 @@ export type Database = {
       }
       job_applications: {
         Row: {
+          ai_analyzed_at: string | null
+          ai_error: string | null
+          ai_experience_years: number | null
+          ai_match_percentage: number | null
+          ai_recommendation: string | null
+          ai_score: number | null
+          ai_skills: Json | null
+          ai_status: string | null
+          ai_strengths: Json | null
+          ai_summary: string | null
+          ai_weaknesses: Json | null
           cover_letter_path: string | null
           created_at: string
           cv_path: string
@@ -281,6 +292,17 @@ export type Database = {
           years_experience: number | null
         }
         Insert: {
+          ai_analyzed_at?: string | null
+          ai_error?: string | null
+          ai_experience_years?: number | null
+          ai_match_percentage?: number | null
+          ai_recommendation?: string | null
+          ai_score?: number | null
+          ai_skills?: Json | null
+          ai_status?: string | null
+          ai_strengths?: Json | null
+          ai_summary?: string | null
+          ai_weaknesses?: Json | null
           cover_letter_path?: string | null
           created_at?: string
           cv_path: string
@@ -301,6 +323,17 @@ export type Database = {
           years_experience?: number | null
         }
         Update: {
+          ai_analyzed_at?: string | null
+          ai_error?: string | null
+          ai_experience_years?: number | null
+          ai_match_percentage?: number | null
+          ai_recommendation?: string | null
+          ai_score?: number | null
+          ai_skills?: Json | null
+          ai_status?: string | null
+          ai_strengths?: Json | null
+          ai_summary?: string | null
+          ai_weaknesses?: Json | null
           cover_letter_path?: string | null
           created_at?: string
           cv_path?: string
