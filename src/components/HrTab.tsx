@@ -783,7 +783,7 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab }: { onbo
                     <AiAnalysisBlock app={app} />
                   )}
 
-                  })()}
+
                 </CardContent>
               </Card>
             );
