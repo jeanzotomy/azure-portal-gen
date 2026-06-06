@@ -57,6 +57,17 @@ interface JobApplication {
   status: AppStatus;
   notes: string | null;
   created_at: string;
+  ai_status?: string | null;
+  ai_score?: number | null;
+  ai_match_percentage?: number | null;
+  ai_summary?: string | null;
+  ai_skills?: string[] | null;
+  ai_strengths?: string[] | null;
+  ai_weaknesses?: string[] | null;
+  ai_recommendation?: string | null;
+  ai_experience_years?: number | null;
+  ai_analyzed_at?: string | null;
+  ai_error?: string | null;
 }
 
 const STATUS_COLORS: Record<JobStatus, string> = {
