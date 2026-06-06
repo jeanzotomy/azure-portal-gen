@@ -428,6 +428,22 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab }: { onbo
     window.open(data.signedUrl, "_blank");
   };
 
+  const [analyzingIds, setAnalyzingIds] = useState<Set<string>>(new Set());
+  const analyzeCv = async (app: JobApplication) => {
+    setAnalyzingIds((prev) => new Set(prev).add(app.id));
+    setApplications((prev) => prev.map((a) => a.id === app.id ? { ...a, ai_status: "processing", ai_error: null } : a));
+    const { data, error } = await supabase.functions.invoke("analyze-cv", { body: { application_id: app.id } });
+    setAnalyzingIds((prev) => { const n = new Set(prev); n.delete(app.id); return n; });
+    if (error || (data as any)?.error) {
+      toast({ title: "Analyse échouée", description: error?.message || (data as any)?.error || "Erreur", variant: "destructive" });
+      load();
+      return;
+    }
+    toast({ title: "✓ Analyse terminée" });
+    load();
+  };
+
+
   const extractSharePointUrl = (notes: string | null): string | null => {
     if (!notes) return null;
     const match = notes.match(/https?:\/\/[^\s)]+/i);
