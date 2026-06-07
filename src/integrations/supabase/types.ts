@@ -428,6 +428,11 @@ export type Database = {
           id: string
           notes: string | null
           process_id: string
+          quiz_answers: Json | null
+          quiz_passed: boolean | null
+          quiz_score: number | null
+          quiz_submitted_at: string | null
+          source: string
           training_id: string
         }
         Insert: {
@@ -437,6 +442,11 @@ export type Database = {
           id?: string
           notes?: string | null
           process_id: string
+          quiz_answers?: Json | null
+          quiz_passed?: boolean | null
+          quiz_score?: number | null
+          quiz_submitted_at?: string | null
+          source?: string
           training_id: string
         }
         Update: {
@@ -446,6 +456,11 @@ export type Database = {
           id?: string
           notes?: string | null
           process_id?: string
+          quiz_answers?: Json | null
+          quiz_passed?: boolean | null
+          quiz_score?: number | null
+          quiz_submitted_at?: string | null
+          source?: string
           training_id?: string
         }
         Relationships: [
@@ -1400,51 +1415,168 @@ export type Database = {
           },
         ]
       }
+      training_group_assignments: {
+        Row: {
+          assigned_at: string
+          assigned_by: string
+          group_id: string
+          training_id: string
+        }
+        Insert: {
+          assigned_at?: string
+          assigned_by: string
+          group_id: string
+          training_id: string
+        }
+        Update: {
+          assigned_at?: string
+          assigned_by?: string
+          group_id?: string
+          training_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_group_assignments_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "training_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_group_assignments_training_id_fkey"
+            columns: ["training_id"]
+            isOneToOne: false
+            referencedRelation: "trainings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_group_members: {
+        Row: {
+          added_at: string
+          added_by: string
+          group_id: string
+          process_id: string
+        }
+        Insert: {
+          added_at?: string
+          added_by: string
+          group_id: string
+          process_id: string
+        }
+        Update: {
+          added_at?: string
+          added_by?: string
+          group_id?: string
+          process_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_group_members_group_id_fkey"
+            columns: ["group_id"]
+            isOneToOne: false
+            referencedRelation: "training_groups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_group_members_process_id_fkey"
+            columns: ["process_id"]
+            isOneToOne: false
+            referencedRelation: "onboarding_processes"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_groups: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       trainings: {
         Row: {
           active: boolean
+          ai_generated: boolean
           category: string | null
+          content: Json | null
           created_at: string
           created_by: string
           departments: string[]
           description: string | null
           duration_minutes: number | null
           id: string
+          level: string | null
+          passing_score: number
+          quiz: Json | null
           sectors: string[]
           target_job_titles: string[]
           title: string
+          topic: string | null
           updated_at: string
-          url: string
+          url: string | null
         }
         Insert: {
           active?: boolean
+          ai_generated?: boolean
           category?: string | null
+          content?: Json | null
           created_at?: string
           created_by: string
           departments?: string[]
           description?: string | null
           duration_minutes?: number | null
           id?: string
+          level?: string | null
+          passing_score?: number
+          quiz?: Json | null
           sectors?: string[]
           target_job_titles?: string[]
           title: string
+          topic?: string | null
           updated_at?: string
-          url: string
+          url?: string | null
         }
         Update: {
           active?: boolean
+          ai_generated?: boolean
           category?: string | null
+          content?: Json | null
           created_at?: string
           created_by?: string
           departments?: string[]
           description?: string | null
           duration_minutes?: number | null
           id?: string
+          level?: string | null
+          passing_score?: number
+          quiz?: Json | null
           sectors?: string[]
           target_job_titles?: string[]
           title?: string
+          topic?: string | null
           updated_at?: string
-          url?: string
+          url?: string | null
         }
         Relationships: []
       }
