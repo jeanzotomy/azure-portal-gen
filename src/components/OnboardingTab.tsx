@@ -554,29 +554,9 @@ function StepContent({ step, contract, docs, trainings = [], uploading, onUpload
             Aucune formation assignée pour le moment. Le service RH vous attribuera vos modules dès que possible.
           </div>
         ) : (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {trainings.map((t: any) => (
-              <div key={t.id} className="p-4 bg-white rounded-lg border flex items-start gap-3">
-                <div className={`flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center ${t.completed_at ? "bg-emerald-100 text-emerald-600" : "bg-primary/10 text-primary"}`}>
-                  {t.completed_at ? <CheckCircle2 className="h-5 w-5" /> : <GraduationCap className="h-5 w-5" />}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-medium text-sm">{t.training?.title}</span>
-                    {t.training?.duration_minutes && <Badge variant="outline" className="text-[10px]">{t.training.duration_minutes} min</Badge>}
-                    {t.training?.category && <Badge variant="secondary" className="text-[10px]">{t.training.category}</Badge>}
-                  </div>
-                  {t.training?.description && <p className="text-xs text-muted-foreground mt-1">{t.training.description}</p>}
-                  <a href={t.training?.url} target="_blank" rel="noreferrer" className="text-xs text-primary hover:underline inline-flex items-center gap-1 mt-2">
-                    <Download className="h-3 w-3" />Ouvrir la formation
-                  </a>
-                </div>
-                {!t.completed_at && (
-                  <Button size="sm" variant="outline" onClick={() => onMarkTrainingDone(t.id)}>
-                    <CheckCircle2 className="h-4 w-4 mr-1" />Suivie
-                  </Button>
-                )}
-              </div>
+              <TrainingPlayer key={t.id} assigned={t} onComplete={() => onMarkTrainingDone(t.id)} />
             ))}
           </div>
         )}
