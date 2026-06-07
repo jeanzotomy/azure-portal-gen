@@ -598,3 +598,139 @@ function StepContent({ step, contract, docs, trainings = [], uploading, onUpload
 
   return null;
 }
+
+/* =================== TRAINING PLAYER (content + QCM) =================== */
+function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: () => void }) {
+  const t = assigned.training;
+  const hasContent = !!(t?.content?.modules?.length);
+  const hasQuiz = !!(t?.quiz?.questions?.length);
+  const passingScore = t?.passing_score || 70;
+  const [expanded, setExpanded] = useState(false);
+  const [quizOpen, setQuizOpen] = useState(false);
+  const [answers, setAnswers] = useState<Record<number, number>>({});
+  const [submitting, setSubmitting] = useState(false);
+  const [result, setResult] = useState<{ score: number; passed: boolean } | null>(
+    assigned.quiz_score != null ? { score: assigned.quiz_score, passed: !!assigned.quiz_passed } : null
+  );
+
+  const submitQuiz = async () => {
+    if (!hasQuiz) return;
+    const questions = t.quiz.questions as any[];
+    if (Object.keys(answers).length < questions.length) {
+      toast.error("Répondez à toutes les questions");
+      return;
+    }
+    setSubmitting(true);
+    let correct = 0;
+    questions.forEach((q, i) => { if (answers[i] === q.correct_index) correct++; });
+    const score = Math.round((correct / questions.length) * 100);
+    const passed = score >= passingScore;
+    const { error } = await (supabase.from("onboarding_assigned_trainings") as any).update({
+      quiz_score: score, quiz_passed: passed, quiz_answers: answers, quiz_submitted_at: new Date().toISOString(),
+      completed_at: passed ? new Date().toISOString() : null,
+    }).eq("id", assigned.id);
+    setSubmitting(false);
+    if (error) return toast.error(error.message);
+    setResult({ score, passed });
+    if (passed) {
+      toast.success(`QCM réussi (${score}%)`);
+      onComplete();
+    } else {
+      toast.error(`Score ${score}% — minimum requis ${passingScore}%. Vous pouvez réessayer.`);
+    }
+  };
+
+  return (
+    <div className={`bg-white rounded-lg border ${assigned.completed_at ? "border-emerald-200" : ""}`}>
+      <div className="p-4 flex items-start gap-3">
+        <div className={`flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center ${assigned.completed_at ? "bg-emerald-100 text-emerald-600" : "bg-primary/10 text-primary"}`}>
+          {assigned.completed_at ? <CheckCircle2 className="h-5 w-5" /> : <GraduationCap className="h-5 w-5" />}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="font-medium text-sm">{t?.title}</span>
+            {t?.duration_minutes && <Badge variant="outline" className="text-[10px]">{t.duration_minutes} min</Badge>}
+            {t?.category && <Badge variant="secondary" className="text-[10px]">{t.category}</Badge>}
+            {hasQuiz && <Badge variant="outline" className="text-[10px]">QCM {t.quiz.questions.length}q · ≥{passingScore}%</Badge>}
+            {result && <Badge variant={result.passed ? "default" : "destructive"} className="text-[10px]">{result.passed ? "Réussi" : "Échec"} {result.score}%</Badge>}
+          </div>
+          {t?.description && <p className="text-xs text-muted-foreground mt-1">{t.description}</p>}
+          <div className="flex gap-2 mt-2 flex-wrap">
+            {hasContent && (
+              <Button size="sm" variant="outline" onClick={() => setExpanded(v => !v)}>
+                {expanded ? "Masquer le cours" : "Voir le cours"}
+              </Button>
+            )}
+            {t?.url && (
+              <a href={t.url} target="_blank" rel="noreferrer">
+                <Button size="sm" variant="outline"><Download className="h-3 w-3 mr-1" />Ressource externe</Button>
+              </a>
+            )}
+            {hasQuiz && !assigned.completed_at && (
+              <Button size="sm" onClick={() => setQuizOpen(true)} className="bg-gradient-to-r from-primary to-[#007aa3]">
+                <GraduationCap className="h-3 w-3 mr-1" />{result ? "Réessayer le QCM" : "Passer le QCM"}
+              </Button>
+            )}
+            {!hasQuiz && !assigned.completed_at && (
+              <Button size="sm" variant="outline" onClick={onComplete}>
+                <CheckCircle2 className="h-3 w-3 mr-1" />Marquer comme suivi
+              </Button>
+            )}
+          </div>
+        </div>
+      </div>
+      {expanded && hasContent && (
+        <div className="px-4 pb-4 border-t pt-3 space-y-3 text-sm">
+          {t.content.objectives?.length > 0 && (
+            <div>
+              <div className="font-semibold text-xs uppercase text-muted-foreground mb-1">Objectifs</div>
+              <ul className="list-disc list-inside space-y-0.5">{t.content.objectives.map((o: string, i: number) => <li key={i}>{o}</li>)}</ul>
+            </div>
+          )}
+          {t.content.modules?.map((m: any, i: number) => (
+            <div key={i} className="border-l-2 border-primary/30 pl-3">
+              <div className="font-semibold">{m.title}</div>
+              {m.summary && <p className="text-xs text-muted-foreground mt-1">{m.summary}</p>}
+              {m.key_points?.length > 0 && (
+                <ul className="text-xs list-disc list-inside mt-1 space-y-0.5">{m.key_points.map((p: string, j: number) => <li key={j}>{p}</li>)}</ul>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+
+      {quizOpen && hasQuiz && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setQuizOpen(false)}>
+          <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+            <div className="bg-gradient-to-r from-primary to-[#007aa3] p-4 rounded-t-lg">
+              <h3 className="text-white font-semibold">QCM — {t.title}</h3>
+              <p className="text-cyan-100 text-xs">Score minimum requis : {passingScore}%</p>
+            </div>
+            <div className="p-4 space-y-4">
+              {t.quiz.questions.map((q: any, i: number) => (
+                <div key={i} className="space-y-2">
+                  <div className="font-medium text-sm">{i + 1}. {q.question}</div>
+                  <div className="space-y-1">
+                    {q.options.map((opt: string, j: number) => (
+                      <label key={j} className={`flex items-center gap-2 p-2 border rounded cursor-pointer text-sm ${answers[i] === j ? "border-primary bg-primary/5" : "hover:bg-muted/30"}`}>
+                        <input type="radio" name={`q-${i}`} checked={answers[i] === j} onChange={() => setAnswers({ ...answers, [i]: j })} />
+                        <span>{opt}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="p-4 border-t flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setQuizOpen(false)} disabled={submitting}>Annuler</Button>
+              <Button onClick={async () => { await submitQuiz(); setQuizOpen(false); }} disabled={submitting}>
+                {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
+                Soumettre
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
