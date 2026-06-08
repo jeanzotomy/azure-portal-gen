@@ -38,10 +38,10 @@ Deno.serve(async (req) => {
     if (!LOVABLE_API_KEY) return new Response(JSON.stringify({ error: 'LOVABLE_API_KEY manquante' }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
     const sys = lang === 'fr'
-      ? `Tu es un concepteur pédagogique expert. Tu produis des formations e-learning concises, structurées et engageantes, avec un QCM d'évaluation rigoureux. Réponds STRICTEMENT en JSON valide, en français, sans markdown.`
-      : `You are an expert instructional designer. Produce concise, well-structured e-learning courses with a rigorous multiple-choice quiz. Reply STRICTLY in valid JSON, no markdown.`;
+      ? `Tu es un concepteur pédagogique expert. Tu rédiges des FORMATIONS E-LEARNING COMPLÈTES avec un véritable contenu de cours rédigé (paragraphes pédagogiques, pas juste des puces), structuré en modules et sections, suivi d'un QCM rigoureux. Réponds STRICTEMENT en JSON valide, en français, sans markdown.`
+      : `You are an expert instructional designer. Write COMPLETE e-learning COURSES with real written lesson body (paragraphs, not just bullets), structured in modules and sections, plus a rigorous quiz. Reply STRICTLY in valid JSON, no markdown.`;
 
-    const userPrompt = `Génère une formation sur le sujet suivant :
+    const userPrompt = `Génère une formation e-learning COMPLÈTE et RÉDIGÉE sur le sujet suivant :
 Sujet: ${body.topic.trim()}
 Niveau: ${level}
 Durée cible: ${duration} minutes
@@ -56,29 +56,37 @@ Retourne UN OBJET JSON STRICT avec cette forme exacte :
   "duration_minutes": ${duration},
   "content": {
     "objectives": ["objectif 1", "objectif 2", "objectif 3"],
+    "introduction": "Paragraphe d'introduction RÉDIGÉ de 3 à 5 phrases : contexte, importance du sujet, ce que l'apprenant va apprendre.",
     "modules": [
-      { "title": "Module 1 - ...", "summary": "synthèse 2-3 phrases", "key_points": ["point 1","point 2","point 3","point 4"] },
-      { "title": "Module 2 - ...", "summary": "...", "key_points": ["...","...","...","..."] },
-      { "title": "Module 3 - ...", "summary": "...", "key_points": ["...","...","...","..."] }
+      {
+        "title": "Module 1 - Titre clair",
+        "summary": "Phrase de présentation du module (1-2 phrases).",
+        "sections": [
+          { "heading": "Titre de section", "body": "Paragraphe pédagogique RÉDIGÉ de 4 à 8 phrases avec définitions, explications, exemples concrets et bonnes pratiques. Texte rédigé, PAS de puces." },
+          { "heading": "Autre section", "body": "Autre paragraphe rédigé de 4 à 8 phrases avec exemples applicables." }
+        ],
+        "key_points": ["Point clé à retenir 1", "Point clé à retenir 2", "Point clé à retenir 3", "Point clé à retenir 4"],
+        "example": "Mini cas pratique illustratif (2-3 phrases)."
+      }
     ],
-    "resources": ["ressource 1 (optionnel)", "ressource 2 (optionnel)"]
+    "conclusion": "Paragraphe de synthèse RÉDIGÉ de 2 à 4 phrases résumant les apprentissages et invitant au QCM.",
+    "resources": ["ressource 1 (optionnel)"]
   },
   "quiz": {
     "passing_score": 70,
     "questions": [
-      {
-        "question": "Énoncé de la question 1 ?",
-        "options": ["Option A", "Option B", "Option C", "Option D"],
-        "correct_index": 0,
-        "explanation": "Pourquoi cette réponse est correcte (1 phrase)"
-      }
+      { "question": "Énoncé ?", "options": ["A","B","C","D"], "correct_index": 0, "explanation": "Pourquoi cette réponse est correcte." }
     ]
   }
 }
-Contraintes :
-- Exactement ${numQ} questions, chacune avec 4 options et 1 seul correct_index (0-3).
-- 3 à 5 modules selon la durée.
-- Pas de texte hors du JSON.`;
+
+Contraintes IMPORTANTES :
+- 3 à 5 modules, chacun avec 2 à 4 sections RÉDIGÉES (paragraphes complets, pas des puces).
+- Chaque section.body fait au moins 4 phrases pédagogiques complètes.
+- Inclure "introduction" et "conclusion" rédigées.
+- Exactement ${numQ} questions QCM, chacune avec 4 options et 1 seul correct_index (0-3).
+- Les questions doivent tester le contenu rédigé ci-dessus.
+- Pas de markdown, pas de texte hors du JSON.`;
 
     const aiRes = await fetch('https://ai.gateway.lovable.dev/v1/chat/completions', {
       method: 'POST',
