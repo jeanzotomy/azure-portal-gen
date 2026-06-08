@@ -421,10 +421,23 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
                     <span className="text-muted-foreground">{form.content.objectives.join(" · ")}</span>
                   </div>
                 )}
-                <div className="space-y-1 text-xs">
+                <div className="space-y-2 text-xs max-h-60 overflow-y-auto">
+                  {form.content.introduction && (
+                    <div className="text-muted-foreground italic">{form.content.introduction}</div>
+                  )}
                   {(form.content.modules || []).map((m: any, i: number) => (
-                    <div key={i}>• <span className="font-medium">{m.title}</span> <span className="text-muted-foreground">— {m.key_points?.length || 0} points</span></div>
+                    <div key={i} className="border-l-2 border-primary/30 pl-2">
+                      <div className="font-medium">{m.title}</div>
+                      {m.sections?.length > 0 ? (
+                        <div className="text-muted-foreground">{m.sections.length} section(s) rédigée(s) · {m.key_points?.length || 0} points clés</div>
+                      ) : (
+                        <div className="text-muted-foreground">{m.key_points?.length || 0} points</div>
+                      )}
+                    </div>
                   ))}
+                  {form.content.conclusion && (
+                    <div className="text-muted-foreground italic">Conclusion : {form.content.conclusion.slice(0, 120)}…</div>
+                  )}
                 </div>
               </Card>
             )}
