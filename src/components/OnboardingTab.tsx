@@ -680,22 +680,54 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
         </div>
       </div>
       {expanded && hasContent && (
-        <div className="px-4 pb-4 border-t pt-3 space-y-3 text-sm">
+        <div className="px-4 pb-4 border-t pt-3 space-y-4 text-sm">
           {t.content.objectives?.length > 0 && (
             <div>
-              <div className="font-semibold text-xs uppercase text-muted-foreground mb-1">Objectifs</div>
+              <div className="font-semibold text-xs uppercase text-muted-foreground mb-1">Objectifs pédagogiques</div>
               <ul className="list-disc list-inside space-y-0.5">{t.content.objectives.map((o: string, i: number) => <li key={i}>{o}</li>)}</ul>
             </div>
           )}
+          {t.content.introduction && (
+            <div>
+              <div className="font-semibold text-xs uppercase text-muted-foreground mb-1">Introduction</div>
+              <p className="text-sm leading-relaxed whitespace-pre-line">{t.content.introduction}</p>
+            </div>
+          )}
           {t.content.modules?.map((m: any, i: number) => (
-            <div key={i} className="border-l-2 border-primary/30 pl-3">
-              <div className="font-semibold">{m.title}</div>
-              {m.summary && <p className="text-xs text-muted-foreground mt-1">{m.summary}</p>}
+            <div key={i} className="border-l-2 border-primary/30 pl-3 space-y-2">
+              <div className="font-semibold text-base">{m.title}</div>
+              {m.summary && <p className="text-xs text-muted-foreground italic">{m.summary}</p>}
+              {m.sections?.map((s: any, k: number) => (
+                <div key={k} className="space-y-1">
+                  {s.heading && <div className="font-medium text-sm">{s.heading}</div>}
+                  {s.body && <p className="text-sm leading-relaxed whitespace-pre-line">{s.body}</p>}
+                </div>
+              ))}
+              {m.example && (
+                <div className="bg-primary/5 border border-primary/20 rounded p-2 text-xs">
+                  <span className="font-semibold">Exemple : </span>{m.example}
+                </div>
+              )}
               {m.key_points?.length > 0 && (
-                <ul className="text-xs list-disc list-inside mt-1 space-y-0.5">{m.key_points.map((p: string, j: number) => <li key={j}>{p}</li>)}</ul>
+                <div>
+                  <div className="font-semibold text-xs uppercase text-muted-foreground mt-1 mb-1">À retenir</div>
+                  <ul className="text-xs list-disc list-inside space-y-0.5">{m.key_points.map((p: string, j: number) => <li key={j}>{p}</li>)}</ul>
+                </div>
               )}
             </div>
           ))}
+          {t.content.conclusion && (
+            <div>
+              <div className="font-semibold text-xs uppercase text-muted-foreground mb-1">Conclusion</div>
+              <p className="text-sm leading-relaxed whitespace-pre-line">{t.content.conclusion}</p>
+            </div>
+          )}
+          {t.content.resources?.length > 0 && (
+            <div>
+              <div className="font-semibold text-xs uppercase text-muted-foreground mb-1">Ressources complémentaires</div>
+              <ul className="text-xs list-disc list-inside space-y-0.5">{t.content.resources.map((r: string, i: number) => <li key={i}>{r}</li>)}</ul>
+            </div>
+          )}
         </div>
       )}
 
