@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, MessageSquare, Send, AtSign, Trash2 } from "lucide-react";
+import { Loader2, MessageSquare, Send, AtSign, Trash2, SmilePlus } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "sonner";
 
 interface CoLearner { user_id: string; full_name: string; role: string; }
@@ -44,8 +45,27 @@ export function TrainingComments({
   const [body, setBody] = useState("");
   const [mentionQuery, setMentionQuery] = useState<string | null>(null);
   const [mentionStart, setMentionStart] = useState<number>(-1);
-  const [selectedMentions, setSelectedMentions] = useState<Record<string, string>>({}); // userId -> displayName
+  const [selectedMentions, setSelectedMentions] = useState<Record<string, string>>({});
+  // reactions: commentId -> emoji -> { count, mine }
+  const [reactions, setReactions] = useState<Record<string, Record<string, { count: number; mine: boolean }>>>({});
   const taRef = useRef<HTMLTextAreaElement>(null);
+
+  const EMOJIS = ["👍", "❤️", "🎯", "💡", "🔥", "👏"];
+
+  const ingestReaction = (row: any, op: "add" | "del") => {
+    setReactions(prev => {
+      const cid = row.comment_id;
+      const em = row.emoji;
+      const next = { ...prev, [cid]: { ...(prev[cid] || {}) } };
+      const cur = next[cid][em] || { count: 0, mine: false };
+      next[cid][em] = {
+        count: Math.max(0, cur.count + (op === "add" ? 1 : -1)),
+        mine: row.user_id === currentUserId ? op === "add" : cur.mine,
+      };
+      if (next[cid][em].count === 0) delete next[cid][em];
+      return next;
+    });
+  };
 
   // Initial load + realtime
   useEffect(() => {
@@ -60,8 +80,29 @@ export function TrainingComments({
         supabase.rpc("list_training_co_learners" as any, { _training_id: trainingId }),
       ]);
       if (!active) return;
-      if (cRes.data) setComments(cRes.data);
+      const list: Comment[] = cRes.data || [];
+      if (cRes.data) setComments(list);
       if (lRes.data) setCoLearners(lRes.data as any);
+
+      // Load reactions for all comments
+      if (list.length > 0) {
+        const ids = list.map(c => c.id);
+        const { data: rxRows } = await (supabase.from("training_comment_reactions") as any)
+          .select("comment_id, user_id, emoji")
+          .in("comment_id", ids);
+        if (active && rxRows) {
+          const agg: Record<string, Record<string, { count: number; mine: boolean }>> = {};
+          (rxRows as any[]).forEach(r => {
+            agg[r.comment_id] = agg[r.comment_id] || {};
+            const cur = agg[r.comment_id][r.emoji] || { count: 0, mine: false };
+            agg[r.comment_id][r.emoji] = {
+              count: cur.count + 1,
+              mine: cur.mine || r.user_id === currentUserId,
+            };
+          });
+          setReactions(agg);
+        }
+      }
       setLoading(false);
     };
     load();
@@ -75,6 +116,14 @@ export function TrainingComments({
       .on("postgres_changes",
         { event: "DELETE", schema: "public", table: "training_comments", filter: `training_id=eq.${trainingId}` },
         (payload) => setComments(prev => prev.filter(c => c.id !== (payload.old as any).id)),
+      )
+      .on("postgres_changes",
+        { event: "INSERT", schema: "public", table: "training_comment_reactions" },
+        (payload) => ingestReaction(payload.new, "add"),
+      )
+      .on("postgres_changes",
+        { event: "DELETE", schema: "public", table: "training_comment_reactions" },
+        (payload) => ingestReaction(payload.old, "del"),
       )
       .subscribe();
 
@@ -137,6 +186,22 @@ export function TrainingComments({
     if (error) toast.error(error.message);
   };
 
+  const toggleReaction = async (commentId: string, emoji: string) => {
+    const mine = reactions[commentId]?.[emoji]?.mine;
+    if (mine) {
+      const { error } = await (supabase.from("training_comment_reactions") as any)
+        .delete()
+        .eq("comment_id", commentId)
+        .eq("user_id", currentUserId)
+        .eq("emoji", emoji);
+      if (error) toast.error(error.message);
+    } else {
+      const { error } = await (supabase.from("training_comment_reactions") as any)
+        .insert({ comment_id: commentId, user_id: currentUserId, emoji });
+      if (error && !error.message.includes("duplicate")) toast.error(error.message);
+    }
+  };
+
   const filtered = mentionQuery !== null
     ? coLearners.filter(c => c.user_id !== currentUserId && c.full_name.toLowerCase().includes(mentionQuery)).slice(0, 6)
     : [];
@@ -195,6 +260,35 @@ export function TrainingComments({
                     )}
                   </div>
                   <div className="text-xs leading-relaxed">{renderBody(c.body, c.mentions || [])}</div>
+                  <div className="flex items-center gap-1 mt-1 flex-wrap">
+                    {Object.entries(reactions[c.id] || {}).map(([em, info]) => (
+                      <button
+                        key={em}
+                        onClick={() => toggleReaction(c.id, em)}
+                        className={`text-[11px] px-1.5 py-0.5 rounded-full border transition ${info.mine ? "bg-primary/10 border-primary/40 text-primary" : "bg-muted/40 border-transparent hover:bg-muted"}`}
+                      >
+                        {em} {info.count}
+                      </button>
+                    ))}
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button className="text-[11px] px-1 py-0.5 rounded-full text-muted-foreground hover:bg-muted/40">
+                          <SmilePlus className="h-3 w-3" />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent align="start" className="w-auto p-1 flex gap-1">
+                        {EMOJIS.map(em => (
+                          <button
+                            key={em}
+                            onClick={() => toggleReaction(c.id, em)}
+                            className="text-base hover:scale-125 transition px-1"
+                          >
+                            {em}
+                          </button>
+                        ))}
+                      </PopoverContent>
+                    </Popover>
+                  </div>
                 </div>
               </div>
             ))}

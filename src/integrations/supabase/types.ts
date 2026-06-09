@@ -1502,6 +1502,38 @@ export type Database = {
           },
         ]
       }
+      training_comment_reactions: {
+        Row: {
+          comment_id: string
+          created_at: string
+          emoji: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          comment_id: string
+          created_at?: string
+          emoji: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          comment_id?: string
+          created_at?: string
+          emoji?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_comment_reactions_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "training_comments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       training_comments: {
         Row: {
           author_name: string
@@ -1813,6 +1845,17 @@ export type Database = {
       generate_project_number: { Args: never; Returns: string }
       generate_service_invoice_number: { Args: never; Returns: string }
       generate_ticket_number: { Args: never; Returns: string }
+      get_cohort_activity: {
+        Args: { _limit?: number }
+        Returns: {
+          detail: string
+          display_name: string
+          emoji: string
+          happened_at: string
+          kind: string
+          user_id: string
+        }[]
+      }
       get_job_by_slug: {
         Args: { _slug: string }
         Returns: {
