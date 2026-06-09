@@ -247,8 +247,8 @@ export default function OnboardingAdminTab({ readOnly = false }: { readOnly?: bo
                       )}
                       {!readOnly && d.status !== "refuse" && (
                         <Button size="sm" variant="outline" onClick={() => {
-                          const r = prompt("Raison du refus ?");
-                          if (r) reviewDoc(d.id, "refuse", r);
+                          setRejectDoc(d);
+                          setRejectReason("");
                         }}>
                           <XCircle className="h-3 w-3" />
                         </Button>
