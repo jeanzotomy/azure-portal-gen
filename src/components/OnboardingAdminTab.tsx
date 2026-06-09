@@ -33,6 +33,8 @@ export default function OnboardingAdminTab({ readOnly = false }: { readOnly?: bo
   const [contract, setContract] = useState<Contract | null>(null);
   const [uploadingContract, setUploadingContract] = useState(false);
   const [search, setSearch] = useState("");
+  const [rejectDoc, setRejectDoc] = useState<Doc | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
