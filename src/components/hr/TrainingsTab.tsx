@@ -84,7 +84,7 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
     setLoading(true);
     const [{ data: trs }, { data: procs }, { data: deps }, { data: secs }, { data: grps }] = await Promise.all([
       supabase.from("trainings").select("*").order("created_at", { ascending: false }),
-      supabase.from("onboarding_processes").select("id, candidate_name, candidate_email, job_id, created_at").order("created_at", { ascending: false }),
+      supabase.from("onboarding_processes").select("id, candidate_name, candidate_email, job_id, created_at").eq("kind", "onboarding").order("created_at", { ascending: false }),
       supabase.from("departments").select("name").order("name"),
       supabase.from("sectors").select("name").order("name"),
       supabase.from("training_groups").select("id, name, description").order("created_at", { ascending: false }),
