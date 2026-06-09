@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import {
   CheckCircle2, Circle, Clock, FileSignature, FileUp, GraduationCap,
   Laptop, Users, PartyPopper, Sparkles, Download, Loader2, AlertCircle, RefreshCw, Lock,
-  XCircle, ShieldAlert,
+  XCircle, ShieldAlert, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { SignaturePad } from "@/components/SignaturePad";
 import type { User as SupaUser } from "@supabase/supabase-js";
@@ -599,24 +599,39 @@ function StepContent({ step, contract, docs, trainings = [], uploading, onUpload
   return null;
 }
 
-/* =================== TRAINING PLAYER (content + QCM) =================== */
+/* =================== TRAINING PLAYER (paginated course + paginated QCM) =================== */
 function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: () => void }) {
   const t = assigned.training;
-  const hasContent = !!(t?.content?.modules?.length);
+  const content = t?.content || {};
+  const modules: any[] = content.modules || [];
+  const hasContent = modules.length > 0 || !!content.introduction || !!content.conclusion;
   const hasQuiz = !!(t?.quiz?.questions?.length);
   const passingScore = t?.passing_score || 70;
+
+  // Build course pages: intro -> each module -> conclusion -> resources
+  const coursePages: { kind: string; data?: any }[] = [];
+  if (content.objectives?.length || content.introduction) coursePages.push({ kind: "intro" });
+  modules.forEach((m, i) => coursePages.push({ kind: "module", data: { ...m, idx: i } }));
+  if (content.conclusion || content.resources?.length) coursePages.push({ kind: "conclusion" });
+
   const [expanded, setExpanded] = useState(false);
+  const [coursePage, setCoursePage] = useState(0);
   const [quizOpen, setQuizOpen] = useState(false);
+  const [quizPage, setQuizPage] = useState(0);
   const [answers, setAnswers] = useState<Record<number, number>>({});
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<{ score: number; passed: boolean } | null>(
-    assigned.quiz_score != null ? { score: assigned.quiz_score, passed: !!assigned.quiz_passed } : null
+    assigned.quiz_score != null ? { score: assigned.quiz_score, passed: !!assigned.quiz_passed } : null,
   );
+
+  const questions: any[] = hasQuiz ? t.quiz.questions : [];
+  const currentQ = questions[quizPage];
+  const currentAnswered = currentQ ? answers[quizPage] != null : false;
+  const allAnswered = questions.length > 0 && questions.every((_, i) => answers[i] != null);
 
   const submitQuiz = async () => {
     if (!hasQuiz) return;
-    const questions = t.quiz.questions as any[];
-    if (Object.keys(answers).length < questions.length) {
+    if (!allAnswered) {
       toast.error("Répondez à toutes les questions");
       return;
     }
@@ -632,6 +647,7 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
     setSubmitting(false);
     if (error) return toast.error(error.message);
     setResult({ score, passed });
+    setQuizOpen(false);
     if (passed) {
       toast.success(`QCM réussi (${score}%)`);
       onComplete();
@@ -639,6 +655,82 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
       toast.error(`Score ${score}% — minimum requis ${passingScore}%. Vous pouvez réessayer.`);
     }
   };
+
+  const openQuiz = () => {
+    setAnswers({});
+    setQuizPage(0);
+    setQuizOpen(true);
+  };
+
+  const renderCoursePage = (page: { kind: string; data?: any }) => {
+    if (page.kind === "intro") {
+      return (
+        <div className="space-y-4">
+          {content.objectives?.length > 0 && (
+            <div>
+              <div className="font-semibold text-xs uppercase text-muted-foreground mb-1">Objectifs pédagogiques</div>
+              <ul className="list-disc list-inside space-y-0.5 text-sm">{content.objectives.map((o: string, i: number) => <li key={i}>{o}</li>)}</ul>
+            </div>
+          )}
+          {content.introduction && (
+            <div>
+              <div className="font-semibold text-xs uppercase text-muted-foreground mb-1">Introduction</div>
+              <p className="text-sm leading-relaxed whitespace-pre-line">{content.introduction}</p>
+            </div>
+          )}
+        </div>
+      );
+    }
+    if (page.kind === "module") {
+      const m = page.data;
+      return (
+        <div className="border-l-2 border-primary/30 pl-3 space-y-2">
+          <div className="font-semibold text-base">Module {m.idx + 1} — {m.title}</div>
+          {m.summary && <p className="text-xs text-muted-foreground italic">{m.summary}</p>}
+          {m.sections?.map((s: any, k: number) => (
+            <div key={k} className="space-y-1">
+              {s.heading && <div className="font-medium text-sm">{s.heading}</div>}
+              {s.body && <p className="text-sm leading-relaxed whitespace-pre-line">{s.body}</p>}
+            </div>
+          ))}
+          {m.example && (
+            <div className="bg-primary/5 border border-primary/20 rounded p-2 text-xs">
+              <span className="font-semibold">Exemple : </span>{m.example}
+            </div>
+          )}
+          {m.key_points?.length > 0 && (
+            <div>
+              <div className="font-semibold text-xs uppercase text-muted-foreground mt-1 mb-1">À retenir</div>
+              <ul className="text-xs list-disc list-inside space-y-0.5">{m.key_points.map((p: string, j: number) => <li key={j}>{p}</li>)}</ul>
+            </div>
+          )}
+        </div>
+      );
+    }
+    if (page.kind === "conclusion") {
+      return (
+        <div className="space-y-4">
+          {content.conclusion && (
+            <div>
+              <div className="font-semibold text-xs uppercase text-muted-foreground mb-1">Conclusion</div>
+              <p className="text-sm leading-relaxed whitespace-pre-line">{content.conclusion}</p>
+            </div>
+          )}
+          {content.resources?.length > 0 && (
+            <div>
+              <div className="font-semibold text-xs uppercase text-muted-foreground mb-1">Ressources complémentaires</div>
+              <ul className="text-xs list-disc list-inside space-y-0.5">{content.resources.map((r: string, i: number) => <li key={i}>{r}</li>)}</ul>
+            </div>
+          )}
+        </div>
+      );
+    }
+    return null;
+  };
+
+  const courseProgress = coursePages.length > 0 ? Math.round(((coursePage + 1) / coursePages.length) * 100) : 0;
+  const quizProgress = questions.length > 0 ? Math.round(((quizPage + 1) / questions.length) * 100) : 0;
+  const onLastCoursePage = coursePage === coursePages.length - 1;
 
   return (
     <div className={`bg-white rounded-lg border ${assigned.completed_at ? "border-emerald-200" : ""}`}>
@@ -651,14 +743,14 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
             <span className="font-medium text-sm">{t?.title}</span>
             {t?.duration_minutes && <Badge variant="outline" className="text-[10px]">{t.duration_minutes} min</Badge>}
             {t?.category && <Badge variant="secondary" className="text-[10px]">{t.category}</Badge>}
-            {hasQuiz && <Badge variant="outline" className="text-[10px]">QCM {t.quiz.questions.length}q · ≥{passingScore}%</Badge>}
+            {hasQuiz && <Badge variant="outline" className="text-[10px]">QCM {questions.length}q · ≥{passingScore}%</Badge>}
             {result && <Badge variant={result.passed ? "default" : "destructive"} className="text-[10px]">{result.passed ? "Réussi" : "Échec"} {result.score}%</Badge>}
           </div>
           {t?.description && <p className="text-xs text-muted-foreground mt-1">{t.description}</p>}
           <div className="flex gap-2 mt-2 flex-wrap">
             {hasContent && (
-              <Button size="sm" variant="outline" onClick={() => setExpanded(v => !v)}>
-                {expanded ? "Masquer le cours" : "Voir le cours"}
+              <Button size="sm" variant="outline" onClick={() => { setExpanded(v => !v); setCoursePage(0); }}>
+                {expanded ? "Masquer le cours" : "Suivre le cours"}
               </Button>
             )}
             {t?.url && (
@@ -667,7 +759,7 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
               </a>
             )}
             {hasQuiz && !assigned.completed_at && (
-              <Button size="sm" onClick={() => setQuizOpen(true)} className="bg-gradient-to-r from-primary to-[#007aa3]">
+              <Button size="sm" onClick={openQuiz} className="bg-gradient-to-r from-primary to-[#007aa3]">
                 <GraduationCap className="h-3 w-3 mr-1" />{result ? "Réessayer le QCM" : "Passer le QCM"}
               </Button>
             )}
@@ -679,86 +771,82 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
           </div>
         </div>
       </div>
-      {expanded && hasContent && (
-        <div className="px-4 pb-4 border-t pt-3 space-y-4 text-sm">
-          {t.content.objectives?.length > 0 && (
-            <div>
-              <div className="font-semibold text-xs uppercase text-muted-foreground mb-1">Objectifs pédagogiques</div>
-              <ul className="list-disc list-inside space-y-0.5">{t.content.objectives.map((o: string, i: number) => <li key={i}>{o}</li>)}</ul>
+
+      {expanded && hasContent && coursePages.length > 0 && (
+        <div className="border-t bg-muted/20">
+          <div className="px-4 pt-3 flex items-center justify-between gap-3">
+            <div className="text-xs font-medium text-muted-foreground">
+              Page {coursePage + 1} / {coursePages.length}
             </div>
-          )}
-          {t.content.introduction && (
-            <div>
-              <div className="font-semibold text-xs uppercase text-muted-foreground mb-1">Introduction</div>
-              <p className="text-sm leading-relaxed whitespace-pre-line">{t.content.introduction}</p>
-            </div>
-          )}
-          {t.content.modules?.map((m: any, i: number) => (
-            <div key={i} className="border-l-2 border-primary/30 pl-3 space-y-2">
-              <div className="font-semibold text-base">{m.title}</div>
-              {m.summary && <p className="text-xs text-muted-foreground italic">{m.summary}</p>}
-              {m.sections?.map((s: any, k: number) => (
-                <div key={k} className="space-y-1">
-                  {s.heading && <div className="font-medium text-sm">{s.heading}</div>}
-                  {s.body && <p className="text-sm leading-relaxed whitespace-pre-line">{s.body}</p>}
-                </div>
-              ))}
-              {m.example && (
-                <div className="bg-primary/5 border border-primary/20 rounded p-2 text-xs">
-                  <span className="font-semibold">Exemple : </span>{m.example}
-                </div>
-              )}
-              {m.key_points?.length > 0 && (
-                <div>
-                  <div className="font-semibold text-xs uppercase text-muted-foreground mt-1 mb-1">À retenir</div>
-                  <ul className="text-xs list-disc list-inside space-y-0.5">{m.key_points.map((p: string, j: number) => <li key={j}>{p}</li>)}</ul>
-                </div>
-              )}
-            </div>
-          ))}
-          {t.content.conclusion && (
-            <div>
-              <div className="font-semibold text-xs uppercase text-muted-foreground mb-1">Conclusion</div>
-              <p className="text-sm leading-relaxed whitespace-pre-line">{t.content.conclusion}</p>
-            </div>
-          )}
-          {t.content.resources?.length > 0 && (
-            <div>
-              <div className="font-semibold text-xs uppercase text-muted-foreground mb-1">Ressources complémentaires</div>
-              <ul className="text-xs list-disc list-inside space-y-0.5">{t.content.resources.map((r: string, i: number) => <li key={i}>{r}</li>)}</ul>
-            </div>
-          )}
+            <Progress value={courseProgress} className="h-1.5 flex-1 max-w-xs" />
+          </div>
+          <div className="p-4 min-h-[180px] text-sm">
+            {renderCoursePage(coursePages[coursePage])}
+          </div>
+          <div className="px-4 pb-4 flex items-center justify-between gap-2 border-t pt-3">
+            <Button size="sm" variant="outline" onClick={() => setCoursePage(p => Math.max(0, p - 1))} disabled={coursePage === 0}>
+              <ChevronLeft className="h-4 w-4 mr-1" /> Précédent
+            </Button>
+            {!onLastCoursePage ? (
+              <Button size="sm" onClick={() => setCoursePage(p => Math.min(coursePages.length - 1, p + 1))} className="bg-gradient-to-r from-primary to-[#007aa3]">
+                Suivant <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            ) : hasQuiz && !assigned.completed_at ? (
+              <Button size="sm" onClick={openQuiz} className="bg-gradient-to-r from-primary to-[#007aa3]">
+                Passer au QCM <ChevronRight className="h-4 w-4 ml-1" />
+              </Button>
+            ) : !hasQuiz && !assigned.completed_at ? (
+              <Button size="sm" onClick={onComplete} className="bg-gradient-to-r from-primary to-[#007aa3]">
+                Terminer la formation <CheckCircle2 className="h-4 w-4 ml-1" />
+              </Button>
+            ) : (
+              <Badge variant="outline" className="text-[10px]">Fin du cours</Badge>
+            )}
+          </div>
         </div>
       )}
 
-      {quizOpen && hasQuiz && (
+      {quizOpen && hasQuiz && currentQ && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setQuizOpen(false)}>
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="bg-gradient-to-r from-primary to-[#007aa3] p-4 rounded-t-lg">
               <h3 className="text-white font-semibold">QCM — {t.title}</h3>
               <p className="text-cyan-100 text-xs">Score minimum requis : {passingScore}%</p>
             </div>
-            <div className="p-4 space-y-4">
-              {t.quiz.questions.map((q: any, i: number) => (
-                <div key={i} className="space-y-2">
-                  <div className="font-medium text-sm">{i + 1}. {q.question}</div>
-                  <div className="space-y-1">
-                    {q.options.map((opt: string, j: number) => (
-                      <label key={j} className={`flex items-center gap-2 p-2 border rounded cursor-pointer text-sm ${answers[i] === j ? "border-primary bg-primary/5" : "hover:bg-muted/30"}`}>
-                        <input type="radio" name={`q-${i}`} checked={answers[i] === j} onChange={() => setAnswers({ ...answers, [i]: j })} />
-                        <span>{opt}</span>
-                      </label>
-                    ))}
-                  </div>
-                </div>
-              ))}
+            <div className="px-4 pt-3 flex items-center justify-between gap-3">
+              <div className="text-xs font-medium text-muted-foreground">
+                Question {quizPage + 1} / {questions.length}
+              </div>
+              <Progress value={quizProgress} className="h-1.5 flex-1 max-w-xs" />
             </div>
-            <div className="p-4 border-t flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setQuizOpen(false)} disabled={submitting}>Annuler</Button>
-              <Button onClick={async () => { await submitQuiz(); setQuizOpen(false); }} disabled={submitting}>
-                {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
-                Soumettre
+            <div className="p-4 space-y-3 min-h-[200px]">
+              <div className="font-medium text-sm">{quizPage + 1}. {currentQ.question}</div>
+              <div className="space-y-1.5">
+                {currentQ.options.map((opt: string, j: number) => (
+                  <label key={j} className={`flex items-center gap-2 p-2.5 border rounded cursor-pointer text-sm ${answers[quizPage] === j ? "border-primary bg-primary/5" : "hover:bg-muted/30"}`}>
+                    <input type="radio" name={`q-${quizPage}`} checked={answers[quizPage] === j} onChange={() => setAnswers({ ...answers, [quizPage]: j })} />
+                    <span>{opt}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            <div className="p-4 border-t flex items-center justify-between gap-2">
+              <Button size="sm" variant="outline" onClick={() => setQuizPage(p => Math.max(0, p - 1))} disabled={quizPage === 0 || submitting}>
+                <ChevronLeft className="h-4 w-4 mr-1" /> Précédent
               </Button>
+              <div className="flex gap-2">
+                <Button size="sm" variant="ghost" onClick={() => setQuizOpen(false)} disabled={submitting}>Annuler</Button>
+                {quizPage < questions.length - 1 ? (
+                  <Button size="sm" onClick={() => setQuizPage(p => p + 1)} disabled={!currentAnswered} className="bg-gradient-to-r from-primary to-[#007aa3]">
+                    Suivant <ChevronRight className="h-4 w-4 ml-1" />
+                  </Button>
+                ) : (
+                  <Button size="sm" onClick={submitQuiz} disabled={!allAnswered || submitting} className="bg-gradient-to-r from-primary to-[#007aa3]">
+                    {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
+                    Soumettre
+                  </Button>
+                )}
+              </div>
             </div>
           </div>
         </div>
@@ -766,3 +854,4 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
     </div>
   );
 }
+
