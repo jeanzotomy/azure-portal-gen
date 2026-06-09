@@ -47,6 +47,7 @@ import PaymentMethodsTab from "@/components/PaymentMethodsTab";
 import HrTab from "@/components/HrTab";
 import { ProfileSignatureDialog } from "@/components/ProfileSignatureDialog";
 import SeoTab from "@/components/SeoTab";
+import { CertificateVerifyDashboard } from "@/components/admin/CertificateVerifyDashboard";
 import { getDialCode, applyDialCode } from "@/lib/country-dial-codes";
 
 type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts" | "sharepoint" | "seo" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods" | "hr" | "hr-recruitment" | "hr-contracts" | "hr-onboarding" | "hr-trainings";
