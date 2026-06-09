@@ -68,6 +68,9 @@ export function CertificateVerifyDashboard() {
   const [win, setWin] = useState<Window>("24h");
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCode, setSelectedCode] = useState<string | null>(null);
+  const [searchValue, setSearchValue] = useState("");
+
 
   const load = async () => {
     setLoading(true);
