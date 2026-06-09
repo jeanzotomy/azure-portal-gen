@@ -83,7 +83,7 @@ export default function HrPortalPage() {
         </div>
       </nav>
       <main className="flex-1 p-3 sm:p-6 overflow-auto">
-        <HrTab onboardingReadOnly defaultTab={sub} key={sub} />
+        {isFormationsRoute ? <Outlet /> : <HrTab onboardingReadOnly defaultTab={sub} key={sub} />}
       </main>
     </div>
   );
