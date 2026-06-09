@@ -697,6 +697,7 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
       setAnswers({});
       setQuizPage(0);
     }
+    setShowResults(false);
     setQuizOpen(true);
   };
 
