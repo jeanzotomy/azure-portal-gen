@@ -704,6 +704,8 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
               <p className="text-sm leading-relaxed whitespace-pre-line">{content.introduction}</p>
             </div>
           )}
+          <MediaCapsuleList items={content.intro_media} />
+          <MediaCapsuleList items={content.standalone_media} />
         </div>
       );
     }
@@ -719,6 +721,7 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
               {s.body && <p className="text-sm leading-relaxed whitespace-pre-line">{s.body}</p>}
             </div>
           ))}
+          <MediaCapsuleList items={m.media} />
           {m.example && (
             <div className="bg-primary/5 border border-primary/20 rounded p-2 text-xs">
               <span className="font-semibold">Exemple : </span>{m.example}
@@ -742,6 +745,7 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
               <p className="text-sm leading-relaxed whitespace-pre-line">{content.conclusion}</p>
             </div>
           )}
+          <MediaCapsuleList items={content.conclusion_media} />
           {content.resources?.length > 0 && (
             <div>
               <div className="font-semibold text-xs uppercase text-muted-foreground mb-1">Ressources complémentaires</div>
