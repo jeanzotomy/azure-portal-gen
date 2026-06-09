@@ -186,6 +186,22 @@ export function TrainingComments({
     if (error) toast.error(error.message);
   };
 
+  const toggleReaction = async (commentId: string, emoji: string) => {
+    const mine = reactions[commentId]?.[emoji]?.mine;
+    if (mine) {
+      const { error } = await (supabase.from("training_comment_reactions") as any)
+        .delete()
+        .eq("comment_id", commentId)
+        .eq("user_id", currentUserId)
+        .eq("emoji", emoji);
+      if (error) toast.error(error.message);
+    } else {
+      const { error } = await (supabase.from("training_comment_reactions") as any)
+        .insert({ comment_id: commentId, user_id: currentUserId, emoji });
+      if (error && !error.message.includes("duplicate")) toast.error(error.message);
+    }
+  };
+
   const filtered = mentionQuery !== null
     ? coLearners.filter(c => c.user_id !== currentUserId && c.full_name.toLowerCase().includes(mentionQuery)).slice(0, 6)
     : [];
@@ -244,6 +260,35 @@ export function TrainingComments({
                     )}
                   </div>
                   <div className="text-xs leading-relaxed">{renderBody(c.body, c.mentions || [])}</div>
+                  <div className="flex items-center gap-1 mt-1 flex-wrap">
+                    {Object.entries(reactions[c.id] || {}).map(([em, info]) => (
+                      <button
+                        key={em}
+                        onClick={() => toggleReaction(c.id, em)}
+                        className={`text-[11px] px-1.5 py-0.5 rounded-full border transition ${info.mine ? "bg-primary/10 border-primary/40 text-primary" : "bg-muted/40 border-transparent hover:bg-muted"}`}
+                      >
+                        {em} {info.count}
+                      </button>
+                    ))}
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <button className="text-[11px] px-1 py-0.5 rounded-full text-muted-foreground hover:bg-muted/40">
+                          <SmilePlus className="h-3 w-3" />
+                        </button>
+                      </PopoverTrigger>
+                      <PopoverContent align="start" className="w-auto p-1 flex gap-1">
+                        {EMOJIS.map(em => (
+                          <button
+                            key={em}
+                            onClick={() => toggleReaction(c.id, em)}
+                            className="text-base hover:scale-125 transition px-1"
+                          >
+                            {em}
+                          </button>
+                        ))}
+                      </PopoverContent>
+                    </Popover>
+                  </div>
                 </div>
               </div>
             ))}
