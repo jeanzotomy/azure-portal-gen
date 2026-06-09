@@ -173,7 +173,7 @@ function PortalContent() {
           <div className="flex items-center gap-3">
             <SidebarTrigger />
             <h2 className="text-sm font-semibold text-card-foreground hidden sm:block">
-              {navItems.find(n => n.id === tab)?.label}
+              {isFormationsRoute ? "Mes formations" : navItems.find(n => n.id === tab)?.label}
             </h2>
           </div>
           <div className="flex items-center gap-2">
