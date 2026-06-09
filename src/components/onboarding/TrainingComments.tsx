@@ -80,8 +80,29 @@ export function TrainingComments({
         supabase.rpc("list_training_co_learners" as any, { _training_id: trainingId }),
       ]);
       if (!active) return;
-      if (cRes.data) setComments(cRes.data);
+      const list: Comment[] = cRes.data || [];
+      if (cRes.data) setComments(list);
       if (lRes.data) setCoLearners(lRes.data as any);
+
+      // Load reactions for all comments
+      if (list.length > 0) {
+        const ids = list.map(c => c.id);
+        const { data: rxRows } = await (supabase.from("training_comment_reactions") as any)
+          .select("comment_id, user_id, emoji")
+          .in("comment_id", ids);
+        if (active && rxRows) {
+          const agg: Record<string, Record<string, { count: number; mine: boolean }>> = {};
+          (rxRows as any[]).forEach(r => {
+            agg[r.comment_id] = agg[r.comment_id] || {};
+            const cur = agg[r.comment_id][r.emoji] || { count: 0, mine: false };
+            agg[r.comment_id][r.emoji] = {
+              count: cur.count + 1,
+              mine: cur.mine || r.user_id === currentUserId,
+            };
+          });
+          setReactions(agg);
+        }
+      }
       setLoading(false);
     };
     load();
@@ -95,6 +116,14 @@ export function TrainingComments({
       .on("postgres_changes",
         { event: "DELETE", schema: "public", table: "training_comments", filter: `training_id=eq.${trainingId}` },
         (payload) => setComments(prev => prev.filter(c => c.id !== (payload.old as any).id)),
+      )
+      .on("postgres_changes",
+        { event: "INSERT", schema: "public", table: "training_comment_reactions" },
+        (payload) => ingestReaction(payload.new, "add"),
+      )
+      .on("postgres_changes",
+        { event: "DELETE", schema: "public", table: "training_comment_reactions" },
+        (payload) => ingestReaction(payload.old, "del"),
       )
       .subscribe();
 
