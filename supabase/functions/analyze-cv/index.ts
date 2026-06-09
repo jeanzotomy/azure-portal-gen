@@ -86,8 +86,32 @@ ${cvText || "(extraction texte impossible)"}`;
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: corsHeaders });
 
+  // Auth: allow internal calls (service role key) OR admin/hr/gestionnaire users
+  const authHeader = req.headers.get("Authorization") || "";
+  const token = authHeader.replace(/^Bearer\s+/i, "");
+  if (!token) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), {
+      status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
+  }
+  if (token !== SERVICE_ROLE) {
+    const caller = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_ANON_KEY")!, {
+      global: { headers: { Authorization: `Bearer ${token}` } },
+    });
+    const { data: u } = await caller.auth.getUser();
+    if (!u?.user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    const { data: roles } = await caller.from("user_roles").select("role").eq("user_id", u.user.id);
+    const allowed = ["admin", "hr", "gestionnaire"];
+    if (!roles?.some((r: { role: string }) => allowed.includes(r.role))) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+  }
+
   try {
     const { application_id } = await req.json();
+
     if (!application_id) {
       return new Response(JSON.stringify({ error: "application_id requis" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
