@@ -17,6 +17,7 @@ import {
   Brain, FileQuestion, Layers, UserPlus, Wand2, BookOpen,
 } from "lucide-react";
 import { TrainingMediaEditor, type MediaCapsule } from "./TrainingMediaEditor";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 
 interface Training {
   id: string;
