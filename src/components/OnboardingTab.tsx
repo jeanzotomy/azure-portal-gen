@@ -758,14 +758,42 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
       return;
     }
     setSubmitting(true);
+
+    // 1) Score MCQ questions
+    const mcq = questions.map((q, i) => ({ q, i })).filter(x => x.q?.type !== "open");
+    const opens = questions.map((q, i) => ({ q, i })).filter(x => x.q?.type === "open");
     let correct = 0;
-    questions.forEach((q, i) => { if (answers[i] === q.correct_index) correct++; });
-    const score = Math.round((correct / questions.length) * 100);
+    mcq.forEach(({ q, i }) => { if (answers[i] === q.correct_index) correct++; });
+
+    // 2) Grade open questions via AI (if any)
+    let openGradesLocal: Record<number, { score: number; feedback: string }> = {};
+    if (opens.length > 0) {
+      try {
+        const { data, error } = await supabase.functions.invoke("training-grade-open", {
+          body: {
+            questions: opens.map(({ q, i }) => ({
+              index: i,
+              question: q.question,
+              expected: q.expected_answer || q.reference_answer || "",
+              answer: openAnswers[i] || "",
+            })),
+          },
+        });
+        if (error) throw error;
+        (data?.grades || []).forEach((g: any) => {
+          openGradesLocal[g.index] = { score: Number(g.score) || 0, feedback: g.feedback || "" };
+        });
+      } catch (e: any) {
+        toast.error("Correction IA indisponible — questions ouvertes notées à 0");
+      }
+    }
+    const openTotal = opens.reduce((s, { i }) => s + (openGradesLocal[i]?.score ?? 0), 0);
+    const totalPoints = (correct * 100) + openTotal;
+    const score = Math.round(totalPoints / questions.length);
     const passed = score >= passingScore;
     const inAdaptive = !!adaptiveQuestions;
+    const quizDuration = quizStartedAt ? Math.round((Date.now() - quizStartedAt) / 1000) : quizElapsed;
 
-    // In adaptive mode: only update completion if passed; never overwrite the original
-    // quiz_answers/score with the rattrapage scoring.
     const update: any = inAdaptive
       ? (passed ? { quiz_passed: true, completed_at: new Date().toISOString(), quiz_draft_answers: {}, quiz_page: 0 } : {})
       : {
@@ -773,6 +801,11 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
           completed_at: passed ? new Date().toISOString() : null,
           quiz_draft_answers: passed ? {} : answers,
           quiz_page: passed ? 0 : quizPage,
+          quiz_open_answers: openAnswers,
+          quiz_open_grades: openGradesLocal,
+          quiz_time_seconds: quizDuration,
+          module_times: moduleTimesRef.current,
+          total_seconds: sessionSeconds,
         };
 
     if (Object.keys(update).length > 0) {
@@ -780,11 +813,21 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
       if (error) { setSubmitting(false); return toast.error(error.message); }
     }
     setSubmitting(false);
+    setOpenGrades(openGradesLocal);
     setResult({ score, passed });
     setShowResults(true);
-    if (passed) toast.success(inAdaptive ? `Rattrapage réussi (${score}%) 🎉` : `QCM réussi (${score}%)`);
+    if (passed) toast.success(inAdaptive ? `Rattrapage réussi (${score}%) 🎉` : `QCM réussi (${score}%) en ${fmtTime(quizDuration)}`);
     else toast.error(`Score ${score}% — minimum requis ${passingScore}%.`);
   };
+
+  // Auto-submit when countdown hits 0
+  useEffect(() => {
+    if (!quizOpen || !quizTimeLimitSec) return;
+    if (quizTimeLeft === 0 && !showResults && !submitting) {
+      toast.error("⏰ Temps écoulé — soumission automatique");
+      submitQuiz();
+    }
+  }, [quizTimeLeft, quizOpen, quizTimeLimitSec, showResults, submitting]);
 
   const closeResults = () => {
     setShowResults(false);
@@ -797,7 +840,11 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
     setShowResults(false);
     setAdaptiveQuestions(null);
     setAnswers({});
+    setOpenAnswers({});
     setQuizPage(0);
+    shuffledMapRef.current = {};
+    setQuizStartedAt(Date.now());
+    setQuizElapsed(0);
   };
 
   const startAdaptive = async () => {
@@ -811,8 +858,12 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
       setAdaptiveQuestions(data.questions);
       setAdaptiveDifficulty(data.difficulty || "");
       setAnswers({});
+      setOpenAnswers({});
       setQuizPage(0);
+      shuffledMapRef.current = {};
       setShowResults(false);
+      setQuizStartedAt(Date.now());
+      setQuizElapsed(0);
       toast.success(`Mode adaptatif activé — ${data.questions.length} questions ciblées (${data.difficulty})`);
     } catch (e: any) {
       toast.error(e.message || "Erreur lors de la génération du rattrapage");
@@ -822,13 +873,16 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
   };
 
   const openQuiz = () => {
-    // Resume where left: keep draft answers & last quiz page unless already completed
     if (assigned.completed_at) {
       setAnswers({});
+      setOpenAnswers({});
       setQuizPage(0);
     }
     setAdaptiveQuestions(null);
     setShowResults(false);
+    shuffledMapRef.current = {};
+    setQuizStartedAt(Date.now());
+    setQuizElapsed(0);
     setQuizOpen(true);
   };
 
