@@ -80,13 +80,16 @@ export default function EmployeeTrainingAssignmentPage({
     if (!userId) return;
     setLoading(true);
 
-    const [userRes, assignedRes, catalogRes] = await Promise.all([
-      supabase.from("profiles").select("user_id, full_name, email").eq("user_id", userId).maybeSingle(),
+    const [usersRes, assignedRes, catalogRes] = await Promise.all([
+      supabase.rpc("list_employee_assignable_users"),
       supabase.rpc("list_employee_trainings_for_user", { _user_id: userId }),
       supabase.from("trainings").select("id, title, category, duration_minutes, active").eq("active", true).order("title"),
     ]);
 
-    if (userRes.data) setUser(userRes.data as UserMeta);
+    const found = (usersRes.data as Array<{ user_id: string; full_name: string; email: string }> | null)?.find(
+      (u) => u.user_id === userId
+    );
+    if (found) setUser({ user_id: found.user_id, full_name: found.full_name, email: found.email });
     if (assignedRes.error) toast.error(assignedRes.error.message);
     else setAssigned((assignedRes.data || []) as AssignedRow[]);
     setCatalog((catalogRes.data || []) as Training[]);
