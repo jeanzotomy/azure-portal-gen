@@ -44,6 +44,66 @@ export type Database = {
         }
         Relationships: []
       }
+      candidate_badges: {
+        Row: {
+          badge_code: string
+          badge_icon: string | null
+          badge_label: string
+          earned_at: string
+          id: string
+          user_id: string
+        }
+        Insert: {
+          badge_code: string
+          badge_icon?: string | null
+          badge_label: string
+          earned_at?: string
+          id?: string
+          user_id: string
+        }
+        Update: {
+          badge_code?: string
+          badge_icon?: string | null
+          badge_label?: string
+          earned_at?: string
+          id?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      candidate_gamification: {
+        Row: {
+          created_at: string
+          last_activity_date: string | null
+          level: number
+          longest_streak: number
+          streak_days: number
+          updated_at: string
+          user_id: string
+          xp: number
+        }
+        Insert: {
+          created_at?: string
+          last_activity_date?: string | null
+          level?: number
+          longest_streak?: number
+          streak_days?: number
+          updated_at?: string
+          user_id: string
+          xp?: number
+        }
+        Update: {
+          created_at?: string
+          last_activity_date?: string | null
+          level?: number
+          longest_streak?: number
+          streak_days?: number
+          updated_at?: string
+          user_id?: string
+          xp?: number
+        }
+        Relationships: []
+      }
       contact_requests: {
         Row: {
           company: string | null
@@ -1618,6 +1678,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      award_badge: {
+        Args: { _code: string; _icon: string; _label: string; _user_id: string }
+        Returns: undefined
+      }
       create_onboarding_for_application: {
         Args: { _application_id: string }
         Returns: string
