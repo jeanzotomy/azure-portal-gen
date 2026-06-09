@@ -1044,9 +1044,17 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
       {quizOpen && hasQuiz && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => !submitting && (showResults ? closeResults() : setQuizOpen(false))}>
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <div className="bg-gradient-to-r from-primary to-[#007aa3] p-4 rounded-t-lg">
-              <h3 className="text-white font-semibold">QCM — {t.title}</h3>
-              <p className="text-cyan-100 text-xs">Score minimum requis : {passingScore}%</p>
+            <div className="bg-gradient-to-r from-primary to-[#007aa3] p-4 rounded-t-lg flex items-start justify-between gap-3">
+              <div>
+                <h3 className="text-white font-semibold">QCM — {t.title}</h3>
+                <p className="text-cyan-100 text-xs">Score minimum requis : {passingScore}%</p>
+              </div>
+              {!showResults && (
+                <Badge className={`font-mono text-xs ${quizTimeLimitSec && quizTimeLeft < 30 ? "bg-rose-500 text-white animate-pulse" : "bg-white/20 text-white border-white/30"}`}>
+                  <Timer className="h-3 w-3 mr-1" />
+                  {quizTimeLimitSec ? fmtTime(quizTimeLeft) : fmtTime(quizElapsed)}
+                </Badge>
+              )}
             </div>
 
             {showResults && result ? (
@@ -1059,12 +1067,61 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
                     {result.passed ? "🎉 Félicitations, QCM réussi !" : "Score insuffisant"}
                   </div>
                   <div className="text-xs text-muted-foreground mt-1">
-                    {questions.filter((q, i) => answers[i] === q.correct_index).length} / {questions.length} bonnes réponses · seuil {passingScore}%
+                    {questions.filter((q, i) => q?.type !== "open" && answers[i] === q.correct_index).length} / {questions.filter(q => q?.type !== "open").length} bonnes réponses · seuil {passingScore}%
+                  </div>
+                  <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
+                    <Timer className="h-3 w-3" /> Quiz terminé en {fmtTime(quizElapsed)} · Session totale {fmtTime(sessionSeconds)}
                   </div>
                 </div>
+
+                {/* Per-module time recap */}
+                <div className="p-4 border-b bg-muted/20">
+                  <div className="font-semibold text-sm mb-2 flex items-center gap-1">
+                    <Clock className="h-3.5 w-3.5" /> Temps passé par module
+                  </div>
+                  <div className="space-y-1">
+                    {coursePages.map((p, idx) => {
+                      const key = p.kind === "module" ? `m${p.data.idx}` : p.kind;
+                      const sec = moduleTimesRef.current[key] || 0;
+                      const label = p.kind === "intro" ? "Introduction" : p.kind === "conclusion" ? "Conclusion" : `Module ${p.data.idx + 1} — ${p.data.title}`;
+                      const pct = sessionSeconds ? Math.round((sec / sessionSeconds) * 100) : 0;
+                      return (
+                        <div key={idx} className="flex items-center gap-2 text-xs">
+                          <span className="flex-1 truncate">{label}</span>
+                          <span className="font-mono text-muted-foreground w-16 text-right">{fmtTime(sec)}</span>
+                          <div className="w-20 h-1.5 bg-muted rounded overflow-hidden">
+                            <div className="h-full bg-primary" style={{ width: `${pct}%` }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                    <div className="flex items-center gap-2 text-xs pt-1 mt-1 border-t">
+                      <span className="flex-1 font-semibold">QCM</span>
+                      <span className="font-mono text-muted-foreground w-16 text-right">{fmtTime(moduleTimesRef.current.quiz || quizElapsed)}</span>
+                      <div className="w-20" />
+                    </div>
+                  </div>
+                </div>
+
                 <div className="p-4 space-y-3">
                   <div className="font-semibold text-sm">Détail des réponses</div>
                   {questions.map((q, i) => {
+                    if (q?.type === "open") {
+                      const grade = openGrades?.[i];
+                      const sc = grade?.score ?? 0;
+                      const ok = sc >= 70;
+                      return (
+                        <div key={i} className={`border rounded p-3 ${ok ? "border-emerald-200 bg-emerald-50/50" : "border-amber-200 bg-amber-50/50"}`}>
+                          <div className="text-sm font-medium mb-2 flex items-center gap-1">
+                            <PenLine className="h-3 w-3" />{i + 1}. {q.question}
+                            <Badge variant="outline" className="ml-auto text-[10px]">{sc}/100</Badge>
+                          </div>
+                          <div className="text-xs bg-white/60 rounded p-2 mb-1 whitespace-pre-line">{openAnswers[i] || <em className="text-muted-foreground">(aucune réponse)</em>}</div>
+                          {grade?.feedback && <div className="text-xs text-muted-foreground italic">💡 {grade.feedback}</div>}
+                          {q.expected_answer && <div className="text-xs text-emerald-700 mt-1">Réponse attendue : {q.expected_answer}</div>}
+                        </div>
+                      );
+                    }
                     const userAns = answers[i];
                     const ok = userAns === q.correct_index;
                     return (
@@ -1116,15 +1173,39 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
                   <Progress value={quizProgress} className="h-1.5 flex-1 max-w-xs" />
                 </div>
                 <div className="p-4 space-y-3 min-h-[200px]">
-                  <div className="font-medium text-sm">{quizPage + 1}. {currentQ.question}</div>
-                  <div className="space-y-1.5">
-                    {currentQ.options.map((opt: string, j: number) => (
-                      <label key={j} className={`flex items-center gap-2 p-2.5 border rounded cursor-pointer text-sm ${answers[quizPage] === j ? "border-primary bg-primary/5" : "hover:bg-muted/30"}`}>
-                        <input type="radio" name={`q-${quizPage}`} checked={answers[quizPage] === j} onChange={() => setAnswers({ ...answers, [quizPage]: j })} />
-                        <span>{opt}</span>
-                      </label>
-                    ))}
+                  <div className="font-medium text-sm flex items-start gap-2">
+                    <span>{quizPage + 1}. {currentQ.question}</span>
+                    {currentQ.type === "open" && <Badge variant="outline" className="text-[10px]"><PenLine className="h-3 w-3 mr-0.5" />Question ouverte</Badge>}
                   </div>
+                  {currentQ.youtube_url && currentQ.timestamp_seconds != null && (
+                    <a
+                      href={`${currentQ.youtube_url}${currentQ.youtube_url.includes("?") ? "&" : "?"}t=${currentQ.timestamp_seconds}s`}
+                      target="_blank" rel="noreferrer"
+                      className="inline-flex items-center gap-1 text-xs text-red-600 hover:underline"
+                    >
+                      <Youtube className="h-3.5 w-3.5" /> Revoir le passage à {fmtTime(currentQ.timestamp_seconds)}
+                    </a>
+                  )}
+                  {isOpen ? (
+                    <textarea
+                      className="w-full min-h-[120px] border rounded p-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                      placeholder="Rédigez votre réponse (au moins 6 caractères)…"
+                      value={openAnswers[quizPage] || ""}
+                      onChange={e => setOpenAnswers({ ...openAnswers, [quizPage]: e.target.value })}
+                    />
+                  ) : (
+                    <div className="space-y-1.5">
+                      {getOptionOrder(quizPage, currentQ).map((j) => {
+                        const opt = currentQ.options[j];
+                        return (
+                          <label key={j} className={`flex items-center gap-2 p-2.5 border rounded cursor-pointer text-sm ${answers[quizPage] === j ? "border-primary bg-primary/5" : "hover:bg-muted/30"}`}>
+                            <input type="radio" name={`q-${quizPage}`} checked={answers[quizPage] === j} onChange={() => setAnswers({ ...answers, [quizPage]: j })} />
+                            <span>{opt}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
                 <div className="p-4 border-t flex items-center justify-between gap-2">
                   <Button size="sm" variant="outline" onClick={() => setQuizPage(p => Math.max(0, p - 1))} disabled={quizPage === 0 || submitting}>
