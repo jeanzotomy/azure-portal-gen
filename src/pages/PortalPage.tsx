@@ -204,13 +204,19 @@ function PortalContent() {
               </AlertDescription>
             </Alert>
           )}
-          {tab === "dashboard" && <DashboardTab user={user} />}
-          {tab === "projects" && <ProjectsTab user={user} />}
-          {tab === "tickets" && <TicketsTab user={user} />}
-          {tab === "applications" && <ApplicationsTab user={user} />}
-          {tab === "onboarding" && <OnboardingTab user={user} />}
-          {tab === "my-trainings" && <EmployeeTrainingsTab user={user} />}
-          {tab === "profile" && <ProfileTab user={user} />}
+          {isFormationsRoute ? (
+            <Outlet />
+          ) : (
+            <>
+              {tab === "dashboard" && <DashboardTab user={user} />}
+              {tab === "projects" && <ProjectsTab user={user} />}
+              {tab === "tickets" && <TicketsTab user={user} />}
+              {tab === "applications" && <ApplicationsTab user={user} />}
+              {tab === "onboarding" && <OnboardingTab user={user} />}
+              {tab === "my-trainings" && <EmployeeTrainingsTab user={user} />}
+              {tab === "profile" && <ProfileTab user={user} />}
+            </>
+          )}
         </main>
       </div>
     </div>
