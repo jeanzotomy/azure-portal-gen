@@ -545,6 +545,7 @@ function AdminContent() {
     { id: "contacts", icon: MessageSquare, label: t("admin.contacts") },
     { id: "users", icon: Users, label: t("admin.users") },
     { id: "seo", icon: Search, label: "SEO" },
+    { id: "verify-certificates", icon: ShieldCheckIcon, label: "Vérif. certificats" },
   ];
 
 
