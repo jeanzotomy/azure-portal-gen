@@ -567,7 +567,12 @@ function StepContent({ step, contract, docs, trainings = [], uploading, userId, 
           <h3 className="font-semibold text-sm">Formations & QCM</h3>
           {userId && <MentionsBell userId={userId} />}
         </div>
-        {userId && <GamificationWidget userId={userId} refreshKey={gamifKey} />}
+        {userId && (
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+            <div className="lg:col-span-2"><GamificationWidget userId={userId} refreshKey={gamifKey} /></div>
+            <div><CohortActivityFeed /></div>
+          </div>
+        )}
         {trainings.length === 0 ? (
           <div className="p-6 bg-white rounded-lg border text-center text-sm text-muted-foreground">
             <GraduationCap className="h-8 w-8 mx-auto mb-2 opacity-50" />
