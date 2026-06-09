@@ -51,11 +51,16 @@ const App = () => (
           <Routes>
             <Route path="/" element={<Index />} />
             <Route path="/auth" element={<AuthPage />} />
-            <Route path="/portal" element={<AuthGuard><PortalPage /></AuthGuard>} />
+            <Route path="/portal" element={<AuthGuard><PortalPage /></AuthGuard>}>
+              <Route path="formations" element={<EmployeeTrainingsListPage />} />
+              <Route path="formations/:assignedId" element={<EmployeeTrainingPlayerPage />} />
+            </Route>
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/mfa" element={<MfaPage />} />
             <Route path="/install" element={<InstallPage />} />
-            <Route path="/admin" element={<AuthGuard requireRoles={["admin","agent","comptable","gestionnaire"]} fallbackRoute="/portal"><AdminPage /></AuthGuard>} />
+            <Route path="/admin" element={<AuthGuard requireRoles={["admin","agent","comptable","gestionnaire"]} fallbackRoute="/portal"><AdminPage /></AuthGuard>}>
+              <Route path="formations/assignations/:userId" element={<EmployeeTrainingAssignmentPage basePath="/admin" parentLabel="Admin" />} />
+            </Route>
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/terms" element={<TermsPage />} />
             <Route path="/careers" element={<CareersPage />} />
@@ -64,12 +69,10 @@ const App = () => (
             <Route path="/candidature/:trackingId" element={<ApplicationTrackingPage />} />
             <Route path="/candidature" element={<ApplicationTrackingPage />} />
             <Route path="/onboarding" element={<AuthGuard><OnboardingPage /></AuthGuard>} />
-            <Route path="/rh" element={<AuthGuard requireRoles={["hr"]} fallbackRoute="/portal"><HrPortalPage /></AuthGuard>} />
+            <Route path="/rh" element={<AuthGuard requireRoles={["hr"]} fallbackRoute="/portal"><HrPortalPage /></AuthGuard>}>
+              <Route path="formations/assignations/:userId" element={<EmployeeTrainingAssignmentPage basePath="/rh" parentLabel="RH" />} />
+            </Route>
             <Route path="/verify/:code" element={<VerifyCertificatePage />} />
-            <Route path="/admin/formations/assignations/:userId" element={<AuthGuard requireRoles={["admin","agent","gestionnaire"]} fallbackRoute="/portal"><EmployeeTrainingAssignmentPage basePath="/admin" parentLabel="Admin" /></AuthGuard>} />
-            <Route path="/rh/formations/assignations/:userId" element={<AuthGuard requireRoles={["hr"]} fallbackRoute="/portal"><EmployeeTrainingAssignmentPage basePath="/rh" parentLabel="RH" /></AuthGuard>} />
-            <Route path="/portal/formations" element={<AuthGuard><EmployeeTrainingsListPage /></AuthGuard>} />
-            <Route path="/portal/formations/:assignedId" element={<AuthGuard><EmployeeTrainingPlayerPage /></AuthGuard>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
