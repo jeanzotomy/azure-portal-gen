@@ -9,8 +9,15 @@ import { toast } from "sonner";
 import {
   CheckCircle2, Circle, Clock, FileSignature, FileUp, GraduationCap,
   Laptop, Users, PartyPopper, Sparkles, Download, Loader2, AlertCircle, RefreshCw, Lock,
-  XCircle, ShieldAlert, ChevronLeft, ChevronRight, Bot, Brain,
+  XCircle, ShieldAlert, ChevronLeft, ChevronRight, Bot, Brain, Timer, PenLine, Youtube,
 } from "lucide-react";
+
+const fmtTime = (s: number) => {
+  s = Math.max(0, Math.floor(s));
+  const m = Math.floor(s / 60);
+  const r = s % 60;
+  return `${String(m).padStart(2, "0")}:${String(r).padStart(2, "0")}`;
+};
 import { SignaturePad } from "@/components/SignaturePad";
 import { MediaCapsuleList } from "@/components/hr/TrainingMediaEditor";
 import { GamificationWidget } from "@/components/onboarding/GamificationWidget";
