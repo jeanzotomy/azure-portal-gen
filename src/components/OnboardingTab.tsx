@@ -671,13 +671,24 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
     setSubmitting(false);
     if (error) return toast.error(error.message);
     setResult({ score, passed });
-    setQuizOpen(false);
+    setShowResults(true);
     if (passed) {
       toast.success(`QCM réussi (${score}%)`);
-      onComplete();
     } else {
       toast.error(`Score ${score}% — minimum requis ${passingScore}%. Vous pouvez réessayer.`);
     }
+  };
+
+  const closeResults = () => {
+    setShowResults(false);
+    setQuizOpen(false);
+    if (result?.passed) onComplete();
+  };
+
+  const retryQuiz = () => {
+    setShowResults(false);
+    setAnswers({});
+    setQuizPage(0);
   };
 
   const openQuiz = () => {
