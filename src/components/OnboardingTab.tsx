@@ -839,6 +839,9 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
                 {expanded ? "Masquer le cours" : "Suivre le cours"}
               </Button>
             )}
+            <Button size="sm" variant="outline" onClick={() => setTutorOpen(true)} className="border-primary/30 text-primary hover:bg-primary/5">
+              <Bot className="h-3 w-3 mr-1" />Tuteur IA
+            </Button>
             {t?.url && (
               <a href={t.url} target="_blank" rel="noreferrer">
                 <Button size="sm" variant="outline"><Download className="h-3 w-3 mr-1" />Ressource externe</Button>
