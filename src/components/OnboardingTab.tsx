@@ -636,8 +636,8 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
   const allAnswered = questions.length > 0 && questions.every((_, i) => answers[i] != null);
 
   // Debounced save of progress (course page, quiz page, draft answers)
-  const lastSavedRef = React.useRef<string>("");
-  React.useEffect(() => {
+  const lastSavedRef = useRef<string>("");
+  useEffect(() => {
     if (assigned.completed_at) return;
     const payload = { course_page: coursePage, quiz_page: quizPage, quiz_draft_answers: answers, last_activity_at: new Date().toISOString() };
     const key = JSON.stringify({ c: coursePage, q: quizPage, a: answers });
