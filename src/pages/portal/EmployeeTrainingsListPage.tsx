@@ -92,20 +92,6 @@ export default function EmployeeTrainingsListPage() {
     void load();
   }, [load]);
 
-  if (!user || loading) {
-    return (
-      <div className="flex items-center justify-center min-h-[60vh]">
-        <Loader2 className="h-10 w-10 animate-spin text-primary" />
-      </div>
-    );
-  }
-
-  const total = trainings.length;
-  const completed = trainings.filter((t) => t.completed_at).length;
-  const inProgress = trainings.filter((t) => !t.completed_at && (t.course_page > 0)).length;
-  const passed = trainings.filter((t) => t.quiz_passed).length;
-  const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
-
   const categories = useMemo(() => {
     const set = new Set<string>();
     trainings.forEach((t) => t.training?.category && set.add(t.training.category));
@@ -141,6 +127,20 @@ export default function EmployeeTrainingsListPage() {
       return true;
     });
   }, [trainings, search, statusFilter, progressFilter, categoryFilter]);
+
+  if (!user || loading) {
+    return (
+      <div className="flex items-center justify-center min-h-[60vh]">
+        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  const total = trainings.length;
+  const completed = trainings.filter((t) => t.completed_at).length;
+  const inProgress = trainings.filter((t) => !t.completed_at && (t.course_page > 0)).length;
+  const passed = trainings.filter((t) => t.quiz_passed).length;
+  const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
 
   const hasActiveFilters =
     search.trim() !== "" ||
