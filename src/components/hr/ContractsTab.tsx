@@ -73,6 +73,7 @@ export default function ContractsTab({ readOnly = false }: { readOnly?: boolean 
     const { data: procs } = await supabase
       .from("onboarding_processes")
       .select("id, application_id, candidate_name, candidate_email, job_id, created_at")
+      .eq("kind", "onboarding")
       .order("created_at", { ascending: false });
     if (!procs?.length) { setRows([]); setLoading(false); return; }
 

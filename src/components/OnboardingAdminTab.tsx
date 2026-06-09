@@ -6,7 +6,8 @@ import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
+import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Loader2, FileUp, CheckCircle2, XCircle, Eye, Users, Clock, Sparkles, ExternalLink } from "lucide-react";
 
@@ -32,10 +33,12 @@ export default function OnboardingAdminTab({ readOnly = false }: { readOnly?: bo
   const [contract, setContract] = useState<Contract | null>(null);
   const [uploadingContract, setUploadingContract] = useState(false);
   const [search, setSearch] = useState("");
+  const [rejectDoc, setRejectDoc] = useState<Doc | null>(null);
+  const [rejectReason, setRejectReason] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data } = await supabase.from("onboarding_processes").select("*").order("invited_at", { ascending: false });
+    const { data } = await supabase.from("onboarding_processes").select("*").eq("kind", "onboarding").order("invited_at", { ascending: false });
     setProcesses((data || []) as any);
     setLoading(false);
   }, []);
@@ -244,8 +247,8 @@ export default function OnboardingAdminTab({ readOnly = false }: { readOnly?: bo
                       )}
                       {!readOnly && d.status !== "refuse" && (
                         <Button size="sm" variant="outline" onClick={() => {
-                          const r = prompt("Raison du refus ?");
-                          if (r) reviewDoc(d.id, "refuse", r);
+                          setRejectDoc(d);
+                          setRejectReason("");
                         }}>
                           <XCircle className="h-3 w-3" />
                         </Button>
@@ -256,6 +259,38 @@ export default function OnboardingAdminTab({ readOnly = false }: { readOnly?: bo
               )}
             </section>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={!!rejectDoc} onOpenChange={(o) => !o && setRejectDoc(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Refuser le document</DialogTitle>
+            <DialogDescription>
+              Indiquez la raison du refus. Elle sera communiquée au candidat.
+            </DialogDescription>
+          </DialogHeader>
+          <Textarea
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+            placeholder="Ex: Document illisible, mauvaise pièce, expiré..."
+            rows={4}
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRejectDoc(null)}>Annuler</Button>
+            <Button
+              variant="destructive"
+              disabled={!rejectReason.trim()}
+              onClick={async () => {
+                if (!rejectDoc || !rejectReason.trim()) return;
+                await reviewDoc(rejectDoc.id, "refuse", rejectReason.trim());
+                setRejectDoc(null);
+                setRejectReason("");
+              }}
+            >
+              Refuser
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>

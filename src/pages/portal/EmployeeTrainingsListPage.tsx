@@ -63,12 +63,33 @@ export default function EmployeeTrainingsListPage() {
   const load = useCallback(async () => {
     if (!user) return;
     setLoading(true);
-    const { data: proc } = await supabase
+
+    // 1. Search by user_id first
+    let { data: proc } = await supabase
       .from("onboarding_processes")
       .select("id")
       .eq("user_id", user.id)
       .eq("kind", "employee_training")
       .maybeSingle();
+
+    // 2. Fallback: search by email (case-insensitive) when process was created before signup
+    if (!proc && user.email) {
+      const { data: byEmail } = await supabase
+        .from("onboarding_processes")
+        .select("id, user_id")
+        .ilike("candidate_email", user.email)
+        .eq("kind", "employee_training")
+        .is("user_id", null)
+        .maybeSingle();
+      if (byEmail) {
+        // Link the process to the current user for future lookups
+        await supabase
+          .from("onboarding_processes")
+          .update({ user_id: user.id })
+          .eq("id", byEmail.id);
+        proc = { id: byEmail.id };
+      }
+    }
 
     if (!proc) {
       setTrainings([]);

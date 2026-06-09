@@ -17,6 +17,7 @@ import {
   Brain, FileQuestion, Layers, UserPlus, Wand2, BookOpen,
 } from "lucide-react";
 import { TrainingMediaEditor, type MediaCapsule } from "./TrainingMediaEditor";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 
 interface Training {
   id: string;
@@ -65,6 +66,7 @@ const emptyForm = {
 };
 
 export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean }) {
+  const { confirm, dialog: confirmDialog } = useConfirm();
   const [trainings, setTrainings] = useState<Training[]>([]);
   const [candidates, setCandidates] = useState<CandidateRow[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
@@ -84,7 +86,7 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
     setLoading(true);
     const [{ data: trs }, { data: procs }, { data: deps }, { data: secs }, { data: grps }] = await Promise.all([
       supabase.from("trainings").select("*").order("created_at", { ascending: false }),
-      supabase.from("onboarding_processes").select("id, candidate_name, candidate_email, job_id, created_at").order("created_at", { ascending: false }),
+      supabase.from("onboarding_processes").select("id, candidate_name, candidate_email, job_id, created_at").eq("kind", "onboarding").order("created_at", { ascending: false }),
       supabase.from("departments").select("name").order("name"),
       supabase.from("sectors").select("name").order("name"),
       supabase.from("training_groups").select("id, name, description").order("created_at", { ascending: false }),
@@ -198,11 +200,22 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
     load();
   };
 
-  const remove = async (id: string) => {
-    if (!confirm("Supprimer cette formation ?")) return;
-    const { error } = await supabase.from("trainings").delete().eq("id", id);
-    if (error) return toast.error(error.message);
-    load();
+  const remove = (id: string) => {
+    confirm({
+      title: "Supprimer cette formation ?",
+      description: "Cette action est irréversible. Les assignations liées seront également supprimées.",
+      variant: "destructive",
+      confirmLabel: "Supprimer",
+      onConfirm: async () => {
+        const { error } = await supabase.from("trainings").delete().eq("id", id);
+        if (error) {
+          toast.error(error.message);
+          return;
+        }
+        toast.success("Formation supprimée");
+        load();
+      },
+    });
   };
 
   const openAssign = (c: CandidateRow) => {
@@ -568,6 +581,7 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      {confirmDialog}
     </div>
   );
 }
