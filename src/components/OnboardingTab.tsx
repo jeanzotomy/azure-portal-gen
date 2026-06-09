@@ -9,8 +9,15 @@ import { toast } from "sonner";
 import {
   CheckCircle2, Circle, Clock, FileSignature, FileUp, GraduationCap,
   Laptop, Users, PartyPopper, Sparkles, Download, Loader2, AlertCircle, RefreshCw, Lock,
-  XCircle, ShieldAlert, ChevronLeft, ChevronRight, Bot, Brain,
+  XCircle, ShieldAlert, ChevronLeft, ChevronRight, Bot, Brain, Timer, PenLine, Youtube,
 } from "lucide-react";
+
+const fmtTime = (s: number) => {
+  s = Math.max(0, Math.floor(s));
+  const m = Math.floor(s / 60);
+  const r = s % 60;
+  return `${String(m).padStart(2, "0")}:${String(r).padStart(2, "0")}`;
+};
 import { SignaturePad } from "@/components/SignaturePad";
 import { MediaCapsuleList } from "@/components/hr/TrainingMediaEditor";
 import { GamificationWidget } from "@/components/onboarding/GamificationWidget";
@@ -641,26 +648,108 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
   const [adaptiveDifficulty, setAdaptiveDifficulty] = useState<string>("");
   const [loadingAdaptive, setLoadingAdaptive] = useState(false);
 
+  // ---- Lot 3: enriched evaluation state ----
+  const [openAnswers, setOpenAnswers] = useState<Record<number, string>>(() => {
+    const d = (assigned.quiz_open_answers && typeof assigned.quiz_open_answers === "object") ? assigned.quiz_open_answers : {};
+    const out: Record<number, string> = {};
+    Object.entries(d).forEach(([k, v]) => { if (typeof v === "string") out[Number(k)] = v; });
+    return out;
+  });
+  const [openGrades, setOpenGrades] = useState<Record<number, { score: number; feedback: string }> | null>(
+    assigned.quiz_open_grades && typeof assigned.quiz_open_grades === "object" ? assigned.quiz_open_grades : null,
+  );
+
+  // ---- Time tracking (session + per-module) ----
+  const initialTotal = assigned.total_seconds ?? 0;
+  const initialModuleTimes: Record<string, number> = (assigned.module_times && typeof assigned.module_times === "object") ? assigned.module_times : {};
+  const [sessionSeconds, setSessionSeconds] = useState<number>(initialTotal);
+  const moduleTimesRef = useRef<Record<string, number>>({ ...initialModuleTimes });
+  const [, forceTick] = useState(0);
+
+  // ---- Quiz timer (countdown if quiz.time_limit_minutes is set) ----
+  const quizTimeLimitSec = t?.quiz?.time_limit_minutes ? t.quiz.time_limit_minutes * 60 : 0;
+  const [quizStartedAt, setQuizStartedAt] = useState<number | null>(null);
+  const [quizElapsed, setQuizElapsed] = useState(0);
+  const quizTimeLeft = quizTimeLimitSec ? Math.max(0, quizTimeLimitSec - quizElapsed) : 0;
+
   const baseQuestions: any[] = hasQuiz ? t.quiz.questions : [];
   const questions: any[] = adaptiveQuestions ?? baseQuestions;
   const currentQ = questions[quizPage];
-  const currentAnswered = currentQ ? answers[quizPage] != null : false;
-  const allAnswered = questions.length > 0 && questions.every((_, i) => answers[i] != null);
 
-  // Debounced save of progress (course page, quiz page, draft answers)
+  // ---- Shuffle option order per question (stable per session) ----
+  const shuffledMapRef = useRef<Record<number, number[]>>({});
+  const getOptionOrder = (qIndex: number, q: any) => {
+    if (!q?.options) return [];
+    if (q.type === "open") return [];
+    if (!shuffledMapRef.current[qIndex]) {
+      const arr = q.options.map((_: any, i: number) => i);
+      // Fisher-Yates
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      shuffledMapRef.current[qIndex] = arr;
+    }
+    return shuffledMapRef.current[qIndex];
+  };
+
+  const isOpen = currentQ?.type === "open";
+  const currentAnswered = currentQ
+    ? (isOpen ? (openAnswers[quizPage] || "").trim().length > 5 : answers[quizPage] != null)
+    : false;
+  const allAnswered = questions.length > 0 && questions.every((q, i) =>
+    q?.type === "open" ? (openAnswers[i] || "").trim().length > 5 : answers[i] != null,
+  );
+
+  // Session timer: increments every second; assigns time to current "context key"
+  const expandedRef = useRef(expanded);
+  const quizOpenRef = useRef(quizOpen);
+  const coursePageRef = useRef(coursePage);
+  expandedRef.current = expanded; quizOpenRef.current = quizOpen; coursePageRef.current = coursePage;
+
+  const currentKey = () => {
+    if (quizOpenRef.current) return "quiz";
+    if (!expandedRef.current) return null;
+    const page = coursePages[coursePageRef.current];
+    if (!page) return null;
+    if (page.kind === "module") return `m${page.data.idx}`;
+    return page.kind;
+  };
+
+  useEffect(() => {
+    if (assigned.completed_at) return;
+    const id = setInterval(() => {
+      const key = currentKey();
+      if (!key) return;
+      moduleTimesRef.current[key] = (moduleTimesRef.current[key] || 0) + 1;
+      setSessionSeconds(s => s + 1);
+      forceTick(n => (n + 1) % 1000);
+      if (quizOpenRef.current && quizTimeLimitSec) {
+        setQuizElapsed(e => e + 1);
+      }
+    }, 1000);
+    return () => clearInterval(id);
+  }, [assigned.completed_at, quizTimeLimitSec]);
+
+  // Debounced save of progress (course page, quiz page, draft answers, times)
   const lastSavedRef = useRef<string>("");
   useEffect(() => {
     if (assigned.completed_at) return;
     if (adaptiveQuestions) return; // never persist adaptive-mode answers
-    const payload = { course_page: coursePage, quiz_page: quizPage, quiz_draft_answers: answers, last_activity_at: new Date().toISOString() };
-    const key = JSON.stringify({ c: coursePage, q: quizPage, a: answers });
+    const payload = {
+      course_page: coursePage, quiz_page: quizPage, quiz_draft_answers: answers,
+      quiz_open_answers: openAnswers,
+      module_times: moduleTimesRef.current, total_seconds: sessionSeconds,
+      last_activity_at: new Date().toISOString(),
+    };
+    const key = JSON.stringify({ c: coursePage, q: quizPage, a: answers, o: openAnswers, s: Math.floor(sessionSeconds / 5) });
     if (key === lastSavedRef.current) return;
     const handle = setTimeout(async () => {
       lastSavedRef.current = key;
       await (supabase.from("onboarding_assigned_trainings") as any).update(payload).eq("id", assigned.id);
-    }, 600);
+    }, 1500);
     return () => clearTimeout(handle);
-  }, [coursePage, quizPage, answers, assigned.id, assigned.completed_at, adaptiveQuestions]);
+  }, [coursePage, quizPage, answers, openAnswers, sessionSeconds, assigned.id, assigned.completed_at, adaptiveQuestions]);
 
   const submitQuiz = async () => {
     if (questions.length === 0) return;
@@ -669,14 +758,42 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
       return;
     }
     setSubmitting(true);
+
+    // 1) Score MCQ questions
+    const mcq = questions.map((q, i) => ({ q, i })).filter(x => x.q?.type !== "open");
+    const opens = questions.map((q, i) => ({ q, i })).filter(x => x.q?.type === "open");
     let correct = 0;
-    questions.forEach((q, i) => { if (answers[i] === q.correct_index) correct++; });
-    const score = Math.round((correct / questions.length) * 100);
+    mcq.forEach(({ q, i }) => { if (answers[i] === q.correct_index) correct++; });
+
+    // 2) Grade open questions via AI (if any)
+    let openGradesLocal: Record<number, { score: number; feedback: string }> = {};
+    if (opens.length > 0) {
+      try {
+        const { data, error } = await supabase.functions.invoke("training-grade-open", {
+          body: {
+            questions: opens.map(({ q, i }) => ({
+              index: i,
+              question: q.question,
+              expected: q.expected_answer || q.reference_answer || "",
+              answer: openAnswers[i] || "",
+            })),
+          },
+        });
+        if (error) throw error;
+        (data?.grades || []).forEach((g: any) => {
+          openGradesLocal[g.index] = { score: Number(g.score) || 0, feedback: g.feedback || "" };
+        });
+      } catch (e: any) {
+        toast.error("Correction IA indisponible — questions ouvertes notées à 0");
+      }
+    }
+    const openTotal = opens.reduce((s, { i }) => s + (openGradesLocal[i]?.score ?? 0), 0);
+    const totalPoints = (correct * 100) + openTotal;
+    const score = Math.round(totalPoints / questions.length);
     const passed = score >= passingScore;
     const inAdaptive = !!adaptiveQuestions;
+    const quizDuration = quizStartedAt ? Math.round((Date.now() - quizStartedAt) / 1000) : quizElapsed;
 
-    // In adaptive mode: only update completion if passed; never overwrite the original
-    // quiz_answers/score with the rattrapage scoring.
     const update: any = inAdaptive
       ? (passed ? { quiz_passed: true, completed_at: new Date().toISOString(), quiz_draft_answers: {}, quiz_page: 0 } : {})
       : {
@@ -684,6 +801,11 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
           completed_at: passed ? new Date().toISOString() : null,
           quiz_draft_answers: passed ? {} : answers,
           quiz_page: passed ? 0 : quizPage,
+          quiz_open_answers: openAnswers,
+          quiz_open_grades: openGradesLocal,
+          quiz_time_seconds: quizDuration,
+          module_times: moduleTimesRef.current,
+          total_seconds: sessionSeconds,
         };
 
     if (Object.keys(update).length > 0) {
@@ -691,11 +813,21 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
       if (error) { setSubmitting(false); return toast.error(error.message); }
     }
     setSubmitting(false);
+    setOpenGrades(openGradesLocal);
     setResult({ score, passed });
     setShowResults(true);
-    if (passed) toast.success(inAdaptive ? `Rattrapage réussi (${score}%) 🎉` : `QCM réussi (${score}%)`);
+    if (passed) toast.success(inAdaptive ? `Rattrapage réussi (${score}%) 🎉` : `QCM réussi (${score}%) en ${fmtTime(quizDuration)}`);
     else toast.error(`Score ${score}% — minimum requis ${passingScore}%.`);
   };
+
+  // Auto-submit when countdown hits 0
+  useEffect(() => {
+    if (!quizOpen || !quizTimeLimitSec) return;
+    if (quizTimeLeft === 0 && !showResults && !submitting) {
+      toast.error("⏰ Temps écoulé — soumission automatique");
+      submitQuiz();
+    }
+  }, [quizTimeLeft, quizOpen, quizTimeLimitSec, showResults, submitting]);
 
   const closeResults = () => {
     setShowResults(false);
@@ -708,7 +840,11 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
     setShowResults(false);
     setAdaptiveQuestions(null);
     setAnswers({});
+    setOpenAnswers({});
     setQuizPage(0);
+    shuffledMapRef.current = {};
+    setQuizStartedAt(Date.now());
+    setQuizElapsed(0);
   };
 
   const startAdaptive = async () => {
@@ -722,8 +858,12 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
       setAdaptiveQuestions(data.questions);
       setAdaptiveDifficulty(data.difficulty || "");
       setAnswers({});
+      setOpenAnswers({});
       setQuizPage(0);
+      shuffledMapRef.current = {};
       setShowResults(false);
+      setQuizStartedAt(Date.now());
+      setQuizElapsed(0);
       toast.success(`Mode adaptatif activé — ${data.questions.length} questions ciblées (${data.difficulty})`);
     } catch (e: any) {
       toast.error(e.message || "Erreur lors de la génération du rattrapage");
@@ -733,13 +873,16 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
   };
 
   const openQuiz = () => {
-    // Resume where left: keep draft answers & last quiz page unless already completed
     if (assigned.completed_at) {
       setAnswers({});
+      setOpenAnswers({});
       setQuizPage(0);
     }
     setAdaptiveQuestions(null);
     setShowResults(false);
+    shuffledMapRef.current = {};
+    setQuizStartedAt(Date.now());
+    setQuizElapsed(0);
     setQuizOpen(true);
   };
 
@@ -868,6 +1011,9 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
               Page {coursePage + 1} / {coursePages.length}
             </div>
             <Progress value={courseProgress} className="h-1.5 flex-1 max-w-xs" />
+            <Badge variant="outline" className="text-[10px] gap-1 font-mono">
+              <Timer className="h-3 w-3" />{fmtTime(sessionSeconds)}
+            </Badge>
           </div>
           <div className="p-4 min-h-[180px] text-sm">
             {renderCoursePage(coursePages[coursePage])}
@@ -898,9 +1044,17 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
       {quizOpen && hasQuiz && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => !submitting && (showResults ? closeResults() : setQuizOpen(false))}>
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <div className="bg-gradient-to-r from-primary to-[#007aa3] p-4 rounded-t-lg">
-              <h3 className="text-white font-semibold">QCM — {t.title}</h3>
-              <p className="text-cyan-100 text-xs">Score minimum requis : {passingScore}%</p>
+            <div className="bg-gradient-to-r from-primary to-[#007aa3] p-4 rounded-t-lg flex items-start justify-between gap-3">
+              <div>
+                <h3 className="text-white font-semibold">QCM — {t.title}</h3>
+                <p className="text-cyan-100 text-xs">Score minimum requis : {passingScore}%</p>
+              </div>
+              {!showResults && (
+                <Badge className={`font-mono text-xs ${quizTimeLimitSec && quizTimeLeft < 30 ? "bg-rose-500 text-white animate-pulse" : "bg-white/20 text-white border-white/30"}`}>
+                  <Timer className="h-3 w-3 mr-1" />
+                  {quizTimeLimitSec ? fmtTime(quizTimeLeft) : fmtTime(quizElapsed)}
+                </Badge>
+              )}
             </div>
 
             {showResults && result ? (
@@ -913,12 +1067,61 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
                     {result.passed ? "🎉 Félicitations, QCM réussi !" : "Score insuffisant"}
                   </div>
                   <div className="text-xs text-muted-foreground mt-1">
-                    {questions.filter((q, i) => answers[i] === q.correct_index).length} / {questions.length} bonnes réponses · seuil {passingScore}%
+                    {questions.filter((q, i) => q?.type !== "open" && answers[i] === q.correct_index).length} / {questions.filter(q => q?.type !== "open").length} bonnes réponses · seuil {passingScore}%
+                  </div>
+                  <div className="mt-2 flex items-center gap-1 text-xs text-muted-foreground">
+                    <Timer className="h-3 w-3" /> Quiz terminé en {fmtTime(quizElapsed)} · Session totale {fmtTime(sessionSeconds)}
                   </div>
                 </div>
+
+                {/* Per-module time recap */}
+                <div className="p-4 border-b bg-muted/20">
+                  <div className="font-semibold text-sm mb-2 flex items-center gap-1">
+                    <Clock className="h-3.5 w-3.5" /> Temps passé par module
+                  </div>
+                  <div className="space-y-1">
+                    {coursePages.map((p, idx) => {
+                      const key = p.kind === "module" ? `m${p.data.idx}` : p.kind;
+                      const sec = moduleTimesRef.current[key] || 0;
+                      const label = p.kind === "intro" ? "Introduction" : p.kind === "conclusion" ? "Conclusion" : `Module ${p.data.idx + 1} — ${p.data.title}`;
+                      const pct = sessionSeconds ? Math.round((sec / sessionSeconds) * 100) : 0;
+                      return (
+                        <div key={idx} className="flex items-center gap-2 text-xs">
+                          <span className="flex-1 truncate">{label}</span>
+                          <span className="font-mono text-muted-foreground w-16 text-right">{fmtTime(sec)}</span>
+                          <div className="w-20 h-1.5 bg-muted rounded overflow-hidden">
+                            <div className="h-full bg-primary" style={{ width: `${pct}%` }} />
+                          </div>
+                        </div>
+                      );
+                    })}
+                    <div className="flex items-center gap-2 text-xs pt-1 mt-1 border-t">
+                      <span className="flex-1 font-semibold">QCM</span>
+                      <span className="font-mono text-muted-foreground w-16 text-right">{fmtTime(moduleTimesRef.current.quiz || quizElapsed)}</span>
+                      <div className="w-20" />
+                    </div>
+                  </div>
+                </div>
+
                 <div className="p-4 space-y-3">
                   <div className="font-semibold text-sm">Détail des réponses</div>
                   {questions.map((q, i) => {
+                    if (q?.type === "open") {
+                      const grade = openGrades?.[i];
+                      const sc = grade?.score ?? 0;
+                      const ok = sc >= 70;
+                      return (
+                        <div key={i} className={`border rounded p-3 ${ok ? "border-emerald-200 bg-emerald-50/50" : "border-amber-200 bg-amber-50/50"}`}>
+                          <div className="text-sm font-medium mb-2 flex items-center gap-1">
+                            <PenLine className="h-3 w-3" />{i + 1}. {q.question}
+                            <Badge variant="outline" className="ml-auto text-[10px]">{sc}/100</Badge>
+                          </div>
+                          <div className="text-xs bg-white/60 rounded p-2 mb-1 whitespace-pre-line">{openAnswers[i] || <em className="text-muted-foreground">(aucune réponse)</em>}</div>
+                          {grade?.feedback && <div className="text-xs text-muted-foreground italic">💡 {grade.feedback}</div>}
+                          {q.expected_answer && <div className="text-xs text-emerald-700 mt-1">Réponse attendue : {q.expected_answer}</div>}
+                        </div>
+                      );
+                    }
                     const userAns = answers[i];
                     const ok = userAns === q.correct_index;
                     return (
@@ -970,15 +1173,39 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
                   <Progress value={quizProgress} className="h-1.5 flex-1 max-w-xs" />
                 </div>
                 <div className="p-4 space-y-3 min-h-[200px]">
-                  <div className="font-medium text-sm">{quizPage + 1}. {currentQ.question}</div>
-                  <div className="space-y-1.5">
-                    {currentQ.options.map((opt: string, j: number) => (
-                      <label key={j} className={`flex items-center gap-2 p-2.5 border rounded cursor-pointer text-sm ${answers[quizPage] === j ? "border-primary bg-primary/5" : "hover:bg-muted/30"}`}>
-                        <input type="radio" name={`q-${quizPage}`} checked={answers[quizPage] === j} onChange={() => setAnswers({ ...answers, [quizPage]: j })} />
-                        <span>{opt}</span>
-                      </label>
-                    ))}
+                  <div className="font-medium text-sm flex items-start gap-2">
+                    <span>{quizPage + 1}. {currentQ.question}</span>
+                    {currentQ.type === "open" && <Badge variant="outline" className="text-[10px]"><PenLine className="h-3 w-3 mr-0.5" />Question ouverte</Badge>}
                   </div>
+                  {currentQ.youtube_url && currentQ.timestamp_seconds != null && (
+                    <a
+                      href={`${currentQ.youtube_url}${currentQ.youtube_url.includes("?") ? "&" : "?"}t=${currentQ.timestamp_seconds}s`}
+                      target="_blank" rel="noreferrer"
+                      className="inline-flex items-center gap-1 text-xs text-red-600 hover:underline"
+                    >
+                      <Youtube className="h-3.5 w-3.5" /> Revoir le passage à {fmtTime(currentQ.timestamp_seconds)}
+                    </a>
+                  )}
+                  {isOpen ? (
+                    <textarea
+                      className="w-full min-h-[120px] border rounded p-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/30"
+                      placeholder="Rédigez votre réponse (au moins 6 caractères)…"
+                      value={openAnswers[quizPage] || ""}
+                      onChange={e => setOpenAnswers({ ...openAnswers, [quizPage]: e.target.value })}
+                    />
+                  ) : (
+                    <div className="space-y-1.5">
+                      {getOptionOrder(quizPage, currentQ).map((j) => {
+                        const opt = currentQ.options[j];
+                        return (
+                          <label key={j} className={`flex items-center gap-2 p-2.5 border rounded cursor-pointer text-sm ${answers[quizPage] === j ? "border-primary bg-primary/5" : "hover:bg-muted/30"}`}>
+                            <input type="radio" name={`q-${quizPage}`} checked={answers[quizPage] === j} onChange={() => setAnswers({ ...answers, [quizPage]: j })} />
+                            <span>{opt}</span>
+                          </label>
+                        );
+                      })}
+                    </div>
+                  )}
                 </div>
                 <div className="p-4 border-t flex items-center justify-between gap-2">
                   <Button size="sm" variant="outline" onClick={() => setQuizPage(p => Math.max(0, p - 1))} disabled={quizPage === 0 || submitting}>
