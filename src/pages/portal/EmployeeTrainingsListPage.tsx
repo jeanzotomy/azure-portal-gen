@@ -106,6 +106,55 @@ export default function EmployeeTrainingsListPage() {
   const passed = trainings.filter((t) => t.quiz_passed).length;
   const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
 
+  const categories = useMemo(() => {
+    const set = new Set<string>();
+    trainings.forEach((t) => t.training?.category && set.add(t.training.category));
+    return Array.from(set).sort();
+  }, [trainings]);
+
+  const getProgressPct = (t: Assigned) => {
+    const totalPages = Array.isArray(t.training?.content) ? t.training!.content.length : 0;
+    return totalPages > 0 ? Math.min(100, Math.round(((t.course_page || 0) / totalPages) * 100)) : 0;
+  };
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return trainings.filter((t) => {
+      if (q) {
+        const hay = `${t.training?.title || ""} ${t.training?.description || ""} ${t.training?.category || ""}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      if (statusFilter !== "all") {
+        const isCompleted = !!t.completed_at;
+        const started = (t.course_page || 0) > 0;
+        if (statusFilter === "completed" && !isCompleted) return false;
+        if (statusFilter === "in_progress" && (isCompleted || !started)) return false;
+        if (statusFilter === "not_started" && (isCompleted || started)) return false;
+        if (statusFilter === "quiz_passed" && !t.quiz_passed) return false;
+      }
+      if (progressFilter !== "all") {
+        const p = getProgressPct(t);
+        const [min, max] = progressFilter.split("-").map(Number);
+        if (p < min || p > max) return false;
+      }
+      if (categoryFilter !== "all" && t.training?.category !== categoryFilter) return false;
+      return true;
+    });
+  }, [trainings, search, statusFilter, progressFilter, categoryFilter]);
+
+  const hasActiveFilters =
+    search.trim() !== "" ||
+    statusFilter !== "all" ||
+    progressFilter !== "all" ||
+    categoryFilter !== "all";
+
+  const resetFilters = () => {
+    setSearch("");
+    setStatusFilter("all");
+    setProgressFilter("all");
+    setCategoryFilter("all");
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-3 sm:px-4 py-6 max-w-6xl space-y-6">
