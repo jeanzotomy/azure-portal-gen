@@ -157,7 +157,6 @@ export default function EmployeeTrainingsListPage() {
 
   return (
     <div className="space-y-6">
-      <div className="space-y-6">{/* keep structure */}
         <TrainingPageHero
           title="Mes formations"
           subtitle="Modules continus assignés par votre RH ou administrateur — suivez votre progression et obtenez vos certificats."
