@@ -67,11 +67,14 @@ export default function HrPortalPage() {
       <nav className="border-b border-border bg-card overflow-x-auto">
         <div className="flex gap-1 px-3 py-2">
           {SUBS.map((s) => {
-            const active = sub === s.id;
+            const active = !isFormationsRoute && sub === s.id;
             return (
               <button
                 key={s.id}
-                onClick={() => setSub(s.id)}
+                onClick={() => {
+                  if (isFormationsRoute) navigate("/rh");
+                  setSub(s.id);
+                }}
                 className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm whitespace-nowrap transition-colors ${
                   active ? "bg-primary text-primary-foreground" : "hover:bg-muted text-foreground"
                 }`}
@@ -81,6 +84,15 @@ export default function HrPortalPage() {
               </button>
             );
           })}
+          <button
+            onClick={() => navigate("/rh/formations")}
+            className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm whitespace-nowrap transition-colors ${
+              isFormationsRoute ? "bg-primary text-primary-foreground" : "hover:bg-muted text-foreground"
+            }`}
+          >
+            <BookOpenCheck size={14} />
+            Formations employés
+          </button>
         </div>
       </nav>
       <main className="flex-1 p-3 sm:p-6 overflow-auto">
