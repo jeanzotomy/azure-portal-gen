@@ -66,7 +66,7 @@ function PortalContent() {
   // Sync tab when URL ?tab= changes (e.g. from MobileBottomNav while already on /portal)
   useEffect(() => {
     const urlTab = searchParams.get("tab") as Tab | null;
-    const valid: Tab[] = ["dashboard", "projects", "tickets", "applications", "onboarding", "profile"];
+    const valid: Tab[] = ["dashboard", "projects", "tickets", "applications", "onboarding", "my-trainings", "profile"];
     if (urlTab && valid.includes(urlTab) && urlTab !== tab) {
       setTab(urlTab);
     }
