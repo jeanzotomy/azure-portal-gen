@@ -220,15 +220,115 @@ export default function EmployeeTrainingsListPage() {
             </Button>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {trainings.map((t) => (
-              <TrainingListCard
-                key={t.id}
-                assigned={t}
-                onOpen={() => navigate(`/portal/formations/${t.id}`)}
-              />
-            ))}
-          </div>
+          <>
+            <Card className="p-3 bg-card/60 backdrop-blur border-border/60">
+              <div className="flex flex-col lg:flex-row lg:items-center gap-2">
+                <div className="relative flex-1 min-w-0">
+                  <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Rechercher par titre, description, catégorie..."
+                    className="pl-9 pr-9 h-9"
+                  />
+                  {search && (
+                    <button
+                      type="button"
+                      onClick={() => setSearch("")}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      aria-label="Effacer la recherche"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 lg:flex lg:items-center">
+                  <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as typeof statusFilter)}>
+                    <SelectTrigger className="h-9 w-full lg:w-[150px]">
+                      <SelectValue placeholder="Statut" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tous statuts</SelectItem>
+                      <SelectItem value="not_started">Non démarrées</SelectItem>
+                      <SelectItem value="in_progress">En cours</SelectItem>
+                      <SelectItem value="completed">Complétées</SelectItem>
+                      <SelectItem value="quiz_passed">QCM réussi</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={progressFilter} onValueChange={(v) => setProgressFilter(v as typeof progressFilter)}>
+                    <SelectTrigger className="h-9 w-full lg:w-[150px]">
+                      <SelectValue placeholder="Progression" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Toute progression</SelectItem>
+                      <SelectItem value="0-25">0 – 25 %</SelectItem>
+                      <SelectItem value="25-50">25 – 50 %</SelectItem>
+                      <SelectItem value="50-75">50 – 75 %</SelectItem>
+                      <SelectItem value="75-100">75 – 100 %</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                    <SelectTrigger className="h-9 w-full lg:w-[170px]">
+                      <SelectValue placeholder="Catégorie" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Toutes catégories</SelectItem>
+                      {categories.map((c) => (
+                        <SelectItem key={c} value={c}>
+                          {c}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {hasActiveFilters && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={resetFilters}
+                    className="h-9 shrink-0 text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="h-4 w-4 mr-1" /> Réinitialiser
+                  </Button>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                <SlidersHorizontal className="h-3 w-3" />
+                <span>
+                  {filtered.length} / {total} formation{total > 1 ? "s" : ""}
+                  {hasActiveFilters ? " (filtrées)" : ""}
+                </span>
+              </div>
+            </Card>
+
+            {filtered.length === 0 ? (
+              <Card className="p-10 text-center space-y-3">
+                <Search className="h-10 w-10 mx-auto text-muted-foreground/60" />
+                <h3 className="font-semibold">Aucun résultat</h3>
+                <p className="text-sm text-muted-foreground">
+                  Aucune formation ne correspond à vos critères de recherche.
+                </p>
+                <Button variant="outline" size="sm" onClick={resetFilters}>
+                  Réinitialiser les filtres
+                </Button>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filtered.map((t) => (
+                  <TrainingListCard
+                    key={t.id}
+                    assigned={t}
+                    onOpen={() => navigate(`/portal/formations/${t.id}`)}
+                  />
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
