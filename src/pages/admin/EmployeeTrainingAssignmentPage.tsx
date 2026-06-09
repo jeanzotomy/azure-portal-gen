@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { TrainingPageHero } from "@/components/training/TrainingPageHero";
 import { TrainingStatsGrid } from "@/components/training/TrainingStatsGrid";
