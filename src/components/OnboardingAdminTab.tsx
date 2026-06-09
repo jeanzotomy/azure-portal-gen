@@ -261,6 +261,38 @@ export default function OnboardingAdminTab({ readOnly = false }: { readOnly?: bo
           </div>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={!!rejectDoc} onOpenChange={(o) => !o && setRejectDoc(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Refuser le document</DialogTitle>
+            <DialogDescription>
+              Indiquez la raison du refus. Elle sera communiquée au candidat.
+            </DialogDescription>
+          </DialogHeader>
+          <Textarea
+            value={rejectReason}
+            onChange={(e) => setRejectReason(e.target.value)}
+            placeholder="Ex: Document illisible, mauvaise pièce, expiré..."
+            rows={4}
+          />
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setRejectDoc(null)}>Annuler</Button>
+            <Button
+              variant="destructive"
+              disabled={!rejectReason.trim()}
+              onClick={async () => {
+                if (!rejectDoc || !rejectReason.trim()) return;
+                await reviewDoc(rejectDoc.id, "refuse", rejectReason.trim());
+                setRejectDoc(null);
+                setRejectReason("");
+              }}
+            >
+              Refuser
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
