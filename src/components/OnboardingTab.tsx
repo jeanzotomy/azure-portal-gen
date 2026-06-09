@@ -24,6 +24,7 @@ import { GamificationWidget } from "@/components/onboarding/GamificationWidget";
 import { TrainingTutor } from "@/components/onboarding/TrainingTutor";
 import { TrainingComments } from "@/components/onboarding/TrainingComments";
 import { MentionsBell } from "@/components/onboarding/MentionsBell";
+import { CohortActivityFeed } from "@/components/onboarding/CohortActivityFeed";
 import type { User as SupaUser } from "@supabase/supabase-js";
 
 const STEP_ICONS: Record<string, any> = {
