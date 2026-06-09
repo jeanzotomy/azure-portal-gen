@@ -1004,7 +1004,7 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
         </div>
       )}
 
-      {tutorOpen && t?.id && (
+      {tutorOpen && assigned.training_id && (
         <TrainingTutor
           trainingId={assigned.training_id}
           trainingTitle={t?.title || "Formation"}
