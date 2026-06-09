@@ -648,26 +648,108 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
   const [adaptiveDifficulty, setAdaptiveDifficulty] = useState<string>("");
   const [loadingAdaptive, setLoadingAdaptive] = useState(false);
 
+  // ---- Lot 3: enriched evaluation state ----
+  const [openAnswers, setOpenAnswers] = useState<Record<number, string>>(() => {
+    const d = (assigned.quiz_open_answers && typeof assigned.quiz_open_answers === "object") ? assigned.quiz_open_answers : {};
+    const out: Record<number, string> = {};
+    Object.entries(d).forEach(([k, v]) => { if (typeof v === "string") out[Number(k)] = v; });
+    return out;
+  });
+  const [openGrades, setOpenGrades] = useState<Record<number, { score: number; feedback: string }> | null>(
+    assigned.quiz_open_grades && typeof assigned.quiz_open_grades === "object" ? assigned.quiz_open_grades : null,
+  );
+
+  // ---- Time tracking (session + per-module) ----
+  const initialTotal = assigned.total_seconds ?? 0;
+  const initialModuleTimes: Record<string, number> = (assigned.module_times && typeof assigned.module_times === "object") ? assigned.module_times : {};
+  const [sessionSeconds, setSessionSeconds] = useState<number>(initialTotal);
+  const moduleTimesRef = useRef<Record<string, number>>({ ...initialModuleTimes });
+  const [, forceTick] = useState(0);
+
+  // ---- Quiz timer (countdown if quiz.time_limit_minutes is set) ----
+  const quizTimeLimitSec = t?.quiz?.time_limit_minutes ? t.quiz.time_limit_minutes * 60 : 0;
+  const [quizStartedAt, setQuizStartedAt] = useState<number | null>(null);
+  const [quizElapsed, setQuizElapsed] = useState(0);
+  const quizTimeLeft = quizTimeLimitSec ? Math.max(0, quizTimeLimitSec - quizElapsed) : 0;
+
   const baseQuestions: any[] = hasQuiz ? t.quiz.questions : [];
   const questions: any[] = adaptiveQuestions ?? baseQuestions;
   const currentQ = questions[quizPage];
-  const currentAnswered = currentQ ? answers[quizPage] != null : false;
-  const allAnswered = questions.length > 0 && questions.every((_, i) => answers[i] != null);
 
-  // Debounced save of progress (course page, quiz page, draft answers)
+  // ---- Shuffle option order per question (stable per session) ----
+  const shuffledMapRef = useRef<Record<number, number[]>>({});
+  const getOptionOrder = (qIndex: number, q: any) => {
+    if (!q?.options) return [];
+    if (q.type === "open") return [];
+    if (!shuffledMapRef.current[qIndex]) {
+      const arr = q.options.map((_: any, i: number) => i);
+      // Fisher-Yates
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      shuffledMapRef.current[qIndex] = arr;
+    }
+    return shuffledMapRef.current[qIndex];
+  };
+
+  const isOpen = currentQ?.type === "open";
+  const currentAnswered = currentQ
+    ? (isOpen ? (openAnswers[quizPage] || "").trim().length > 5 : answers[quizPage] != null)
+    : false;
+  const allAnswered = questions.length > 0 && questions.every((q, i) =>
+    q?.type === "open" ? (openAnswers[i] || "").trim().length > 5 : answers[i] != null,
+  );
+
+  // Session timer: increments every second; assigns time to current "context key"
+  const expandedRef = useRef(expanded);
+  const quizOpenRef = useRef(quizOpen);
+  const coursePageRef = useRef(coursePage);
+  expandedRef.current = expanded; quizOpenRef.current = quizOpen; coursePageRef.current = coursePage;
+
+  const currentKey = () => {
+    if (quizOpenRef.current) return "quiz";
+    if (!expandedRef.current) return null;
+    const page = coursePages[coursePageRef.current];
+    if (!page) return null;
+    if (page.kind === "module") return `m${page.data.idx}`;
+    return page.kind;
+  };
+
+  useEffect(() => {
+    if (assigned.completed_at) return;
+    const id = setInterval(() => {
+      const key = currentKey();
+      if (!key) return;
+      moduleTimesRef.current[key] = (moduleTimesRef.current[key] || 0) + 1;
+      setSessionSeconds(s => s + 1);
+      forceTick(n => (n + 1) % 1000);
+      if (quizOpenRef.current && quizTimeLimitSec) {
+        setQuizElapsed(e => e + 1);
+      }
+    }, 1000);
+    return () => clearInterval(id);
+  }, [assigned.completed_at, quizTimeLimitSec]);
+
+  // Debounced save of progress (course page, quiz page, draft answers, times)
   const lastSavedRef = useRef<string>("");
   useEffect(() => {
     if (assigned.completed_at) return;
     if (adaptiveQuestions) return; // never persist adaptive-mode answers
-    const payload = { course_page: coursePage, quiz_page: quizPage, quiz_draft_answers: answers, last_activity_at: new Date().toISOString() };
-    const key = JSON.stringify({ c: coursePage, q: quizPage, a: answers });
+    const payload = {
+      course_page: coursePage, quiz_page: quizPage, quiz_draft_answers: answers,
+      quiz_open_answers: openAnswers,
+      module_times: moduleTimesRef.current, total_seconds: sessionSeconds,
+      last_activity_at: new Date().toISOString(),
+    };
+    const key = JSON.stringify({ c: coursePage, q: quizPage, a: answers, o: openAnswers, s: Math.floor(sessionSeconds / 5) });
     if (key === lastSavedRef.current) return;
     const handle = setTimeout(async () => {
       lastSavedRef.current = key;
       await (supabase.from("onboarding_assigned_trainings") as any).update(payload).eq("id", assigned.id);
-    }, 600);
+    }, 1500);
     return () => clearTimeout(handle);
-  }, [coursePage, quizPage, answers, assigned.id, assigned.completed_at, adaptiveQuestions]);
+  }, [coursePage, quizPage, answers, openAnswers, sessionSeconds, assigned.id, assigned.completed_at, adaptiveQuestions]);
 
   const submitQuiz = async () => {
     if (questions.length === 0) return;
