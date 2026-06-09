@@ -12,31 +12,30 @@ type Cert = {
   score: number | null;
   issued_at: string;
   expires_at: string | null;
-  revoked_at: string | null;
 };
 
 export default function VerifyCertificatePage() {
   const { code } = useParams();
   const [cert, setCert] = useState<Cert | null>(null);
+  const [valid, setValid] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
-  const [notFound, setNotFound] = useState(false);
 
   useEffect(() => {
-    document.title = `Vérification certificat ${code ?? ""} | CloudMature`;
+    document.title = `Vérification certificat | CloudMature`;
     (async () => {
-      if (!code) { setNotFound(true); setLoading(false); return; }
-      const { data, error } = await supabase
-        .from("training_certificates")
-        .select("verification_code, candidate_name, training_title, score, issued_at, expires_at, revoked_at")
-        .eq("verification_code", code)
-        .maybeSingle();
-      if (error || !data) setNotFound(true);
-      else setCert(data as Cert);
+      const safeCode = (code || "").trim().toUpperCase();
+      const { data, error } = await supabase.functions.invoke("verify-certificate", {
+        body: { code: safeCode },
+      });
+      if (error || !data || !(data as any).valid) {
+        setValid(false);
+      } else {
+        setCert((data as any).certificate as Cert);
+        setValid(true);
+      }
       setLoading(false);
     })();
   }, [code]);
-
-  const isValid = cert && !cert.revoked_at && (!cert.expires_at || new Date(cert.expires_at) > new Date());
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 px-4 py-10">
@@ -47,7 +46,6 @@ export default function VerifyCertificatePage() {
             <ShieldCheck className="h-4 w-4" /> Vérification d'authenticité
           </div>
           <h1 className="text-3xl font-bold mt-2 text-[#003d66]">Certificat CloudMature</h1>
-          {code && <p className="text-xs text-muted-foreground mt-1 font-mono">Code : {code}</p>}
         </header>
 
         <Card className="shadow-lg border-0">
@@ -57,31 +55,21 @@ export default function VerifyCertificatePage() {
                 <Loader2 className="h-8 w-8 animate-spin mb-3" />
                 <p>Vérification en cours…</p>
               </div>
-            ) : notFound || !cert ? (
+            ) : !valid || !cert ? (
               <div className="flex flex-col items-center py-10">
                 <XCircle className="h-14 w-14 text-red-500 mb-3" />
-                <h2 className="text-xl font-bold text-red-700">Certificat introuvable</h2>
-                <p className="text-sm text-muted-foreground text-center mt-2 max-w-md">
-                  Aucun certificat ne correspond à ce code. Vérifiez la saisie ou contactez CloudMature.
+                <h2 className="text-xl font-bold text-red-700">Vérification impossible</h2>
+                <p className="text-sm text-muted-foreground text-center mt-3 max-w-md">
+                  Ce code ne correspond pas à un certificat valide. Si vous pensez qu'il s'agit d'une erreur,
+                  contactez le service Formation de CloudMature en joignant le certificat original.
                 </p>
               </div>
             ) : (
               <>
                 <div className="flex flex-col items-center pb-6 border-b">
-                  {isValid ? (
-                    <>
-                      <CheckCircle2 className="h-14 w-14 text-emerald-500 mb-3" />
-                      <h2 className="text-xl font-bold text-emerald-700">Certificat authentique</h2>
-                      <p className="text-sm text-muted-foreground mt-1">Émis officiellement par CloudMature</p>
-                    </>
-                  ) : (
-                    <>
-                      <XCircle className="h-14 w-14 text-amber-500 mb-3" />
-                      <h2 className="text-xl font-bold text-amber-700">
-                        {cert.revoked_at ? "Certificat révoqué" : "Certificat expiré"}
-                      </h2>
-                    </>
-                  )}
+                  <CheckCircle2 className="h-14 w-14 text-emerald-500 mb-3" />
+                  <h2 className="text-xl font-bold text-emerald-700">Certificat authentique</h2>
+                  <p className="text-sm text-muted-foreground mt-1">Émis officiellement par CloudMature</p>
                 </div>
                 <dl className="mt-6 space-y-4 text-sm">
                   <Row icon={<User className="h-4 w-4 text-primary" />} label="Titulaire" value={cert.candidate_name} />
@@ -97,7 +85,7 @@ export default function VerifyCertificatePage() {
                   )}
                   <div className="pt-2 flex items-center gap-2">
                     <Badge variant="outline" className="font-mono text-[10px]">{cert.verification_code}</Badge>
-                    {isValid && <Badge className="bg-emerald-100 text-emerald-700 border-emerald-300">Valide</Badge>}
+                    <Badge className="bg-emerald-100 text-emerald-700 border-emerald-300">Valide</Badge>
                   </div>
                 </dl>
               </>
@@ -106,7 +94,7 @@ export default function VerifyCertificatePage() {
         </Card>
 
         <p className="text-xs text-muted-foreground text-center mt-6">
-          La vérification s'effectue en consultant directement notre base de certificats officielle.
+          Pour des raisons de sécurité, aucune information n'est divulguée pour les codes invalides.
         </p>
       </div>
     </main>
