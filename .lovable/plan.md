@@ -1,65 +1,99 @@
-## Objectif
+## Redesign du module Formation
 
-Permettre **deux types d'assignation de formation** :
+Direction visuelle verrouillée : **Navy Trust** (#0f1b3d / #1e3a5f / #0099cc / #e8edf3) — alignée sur l'identité CloudMature existante, glassmorphism conservé, headers dialog navy→cyan. Aucune dérive purple/indigo générique.
 
-1. **Onboarding d'intégration** — comportement actuel (déjà en place via `onboarding_processes` lié à une candidature acceptée).
-2. **Formation continue employé** — nouvelle assignation directe à un utilisateur, gérée depuis un **menu dédié dans chaque profil utilisateur**, réservée à **Admin et RH**.
+Pattern UI verrouillé : **pages dédiées partout** pour les formulaires longs. Modales conservées uniquement pour confirmations courtes (supprimer, retirer une assignation).
 
-L'utilisateur retrouve ses formations dans deux espaces séparés. Les statistiques, quiz, certificats, commentaires et gamification continuent de fonctionner pour les deux types — sans dupliquer la logique existante.
+---
 
-## Approche technique
-
-On réutilise `onboarding_processes` comme conteneur générique et on lui ajoute un champ `kind`.
+### 1. Nouvelles routes (React Router)
 
 ```text
-onboarding_processes
- ├─ kind = 'onboarding'         (1 par candidature acceptée) — existant
- └─ kind = 'employee_training'  (1 par utilisateur, créé à la demande)
+/admin/formations                       → Tableau de bord formations (KPIs globaux)
+/admin/formations/catalogue             → Liste des modules (CRUD)
+/admin/formations/catalogue/nouveau     → Création d'un module (multi-step)
+/admin/formations/catalogue/:id         → Détail + édition (vidéo, quiz, prérequis)
+/admin/formations/assignations          → Annuaire users + KPIs d'assignation
+/admin/formations/assignations/:userId  → Page détail user : assigner / retirer / voir progression
+
+/rh/formations                          → Même vue que /admin/formations mais scoped HR
+/rh/formations/assignations/:userId     → Idem côté RH
+
+/portal/formations                      → Mes formations continues (cards)
+/portal/formations/:processItemId       → Player plein écran (vidéo + quiz + commentaires)
+/portal/onboarding                      → Parcours onboarding (timeline)
+/portal/onboarding/training/:itemId     → Player onboarding plein écran
 ```
 
-Chaque utilisateur n'aura **qu'un seul** process `employee_training` (contrat d'unicité) dans lequel s'accumulent toutes les formations continues qu'on lui assigne. Tous les triggers / fonctions existants (`can_access_training`, gamification, certificats, commentaires, cohort feed) marchent **sans modification**.
+Toutes protégées par `AuthGuard` + rôles existants (`admin`/`agent`/`gestionnaire` ; `hr` ; user authentifié).
 
-## Lot — Migration SQL
+---
 
-- Colonne `kind text not null default 'onboarding'` sur `onboarding_processes` + check (`'onboarding' | 'employee_training'`).
-- Index unique partiel : `(user_id) WHERE kind = 'employee_training'`.
-- Fonction `get_or_create_employee_process(_user_id uuid)` — SECURITY DEFINER, refusée si l'appelant n'est pas admin ou RH.
-- Fonction `assign_employee_training(_user_id uuid, _training_id uuid)` — crée le process si besoin puis `INSERT … ON CONFLICT DO NOTHING` dans `onboarding_assigned_trainings` (source = `'employee'`).
-- Fonction `unassign_employee_training(_user_id uuid, _training_id uuid)` — DELETE conditionnée à la non-complétion (sinon on garde l'historique).
-- Fonction `list_employee_assignable_users()` — admin/RH seulement, retourne id, nom, email, nb formations actives, nb complétées.
-- Fonction `list_employee_trainings_for_user(_user_id uuid)` — admin/RH **ou** l'utilisateur lui-même.
-- Adaptations RLS triviales : les policies actuelles sur `onboarding_assigned_trainings` filtrent déjà par `process.user_id = auth.uid()` → fonctionnent telles quelles pour les deux `kind`.
+### 2. Surfaces redessinées
 
-## Lot — UI utilisateur
+**A. Admin / RH — Centre de formation**
+- Hero header navy avec breadcrumb + KPIs (modules actifs, users en cours, taux complétion, score moyen).
+- 3 onglets-cards : Catalogue / Assignations / Certificats.
+- Catalogue : grille de cards (thumbnail, durée, # modules, statut). Bouton `+ Nouveau module` → page de création.
+- Assignations : split-screen — liste users (recherche, filtres rôle/statut) à gauche, panneau de détails à droite OU navigation vers `/admin/formations/assignations/:userId`.
+- Pages création/édition : form en 3 sections (Infos générales, Contenu vidéo, Quiz). Sticky footer "Enregistrer / Publier".
 
-Nouveau composant **`EmployeeTrainingsTab.tsx`** (séparé de `OnboardingTab`) :
+**B. User — Mes formations (continu)**
+- Page `/portal/formations` : hero "Mon parcours", stat row (assignées, en cours, complétées, certificats), grille de cards formations avec barre de progression et badge gamification.
+- Click card → page player `/portal/formations/:id` plein écran (sidebar gauche : modules + checkmarks ; main : vidéo + transcription ; tabs : Quiz / Commentaires / Tuteur IA / Certificat).
 
-- Visible dans le portail utilisateur sous un nouvel onglet « Mes formations » dans la sidebar/profil.
-- Réutilise les sous-composants existants : lecteur vidéo, quiz, commentaires, certificat, gamification.
-- Cache complètement l'UI « onboarding » (étapes, contrat, documents) — uniquement la liste des formations assignées avec progression.
+**C. User — Onboarding**
+- Page `/portal/onboarding` : timeline verticale visuelle (steps actuels conservés) + accès rapide formations onboarding.
+- Player onboarding identique au player formation continue (composant partagé).
 
-`OnboardingTab` reste inchangé et continue de ne montrer que les formations du process `kind = 'onboarding'`.
+---
 
-## Lot — UI Admin & RH
+### 3. Composants partagés à créer
 
-Nouveau composant **`EmployeeTrainingManager.tsx`** intégré :
+| Composant | Rôle |
+|---|---|
+| `TrainingHeader` | Hero navy + breadcrumb + KPIs |
+| `TrainingStatsRow` | Row de 4 stat-cards glassmorphism |
+| `TrainingCard` | Card formation (catalogue + portail user) |
+| `TrainingPlayerLayout` | Layout split sidebar/main réutilisable |
+| `AssignmentUserList` | Annuaire users avec filtres + recherche |
+| `TrainingFormShell` | Wrapper page-form avec sticky footer Save/Cancel |
 
-- Sous un nouvel onglet **« Formations employés »** dans `AdminPage` (visible Admin) et `RHPage` (visible RH).
-- Liste des utilisateurs (recherche, filtre par département si dispo).
-- Pour l'utilisateur sélectionné, panneau de droite avec :
-  - Formations déjà assignées (avec source, statut, score, date complétion).
-  - Bouton « Assigner une formation » → modal avec recherche dans le catalogue `trainings` actif.
-  - Bouton retrait sur les formations non encore complétées.
-- KPIs : nb d'utilisateurs avec formation en cours, taux de complétion, score moyen.
+Tokens existants réutilisés (pas de nouveaux). Headers gradient `from-primary to-[#007aa3]` conservés sur les cards/sections clés. Glassmorphism (`bg-white/5 backdrop-blur border-white/10`) appliqué aux cards et stat rows.
 
-## Récap
+---
 
-```text
-                ┌─ Onboarding (intégration) ────► OnboardingTab (inchangé)
-Process kind ───┤
-                └─ Employee training ──────────► EmployeeTrainingsTab (nouveau)
-                                                  ▲
-                              assigné par Admin/RH│ via EmployeeTrainingManager
-```
+### 4. Migration des écrans existants
 
-Aucune donnée existante n'est migrée ni cassée : tous les process actuels gardent `kind = 'onboarding'` par défaut.
+| Existant | Devient |
+|---|---|
+| `EmployeeTrainingManager.tsx` (tab admin) | Pages `/admin/formations/*` |
+| Dialog "Assigner une formation" | Page `/admin/formations/assignations/:userId` |
+| `OnboardingTab.tsx` (1344 lignes) | Découpé : `OnboardingTimelinePage` + `TrainingPlayerPage` partagé |
+| `EmployeeTrainingsTab.tsx` | Page `/portal/formations` + redirection depuis l'onglet |
+| Modales création/édition module | Pages `/admin/formations/catalogue/*` |
+
+L'onglet existant dans `PortalPage` et `AdminPage` reste comme entry-point mais redirige (`navigate`) vers les nouvelles routes pour préserver les liens internes le temps de la transition.
+
+---
+
+### 5. Hors-scope explicite
+
+- Aucun changement backend (RLS, RPC, schema) — toutes les RPC existantes (`assign_employee_training`, `list_employee_trainings_for_user`, etc.) sont réutilisées.
+- Pas de nouveau token de couleur, pas de changement de typographie.
+- Pas de touch à la logique métier (gamification, certificats, partage social, vérification publique).
+- I18n FR/EN : nouvelles clés ajoutées via le contexte existant, pas de refonte du système.
+
+---
+
+### Détails techniques
+
+- Découper `OnboardingTab.tsx` en sous-composants avant migration pour limiter la dette.
+- `TrainingPlayerPage` accepte `mode: "onboarding" | "employee"` pour brancher la bonne RPC.
+- Sticky footer des formulaires : `position: sticky; bottom: 0; bg-background/80 backdrop-blur`.
+- AuthGuard sur `/admin/formations/*` et `/rh/formations/*` : mêmes rôles que `AdminPage` / `HrPortalPage`.
+- Mobile : sidebar player → Sheet, split-screen assignations → stack.
+
+---
+
+**Prêt à implémenter ?** Je commence par les routes + le shell des pages admin (Catalogue + Assignations), puis le player partagé, puis le portail user.
