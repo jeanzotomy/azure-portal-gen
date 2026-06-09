@@ -42,10 +42,14 @@ export function HeroSection() {
               <span className="text-secondary-foreground/70">·</span>
               <span className="gradient-text font-semibold">{t("hero.badge.ai")}</span>
             </div>
-            <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-tight text-primary-foreground mb-6">
+            <h1
+              className="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-tight text-primary-foreground mb-6"
+              aria-label="Cloud Mature — Conseil Cloud, DevOps et Intelligence Artificielle en Guinée"
+            >
               {words.map((word: string, i: number) => (
                 <span
                   key={word}
+                  aria-hidden="true"
                   className={`inline-block transition-all duration-700 ${
                     i === 1 ? "gradient-text" : ""
                   } ${

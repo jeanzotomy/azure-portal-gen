@@ -89,6 +89,7 @@ export function Navbar() {
                 onClick={handleLogout}
                 className="p-1.5 rounded-lg text-secondary-foreground/70 hover:text-destructive hover:bg-destructive/10 transition-colors"
                 title={locale === "fr" ? "Déconnexion" : "Sign out"}
+                aria-label={locale === "fr" ? "Déconnexion" : "Sign out"}
               >
                 <LogOut size={16} />
               </button>

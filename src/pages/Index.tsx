@@ -9,9 +9,15 @@ import { IndustriesSection } from "@/components/IndustriesSection";
 import { WhyUsSection } from "@/components/WhyUsSection";
 import { ContactSection } from "@/components/ContactSection";
 import { Footer } from "@/components/Footer";
+import { useSeo } from "@/hooks/use-seo";
 
 
 const Index = () => {
+  useSeo({
+    title: "CloudMature | Cloud · DevOps · IA — Conakry, Guinée",
+    description: "Cloud Mature — Conseil Cloud (Azure, AWS, GCP), DevOps et Intelligence Artificielle pour entreprises. Conakry, Guinée.",
+    path: "/",
+  });
   const location = useLocation();
 
   useEffect(() => {
