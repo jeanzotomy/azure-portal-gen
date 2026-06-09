@@ -651,6 +651,7 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
   const lastSavedRef = useRef<string>("");
   useEffect(() => {
     if (assigned.completed_at) return;
+    if (adaptiveQuestions) return; // never persist adaptive-mode answers
     const payload = { course_page: coursePage, quiz_page: quizPage, quiz_draft_answers: answers, last_activity_at: new Date().toISOString() };
     const key = JSON.stringify({ c: coursePage, q: quizPage, a: answers });
     if (key === lastSavedRef.current) return;
@@ -659,7 +660,7 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
       await (supabase.from("onboarding_assigned_trainings") as any).update(payload).eq("id", assigned.id);
     }, 600);
     return () => clearTimeout(handle);
-  }, [coursePage, quizPage, answers, assigned.id, assigned.completed_at]);
+  }, [coursePage, quizPage, answers, assigned.id, assigned.completed_at, adaptiveQuestions]);
 
   const submitQuiz = async () => {
     if (!hasQuiz) return;
