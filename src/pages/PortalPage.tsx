@@ -200,6 +200,7 @@ function PortalContent() {
           {tab === "tickets" && <TicketsTab user={user} />}
           {tab === "applications" && <ApplicationsTab user={user} />}
           {tab === "onboarding" && <OnboardingTab user={user} />}
+          {tab === "my-trainings" && <EmployeeTrainingsTab user={user} />}
           {tab === "profile" && <ProfileTab user={user} />}
         </main>
       </div>
