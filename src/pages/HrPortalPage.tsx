@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Outlet, useMatch } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { useUserRoles } from "@/hooks/use-admin";
@@ -24,6 +24,8 @@ export default function HrPortalPage() {
   const { isHr, loading } = useUserRoles();
   const navigate = useNavigate();
   const [sub, setSub] = useState<HrSubTab>("recruitment");
+  const formationsMatch = useMatch("/rh/formations/*");
+  const isFormationsRoute = !!formationsMatch;
 
   useEffect(() => {
     if (!ready || loading) return;
@@ -81,7 +83,7 @@ export default function HrPortalPage() {
         </div>
       </nav>
       <main className="flex-1 p-3 sm:p-6 overflow-auto">
-        <HrTab onboardingReadOnly defaultTab={sub} key={sub} />
+        {isFormationsRoute ? <Outlet /> : <HrTab onboardingReadOnly defaultTab={sub} key={sub} />}
       </main>
     </div>
   );

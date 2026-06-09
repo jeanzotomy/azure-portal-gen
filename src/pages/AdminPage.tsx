@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import adminLogo from "@/assets/cloudmature-logo.png";
-import { useNavigate, Link, useSearchParams } from "react-router-dom";
+import { useNavigate, Link, useSearchParams, Outlet, useMatch } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useUserRoles } from "@/hooks/use-admin";
 import { useMfaCheck, clearSmsMfaVerified } from "@/hooks/use-mfa";
@@ -205,6 +205,8 @@ function AdminContent() {
   const [gestionnaireServicesOpen, setGestionnaireServicesOpen] = useState(true);
   const [gestionnaireHrOpen, setGestionnaireHrOpen] = useState(true);
   const { t } = useTranslation();
+  const formationsMatch = useMatch("/admin/formations/*");
+  const isFormationsRoute = !!formationsMatch;
 
   // Auto-open services submenu when a services tab is active. Must run before any early return to keep hook order stable.
   const ADMIN_SERVICES_TABS: AdminTab[] = ["service-clients", "service-catalog", "service-invoices", "payment-methods"];
@@ -687,24 +689,30 @@ function AdminContent() {
         <PortalInfoBar />
 
         <main className="flex-1 p-3 sm:p-6 pb-[calc(80px+env(safe-area-inset-bottom))] md:pb-6 overflow-auto">
-          {tab === "dashboard" && <AdminDashboard />}
-          {tab === "projects" && <AdminProjects />}
-          {tab === "tickets" && <AdminTickets />}
-          {tab === "contacts" && <AdminContacts />}
-          {tab === "users" && <AdminUsers />}
-          {tab === "sharepoint" && <SharePointTab />}
-          {tab === "seo" && <SeoTab />}
-          {tab === "verify-certificates" && <CertificateVerifyDashboard />}
-          {tab === "service-clients" && <ServiceClientsTab />}
-          {tab === "service-catalog" && <ServiceCatalogTab />}
-          {tab === "service-invoices" && <ServiceInvoicesTab />}
-          {tab === "payment-methods" && <PaymentMethodsTab />}
-          {tab === "hr" && <HrTab />}
-          {tab === "hr-recruitment" && <HrTab defaultTab="recruitment" />}
-          {tab === "hr-contracts" && <HrTab defaultTab="contracts" />}
-          {tab === "hr-onboarding" && <HrTab defaultTab="onboarding" />}
-          {tab === "hr-trainings" && <HrTab defaultTab="trainings" />}
-          {tab === "hr-employee-trainings" && <EmployeeTrainingManager />}
+          {isFormationsRoute ? (
+            <Outlet />
+          ) : (
+            <>
+              {tab === "dashboard" && <AdminDashboard />}
+              {tab === "projects" && <AdminProjects />}
+              {tab === "tickets" && <AdminTickets />}
+              {tab === "contacts" && <AdminContacts />}
+              {tab === "users" && <AdminUsers />}
+              {tab === "sharepoint" && <SharePointTab />}
+              {tab === "seo" && <SeoTab />}
+              {tab === "verify-certificates" && <CertificateVerifyDashboard />}
+              {tab === "service-clients" && <ServiceClientsTab />}
+              {tab === "service-catalog" && <ServiceCatalogTab />}
+              {tab === "service-invoices" && <ServiceInvoicesTab />}
+              {tab === "payment-methods" && <PaymentMethodsTab />}
+              {tab === "hr" && <HrTab />}
+              {tab === "hr-recruitment" && <HrTab defaultTab="recruitment" />}
+              {tab === "hr-contracts" && <HrTab defaultTab="contracts" />}
+              {tab === "hr-onboarding" && <HrTab defaultTab="onboarding" />}
+              {tab === "hr-trainings" && <HrTab defaultTab="trainings" />}
+              {tab === "hr-employee-trainings" && <EmployeeTrainingManager />}
+            </>
+          )}
         </main>
       </div>
       <ProfileSignatureDialog open={signatureOpen} onOpenChange={setSignatureOpen} />

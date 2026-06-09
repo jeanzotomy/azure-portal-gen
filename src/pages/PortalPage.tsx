@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from "react";
-import { useNavigate, Link, useSearchParams } from "react-router-dom";
+import { useNavigate, Link, useSearchParams, Outlet, useMatch } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -60,6 +60,8 @@ function PortalContent() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const { t, locale } = useTranslation();
+  const formationsMatch = useMatch("/portal/formations/*");
+  const isFormationsRoute = !!formationsMatch;
 
   // Auth/MFA/blocked checks are handled upstream by <AuthGuard>. We can rely on `user` being non-null.
 
@@ -130,8 +132,15 @@ function PortalContent() {
                 {navItems.map((item) => (
                   <SidebarMenuItem key={item.id}>
                     <SidebarMenuButton
-                      onClick={() => setTab(item.id)}
-                      isActive={tab === item.id}
+                      onClick={() => {
+                        if (item.id === "my-trainings") {
+                          navigate("/portal/formations");
+                        } else {
+                          if (isFormationsRoute) navigate("/portal");
+                          setTab(item.id);
+                        }
+                      }}
+                      isActive={item.id === "my-trainings" ? isFormationsRoute : (tab === item.id && !isFormationsRoute)}
                       tooltip={item.label}
                       className="gap-3"
                     >
@@ -164,7 +173,7 @@ function PortalContent() {
           <div className="flex items-center gap-3">
             <SidebarTrigger />
             <h2 className="text-sm font-semibold text-card-foreground hidden sm:block">
-              {navItems.find(n => n.id === tab)?.label}
+              {isFormationsRoute ? "Mes formations" : navItems.find(n => n.id === tab)?.label}
             </h2>
           </div>
           <div className="flex items-center gap-2">
@@ -195,13 +204,19 @@ function PortalContent() {
               </AlertDescription>
             </Alert>
           )}
-          {tab === "dashboard" && <DashboardTab user={user} />}
-          {tab === "projects" && <ProjectsTab user={user} />}
-          {tab === "tickets" && <TicketsTab user={user} />}
-          {tab === "applications" && <ApplicationsTab user={user} />}
-          {tab === "onboarding" && <OnboardingTab user={user} />}
-          {tab === "my-trainings" && <EmployeeTrainingsTab user={user} />}
-          {tab === "profile" && <ProfileTab user={user} />}
+          {isFormationsRoute ? (
+            <Outlet />
+          ) : (
+            <>
+              {tab === "dashboard" && <DashboardTab user={user} />}
+              {tab === "projects" && <ProjectsTab user={user} />}
+              {tab === "tickets" && <TicketsTab user={user} />}
+              {tab === "applications" && <ApplicationsTab user={user} />}
+              {tab === "onboarding" && <OnboardingTab user={user} />}
+              {tab === "my-trainings" && <EmployeeTrainingsTab user={user} />}
+              {tab === "profile" && <ProfileTab user={user} />}
+            </>
+          )}
         </main>
       </div>
     </div>
