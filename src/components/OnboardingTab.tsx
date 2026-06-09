@@ -627,6 +627,7 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
     return out;
   });
   const [submitting, setSubmitting] = useState(false);
+  const [showResults, setShowResults] = useState(false);
   const [result, setResult] = useState<{ score: number; passed: boolean } | null>(
     assigned.quiz_score != null ? { score: assigned.quiz_score, passed: !!assigned.quiz_passed } : null,
   );
@@ -670,13 +671,24 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
     setSubmitting(false);
     if (error) return toast.error(error.message);
     setResult({ score, passed });
-    setQuizOpen(false);
+    setShowResults(true);
     if (passed) {
       toast.success(`QCM réussi (${score}%)`);
-      onComplete();
     } else {
       toast.error(`Score ${score}% — minimum requis ${passingScore}%. Vous pouvez réessayer.`);
     }
+  };
+
+  const closeResults = () => {
+    setShowResults(false);
+    setQuizOpen(false);
+    if (result?.passed) onComplete();
+  };
+
+  const retryQuiz = () => {
+    setShowResults(false);
+    setAnswers({});
+    setQuizPage(0);
   };
 
   const openQuiz = () => {
@@ -685,6 +697,7 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
       setAnswers({});
       setQuizPage(0);
     }
+    setShowResults(false);
     setQuizOpen(true);
   };
 
@@ -836,48 +849,105 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
         </div>
       )}
 
-      {quizOpen && hasQuiz && currentQ && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => setQuizOpen(false)}>
+      {quizOpen && hasQuiz && (
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => !submitting && (showResults ? closeResults() : setQuizOpen(false))}>
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="bg-gradient-to-r from-primary to-[#007aa3] p-4 rounded-t-lg">
               <h3 className="text-white font-semibold">QCM — {t.title}</h3>
               <p className="text-cyan-100 text-xs">Score minimum requis : {passingScore}%</p>
             </div>
-            <div className="px-4 pt-3 flex items-center justify-between gap-3">
-              <div className="text-xs font-medium text-muted-foreground">
-                Question {quizPage + 1} / {questions.length}
-              </div>
-              <Progress value={quizProgress} className="h-1.5 flex-1 max-w-xs" />
-            </div>
-            <div className="p-4 space-y-3 min-h-[200px]">
-              <div className="font-medium text-sm">{quizPage + 1}. {currentQ.question}</div>
-              <div className="space-y-1.5">
-                {currentQ.options.map((opt: string, j: number) => (
-                  <label key={j} className={`flex items-center gap-2 p-2.5 border rounded cursor-pointer text-sm ${answers[quizPage] === j ? "border-primary bg-primary/5" : "hover:bg-muted/30"}`}>
-                    <input type="radio" name={`q-${quizPage}`} checked={answers[quizPage] === j} onChange={() => setAnswers({ ...answers, [quizPage]: j })} />
-                    <span>{opt}</span>
-                  </label>
-                ))}
-              </div>
-            </div>
-            <div className="p-4 border-t flex items-center justify-between gap-2">
-              <Button size="sm" variant="outline" onClick={() => setQuizPage(p => Math.max(0, p - 1))} disabled={quizPage === 0 || submitting}>
-                <ChevronLeft className="h-4 w-4 mr-1" /> Précédent
-              </Button>
-              <div className="flex gap-2">
-                <Button size="sm" variant="ghost" onClick={() => setQuizOpen(false)} disabled={submitting}>Annuler</Button>
-                {quizPage < questions.length - 1 ? (
-                  <Button size="sm" onClick={() => setQuizPage(p => p + 1)} disabled={!currentAnswered} className="bg-gradient-to-r from-primary to-[#007aa3]">
-                    Suivant <ChevronRight className="h-4 w-4 ml-1" />
+
+            {showResults && result ? (
+              <>
+                <div className="p-5 flex flex-col items-center text-center border-b">
+                  <div className={`h-20 w-20 rounded-full flex items-center justify-center text-2xl font-bold ${result.passed ? "bg-emerald-100 text-emerald-700" : "bg-rose-100 text-rose-700"}`}>
+                    {result.score}%
+                  </div>
+                  <div className={`mt-3 font-semibold ${result.passed ? "text-emerald-700" : "text-rose-700"}`}>
+                    {result.passed ? "🎉 Félicitations, QCM réussi !" : "Score insuffisant"}
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {questions.filter((q, i) => answers[i] === q.correct_index).length} / {questions.length} bonnes réponses · seuil {passingScore}%
+                  </div>
+                </div>
+                <div className="p-4 space-y-3">
+                  <div className="font-semibold text-sm">Détail des réponses</div>
+                  {questions.map((q, i) => {
+                    const userAns = answers[i];
+                    const ok = userAns === q.correct_index;
+                    return (
+                      <div key={i} className={`border rounded p-3 ${ok ? "border-emerald-200 bg-emerald-50/50" : "border-rose-200 bg-rose-50/50"}`}>
+                        <div className="text-sm font-medium mb-2">{i + 1}. {q.question}</div>
+                        <div className="space-y-1 text-xs">
+                          {q.options.map((opt: string, j: number) => {
+                            const isCorrect = j === q.correct_index;
+                            const isUser = j === userAns;
+                            return (
+                              <div key={j} className={`flex items-center gap-2 px-2 py-1 rounded ${isCorrect ? "bg-emerald-100 text-emerald-900" : isUser ? "bg-rose-100 text-rose-900" : "text-muted-foreground"}`}>
+                                <span className="font-semibold">{isCorrect ? "✓" : isUser ? "✗" : "·"}</span>
+                                <span>{opt}</span>
+                                {isUser && <span className="ml-auto text-[10px] uppercase opacity-70">votre réponse</span>}
+                              </div>
+                            );
+                          })}
+                        </div>
+                        {q.explanation && (
+                          <div className="mt-2 text-xs text-muted-foreground italic">💡 {q.explanation}</div>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+                <div className="p-4 border-t flex items-center justify-end gap-2">
+                  {!result.passed && (
+                    <Button size="sm" variant="outline" onClick={retryQuiz}>
+                      Réessayer
+                    </Button>
+                  )}
+                  <Button size="sm" onClick={closeResults} className="bg-gradient-to-r from-primary to-[#007aa3]">
+                    Fermer
                   </Button>
-                ) : (
-                  <Button size="sm" onClick={submitQuiz} disabled={!allAnswered || submitting} className="bg-gradient-to-r from-primary to-[#007aa3]">
-                    {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
-                    Soumettre
+                </div>
+              </>
+            ) : currentQ ? (
+              <>
+                <div className="px-4 pt-3 flex items-center justify-between gap-3">
+                  <div className="text-xs font-medium text-muted-foreground">
+                    Question {quizPage + 1} / {questions.length}
+                  </div>
+                  <Progress value={quizProgress} className="h-1.5 flex-1 max-w-xs" />
+                </div>
+                <div className="p-4 space-y-3 min-h-[200px]">
+                  <div className="font-medium text-sm">{quizPage + 1}. {currentQ.question}</div>
+                  <div className="space-y-1.5">
+                    {currentQ.options.map((opt: string, j: number) => (
+                      <label key={j} className={`flex items-center gap-2 p-2.5 border rounded cursor-pointer text-sm ${answers[quizPage] === j ? "border-primary bg-primary/5" : "hover:bg-muted/30"}`}>
+                        <input type="radio" name={`q-${quizPage}`} checked={answers[quizPage] === j} onChange={() => setAnswers({ ...answers, [quizPage]: j })} />
+                        <span>{opt}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+                <div className="p-4 border-t flex items-center justify-between gap-2">
+                  <Button size="sm" variant="outline" onClick={() => setQuizPage(p => Math.max(0, p - 1))} disabled={quizPage === 0 || submitting}>
+                    <ChevronLeft className="h-4 w-4 mr-1" /> Précédent
                   </Button>
-                )}
-              </div>
-            </div>
+                  <div className="flex gap-2">
+                    <Button size="sm" variant="ghost" onClick={() => setQuizOpen(false)} disabled={submitting}>Annuler</Button>
+                    {quizPage < questions.length - 1 ? (
+                      <Button size="sm" onClick={() => setQuizPage(p => p + 1)} disabled={!currentAnswered} className="bg-gradient-to-r from-primary to-[#007aa3]">
+                        Suivant <ChevronRight className="h-4 w-4 ml-1" />
+                      </Button>
+                    ) : (
+                      <Button size="sm" onClick={submitQuiz} disabled={!allAnswered || submitting} className="bg-gradient-to-r from-primary to-[#007aa3]">
+                        {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
+                        Soumettre
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </>
+            ) : null}
           </div>
         </div>
       )}
