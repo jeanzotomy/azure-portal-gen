@@ -67,7 +67,7 @@ export default function EmployeeTrainingAssignmentPage({
   parentLabel = "Formations",
 }: Props) {
   const { userId = "" } = useParams<{ userId: string }>();
-  const navigate = useNavigate();
+  
   const [user, setUser] = useState<UserMeta | null>(null);
   const [assigned, setAssigned] = useState<AssignedRow[]>([]);
   const [catalog, setCatalog] = useState<Training[]>([]);
