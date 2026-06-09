@@ -252,12 +252,91 @@ export function CertificateVerifyDashboard() {
         </CardContent>
       </Card>
 
+      <Card>
+        <CardHeader className="pb-2 flex flex-row items-center justify-between gap-2 flex-wrap">
+          <CardTitle className="text-sm flex items-center gap-1.5"><Hash className="h-4 w-4 text-primary" />Recherche / Détail d'un code</CardTitle>
+          <form
+            className="flex items-center gap-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const v = searchValue.trim().toUpperCase();
+              if (v) setSelectedCode(v);
+            }}
+          >
+            <Input
+              placeholder="XXXX-XXXX-XXXX"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value.toUpperCase())}
+              className="font-mono text-xs h-8 w-44"
+            />
+            <Button size="sm" type="submit" variant="outline" disabled={!searchValue.trim()}>
+              <Search className="h-3.5 w-3.5 mr-1" />Ouvrir
+            </Button>
+          </form>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
+                <tr>
+                  <th className="text-left px-3 py-2">Code</th>
+                  <th className="text-right px-3 py-2">Tentatives</th>
+                  <th className="text-right px-3 py-2">Succès</th>
+                  <th className="text-right px-3 py-2">Échecs</th>
+                  <th className="text-right px-3 py-2">IP uniques</th>
+                  <th className="text-left px-3 py-2">Dernière</th>
+                  <th className="px-3 py-2 w-12"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {(() => {
+                  const byCode = new Map<string, { code: string; total: number; ok: number; fail: number; ips: Set<string>; last: string }>();
+                  for (const r of rows) {
+                    if (!r.code) continue;
+                    const c = byCode.get(r.code) || { code: r.code, total: 0, ok: 0, fail: 0, ips: new Set<string>(), last: r.attempted_at };
+                    c.total++; if (r.ok) c.ok++; else c.fail++; c.ips.add(r.ip);
+                    if (new Date(r.attempted_at) > new Date(c.last)) c.last = r.attempted_at;
+                    byCode.set(r.code, c);
+                  }
+                  const list = [...byCode.values()].sort((a, b) => b.total - a.total).slice(0, 25);
+                  if (list.length === 0) {
+                    return (
+                      <tr><td colSpan={7} className="px-3 py-6 text-center text-muted-foreground">
+                        Aucun code interrogé sur cette fenêtre. Utilisez la recherche pour en inspecter un.
+                      </td></tr>
+                    );
+                  }
+                  return list.map(c => (
+                    <tr key={c.code} className="border-t hover:bg-muted/30 cursor-pointer" onClick={() => setSelectedCode(c.code)}>
+                      <td className="px-3 py-2 font-mono text-xs">{c.code}</td>
+                      <td className="px-3 py-2 text-right">{c.total}</td>
+                      <td className="px-3 py-2 text-right text-emerald-600">{c.ok}</td>
+                      <td className="px-3 py-2 text-right text-red-500">{c.fail}</td>
+                      <td className="px-3 py-2 text-right">{c.ips.size}</td>
+                      <td className="px-3 py-2 text-xs text-muted-foreground">{fmtDate(new Date(c.last))}</td>
+                      <td className="px-3 py-2 text-right"><Search className="h-3.5 w-3.5 text-muted-foreground inline" /></td>
+                    </tr>
+                  ));
+                })()}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+
       <p className="text-[11px] text-muted-foreground">
         Seuils anti-bruteforce : {SHORT_MAX} tentatives / {SHORT_WIN_S}s et {LONG_MAX} / {LONG_WIN_S / 60} min par IP.
+        Cliquez sur un code ou une IP pour ouvrir le détail complet des tentatives associées.
       </p>
+
+      <CodeDetailDialog
+        code={selectedCode}
+        onClose={() => setSelectedCode(null)}
+      />
     </div>
   );
 }
+
 
 function Kpi({ icon, label, value, sub, color }: { icon: React.ReactNode; label: string; value: number; sub?: string; color?: string }) {
   return (
