@@ -24,6 +24,13 @@ Deno.serve(async (req) => {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
 
+    const { data: roles } = await supabase.from('user_roles').select('role').eq('user_id', user.id);
+    const allowed = ['admin', 'hr', 'gestionnaire'];
+    if (!roles?.some((r: { role: string }) => allowed.includes(r.role))) {
+      return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+    }
+
+
     const body = (await req.json()) as Body;
     if (!body?.topic || typeof body.topic !== 'string' || body.topic.trim().length < 3) {
       return new Response(JSON.stringify({ error: 'topic requis (min 3 caractères)' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });

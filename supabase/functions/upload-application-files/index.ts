@@ -194,6 +194,24 @@ serve(async (req) => {
       });
     }
 
+    // File type & size validation (public endpoint)
+    const ALLOWED_EXTS = ["pdf", "doc", "docx", "odt", "rtf", "txt", "jpg", "jpeg", "png"];
+    const MAX_BYTES = 10 * 1024 * 1024; // 10 MB
+    const validateFile = (file: File, label: string): string | null => {
+      const ext = (file.name.split(".").pop() || "").toLowerCase();
+      if (!ALLOWED_EXTS.includes(ext)) return `${label}: type de fichier non autorisé (.${ext})`;
+      if (file.size > MAX_BYTES) return `${label}: fichier trop volumineux (max 10 Mo)`;
+      if (file.size === 0) return `${label}: fichier vide`;
+      return null;
+    };
+    const cvErr = validateFile(cv, "CV");
+    if (cvErr) return new Response(JSON.stringify({ error: cvErr }), { status: 415, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    if (letter) {
+      const lErr = validateFile(letter, "Lettre de motivation");
+      if (lErr) return new Response(JSON.stringify({ error: lErr }), { status: 415, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
+
     // Read SharePoint config (use service role since callers may be anonymous)
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,

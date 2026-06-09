@@ -49,8 +49,32 @@ function buildHtml(name: string, jobTitle: string, inviteUrl: string): string {
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
   try {
+    const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+    const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    const anonKey = Deno.env.get('SUPABASE_ANON_KEY')!
+
+    // Auth: allow internal calls (service role key) OR admin/hr/gestionnaire users
+    const authHeader = req.headers.get('Authorization') || ''
+    const token = authHeader.replace(/^Bearer\s+/i, '')
+    if (!token) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    }
+    if (token !== serviceKey) {
+      const caller = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: `Bearer ${token}` } } })
+      const { data: u } = await caller.auth.getUser()
+      if (!u?.user) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      }
+      const { data: roles } = await caller.from('user_roles').select('role').eq('user_id', u.user.id)
+      const allowed = ['admin', 'hr', 'gestionnaire']
+      if (!roles?.some((r: { role: string }) => allowed.includes(r.role))) {
+        return new Response(JSON.stringify({ error: 'Forbidden' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      }
+    }
+
     const { process_id, application_id } = await req.json()
-    const supabase = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!)
+    const supabase = createClient(supabaseUrl, serviceKey)
+
 
     const { data: proc, error } = await supabase
       .from('onboarding_processes')

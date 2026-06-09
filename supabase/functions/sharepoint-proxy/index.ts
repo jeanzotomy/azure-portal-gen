@@ -82,6 +82,17 @@ serve(async (req) => {
       });
     }
 
+    // Role check: only staff roles may access corporate SharePoint
+    const { data: roleRows } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
+    const allowedRoles = ["admin", "gestionnaire", "comptable", "agent", "hr"];
+    if (!roleRows?.some((r: { role: string }) => allowedRoles.includes(r.role))) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403,
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+
     // Get Microsoft Graph token via Azure AD client credentials
     const graphToken = await getGraphToken();
 
