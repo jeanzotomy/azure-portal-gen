@@ -9,11 +9,12 @@ import { toast } from "sonner";
 import {
   CheckCircle2, Circle, Clock, FileSignature, FileUp, GraduationCap,
   Laptop, Users, PartyPopper, Sparkles, Download, Loader2, AlertCircle, RefreshCw, Lock,
-  XCircle, ShieldAlert, ChevronLeft, ChevronRight,
+  XCircle, ShieldAlert, ChevronLeft, ChevronRight, Bot, Brain,
 } from "lucide-react";
 import { SignaturePad } from "@/components/SignaturePad";
 import { MediaCapsuleList } from "@/components/hr/TrainingMediaEditor";
 import { GamificationWidget } from "@/components/onboarding/GamificationWidget";
+import { TrainingTutor } from "@/components/onboarding/TrainingTutor";
 import type { User as SupaUser } from "@supabase/supabase-js";
 
 const STEP_ICONS: Record<string, any> = {
