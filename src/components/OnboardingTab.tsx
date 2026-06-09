@@ -1237,6 +1237,10 @@ function TrainingPlayer({ assigned, userId, onComplete }: { assigned: any; userI
         </div>
       )}
 
+      {userId && assigned.training_id && (
+        <TrainingComments trainingId={assigned.training_id} currentUserId={userId} />
+      )}
+
       {tutorOpen && assigned.training_id && (
         <TrainingTutor
           trainingId={assigned.training_id}
