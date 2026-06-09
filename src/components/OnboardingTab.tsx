@@ -605,7 +605,7 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
   const t = assigned.training;
   const content = t?.content || {};
   const modules: any[] = content.modules || [];
-  const hasContent = modules.length > 0 || !!content.introduction || !!content.conclusion;
+  const hasContent = modules.length > 0 || !!content.introduction || !!content.conclusion || (content.intro_media?.length || 0) > 0 || (content.conclusion_media?.length || 0) > 0 || (content.standalone_media?.length || 0) > 0;
   const hasQuiz = !!(t?.quiz?.questions?.length);
   const passingScore = t?.passing_score || 70;
 
