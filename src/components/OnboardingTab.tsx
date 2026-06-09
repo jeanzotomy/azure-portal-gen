@@ -9,11 +9,12 @@ import { toast } from "sonner";
 import {
   CheckCircle2, Circle, Clock, FileSignature, FileUp, GraduationCap,
   Laptop, Users, PartyPopper, Sparkles, Download, Loader2, AlertCircle, RefreshCw, Lock,
-  XCircle, ShieldAlert, ChevronLeft, ChevronRight,
+  XCircle, ShieldAlert, ChevronLeft, ChevronRight, Bot, Brain,
 } from "lucide-react";
 import { SignaturePad } from "@/components/SignaturePad";
 import { MediaCapsuleList } from "@/components/hr/TrainingMediaEditor";
 import { GamificationWidget } from "@/components/onboarding/GamificationWidget";
+import { TrainingTutor } from "@/components/onboarding/TrainingTutor";
 import type { User as SupaUser } from "@supabase/supabase-js";
 
 const STEP_ICONS: Record<string, any> = {
@@ -635,8 +636,13 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
   const [result, setResult] = useState<{ score: number; passed: boolean } | null>(
     assigned.quiz_score != null ? { score: assigned.quiz_score, passed: !!assigned.quiz_passed } : null,
   );
+  const [tutorOpen, setTutorOpen] = useState(false);
+  const [adaptiveQuestions, setAdaptiveQuestions] = useState<any[] | null>(null);
+  const [adaptiveDifficulty, setAdaptiveDifficulty] = useState<string>("");
+  const [loadingAdaptive, setLoadingAdaptive] = useState(false);
 
-  const questions: any[] = hasQuiz ? t.quiz.questions : [];
+  const baseQuestions: any[] = hasQuiz ? t.quiz.questions : [];
+  const questions: any[] = adaptiveQuestions ?? baseQuestions;
   const currentQ = questions[quizPage];
   const currentAnswered = currentQ ? answers[quizPage] != null : false;
   const allAnswered = questions.length > 0 && questions.every((_, i) => answers[i] != null);
@@ -645,6 +651,7 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
   const lastSavedRef = useRef<string>("");
   useEffect(() => {
     if (assigned.completed_at) return;
+    if (adaptiveQuestions) return; // never persist adaptive-mode answers
     const payload = { course_page: coursePage, quiz_page: quizPage, quiz_draft_answers: answers, last_activity_at: new Date().toISOString() };
     const key = JSON.stringify({ c: coursePage, q: quizPage, a: answers });
     if (key === lastSavedRef.current) return;
@@ -653,10 +660,10 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
       await (supabase.from("onboarding_assigned_trainings") as any).update(payload).eq("id", assigned.id);
     }, 600);
     return () => clearTimeout(handle);
-  }, [coursePage, quizPage, answers, assigned.id, assigned.completed_at]);
+  }, [coursePage, quizPage, answers, assigned.id, assigned.completed_at, adaptiveQuestions]);
 
   const submitQuiz = async () => {
-    if (!hasQuiz) return;
+    if (questions.length === 0) return;
     if (!allAnswered) {
       toast.error("Répondez à toutes les questions");
       return;
@@ -666,33 +673,63 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
     questions.forEach((q, i) => { if (answers[i] === q.correct_index) correct++; });
     const score = Math.round((correct / questions.length) * 100);
     const passed = score >= passingScore;
-    const { error } = await (supabase.from("onboarding_assigned_trainings") as any).update({
-      quiz_score: score, quiz_passed: passed, quiz_answers: answers, quiz_submitted_at: new Date().toISOString(),
-      completed_at: passed ? new Date().toISOString() : null,
-      quiz_draft_answers: passed ? {} : answers,
-      quiz_page: passed ? 0 : quizPage,
-    }).eq("id", assigned.id);
+    const inAdaptive = !!adaptiveQuestions;
+
+    // In adaptive mode: only update completion if passed; never overwrite the original
+    // quiz_answers/score with the rattrapage scoring.
+    const update: any = inAdaptive
+      ? (passed ? { quiz_passed: true, completed_at: new Date().toISOString(), quiz_draft_answers: {}, quiz_page: 0 } : {})
+      : {
+          quiz_score: score, quiz_passed: passed, quiz_answers: answers, quiz_submitted_at: new Date().toISOString(),
+          completed_at: passed ? new Date().toISOString() : null,
+          quiz_draft_answers: passed ? {} : answers,
+          quiz_page: passed ? 0 : quizPage,
+        };
+
+    if (Object.keys(update).length > 0) {
+      const { error } = await (supabase.from("onboarding_assigned_trainings") as any).update(update).eq("id", assigned.id);
+      if (error) { setSubmitting(false); return toast.error(error.message); }
+    }
     setSubmitting(false);
-    if (error) return toast.error(error.message);
     setResult({ score, passed });
     setShowResults(true);
-    if (passed) {
-      toast.success(`QCM réussi (${score}%)`);
-    } else {
-      toast.error(`Score ${score}% — minimum requis ${passingScore}%. Vous pouvez réessayer.`);
-    }
+    if (passed) toast.success(inAdaptive ? `Rattrapage réussi (${score}%) 🎉` : `QCM réussi (${score}%)`);
+    else toast.error(`Score ${score}% — minimum requis ${passingScore}%.`);
   };
 
   const closeResults = () => {
     setShowResults(false);
     setQuizOpen(false);
+    setAdaptiveQuestions(null);
     if (result?.passed) onComplete();
   };
 
   const retryQuiz = () => {
     setShowResults(false);
+    setAdaptiveQuestions(null);
     setAnswers({});
     setQuizPage(0);
+  };
+
+  const startAdaptive = async () => {
+    setLoadingAdaptive(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("training-adaptive-quiz", {
+        body: { assignedId: assigned.id },
+      });
+      if (error) throw error;
+      if (!data?.questions?.length) throw new Error("Aucune question générée");
+      setAdaptiveQuestions(data.questions);
+      setAdaptiveDifficulty(data.difficulty || "");
+      setAnswers({});
+      setQuizPage(0);
+      setShowResults(false);
+      toast.success(`Mode adaptatif activé — ${data.questions.length} questions ciblées (${data.difficulty})`);
+    } catch (e: any) {
+      toast.error(e.message || "Erreur lors de la génération du rattrapage");
+    } finally {
+      setLoadingAdaptive(false);
+    }
   };
 
   const openQuiz = () => {
@@ -701,6 +738,7 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
       setAnswers({});
       setQuizPage(0);
     }
+    setAdaptiveQuestions(null);
     setShowResults(false);
     setQuizOpen(true);
   };
@@ -790,7 +828,8 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
             <span className="font-medium text-sm">{t?.title}</span>
             {t?.duration_minutes && <Badge variant="outline" className="text-[10px]">{t.duration_minutes} min</Badge>}
             {t?.category && <Badge variant="secondary" className="text-[10px]">{t.category}</Badge>}
-            {hasQuiz && <Badge variant="outline" className="text-[10px]">QCM {questions.length}q · ≥{passingScore}%</Badge>}
+            {hasQuiz && <Badge variant="outline" className="text-[10px]">QCM {baseQuestions.length}q · ≥{passingScore}%</Badge>}
+            {adaptiveQuestions && <Badge className="text-[10px] bg-purple-100 text-purple-700 border-purple-300"><Brain className="h-3 w-3 mr-0.5" />Mode adaptatif {adaptiveDifficulty && `· ${adaptiveDifficulty}`}</Badge>}
             {result && <Badge variant={result.passed ? "default" : "destructive"} className="text-[10px]">{result.passed ? "Réussi" : "Échec"} {result.score}%</Badge>}
           </div>
           {t?.description && <p className="text-xs text-muted-foreground mt-1">{t.description}</p>}
@@ -800,6 +839,9 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
                 {expanded ? "Masquer le cours" : "Suivre le cours"}
               </Button>
             )}
+            <Button size="sm" variant="outline" onClick={() => setTutorOpen(true)} className="border-primary/30 text-primary hover:bg-primary/5">
+              <Bot className="h-3 w-3 mr-1" />Tuteur IA
+            </Button>
             {t?.url && (
               <a href={t.url} target="_blank" rel="noreferrer">
                 <Button size="sm" variant="outline"><Download className="h-3 w-3 mr-1" />Ressource externe</Button>
@@ -902,11 +944,17 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
                     );
                   })}
                 </div>
-                <div className="p-4 border-t flex items-center justify-end gap-2">
+                <div className="p-4 border-t flex flex-wrap items-center justify-end gap-2">
                   {!result.passed && (
-                    <Button size="sm" variant="outline" onClick={retryQuiz}>
-                      Réessayer
-                    </Button>
+                    <>
+                      <Button size="sm" variant="outline" onClick={retryQuiz}>
+                        Réessayer
+                      </Button>
+                      <Button size="sm" onClick={startAdaptive} disabled={loadingAdaptive} className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white">
+                        {loadingAdaptive ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Brain className="h-4 w-4 mr-1" />}
+                        Rattrapage IA (3 questions ciblées)
+                      </Button>
+                    </>
                   )}
                   <Button size="sm" onClick={closeResults} className="bg-gradient-to-r from-primary to-[#007aa3]">
                     Fermer
@@ -954,6 +1002,14 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
             ) : null}
           </div>
         </div>
+      )}
+
+      {tutorOpen && assigned.training_id && (
+        <TrainingTutor
+          trainingId={assigned.training_id}
+          trainingTitle={t?.title || "Formation"}
+          onClose={() => setTutorOpen(false)}
+        />
       )}
     </div>
   );
