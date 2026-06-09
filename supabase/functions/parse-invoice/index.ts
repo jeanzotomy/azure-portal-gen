@@ -33,6 +33,15 @@ serve(async (req) => {
       });
     }
 
+    const { data: roleRows } = await supabase.from("user_roles").select("role").eq("user_id", user.id);
+    const allowed = ["admin", "comptable", "gestionnaire"];
+    if (!roleRows?.some((r: { role: string }) => allowed.includes(r.role))) {
+      return new Response(JSON.stringify({ error: "Forbidden" }), {
+        status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+
     // Get file content as base64
     const formData = await req.formData();
     const file = formData.get("file") as File;
