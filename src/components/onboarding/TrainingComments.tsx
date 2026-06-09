@@ -45,8 +45,27 @@ export function TrainingComments({
   const [body, setBody] = useState("");
   const [mentionQuery, setMentionQuery] = useState<string | null>(null);
   const [mentionStart, setMentionStart] = useState<number>(-1);
-  const [selectedMentions, setSelectedMentions] = useState<Record<string, string>>({}); // userId -> displayName
+  const [selectedMentions, setSelectedMentions] = useState<Record<string, string>>({});
+  // reactions: commentId -> emoji -> { count, mine }
+  const [reactions, setReactions] = useState<Record<string, Record<string, { count: number; mine: boolean }>>>({});
   const taRef = useRef<HTMLTextAreaElement>(null);
+
+  const EMOJIS = ["👍", "❤️", "🎯", "💡", "🔥", "👏"];
+
+  const ingestReaction = (row: any, op: "add" | "del") => {
+    setReactions(prev => {
+      const cid = row.comment_id;
+      const em = row.emoji;
+      const next = { ...prev, [cid]: { ...(prev[cid] || {}) } };
+      const cur = next[cid][em] || { count: 0, mine: false };
+      next[cid][em] = {
+        count: Math.max(0, cur.count + (op === "add" ? 1 : -1)),
+        mine: row.user_id === currentUserId ? op === "add" : cur.mine,
+      };
+      if (next[cid][em].count === 0) delete next[cid][em];
+      return next;
+    });
+  };
 
   // Initial load + realtime
   useEffect(() => {
