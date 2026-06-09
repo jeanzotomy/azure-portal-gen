@@ -1011,6 +1011,9 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
               Page {coursePage + 1} / {coursePages.length}
             </div>
             <Progress value={courseProgress} className="h-1.5 flex-1 max-w-xs" />
+            <Badge variant="outline" className="text-[10px] gap-1 font-mono">
+              <Timer className="h-3 w-3" />{fmtTime(sessionSeconds)}
+            </Badge>
           </div>
           <div className="p-4 min-h-[180px] text-sm">
             {renderCoursePage(coursePages[coursePage])}
