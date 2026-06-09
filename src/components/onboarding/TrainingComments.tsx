@@ -2,7 +2,8 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, MessageSquare, Send, AtSign, Trash2 } from "lucide-react";
+import { Loader2, MessageSquare, Send, AtSign, Trash2, SmilePlus } from "lucide-react";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "sonner";
 
 interface CoLearner { user_id: string; full_name: string; role: string; }
