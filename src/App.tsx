@@ -28,6 +28,7 @@ const OnboardingPage = lazy(() => import("./pages/OnboardingPage.tsx"));
 const HrPortalPage = lazy(() => import("./pages/HrPortalPage.tsx"));
 const VerifyCertificatePage = lazy(() => import("./pages/VerifyCertificatePage.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
+const EmployeeTrainingAssignmentPage = lazy(() => import("./pages/admin/EmployeeTrainingAssignmentPage.tsx"));
 
 const ScrollToTopOnNavigate = () => {
   const { pathname } = useLocation();
