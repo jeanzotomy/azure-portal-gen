@@ -1,10 +1,18 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Loader2,
   GraduationCap,
@@ -15,6 +23,9 @@ import {
   PlayCircle,
   Clock,
   ArrowLeft,
+  Search,
+  X,
+  SlidersHorizontal,
 } from "lucide-react";
 import { TrainingPageHero } from "@/components/training/TrainingPageHero";
 import { TrainingStatsGrid } from "@/components/training/TrainingStatsGrid";
@@ -44,6 +55,10 @@ export default function EmployeeTrainingsListPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [trainings, setTrainings] = useState<Assigned[]>([]);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "not_started" | "in_progress" | "completed" | "quiz_passed">("all");
+  const [progressFilter, setProgressFilter] = useState<"all" | "0-25" | "25-50" | "50-75" | "75-100">("all");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
 
   const load = useCallback(async () => {
     if (!user) return;
@@ -90,6 +105,55 @@ export default function EmployeeTrainingsListPage() {
   const inProgress = trainings.filter((t) => !t.completed_at && (t.course_page > 0)).length;
   const passed = trainings.filter((t) => t.quiz_passed).length;
   const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+
+  const categories = useMemo(() => {
+    const set = new Set<string>();
+    trainings.forEach((t) => t.training?.category && set.add(t.training.category));
+    return Array.from(set).sort();
+  }, [trainings]);
+
+  const getProgressPct = (t: Assigned) => {
+    const totalPages = Array.isArray(t.training?.content) ? t.training!.content.length : 0;
+    return totalPages > 0 ? Math.min(100, Math.round(((t.course_page || 0) / totalPages) * 100)) : 0;
+  };
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return trainings.filter((t) => {
+      if (q) {
+        const hay = `${t.training?.title || ""} ${t.training?.description || ""} ${t.training?.category || ""}`.toLowerCase();
+        if (!hay.includes(q)) return false;
+      }
+      if (statusFilter !== "all") {
+        const isCompleted = !!t.completed_at;
+        const started = (t.course_page || 0) > 0;
+        if (statusFilter === "completed" && !isCompleted) return false;
+        if (statusFilter === "in_progress" && (isCompleted || !started)) return false;
+        if (statusFilter === "not_started" && (isCompleted || started)) return false;
+        if (statusFilter === "quiz_passed" && !t.quiz_passed) return false;
+      }
+      if (progressFilter !== "all") {
+        const p = getProgressPct(t);
+        const [min, max] = progressFilter.split("-").map(Number);
+        if (p < min || p > max) return false;
+      }
+      if (categoryFilter !== "all" && t.training?.category !== categoryFilter) return false;
+      return true;
+    });
+  }, [trainings, search, statusFilter, progressFilter, categoryFilter]);
+
+  const hasActiveFilters =
+    search.trim() !== "" ||
+    statusFilter !== "all" ||
+    progressFilter !== "all" ||
+    categoryFilter !== "all";
+
+  const resetFilters = () => {
+    setSearch("");
+    setStatusFilter("all");
+    setProgressFilter("all");
+    setCategoryFilter("all");
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -156,15 +220,115 @@ export default function EmployeeTrainingsListPage() {
             </Button>
           </Card>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {trainings.map((t) => (
-              <TrainingListCard
-                key={t.id}
-                assigned={t}
-                onOpen={() => navigate(`/portal/formations/${t.id}`)}
-              />
-            ))}
-          </div>
+          <>
+            <Card className="p-3 bg-card/60 backdrop-blur border-border/60">
+              <div className="flex flex-col lg:flex-row lg:items-center gap-2">
+                <div className="relative flex-1 min-w-0">
+                  <Search className="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                  <Input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Rechercher par titre, description, catégorie..."
+                    className="pl-9 pr-9 h-9"
+                  />
+                  {search && (
+                    <button
+                      type="button"
+                      onClick={() => setSearch("")}
+                      className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                      aria-label="Effacer la recherche"
+                    >
+                      <X className="h-4 w-4" />
+                    </button>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 lg:flex lg:items-center">
+                  <Select value={statusFilter} onValueChange={(v) => setStatusFilter(v as typeof statusFilter)}>
+                    <SelectTrigger className="h-9 w-full lg:w-[150px]">
+                      <SelectValue placeholder="Statut" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Tous statuts</SelectItem>
+                      <SelectItem value="not_started">Non démarrées</SelectItem>
+                      <SelectItem value="in_progress">En cours</SelectItem>
+                      <SelectItem value="completed">Complétées</SelectItem>
+                      <SelectItem value="quiz_passed">QCM réussi</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={progressFilter} onValueChange={(v) => setProgressFilter(v as typeof progressFilter)}>
+                    <SelectTrigger className="h-9 w-full lg:w-[150px]">
+                      <SelectValue placeholder="Progression" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Toute progression</SelectItem>
+                      <SelectItem value="0-25">0 – 25 %</SelectItem>
+                      <SelectItem value="25-50">25 – 50 %</SelectItem>
+                      <SelectItem value="50-75">50 – 75 %</SelectItem>
+                      <SelectItem value="75-100">75 – 100 %</SelectItem>
+                    </SelectContent>
+                  </Select>
+
+                  <Select value={categoryFilter} onValueChange={setCategoryFilter}>
+                    <SelectTrigger className="h-9 w-full lg:w-[170px]">
+                      <SelectValue placeholder="Catégorie" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">Toutes catégories</SelectItem>
+                      {categories.map((c) => (
+                        <SelectItem key={c} value={c}>
+                          {c}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {hasActiveFilters && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={resetFilters}
+                    className="h-9 shrink-0 text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="h-4 w-4 mr-1" /> Réinitialiser
+                  </Button>
+                )}
+              </div>
+
+              <div className="flex items-center gap-2 mt-2 text-xs text-muted-foreground">
+                <SlidersHorizontal className="h-3 w-3" />
+                <span>
+                  {filtered.length} / {total} formation{total > 1 ? "s" : ""}
+                  {hasActiveFilters ? " (filtrées)" : ""}
+                </span>
+              </div>
+            </Card>
+
+            {filtered.length === 0 ? (
+              <Card className="p-10 text-center space-y-3">
+                <Search className="h-10 w-10 mx-auto text-muted-foreground/60" />
+                <h3 className="font-semibold">Aucun résultat</h3>
+                <p className="text-sm text-muted-foreground">
+                  Aucune formation ne correspond à vos critères de recherche.
+                </p>
+                <Button variant="outline" size="sm" onClick={resetFilters}>
+                  Réinitialiser les filtres
+                </Button>
+              </Card>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {filtered.map((t) => (
+                  <TrainingListCard
+                    key={t.id}
+                    assigned={t}
+                    onOpen={() => navigate(`/portal/formations/${t.id}`)}
+                  />
+                ))}
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>
