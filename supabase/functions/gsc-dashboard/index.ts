@@ -95,21 +95,21 @@ Deno.serve(async (req) => {
 
     const auth = req.headers.get("Authorization");
     let isCron = false;
-    if (auth?.startsWith("Bearer ")) {
-      const token = auth.slice(7);
-      if (token === Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")) {
-        isCron = true;
-      } else {
-        const { data: u } = await supabase.auth.getUser(token);
-        if (!u?.user) return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-        const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", u.user.id);
-        if (!roles?.some((r) => r.role === "admin")) {
-          return new Response(JSON.stringify({ error: "forbidden" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
-        }
-      }
-    } else if (req.method !== "POST") {
+    if (!auth?.startsWith("Bearer ")) {
       return new Response(JSON.stringify({ error: "missing auth" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
+    const token = auth.slice(7);
+    if (token === Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")) {
+      isCron = true;
+    } else {
+      const { data: u } = await supabase.auth.getUser(token);
+      if (!u?.user) return new Response(JSON.stringify({ error: "unauthorized" }), { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      const { data: roles } = await supabase.from("user_roles").select("role").eq("user_id", u.user.id);
+      if (!roles?.some((r) => r.role === "admin")) {
+        return new Response(JSON.stringify({ error: "forbidden" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+      }
+    }
+
 
     const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
     const action = (body?.action as string) || (isCron ? "snapshot" : "live");
