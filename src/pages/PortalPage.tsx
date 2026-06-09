@@ -32,7 +32,7 @@ import logo from "@/assets/cloudmature-logo.png";
 import {
   LayoutDashboard, FolderOpen, LifeBuoy, User, LogOut, Send, Clock, CheckCircle2, AlertCircle,
   Menu, Bell, Search, Filter, Upload, X, FileText, DollarSign, Calendar, Cpu, Flag, Pencil, Shield,
-  Activity, TrendingUp, Plus, Trash2, Info, RefreshCw, UserCheck, Briefcase, Sparkles,
+  Activity, TrendingUp, Plus, Trash2, Info, RefreshCw, UserCheck, Briefcase, Sparkles, GraduationCap,
 } from "lucide-react";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
@@ -42,9 +42,10 @@ import { PortalInfoBar } from "@/components/PortalInfoBar";
 import { NotificationBell } from "@/components/NotificationBell";
 import ApplicationsTab from "@/components/ApplicationsTab";
 import OnboardingTab from "@/components/OnboardingTab";
+import EmployeeTrainingsTab from "@/components/EmployeeTrainingsTab";
 import { getDialCode, applyDialCode } from "@/lib/country-dial-codes";
 
-type Tab = "dashboard" | "projects" | "tickets" | "applications" | "onboarding" | "profile";
+type Tab = "dashboard" | "projects" | "tickets" | "applications" | "onboarding" | "my-trainings" | "profile";
 
 function PortalContent() {
   const { user, ready } = useAuthSession();
@@ -65,7 +66,7 @@ function PortalContent() {
   // Sync tab when URL ?tab= changes (e.g. from MobileBottomNav while already on /portal)
   useEffect(() => {
     const urlTab = searchParams.get("tab") as Tab | null;
-    const valid: Tab[] = ["dashboard", "projects", "tickets", "applications", "onboarding", "profile"];
+    const valid: Tab[] = ["dashboard", "projects", "tickets", "applications", "onboarding", "my-trainings", "profile"];
     if (urlTab && valid.includes(urlTab) && urlTab !== tab) {
       setTab(urlTab);
     }
@@ -108,6 +109,7 @@ function PortalContent() {
     { id: "tickets", icon: LifeBuoy, label: t("portal.support") },
     { id: "applications", icon: Briefcase, label: "Mes candidatures" },
     ...(isOnboarding ? [{ id: "onboarding" as Tab, icon: Sparkles, label: "Mon onboarding" }] : []),
+    { id: "my-trainings", icon: GraduationCap, label: "Mes formations" },
     { id: "profile", icon: User, label: t("portal.profile") },
   ];
 
@@ -198,6 +200,7 @@ function PortalContent() {
           {tab === "tickets" && <TicketsTab user={user} />}
           {tab === "applications" && <ApplicationsTab user={user} />}
           {tab === "onboarding" && <OnboardingTab user={user} />}
+          {tab === "my-trainings" && <EmployeeTrainingsTab user={user} />}
           {tab === "profile" && <ProfileTab user={user} />}
         </main>
       </div>

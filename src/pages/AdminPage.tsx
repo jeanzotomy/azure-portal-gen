@@ -48,9 +48,10 @@ import HrTab from "@/components/HrTab";
 import { ProfileSignatureDialog } from "@/components/ProfileSignatureDialog";
 import SeoTab from "@/components/SeoTab";
 import { CertificateVerifyDashboard } from "@/components/admin/CertificateVerifyDashboard";
+import EmployeeTrainingManager from "@/components/admin/EmployeeTrainingManager";
 import { getDialCode, applyDialCode } from "@/lib/country-dial-codes";
 
-type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts" | "sharepoint" | "seo" | "verify-certificates" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods" | "hr" | "hr-recruitment" | "hr-contracts" | "hr-onboarding" | "hr-trainings";
+type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts" | "sharepoint" | "seo" | "verify-certificates" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods" | "hr" | "hr-recruitment" | "hr-contracts" | "hr-onboarding" | "hr-trainings" | "hr-employee-trainings";
 type AgentTab = "dashboard" | "tickets" | "contacts";
 type GestionnaireTab = "dashboard" | "projects" | "sharepoint" | "tickets" | "contacts" | "hr" | "hr-recruitment" | "hr-contracts" | "hr-onboarding" | "hr-trainings" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods";
 
@@ -530,9 +531,10 @@ function AdminContent() {
     { id: "hr-recruitment", icon: Briefcase, label: "Recrutement" },
     { id: "hr-contracts", icon: FileSignature, label: "Générer le contrat" },
     { id: "hr-onboarding", icon: Users, label: "Onboarding" },
-    { id: "hr-trainings", icon: GraduationCap, label: "Formation" },
+    { id: "hr-trainings", icon: GraduationCap, label: "Catalogue formations" },
+    { id: "hr-employee-trainings", icon: GraduationCap, label: "Formations employés" },
   ];
-  const HR_TABS: AdminTab[] = ["hr", "hr-recruitment", "hr-contracts", "hr-onboarding", "hr-trainings"];
+  const HR_TABS: AdminTab[] = ["hr", "hr-recruitment", "hr-contracts", "hr-onboarding", "hr-trainings", "hr-employee-trainings"];
   const isHrTab = HR_TABS.includes(tab);
   const [hrOpen, setHrOpen] = useState(true);
   useEffect(() => { if (isHrTab) setHrOpen(true); }, [isHrTab]);
@@ -702,6 +704,7 @@ function AdminContent() {
           {tab === "hr-contracts" && <HrTab defaultTab="contracts" />}
           {tab === "hr-onboarding" && <HrTab defaultTab="onboarding" />}
           {tab === "hr-trainings" && <HrTab defaultTab="trainings" />}
+          {tab === "hr-employee-trainings" && <EmployeeTrainingManager />}
         </main>
       </div>
       <ProfileSignatureDialog open={signatureOpen} onOpenChange={setSignatureOpen} />

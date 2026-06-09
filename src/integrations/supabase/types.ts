@@ -704,7 +704,7 @@ export type Database = {
       }
       onboarding_processes: {
         Row: {
-          application_id: string
+          application_id: string | null
           candidate_email: string
           candidate_name: string
           completed_at: string | null
@@ -713,13 +713,14 @@ export type Database = {
           id: string
           invited_at: string
           job_id: string | null
+          kind: string
           start_date: string | null
           status: Database["public"]["Enums"]["onboarding_status"]
           updated_at: string
           user_id: string | null
         }
         Insert: {
-          application_id: string
+          application_id?: string | null
           candidate_email: string
           candidate_name: string
           completed_at?: string | null
@@ -728,13 +729,14 @@ export type Database = {
           id?: string
           invited_at?: string
           job_id?: string | null
+          kind?: string
           start_date?: string | null
           status?: Database["public"]["Enums"]["onboarding_status"]
           updated_at?: string
           user_id?: string | null
         }
         Update: {
-          application_id?: string
+          application_id?: string | null
           candidate_email?: string
           candidate_name?: string
           completed_at?: string | null
@@ -743,6 +745,7 @@ export type Database = {
           id?: string
           invited_at?: string
           job_id?: string | null
+          kind?: string
           start_date?: string | null
           status?: Database["public"]["Enums"]["onboarding_status"]
           updated_at?: string
@@ -1907,6 +1910,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      assign_employee_training: {
+        Args: { _training_id: string; _user_id: string }
+        Returns: string
+      }
       award_badge: {
         Args: { _code: string; _icon: string; _label: string; _user_id: string }
         Returns: undefined
@@ -1970,12 +1977,42 @@ export type Database = {
           isSetofReturn: true
         }
       }
+      get_or_create_employee_process: {
+        Args: { _user_id: string }
+        Returns: string
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
         }
         Returns: boolean
+      }
+      list_employee_assignable_users: {
+        Args: never
+        Returns: {
+          email: string
+          full_name: string
+          process_id: string
+          total_assigned: number
+          total_completed: number
+          user_id: string
+        }[]
+      }
+      list_employee_trainings_for_user: {
+        Args: { _user_id: string }
+        Returns: {
+          assigned_at: string
+          assigned_id: string
+          category: string
+          completed_at: string
+          duration_minutes: number
+          quiz_passed: boolean
+          quiz_score: number
+          source: string
+          title: string
+          training_id: string
+        }[]
       }
       list_training_co_learners: {
         Args: { _training_id: string }
@@ -2032,6 +2069,10 @@ export type Database = {
           id: string
           tracking_id: string
         }[]
+      }
+      unassign_employee_training: {
+        Args: { _training_id: string; _user_id: string }
+        Returns: boolean
       }
       update_own_profile:
         | {
