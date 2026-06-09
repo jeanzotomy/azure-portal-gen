@@ -488,15 +488,20 @@ export type Database = {
           course_page: number
           id: string
           last_activity_at: string | null
+          module_times: Json
           notes: string | null
           process_id: string
           quiz_answers: Json | null
           quiz_draft_answers: Json
+          quiz_open_answers: Json | null
+          quiz_open_grades: Json | null
           quiz_page: number
           quiz_passed: boolean | null
           quiz_score: number | null
           quiz_submitted_at: string | null
+          quiz_time_seconds: number | null
           source: string
+          total_seconds: number
           training_id: string
         }
         Insert: {
@@ -506,15 +511,20 @@ export type Database = {
           course_page?: number
           id?: string
           last_activity_at?: string | null
+          module_times?: Json
           notes?: string | null
           process_id: string
           quiz_answers?: Json | null
           quiz_draft_answers?: Json
+          quiz_open_answers?: Json | null
+          quiz_open_grades?: Json | null
           quiz_page?: number
           quiz_passed?: boolean | null
           quiz_score?: number | null
           quiz_submitted_at?: string | null
+          quiz_time_seconds?: number | null
           source?: string
+          total_seconds?: number
           training_id: string
         }
         Update: {
@@ -524,15 +534,20 @@ export type Database = {
           course_page?: number
           id?: string
           last_activity_at?: string | null
+          module_times?: Json
           notes?: string | null
           process_id?: string
           quiz_answers?: Json | null
           quiz_draft_answers?: Json
+          quiz_open_answers?: Json | null
+          quiz_open_grades?: Json | null
           quiz_page?: number
           quiz_passed?: boolean | null
           quiz_score?: number | null
           quiz_submitted_at?: string | null
+          quiz_time_seconds?: number | null
           source?: string
+          total_seconds?: number
           training_id?: string
         }
         Relationships: [
