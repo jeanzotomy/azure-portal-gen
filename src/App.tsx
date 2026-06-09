@@ -29,6 +29,8 @@ const HrPortalPage = lazy(() => import("./pages/HrPortalPage.tsx"));
 const VerifyCertificatePage = lazy(() => import("./pages/VerifyCertificatePage.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 const EmployeeTrainingAssignmentPage = lazy(() => import("./pages/admin/EmployeeTrainingAssignmentPage.tsx"));
+const EmployeeTrainingsListPage = lazy(() => import("./pages/portal/EmployeeTrainingsListPage.tsx"));
+const EmployeeTrainingPlayerPage = lazy(() => import("./pages/portal/EmployeeTrainingPlayerPage.tsx"));
 
 const ScrollToTopOnNavigate = () => {
   const { pathname } = useLocation();
@@ -66,6 +68,8 @@ const App = () => (
             <Route path="/verify/:code" element={<VerifyCertificatePage />} />
             <Route path="/admin/formations/assignations/:userId" element={<AuthGuard requireRoles={["admin","agent","gestionnaire"]} fallbackRoute="/portal"><EmployeeTrainingAssignmentPage basePath="/admin" parentLabel="Admin" /></AuthGuard>} />
             <Route path="/rh/formations/assignations/:userId" element={<AuthGuard requireRoles={["hr"]} fallbackRoute="/portal"><EmployeeTrainingAssignmentPage basePath="/rh" parentLabel="RH" /></AuthGuard>} />
+            <Route path="/portal/formations" element={<AuthGuard><EmployeeTrainingsListPage /></AuthGuard>} />
+            <Route path="/portal/formations/:assignedId" element={<AuthGuard><EmployeeTrainingPlayerPage /></AuthGuard>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
