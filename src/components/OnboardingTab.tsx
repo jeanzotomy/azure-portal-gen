@@ -828,7 +828,8 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
             <span className="font-medium text-sm">{t?.title}</span>
             {t?.duration_minutes && <Badge variant="outline" className="text-[10px]">{t.duration_minutes} min</Badge>}
             {t?.category && <Badge variant="secondary" className="text-[10px]">{t.category}</Badge>}
-            {hasQuiz && <Badge variant="outline" className="text-[10px]">QCM {questions.length}q · ≥{passingScore}%</Badge>}
+            {hasQuiz && <Badge variant="outline" className="text-[10px]">QCM {baseQuestions.length}q · ≥{passingScore}%</Badge>}
+            {adaptiveQuestions && <Badge className="text-[10px] bg-purple-100 text-purple-700 border-purple-300"><Brain className="h-3 w-3 mr-0.5" />Mode adaptatif {adaptiveDifficulty && `· ${adaptiveDifficulty}`}</Badge>}
             {result && <Badge variant={result.passed ? "default" : "destructive"} className="text-[10px]">{result.passed ? "Réussi" : "Échec"} {result.score}%</Badge>}
           </div>
           {t?.description && <p className="text-xs text-muted-foreground mt-1">{t.description}</p>}
