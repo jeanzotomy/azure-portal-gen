@@ -16,6 +16,7 @@ import {
   GraduationCap, Plus, Pencil, Trash2, ExternalLink, Loader2, RefreshCw, Users, Sparkles, CheckCircle2, Clock,
   Brain, FileQuestion, Layers, UserPlus, Wand2, BookOpen,
 } from "lucide-react";
+import { TrainingMediaEditor, type MediaCapsule } from "./TrainingMediaEditor";
 
 interface Training {
   id: string;
