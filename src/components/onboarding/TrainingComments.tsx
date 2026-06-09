@@ -143,20 +143,23 @@ export function TrainingComments({
 
   const renderBody = (text: string, mentions: string[]) => {
     const mentionNames = coLearners.filter(c => mentions.includes(c.user_id)).map(c => c.full_name);
-    let nodes: React.ReactNode[] = [text];
+    let nodes: Array<string | JSX.Element> = [text];
     mentionNames.forEach((name) => {
       const handle = `@${name.replace(/\s+/g, "_")}`;
-      nodes = nodes.flatMap((n) => {
-        if (typeof n !== "string") return [n];
+      const next: Array<string | JSX.Element> = [];
+      nodes.forEach((n) => {
+        if (typeof n !== "string") { next.push(n); return; }
         const parts = n.split(handle);
-        return parts.flatMap((p, i) =>
-          i < parts.length - 1
-            ? [p, <span key={`${handle}-${i}-${Math.random()}`} className="font-semibold text-primary bg-primary/10 px-1 rounded">{handle}</span>]
-            : [p],
-        );
+        parts.forEach((p, i) => {
+          next.push(p);
+          if (i < parts.length - 1) {
+            next.push(<span key={`${handle}-${next.length}`} className="font-semibold text-primary bg-primary/10 px-1 rounded">{handle}</span>);
+          }
+        });
       });
+      nodes = next;
     });
-    return <span className="whitespace-pre-wrap">{nodes}</span>;
+    return <span className="whitespace-pre-wrap">{nodes.map((n, i) => <span key={i}>{n}</span>)}</span>;
   };
 
   return (
