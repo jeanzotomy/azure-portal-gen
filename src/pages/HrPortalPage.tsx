@@ -24,6 +24,8 @@ export default function HrPortalPage() {
   const { isHr, loading } = useUserRoles();
   const navigate = useNavigate();
   const [sub, setSub] = useState<HrSubTab>("recruitment");
+  const formationsMatch = useMatch("/rh/formations/*");
+  const isFormationsRoute = !!formationsMatch;
 
   useEffect(() => {
     if (!ready || loading) return;
