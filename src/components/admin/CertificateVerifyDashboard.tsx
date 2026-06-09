@@ -3,8 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ShieldCheck, ShieldAlert, CheckCircle2, XCircle, RefreshCw, Activity, Ban } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { ShieldCheck, ShieldAlert, CheckCircle2, XCircle, RefreshCw, Activity, Ban, Search, AlertTriangle, Hash } from "lucide-react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from "recharts";
 
 type Row = { ip: string; code: string | null; ok: boolean; attempted_at: string };
@@ -17,15 +19,59 @@ const SHORT_WIN_S = 60;
 const SHORT_MAX = 10;
 const LONG_WIN_S = 600;
 const LONG_MAX = 60;
+const CODE_RE = /^[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$/;
 
 function fmtDate(d: Date) {
-  return d.toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+  return d.toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit" });
 }
+
+type Reason = "success" | "malformed" | "throttled" | "invalid";
+const REASON_META: Record<Reason, { label: string; cls: string }> = {
+  success:   { label: "Vérification réussie",       cls: "bg-emerald-100 text-emerald-700 border-emerald-300" },
+  malformed: { label: "Code mal formé",             cls: "bg-amber-100 text-amber-700 border-amber-300" },
+  throttled: { label: "Bloqué (anti-bruteforce)",   cls: "bg-rose-100 text-rose-700 border-rose-300" },
+  invalid:   { label: "Code inconnu / expiré",      cls: "bg-slate-100 text-slate-700 border-slate-300" },
+};
+
+function classifyAttempts(attempts: { ip: string; code: string | null; ok: boolean; attempted_at: string }[]) {
+  // Group times per IP to detect throttling at moment of attempt
+  const perIp = new Map<string, number[]>();
+  for (const a of attempts) {
+    const arr = perIp.get(a.ip) || [];
+    arr.push(new Date(a.attempted_at).getTime());
+    perIp.set(a.ip, arr);
+  }
+  perIp.forEach((arr) => arr.sort((a, b) => a - b));
+
+  return attempts.map((a) => {
+    let reason: Reason;
+    if (a.ok) reason = "success";
+    else if (!a.code) reason = "malformed";
+    else {
+      const t = new Date(a.attempted_at).getTime();
+      const arr = perIp.get(a.ip) || [];
+      let shortC = 0, longC = 0;
+      for (const ts of arr) {
+        if (ts >= t) break;
+        const dt = t - ts;
+        if (dt <= SHORT_WIN_S * 1000) shortC++;
+        if (dt <= LONG_WIN_S * 1000) longC++;
+      }
+      reason = (shortC >= SHORT_MAX || longC >= LONG_MAX) ? "throttled" : "invalid";
+    }
+    return { ...a, reason };
+  });
+}
+
 
 export function CertificateVerifyDashboard() {
   const [win, setWin] = useState<Window>("24h");
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCode, setSelectedCode] = useState<string | null>(null);
+  const [selectedIp, setSelectedIp] = useState<string | null>(null);
+  const [searchValue, setSearchValue] = useState("");
+
 
   const load = async () => {
     setLoading(true);
@@ -188,7 +234,7 @@ export function CertificateVerifyDashboard() {
                 {blocks.length === 0 ? (
                   <tr><td colSpan={6} className="px-3 py-6 text-center text-muted-foreground">Aucune donnée</td></tr>
                 ) : blocks.map(b => (
-                  <tr key={b.ip} className="border-t">
+                  <tr key={b.ip} className="border-t hover:bg-muted/30 cursor-pointer" onClick={() => setSelectedIp(b.ip)}>
                     <td className="px-3 py-2 font-mono text-xs">{b.ip}</td>
                     <td className="px-3 py-2 text-right">{b.total}</td>
                     <td className="px-3 py-2 text-right text-emerald-600">{b.ok}</td>
@@ -207,12 +253,91 @@ export function CertificateVerifyDashboard() {
         </CardContent>
       </Card>
 
+      <Card>
+        <CardHeader className="pb-2 flex flex-row items-center justify-between gap-2 flex-wrap">
+          <CardTitle className="text-sm flex items-center gap-1.5"><Hash className="h-4 w-4 text-primary" />Recherche / Détail d'un code</CardTitle>
+          <form
+            className="flex items-center gap-2"
+            onSubmit={(e) => {
+              e.preventDefault();
+              const v = searchValue.trim().toUpperCase();
+              if (v) setSelectedCode(v);
+            }}
+          >
+            <Input
+              placeholder="XXXX-XXXX-XXXX"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value.toUpperCase())}
+              className="font-mono text-xs h-8 w-44"
+            />
+            <Button size="sm" type="submit" variant="outline" disabled={!searchValue.trim()}>
+              <Search className="h-3.5 w-3.5 mr-1" />Ouvrir
+            </Button>
+          </form>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead className="bg-muted/50 text-xs uppercase tracking-wide text-muted-foreground">
+                <tr>
+                  <th className="text-left px-3 py-2">Code</th>
+                  <th className="text-right px-3 py-2">Tentatives</th>
+                  <th className="text-right px-3 py-2">Succès</th>
+                  <th className="text-right px-3 py-2">Échecs</th>
+                  <th className="text-right px-3 py-2">IP uniques</th>
+                  <th className="text-left px-3 py-2">Dernière</th>
+                  <th className="px-3 py-2 w-12"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {(() => {
+                  const byCode = new Map<string, { code: string; total: number; ok: number; fail: number; ips: Set<string>; last: string }>();
+                  for (const r of rows) {
+                    if (!r.code) continue;
+                    const c = byCode.get(r.code) || { code: r.code, total: 0, ok: 0, fail: 0, ips: new Set<string>(), last: r.attempted_at };
+                    c.total++; if (r.ok) c.ok++; else c.fail++; c.ips.add(r.ip);
+                    if (new Date(r.attempted_at) > new Date(c.last)) c.last = r.attempted_at;
+                    byCode.set(r.code, c);
+                  }
+                  const list = [...byCode.values()].sort((a, b) => b.total - a.total).slice(0, 25);
+                  if (list.length === 0) {
+                    return (
+                      <tr><td colSpan={7} className="px-3 py-6 text-center text-muted-foreground">
+                        Aucun code interrogé sur cette fenêtre. Utilisez la recherche pour en inspecter un.
+                      </td></tr>
+                    );
+                  }
+                  return list.map(c => (
+                    <tr key={c.code} className="border-t hover:bg-muted/30 cursor-pointer" onClick={() => setSelectedCode(c.code)}>
+                      <td className="px-3 py-2 font-mono text-xs">{c.code}</td>
+                      <td className="px-3 py-2 text-right">{c.total}</td>
+                      <td className="px-3 py-2 text-right text-emerald-600">{c.ok}</td>
+                      <td className="px-3 py-2 text-right text-red-500">{c.fail}</td>
+                      <td className="px-3 py-2 text-right">{c.ips.size}</td>
+                      <td className="px-3 py-2 text-xs text-muted-foreground">{fmtDate(new Date(c.last))}</td>
+                      <td className="px-3 py-2 text-right"><Search className="h-3.5 w-3.5 text-muted-foreground inline" /></td>
+                    </tr>
+                  ));
+                })()}
+              </tbody>
+            </table>
+          </div>
+        </CardContent>
+      </Card>
+
       <p className="text-[11px] text-muted-foreground">
         Seuils anti-bruteforce : {SHORT_MAX} tentatives / {SHORT_WIN_S}s et {LONG_MAX} / {LONG_WIN_S / 60} min par IP.
+        Cliquez sur un code ou une IP pour ouvrir le détail complet des tentatives associées.
       </p>
+
+      <AttemptDetailDialog
+        filter={selectedCode ? { kind: "code", value: selectedCode } : selectedIp ? { kind: "ip", value: selectedIp } : null}
+        onClose={() => { setSelectedCode(null); setSelectedIp(null); }}
+      />
     </div>
   );
 }
+
 
 function Kpi({ icon, label, value, sub, color }: { icon: React.ReactNode; label: string; value: number; sub?: string; color?: string }) {
   return (
@@ -225,3 +350,209 @@ function Kpi({ icon, label, value, sub, color }: { icon: React.ReactNode; label:
     </Card>
   );
 }
+
+type Filter = { kind: "code" | "ip"; value: string } | null;
+
+function AttemptDetailDialog({ filter, onClose }: { filter: Filter; onClose: () => void }) {
+  const [attempts, setAttempts] = useState<Row[] | null>(null);
+  const [cert, setCert] = useState<any | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [allIpsTimes, setAllIpsTimes] = useState<Map<string, number[]> | null>(null);
+
+  useEffect(() => {
+    if (!filter) { setAttempts(null); setCert(null); setAllIpsTimes(null); return; }
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      // Pull all attempts matching the filter (cap 1000, newest first)
+      let q = supabase.from("verify_attempts").select("ip, code, ok, attempted_at").order("attempted_at", { ascending: false }).limit(1000);
+      if (filter.kind === "code") q = q.eq("code", filter.value);
+      else q = q.eq("ip", filter.value);
+      const { data } = await q;
+      const list = (data || []) as Row[];
+
+      // For correct throttle detection on a code, we also need ALL prior attempts per IP within 10 minutes.
+      // Fetch the IPs involved and pull their nearby activity.
+      let ipsTimes: Map<string, number[]> = new Map();
+      if (filter.kind === "code") {
+        const ips = Array.from(new Set(list.map(r => r.ip)));
+        if (ips.length > 0) {
+          const since = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
+          const { data: extra } = await supabase
+            .from("verify_attempts")
+            .select("ip, attempted_at")
+            .in("ip", ips)
+            .gte("attempted_at", since)
+            .order("attempted_at", { ascending: true })
+            .limit(5000);
+          for (const e of (extra || [])) {
+            const arr = ipsTimes.get(e.ip) || [];
+            arr.push(new Date(e.attempted_at).getTime());
+            ipsTimes.set(e.ip, arr);
+          }
+        }
+      } else {
+        // single IP: use the returned rows themselves (already sorted desc; resort asc)
+        const arr = list.map(r => new Date(r.attempted_at).getTime()).sort((a, b) => a - b);
+        ipsTimes.set(filter.value, arr);
+      }
+
+      // Lookup certificate (only useful for code filter)
+      let certRow: any = null;
+      if (filter.kind === "code" && CODE_RE.test(filter.value)) {
+        const { data: c } = await supabase
+          .from("training_certificates")
+          .select("verification_code, candidate_name, training_title, score, issued_at, expires_at, revoked_at, pdf_path")
+          .eq("verification_code", filter.value)
+          .maybeSingle();
+        certRow = c;
+      }
+
+      if (cancelled) return;
+      setAttempts(list);
+      setCert(certRow);
+      setAllIpsTimes(ipsTimes);
+      setLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [filter?.kind, filter?.value]);
+
+  const enriched = useMemo(() => {
+    if (!attempts || !allIpsTimes) return [];
+    return attempts.map(a => {
+      let reason: Reason;
+      if (a.ok) reason = "success";
+      else if (!a.code) reason = "malformed";
+      else {
+        const t = new Date(a.attempted_at).getTime();
+        const arr = allIpsTimes.get(a.ip) || [];
+        let shortC = 0, longC = 0;
+        for (const ts of arr) {
+          if (ts >= t) break;
+          const dt = t - ts;
+          if (dt <= SHORT_WIN_S * 1000) shortC++;
+          if (dt <= LONG_WIN_S * 1000) longC++;
+        }
+        reason = (shortC >= SHORT_MAX || longC >= LONG_MAX) ? "throttled" : "invalid";
+      }
+      return { ...a, reason };
+    });
+  }, [attempts, allIpsTimes]);
+
+  const summary = useMemo(() => {
+    const total = enriched.length;
+    const ok = enriched.filter(a => a.reason === "success").length;
+    const malformed = enriched.filter(a => a.reason === "malformed").length;
+    const throttled = enriched.filter(a => a.reason === "throttled").length;
+    const invalid = enriched.filter(a => a.reason === "invalid").length;
+    const ips = new Set(enriched.map(a => a.ip)).size;
+    return { total, ok, malformed, throttled, invalid, ips };
+  }, [enriched]);
+
+  const open = !!filter;
+  const title = filter?.kind === "code" ? `Code ${filter.value}` : filter?.kind === "ip" ? `IP ${filter.value}` : "";
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <ShieldCheck className="h-5 w-5 text-primary" />
+            Détail — <span className="font-mono">{title}</span>
+          </DialogTitle>
+          <DialogDescription>
+            Historique complet des tentatives de vérification et raison de chaque résultat.
+          </DialogDescription>
+        </DialogHeader>
+
+        {loading ? (
+          <div className="py-10 text-center text-sm text-muted-foreground">Chargement…</div>
+        ) : (
+          <>
+            {filter?.kind === "code" && (
+              <Card>
+                <CardContent className="p-3 text-sm">
+                  {cert ? (
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 text-emerald-700">
+                        <CheckCircle2 className="h-4 w-4" /> <span className="font-medium">Certificat existant</span>
+                        {cert.revoked_at && <Badge className="bg-rose-100 text-rose-700 border-rose-300">Révoqué</Badge>}
+                        {cert.expires_at && new Date(cert.expires_at) < new Date() && <Badge className="bg-amber-100 text-amber-700 border-amber-300">Expiré</Badge>}
+                      </div>
+                      <div className="text-xs grid grid-cols-2 gap-x-4 gap-y-1 mt-1">
+                        <div><span className="text-muted-foreground">Titulaire :</span> {cert.candidate_name}</div>
+                        <div><span className="text-muted-foreground">Formation :</span> {cert.training_title}</div>
+                        <div><span className="text-muted-foreground">Score :</span> {cert.score ?? "—"}{cert.score != null ? "%" : ""}</div>
+                        <div><span className="text-muted-foreground">Émis le :</span> {new Date(cert.issued_at).toLocaleDateString("fr-FR")}</div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 text-amber-700">
+                      <AlertTriangle className="h-4 w-4" /> Aucun certificat n'existe pour ce code — toutes les tentatives sont des échecs.
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-center">
+              <MiniKpi label="Tentatives" value={summary.total} />
+              <MiniKpi label="Succès" value={summary.ok} cls="text-emerald-600" />
+              <MiniKpi label="Code invalide" value={summary.invalid} cls="text-slate-600" />
+              <MiniKpi label="Mal formés" value={summary.malformed} cls="text-amber-600" />
+              <MiniKpi label="Bloqués" value={summary.throttled} cls="text-rose-600" />
+            </div>
+            {filter?.kind === "code" && <p className="text-xs text-muted-foreground">{summary.ips} IP unique{summary.ips > 1 ? "s" : ""} ont tenté ce code.</p>}
+
+            <div className="border rounded-lg overflow-hidden">
+              <div className="max-h-[50vh] overflow-y-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-muted/60 text-xs uppercase tracking-wide text-muted-foreground sticky top-0">
+                    <tr>
+                      <th className="text-left px-3 py-2">Date</th>
+                      <th className="text-left px-3 py-2">IP</th>
+                      {filter?.kind === "ip" && <th className="text-left px-3 py-2">Code</th>}
+                      <th className="text-left px-3 py-2">Résultat</th>
+                      <th className="text-left px-3 py-2">Raison</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {enriched.length === 0 ? (
+                      <tr><td colSpan={filter?.kind === "ip" ? 5 : 4} className="px-3 py-6 text-center text-muted-foreground">Aucune tentative enregistrée.</td></tr>
+                    ) : enriched.map((a, i) => (
+                      <tr key={i} className="border-t">
+                        <td className="px-3 py-1.5 text-xs whitespace-nowrap">{fmtDate(new Date(a.attempted_at))}</td>
+                        <td className="px-3 py-1.5 font-mono text-xs">{a.ip}</td>
+                        {filter?.kind === "ip" && <td className="px-3 py-1.5 font-mono text-xs">{a.code ?? <span className="text-muted-foreground italic">—</span>}</td>}
+                        <td className="px-3 py-1.5">
+                          {a.ok ? (
+                            <Badge className="bg-emerald-100 text-emerald-700 border-emerald-300">OK</Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-red-600 border-red-300">KO</Badge>
+                          )}
+                        </td>
+                        <td className="px-3 py-1.5">
+                          <Badge className={REASON_META[a.reason].cls}>{REASON_META[a.reason].label}</Badge>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function MiniKpi({ label, value, cls }: { label: string; value: number; cls?: string }) {
+  return (
+    <div className="rounded-lg border bg-muted/30 py-2">
+      <div className={`text-xl font-bold ${cls ?? ""}`}>{value}</div>
+      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</div>
+    </div>
+  );
+}
+
