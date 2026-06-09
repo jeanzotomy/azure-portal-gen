@@ -50,7 +50,7 @@ import SeoTab from "@/components/SeoTab";
 import { CertificateVerifyDashboard } from "@/components/admin/CertificateVerifyDashboard";
 import { getDialCode, applyDialCode } from "@/lib/country-dial-codes";
 
-type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts" | "sharepoint" | "seo" | "verify-certificates" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods" | "hr" | "hr-recruitment" | "hr-contracts" | "hr-onboarding" | "hr-trainings";
+type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts" | "sharepoint" | "seo" | "verify-certificates" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods" | "hr" | "hr-recruitment" | "hr-contracts" | "hr-onboarding" | "hr-trainings" | "hr-employee-trainings";
 type AgentTab = "dashboard" | "tickets" | "contacts";
 type GestionnaireTab = "dashboard" | "projects" | "sharepoint" | "tickets" | "contacts" | "hr" | "hr-recruitment" | "hr-contracts" | "hr-onboarding" | "hr-trainings" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods";
 
