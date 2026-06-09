@@ -66,6 +66,7 @@ const emptyForm = {
 };
 
 export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean }) {
+  const { confirm, dialog: confirmDialog } = useConfirm();
   const [trainings, setTrainings] = useState<Training[]>([]);
   const [candidates, setCandidates] = useState<CandidateRow[]>([]);
   const [groups, setGroups] = useState<Group[]>([]);
