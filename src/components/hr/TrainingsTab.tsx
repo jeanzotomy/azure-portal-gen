@@ -581,6 +581,7 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
           </DialogFooter>
         </DialogContent>
       </Dialog>
+      {confirmDialog}
     </div>
   );
 }
