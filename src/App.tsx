@@ -26,6 +26,7 @@ const UnsubscribePage = lazy(() => import("./pages/UnsubscribePage.tsx"));
 const ApplicationTrackingPage = lazy(() => import("./pages/ApplicationTrackingPage.tsx"));
 const OnboardingPage = lazy(() => import("./pages/OnboardingPage.tsx"));
 const HrPortalPage = lazy(() => import("./pages/HrPortalPage.tsx"));
+const VerifyCertificatePage = lazy(() => import("./pages/VerifyCertificatePage.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 
 const ScrollToTopOnNavigate = () => {
