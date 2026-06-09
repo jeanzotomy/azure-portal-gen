@@ -16,18 +16,19 @@ export default function EmployeeTrainingPlayerPage() {
   const [assigned, setAssigned] = useState<any | null>(null);
 
   const load = useCallback(async () => {
-    if (!assignedId) return;
+    if (!assignedId || !user) return;
     setLoading(true);
     const { data } = await supabase
       .from("onboarding_assigned_trainings")
       .select(
-        "id, training_id, completed_at, quiz_score, quiz_passed, quiz_submitted_at, course_page, quiz_page, quiz_draft_answers, quiz_answers, training:trainings(title, description, url, duration_minutes, category, content, quiz, passing_score)"
+        "id, training_id, completed_at, quiz_score, quiz_passed, quiz_submitted_at, course_page, quiz_page, quiz_draft_answers, quiz_answers, process:onboarding_processes!inner(user_id), training:trainings(title, description, url, duration_minutes, category, content, quiz, passing_score)"
       )
       .eq("id", assignedId)
+      .eq("process.user_id", user.id)
       .maybeSingle();
     setAssigned(data);
     setLoading(false);
-  }, [assignedId]);
+  }, [assignedId, user]);
 
   useEffect(() => {
     void load();
