@@ -437,6 +437,7 @@ export default function OnboardingTab({ user }: { user: SupaUser }) {
                     docs={docs}
                     trainings={trainings}
                     uploading={uploading}
+                    userId={user.id}
                     onUploadDoc={handleDocUpload}
                     onSignContract={handleContractSign}
                     onDownloadContract={downloadContract}
