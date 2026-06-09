@@ -66,22 +66,20 @@ export default function EmployeeTrainingPlayerPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-3 sm:px-4 py-6 max-w-5xl space-y-5">
-        <TrainingPageHero
-          title={assigned.training?.title || "Formation"}
-          subtitle={assigned.training?.description || undefined}
-          icon={<GraduationCap className="h-6 w-6 text-white" />}
-          backTo="/portal/formations"
-          breadcrumbs={[
-            { label: "Portail", to: "/portal" },
-            { label: "Mes formations", to: "/portal/formations" },
-            { label: assigned.training?.title || "Formation" },
-          ]}
-        />
+    <div className="space-y-5">
+      <TrainingPageHero
+        title={assigned.training?.title || "Formation"}
+        subtitle={assigned.training?.description || undefined}
+        icon={<GraduationCap className="h-6 w-6 text-white" />}
+        backTo="/portal/formations"
+        breadcrumbs={[
+          { label: "Portail", to: "/portal" },
+          { label: "Mes formations", to: "/portal/formations" },
+          { label: assigned.training?.title || "Formation" },
+        ]}
+      />
 
-        <TrainingPlayer assigned={assigned} userId={user.id} onComplete={onComplete} />
-      </div>
+      <TrainingPlayer assigned={assigned} userId={user.id} onComplete={onComplete} />
     </div>
   );
 }
