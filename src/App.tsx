@@ -71,6 +71,7 @@ const App = () => (
             <Route path="/candidature" element={<ApplicationTrackingPage />} />
             <Route path="/onboarding" element={<AuthGuard><OnboardingPage /></AuthGuard>} />
             <Route path="/rh" element={<AuthGuard requireRoles={["hr"]} fallbackRoute="/portal"><HrPortalPage /></AuthGuard>}>
+              <Route path="formations" element={<EmployeeTrainingManager />} />
               <Route path="formations/assignations/:userId" element={<EmployeeTrainingAssignmentPage basePath="/rh" parentLabel="RH" />} />
             </Route>
             <Route path="/verify/:code" element={<VerifyCertificatePage />} />
