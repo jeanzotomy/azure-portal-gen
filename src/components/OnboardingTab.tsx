@@ -62,10 +62,10 @@ export default function OnboardingTab({ user }: { user: SupaUser }) {
   const load = useCallback(async () => {
     setLoading(true);
     let { data: proc } = await supabase
-      .from("onboarding_processes").select("*").eq("user_id", user.id).maybeSingle();
+      .from("onboarding_processes").select("*").eq("user_id", user.id).eq("kind", "onboarding").maybeSingle();
     if (!proc) {
       const { data: byEmail } = await supabase
-        .from("onboarding_processes").select("*").eq("candidate_email", user.email!).maybeSingle();
+        .from("onboarding_processes").select("*").eq("candidate_email", user.email!).eq("kind", "onboarding").maybeSingle();
       if (byEmail) {
         if (!byEmail.user_id) {
           await supabase.from("onboarding_processes").update({ user_id: user.id }).eq("id", byEmail.id);
