@@ -234,7 +234,7 @@ export function CertificateVerifyDashboard() {
                 {blocks.length === 0 ? (
                   <tr><td colSpan={6} className="px-3 py-6 text-center text-muted-foreground">Aucune donnée</td></tr>
                 ) : blocks.map(b => (
-                  <tr key={b.ip} className="border-t">
+                  <tr key={b.ip} className="border-t hover:bg-muted/30 cursor-pointer" onClick={() => setSelectedIp(b.ip)}>
                     <td className="px-3 py-2 font-mono text-xs">{b.ip}</td>
                     <td className="px-3 py-2 text-right">{b.total}</td>
                     <td className="px-3 py-2 text-right text-emerald-600">{b.ok}</td>
