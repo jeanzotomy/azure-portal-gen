@@ -1502,6 +1502,50 @@ export type Database = {
           },
         ]
       }
+      training_comments: {
+        Row: {
+          author_name: string
+          body: string
+          created_at: string
+          id: string
+          mentions: string[]
+          module_index: number | null
+          training_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          author_name: string
+          body: string
+          created_at?: string
+          id?: string
+          mentions?: string[]
+          module_index?: number | null
+          training_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          author_name?: string
+          body?: string
+          created_at?: string
+          id?: string
+          mentions?: string[]
+          module_index?: number | null
+          training_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_comments_training_id_fkey"
+            columns: ["training_id"]
+            isOneToOne: false
+            referencedRelation: "trainings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       training_group_assignments: {
         Row: {
           assigned_at: string
@@ -1601,6 +1645,57 @@ export type Database = {
         }
         Relationships: []
       }
+      training_mention_notifications: {
+        Row: {
+          comment_id: string
+          created_at: string
+          excerpt: string
+          from_name: string
+          from_user_id: string
+          id: string
+          read_at: string | null
+          training_id: string
+          user_id: string
+        }
+        Insert: {
+          comment_id: string
+          created_at?: string
+          excerpt: string
+          from_name: string
+          from_user_id: string
+          id?: string
+          read_at?: string | null
+          training_id: string
+          user_id: string
+        }
+        Update: {
+          comment_id?: string
+          created_at?: string
+          excerpt?: string
+          from_name?: string
+          from_user_id?: string
+          id?: string
+          read_at?: string | null
+          training_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_mention_notifications_comment_id_fkey"
+            columns: ["comment_id"]
+            isOneToOne: false
+            referencedRelation: "training_comments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_mention_notifications_training_id_fkey"
+            columns: ["training_id"]
+            isOneToOne: false
+            referencedRelation: "trainings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       trainings: {
         Row: {
           active: boolean
@@ -1697,6 +1792,10 @@ export type Database = {
         Args: { _code: string; _icon: string; _label: string; _user_id: string }
         Returns: undefined
       }
+      can_access_training: {
+        Args: { _training_id: string; _user_id: string }
+        Returns: boolean
+      }
       create_onboarding_for_application: {
         Args: { _application_id: string }
         Returns: string
@@ -1748,6 +1847,14 @@ export type Database = {
         }
         Returns: boolean
       }
+      list_training_co_learners: {
+        Args: { _training_id: string }
+        Returns: {
+          full_name: string
+          role: string
+          user_id: string
+        }[]
+      }
       move_to_dlq: {
         Args: {
           dlq_name: string
@@ -1756,6 +1863,15 @@ export type Database = {
           source_queue: string
         }
         Returns: number
+      }
+      post_training_comment: {
+        Args: {
+          _body: string
+          _mentions: string[]
+          _module_index: number
+          _training_id: string
+        }
+        Returns: string
       }
       read_email_batch: {
         Args: { batch_size: number; queue_name: string; vt: number }

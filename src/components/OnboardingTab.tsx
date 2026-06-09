@@ -22,6 +22,8 @@ import { SignaturePad } from "@/components/SignaturePad";
 import { MediaCapsuleList } from "@/components/hr/TrainingMediaEditor";
 import { GamificationWidget } from "@/components/onboarding/GamificationWidget";
 import { TrainingTutor } from "@/components/onboarding/TrainingTutor";
+import { TrainingComments } from "@/components/onboarding/TrainingComments";
+import { MentionsBell } from "@/components/onboarding/MentionsBell";
 import type { User as SupaUser } from "@supabase/supabase-js";
 
 const STEP_ICONS: Record<string, any> = {
@@ -560,6 +562,10 @@ function StepContent({ step, contract, docs, trainings = [], uploading, userId, 
     const gamifKey = trainings.filter((t: any) => t.quiz_passed).length;
     return (
       <div className="space-y-4">
+        <div className="flex items-center justify-between gap-3">
+          <h3 className="font-semibold text-sm">Formations & QCM</h3>
+          {userId && <MentionsBell userId={userId} />}
+        </div>
         {userId && <GamificationWidget userId={userId} refreshKey={gamifKey} />}
         {trainings.length === 0 ? (
           <div className="p-6 bg-white rounded-lg border text-center text-sm text-muted-foreground">
@@ -569,7 +575,7 @@ function StepContent({ step, contract, docs, trainings = [], uploading, userId, 
         ) : (
           <div className="space-y-3">
             {trainings.map((t: any) => (
-              <TrainingPlayer key={t.id} assigned={t} onComplete={() => onMarkTrainingDone(t.id)} />
+              <TrainingPlayer key={t.id} assigned={t} userId={userId} onComplete={() => onMarkTrainingDone(t.id)} />
             ))}
           </div>
         )}
@@ -613,7 +619,7 @@ function StepContent({ step, contract, docs, trainings = [], uploading, userId, 
 }
 
 /* =================== TRAINING PLAYER (paginated course + paginated QCM) =================== */
-function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: () => void }) {
+function TrainingPlayer({ assigned, userId, onComplete }: { assigned: any; userId?: string | null; onComplete: () => void }) {
   const t = assigned.training;
   const content = t?.content || {};
   const modules: any[] = content.modules || [];
@@ -1229,6 +1235,10 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
             ) : null}
           </div>
         </div>
+      )}
+
+      {userId && assigned.training_id && (
+        <TrainingComments trainingId={assigned.training_id} currentUserId={userId} />
       )}
 
       {tutorOpen && assigned.training_id && (
