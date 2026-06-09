@@ -1261,3 +1261,31 @@ function TrainingPlayer({ assigned, userId, onComplete }: { assigned: any; userI
   );
 }
 
+function CertificateButton({ assignedId }: { assignedId: string }) {
+  const [loading, setLoading] = useState(false);
+  const handle = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("issue-training-certificate", {
+        body: { assigned_id: assignedId },
+      });
+      if (error) throw error;
+      const url = (data as any)?.url;
+      if (!url) throw new Error("Lien introuvable");
+      window.open(url, "_blank", "noopener");
+      toast.success("Certificat prêt !");
+    } catch (e: any) {
+      toast.error(e?.message || "Impossible de générer le certificat");
+    } finally {
+      setLoading(false);
+    }
+  };
+  return (
+    <Button size="sm" onClick={handle} disabled={loading} className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white">
+      {loading ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Award className="h-3 w-3 mr-1" />}
+      Certificat PDF
+    </Button>
+  );
+}
+
+
