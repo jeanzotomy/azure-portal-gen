@@ -12,6 +12,7 @@ import {
   XCircle, ShieldAlert, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { SignaturePad } from "@/components/SignaturePad";
+import { MediaCapsuleList } from "@/components/hr/TrainingMediaEditor";
 import type { User as SupaUser } from "@supabase/supabase-js";
 
 const STEP_ICONS: Record<string, any> = {
