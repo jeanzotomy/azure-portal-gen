@@ -69,6 +69,7 @@ export function CertificateVerifyDashboard() {
   const [rows, setRows] = useState<Row[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCode, setSelectedCode] = useState<string | null>(null);
+  const [selectedIp, setSelectedIp] = useState<string | null>(null);
   const [searchValue, setSearchValue] = useState("");
 
 
