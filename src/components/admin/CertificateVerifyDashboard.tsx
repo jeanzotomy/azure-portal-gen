@@ -3,8 +3,10 @@ import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ShieldCheck, ShieldAlert, CheckCircle2, XCircle, RefreshCw, Activity, Ban } from "lucide-react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
+import { ShieldCheck, ShieldAlert, CheckCircle2, XCircle, RefreshCw, Activity, Ban, Search, AlertTriangle, Hash } from "lucide-react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from "recharts";
 
 type Row = { ip: string; code: string | null; ok: boolean; attempted_at: string };
@@ -17,10 +19,50 @@ const SHORT_WIN_S = 60;
 const SHORT_MAX = 10;
 const LONG_WIN_S = 600;
 const LONG_MAX = 60;
+const CODE_RE = /^[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$/;
 
 function fmtDate(d: Date) {
-  return d.toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+  return d.toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit" });
 }
+
+type Reason = "success" | "malformed" | "throttled" | "invalid";
+const REASON_META: Record<Reason, { label: string; cls: string }> = {
+  success:   { label: "Vérification réussie",       cls: "bg-emerald-100 text-emerald-700 border-emerald-300" },
+  malformed: { label: "Code mal formé",             cls: "bg-amber-100 text-amber-700 border-amber-300" },
+  throttled: { label: "Bloqué (anti-bruteforce)",   cls: "bg-rose-100 text-rose-700 border-rose-300" },
+  invalid:   { label: "Code inconnu / expiré",      cls: "bg-slate-100 text-slate-700 border-slate-300" },
+};
+
+function classifyAttempts(attempts: { ip: string; code: string | null; ok: boolean; attempted_at: string }[]) {
+  // Group times per IP to detect throttling at moment of attempt
+  const perIp = new Map<string, number[]>();
+  for (const a of attempts) {
+    const arr = perIp.get(a.ip) || [];
+    arr.push(new Date(a.attempted_at).getTime());
+    perIp.set(a.ip, arr);
+  }
+  perIp.forEach((arr) => arr.sort((a, b) => a - b));
+
+  return attempts.map((a) => {
+    let reason: Reason;
+    if (a.ok) reason = "success";
+    else if (!a.code) reason = "malformed";
+    else {
+      const t = new Date(a.attempted_at).getTime();
+      const arr = perIp.get(a.ip) || [];
+      let shortC = 0, longC = 0;
+      for (const ts of arr) {
+        if (ts >= t) break;
+        const dt = t - ts;
+        if (dt <= SHORT_WIN_S * 1000) shortC++;
+        if (dt <= LONG_WIN_S * 1000) longC++;
+      }
+      reason = (shortC >= SHORT_MAX || longC >= LONG_MAX) ? "throttled" : "invalid";
+    }
+    return { ...a, reason };
+  });
+}
+
 
 export function CertificateVerifyDashboard() {
   const [win, setWin] = useState<Window>("24h");
