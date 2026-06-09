@@ -156,8 +156,8 @@ export default function EmployeeTrainingsListPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="container mx-auto px-3 sm:px-4 py-6 max-w-6xl space-y-6">
+    <div className="space-y-6">
+      <div className="space-y-6">{/* keep structure */}
         <TrainingPageHero
           title="Mes formations"
           subtitle="Modules continus assignés par votre RH ou administrateur — suivez votre progression et obtenez vos certificats."
