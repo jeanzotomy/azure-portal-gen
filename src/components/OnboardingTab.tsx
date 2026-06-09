@@ -944,11 +944,17 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
                     );
                   })}
                 </div>
-                <div className="p-4 border-t flex items-center justify-end gap-2">
+                <div className="p-4 border-t flex flex-wrap items-center justify-end gap-2">
                   {!result.passed && (
-                    <Button size="sm" variant="outline" onClick={retryQuiz}>
-                      Réessayer
-                    </Button>
+                    <>
+                      <Button size="sm" variant="outline" onClick={retryQuiz}>
+                        Réessayer
+                      </Button>
+                      <Button size="sm" onClick={startAdaptive} disabled={loadingAdaptive} className="bg-gradient-to-r from-purple-600 to-fuchsia-600 hover:from-purple-700 hover:to-fuchsia-700 text-white">
+                        {loadingAdaptive ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Brain className="h-4 w-4 mr-1" />}
+                        Rattrapage IA (3 questions ciblées)
+                      </Button>
+                    </>
                   )}
                   <Button size="sm" onClick={closeResults} className="bg-gradient-to-r from-primary to-[#007aa3]">
                     Fermer
