@@ -330,9 +330,9 @@ export function CertificateVerifyDashboard() {
         Cliquez sur un code ou une IP pour ouvrir le détail complet des tentatives associées.
       </p>
 
-      <CodeDetailDialog
-        code={selectedCode}
-        onClose={() => setSelectedCode(null)}
+      <AttemptDetailDialog
+        filter={selectedCode ? { kind: "code", value: selectedCode } : selectedIp ? { kind: "ip", value: selectedIp } : null}
+        onClose={() => { setSelectedCode(null); setSelectedIp(null); }}
       />
     </div>
   );
@@ -350,3 +350,209 @@ function Kpi({ icon, label, value, sub, color }: { icon: React.ReactNode; label:
     </Card>
   );
 }
+
+type Filter = { kind: "code" | "ip"; value: string } | null;
+
+function AttemptDetailDialog({ filter, onClose }: { filter: Filter; onClose: () => void }) {
+  const [attempts, setAttempts] = useState<Row[] | null>(null);
+  const [cert, setCert] = useState<any | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [allIpsTimes, setAllIpsTimes] = useState<Map<string, number[]> | null>(null);
+
+  useEffect(() => {
+    if (!filter) { setAttempts(null); setCert(null); setAllIpsTimes(null); return; }
+    let cancelled = false;
+    (async () => {
+      setLoading(true);
+      // Pull all attempts matching the filter (cap 1000, newest first)
+      let q = supabase.from("verify_attempts").select("ip, code, ok, attempted_at").order("attempted_at", { ascending: false }).limit(1000);
+      if (filter.kind === "code") q = q.eq("code", filter.value);
+      else q = q.eq("ip", filter.value);
+      const { data } = await q;
+      const list = (data || []) as Row[];
+
+      // For correct throttle detection on a code, we also need ALL prior attempts per IP within 10 minutes.
+      // Fetch the IPs involved and pull their nearby activity.
+      let ipsTimes: Map<string, number[]> = new Map();
+      if (filter.kind === "code") {
+        const ips = Array.from(new Set(list.map(r => r.ip)));
+        if (ips.length > 0) {
+          const since = new Date(Date.now() - 7 * 24 * 3600 * 1000).toISOString();
+          const { data: extra } = await supabase
+            .from("verify_attempts")
+            .select("ip, attempted_at")
+            .in("ip", ips)
+            .gte("attempted_at", since)
+            .order("attempted_at", { ascending: true })
+            .limit(5000);
+          for (const e of (extra || [])) {
+            const arr = ipsTimes.get(e.ip) || [];
+            arr.push(new Date(e.attempted_at).getTime());
+            ipsTimes.set(e.ip, arr);
+          }
+        }
+      } else {
+        // single IP: use the returned rows themselves (already sorted desc; resort asc)
+        const arr = list.map(r => new Date(r.attempted_at).getTime()).sort((a, b) => a - b);
+        ipsTimes.set(filter.value, arr);
+      }
+
+      // Lookup certificate (only useful for code filter)
+      let certRow: any = null;
+      if (filter.kind === "code" && CODE_RE.test(filter.value)) {
+        const { data: c } = await supabase
+          .from("training_certificates")
+          .select("verification_code, candidate_name, training_title, score, issued_at, expires_at, revoked_at, pdf_path")
+          .eq("verification_code", filter.value)
+          .maybeSingle();
+        certRow = c;
+      }
+
+      if (cancelled) return;
+      setAttempts(list);
+      setCert(certRow);
+      setAllIpsTimes(ipsTimes);
+      setLoading(false);
+    })();
+    return () => { cancelled = true; };
+  }, [filter?.kind, filter?.value]);
+
+  const enriched = useMemo(() => {
+    if (!attempts || !allIpsTimes) return [];
+    return attempts.map(a => {
+      let reason: Reason;
+      if (a.ok) reason = "success";
+      else if (!a.code) reason = "malformed";
+      else {
+        const t = new Date(a.attempted_at).getTime();
+        const arr = allIpsTimes.get(a.ip) || [];
+        let shortC = 0, longC = 0;
+        for (const ts of arr) {
+          if (ts >= t) break;
+          const dt = t - ts;
+          if (dt <= SHORT_WIN_S * 1000) shortC++;
+          if (dt <= LONG_WIN_S * 1000) longC++;
+        }
+        reason = (shortC >= SHORT_MAX || longC >= LONG_MAX) ? "throttled" : "invalid";
+      }
+      return { ...a, reason };
+    });
+  }, [attempts, allIpsTimes]);
+
+  const summary = useMemo(() => {
+    const total = enriched.length;
+    const ok = enriched.filter(a => a.reason === "success").length;
+    const malformed = enriched.filter(a => a.reason === "malformed").length;
+    const throttled = enriched.filter(a => a.reason === "throttled").length;
+    const invalid = enriched.filter(a => a.reason === "invalid").length;
+    const ips = new Set(enriched.map(a => a.ip)).size;
+    return { total, ok, malformed, throttled, invalid, ips };
+  }, [enriched]);
+
+  const open = !!filter;
+  const title = filter?.kind === "code" ? `Code ${filter.value}` : filter?.kind === "ip" ? `IP ${filter.value}` : "";
+
+  return (
+    <Dialog open={open} onOpenChange={(o) => { if (!o) onClose(); }}>
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center gap-2">
+            <ShieldCheck className="h-5 w-5 text-primary" />
+            Détail — <span className="font-mono">{title}</span>
+          </DialogTitle>
+          <DialogDescription>
+            Historique complet des tentatives de vérification et raison de chaque résultat.
+          </DialogDescription>
+        </DialogHeader>
+
+        {loading ? (
+          <div className="py-10 text-center text-sm text-muted-foreground">Chargement…</div>
+        ) : (
+          <>
+            {filter?.kind === "code" && (
+              <Card>
+                <CardContent className="p-3 text-sm">
+                  {cert ? (
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2 text-emerald-700">
+                        <CheckCircle2 className="h-4 w-4" /> <span className="font-medium">Certificat existant</span>
+                        {cert.revoked_at && <Badge className="bg-rose-100 text-rose-700 border-rose-300">Révoqué</Badge>}
+                        {cert.expires_at && new Date(cert.expires_at) < new Date() && <Badge className="bg-amber-100 text-amber-700 border-amber-300">Expiré</Badge>}
+                      </div>
+                      <div className="text-xs grid grid-cols-2 gap-x-4 gap-y-1 mt-1">
+                        <div><span className="text-muted-foreground">Titulaire :</span> {cert.candidate_name}</div>
+                        <div><span className="text-muted-foreground">Formation :</span> {cert.training_title}</div>
+                        <div><span className="text-muted-foreground">Score :</span> {cert.score ?? "—"}{cert.score != null ? "%" : ""}</div>
+                        <div><span className="text-muted-foreground">Émis le :</span> {new Date(cert.issued_at).toLocaleDateString("fr-FR")}</div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2 text-amber-700">
+                      <AlertTriangle className="h-4 w-4" /> Aucun certificat n'existe pour ce code — toutes les tentatives sont des échecs.
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
+
+            <div className="grid grid-cols-2 md:grid-cols-5 gap-2 text-center">
+              <MiniKpi label="Tentatives" value={summary.total} />
+              <MiniKpi label="Succès" value={summary.ok} cls="text-emerald-600" />
+              <MiniKpi label="Code invalide" value={summary.invalid} cls="text-slate-600" />
+              <MiniKpi label="Mal formés" value={summary.malformed} cls="text-amber-600" />
+              <MiniKpi label="Bloqués" value={summary.throttled} cls="text-rose-600" />
+            </div>
+            {filter?.kind === "code" && <p className="text-xs text-muted-foreground">{summary.ips} IP unique{summary.ips > 1 ? "s" : ""} ont tenté ce code.</p>}
+
+            <div className="border rounded-lg overflow-hidden">
+              <div className="max-h-[50vh] overflow-y-auto">
+                <table className="w-full text-sm">
+                  <thead className="bg-muted/60 text-xs uppercase tracking-wide text-muted-foreground sticky top-0">
+                    <tr>
+                      <th className="text-left px-3 py-2">Date</th>
+                      <th className="text-left px-3 py-2">IP</th>
+                      {filter?.kind === "ip" && <th className="text-left px-3 py-2">Code</th>}
+                      <th className="text-left px-3 py-2">Résultat</th>
+                      <th className="text-left px-3 py-2">Raison</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {enriched.length === 0 ? (
+                      <tr><td colSpan={filter?.kind === "ip" ? 5 : 4} className="px-3 py-6 text-center text-muted-foreground">Aucune tentative enregistrée.</td></tr>
+                    ) : enriched.map((a, i) => (
+                      <tr key={i} className="border-t">
+                        <td className="px-3 py-1.5 text-xs whitespace-nowrap">{fmtDate(new Date(a.attempted_at))}</td>
+                        <td className="px-3 py-1.5 font-mono text-xs">{a.ip}</td>
+                        {filter?.kind === "ip" && <td className="px-3 py-1.5 font-mono text-xs">{a.code ?? <span className="text-muted-foreground italic">—</span>}</td>}
+                        <td className="px-3 py-1.5">
+                          {a.ok ? (
+                            <Badge className="bg-emerald-100 text-emerald-700 border-emerald-300">OK</Badge>
+                          ) : (
+                            <Badge variant="outline" className="text-red-600 border-red-300">KO</Badge>
+                          )}
+                        </td>
+                        <td className="px-3 py-1.5">
+                          <Badge className={REASON_META[a.reason].cls}>{REASON_META[a.reason].label}</Badge>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+}
+
+function MiniKpi({ label, value, cls }: { label: string; value: number; cls?: string }) {
+  return (
+    <div className="rounded-lg border bg-muted/30 py-2">
+      <div className={`text-xl font-bold ${cls ?? ""}`}>{value}</div>
+      <div className="text-[10px] uppercase tracking-wide text-muted-foreground">{label}</div>
+    </div>
+  );
+}
+
