@@ -208,7 +208,10 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
       confirmLabel: "Supprimer",
       onConfirm: async () => {
         const { error } = await supabase.from("trainings").delete().eq("id", id);
-        if (error) return toast.error(error.message);
+        if (error) {
+          toast.error(error.message);
+          return;
+        }
         toast.success("Formation supprimée");
         load();
       },
