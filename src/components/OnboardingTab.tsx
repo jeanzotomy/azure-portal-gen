@@ -549,8 +549,10 @@ function StepContent({ step, contract, docs, trainings = [], uploading, userId, 
 
   if (step.step_key === "training") {
     const allDone = trainings.length > 0 && trainings.every((t: any) => t.completed_at);
+    const gamifKey = trainings.filter((t: any) => t.quiz_passed).length;
     return (
       <div className="space-y-4">
+        {userId && <GamificationWidget userId={userId} refreshKey={gamifKey} />}
         {trainings.length === 0 ? (
           <div className="p-6 bg-white rounded-lg border text-center text-sm text-muted-foreground">
             <GraduationCap className="h-8 w-8 mx-auto mb-2 opacity-50" />
