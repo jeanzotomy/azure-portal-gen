@@ -109,6 +109,7 @@ function PortalContent() {
     { id: "tickets", icon: LifeBuoy, label: t("portal.support") },
     { id: "applications", icon: Briefcase, label: "Mes candidatures" },
     ...(isOnboarding ? [{ id: "onboarding" as Tab, icon: Sparkles, label: "Mon onboarding" }] : []),
+    { id: "my-trainings", icon: GraduationCap, label: "Mes formations" },
     { id: "profile", icon: User, label: t("portal.profile") },
   ];
 
