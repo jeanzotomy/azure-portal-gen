@@ -1,128 +1,65 @@
-# Déploiement Azure depuis Git — Impact sur tes connecteurs
+## Objectif
 
-## TL;DR
+Permettre **deux types d'assignation de formation** :
 
-Ton repo Git contient **le code**, mais **pas les secrets ni l'infrastructure** Lovable Cloud. Si tu déploies tel quel sur Azure sans rien d'autre, l'app **ne fonctionnera pas** : pas de DB, pas d'auth, pas de connecteurs.
+1. **Onboarding d'intégration** — comportement actuel (déjà en place via `onboarding_processes` lié à une candidature acceptée).
+2. **Formation continue employé** — nouvelle assignation directe à un utilisateur, gérée depuis un **menu dédié dans chaque profil utilisateur**, réservée à **Admin et RH**.
 
-Recommandation : **Frontend sur Azure Static Web Apps + backend qui reste sur Lovable Cloud**. C'est le chemin avec 90% du gain pour 10% de l'effort. Migration complète possible plus tard.
+L'utilisateur retrouve ses formations dans deux espaces séparés. Les statistiques, quiz, certificats, commentaires et gamification continuent de fonctionner pour les deux types — sans dupliquer la logique existante.
 
----
+## Approche technique
 
-## Ce qui est dans Git vs ce qui n'y est pas
-
-**Présent dans Git :**
-- Code React/Vite (`src/`)
-- Code Edge Functions (`supabase/functions/*`)
-- Migrations SQL (`supabase/migrations/`)
-- `supabase/config.toml`
-- Références aux env vars (`Deno.env.get(...)`, `import.meta.env.VITE_*`)
-
-**Absent (vit côté Lovable Cloud) :**
-- Tous les secrets : `LOVABLE_API_KEY`, `GOOGLE_SEARCH_CONSOLE_API_KEY`, `AZURE_TENANT_ID/CLIENT_ID/CLIENT_SECRET`, `TWILIO_*`, etc.
-- La base Postgres + données + RLS exécutées
-- L'auth Supabase (utilisateurs, sessions, OAuth Google configuré)
-- Le storage (buckets, fichiers)
-- Le routage vers `connector-gateway.lovable.dev`
-
----
-
-## Comportement par connecteur après déploiement Azure
-
-| Connecteur | Type | Sur Azure (sans Lovable) |
-|---|---|---|
-| **Azure AD / SharePoint** (`sharepoint-proxy`) | Tes credentials Azure directs | ✅ Marche partout, recopier `AZURE_*` |
-| **Twilio SMS** (MFA) | Clé API directe | ✅ Marche, recopier les clés |
-| **Resend / Email** | Clé API directe | ✅ Marche, recopier la clé |
-| **Google Search Console** (`gsc-dashboard`) | Via gateway Lovable | ❌ Cassé — nécessite `LOVABLE_API_KEY` + connexion liée |
-| **Lovable AI Gateway** (si utilisé) | Via gateway Lovable | ❌ Cassé — à remplacer par OpenAI/Gemini direct |
-| **Google OAuth signin** (`@lovable.dev/cloud-auth-js`) | Via Lovable Auth | ❌ Cassé — à remplacer par Supabase OAuth natif |
-| **DB Postgres + RLS + triggers** | Lovable Cloud (Supabase managé) | ❌ Aucune DB côté Azure tant que rien n'est recréé |
-
----
-
-## Plan recommandé — Architecture hybride
+On réutilise `onboarding_processes` comme conteneur générique et on lui ajoute un champ `kind`.
 
 ```text
-       ┌──────────────────────────┐
-       │  Azure Static Web Apps   │  ← build Vite déployé via GitHub Actions
-       │   (cloudmature.com)      │
-       └────────────┬─────────────┘
-                    │ HTTPS
-                    ▼
-       ┌──────────────────────────┐
-       │   Lovable Cloud backend  │
-       │  - Supabase DB + Auth    │
-       │  - Edge Functions        │
-       │  - Connecteurs (GSC...)  │
-       │  - Storage               │
-       └──────────────────────────┘
+onboarding_processes
+ ├─ kind = 'onboarding'         (1 par candidature acceptée) — existant
+ └─ kind = 'employee_training'  (1 par utilisateur, créé à la demande)
 ```
 
-**Avantages :**
-- Connecteurs gateway (GSC, AI) continuent de marcher sans refonte
-- Custom domain `cloudmature.com` géré par Azure (CDN + SSL gratuit)
-- CI/CD automatique via GitHub Actions
-- Aucun secret à migrer
-- Tu peux toujours éditer dans Lovable, les changes sync via Git
+Chaque utilisateur n'aura **qu'un seul** process `employee_training` (contrat d'unicité) dans lequel s'accumulent toutes les formations continues qu'on lui assigne. Tous les triggers / fonctions existants (`can_access_training`, gamification, certificats, commentaires, cohort feed) marchent **sans modification**.
 
-**À faire (étapes haut niveau) :**
+## Lot — Migration SQL
 
-1. **Vérifier les origines CORS autorisées** dans les Edge Functions (déjà `*` partout → OK)
-2. **Créer une Azure Static Web App** liée au repo GitHub
-3. **Configurer le build** : framework Vite, output `dist/`, app location `/`
-4. **Ajouter les env vars publiques** côté Azure (Build Configuration) :
-   - `VITE_SUPABASE_URL` = `https://zwzazxebufydnaxezngx.supabase.co`
-   - `VITE_SUPABASE_PUBLISHABLE_KEY` = la clé anon publique
-   - `VITE_SUPABASE_PROJECT_ID` = `zwzazxebufydnaxezngx`
-5. **Configurer le SPA fallback** (`staticwebapp.config.json` à la racine) pour que React Router gère les deep links
-6. **Pointer `cloudmature.com`** vers le Static Web App Azure (DNS) au lieu de Lovable
-7. **Reconfigurer Google OAuth** côté Supabase : ajouter l'URL Azure dans les Redirect URLs autorisées
-8. **Tester** : auth, MFA, SharePoint, GSC, notifications, paiements
+- Colonne `kind text not null default 'onboarding'` sur `onboarding_processes` + check (`'onboarding' | 'employee_training'`).
+- Index unique partiel : `(user_id) WHERE kind = 'employee_training'`.
+- Fonction `get_or_create_employee_process(_user_id uuid)` — SECURITY DEFINER, refusée si l'appelant n'est pas admin ou RH.
+- Fonction `assign_employee_training(_user_id uuid, _training_id uuid)` — crée le process si besoin puis `INSERT … ON CONFLICT DO NOTHING` dans `onboarding_assigned_trainings` (source = `'employee'`).
+- Fonction `unassign_employee_training(_user_id uuid, _training_id uuid)` — DELETE conditionnée à la non-complétion (sinon on garde l'historique).
+- Fonction `list_employee_assignable_users()` — admin/RH seulement, retourne id, nom, email, nb formations actives, nb complétées.
+- Fonction `list_employee_trainings_for_user(_user_id uuid)` — admin/RH **ou** l'utilisateur lui-même.
+- Adaptations RLS triviales : les policies actuelles sur `onboarding_assigned_trainings` filtrent déjà par `process.user_id = auth.uid()` → fonctionnent telles quelles pour les deux `kind`.
 
----
+## Lot — UI utilisateur
 
-## Si plus tard tu veux la migration complète
+Nouveau composant **`EmployeeTrainingsTab.tsx`** (séparé de `OnboardingTab`) :
 
-À prévoir comme chantier séparé (non couvert ici) :
-- Self-hosting Supabase sur Azure Container Apps OU bascule vers Azure Database for PostgreSQL + Azure Functions (Deno → Node)
-- Remplacer `gsc-dashboard` par appel direct GSC avec service account Google
-- Remplacer `@lovable.dev/cloud-auth-js` par flux OAuth Supabase natif
-- Réécrire toutes les RLS et triggers dans la nouvelle DB
-- Migrer données via `pg_dump` / `pg_restore`
-- Reconfigurer le hook `auth-email-hook` côté nouveau Supabase
+- Visible dans le portail utilisateur sous un nouvel onglet « Mes formations » dans la sidebar/profil.
+- Réutilise les sous-composants existants : lecteur vidéo, quiz, commentaires, certificat, gamification.
+- Cache complètement l'UI « onboarding » (étapes, contrat, documents) — uniquement la liste des formations assignées avec progression.
 
-C'est 2-4 semaines de travail vs 1 journée pour le scénario hybride.
+`OnboardingTab` reste inchangé et continue de ne montrer que les formations du process `kind = 'onboarding'`.
 
----
+## Lot — UI Admin & RH
 
-## Détails techniques (pour ton équipe technique)
+Nouveau composant **`EmployeeTrainingManager.tsx`** intégré :
 
-**Fichier à créer : `staticwebapp.config.json`**
-```json
-{
-  "navigationFallback": {
-    "rewrite": "/index.html",
-    "exclude": ["/assets/*", "/*.{css,js,svg,png,jpg,webp,ico,xml,txt,json}"]
-  },
-  "globalHeaders": {
-    "Cache-Control": "no-cache"
-  }
-}
+- Sous un nouvel onglet **« Formations employés »** dans `AdminPage` (visible Admin) et `RHPage` (visible RH).
+- Liste des utilisateurs (recherche, filtre par département si dispo).
+- Pour l'utilisateur sélectionné, panneau de droite avec :
+  - Formations déjà assignées (avec source, statut, score, date complétion).
+  - Bouton « Assigner une formation » → modal avec recherche dans le catalogue `trainings` actif.
+  - Bouton retrait sur les formations non encore complétées.
+- KPIs : nb d'utilisateurs avec formation en cours, taux de complétion, score moyen.
+
+## Récap
+
+```text
+                ┌─ Onboarding (intégration) ────► OnboardingTab (inchangé)
+Process kind ───┤
+                └─ Employee training ──────────► EmployeeTrainingsTab (nouveau)
+                                                  ▲
+                              assigné par Admin/RH│ via EmployeeTrainingManager
 ```
 
-**GitHub Actions workflow** : Azure Static Web Apps génère automatiquement `.github/workflows/azure-static-web-apps-*.yml` lors de la création de la ressource. Vérifier `app_build_command: "npm run build"` et `output_location: "dist"`.
-
-**Variables d'env côté Azure** : Settings → Configuration → Application settings (préfixe `VITE_` pour qu'elles soient injectées au build).
-
-**DNS pour `cloudmature.com`** :
-- Type `CNAME` : `www` → `<azure-swa-hostname>.azurestaticapps.net`
-- Type `TXT` : validation domaine (fourni par Azure)
-- Apex (`@`) : utiliser `ALIAS`/`ANAME` si supporté, sinon redirection 301 vers `www`
-
-**Aucun changement nécessaire** dans les Edge Functions, les migrations, le code React, ou les secrets Lovable.
-
----
-
-## Question
-
-Confirmes-tu cette approche hybride ? Si oui, je peux préparer le `staticwebapp.config.json` et documenter la procédure DNS exacte pour `cloudmature.com`.
+Aucune donnée existante n'est migrée ni cassée : tous les process actuels gardent `kind = 'onboarding'` par défaut.
