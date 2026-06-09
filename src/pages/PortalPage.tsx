@@ -60,6 +60,8 @@ function PortalContent() {
   const { state } = useSidebar();
   const collapsed = state === "collapsed";
   const { t, locale } = useTranslation();
+  const formationsMatch = useMatch("/portal/formations/*");
+  const isFormationsRoute = !!formationsMatch;
 
   // Auth/MFA/blocked checks are handled upstream by <AuthGuard>. We can rely on `user` being non-null.
 
