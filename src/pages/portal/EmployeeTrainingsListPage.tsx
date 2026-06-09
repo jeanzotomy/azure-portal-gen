@@ -55,6 +55,10 @@ export default function EmployeeTrainingsListPage() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(true);
   const [trainings, setTrainings] = useState<Assigned[]>([]);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState<"all" | "not_started" | "in_progress" | "completed" | "quiz_passed">("all");
+  const [progressFilter, setProgressFilter] = useState<"all" | "0-25" | "25-50" | "50-75" | "75-100">("all");
+  const [categoryFilter, setCategoryFilter] = useState<string>("all");
 
   const load = useCallback(async () => {
     if (!user) return;
