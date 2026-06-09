@@ -8,7 +8,6 @@ import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Textarea } from "@/components/ui/textarea";
-import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 import { Loader2, FileUp, CheckCircle2, XCircle, Eye, Users, Clock, Sparkles, ExternalLink } from "lucide-react";
 
