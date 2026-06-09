@@ -611,9 +611,9 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
 
   // Build course pages: intro -> each module -> conclusion -> resources
   const coursePages: { kind: string; data?: any }[] = [];
-  if (content.objectives?.length || content.introduction) coursePages.push({ kind: "intro" });
+  if (content.objectives?.length || content.introduction || content.intro_media?.length || content.standalone_media?.length) coursePages.push({ kind: "intro" });
   modules.forEach((m, i) => coursePages.push({ kind: "module", data: { ...m, idx: i } }));
-  if (content.conclusion || content.resources?.length) coursePages.push({ kind: "conclusion" });
+  if (content.conclusion || content.resources?.length || content.conclusion_media?.length) coursePages.push({ kind: "conclusion" });
 
   const [expanded, setExpanded] = useState(false);
   const [coursePage, setCoursePage] = useState<number>(Math.min(assigned.course_page ?? 0, Math.max(0, coursePages.length - 1)));
