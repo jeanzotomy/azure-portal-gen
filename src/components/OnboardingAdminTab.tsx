@@ -35,7 +35,7 @@ export default function OnboardingAdminTab({ readOnly = false }: { readOnly?: bo
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data } = await supabase.from("onboarding_processes").select("*").order("invited_at", { ascending: false });
+    const { data } = await supabase.from("onboarding_processes").select("*").eq("kind", "onboarding").order("invited_at", { ascending: false });
     setProcesses((data || []) as any);
     setLoading(false);
   }, []);
