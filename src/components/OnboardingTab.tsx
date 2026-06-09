@@ -1003,6 +1003,14 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
           </div>
         </div>
       )}
+
+      {tutorOpen && t?.id && (
+        <TrainingTutor
+          trainingId={assigned.training_id}
+          trainingTitle={t?.title || "Formation"}
+          onClose={() => setTutorOpen(false)}
+        />
+      )}
     </div>
   );
 }
