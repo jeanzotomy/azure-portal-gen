@@ -1502,6 +1502,69 @@ export type Database = {
           },
         ]
       }
+      training_certificates: {
+        Row: {
+          assigned_id: string | null
+          candidate_name: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          issued_at: string
+          pdf_path: string | null
+          revoked_at: string | null
+          score: number | null
+          training_id: string
+          training_title: string
+          user_id: string
+          verification_code: string
+        }
+        Insert: {
+          assigned_id?: string | null
+          candidate_name: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          issued_at?: string
+          pdf_path?: string | null
+          revoked_at?: string | null
+          score?: number | null
+          training_id: string
+          training_title: string
+          user_id: string
+          verification_code: string
+        }
+        Update: {
+          assigned_id?: string | null
+          candidate_name?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          issued_at?: string
+          pdf_path?: string | null
+          revoked_at?: string | null
+          score?: number | null
+          training_id?: string
+          training_title?: string
+          user_id?: string
+          verification_code?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_certificates_assigned_id_fkey"
+            columns: ["assigned_id"]
+            isOneToOne: false
+            referencedRelation: "onboarding_assigned_trainings"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "training_certificates_training_id_fkey"
+            columns: ["training_id"]
+            isOneToOne: false
+            referencedRelation: "trainings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       training_comment_reactions: {
         Row: {
           comment_id: string

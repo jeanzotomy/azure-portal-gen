@@ -26,6 +26,7 @@ const UnsubscribePage = lazy(() => import("./pages/UnsubscribePage.tsx"));
 const ApplicationTrackingPage = lazy(() => import("./pages/ApplicationTrackingPage.tsx"));
 const OnboardingPage = lazy(() => import("./pages/OnboardingPage.tsx"));
 const HrPortalPage = lazy(() => import("./pages/HrPortalPage.tsx"));
+const VerifyCertificatePage = lazy(() => import("./pages/VerifyCertificatePage.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 
 const ScrollToTopOnNavigate = () => {
@@ -61,6 +62,7 @@ const App = () => (
             <Route path="/candidature" element={<ApplicationTrackingPage />} />
             <Route path="/onboarding" element={<AuthGuard><OnboardingPage /></AuthGuard>} />
             <Route path="/rh" element={<AuthGuard requireRoles={["hr"]} fallbackRoute="/portal"><HrPortalPage /></AuthGuard>} />
+            <Route path="/verify/:code" element={<VerifyCertificatePage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </Suspense>
