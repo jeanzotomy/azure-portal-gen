@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { SignaturePad } from "@/components/SignaturePad";
 import { MediaCapsuleList } from "@/components/hr/TrainingMediaEditor";
+import { GamificationWidget } from "@/components/onboarding/GamificationWidget";
 import type { User as SupaUser } from "@supabase/supabase-js";
 
 const STEP_ICONS: Record<string, any> = {
@@ -436,6 +437,7 @@ export default function OnboardingTab({ user }: { user: SupaUser }) {
                     docs={docs}
                     trainings={trainings}
                     uploading={uploading}
+                    userId={user.id}
                     onUploadDoc={handleDocUpload}
                     onSignContract={handleContractSign}
                     onDownloadContract={downloadContract}
@@ -456,7 +458,7 @@ export default function OnboardingTab({ user }: { user: SupaUser }) {
   );
 }
 
-function StepContent({ step, contract, docs, trainings = [], uploading, onUploadDoc, onSignContract, onDownloadContract, onMarkDone, onMarkTrainingDone }: any) {
+function StepContent({ step, contract, docs, trainings = [], uploading, userId, onUploadDoc, onSignContract, onDownloadContract, onMarkDone, onMarkTrainingDone }: any) {
   if (step.step_key === "welcome") return (
     <div className="space-y-4">
       <p className="text-sm">🎬 Découvrez l'équipe, nos valeurs et votre rôle dans cette aventure.</p>
@@ -547,8 +549,10 @@ function StepContent({ step, contract, docs, trainings = [], uploading, onUpload
 
   if (step.step_key === "training") {
     const allDone = trainings.length > 0 && trainings.every((t: any) => t.completed_at);
+    const gamifKey = trainings.filter((t: any) => t.quiz_passed).length;
     return (
       <div className="space-y-4">
+        {userId && <GamificationWidget userId={userId} refreshKey={gamifKey} />}
         {trainings.length === 0 ? (
           <div className="p-6 bg-white rounded-lg border text-center text-sm text-muted-foreground">
             <GraduationCap className="h-8 w-8 mx-auto mb-2 opacity-50" />
