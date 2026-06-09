@@ -799,6 +799,7 @@ function GroupsManager({
         initialSelected={new Set(groupTrainingIds)}
         onSave={saveGroupTrainings}
       />
+      {confirmDialog}
     </div>
   );
 }
