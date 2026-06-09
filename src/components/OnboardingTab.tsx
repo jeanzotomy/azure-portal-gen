@@ -66,7 +66,7 @@ export default function OnboardingTab({ user }: { user: SupaUser }) {
       supabase.from("onboarding_steps").select("*").eq("process_id", proc.id).order("step_order"),
       supabase.from("onboarding_documents").select("*").eq("process_id", proc.id).order("uploaded_at", { ascending: false }),
       supabase.from("onboarding_contracts").select("*").eq("process_id", proc.id).order("uploaded_at", { ascending: false }).limit(1).maybeSingle(),
-      supabase.from("onboarding_assigned_trainings").select("id, training_id, completed_at, quiz_score, quiz_passed, quiz_submitted_at, training:trainings(title, description, url, duration_minutes, category, content, quiz, passing_score)").eq("process_id", proc.id),
+      supabase.from("onboarding_assigned_trainings").select("id, training_id, completed_at, quiz_score, quiz_passed, quiz_submitted_at, course_page, quiz_page, quiz_draft_answers, quiz_answers, training:trainings(title, description, url, duration_minutes, category, content, quiz, passing_score)").eq("process_id", proc.id),
     ]);
     setSteps((stepsData || []) as any);
     setDocs((docsData || []) as any);
@@ -615,10 +615,16 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
   if (content.conclusion || content.resources?.length) coursePages.push({ kind: "conclusion" });
 
   const [expanded, setExpanded] = useState(false);
-  const [coursePage, setCoursePage] = useState(0);
+  const [coursePage, setCoursePage] = useState<number>(Math.min(assigned.course_page ?? 0, Math.max(0, coursePages.length - 1)));
   const [quizOpen, setQuizOpen] = useState(false);
-  const [quizPage, setQuizPage] = useState(0);
-  const [answers, setAnswers] = useState<Record<number, number>>({});
+  const [quizPage, setQuizPage] = useState<number>(assigned.quiz_page ?? 0);
+  const [answers, setAnswers] = useState<Record<number, number>>(() => {
+    const draft = assigned.quiz_draft_answers && typeof assigned.quiz_draft_answers === "object" ? assigned.quiz_draft_answers : {};
+    // normalize keys to numbers
+    const out: Record<number, number> = {};
+    Object.entries(draft).forEach(([k, v]) => { if (typeof v === "number") out[Number(k)] = v; });
+    return out;
+  });
   const [submitting, setSubmitting] = useState(false);
   const [result, setResult] = useState<{ score: number; passed: boolean } | null>(
     assigned.quiz_score != null ? { score: assigned.quiz_score, passed: !!assigned.quiz_passed } : null,
@@ -628,6 +634,20 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
   const currentQ = questions[quizPage];
   const currentAnswered = currentQ ? answers[quizPage] != null : false;
   const allAnswered = questions.length > 0 && questions.every((_, i) => answers[i] != null);
+
+  // Debounced save of progress (course page, quiz page, draft answers)
+  const lastSavedRef = useRef<string>("");
+  useEffect(() => {
+    if (assigned.completed_at) return;
+    const payload = { course_page: coursePage, quiz_page: quizPage, quiz_draft_answers: answers, last_activity_at: new Date().toISOString() };
+    const key = JSON.stringify({ c: coursePage, q: quizPage, a: answers });
+    if (key === lastSavedRef.current) return;
+    const handle = setTimeout(async () => {
+      lastSavedRef.current = key;
+      await (supabase.from("onboarding_assigned_trainings") as any).update(payload).eq("id", assigned.id);
+    }, 600);
+    return () => clearTimeout(handle);
+  }, [coursePage, quizPage, answers, assigned.id, assigned.completed_at]);
 
   const submitQuiz = async () => {
     if (!hasQuiz) return;
@@ -643,6 +663,8 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
     const { error } = await (supabase.from("onboarding_assigned_trainings") as any).update({
       quiz_score: score, quiz_passed: passed, quiz_answers: answers, quiz_submitted_at: new Date().toISOString(),
       completed_at: passed ? new Date().toISOString() : null,
+      quiz_draft_answers: passed ? {} : answers,
+      quiz_page: passed ? 0 : quizPage,
     }).eq("id", assigned.id);
     setSubmitting(false);
     if (error) return toast.error(error.message);
@@ -657,8 +679,11 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
   };
 
   const openQuiz = () => {
-    setAnswers({});
-    setQuizPage(0);
+    // Resume where left: keep draft answers & last quiz page unless already completed
+    if (assigned.completed_at) {
+      setAnswers({});
+      setQuizPage(0);
+    }
     setQuizOpen(true);
   };
 

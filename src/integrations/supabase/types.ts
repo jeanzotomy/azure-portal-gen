@@ -425,10 +425,14 @@ export type Database = {
           assigned_at: string
           assigned_by: string
           completed_at: string | null
+          course_page: number
           id: string
+          last_activity_at: string | null
           notes: string | null
           process_id: string
           quiz_answers: Json | null
+          quiz_draft_answers: Json
+          quiz_page: number
           quiz_passed: boolean | null
           quiz_score: number | null
           quiz_submitted_at: string | null
@@ -439,10 +443,14 @@ export type Database = {
           assigned_at?: string
           assigned_by: string
           completed_at?: string | null
+          course_page?: number
           id?: string
+          last_activity_at?: string | null
           notes?: string | null
           process_id: string
           quiz_answers?: Json | null
+          quiz_draft_answers?: Json
+          quiz_page?: number
           quiz_passed?: boolean | null
           quiz_score?: number | null
           quiz_submitted_at?: string | null
@@ -453,10 +461,14 @@ export type Database = {
           assigned_at?: string
           assigned_by?: string
           completed_at?: string | null
+          course_page?: number
           id?: string
+          last_activity_at?: string | null
           notes?: string | null
           process_id?: string
           quiz_answers?: Json | null
+          quiz_draft_answers?: Json
+          quiz_page?: number
           quiz_passed?: boolean | null
           quiz_score?: number | null
           quiz_submitted_at?: string | null
