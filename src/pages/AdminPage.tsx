@@ -704,6 +704,7 @@ function AdminContent() {
           {tab === "hr-contracts" && <HrTab defaultTab="contracts" />}
           {tab === "hr-onboarding" && <HrTab defaultTab="onboarding" />}
           {tab === "hr-trainings" && <HrTab defaultTab="trainings" />}
+          {tab === "hr-employee-trainings" && <EmployeeTrainingManager />}
         </main>
       </div>
       <ProfileSignatureDialog open={signatureOpen} onOpenChange={setSignatureOpen} />
