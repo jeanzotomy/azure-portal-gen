@@ -627,6 +627,7 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
     return out;
   });
   const [submitting, setSubmitting] = useState(false);
+  const [showResults, setShowResults] = useState(false);
   const [result, setResult] = useState<{ score: number; passed: boolean } | null>(
     assigned.quiz_score != null ? { score: assigned.quiz_score, passed: !!assigned.quiz_passed } : null,
   );
