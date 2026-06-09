@@ -619,7 +619,7 @@ function StepContent({ step, contract, docs, trainings = [], uploading, userId, 
 }
 
 /* =================== TRAINING PLAYER (paginated course + paginated QCM) =================== */
-function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: () => void }) {
+function TrainingPlayer({ assigned, userId, onComplete }: { assigned: any; userId?: string | null; onComplete: () => void }) {
   const t = assigned.training;
   const content = t?.content || {};
   const modules: any[] = content.modules || [];
