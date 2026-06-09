@@ -636,8 +636,13 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
   const [result, setResult] = useState<{ score: number; passed: boolean } | null>(
     assigned.quiz_score != null ? { score: assigned.quiz_score, passed: !!assigned.quiz_passed } : null,
   );
+  const [tutorOpen, setTutorOpen] = useState(false);
+  const [adaptiveQuestions, setAdaptiveQuestions] = useState<any[] | null>(null);
+  const [adaptiveDifficulty, setAdaptiveDifficulty] = useState<string>("");
+  const [loadingAdaptive, setLoadingAdaptive] = useState(false);
 
-  const questions: any[] = hasQuiz ? t.quiz.questions : [];
+  const baseQuestions: any[] = hasQuiz ? t.quiz.questions : [];
+  const questions: any[] = adaptiveQuestions ?? baseQuestions;
   const currentQ = questions[quizPage];
   const currentAnswered = currentQ ? answers[quizPage] != null : false;
   const allAnswered = questions.length > 0 && questions.every((_, i) => answers[i] != null);
