@@ -18,9 +18,11 @@ if (typeof document !== "undefined" && window.matchMedia("(min-width: 768px)").m
 }
 
 createRoot(document.getElementById("root")!).render(
-  <LanguageProvider>
-    <AuthSessionProvider>
-      <App />
-    </AuthSessionProvider>
-  </LanguageProvider>
+  <HelmetProvider>
+    <LanguageProvider>
+      <AuthSessionProvider>
+        <App />
+      </AuthSessionProvider>
+    </LanguageProvider>
+  </HelmetProvider>
 );
