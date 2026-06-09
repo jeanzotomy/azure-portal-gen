@@ -132,8 +132,15 @@ function PortalContent() {
                 {navItems.map((item) => (
                   <SidebarMenuItem key={item.id}>
                     <SidebarMenuButton
-                      onClick={() => setTab(item.id)}
-                      isActive={tab === item.id}
+                      onClick={() => {
+                        if (item.id === "my-trainings") {
+                          navigate("/portal/formations");
+                        } else {
+                          if (isFormationsRoute) navigate("/portal");
+                          setTab(item.id);
+                        }
+                      }}
+                      isActive={item.id === "my-trainings" ? isFormationsRoute : (tab === item.id && !isFormationsRoute)}
                       tooltip={item.label}
                       className="gap-3"
                     >
