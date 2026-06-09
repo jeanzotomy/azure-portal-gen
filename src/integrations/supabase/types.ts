@@ -1878,6 +1878,30 @@ export type Database = {
         }
         Relationships: []
       }
+      verify_attempts: {
+        Row: {
+          attempted_at: string
+          code: string | null
+          id: number
+          ip: string
+          ok: boolean
+        }
+        Insert: {
+          attempted_at?: string
+          code?: string | null
+          id?: number
+          ip: string
+          ok?: boolean
+        }
+        Update: {
+          attempted_at?: string
+          code?: string | null
+          id?: number
+          ip?: string
+          ok?: boolean
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
