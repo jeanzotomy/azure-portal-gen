@@ -16,6 +16,7 @@ import {
   GraduationCap, Plus, Pencil, Trash2, ExternalLink, Loader2, RefreshCw, Users, Sparkles, CheckCircle2, Clock,
   Brain, FileQuestion, Layers, UserPlus, Wand2, BookOpen,
 } from "lucide-react";
+import { TrainingMediaEditor, type MediaCapsule } from "./TrainingMediaEditor";
 
 interface Training {
   id: string;
@@ -412,35 +413,78 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
             </div>
             <div><Label>URL externe (optionnel si contenu généré)</Label><Input value={form.url} onChange={e => setForm({ ...form, url: e.target.value })} placeholder="https://..." /></div>
 
-            {form.content && (
-              <Card className="p-3 bg-muted/30">
-                <div className="flex items-center gap-2 text-sm font-semibold mb-2"><BookOpen className="h-4 w-4 text-primary" />Contenu généré</div>
-                {form.content.objectives?.length > 0 && (
-                  <div className="text-xs mb-2">
-                    <span className="font-medium">Objectifs : </span>
-                    <span className="text-muted-foreground">{form.content.objectives.join(" · ")}</span>
+            {(() => {
+              const c = form.content || {};
+              const updateContent = (patch: any) => setForm({ ...form, content: { ...(form.content || {}), ...patch } });
+              const updateModule = (i: number, patch: any) => {
+                const modules = [...(c.modules || [])];
+                modules[i] = { ...modules[i], ...patch };
+                updateContent({ modules });
+              };
+              const hasStructured = (c.modules?.length || 0) > 0 || c.introduction || c.conclusion;
+              return (
+                <Card className="p-3 bg-muted/30 space-y-3">
+                  <div className="flex items-center gap-2 text-sm font-semibold">
+                    <BookOpen className="h-4 w-4 text-primary" />
+                    Contenu & capsules d'illustration
                   </div>
-                )}
-                <div className="space-y-2 text-xs max-h-60 overflow-y-auto">
-                  {form.content.introduction && (
-                    <div className="text-muted-foreground italic">{form.content.introduction}</div>
+                  {c.objectives?.length > 0 && (
+                    <div className="text-xs">
+                      <span className="font-medium">Objectifs : </span>
+                      <span className="text-muted-foreground">{c.objectives.join(" · ")}</span>
+                    </div>
                   )}
-                  {(form.content.modules || []).map((m: any, i: number) => (
-                    <div key={i} className="border-l-2 border-primary/30 pl-2">
-                      <div className="font-medium">{m.title}</div>
-                      {m.sections?.length > 0 ? (
-                        <div className="text-muted-foreground">{m.sections.length} section(s) rédigée(s) · {m.key_points?.length || 0} points clés</div>
-                      ) : (
-                        <div className="text-muted-foreground">{m.key_points?.length || 0} points</div>
+
+                  {hasStructured ? (
+                    <div className="space-y-3">
+                      {(c.introduction || c.objectives?.length) && (
+                        <div className="space-y-1">
+                          <div className="text-xs font-medium">Introduction</div>
+                          {c.introduction && <p className="text-xs text-muted-foreground italic line-clamp-3">{c.introduction}</p>}
+                          <TrainingMediaEditor
+                            label="Capsules pour l'introduction"
+                            items={(c.intro_media || []) as MediaCapsule[]}
+                            onChange={(next) => updateContent({ intro_media: next })}
+                          />
+                        </div>
+                      )}
+                      {(c.modules || []).map((m: any, i: number) => (
+                        <div key={i} className="border-l-2 border-primary/30 pl-3 space-y-1">
+                          <div className="text-xs font-medium">Module {i + 1} — {m.title}</div>
+                          {m.sections?.length > 0 ? (
+                            <div className="text-xs text-muted-foreground">{m.sections.length} section(s) · {m.key_points?.length || 0} points clés</div>
+                          ) : (
+                            <div className="text-xs text-muted-foreground">{m.key_points?.length || 0} points</div>
+                          )}
+                          <TrainingMediaEditor
+                            label={`Capsules pour le module ${i + 1}`}
+                            items={(m.media || []) as MediaCapsule[]}
+                            onChange={(next) => updateModule(i, { media: next })}
+                          />
+                        </div>
+                      ))}
+                      {(c.conclusion || c.resources?.length) && (
+                        <div className="space-y-1">
+                          <div className="text-xs font-medium">Conclusion</div>
+                          {c.conclusion && <p className="text-xs text-muted-foreground italic line-clamp-2">{c.conclusion}</p>}
+                          <TrainingMediaEditor
+                            label="Capsules pour la conclusion"
+                            items={(c.conclusion_media || []) as MediaCapsule[]}
+                            onChange={(next) => updateContent({ conclusion_media: next })}
+                          />
+                        </div>
                       )}
                     </div>
-                  ))}
-                  {form.content.conclusion && (
-                    <div className="text-muted-foreground italic">Conclusion : {form.content.conclusion.slice(0, 120)}…</div>
+                  ) : (
+                    <TrainingMediaEditor
+                      label="Capsules d'illustration (images / vidéos YouTube)"
+                      items={(c.standalone_media || []) as MediaCapsule[]}
+                      onChange={(next) => updateContent({ standalone_media: next })}
+                    />
                   )}
-                </div>
-              </Card>
-            )}
+                </Card>
+              );
+            })()}
             {form.quiz?.questions?.length > 0 && (
               <Card className="p-3 bg-muted/30">
                 <div className="flex items-center gap-2 text-sm font-semibold mb-2"><FileQuestion className="h-4 w-4 text-primary" />QCM ({form.quiz.questions.length} questions)</div>

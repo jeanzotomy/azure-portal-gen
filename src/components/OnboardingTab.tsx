@@ -12,6 +12,7 @@ import {
   XCircle, ShieldAlert, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { SignaturePad } from "@/components/SignaturePad";
+import { MediaCapsuleList } from "@/components/hr/TrainingMediaEditor";
 import type { User as SupaUser } from "@supabase/supabase-js";
 
 const STEP_ICONS: Record<string, any> = {
@@ -604,15 +605,15 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
   const t = assigned.training;
   const content = t?.content || {};
   const modules: any[] = content.modules || [];
-  const hasContent = modules.length > 0 || !!content.introduction || !!content.conclusion;
+  const hasContent = modules.length > 0 || !!content.introduction || !!content.conclusion || (content.intro_media?.length || 0) > 0 || (content.conclusion_media?.length || 0) > 0 || (content.standalone_media?.length || 0) > 0;
   const hasQuiz = !!(t?.quiz?.questions?.length);
   const passingScore = t?.passing_score || 70;
 
   // Build course pages: intro -> each module -> conclusion -> resources
   const coursePages: { kind: string; data?: any }[] = [];
-  if (content.objectives?.length || content.introduction) coursePages.push({ kind: "intro" });
+  if (content.objectives?.length || content.introduction || content.intro_media?.length || content.standalone_media?.length) coursePages.push({ kind: "intro" });
   modules.forEach((m, i) => coursePages.push({ kind: "module", data: { ...m, idx: i } }));
-  if (content.conclusion || content.resources?.length) coursePages.push({ kind: "conclusion" });
+  if (content.conclusion || content.resources?.length || content.conclusion_media?.length) coursePages.push({ kind: "conclusion" });
 
   const [expanded, setExpanded] = useState(false);
   const [coursePage, setCoursePage] = useState<number>(Math.min(assigned.course_page ?? 0, Math.max(0, coursePages.length - 1)));
@@ -703,6 +704,8 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
               <p className="text-sm leading-relaxed whitespace-pre-line">{content.introduction}</p>
             </div>
           )}
+          <MediaCapsuleList items={content.intro_media} />
+          <MediaCapsuleList items={content.standalone_media} />
         </div>
       );
     }
@@ -718,6 +721,7 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
               {s.body && <p className="text-sm leading-relaxed whitespace-pre-line">{s.body}</p>}
             </div>
           ))}
+          <MediaCapsuleList items={m.media} />
           {m.example && (
             <div className="bg-primary/5 border border-primary/20 rounded p-2 text-xs">
               <span className="font-semibold">Exemple : </span>{m.example}
@@ -741,6 +745,7 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
               <p className="text-sm leading-relaxed whitespace-pre-line">{content.conclusion}</p>
             </div>
           )}
+          <MediaCapsuleList items={content.conclusion_media} />
           {content.resources?.length > 0 && (
             <div>
               <div className="font-semibold text-xs uppercase text-muted-foreground mb-1">Ressources complémentaires</div>
