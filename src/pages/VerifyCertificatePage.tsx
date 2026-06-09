@@ -1,9 +1,12 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
+import { Helmet } from "react-helmet-async";
 import { supabase } from "@/integrations/supabase/client";
 import { Card, CardContent } from "@/components/ui/card";
-import { CheckCircle2, XCircle, ShieldCheck, Loader2, Calendar, User, GraduationCap, Award } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { CheckCircle2, XCircle, ShieldCheck, Loader2, Calendar, User, GraduationCap, Award, Share2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { CertificateShareDialog } from "@/components/onboarding/CertificateShareDialog";
 
 type Cert = {
   verification_code: string;
@@ -14,14 +17,16 @@ type Cert = {
   expires_at: string | null;
 };
 
+const APP_URL = "https://cloudmature.com";
+
 export default function VerifyCertificatePage() {
   const { code } = useParams();
   const [cert, setCert] = useState<Cert | null>(null);
   const [valid, setValid] = useState<boolean | null>(null);
   const [loading, setLoading] = useState(true);
+  const [shareOpen, setShareOpen] = useState(false);
 
   useEffect(() => {
-    document.title = `Vérification certificat | CloudMature`;
     (async () => {
       const safeCode = (code || "").trim().toUpperCase();
       const { data, error } = await supabase.functions.invoke("verify-certificate", {
@@ -37,8 +42,30 @@ export default function VerifyCertificatePage() {
     })();
   }, [code]);
 
+  const pageTitle = cert
+    ? `Certificat de ${cert.candidate_name} — ${cert.training_title} | CloudMature`
+    : "Vérification certificat | CloudMature";
+  const pageDesc = cert
+    ? `${cert.candidate_name} a validé la formation « ${cert.training_title} » avec CloudMature. Authenticité vérifiée — code ${cert.verification_code}.`
+    : "Vérifiez l'authenticité d'un certificat de formation délivré par CloudMature.";
+  const canonical = `${APP_URL}/verify/${(code || "").toUpperCase()}`;
+
   return (
     <main className="min-h-screen bg-gradient-to-br from-slate-50 to-blue-50 px-4 py-10">
+      <Helmet>
+        <title>{pageTitle}</title>
+        <meta name="description" content={pageDesc} />
+        <link rel="canonical" href={canonical} />
+        <meta property="og:title" content={pageTitle} />
+        <meta property="og:description" content={pageDesc} />
+        <meta property="og:url" content={canonical} />
+        <meta property="og:type" content="profile" />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageTitle} />
+        <meta name="twitter:description" content={pageDesc} />
+        {valid === false && <meta name="robots" content="noindex,nofollow" />}
+      </Helmet>
+
       <div className="max-w-2xl mx-auto">
         <Link to="/" className="text-sm text-primary hover:underline">← Retour à CloudMature</Link>
         <header className="mt-4 mb-6 text-center">
@@ -83,11 +110,20 @@ export default function VerifyCertificatePage() {
                     <Row icon={<Calendar className="h-4 w-4 text-primary" />} label="Expire le"
                       value={new Date(cert.expires_at).toLocaleDateString("fr-FR")} />
                   )}
-                  <div className="pt-2 flex items-center gap-2">
+                  <div className="pt-2 flex items-center gap-2 flex-wrap">
                     <Badge variant="outline" className="font-mono text-[10px]">{cert.verification_code}</Badge>
                     <Badge className="bg-emerald-100 text-emerald-700 border-emerald-300">Valide</Badge>
                   </div>
                 </dl>
+
+                <div className="mt-6 pt-6 border-t flex flex-wrap gap-2 justify-center">
+                  <Button
+                    onClick={() => setShareOpen(true)}
+                    className="bg-gradient-to-r from-primary to-[#007aa3] text-white"
+                  >
+                    <Share2 className="h-4 w-4 mr-2" /> Partager ce certificat
+                  </Button>
+                </div>
               </>
             )}
           </CardContent>
@@ -97,6 +133,38 @@ export default function VerifyCertificatePage() {
           Pour des raisons de sécurité, aucune information n'est divulguée pour les codes invalides.
         </p>
       </div>
+
+      {cert && (
+        <CertificateShareDialog
+          open={shareOpen}
+          onOpenChange={setShareOpen}
+          data={{
+            verification_code: cert.verification_code,
+            candidate_name: cert.candidate_name,
+            training_title: cert.training_title,
+            score: cert.score,
+            issued_at: cert.issued_at,
+          }}
+        />
+      )}
+
+      {cert && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "EducationalOccupationalCredential",
+              name: cert.training_title,
+              credentialCategory: "Certificate",
+              recognizedBy: { "@type": "Organization", name: "CloudMature", url: APP_URL },
+              dateCreated: cert.issued_at,
+              identifier: cert.verification_code,
+              url: canonical,
+            }),
+          }}
+        />
+      )}
     </main>
   );
 }

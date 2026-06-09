@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import {
   CheckCircle2, Circle, Clock, FileSignature, FileUp, GraduationCap,
   Laptop, Users, PartyPopper, Sparkles, Download, Loader2, AlertCircle, RefreshCw, Lock,
-  XCircle, ShieldAlert, ChevronLeft, ChevronRight, Bot, Brain, Timer, PenLine, Youtube, Award,
+  XCircle, ShieldAlert, ChevronLeft, ChevronRight, Bot, Brain, Timer, PenLine, Youtube, Award, Share2,
 } from "lucide-react";
 
 const fmtTime = (s: number) => {
@@ -25,6 +25,7 @@ import { TrainingTutor } from "@/components/onboarding/TrainingTutor";
 import { TrainingComments } from "@/components/onboarding/TrainingComments";
 import { MentionsBell } from "@/components/onboarding/MentionsBell";
 import { CohortActivityFeed } from "@/components/onboarding/CohortActivityFeed";
+import { CertificateShareDialog } from "@/components/onboarding/CertificateShareDialog";
 import type { User as SupaUser } from "@supabase/supabase-js";
 
 const STEP_ICONS: Record<string, any> = {
@@ -1263,7 +1264,16 @@ function TrainingPlayer({ assigned, userId, onComplete }: { assigned: any; userI
 
 function CertificateButton({ assignedId }: { assignedId: string }) {
   const [loading, setLoading] = useState(false);
-  const handle = async () => {
+  const [cert, setCert] = useState<{
+    verification_code: string;
+    candidate_name: string;
+    training_title: string;
+    score: number | null;
+    issued_at: string;
+  } | null>(null);
+  const [shareOpen, setShareOpen] = useState(false);
+
+  const issue = async (openPdf: boolean) => {
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("issue-training-certificate", {
@@ -1271,20 +1281,63 @@ function CertificateButton({ assignedId }: { assignedId: string }) {
       });
       if (error) throw error;
       const url = (data as any)?.url;
-      if (!url) throw new Error("Lien introuvable");
-      window.open(url, "_blank", "noopener");
-      toast.success("Certificat prêt !");
+      const c = (data as any)?.certificate;
+      if (c) {
+        setCert({
+          verification_code: c.verification_code,
+          candidate_name: c.candidate_name,
+          training_title: c.training_title,
+          score: c.score ?? null,
+          issued_at: c.issued_at || new Date().toISOString(),
+        });
+      }
+      if (openPdf) {
+        if (!url) throw new Error("Lien introuvable");
+        window.open(url, "_blank", "noopener");
+        toast.success("Certificat prêt !");
+      }
+      return c;
     } catch (e: any) {
       toast.error(e?.message || "Impossible de générer le certificat");
+      return null;
     } finally {
       setLoading(false);
     }
   };
+
+  const handlePdf = () => issue(true);
+  const handleShare = async () => {
+    if (!cert) {
+      const c = await issue(false);
+      if (!c) return;
+    }
+    setShareOpen(true);
+  };
+
   return (
-    <Button size="sm" onClick={handle} disabled={loading} className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white">
-      {loading ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Award className="h-3 w-3 mr-1" />}
-      Certificat PDF
-    </Button>
+    <>
+      <Button
+        size="sm"
+        onClick={handlePdf}
+        disabled={loading}
+        className="bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white"
+      >
+        {loading ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Award className="h-3 w-3 mr-1" />}
+        Certificat PDF
+      </Button>
+      <Button
+        size="sm"
+        variant="outline"
+        onClick={handleShare}
+        disabled={loading}
+        className="border-amber-500/40 text-amber-700 hover:bg-amber-50"
+      >
+        <Share2 className="h-3 w-3 mr-1" /> Partager
+      </Button>
+      {cert && (
+        <CertificateShareDialog open={shareOpen} onOpenChange={setShareOpen} data={cert} />
+      )}
+    </>
   );
 }
 

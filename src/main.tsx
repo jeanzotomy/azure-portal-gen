@@ -1,4 +1,5 @@
 import { createRoot } from "react-dom/client";
+import { HelmetProvider } from "react-helmet-async";
 import App from "./App.tsx";
 import "./index.css";
 import { LanguageProvider } from "./i18n/LanguageContext";
@@ -17,9 +18,11 @@ if (typeof document !== "undefined" && window.matchMedia("(min-width: 768px)").m
 }
 
 createRoot(document.getElementById("root")!).render(
-  <LanguageProvider>
-    <AuthSessionProvider>
-      <App />
-    </AuthSessionProvider>
-  </LanguageProvider>
+  <HelmetProvider>
+    <LanguageProvider>
+      <AuthSessionProvider>
+        <App />
+      </AuthSessionProvider>
+    </LanguageProvider>
+  </HelmetProvider>
 );
