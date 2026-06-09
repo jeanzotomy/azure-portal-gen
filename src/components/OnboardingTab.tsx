@@ -66,7 +66,7 @@ export default function OnboardingTab({ user }: { user: SupaUser }) {
       supabase.from("onboarding_steps").select("*").eq("process_id", proc.id).order("step_order"),
       supabase.from("onboarding_documents").select("*").eq("process_id", proc.id).order("uploaded_at", { ascending: false }),
       supabase.from("onboarding_contracts").select("*").eq("process_id", proc.id).order("uploaded_at", { ascending: false }).limit(1).maybeSingle(),
-      supabase.from("onboarding_assigned_trainings").select("id, training_id, completed_at, quiz_score, quiz_passed, quiz_submitted_at, training:trainings(title, description, url, duration_minutes, category, content, quiz, passing_score)").eq("process_id", proc.id),
+      supabase.from("onboarding_assigned_trainings").select("id, training_id, completed_at, quiz_score, quiz_passed, quiz_submitted_at, course_page, quiz_page, quiz_draft_answers, quiz_answers, training:trainings(title, description, url, duration_minutes, category, content, quiz, passing_score)").eq("process_id", proc.id),
     ]);
     setSteps((stepsData || []) as any);
     setDocs((docsData || []) as any);
