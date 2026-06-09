@@ -200,11 +200,19 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
     load();
   };
 
-  const remove = async (id: string) => {
-    if (!confirm("Supprimer cette formation ?")) return;
-    const { error } = await supabase.from("trainings").delete().eq("id", id);
-    if (error) return toast.error(error.message);
-    load();
+  const remove = (id: string) => {
+    confirm({
+      title: "Supprimer cette formation ?",
+      description: "Cette action est irréversible. Les assignations liées seront également supprimées.",
+      variant: "destructive",
+      confirmLabel: "Supprimer",
+      onConfirm: async () => {
+        const { error } = await supabase.from("trainings").delete().eq("id", id);
+        if (error) return toast.error(error.message);
+        toast.success("Formation supprimée");
+        load();
+      },
+    });
   };
 
   const openAssign = (c: CandidateRow) => {
