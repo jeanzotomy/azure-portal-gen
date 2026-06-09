@@ -663,7 +663,7 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
   }, [coursePage, quizPage, answers, assigned.id, assigned.completed_at, adaptiveQuestions]);
 
   const submitQuiz = async () => {
-    if (!hasQuiz) return;
+    if (questions.length === 0) return;
     if (!allAnswered) {
       toast.error("Répondez à toutes les questions");
       return;
@@ -673,33 +673,63 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
     questions.forEach((q, i) => { if (answers[i] === q.correct_index) correct++; });
     const score = Math.round((correct / questions.length) * 100);
     const passed = score >= passingScore;
-    const { error } = await (supabase.from("onboarding_assigned_trainings") as any).update({
-      quiz_score: score, quiz_passed: passed, quiz_answers: answers, quiz_submitted_at: new Date().toISOString(),
-      completed_at: passed ? new Date().toISOString() : null,
-      quiz_draft_answers: passed ? {} : answers,
-      quiz_page: passed ? 0 : quizPage,
-    }).eq("id", assigned.id);
+    const inAdaptive = !!adaptiveQuestions;
+
+    // In adaptive mode: only update completion if passed; never overwrite the original
+    // quiz_answers/score with the rattrapage scoring.
+    const update: any = inAdaptive
+      ? (passed ? { quiz_passed: true, completed_at: new Date().toISOString(), quiz_draft_answers: {}, quiz_page: 0 } : {})
+      : {
+          quiz_score: score, quiz_passed: passed, quiz_answers: answers, quiz_submitted_at: new Date().toISOString(),
+          completed_at: passed ? new Date().toISOString() : null,
+          quiz_draft_answers: passed ? {} : answers,
+          quiz_page: passed ? 0 : quizPage,
+        };
+
+    if (Object.keys(update).length > 0) {
+      const { error } = await (supabase.from("onboarding_assigned_trainings") as any).update(update).eq("id", assigned.id);
+      if (error) { setSubmitting(false); return toast.error(error.message); }
+    }
     setSubmitting(false);
-    if (error) return toast.error(error.message);
     setResult({ score, passed });
     setShowResults(true);
-    if (passed) {
-      toast.success(`QCM réussi (${score}%)`);
-    } else {
-      toast.error(`Score ${score}% — minimum requis ${passingScore}%. Vous pouvez réessayer.`);
-    }
+    if (passed) toast.success(inAdaptive ? `Rattrapage réussi (${score}%) 🎉` : `QCM réussi (${score}%)`);
+    else toast.error(`Score ${score}% — minimum requis ${passingScore}%.`);
   };
 
   const closeResults = () => {
     setShowResults(false);
     setQuizOpen(false);
+    setAdaptiveQuestions(null);
     if (result?.passed) onComplete();
   };
 
   const retryQuiz = () => {
     setShowResults(false);
+    setAdaptiveQuestions(null);
     setAnswers({});
     setQuizPage(0);
+  };
+
+  const startAdaptive = async () => {
+    setLoadingAdaptive(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("training-adaptive-quiz", {
+        body: { assignedId: assigned.id },
+      });
+      if (error) throw error;
+      if (!data?.questions?.length) throw new Error("Aucune question générée");
+      setAdaptiveQuestions(data.questions);
+      setAdaptiveDifficulty(data.difficulty || "");
+      setAnswers({});
+      setQuizPage(0);
+      setShowResults(false);
+      toast.success(`Mode adaptatif activé — ${data.questions.length} questions ciblées (${data.difficulty})`);
+    } catch (e: any) {
+      toast.error(e.message || "Erreur lors de la génération du rattrapage");
+    } finally {
+      setLoadingAdaptive(false);
+    }
   };
 
   const openQuiz = () => {
@@ -708,6 +738,7 @@ function TrainingPlayer({ assigned, onComplete }: { assigned: any; onComplete: (
       setAnswers({});
       setQuizPage(0);
     }
+    setAdaptiveQuestions(null);
     setShowResults(false);
     setQuizOpen(true);
   };
