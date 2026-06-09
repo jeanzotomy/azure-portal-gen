@@ -9,7 +9,7 @@ import { toast } from "sonner";
 import {
   CheckCircle2, Circle, Clock, FileSignature, FileUp, GraduationCap,
   Laptop, Users, PartyPopper, Sparkles, Download, Loader2, AlertCircle, RefreshCw, Lock,
-  XCircle, ShieldAlert, ChevronLeft, ChevronRight, Bot, Brain, Timer, PenLine, Youtube, Award,
+  XCircle, ShieldAlert, ChevronLeft, ChevronRight, Bot, Brain, Timer, PenLine, Youtube, Award, Share2,
 } from "lucide-react";
 
 const fmtTime = (s: number) => {
