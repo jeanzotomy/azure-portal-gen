@@ -1087,6 +1087,7 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto w-[95vw] sm:w-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2"><Briefcase size={18} /> Gérer les secteurs</DialogTitle>
+            <DialogDescription>Définissez les secteurs d'activité utilisés dans la sélection des offres.</DialogDescription>
           </DialogHeader>
           <div className="space-y-5 pt-1">
             <FormSection
