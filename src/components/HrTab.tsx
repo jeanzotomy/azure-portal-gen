@@ -550,13 +550,19 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
         </div>
       </div>
 
-      <Tabs value={activeTab ?? defaultTab ?? "recruitment"} onValueChange={(v) => onTabChange?.(v as HrMainTab)} defaultValue={activeTab ? undefined : (defaultTab || "recruitment")}>
+      <Tabs value={activeTab ?? defaultTab ?? "dashboard"} onValueChange={(v) => onTabChange?.(v as HrMainTab)} defaultValue={activeTab ? undefined : (defaultTab || "dashboard")}>
         <TabsList className="flex flex-wrap h-auto">
+          <TabsTrigger value="dashboard"><LayoutDashboard size={14} className="mr-1" />Vue d'ensemble</TabsTrigger>
           <TabsTrigger value="recruitment"><Briefcase size={14} className="mr-1" />Recrutement</TabsTrigger>
           <TabsTrigger value="contracts"><FileSignature size={14} className="mr-1" />Contrats</TabsTrigger>
           <TabsTrigger value="trainings"><GraduationCap size={14} className="mr-1" />Formations</TabsTrigger>
           <TabsTrigger value="onboarding"><Users size={14} className="mr-1" />Onboarding</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="dashboard" className="mt-4">
+          <HrDashboardTab />
+        </TabsContent>
+
 
         <TabsContent value="recruitment" className="mt-4">
           <Tabs defaultValue="jobs">
