@@ -115,7 +115,7 @@ type HrMainTab = "recruitment" | "contracts" | "trainings" | "onboarding";
 export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTab, onTabChange }: { onboardingReadOnly?: boolean; defaultTab?: HrMainTab; activeTab?: HrMainTab; onTabChange?: (t: HrMainTab) => void } = {}) {
   const { user } = useAuthSession();
   const { isAdmin } = useUserRoles();
-  const { toast } = useToast();
+  // toast is provided by the sonner adapter declared at module scope.
   const { confirm, dialog: confirmDialog } = useConfirm();
   const [jobs, setJobs] = useState<JobPosting[]>([]);
   const [applications, setApplications] = useState<JobApplication[]>([]);
