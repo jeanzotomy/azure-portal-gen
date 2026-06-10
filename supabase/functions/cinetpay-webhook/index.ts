@@ -1,5 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { checkPayment, corsHeaders, getCinetPayCreds, verifyIpnSignature } from "../_shared/cinetpay.ts";
+import { checkPayment, corsHeaders, loadCinetPayCreds, verifyIpnSignature } from "../_shared/cinetpay.ts";
 
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SERVICE_KEY = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
@@ -79,7 +79,7 @@ Deno.serve(async (req) => {
   const sb = createClient(SUPABASE_URL, SERVICE_KEY);
 
   try {
-    const creds = getCinetPayCreds();
+    const creds = await loadCinetPayCreds();
     if (!creds) {
       console.error("CinetPay creds missing in webhook");
       return new Response("Service unavailable", { status: 503 });

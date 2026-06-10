@@ -16,6 +16,7 @@ import {
   Webhook, Plus, ExternalLink,
 } from "lucide-react";
 import { toast } from "sonner";
+import CinetPayConfigCard from "./CinetPayConfigCard";
 
 const PROJECT_ID = "zwzazxebufydnaxezngx";
 const FUNCTIONS_BASE = `https://${PROJECT_ID}.supabase.co/functions/v1`;
@@ -231,6 +232,9 @@ export default function IntegrationsTab() {
           })}
         </CardContent>
       </Card>
+
+      {/* 1bis. CinetPay config */}
+      <CinetPayConfigCard />
 
       {/* 2. Webhooks entrants */}
       <Card>

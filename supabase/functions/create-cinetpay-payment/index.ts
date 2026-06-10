@@ -1,5 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { corsHeaders, getCinetPayCreds, initPayment, normalizeAmount, type CinetPayCurrency } from "../_shared/cinetpay.ts";
+import { corsHeaders, loadCinetPayCreds, initPayment, normalizeAmount, type CinetPayCurrency } from "../_shared/cinetpay.ts";
 
 type Kind = "saas_subscription" | "training" | "service_invoice" | "consulting_pack";
 
@@ -33,10 +33,15 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return new Response("Method not allowed", { status: 405, headers: corsHeaders });
 
   try {
-    const creds = getCinetPayCreds();
+    const creds = await loadCinetPayCreds();
     if (!creds) {
       return new Response(JSON.stringify({
-        error: "CinetPay non configuré. Les secrets CINETPAY_API_KEY, CINETPAY_SITE_ID et CINETPAY_SECRET_KEY doivent être renseignés."
+        error: "CinetPay non configuré. Renseignez API Key, Site ID et Secret Key dans Admin → Intégrations → CinetPay."
+      }), { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    if (!creds.enabled) {
+      return new Response(JSON.stringify({
+        error: "CinetPay est désactivé. Activez-le dans Admin → Intégrations → CinetPay."
       }), { status: 503, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
