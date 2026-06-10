@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/sidebar";
 import {
   LayoutDashboard, FolderOpen, LifeBuoy, Users, LogOut, Shield, Clock, CheckCircle2,
-  AlertCircle, Bell, ChevronDown, ChevronUp, MessageSquare, Search, Send, UserCog,
+  AlertCircle, Bell, ChevronDown, ChevronUp, MessageSquare, Search, Send, UserCog, Settings,
   Flag, DollarSign, Calendar, Filter, TrendingUp, Activity, BarChart3, PieChart, ShieldBan, ShieldCheck, Trash2, RefreshCw,
   Smartphone, Phone, X, UserCheck, UserPlus, Upload, FileSpreadsheet, Pencil,
   LayoutGrid, List as ListIcon, Table as TableIcon, MapPin, Mail, Download,
@@ -541,14 +541,21 @@ function AdminContent() {
   const [hrOpen, setHrOpen] = useState(true);
   useEffect(() => { if (isHrTab) setHrOpen(true); }, [isHrTab]);
 
+  const settingsGroup: { id: AdminTab; icon: typeof LayoutDashboard; label: string }[] = [
+    { id: "users", icon: Users, label: t("admin.users") },
+    { id: "seo", icon: Search, label: "SEO & AI Search" },
+  ];
+  const SETTINGS_TABS: AdminTab[] = ["users", "seo"];
+  const isSettingsTab = SETTINGS_TABS.includes(tab);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  useEffect(() => { if (isSettingsTab) setSettingsOpen(true); }, [isSettingsTab]);
+
   const allNavItems: { id: AdminTab; icon: typeof LayoutDashboard; label: string }[] = [
     { id: "dashboard", icon: LayoutDashboard, label: t("admin.overview") },
     { id: "projects", icon: FolderOpen, label: t("admin.projects") },
     { id: "sharepoint", icon: HardDrive, label: "SharePoint" },
     { id: "tickets", icon: LifeBuoy, label: t("admin.tickets") },
     { id: "contacts", icon: MessageSquare, label: t("admin.contacts") },
-    { id: "users", icon: Users, label: t("admin.users") },
-    { id: "seo", icon: Search, label: "SEO" },
     { id: "verify-certificates", icon: ShieldCheck, label: "Vérif. certificats" },
   ];
 
@@ -648,6 +655,33 @@ function AdminContent() {
                     </SidebarMenuSub>
                   )}
                 </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    onClick={() => {
+                      setSettingsOpen((v) => !v);
+                      if (!isSettingsTab) setTab("users");
+                    }}
+                    isActive={isSettingsTab}
+                    tooltip="Paramètres" data-keep-mobile-open="true"
+                    className="gap-3"
+                  >
+                    <Settings size={18} />
+                    <span className="flex-1 text-left">Paramètres</span>
+                    {settingsOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                  </SidebarMenuButton>
+                  {settingsOpen && (
+                    <SidebarMenuSub>
+                      {settingsGroup.map((s) => (
+                        <SidebarMenuSubItem key={s.id}>
+                          <SidebarMenuSubButton onClick={() => setTab(s.id)} isActive={tab === s.id} className="gap-2 cursor-pointer">
+                            <s.icon size={14} />
+                            <span>{s.label}</span>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  )}
+                </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
@@ -669,7 +703,7 @@ function AdminContent() {
           <div className="flex items-center gap-3">
             <SidebarTrigger />
             <h2 className="text-sm font-semibold text-card-foreground hidden sm:block">
-              {[...allNavItems, ...adminServicesGroup, ...hrGroup].find((n) => n.id === tab)?.label}
+              {[...allNavItems, ...adminServicesGroup, ...hrGroup, ...settingsGroup].find((n) => n.id === tab)?.label}
             </h2>
           </div>
           <div className="flex items-center gap-2">
