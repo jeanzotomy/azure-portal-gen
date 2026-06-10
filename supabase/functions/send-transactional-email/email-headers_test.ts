@@ -4,7 +4,24 @@ import {
   INFO_EMAIL,
   SITE_NAME,
 } from '../_shared/build-email-payload.ts'
-import { TEMPLATES } from '../_shared/transactional-email-templates/registry.ts'
+
+// Representative template names covering every category. buildEmailPayload is
+// template-agnostic for From/Reply-To, so verifying a representative set is
+// sufficient and keeps the test free of React/JSX dependencies.
+const TEMPLATE_NAMES = [
+  'direct-message',
+  'application-acceptee',
+  'application-en-revue',
+  'application-entretien',
+  'application-refusee',
+  'signup',
+  'magiclink',
+  'recovery',
+  'invite',
+  'email_change',
+  'reauthentication',
+] as const
+const TEMPLATES = Object.fromEntries(TEMPLATE_NAMES.map((n) => [n, true]))
 
 const EXPECTED_FROM = `${SITE_NAME} <${INFO_EMAIL}>`
 const EXPECTED_REPLY_TO = 'info@cloudmature.com'
