@@ -603,6 +603,30 @@ export type Database = {
         }
         Relationships: []
       }
+      mfa_verifications: {
+        Row: {
+          expires_at: string
+          id: string
+          method: string
+          user_id: string
+          verified_at: string
+        }
+        Insert: {
+          expires_at?: string
+          id?: string
+          method?: string
+          user_id: string
+          verified_at?: string
+        }
+        Update: {
+          expires_at?: string
+          id?: string
+          method?: string
+          user_id?: string
+          verified_at?: string
+        }
+        Relationships: []
+      }
       onboarding_assigned_trainings: {
         Row: {
           assigned_at: string
@@ -2234,6 +2258,7 @@ export type Database = {
         Args: { check_env?: string; user_uuid: string }
         Returns: boolean
       }
+      has_recent_sms_mfa: { Args: { _user_id?: string }; Returns: boolean }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -2333,6 +2358,48 @@ export type Database = {
           id: string
           tracking_id: string
         }[]
+      }
+      submit_training_quiz_attempt: {
+        Args: {
+          _assigned_id: string
+          _module_times: Json
+          _quiz_answers: Json
+          _quiz_open_answers: Json
+          _quiz_open_grades: Json
+          _quiz_passed: boolean
+          _quiz_score: number
+          _quiz_time_seconds: number
+          _total_seconds: number
+        }
+        Returns: {
+          assigned_at: string
+          assigned_by: string
+          completed_at: string | null
+          course_page: number
+          id: string
+          last_activity_at: string | null
+          module_times: Json
+          notes: string | null
+          process_id: string
+          quiz_answers: Json | null
+          quiz_draft_answers: Json
+          quiz_open_answers: Json | null
+          quiz_open_grades: Json | null
+          quiz_page: number
+          quiz_passed: boolean | null
+          quiz_score: number | null
+          quiz_submitted_at: string | null
+          quiz_time_seconds: number | null
+          source: string
+          total_seconds: number
+          training_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "onboarding_assigned_trainings"
+          isOneToOne: true
+          isSetofReturn: false
+        }
       }
       sync_premium_role_for_user: {
         Args: { _user_id: string }
