@@ -1,6 +1,8 @@
 // Shared helpers for CinetPay integration
 // Docs: https://docs.cinetpay.com/api/1.0-fr/checkout/initialisation
 
+import { createClient } from "npm:@supabase/supabase-js@2";
+
 export const CINETPAY_API_BASE = "https://api-checkout.cinetpay.com/v2";
 
 export type CinetPayCurrency = "GNF" | "XOF" | "XAF" | "CDF" | "USD" | "EUR";
@@ -9,20 +11,56 @@ export interface CinetPayCredentials {
   apiKey: string;
   siteId: string;
   secretKey: string;
+  enabled: boolean;
+  environment: "sandbox" | "live";
 }
 
+// Loads creds from DB (payment_provider_settings) with env fallback.
+// Returns null if disabled or incomplete.
+export async function loadCinetPayCreds(): Promise<CinetPayCredentials | null> {
+  const url = Deno.env.get("SUPABASE_URL");
+  const key = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
+  let apiKey = Deno.env.get("CINETPAY_API_KEY") || "";
+  let siteId = Deno.env.get("CINETPAY_SITE_ID") || "";
+  let secretKey = Deno.env.get("CINETPAY_SECRET_KEY") || "";
+  let enabled = false;
+  let environment: "sandbox" | "live" = "sandbox";
+
+  if (url && key) {
+    try {
+      const sb = createClient(url, key);
+      const { data } = await sb
+        .from("payment_provider_settings")
+        .select("enabled, environment, config")
+        .eq("provider", "cinetpay")
+        .maybeSingle();
+      if (data) {
+        enabled = !!data.enabled;
+        environment = (data.environment === "live" ? "live" : "sandbox");
+        const cfg = (data.config ?? {}) as Record<string, string>;
+        apiKey = cfg.api_key || apiKey;
+        siteId = cfg.site_id || siteId;
+        secretKey = cfg.secret_key || secretKey;
+      }
+    } catch (_) { /* ignore — fall back to env */ }
+  }
+
+  if (!apiKey || !siteId || !secretKey) return null;
+  return { apiKey, siteId, secretKey, enabled, environment };
+}
+
+// Back-compat sync helper (env-only). Prefer loadCinetPayCreds().
 export function getCinetPayCreds(): CinetPayCredentials | null {
   const apiKey = Deno.env.get("CINETPAY_API_KEY");
   const siteId = Deno.env.get("CINETPAY_SITE_ID");
   const secretKey = Deno.env.get("CINETPAY_SECRET_KEY");
   if (!apiKey || !siteId || !secretKey) return null;
-  return { apiKey, siteId, secretKey };
+  return { apiKey, siteId, secretKey, enabled: true, environment: "sandbox" };
 }
 
 // CinetPay requires CFA/GNF/CDF amounts to be multiples of 5.
 export function normalizeAmount(amount: number, currency: CinetPayCurrency): number {
   if (currency === "USD" || currency === "EUR") return Math.round(amount);
-  // Round to nearest multiple of 5
   return Math.round(amount / 5) * 5;
 }
 
@@ -41,8 +79,8 @@ export interface InitPaymentInput {
     phone?: string;
     address?: string;
     city?: string;
-    country?: string; // ISO 2 (GN, CI, CM, CD, ...)
-    state?: string;   // ISO 2
+    country?: string;
+    state?: string;
     zipCode?: string;
   };
   channels?: "ALL" | "MOBILE_MONEY" | "CREDIT_CARD" | "WALLET";
@@ -96,12 +134,6 @@ export async function checkPayment(creds: CinetPayCredentials, transactionId: st
   return { ok: res.ok, status: res.status, json };
 }
 
-// IPN signature verification (HMAC-SHA256).
-// CinetPay sends headers including `x-token` = HMAC of concatenated fields with the Secret Key.
-// Concatenation order per docs:
-// cpm_site_id + cpm_trans_id + cpm_trans_date + cpm_amount + cpm_currency + signature
-// + payment_method + cel_phone_num + cpm_phone_prefixe + cpm_language + cpm_version
-// + cpm_payment_config + cpm_page_action + cpm_custom + cpm_designation + cpm_error_message
 export async function verifyIpnSignature(
   secretKey: string,
   body: Record<string, unknown>,
