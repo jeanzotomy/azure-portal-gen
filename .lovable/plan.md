@@ -1,76 +1,55 @@
+## Problème
 
-## Vague 2 — Cohérence UX & architecture
+Sur `/pricing`, en GNF/XOF/XAF/CDF, l'appel à l'edge function `create-cinetpay-payment` renvoie **503** parce que CinetPay n'est pas configuré (ou désactivé) dans **Admin → Intégrations → CinetPay**. Le frontend affiche le message générique de Supabase « Edge Function returned a non-2xx status code » au lieu du vrai message renvoyé par la fonction (« CinetPay non configuré… »).
 
-### V2.1 — `HrTab` : `TabsTrigger` + `activeTab` contrôlé
-- Ajouter une `TabsList` avec `TabsTrigger` pour `recruitment / contracts / onboarding / trainings` (déjà géré côté `HrPortalPage`, mais `HrTab` doit accepter `value`/`onValueChange` cohérents).
-- Supprimer `key={sub}` dans `HrPortalPage` → passer `activeTab` + `onTabChange` en prop contrôlée (déjà en place mais le remontage forcé persiste). Vérifier qu'un seul `Tabs` orchestre l'état.
-- Wrapper `filteredJobs` / `filteredApps` dans `useMemo`.
+## Cause
 
-### V2.2 — Migration `useToast` → `sonner` dans `HrTab`
-- Remplacer tous les `toast({ title, description, variant })` par `toast.success(...) / toast.error(...)` (`import { toast } from "sonner"`).
-- Supprimer l'import `useToast`.
+Dans `src/hooks/useCinetPayCheckout.tsx`, on fait :
 
-### V2.3 — Token gradient partagé
-- Ajouter `--gradient-primary-deep: linear-gradient(135deg, hsl(var(--primary)), #007aa3)` dans `src/index.css`.
-- Étendre `tailwind.config.ts` avec `backgroundImage: { "gradient-primary-deep": "var(--gradient-primary-deep)" }`.
-- Remplacer dans `HrTab.tsx`, `ContractsTab.tsx`, `OnboardingAdminTab.tsx`, `TrainingsTab.tsx`, `OnboardingTab.tsx`, `EmployeeTrainingManager.tsx` toutes les occurrences `bg-gradient-to-r from-primary to-[#007aa3]` (et variantes inline) par `bg-gradient-primary-deep`.
+```ts
+const { data, error: invokeErr } = await supabase.functions.invoke(...)
+if (invokeErr) throw new Error(invokeErr.message);
+```
 
-### V2.4 — `DialogDescription` manquantes
-- Audit rapide des dialogs RH : ajouter `<DialogDescription>` quand manquant (warning Radix). Cibles probables : `HrTab` (dialog candidature), `OnboardingAdminTab` (dialog refus), `TrainingsTab` (dialog assignation).
+`supabase.functions.invoke` considère tout status ≥ 300 comme une erreur, met `data = null` et renvoie un `FunctionsHttpError` dont `.message` est le texte générique. Le **vrai** JSON (`{ error: "CinetPay non configuré..." }`) est dans `invokeErr.context.json()`.
 
-### V2.5 — `DialogTitle` blanc sur blanc dans `HrTab`
-- Wrapper l'en-tête concerné (lignes ~813-820) dans un `bg-gradient-primary-deep text-primary-foreground` cohérent.
+## Plan
 
----
+### 1. `src/hooks/useCinetPayCheckout.tsx` — afficher le vrai message d'erreur
 
-## Vague 3 — Innovations
+- Détecter `FunctionsHttpError` et lire `await invokeErr.context.json()` pour récupérer `error` (et `details` éventuel).
+- Fallback sur `invokeErr.message` si le body n'est pas du JSON.
+- Renvoyer cette erreur claire dans le state `error` du hook (déjà affiché en rouge sur `PricingPage`).
 
-### V3.1 — `HrSectionHeader` partagé
-- Créer `src/components/hr/HrSectionHeader.tsx` : titre + icône + compteur + actions (slot `right`) + bouton "Actualiser" optionnel.
-- Le brancher dans `ContractsTab`, `TrainingsTab`, `OnboardingAdminTab`, et le nouveau Dashboard.
+### 2. `src/pages/PricingPage.tsx` — meilleur affichage de l'erreur
 
-### V3.2 — Dashboard RH
-- Créer `src/components/hr/HrDashboardTab.tsx` :
-  - **4 KPI** (cards) : Candidatures du mois, Acceptées (taux), Onboarding en cours, Formations à compléter (< 7 j).
-  - **Funnel recrutement** (recharts FunnelChart ou barres horizontales) : reçue → en revue → entretien → acceptée.
-  - **Alertes du jour** : contrats non signés > 7j, onboardings bloqués > 14j, formations en retard.
-  - Requêtes : `job_applications` (groupé par status + date), `onboarding_processes`, `onboarding_assigned_trainings`.
-- Ajouter onglet "Vue d'ensemble" en tête de `HrPortalPage` + branche dans `HrTab` (activeTab `"dashboard"`).
+- L'encart d'erreur existe déjà (`cinetpay.error`). On le garde, mais on ajoute :
+  - Pour les admins (déjà détectables via `use-admin`), un lien direct « Configurer CinetPay » → `/admin?tab=integrations`.
+  - Pour les autres utilisateurs, un message plus humain : « Le paiement Mobile Money est temporairement indisponible. Choisis une devise internationale (CAD/USD/EUR) ou réessaie plus tard. »
+- Désactiver les boutons "S'abonner" / "Acheter" tant qu'on est en devise africaine et qu'une erreur 503 a été rencontrée (jusqu'à changement de devise).
 
-### V3.3 — Export CSV
-- Installer `papaparse`.
-- Ajouter bouton "Exporter CSV" dans `ContractsTab`, `HrTab` (candidatures), `OnboardingAdminTab`, `TrainingsTab` (assignations).
-- Helper `src/lib/csv-export.ts` : `exportCsv(filename, rows)` qui sérialise via Papa.unparse + déclenche download.
+### 3. Aucun changement backend
 
----
+L'edge function renvoie déjà le bon message et le bon status (503). Le problème est purement côté affichage côté client. On ne touche pas à `create-cinetpay-payment` ni à la config CinetPay.
 
 ## Détails techniques
 
-**Aucune migration BD nécessaire** — toutes les données existent déjà (`job_applications`, `onboarding_processes`, `onboarding_assigned_trainings`).
+```ts
+import { FunctionsHttpError } from "@supabase/supabase-js";
 
-**Fichiers principaux modifiés :**
-- `src/index.css`, `tailwind.config.ts` (token gradient)
-- `src/components/HrTab.tsx` (TabsTrigger, useMemo, sonner, gradient, DialogDescription, DialogTitle fix)
-- `src/components/hr/ContractsTab.tsx`, `src/components/hr/TrainingsTab.tsx`, `src/components/OnboardingAdminTab.tsx`, `src/components/OnboardingTab.tsx`, `src/components/admin/EmployeeTrainingManager.tsx` (gradient token)
-- `src/pages/HrPortalPage.tsx` (onglet dashboard, suppression remontage)
-
-**Fichiers créés :**
-- `src/components/hr/HrSectionHeader.tsx`
-- `src/components/hr/HrDashboardTab.tsx`
-- `src/lib/csv-export.ts`
-
-**Dépendance ajoutée :** `papaparse`
-
----
-
-## Plan de déploiement
-```text
-1. Token gradient + index.css/tailwind
-2. Migration sonner dans HrTab + useMemo + DialogDescription/Title
-3. HrPortalPage: dashboard tab + activeTab contrôlé
-4. Composant HrSectionHeader + branchements
-5. Composant HrDashboardTab (KPI + funnel + alertes)
-6. csv-export helper + boutons d'export
-7. Remplacement des gradients inline dans 6 fichiers
-8. Vérification build/typecheck
+if (invokeErr) {
+  let msg = invokeErr.message;
+  if (invokeErr instanceof FunctionsHttpError) {
+    try {
+      const body = await invokeErr.context.json();
+      if (body?.error) msg = body.error;
+    } catch { /* keep generic message */ }
+  }
+  throw new Error(msg);
+}
 ```
+
+## Hors périmètre
+
+- Configurer effectivement les credentials CinetPay (action user dans `/admin`).
+- Modifier les autres hooks d'invocation Supabase (peuvent être traités plus tard si besoin).

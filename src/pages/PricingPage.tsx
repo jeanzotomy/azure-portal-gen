@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -11,6 +11,8 @@ import { Footer } from "@/components/Footer";
 import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { useStripeCheckout } from "@/hooks/useStripeCheckout";
 import { useCinetPayCheckout } from "@/hooks/useCinetPayCheckout";
+import { useUserRoles } from "@/hooks/use-admin";
+
 import { supabase } from "@/integrations/supabase/client";
 import {
   isAfricanCurrency,
@@ -76,6 +78,7 @@ export default function PricingPage() {
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
   const { openCheckout, closeCheckout, isOpen, checkoutElement } = useStripeCheckout();
   const cinetpay = useCinetPayCheckout();
+  const { isAdmin } = useUserRoles();
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -214,8 +217,19 @@ export default function PricingPage() {
         </div>
 
         {cinetpay.error && (
-          <div className="max-w-2xl mx-auto mb-6 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800">
-            {cinetpay.error}
+          <div className="max-w-2xl mx-auto mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800 space-y-2">
+            <p className="font-medium">{cinetpay.error}</p>
+            {isAdmin ? (
+              <p className="text-xs">
+                <Link to="/admin?tab=integrations" className="underline font-semibold">
+                  Configurer CinetPay dans Admin → Intégrations →
+                </Link>
+              </p>
+            ) : (
+              <p className="text-xs text-red-700">
+                Le paiement Mobile Money est temporairement indisponible. Choisis une devise internationale (CAD / USD / EUR) ou réessaie plus tard.
+              </p>
+            )}
           </div>
         )}
 
