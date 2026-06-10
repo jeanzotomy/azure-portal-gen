@@ -21,3 +21,13 @@ project_id = "zwzazxebufydnaxezngx"
     verify_jwt = false
   [functions.application-tracking]
     verify_jwt = false
+  [functions.create-checkout]
+    verify_jwt = false
+  [functions.create-invoice-checkout]
+    verify_jwt = false
+  [functions.create-portal-session]
+    verify_jwt = false
+  [functions.create-training-checkout]
+    verify_jwt = false
+  [functions.payments-webhook]
+    verify_jwt = false

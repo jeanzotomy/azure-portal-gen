@@ -24,6 +24,11 @@ export function Navbar() {
     { label: t("nav.contact"), href: "#contact" },
   ];
 
+  const routeLinks = [
+    { label: locale === "fr" ? "Tarifs" : "Pricing", to: "/pricing" },
+    { label: locale === "fr" ? "Formations" : "Trainings", to: "/formations" },
+  ];
+
   const scrollTo = (id: string) => {
     setOpen(false);
     if (location.pathname !== "/") {
@@ -68,6 +73,11 @@ export function Navbar() {
             <button key={l.href} onClick={() => scrollTo(l.href)} className="text-sm font-medium text-secondary-foreground/80 hover:text-primary transition-colors">
               {l.label}
             </button>
+          ))}
+          {routeLinks.map((l) => (
+            <Link key={l.to} to={l.to} className="text-sm font-medium text-secondary-foreground/80 hover:text-primary transition-colors">
+              {l.label}
+            </Link>
           ))}
           <button
             onClick={toggleLang}
@@ -120,6 +130,11 @@ export function Navbar() {
             <button key={l.href} onClick={() => scrollTo(l.href)} className="block w-full text-left px-6 py-3 text-sm text-secondary-foreground hover:bg-secondary/50">
               {l.label}
             </button>
+          ))}
+          {routeLinks.map((l) => (
+            <Link key={l.to} to={l.to} onClick={() => setOpen(false)} className="block w-full text-left px-6 py-3 text-sm text-secondary-foreground hover:bg-secondary/50">
+              {l.label}
+            </Link>
           ))}
           <button
             onClick={toggleLang}

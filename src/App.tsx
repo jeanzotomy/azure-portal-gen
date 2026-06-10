@@ -36,6 +36,7 @@ const TrainingGroupsManagerPage = lazy(() => import("./pages/admin/TrainingGroup
 const PricingPage = lazy(() => import("./pages/PricingPage.tsx"));
 const CheckoutReturnPage = lazy(() => import("./pages/CheckoutReturnPage.tsx"));
 const SubscriptionPage = lazy(() => import("./pages/portal/SubscriptionPage.tsx"));
+const TrainingsStorePage = lazy(() => import("./pages/TrainingsStorePage.tsx"));
 
 const ScrollToTopOnNavigate = () => {
   const { pathname } = useLocation();
@@ -62,6 +63,7 @@ const App = () => (
               <Route path="subscription" element={<SubscriptionPage />} />
             </Route>
             <Route path="/pricing" element={<PricingPage />} />
+            <Route path="/formations" element={<TrainingsStorePage />} />
             <Route path="/checkout/return" element={<CheckoutReturnPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/mfa" element={<MfaPage />} />
