@@ -143,6 +143,90 @@ export type Database = {
         }
         Relationships: []
       }
+      cinetpay_transactions: {
+        Row: {
+          amount: number
+          cinetpay_response: Json | null
+          cpm_payid: string | null
+          cpm_phone_prefixe: string | null
+          created_at: string
+          currency: string
+          customer_email: string | null
+          customer_name: string | null
+          customer_phone: string | null
+          description: string | null
+          environment: string
+          expires_at: string | null
+          id: string
+          kind: string
+          metadata: Json | null
+          paid_at: string | null
+          payment_method: string | null
+          payment_operator: string | null
+          payment_url: string | null
+          related_id: string | null
+          related_ref: string | null
+          status: string
+          transaction_id: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          amount: number
+          cinetpay_response?: Json | null
+          cpm_payid?: string | null
+          cpm_phone_prefixe?: string | null
+          created_at?: string
+          currency: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          description?: string | null
+          environment?: string
+          expires_at?: string | null
+          id?: string
+          kind: string
+          metadata?: Json | null
+          paid_at?: string | null
+          payment_method?: string | null
+          payment_operator?: string | null
+          payment_url?: string | null
+          related_id?: string | null
+          related_ref?: string | null
+          status?: string
+          transaction_id: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          amount?: number
+          cinetpay_response?: Json | null
+          cpm_payid?: string | null
+          cpm_phone_prefixe?: string | null
+          created_at?: string
+          currency?: string
+          customer_email?: string | null
+          customer_name?: string | null
+          customer_phone?: string | null
+          description?: string | null
+          environment?: string
+          expires_at?: string | null
+          id?: string
+          kind?: string
+          metadata?: Json | null
+          paid_at?: string | null
+          payment_method?: string | null
+          payment_operator?: string | null
+          payment_url?: string | null
+          related_id?: string | null
+          related_ref?: string | null
+          status?: string
+          transaction_id?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       contact_requests: {
         Row: {
           company: string | null
@@ -2070,6 +2154,7 @@ export type Database = {
         Returns: number
       }
       generate_application_tracking_id: { Args: never; Returns: string }
+      generate_cinetpay_transaction_id: { Args: never; Returns: string }
       generate_project_number: { Args: never; Returns: string }
       generate_service_invoice_number: { Args: never; Returns: string }
       generate_ticket_number: { Args: never; Returns: string }
