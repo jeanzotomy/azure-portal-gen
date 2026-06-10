@@ -44,8 +44,8 @@ export default function HrDashboardTab() {
       supabase.from("job_applications").select("id", { count: "exact", head: true }).gte("created_at", startOfMonth),
       supabase.from("job_applications").select("status, created_at"),
       supabase.from("onboarding_processes").select("id, status, created_at, kind").eq("kind", "onboarding"),
-      supabase.from("onboarding_contracts").select("created_at, signed_at"),
-      supabase.from("onboarding_assigned_trainings").select("assigned_at, completed_at, due_at"),
+      supabase.from("onboarding_contracts").select("uploaded_at, signed_at"),
+      supabase.from("onboarding_assigned_trainings").select("assigned_at, completed_at"),
     ]);
 
     const apps = (appsAllStatusRes.data || []) as { status: string; created_at: string }[];
@@ -57,13 +57,15 @@ export default function HrDashboardTab() {
     const onboardingsActive = processes.filter(p => p.status !== "complete").length;
     const onboardingStuckOver14d = processes.filter(p => p.status !== "complete" && p.created_at < fourteenDaysAgo).length;
 
-    const contracts = (contractsRes.data || []) as { created_at: string; signed_at: string | null }[];
-    const unsignedContractsOver7d = contracts.filter(c => !c.signed_at && c.created_at < sevenDaysAgo).length;
+    const contracts = (contractsRes.data || []) as { uploaded_at: string; signed_at: string | null }[];
+    const unsignedContractsOver7d = contracts.filter(c => !c.signed_at && c.uploaded_at < sevenDaysAgo).length;
 
-    const assigned = (assignedRes.data || []) as { completed_at: string | null; due_at?: string | null }[];
-    const todayIso = new Date().toISOString();
-    const trainingsDueSoon = assigned.filter(a => !a.completed_at && a.due_at && a.due_at <= sevenDaysAhead && a.due_at >= todayIso).length;
-    const trainingsOverdue = assigned.filter(a => !a.completed_at && a.due_at && a.due_at < todayIso).length;
+    // Heuristique : sans colonne due_at, on considère qu'une formation assignée depuis > 30 jours et non terminée est "en retard".
+    const assigned = (assignedRes.data || []) as { assigned_at: string; completed_at: string | null }[];
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 86400_000).toISOString();
+    const twentyThreeDaysAgo = new Date(Date.now() - 23 * 86400_000).toISOString();
+    const trainingsOverdue = assigned.filter(a => !a.completed_at && a.assigned_at < thirtyDaysAgo).length;
+    const trainingsDueSoon = assigned.filter(a => !a.completed_at && a.assigned_at < twentyThreeDaysAgo && a.assigned_at >= thirtyDaysAgo).length;
 
     setKpis({
       appsMonth: appsMonthRes.count || 0,
