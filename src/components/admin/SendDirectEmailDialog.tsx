@@ -113,7 +113,8 @@ export default function SendDirectEmailDialog({
   const [submitting, setSubmitting] = useState(false);
   const [senderName, setSenderName] = useState("CloudMature");
   const [senderRole, setSenderRole] = useState<string>("");
-  const [tab, setTab] = useState<"edit" | "preview">("edit");
+  const [files, setFiles] = useState<File[]>([]);
+  const [uploadProgress, setUploadProgress] = useState<string>("");
 
   useEffect(() => {
     if (!open) return;
