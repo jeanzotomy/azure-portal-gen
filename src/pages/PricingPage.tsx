@@ -12,7 +12,7 @@ import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { useStripeCheckout } from "@/hooks/useStripeCheckout";
 import { useCinetPayCheckout } from "@/hooks/useCinetPayCheckout";
 import { useUserRoles } from "@/hooks/use-admin";
-import { Link } from "react-router-dom";
+
 import { supabase } from "@/integrations/supabase/client";
 import {
   isAfricanCurrency,
