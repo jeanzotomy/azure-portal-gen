@@ -44,7 +44,7 @@ export default function EmployeeTrainingManager() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "with" | "without">("all");
   const [bulkOpen, setBulkOpen] = useState(false);
-  const [emailTarget, setEmailTarget] = useState<UserRow | null>(null);
+  
 
 
 
@@ -189,13 +189,6 @@ export default function EmployeeTrainingManager() {
                     </div>
                     <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition" />
                   </button>
-                  <button
-                    onClick={(e) => { e.stopPropagation(); setEmailTarget(u); }}
-                    title={`Envoyer un email à ${u.full_name}`}
-                    className="px-3 border-l hover:bg-primary/10 text-muted-foreground hover:text-primary transition flex items-center"
-                  >
-                    <Mail className="h-4 w-4" />
-                  </button>
                 </li>
               ))}
             </ul>
@@ -210,13 +203,6 @@ export default function EmployeeTrainingManager() {
         onDone={loadUsers}
       />
 
-      <SendDirectEmailDialog
-        open={!!emailTarget}
-        onOpenChange={(v) => { if (!v) setEmailTarget(null); }}
-        recipientEmail={emailTarget?.email || ""}
-        recipientName={emailTarget?.full_name}
-        recipientUserId={emailTarget?.user_id}
-      />
     </div>
   );
 }
