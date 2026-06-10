@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
     // Load invoice using service-role (RLS bypass) but verify ownership manually
     const { data: invoice, error: invErr } = await sb
       .from("service_invoices")
-      .select("id, invoice_number, total_ttc, currency, client_id, status")
+      .select("id, invoice_number, total, currency, client_id, status")
       .eq("id", invoiceId)
       .maybeSingle();
     if (invErr || !invoice) return new Response(JSON.stringify({ error: "Invoice not found" }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -49,7 +49,7 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    const amountCents = Math.round(Number(invoice.total_ttc) * 100);
+    const amountCents = Math.round(Number(invoice.total) * 100);
     if (!amountCents || amountCents < 50) {
       return new Response(JSON.stringify({ error: "Invalid amount" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
