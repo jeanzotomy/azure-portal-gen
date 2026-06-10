@@ -130,9 +130,9 @@ async function handleCheckoutCompleted(session: any, env: StripeEnv) {
       ? `Pack ${meta.priceId} (${(session.amount_total / 100).toFixed(2)} ${session.currency?.toUpperCase()})`
       : `Pack ${meta.priceId}`;
     await sb().from("support_tickets").insert({
-      created_by: userId,
+      user_id: userId,
       subject: `Activation pack consulting`,
-      description: `Le client a acheté : ${productName}.\nSession Stripe : ${session.id}.\nÀ activer.`,
+      message: `Le client a acheté : ${productName}.\nSession Stripe : ${session.id}.\nÀ activer côté équipe.`,
       status: "ouvert",
       priority: "haute",
     });
