@@ -807,23 +807,37 @@ export function TrainingPlayer({ assigned, userId, onComplete }: { assigned: any
     const inAdaptive = !!adaptiveQuestions;
     const quizDuration = quizStartedAt ? Math.round((Date.now() - quizStartedAt) / 1000) : quizElapsed;
 
-    const update: any = inAdaptive
-      ? (passed ? { quiz_passed: true, completed_at: new Date().toISOString(), quiz_draft_answers: {}, quiz_page: 0 } : {})
-      : {
-          quiz_score: score, quiz_passed: passed, quiz_answers: answers, quiz_submitted_at: new Date().toISOString(),
-          completed_at: passed ? new Date().toISOString() : null,
-          quiz_draft_answers: passed ? {} : answers,
-          quiz_page: passed ? 0 : quizPage,
-          quiz_open_answers: openAnswers,
-          quiz_open_grades: openGradesLocal,
-          quiz_time_seconds: quizDuration,
-          module_times: moduleTimesRef.current,
-          total_seconds: sessionSeconds,
-        };
-
-    if (Object.keys(update).length > 0) {
-      const { error } = await (supabase.from("onboarding_assigned_trainings") as any).update(update).eq("id", assigned.id);
-      if (error) { setSubmitting(false); return toast.error(error.message); }
+    if (inAdaptive) {
+      if (passed) {
+        // Adaptive remediation pass — write grading via secure RPC
+        const { error } = await (supabase as any).rpc("submit_training_quiz_attempt", {
+          _assigned_id: assigned.id,
+          _quiz_score: score,
+          _quiz_passed: passed,
+          _quiz_answers: answers,
+          _quiz_open_answers: openAnswers,
+          _quiz_open_grades: openGradesLocal,
+          _quiz_time_seconds: quizDuration,
+          _module_times: moduleTimesRef.current,
+          _total_seconds: sessionSeconds,
+        });
+        if (error) { setSubmitting(false); return toast.error(error.message); }
+      }
+    } else {
+      // Standard submit — grading fields go through the secure RPC (RLS-protected),
+      // remaining progress fields are updated directly.
+      const { error: rpcError } = await (supabase as any).rpc("submit_training_quiz_attempt", {
+        _assigned_id: assigned.id,
+        _quiz_score: score,
+        _quiz_passed: passed,
+        _quiz_answers: answers,
+        _quiz_open_answers: openAnswers,
+        _quiz_open_grades: openGradesLocal,
+        _quiz_time_seconds: quizDuration,
+        _module_times: moduleTimesRef.current,
+        _total_seconds: sessionSeconds,
+      });
+      if (rpcError) { setSubmitting(false); return toast.error(rpcError.message); }
     }
     setSubmitting(false);
     setOpenGrades(openGradesLocal);

@@ -89,9 +89,11 @@ export function useMfaCheck() {
 
     const check = async () => {
       try {
-        const [aalResult, factorsResult] = await Promise.all([
+        const [aalResult, factorsResult, smsMfaResult] = await Promise.all([
           supabase.auth.mfa.getAuthenticatorAssuranceLevel(),
           supabase.auth.mfa.listFactors(),
+          // Server-side check: did the user complete SMS/email MFA recently?
+          (supabase as any).rpc("has_recent_sms_mfa"),
         ]);
 
         if (!active || resolvedRef.current) return;
@@ -107,7 +109,9 @@ export function useMfaCheck() {
           return;
         }
 
-        if (sessionStorage.getItem(SMS_MFA_KEY) === "true") {
+        // Trust ONLY the server's record (signed by service role). sessionStorage is just a UX cache.
+        if (smsMfaResult?.data === true) {
+          sessionStorage.setItem(SMS_MFA_KEY, "true");
           resolve(true);
           return;
         }
