@@ -91,67 +91,109 @@ Deno.serve(async (req) => {
     const font = await pdf.embedFont(StandardFonts.Helvetica);
     const fontItalic = await pdf.embedFont(StandardFonts.HelveticaOblique);
 
-    // Background border
+    // Palette
     const navy = rgb(0, 0.235, 0.4);
     const cyan = rgb(0, 0.6, 0.8);
     const ink = rgb(0.1, 0.12, 0.18);
     const muted = rgb(0.4, 0.45, 0.55);
+    const seal = rgb(0.78, 0.12, 0.16);
+    const sealDark = rgb(0.6, 0.08, 0.12);
+    const paper = rgb(0.995, 0.997, 1);
 
-    page.drawRectangle({ x: 0, y: 0, width, height, color: rgb(0.99, 0.99, 1) });
-    // Outer border
+    // Background + double border
+    page.drawRectangle({ x: 0, y: 0, width, height, color: paper });
     page.drawRectangle({ x: 20, y: 20, width: width - 40, height: height - 40, borderColor: navy, borderWidth: 2 });
     page.drawRectangle({ x: 28, y: 28, width: width - 56, height: height - 56, borderColor: cyan, borderWidth: 0.6 });
 
+    // Decorative corner accents
+    const corner = (cx: number, cy: number, dx: number, dy: number) => {
+      page.drawLine({ start: { x: cx, y: cy }, end: { x: cx + dx * 22, y: cy }, thickness: 1.4, color: navy });
+      page.drawLine({ start: { x: cx, y: cy }, end: { x: cx, y: cy + dy * 22 }, thickness: 1.4, color: navy });
+    };
+    corner(40, height - 40, 1, -1);
+    corner(width - 40, height - 40, -1, -1);
+    corner(40, 40, 1, 1);
+    corner(width - 40, 40, -1, 1);
+
     // Top band
     page.drawRectangle({ x: 28, y: height - 110, width: width - 56, height: 60, color: navy });
+    page.drawRectangle({ x: 28, y: height - 114, width: width - 56, height: 2, color: cyan });
     page.drawText("CLOUDMATURE", { x: 60, y: height - 78, size: 22, font: fontBold, color: rgb(1, 1, 1) });
-    page.drawText("Certificat de réussite", { x: 60, y: height - 100, size: 11, font: font, color: rgb(0.85, 0.92, 1) });
+    page.drawText("Certificat de réussite", { x: 60, y: height - 100, size: 11, font, color: rgb(0.85, 0.92, 1) });
 
     // Title
     const title = "CERTIFICAT D'ACCOMPLISSEMENT";
     const titleSize = 28;
     const titleWidth = fontBold.widthOfTextAtSize(title, titleSize);
-    page.drawText(title, { x: (width - titleWidth) / 2, y: height - 170, size: titleSize, font: fontBold, color: ink });
+    page.drawText(title, { x: (width - titleWidth) / 2, y: height - 175, size: titleSize, font: fontBold, color: ink });
+
+    // Title flourish underlines
+    const flourishY = height - 188;
+    page.drawLine({ start: { x: width / 2 - 140, y: flourishY }, end: { x: width / 2 - 30, y: flourishY }, thickness: 0.6, color: cyan });
+    page.drawLine({ start: { x: width / 2 + 30, y: flourishY }, end: { x: width / 2 + 140, y: flourishY }, thickness: 0.6, color: cyan });
+    page.drawCircle({ x: width / 2, y: flourishY, size: 2, color: cyan });
 
     // Subtitle
     const sub = "Ce certificat est décerné à";
     const subWidth = fontItalic.widthOfTextAtSize(sub, 13);
-    page.drawText(sub, { x: (width - subWidth) / 2, y: height - 210, size: 13, font: fontItalic, color: muted });
+    page.drawText(sub, { x: (width - subWidth) / 2, y: height - 220, size: 13, font: fontItalic, color: muted });
 
     // Recipient name
     const nameSize = 30;
     const nameWidth = fontBold.widthOfTextAtSize(candidateName, nameSize);
-    page.drawText(candidateName, { x: (width - nameWidth) / 2, y: height - 255, size: nameSize, font: fontBold, color: navy });
-
-    // Underline
+    page.drawText(candidateName, { x: (width - nameWidth) / 2, y: height - 265, size: nameSize, font: fontBold, color: navy });
     page.drawLine({
-      start: { x: (width - Math.max(nameWidth, 260)) / 2 - 10, y: height - 265 },
-      end: { x: (width + Math.max(nameWidth, 260)) / 2 + 10, y: height - 265 },
+      start: { x: (width - Math.max(nameWidth, 280)) / 2 - 10, y: height - 275 },
+      end: { x: (width + Math.max(nameWidth, 280)) / 2 + 10, y: height - 275 },
       thickness: 1, color: cyan,
     });
 
     // Body
     const body1 = "pour avoir suivi et validé avec succès la formation";
     const body1Width = font.widthOfTextAtSize(body1, 13);
-    page.drawText(body1, { x: (width - body1Width) / 2, y: height - 300, size: 13, font, color: ink });
+    page.drawText(body1, { x: (width - body1Width) / 2, y: height - 310, size: 13, font, color: ink });
 
     const tSize = 20;
     const tWidth = fontBold.widthOfTextAtSize(trainingTitle, tSize);
-    page.drawText(trainingTitle, { x: (width - tWidth) / 2, y: height - 335, size: tSize, font: fontBold, color: ink });
+    page.drawText(trainingTitle, { x: (width - tWidth) / 2, y: height - 345, size: tSize, font: fontBold, color: ink });
 
-    if (score != null) {
-      const sTxt = `Score obtenu : ${score}%`;
-      const sW = font.widthOfTextAtSize(sTxt, 12);
-      page.drawText(sTxt, { x: (width - sW) / 2, y: height - 360, size: 12, font, color: muted });
-    }
-
-    // Footer: date + code + QR
+    // Footer: date (left) — seal (center) — QR (right)
     const issued = new Date();
     const issuedStr = issued.toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" });
     page.drawText(`Délivré le ${issuedStr}`, { x: 60, y: 90, size: 11, font, color: ink });
     page.drawText("Signature autorisée", { x: 60, y: 70, size: 10, font: fontItalic, color: muted });
     page.drawLine({ start: { x: 60, y: 60 }, end: { x: 220, y: 60 }, thickness: 0.6, color: ink });
     page.drawText("Directeur Formation – CloudMature", { x: 60, y: 48, size: 9, font, color: muted });
+
+    // "CERTIFIED" seal stamp — drawn vectorially in PDF
+    const sx = width / 2;
+    const sy = 95;
+    // Outer scalloped ring (24 small circles around)
+    const scallops = 24;
+    const rOuter = 52;
+    for (let i = 0; i < scallops; i++) {
+      const a = (i / scallops) * Math.PI * 2;
+      page.drawCircle({ x: sx + Math.cos(a) * rOuter, y: sy + Math.sin(a) * rOuter, size: 3.2, color: seal });
+    }
+    page.drawCircle({ x: sx, y: sy, size: 48, color: seal });
+    page.drawCircle({ x: sx, y: sy, size: 44, color: paper });
+    // Dashed inner ring
+    page.drawCircle({ x: sx, y: sy, size: 42, borderColor: seal, borderWidth: 0.8, color: undefined as any });
+    page.drawCircle({ x: sx, y: sy, size: 38, borderColor: seal, borderWidth: 0.4, color: undefined as any });
+    // Small star dots ring
+    for (let i = 0; i < 16; i++) {
+      const a = (i / 16) * Math.PI * 2;
+      page.drawCircle({ x: sx + Math.cos(a) * 33, y: sy + Math.sin(a) * 33, size: 0.9, color: seal });
+    }
+    // Central banner ribbon
+    page.drawRectangle({ x: sx - 60, y: sy - 10, width: 120, height: 22, color: seal });
+    // Ribbon tails (triangular notches via small dark rectangles)
+    page.drawRectangle({ x: sx - 66, y: sy - 7, width: 8, height: 16, color: sealDark });
+    page.drawRectangle({ x: sx + 58, y: sy - 7, width: 8, height: 16, color: sealDark });
+    const certifiedText = "CERTIFIED";
+    const cSize = 13;
+    const cW = fontBold.widthOfTextAtSize(certifiedText, cSize);
+    page.drawText(certifiedText, { x: sx - cW / 2, y: sy - 4, size: cSize, font: fontBold, color: rgb(1, 1, 1) });
 
     // QR block (right side)
     const qrImg = await pdf.embedPng(qrPngBytes);
