@@ -201,7 +201,20 @@ export default function ContractsTab({ readOnly = false }: { readOnly?: boolean 
           <FileSignature className="h-5 w-5 text-primary" />
           <h3 className="font-semibold">Contrats des candidats acceptés ({rows.length})</h3>
         </div>
-        <Button size="sm" variant="outline" onClick={load}><RefreshCw className="h-4 w-4 mr-1" />Actualiser</Button>
+        <div className="flex gap-2 flex-wrap">
+          <Button size="sm" variant="outline" onClick={() => {
+            const csvRows = filtered.map(r => ({
+              candidat: r.candidate_name,
+              email: r.candidate_email,
+              poste: r.job_title || "",
+              statut_contrat: r.contract?.signed_at ? "Signé" : r.contract ? "En attente" : "Aucun",
+              signe_le: r.contract?.signed_at ? new Date(r.contract.signed_at).toISOString().slice(0, 10) : "",
+              accepte_le: new Date(r.accepted_at).toISOString().slice(0, 10),
+            }));
+            exportCsv(`contrats-${new Date().toISOString().slice(0, 10)}.csv`, csvRows);
+          }}><FileDown className="h-4 w-4 mr-1" />Exporter CSV</Button>
+          <Button size="sm" variant="outline" onClick={load}><RefreshCw className="h-4 w-4 mr-1" />Actualiser</Button>
+        </div>
       </div>
 
       <div className="flex gap-2 flex-wrap">
