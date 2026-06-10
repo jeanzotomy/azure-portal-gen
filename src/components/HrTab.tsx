@@ -104,7 +104,9 @@ interface Sector {
   description: string | null;
 }
 
-export default function HrTab({ onboardingReadOnly = false, defaultTab }: { onboardingReadOnly?: boolean; defaultTab?: "recruitment" | "contracts" | "trainings" | "onboarding" } = {}) {
+type HrMainTab = "recruitment" | "contracts" | "trainings" | "onboarding";
+
+export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTab, onTabChange }: { onboardingReadOnly?: boolean; defaultTab?: HrMainTab; activeTab?: HrMainTab; onTabChange?: (t: HrMainTab) => void } = {}) {
   const { user } = useAuthSession();
   const { isAdmin } = useUserRoles();
   const { toast } = useToast();
