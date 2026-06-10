@@ -425,6 +425,93 @@ export default function SendDirectEmailDialog({
                   ) : null}
                 </div>
               </div>
+
+              {/* Attachments */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label className="text-xs flex items-center gap-1.5">
+                    <Paperclip className="h-3.5 w-3.5" /> Pièces jointes
+                  </Label>
+                  <span className="text-[10px] text-muted-foreground">
+                    {files.length} / {MAX_FILES} · {formatBytes(totalSize)}
+                  </span>
+                </div>
+
+                <label
+                  htmlFor="direct-email-files"
+                  className={cn(
+                    "flex flex-col items-center justify-center gap-1 rounded-md border-2 border-dashed border-border bg-muted/20 hover:bg-muted/40 hover:border-primary/50 cursor-pointer transition-colors py-4 px-3 text-center",
+                    files.length >= MAX_FILES && "opacity-50 pointer-events-none"
+                  )}
+                >
+                  <Paperclip className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-xs font-medium">
+                    Cliquez pour ajouter des fichiers
+                  </span>
+                  <span className="text-[10px] text-muted-foreground">
+                    PDF, JPG, PNG, WEBP, GIF · {formatBytes(MAX_FILE_SIZE)} max par fichier
+                  </span>
+                  <input
+                    id="direct-email-files"
+                    type="file"
+                    multiple
+                    accept={ACCEPT_ATTR}
+                    className="sr-only"
+                    onChange={(e) => {
+                      handleFiles(e.target.files);
+                      e.target.value = "";
+                    }}
+                    disabled={files.length >= MAX_FILES}
+                  />
+                </label>
+
+                {files.length > 0 && (
+                  <div className="space-y-1.5">
+                    {files.map((f, i) => {
+                      const isImage = f.type.startsWith("image/");
+                      return (
+                        <div
+                          key={`${f.name}-${i}`}
+                          className="flex items-center gap-2 rounded-md border bg-background px-2.5 py-1.5"
+                        >
+                          <div className="h-7 w-7 rounded bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
+                            {isImage ? (
+                              <ImageIcon className="h-3.5 w-3.5" />
+                            ) : (
+                              <FileText className="h-3.5 w-3.5" />
+                            )}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="text-xs font-medium truncate">{f.name}</div>
+                            <div className="text-[10px] text-muted-foreground">
+                              {formatBytes(f.size)}
+                            </div>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeFile(i)}
+                            disabled={submitting}
+                            className="p-1 rounded hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors disabled:opacity-40"
+                            aria-label="Retirer"
+                          >
+                            <X className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {filesError ? (
+                  <p className="text-[11px] text-destructive flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" /> {filesError}
+                  </p>
+                ) : files.length > 0 ? (
+                  <p className="text-[10px] text-muted-foreground italic">
+                    Les fichiers seront envoyés via des liens de téléchargement sécurisés (valides 30 jours).
+                  </p>
+                ) : null}
+              </div>
             </div>
           ) : (
             <div className="rounded-lg border bg-background overflow-hidden">
