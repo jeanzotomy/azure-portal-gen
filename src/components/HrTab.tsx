@@ -671,6 +671,31 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
         </TabsContent>
 
         <TabsContent value="applications" className="space-y-3 mt-4">
+          {!loading && applications.length > 0 && (
+            <div className="flex justify-end">
+              <Button size="sm" variant="outline" onClick={() => {
+                const rows = filteredApps.map(a => {
+                  const job = jobs.find(j => j.id === a.job_id);
+                  return {
+                    nom: a.full_name,
+                    email: a.email,
+                    telephone: a.phone || "",
+                    offre: job?.title || "",
+                    statut: APP_STATUS_LABELS[a.status],
+                    experience_annees: a.years_experience ?? "",
+                    salaire_attendu: a.salary_expectation || "",
+                    score_ia: a.ai_score ?? "",
+                    match_ia: a.ai_match_percentage ?? "",
+                    recommandation_ia: a.ai_recommendation || "",
+                    cree_le: format(new Date(a.created_at), "yyyy-MM-dd HH:mm"),
+                  };
+                });
+                exportCsv(`candidatures-${format(new Date(), "yyyy-MM-dd")}.csv`, rows);
+              }}>
+                <FileDown size={14} className="mr-1" /> Exporter CSV
+              </Button>
+            </div>
+          )}
           {loading && <p className="text-sm text-muted-foreground">Chargement...</p>}
           {!loading && applications.length === 0 && (
             <Card><CardContent className="p-8 text-center text-muted-foreground">Aucune candidature reçue.</CardContent></Card>
