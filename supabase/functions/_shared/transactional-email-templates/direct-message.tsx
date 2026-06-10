@@ -86,8 +86,10 @@ const Email = ({
 
           <Hr style={hr} />
           <Text style={small}>
-            Ce message vous a été adressé directement par {senderName || 'l\'équipe CloudMature'}
-            {senderRole ? ` (${senderRole})` : ''}. Vous pouvez répondre à cet email — la réponse sera transmise à l'expéditeur.
+            Ce message vous a été adressé par {senderName || 'l\'équipe CloudMature'}
+            {senderRole ? ` (${senderRole})` : ''}. Pour toute réponse, écrivez à{' '}
+            <Link href="mailto:info@cloudmature.com" style={{ color: '#0099cc' }}>info@cloudmature.com</Link>
+            {' '}— votre message sera transmis à l'expéditeur.
           </Text>
           <Text style={footer}>L'équipe {SITE_NAME}</Text>
         </Container>
