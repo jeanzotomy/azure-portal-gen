@@ -302,26 +302,21 @@ Deno.serve(async (req) => {
     status: 'pending',
   })
 
-  // All emails are sent from and reply to info@cloudmature.com
-  const replyTo = `info@${FROM_DOMAIN}`
+  // All emails are sent from and reply to info@cloudmature.com (centralized in build-email-payload.ts)
+  const payload = buildEmailPayload({
+    messageId,
+    recipient: effectiveRecipient,
+    subject: resolvedSubject,
+    html,
+    text: plainText,
+    templateName,
+    idempotencyKey,
+    unsubscribeToken,
+  })
 
   const { error: enqueueError } = await supabase.rpc('enqueue_email', {
     queue_name: 'transactional_emails',
-    payload: {
-      message_id: messageId,
-      to: effectiveRecipient,
-      from: `${SITE_NAME} <info@${FROM_DOMAIN}>`,
-      sender_domain: SENDER_DOMAIN,
-      subject: resolvedSubject,
-      html,
-      text: plainText,
-      purpose: 'transactional',
-      label: templateName,
-      idempotency_key: idempotencyKey,
-      unsubscribe_token: unsubscribeToken,
-      queued_at: new Date().toISOString(),
-      reply_to: replyTo,
-    },
+    payload,
   })
 
   if (enqueueError) {
