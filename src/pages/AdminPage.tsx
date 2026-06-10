@@ -47,6 +47,7 @@ import PaymentMethodsTab from "@/components/PaymentMethodsTab";
 import HrTab from "@/components/HrTab";
 import { ProfileSignatureDialog } from "@/components/ProfileSignatureDialog";
 import SeoTab from "@/components/SeoTab";
+import IntegrationsTab from "@/components/admin/IntegrationsTab";
 import { CertificateVerifyDashboard } from "@/components/admin/CertificateVerifyDashboard";
 import EmployeeTrainingManager from "@/components/admin/EmployeeTrainingManager";
 import { getDialCode, applyDialCode } from "@/lib/country-dial-codes";
