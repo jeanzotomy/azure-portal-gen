@@ -13,13 +13,21 @@ import { FormSection } from "@/components/ui/form-section";
 import { Label } from "@/components/ui/label";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { useToast } from "@/hooks/use-toast";
-import { Briefcase, Plus, Pencil, Trash2, FileText, Download, Calendar, MapPin, RefreshCw, Building2, X, Search, FolderOpen, FolderX, Mail, FileSignature, GraduationCap, Users, Sparkles, Loader2, AlertCircle, TrendingUp, ThumbsUp, ThumbsDown } from "lucide-react";
+import { toast as sonnerToast } from "sonner";
+
+// Adapter: keep legacy `toast({ title, description, variant })` calls while using sonner under the hood.
+const toast = (opts: { title?: string; description?: string; variant?: string }) => {
+  const fn = opts.variant === "destructive" ? sonnerToast.error : sonnerToast.success;
+  fn(opts.title || "", opts.description ? { description: opts.description } : undefined);
+};
+import { Briefcase, Plus, Pencil, Trash2, FileText, Download, Calendar, MapPin, RefreshCw, Building2, X, Search, FolderOpen, FolderX, Mail, FileSignature, GraduationCap, Users, Sparkles, Loader2, AlertCircle, TrendingUp, ThumbsUp, ThumbsDown, LayoutDashboard, FileDown } from "lucide-react";
 import { format } from "date-fns";
 import EmailLogTab from "./EmailLogTab";
 import OnboardingAdminTab from "./OnboardingAdminTab";
 import ContractsTab from "./hr/ContractsTab";
 import TrainingsTab from "./hr/TrainingsTab";
+import HrDashboardTab from "./hr/HrDashboardTab";
+import { exportCsv } from "@/lib/csv-export";
 
 type JobStatus = "brouillon" | "publiee" | "fermee";
 type ContractType = "CDI" | "CDD" | "Stage" | "Freelance" | "Alternance";
@@ -104,12 +112,12 @@ interface Sector {
   description: string | null;
 }
 
-type HrMainTab = "recruitment" | "contracts" | "trainings" | "onboarding";
+type HrMainTab = "dashboard" | "recruitment" | "contracts" | "trainings" | "onboarding";
 
 export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTab, onTabChange }: { onboardingReadOnly?: boolean; defaultTab?: HrMainTab; activeTab?: HrMainTab; onTabChange?: (t: HrMainTab) => void } = {}) {
   const { user } = useAuthSession();
   const { isAdmin } = useUserRoles();
-  const { toast } = useToast();
+  // toast is provided by the sonner adapter declared at module scope.
   const { confirm, dialog: confirmDialog } = useConfirm();
   const [jobs, setJobs] = useState<JobPosting[]>([]);
   const [applications, setApplications] = useState<JobApplication[]>([]);
@@ -542,13 +550,19 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
         </div>
       </div>
 
-      <Tabs value={activeTab ?? defaultTab ?? "recruitment"} onValueChange={(v) => onTabChange?.(v as HrMainTab)} defaultValue={activeTab ? undefined : (defaultTab || "recruitment")}>
+      <Tabs value={activeTab ?? defaultTab ?? "dashboard"} onValueChange={(v) => onTabChange?.(v as HrMainTab)} defaultValue={activeTab ? undefined : (defaultTab || "dashboard")}>
         <TabsList className="flex flex-wrap h-auto">
+          <TabsTrigger value="dashboard"><LayoutDashboard size={14} className="mr-1" />Vue d'ensemble</TabsTrigger>
           <TabsTrigger value="recruitment"><Briefcase size={14} className="mr-1" />Recrutement</TabsTrigger>
           <TabsTrigger value="contracts"><FileSignature size={14} className="mr-1" />Contrats</TabsTrigger>
           <TabsTrigger value="trainings"><GraduationCap size={14} className="mr-1" />Formations</TabsTrigger>
           <TabsTrigger value="onboarding"><Users size={14} className="mr-1" />Onboarding</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="dashboard" className="mt-4">
+          <HrDashboardTab />
+        </TabsContent>
+
 
         <TabsContent value="recruitment" className="mt-4">
           <Tabs defaultValue="jobs">
@@ -657,6 +671,31 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
         </TabsContent>
 
         <TabsContent value="applications" className="space-y-3 mt-4">
+          {!loading && applications.length > 0 && (
+            <div className="flex justify-end">
+              <Button size="sm" variant="outline" onClick={() => {
+                const rows = filteredApps.map(a => {
+                  const job = jobs.find(j => j.id === a.job_id);
+                  return {
+                    nom: a.full_name,
+                    email: a.email,
+                    telephone: a.phone || "",
+                    offre: job?.title || "",
+                    statut: APP_STATUS_LABELS[a.status],
+                    experience_annees: a.years_experience ?? "",
+                    salaire_attendu: a.salary_expectation || "",
+                    score_ia: a.ai_score ?? "",
+                    match_ia: a.ai_match_percentage ?? "",
+                    recommandation_ia: a.ai_recommendation || "",
+                    cree_le: format(new Date(a.created_at), "yyyy-MM-dd HH:mm"),
+                  };
+                });
+                exportCsv(`candidatures-${format(new Date(), "yyyy-MM-dd")}.csv`, rows);
+              }}>
+                <FileDown size={14} className="mr-1" /> Exporter CSV
+              </Button>
+            </div>
+          )}
           {loading && <p className="text-sm text-muted-foreground">Chargement...</p>}
           {!loading && applications.length === 0 && (
             <Card><CardContent className="p-8 text-center text-muted-foreground">Aucune candidature reçue.</CardContent></Card>

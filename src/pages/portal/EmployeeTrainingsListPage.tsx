@@ -371,7 +371,7 @@ function TrainingListCard({
 
   return (
     <Card className="group relative overflow-hidden border-border/60 bg-card/70 backdrop-blur hover:border-primary/40 hover:shadow-lg transition flex flex-col">
-      <div className="h-1.5 bg-gradient-to-r from-primary to-[#007aa3]" />
+      <div className="h-1.5 bg-gradient-primary-deep text-primary-foreground" />
       <div className="p-5 flex flex-col flex-1 gap-3">
         <div className="flex items-start justify-between gap-2">
           <div className="min-w-0">

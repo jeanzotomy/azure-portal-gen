@@ -5,14 +5,15 @@ import { useAuthSession } from "@/hooks/use-auth-session";
 import { useUserRoles } from "@/hooks/use-admin";
 import { clearSmsMfaVerified } from "@/hooks/use-mfa";
 import { Button } from "@/components/ui/button";
-import { Briefcase, LogOut, Shield, FileSignature, Users, GraduationCap, BookOpenCheck } from "lucide-react";
+import { Briefcase, LogOut, Shield, FileSignature, Users, GraduationCap, BookOpenCheck, LayoutDashboard } from "lucide-react";
 import HrTab from "@/components/HrTab";
 import { PortalInfoBar } from "@/components/PortalInfoBar";
 import cmLogo from "@/assets/cloudmature-logo.png";
 
-type HrSubTab = "recruitment" | "contracts" | "onboarding" | "trainings";
+type HrSubTab = "dashboard" | "recruitment" | "contracts" | "onboarding" | "trainings";
 
 const SUBS: { id: HrSubTab; label: string; icon: typeof Briefcase }[] = [
+  { id: "dashboard", label: "Vue d'ensemble", icon: LayoutDashboard },
   { id: "recruitment", label: "Recrutement", icon: Briefcase },
   { id: "contracts", label: "Générer le contrat", icon: FileSignature },
   { id: "onboarding", label: "Onboarding", icon: Users },
@@ -24,7 +25,7 @@ export default function HrPortalPage() {
   const { isHr, loading } = useUserRoles();
   const navigate = useNavigate();
   const location = useLocation();
-  const [sub, setSub] = useState<HrSubTab>("recruitment");
+  const [sub, setSub] = useState<HrSubTab>("dashboard");
   const formationsMatch = useMatch("/rh/formations/*");
   const isFormationsRoute = !!formationsMatch || location.pathname === "/rh/formations";
 

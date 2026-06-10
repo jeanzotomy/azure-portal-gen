@@ -72,7 +72,7 @@ export const FormStepper: React.FC<FormStepperProps> = ({ steps, current, onStep
                   aria-hidden="true"
                   className={cn(
                     "mt-1 h-0.5 rounded-full transition-colors",
-                    isComplete ? "bg-gradient-to-r from-primary to-[#007aa3]" : "bg-border/70",
+                    isComplete ? "bg-gradient-primary-deep" : "bg-border/70",
                   )}
                 />
               )}

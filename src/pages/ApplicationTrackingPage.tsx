@@ -103,7 +103,7 @@ export default function ApplicationTrackingPage() {
       <Navbar />
       <main className="flex-1 container mx-auto px-4 py-12 max-w-3xl">
         <div className="text-center mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold mb-2 bg-gradient-to-r from-primary to-[#007aa3] bg-clip-text text-transparent">
+          <h1 className="text-3xl md:text-4xl font-bold mb-2 bg-gradient-primary-deep text-primary-foreground bg-clip-text text-transparent">
             Suivi de candidature
           </h1>
           <p className="text-muted-foreground">Consultez l'état d'avancement de votre dossier en toute confidentialité.</p>
@@ -135,7 +135,7 @@ export default function ApplicationTrackingPage() {
                   required
                 />
               </div>
-              <Button type="submit" disabled={loading} className="w-full h-11 bg-gradient-to-r from-primary to-[#007aa3] hover:opacity-95">
+              <Button type="submit" disabled={loading} className="w-full h-11 bg-gradient-primary-deep hover:opacity-95">
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <><Mail className="h-4 w-4 mr-2" /> Recevoir le code</>}
               </Button>
               <p className="text-xs text-muted-foreground text-center">
@@ -165,7 +165,7 @@ export default function ApplicationTrackingPage() {
                   required
                 />
               </div>
-              <Button type="submit" disabled={loading || code.length !== 6} className="w-full h-11 bg-gradient-to-r from-primary to-[#007aa3]">
+              <Button type="submit" disabled={loading || code.length !== 6} className="w-full h-11 bg-gradient-primary-deep text-primary-foreground">
                 {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Vérifier"}
               </Button>
               <button type="button" onClick={() => setStep("identify")} className="text-sm text-muted-foreground hover:text-primary block mx-auto">

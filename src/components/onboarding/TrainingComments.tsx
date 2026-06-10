@@ -328,7 +328,7 @@ export function TrainingComments({
                 ? `${Object.keys(selectedMentions).length} mention(s)`
                 : "Tapez @ pour mentionner"}
             </div>
-            <Button size="sm" onClick={submit} disabled={posting || !body.trim()} className="bg-gradient-to-r from-primary to-[#007aa3] h-7 text-xs">
+            <Button size="sm" onClick={submit} disabled={posting || !body.trim()} className="bg-gradient-primary-deep text-primary-foreground h-7 text-xs">
               {posting ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Send className="h-3 w-3 mr-1" />}
               Publier
             </Button>

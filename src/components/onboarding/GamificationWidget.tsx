@@ -78,7 +78,7 @@ export function GamificationWidget({ userId, refreshKey = 0 }: { userId: string;
 
   return (
     <div className="rounded-xl border bg-gradient-to-br from-primary/5 via-white to-cyan-50/40 overflow-hidden">
-      <div className="bg-gradient-to-r from-primary to-[#007aa3] px-4 py-2.5 flex items-center justify-between">
+      <div className="bg-gradient-primary-deep text-primary-foreground px-4 py-2.5 flex items-center justify-between">
         <div className="flex items-center gap-2 text-white">
           <Sparkles className="h-4 w-4" />
           <span className="font-semibold text-sm">Mon parcours d'apprentissage</span>

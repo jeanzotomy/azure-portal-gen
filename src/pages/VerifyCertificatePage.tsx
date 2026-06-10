@@ -119,7 +119,7 @@ export default function VerifyCertificatePage() {
                 <div className="mt-6 pt-6 border-t flex flex-wrap gap-2 justify-center">
                   <Button
                     onClick={() => setShareOpen(true)}
-                    className="bg-gradient-to-r from-primary to-[#007aa3] text-white"
+                    className="bg-gradient-primary-deep text-primary-foreground"
                   >
                     <Share2 className="h-4 w-4 mr-2" /> Partager ce certificat
                   </Button>

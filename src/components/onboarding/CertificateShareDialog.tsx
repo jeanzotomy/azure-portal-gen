@@ -88,7 +88,7 @@ export function CertificateShareDialog({ open, onOpenChange, data }: Props) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl">
-        <DialogHeader className="-mx-6 -mt-6 mb-2 px-6 pt-6 pb-4 bg-gradient-to-r from-primary to-[#007aa3] rounded-t-lg text-white">
+        <DialogHeader className="-mx-6 -mt-6 mb-2 px-6 pt-6 pb-4 bg-gradient-primary-deep text-primary-foreground rounded-t-lg text-white">
           <DialogTitle className="text-white flex items-center gap-2">
             <Share2 className="h-5 w-5" /> Partager mon certificat
           </DialogTitle>
