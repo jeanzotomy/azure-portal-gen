@@ -25,10 +25,13 @@ export function Navbar() {
     { label: t("nav.contact"), href: "#contact" },
   ];
 
+  const { value: pricingVisible } = useSiteSetting<boolean>("nav.pricing_visible", true);
+
   const routeLinks = [
-    { label: locale === "fr" ? "Tarifs" : "Pricing", to: "/pricing" },
+    ...(pricingVisible ? [{ label: locale === "fr" ? "Tarifs" : "Pricing", to: "/pricing" }] : []),
     { label: locale === "fr" ? "Formations" : "Trainings", to: "/formations" },
   ];
+
 
   const scrollTo = (id: string) => {
     setOpen(false);
