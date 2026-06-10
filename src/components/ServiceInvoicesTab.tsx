@@ -34,12 +34,23 @@ const STATUS_LABELS: Record<InvoiceRow["status"], { label: string; cls: string }
 
 export default function ServiceInvoicesTab() {
   const { toast } = useToast();
+  const { user } = useAuthSession();
+  const { openCheckout, closeCheckout, isOpen, checkoutElement } = useStripeCheckout();
   const [rows, setRows] = useState<InvoiceRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const [formOpen, setFormOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
+
+  const payInvoice = (id: string) => {
+    openCheckout({
+      invoiceId: id,
+      customerEmail: user?.email,
+      userId: user?.id,
+      returnUrl: `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
+    });
+  };
 
   const load = async () => {
     setLoading(true);
@@ -158,6 +169,11 @@ export default function ServiceInvoicesTab() {
                         <SelectItem value="annulee">Annulée</SelectItem>
                       </SelectContent>
                     </Select>
+                    {(r.status === "emise" || r.status === "en_retard") && (
+                      <Button size="icon" variant="ghost" onClick={() => payInvoice(r.id)} title="Payer en ligne (Stripe)">
+                        <CreditCard size={14} className="text-primary" />
+                      </Button>
+                    )}
                     {r.sharepoint_url && (
                       <Button size="icon" variant="ghost" asChild>
                         <a href={r.sharepoint_url} target="_blank" rel="noreferrer" title="Ouvrir dans SharePoint"><ExternalLink size={14} /></a>
@@ -176,6 +192,15 @@ export default function ServiceInvoicesTab() {
       )}
 
       <ServiceInvoiceForm open={formOpen} onOpenChange={(v) => { setFormOpen(v); if (!v) setEditId(null); }} editId={editId} onSaved={() => void load()} />
+
+      <Dialog open={isOpen} onOpenChange={(o) => { if (!o) closeCheckout(); }}>
+        <DialogContent className="max-w-2xl p-0 overflow-hidden max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="px-6 pt-6 pb-2">
+            <DialogTitle>Paiement de la facture</DialogTitle>
+          </DialogHeader>
+          <div className="p-4">{checkoutElement}</div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
