@@ -1,5 +1,5 @@
 import { createClient } from "npm:@supabase/supabase-js@2";
-import { corsHeaders, getCinetPayCreds, initPayment, normalizeAmount, type CinetPayCurrency } from "../_shared/cinetpay.ts";
+import { corsHeaders, loadCinetPayCreds, initPayment, normalizeAmount, type CinetPayCurrency } from "../_shared/cinetpay.ts";
 
 type Kind = "saas_subscription" | "training" | "service_invoice" | "consulting_pack";
 
