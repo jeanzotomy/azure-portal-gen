@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/sidebar";
 import {
   LayoutDashboard, FolderOpen, LifeBuoy, Users, LogOut, Shield, Clock, CheckCircle2,
-  AlertCircle, Bell, ChevronDown, ChevronUp, MessageSquare, Search, Send, UserCog, Settings,
+  AlertCircle, Bell, ChevronDown, ChevronUp, MessageSquare, Search, Send, UserCog, Settings, Plug,
   Flag, DollarSign, Calendar, Filter, TrendingUp, Activity, BarChart3, PieChart, ShieldBan, ShieldCheck, Trash2, RefreshCw,
   Smartphone, Phone, X, UserCheck, UserPlus, Upload, FileSpreadsheet, Pencil,
   LayoutGrid, List as ListIcon, Table as TableIcon, MapPin, Mail, Download,
