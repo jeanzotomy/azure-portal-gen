@@ -23,9 +23,33 @@ import {
   Pencil,
   AlertCircle,
   CheckCircle2,
+  Paperclip,
+  X,
+  FileText,
+  ImageIcon,
 } from "lucide-react";
 import { toast } from "sonner";
 import { cn } from "@/lib/utils";
+
+const MAX_FILES = 5;
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10 MB
+const TOTAL_MAX_SIZE = 25 * 1024 * 1024; // 25 MB combined
+const ACCEPTED_TYPES = [
+  "application/pdf",
+  "image/png",
+  "image/jpeg",
+  "image/jpg",
+  "image/webp",
+  "image/gif",
+];
+const ACCEPT_ATTR = ".pdf,image/png,image/jpeg,image/webp,image/gif";
+const ATTACHMENT_EXPIRY_SECONDS = 60 * 60 * 24 * 30; // 30 days
+
+const formatBytes = (b: number) => {
+  if (b < 1024) return `${b} o`;
+  if (b < 1024 * 1024) return `${(b / 1024).toFixed(1)} Ko`;
+  return `${(b / (1024 * 1024)).toFixed(2)} Mo`;
+};
 
 interface Props {
   open: boolean;
