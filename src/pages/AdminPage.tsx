@@ -655,6 +655,33 @@ function AdminContent() {
                     </SidebarMenuSub>
                   )}
                 </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton
+                    onClick={() => {
+                      setSettingsOpen((v) => !v);
+                      if (!isSettingsTab) setTab("users");
+                    }}
+                    isActive={isSettingsTab}
+                    tooltip="Paramètres" data-keep-mobile-open="true"
+                    className="gap-3"
+                  >
+                    <Settings size={18} />
+                    <span className="flex-1 text-left">Paramètres</span>
+                    {settingsOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                  </SidebarMenuButton>
+                  {settingsOpen && (
+                    <SidebarMenuSub>
+                      {settingsGroup.map((s) => (
+                        <SidebarMenuSubItem key={s.id}>
+                          <SidebarMenuSubButton onClick={() => setTab(s.id)} isActive={tab === s.id} className="gap-2 cursor-pointer">
+                            <s.icon size={14} />
+                            <span>{s.label}</span>
+                          </SidebarMenuSubButton>
+                        </SidebarMenuSubItem>
+                      ))}
+                    </SidebarMenuSub>
+                  )}
+                </SidebarMenuItem>
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>
