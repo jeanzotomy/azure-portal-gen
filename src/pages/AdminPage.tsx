@@ -50,6 +50,7 @@ import SeoTab from "@/components/SeoTab";
 import IntegrationsTab from "@/components/admin/IntegrationsTab";
 import { CertificateVerifyDashboard } from "@/components/admin/CertificateVerifyDashboard";
 import EmployeeTrainingManager from "@/components/admin/EmployeeTrainingManager";
+import CommerceTab from "@/components/admin/CommerceTab";
 import { getDialCode, applyDialCode } from "@/lib/country-dial-codes";
 
 type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts" | "sharepoint" | "seo" | "integrations" | "verify-certificates" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods" | "commerce" | "hr" | "hr-recruitment" | "hr-contracts" | "hr-onboarding" | "hr-trainings" | "hr-employee-trainings";
