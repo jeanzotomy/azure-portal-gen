@@ -152,7 +152,7 @@ export default function TrainingGroupsManagerPage({ basePath, parentLabel }: Pro
         subtitle="Créez des groupes pour assigner automatiquement un lot de formations à plusieurs employés. L'ajout d'une formation ou d'un membre propage les inscriptions."
         breadcrumbs={[
           { label: parentLabel },
-          { label: "Formations", href: `${effectiveBase}/formations` },
+          { label: "Formations" },
           { label: "Groupes" },
         ]}
         actions={
