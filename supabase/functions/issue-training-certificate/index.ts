@@ -205,15 +205,7 @@ Deno.serve(async (req) => {
     // Label
     const label = "Vérifier l'authenticité";
     const labelW = fontBold.widthOfTextAtSize(label, 9);
-    page.drawText(label, { x: qrX + (qrSize - labelW) / 2, y: qrY + qrSize + 14, size: 9, font: fontBold, color: ink });
-    // URL — auto-shrink to fit qrSize
-    let urlSize = 6.5;
-    let urlW = font.widthOfTextAtSize(verifyUrl, urlSize);
-    while (urlW > qrSize && urlSize > 4) {
-      urlSize -= 0.5;
-      urlW = font.widthOfTextAtSize(verifyUrl, urlSize);
-    }
-    page.drawText(verifyUrl, { x: qrX + (qrSize - urlW) / 2, y: qrY + qrSize + 4, size: urlSize, font, color: muted });
+    page.drawText(label, { x: qrX + (qrSize - labelW) / 2, y: qrY + qrSize + 6, size: 9, font: fontBold, color: ink });
     // Code under QR, centered
     const codeText = `Code : ${code}`;
     const codeW = fontBold.widthOfTextAtSize(codeText, 9);
