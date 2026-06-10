@@ -773,8 +773,7 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
                 </CardContent>
               </Card>
             );
-          });
-          })()}
+          })}
         </TabsContent>
 
             <TabsContent value="email-log" className="mt-4">
