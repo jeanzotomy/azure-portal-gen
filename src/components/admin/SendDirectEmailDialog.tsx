@@ -122,6 +122,8 @@ export default function SendDirectEmailDialog({
     setSubject("");
     setMessage("");
     setTab("edit");
+    setFiles([]);
+    setUploadProgress("");
     (async () => {
       const { data: u } = await supabase.auth.getUser();
       if (!u.user) return;
