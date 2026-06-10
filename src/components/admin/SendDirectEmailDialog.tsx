@@ -183,13 +183,6 @@ export default function SendDirectEmailDialog({
     setTab("edit");
   };
 
-  const totalSize = files.reduce((s, f) => s + f.size, 0);
-  const filesError =
-    files.length > MAX_FILES
-      ? `Trop de fichiers (max ${MAX_FILES})`
-      : totalSize > TOTAL_MAX_SIZE
-      ? `Taille totale dépassée (max ${formatBytes(TOTAL_MAX_SIZE)})`
-      : "";
 
   const handleFiles = (incoming: FileList | null) => {
     if (!incoming) return;
