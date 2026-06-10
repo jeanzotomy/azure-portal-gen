@@ -86,7 +86,7 @@ export function useConfirm() {
               "text-white shadow-sm",
               isDestructive
                 ? "bg-gradient-to-r from-destructive to-red-600 hover:opacity-95"
-                : "bg-gradient-to-r from-primary to-[#007aa3] hover:opacity-95",
+                : "bg-gradient-primary-deep hover:opacity-95",
             )}
           >
             {busy ? "..." : state?.confirmLabel ?? "Confirmer"}
