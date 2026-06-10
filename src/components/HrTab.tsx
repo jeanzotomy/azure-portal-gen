@@ -499,6 +499,34 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
     load();
   };
 
+  const filteredJobs = useMemo(() => {
+    const q = jobSearch.trim().toLowerCase();
+    return jobs.filter((j) => {
+      if (q) {
+        const haystack = [j.title, j.description, j.location, j.department, j.sector].filter(Boolean).join(" ").toLowerCase();
+        if (!haystack.includes(q)) return false;
+      }
+      if (jobStatusFilter !== "all" && j.status !== jobStatusFilter) return false;
+      if (jobContractFilter !== "all" && j.contract_type !== jobContractFilter) return false;
+      if (jobDeptFilter !== "all" && j.department !== jobDeptFilter) return false;
+      return true;
+    });
+  }, [jobs, jobSearch, jobStatusFilter, jobContractFilter, jobDeptFilter]);
+
+  const filteredApps = useMemo(() => {
+    const q = appSearch.trim().toLowerCase();
+    return applications.filter((a) => {
+      const job = jobs.find((j) => j.id === a.job_id);
+      if (q) {
+        const haystack = [a.full_name, a.email, a.phone, job?.title, job?.location].filter(Boolean).join(" ").toLowerCase();
+        if (!haystack.includes(q)) return false;
+      }
+      if (appStatusFilter !== "all" && a.status !== appStatusFilter) return false;
+      if (appJobFilter !== "all" && a.job_id !== appJobFilter) return false;
+      return true;
+    });
+  }, [applications, jobs, appSearch, appStatusFilter, appJobFilter]);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
