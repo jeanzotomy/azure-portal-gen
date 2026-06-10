@@ -1,52 +1,85 @@
-# Paramètres > Intégrations
+# Paiements CloudMature — Catalogue, checkout & logique métier
 
-## 1. Activer Stripe Payments natif (Lovable)
+Tu as choisi **les 4 types d'offres** + **multi-devises (CAD / USD / EUR)** + **accès jusqu'à fin de période avec upgrade prorata**. La logique métier post-achat n'a pas été remplie — je propose des défauts ci-dessous, dis-moi quoi ajuster avant que j'enchaîne.
 
-- Vendeur en Guinée → la prise en charge complète des taxes (`managed_payments`) n'est pas disponible pour ce pays.
-- Je vais activer Stripe avec **calcul et collecte automatiques des taxes uniquement** (`automatic_tax`, +0,5 %). Tu gardes la responsabilité de déclaration/remise.
-- Tu remplis un petit formulaire (email, nom commercial) au moment de l'activation. Environnement test immédiat ; le passage en live nécessite ensuite la vérification du compte.
+## 1. Catalogue à créer
 
-Aucun catalogue produit ni page de checkout n'est créé dans ce plan — seulement l'activation et l'affichage du statut dans la section Intégrations. Quand tu seras prêt à vendre, on créera produits + checkout dans une étape suivante.
+### A. Abonnements SaaS — Portail client
+3 plans, chacun en CAD/USD/EUR mensuel + annuel (économie ~17 %).
 
-## 2. Backend — 2 nouvelles tables
+| Plan | CAD/mois | USD/mois | EUR/mois | Inclus |
+|---|---|---|---|---|
+| Starter | 29 | 22 | 19 | Portail, 1 projet actif, 5 Go SharePoint, support email |
+| Pro | 89 | 65 | 59 | 5 projets, 50 Go, support prioritaire, factures illimitées |
+| Enterprise | 249 | 185 | 169 | Projets illimités, 500 Go, SSO, support 24/7, multi-utilisateurs |
 
-### `api_tokens` (clés API sortantes — pour qu'un tiers appelle nos Edge Functions)
-- `id uuid pk`, `name text`, `token_prefix text` (8 premiers caractères, affichable), `token_hash text` (SHA-256, jamais la valeur en clair), `scopes text[]`, `created_by uuid`, `created_at`, `last_used_at`, `expires_at nullable`, `revoked_at nullable`.
-- Le token complet n'est affiché **qu'une seule fois** à la création.
-- RLS : admin uniquement (SELECT/INSERT/UPDATE), `service_role` plein accès.
+→ Tax code `txcd_10103001` (SaaS).
 
-### `webhook_events` (journal d'appels webhooks entrants)
-- `id uuid`, `source text` (stripe/mailgun/sharepoint/…), `event_type text`, `status text` (received/processed/failed), `error text nullable`, `payload jsonb`, `received_at timestamptz default now()`.
-- Alimenté par les Edge Functions existantes (`handle-email-suppression`, `handle-email-unsubscribe`, futures stripe).
-- RLS : admin uniquement (SELECT), `service_role` INSERT.
+### B. Formations en ligne — one-shot
+Lecture dynamique de `public.trainings` (catalogue déjà en base). Je crée **un produit Stripe par formation active** au moment de l'init (script idempotent), prix défini par le champ `price` à ajouter sur la table (défaut 49 CAD si null). Tax code `txcd_10101000` (formation en ligne).
 
-## 3. Frontend — onglet `integrations` dans Paramètres
+### C. Acompte / paiement de facture (montant dynamique)
+Pas de produit fixe — utilise `price_data` au moment du checkout, monnaie et montant lus depuis la `service_invoice` sélectionnée. Tax code `txcd_20030000` (services pro).
 
-Nouvel onglet ajouté au groupe **Paramètres** (sidebar admin déjà créée).
-Composant `IntegrationsTab.tsx` à 4 cartes empilées :
+### D. Packs de consulting — forfaits
+| Pack | CAD | USD | EUR |
+|---|---|---|---|
+| Audit Cloud (1 jour) | 1 200 | 890 | 800 |
+| Sprint DevOps (5 jours) | 5 500 | 4 100 | 3 700 |
+| Accompagnement Mensuel (20 h) | 3 200 | 2 400 | 2 150 |
 
-1. **Connecteurs** — cartes Stripe / Microsoft Graph / Twilio / Mailgun avec badge « Connecté / Non connecté » lu depuis la présence des secrets correspondants (via Edge Function `check-integrations-status` qui retourne juste des booléens, jamais les valeurs).
-2. **Webhooks entrants** — liste statique des URLs Edge Function (suppression, unsubscribe, application-tracking…) avec bouton copier.
-3. **Clés API sortantes** — table des tokens + bouton « Générer un token » (modale qui affiche la valeur 1 seule fois) + actions Révoquer.
-4. **Journal des webhooks** — table paginée de `webhook_events` (50 derniers), filtre par source/status, refresh manuel.
+→ Tax code `txcd_20030000`.
 
-## 4. Edge Functions
+## 2. Logique métier post-paiement (défauts proposés)
 
-- `check-integrations-status` (nouvelle) : retourne `{ stripe: bool, microsoft: bool, twilio: bool, mailgun: bool }` en lisant `Deno.env`.
-- `manage-api-token` (nouvelle) : actions `create | revoke | list`. Admin uniquement (vérif role via JWT + `has_role`).
-- Pas de modification des fonctions de webhooks existantes dans ce plan (j'ajouterai l'insertion dans `webhook_events` dans une 2ᵉ passe si tu valides l'UI).
+| Événement Stripe | Action côté app |
+|---|---|
+| `customer.subscription.created` (SaaS) | Crée rôle `client_premium` (nouveau, à côté de `client`) + flag `plan_tier` sur `profiles` + email confirmation |
+| `customer.subscription.updated` (upgrade/downgrade) | Met à jour `plan_tier` immédiatement (proration gérée par Stripe) |
+| `customer.subscription.deleted` ou `cancel_at_period_end=true` | Garde l'accès jusqu'à `current_period_end`, puis retire `client_premium` automatiquement |
+| `checkout.session.completed` mode `payment` (formation) | INSERT dans `onboarding_assigned_trainings` (auto-enrôle l'acheteur) + email |
+| `checkout.session.completed` mode `payment` (facture) | UPDATE `service_invoices.status = 'payee'` + déclenche le trigger existant `recalculate_project_paid` |
+| `checkout.session.completed` mode `payment` (pack consulting) | Crée un `support_ticket` interne « Activation pack X » assigné aux admins + email |
+| `invoice.payment_failed` | Notif bell admin + email client, conserve l'accès (status `past_due`) |
 
-## Détails techniques
+**Confirme ou modifie cette liste** — je n'irai pas plus loin sans ton OK sur ce tableau.
 
-- Types ajoutés à `AdminTab` : `"integrations"`.
-- `settingsGroup` reçoit une 3ᵉ entrée `{ id: "integrations", icon: Plug, label: "Intégrations" }`.
-- Tokens : hashage `crypto.subtle.digest('SHA-256', ...)` côté Edge Function ; jamais stocké en clair.
-- Statut Stripe lu via la présence des secrets `STRIPE_*` injectés par `enable_stripe_payments`.
+## 3. Backend — migrations
 
-## Hors scope (à discuter ensuite)
-- Création de produits Stripe + page de checkout.
-- Webhook handler Stripe (signature vérifiée) — à brancher quand tu auras des produits.
-- Rate-limiting sur les tokens sortants.
-- Rotation automatique.
+1. **`subscriptions`** : table standard Stripe (user_id, stripe_subscription_id, price_id, status, current_period_end, cancel_at_period_end, environment) + RLS user-self-read + service_role-all + fonction `has_active_subscription`.
+2. **Ajouts** : colonnes `plan_tier text` sur `profiles`, `price_cents int` + `currency text` sur `trainings`.
+3. **Nouveau rôle** : `client_premium` ajouté à l'enum `app_role`.
+4. **Trigger** : cron horaire `revoke_expired_premium()` qui retire `client_premium` quand `current_period_end < now()`.
 
-Confirme-moi que ce périmètre est OK et j'enchaîne avec l'activation Stripe puis l'implémentation.
+## 4. Edge functions
+
+- `create-checkout` — résout `priceId` via lookup_key, crée Customer avec metadata.userId, mode auto (`payment`/`subscription`), `managed_payments: { enabled: true }` (compte Stripe au Canada ⇒ éligible, +3,5 %), `return_url`. `verify_jwt = false`.
+- `create-invoice-checkout` — variante `price_data` pour les factures (montant dynamique).
+- `create-portal-session` — billing portal Stripe (annulation/MAJ CB).
+- `payments-webhook` — handler dahlia avec les 7 cas du tableau ci-dessus.
+
+## 5. Frontend
+
+- `src/lib/stripe.ts` + `getStripe()` + `getStripeEnvironment()` (token derivation safe).
+- `PaymentTestModeBanner` posé sur `/portail` et `/pricing`.
+- **`/pricing`** (publique) — 3 plans SaaS, sélecteur devise (CAD/USD/EUR), toggle mois/année. Boutons → embedded checkout.
+- **`/portail/abonnement`** — état actuel (plan, prochain renouvellement, badge `cancel_at_period_end`), bouton « Gérer mon abonnement » (portal).
+- **Bouton « Payer en ligne »** sur la fiche facture (`ServiceInvoicesTab`) → embedded checkout `price_data`.
+- **Page formation** — bouton « S'inscrire (X CAD) » si user n'a pas déjà la formation assignée.
+- **`/services/packs`** — 3 cartes pack consulting.
+- Page de retour `/checkout/return` (lit `session_id`).
+
+## 6. Hors scope (à faire après)
+
+- Tax codes par formation individuelle (on met le défaut SaaS pour toutes pour démarrer).
+- Routing buyer-country pour optimiser le +3,5 % (tout en `managed_payments` au début, plus simple).
+- Coupons / codes promo.
+- Facturation prorata custom (Stripe gère).
+- Multi-seat sur Enterprise (seats fixes pour l'instant).
+
+---
+
+**Pour valider ce plan, j'ai besoin de :**
+1. **OK ou ajustements sur les prix** (Starter 29 CAD, Pro 89, Enterprise 249, packs…) — c'est le seul point que je ne peux pas inventer.
+2. **OK sur la logique métier** du tableau §2 (en particulier : créer le rôle `client_premium` ? auto-enrôler les formations ? marquer facture payée auto ?).
+3. **OK sur le scope** — si tu veux qu'on découpe et qu'on commence par 1 seule offre (ex: SaaS seul d'abord), dis-le, ça réduit énormément le diff.

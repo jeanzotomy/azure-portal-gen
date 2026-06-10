@@ -911,6 +911,7 @@ export type Database = {
           last_name: string | null
           location: string | null
           phone: string | null
+          plan_tier: string | null
           signature_url: string | null
           timezone: string | null
           updated_at: string
@@ -930,6 +931,7 @@ export type Database = {
           last_name?: string | null
           location?: string | null
           phone?: string | null
+          plan_tier?: string | null
           signature_url?: string | null
           timezone?: string | null
           updated_at?: string
@@ -949,6 +951,7 @@ export type Database = {
           last_name?: string | null
           location?: string | null
           phone?: string | null
+          plan_tier?: string | null
           signature_url?: string | null
           timezone?: string | null
           updated_at?: string
@@ -1449,6 +1452,54 @@ export type Database = {
         }
         Relationships: []
       }
+      subscriptions: {
+        Row: {
+          cancel_at_period_end: boolean | null
+          created_at: string
+          current_period_end: string | null
+          current_period_start: string | null
+          environment: string
+          id: string
+          price_id: string
+          product_id: string
+          status: string
+          stripe_customer_id: string
+          stripe_subscription_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          cancel_at_period_end?: boolean | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          environment?: string
+          id?: string
+          price_id: string
+          product_id: string
+          status?: string
+          stripe_customer_id: string
+          stripe_subscription_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          cancel_at_period_end?: boolean | null
+          created_at?: string
+          current_period_end?: string | null
+          current_period_start?: string | null
+          environment?: string
+          id?: string
+          price_id?: string
+          product_id?: string
+          status?: string
+          stripe_customer_id?: string
+          stripe_subscription_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       support_tickets: {
         Row: {
           created_at: string
@@ -1841,12 +1892,14 @@ export type Database = {
           content: Json | null
           created_at: string
           created_by: string
+          currency: string | null
           departments: string[]
           description: string | null
           duration_minutes: number | null
           id: string
           level: string | null
           passing_score: number
+          price_cents: number | null
           quiz: Json | null
           sectors: string[]
           target_job_titles: string[]
@@ -1862,12 +1915,14 @@ export type Database = {
           content?: Json | null
           created_at?: string
           created_by: string
+          currency?: string | null
           departments?: string[]
           description?: string | null
           duration_minutes?: number | null
           id?: string
           level?: string | null
           passing_score?: number
+          price_cents?: number | null
           quiz?: Json | null
           sectors?: string[]
           target_job_titles?: string[]
@@ -1883,12 +1938,14 @@ export type Database = {
           content?: Json | null
           created_at?: string
           created_by?: string
+          currency?: string | null
           departments?: string[]
           description?: string | null
           duration_minutes?: number | null
           id?: string
           level?: string | null
           passing_score?: number
+          price_cents?: number | null
           quiz?: Json | null
           sectors?: string[]
           target_job_titles?: string[]
@@ -2058,6 +2115,10 @@ export type Database = {
         Args: { _user_id: string }
         Returns: string
       }
+      has_active_subscription: {
+        Args: { check_env?: string; user_uuid: string }
+        Returns: boolean
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -2158,6 +2219,10 @@ export type Database = {
           tracking_id: string
         }[]
       }
+      sync_premium_role_for_user: {
+        Args: { _user_id: string }
+        Returns: undefined
+      }
       unassign_employee_training: {
         Args: { _training_id: string; _user_id: string }
         Returns: boolean
@@ -2188,6 +2253,7 @@ export type Database = {
         | "gestionnaire"
         | "onboarding"
         | "hr"
+        | "client_premium"
       application_status:
         | "nouvelle"
         | "en_revue"
@@ -2362,6 +2428,7 @@ export const Constants = {
         "gestionnaire",
         "onboarding",
         "hr",
+        "client_premium",
       ],
       application_status: [
         "nouvelle",
