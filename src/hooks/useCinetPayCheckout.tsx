@@ -1,4 +1,5 @@
 import { useState, useCallback } from "react";
+import { FunctionsHttpError } from "@supabase/supabase-js";
 import { supabase } from "@/integrations/supabase/client";
 import type { AfricanCurrency } from "@/lib/cinetpay";
 
