@@ -802,6 +802,9 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
               <Briefcase size={18} />
               {editing ? "Modifier l'offre" : "Nouvelle offre d'emploi"}
             </DialogTitle>
+            <DialogDescription>
+              {editing ? "Mettez à jour les informations de l'offre publiée." : "Renseignez le poste, le contrat et la description publique."}
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-5 max-h-[60vh] overflow-y-auto pr-1 pt-1">
             <FormSection
