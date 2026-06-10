@@ -51,7 +51,6 @@ const Email = ({
         <Container style={container}>
           <Img src={LOGO_URL} alt={SITE_NAME} width="48" height="48" style={{ margin: '0 0 20px' }} />
           <Heading style={h1}>{messageSubject || 'Vous avez un nouveau message'}</Heading>
-          <Text style={text}>Bonjour {recipientName || ''},</Text>
           <Section style={card}>
             {paragraphs.length > 0
               ? paragraphs.map((p, i) => (
