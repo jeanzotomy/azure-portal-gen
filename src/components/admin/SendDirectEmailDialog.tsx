@@ -289,14 +289,21 @@ export default function SendDirectEmailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl p-0 overflow-hidden">
-        <DialogHeader className="bg-gradient-primary-deep px-6 py-4">
-          <DialogTitle className="flex items-center gap-2 text-white">
-            <Mail className="h-5 w-5" /> Envoyer un email
-          </DialogTitle>
-          <DialogDescription className="text-white/80">
-            Message direct au destinataire — il pourra répondre par retour d'email.
-          </DialogDescription>
+      <DialogContent className="max-w-2xl p-0 overflow-hidden gap-0 [&>button.absolute]:top-5 [&>button.absolute]:right-5 [&>button.absolute]:text-white [&>button.absolute]:opacity-80 [&>button.absolute]:hover:opacity-100 [&>button.absolute]:hover:bg-white/15 [&>button.absolute]:rounded-md [&>button.absolute]:p-1 [&>button.absolute]:transition">
+        <DialogHeader className="bg-gradient-primary-deep px-6 py-5 pr-14 space-y-1.5 text-left">
+          <div className="flex items-center gap-3">
+            <div className="h-9 w-9 rounded-lg bg-white/15 backdrop-blur-sm flex items-center justify-center ring-1 ring-white/20 shrink-0">
+              <Mail className="h-4.5 w-4.5 text-white" />
+            </div>
+            <div className="min-w-0">
+              <DialogTitle className="text-white text-lg font-semibold leading-tight">
+                Envoyer un email
+              </DialogTitle>
+              <DialogDescription className="text-white/75 text-xs mt-0.5 leading-snug">
+                Message direct — le destinataire peut répondre par retour d'email
+              </DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
 
         <div className="px-6 pt-5 pb-2 space-y-4 max-h-[70vh] overflow-y-auto">
