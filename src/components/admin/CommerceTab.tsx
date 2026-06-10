@@ -3,13 +3,17 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Briefcase, BookOpen, Receipt, CreditCard, Tag, Plug, ExternalLink, AlertCircle } from "lucide-react";
+import { Switch } from "@/components/ui/switch";
+import { Label } from "@/components/ui/label";
+import { Briefcase, BookOpen, Receipt, CreditCard, Tag, Plug, ExternalLink, AlertCircle, Eye, EyeOff } from "lucide-react";
 import ServiceClientsTab from "@/components/ServiceClientsTab";
 import ServiceCatalogTab from "@/components/ServiceCatalogTab";
 import ServiceInvoicesTab from "@/components/ServiceInvoicesTab";
 import PaymentMethodsTab from "@/components/PaymentMethodsTab";
 import CinetPayConfigCard from "@/components/admin/CinetPayConfigCard";
 import { Link } from "react-router-dom";
+import { useSiteSetting } from "@/hooks/use-site-setting";
+import { toast } from "sonner";
 
 interface CommerceTabProps {
   initialSection?: CommerceSection;
