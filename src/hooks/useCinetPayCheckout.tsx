@@ -36,7 +36,20 @@ export function useCinetPayCheckout() {
       const { data, error: invokeErr } = await supabase.functions.invoke("create-cinetpay-payment", {
         body: { ...input, returnUrl },
       });
-      if (invokeErr) throw new Error(invokeErr.message);
+      if (invokeErr) {
+        let msg = invokeErr.message;
+        let status: number | undefined;
+        if (invokeErr instanceof FunctionsHttpError) {
+          status = invokeErr.context?.status;
+          try {
+            const body = await invokeErr.context.json();
+            if (body?.error) msg = body.error;
+          } catch { /* keep generic message */ }
+        }
+        const err = new Error(msg) as Error & { status?: number };
+        err.status = status;
+        throw err;
+      }
       if (!data?.payment_url) throw new Error(data?.error || "Initialisation CinetPay échouée");
       const result = data as CinetPayCheckoutResult;
       setLast(result);
