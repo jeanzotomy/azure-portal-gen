@@ -566,17 +566,6 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
           {!loading && jobs.length > 0 && (() => {
             const jobDepartments = Array.from(new Set(jobs.map((j) => j.department).filter((d): d is string => !!d))).sort();
             const jobContracts = Array.from(new Set(jobs.map((j) => j.contract_type)));
-            const filteredJobs = jobs.filter((j) => {
-              const q = jobSearch.trim().toLowerCase();
-              if (q) {
-                const haystack = [j.title, j.description, j.location, j.department, j.sector].filter(Boolean).join(" ").toLowerCase();
-                if (!haystack.includes(q)) return false;
-              }
-              if (jobStatusFilter !== "all" && j.status !== jobStatusFilter) return false;
-              if (jobContractFilter !== "all" && j.contract_type !== jobContractFilter) return false;
-              if (jobDeptFilter !== "all" && j.department !== jobDeptFilter) return false;
-              return true;
-            });
             const hasJobFilters = !!jobSearch || jobStatusFilter !== "all" || jobContractFilter !== "all" || jobDeptFilter !== "all";
             const resetJobFilters = () => { setJobSearch(""); setJobStatusFilter("all"); setJobContractFilter("all"); setJobDeptFilter("all"); };
             return (
