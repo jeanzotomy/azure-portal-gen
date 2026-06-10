@@ -20,12 +20,14 @@ const toast = (opts: { title?: string; description?: string; variant?: string })
   const fn = opts.variant === "destructive" ? sonnerToast.error : sonnerToast.success;
   fn(opts.title || "", opts.description ? { description: opts.description } : undefined);
 };
-import { Briefcase, Plus, Pencil, Trash2, FileText, Download, Calendar, MapPin, RefreshCw, Building2, X, Search, FolderOpen, FolderX, Mail, FileSignature, GraduationCap, Users, Sparkles, Loader2, AlertCircle, TrendingUp, ThumbsUp, ThumbsDown } from "lucide-react";
+import { Briefcase, Plus, Pencil, Trash2, FileText, Download, Calendar, MapPin, RefreshCw, Building2, X, Search, FolderOpen, FolderX, Mail, FileSignature, GraduationCap, Users, Sparkles, Loader2, AlertCircle, TrendingUp, ThumbsUp, ThumbsDown, LayoutDashboard, FileDown } from "lucide-react";
 import { format } from "date-fns";
 import EmailLogTab from "./EmailLogTab";
 import OnboardingAdminTab from "./OnboardingAdminTab";
 import ContractsTab from "./hr/ContractsTab";
 import TrainingsTab from "./hr/TrainingsTab";
+import HrDashboardTab from "./hr/HrDashboardTab";
+import { exportCsv } from "@/lib/csv-export";
 
 type JobStatus = "brouillon" | "publiee" | "fermee";
 type ContractType = "CDI" | "CDD" | "Stage" | "Freelance" | "Alternance";
