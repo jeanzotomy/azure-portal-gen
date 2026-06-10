@@ -314,9 +314,11 @@ export default function PricingPage() {
 
       <Dialog open={isOpen} onOpenChange={(o) => { if (!o) closeCheckout(); }}>
         <DialogContent className="max-w-2xl max-h-[90vh] p-0 overflow-hidden flex flex-col gap-0">
-          <DialogHeader className="shrink-0 px-6 py-4 pr-12 border-b bg-gradient-primary-deep text-primary-foreground space-y-1 text-left">
-            <DialogTitle className="text-primary-foreground">Paiement sécurisé</DialogTitle>
-            <DialogDescription className="text-primary-foreground/80">
+          <DialogHeader className="shrink-0 px-8 pt-6 pb-5 pr-14 border-b bg-gradient-primary-deep text-primary-foreground space-y-1.5 text-left">
+            <DialogTitle className="text-primary-foreground text-xl font-semibold leading-tight">
+              Paiement sécurisé
+            </DialogTitle>
+            <DialogDescription className="text-primary-foreground/85 text-sm leading-relaxed">
               Powered by Stripe — données chiffrées de bout en bout.
             </DialogDescription>
           </DialogHeader>
