@@ -339,7 +339,7 @@ export default function EmployeeTrainingAssignmentPage({
                     disabled={already || busy === t.id}
                     onClick={() => assignTraining(t.id)}
                     variant={already ? "outline" : "default"}
-                    className={!already ? "bg-gradient-to-r from-primary to-[#007aa3] text-white" : ""}
+                    className={!already ? "bg-gradient-primary-deep text-primary-foreground" : ""}
                   >
                     {busy === t.id ? (
                       <Loader2 className="h-4 w-4 animate-spin" />

@@ -90,7 +90,7 @@ export function TrainingTutor({ trainingId, trainingTitle, onClose }: { training
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-end md:items-center justify-center p-0 md:p-4" onClick={onClose}>
       <div className="bg-white rounded-t-lg md:rounded-lg w-full max-w-2xl h-[80vh] md:h-[70vh] flex flex-col shadow-xl" onClick={e => e.stopPropagation()}>
-        <div className="bg-gradient-to-r from-primary to-[#007aa3] px-4 py-3 rounded-t-lg flex items-center justify-between">
+        <div className="bg-gradient-primary-deep text-primary-foreground px-4 py-3 rounded-t-lg flex items-center justify-between">
           <div className="flex items-center gap-2 text-white">
             <div className="h-8 w-8 rounded-full bg-white/20 flex items-center justify-center">
               <Sparkles className="h-4 w-4" />
@@ -129,7 +129,7 @@ export function TrainingTutor({ trainingId, trainingTitle, onClose }: { training
             disabled={streaming}
             className="flex-1 px-3 py-2 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
           />
-          <Button size="sm" onClick={send} disabled={streaming || !input.trim()} className="bg-gradient-to-r from-primary to-[#007aa3]">
+          <Button size="sm" onClick={send} disabled={streaming || !input.trim()} className="bg-gradient-primary-deep text-primary-foreground">
             {streaming ? <Loader2 className="h-4 w-4 animate-spin" /> : <Send className="h-4 w-4" />}
           </Button>
         </div>

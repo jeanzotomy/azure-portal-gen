@@ -284,7 +284,7 @@ export default function OnboardingTab({ user }: { user: SupaUser }) {
   return (
     <div className="space-y-6">
       {/* Hero */}
-      <div className="rounded-2xl bg-gradient-to-r from-primary to-[#007aa3] text-white p-6 shadow-md">
+      <div className="rounded-2xl bg-gradient-primary-deep text-primary-foreground p-6 shadow-md">
         <div className="flex items-start justify-between gap-3 flex-wrap">
           <div>
             <div className="flex items-center gap-2 text-cyan-100 text-sm mb-2">
@@ -386,7 +386,7 @@ export default function OnboardingTab({ user }: { user: SupaUser }) {
                   </Button>
                 )}
                 {accessible && !signed && (
-                  <Button className="bg-gradient-to-r from-primary to-[#007aa3]" onClick={() => setActiveStepId(contractStep.id)}>
+                  <Button className="bg-gradient-primary-deep text-primary-foreground" onClick={() => setActiveStepId(contractStep.id)}>
                     <FileSignature className="h-4 w-4 mr-2" /> Démarrer la signature
                   </Button>
                 )}
@@ -1004,7 +1004,7 @@ export function TrainingPlayer({ assigned, userId, onComplete }: { assigned: any
               </a>
             )}
             {hasQuiz && !assigned.completed_at && (
-              <Button size="sm" onClick={openQuiz} className="bg-gradient-to-r from-primary to-[#007aa3]">
+              <Button size="sm" onClick={openQuiz} className="bg-gradient-primary-deep text-primary-foreground">
                 <GraduationCap className="h-3 w-3 mr-1" />{result ? "Réessayer le QCM" : "Passer le QCM"}
               </Button>
             )}
@@ -1039,15 +1039,15 @@ export function TrainingPlayer({ assigned, userId, onComplete }: { assigned: any
               <ChevronLeft className="h-4 w-4 mr-1" /> Précédent
             </Button>
             {!onLastCoursePage ? (
-              <Button size="sm" onClick={() => setCoursePage(p => Math.min(coursePages.length - 1, p + 1))} className="bg-gradient-to-r from-primary to-[#007aa3]">
+              <Button size="sm" onClick={() => setCoursePage(p => Math.min(coursePages.length - 1, p + 1))} className="bg-gradient-primary-deep text-primary-foreground">
                 Suivant <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             ) : hasQuiz && !assigned.completed_at ? (
-              <Button size="sm" onClick={openQuiz} className="bg-gradient-to-r from-primary to-[#007aa3]">
+              <Button size="sm" onClick={openQuiz} className="bg-gradient-primary-deep text-primary-foreground">
                 Passer au QCM <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             ) : !hasQuiz && !assigned.completed_at ? (
-              <Button size="sm" onClick={onComplete} className="bg-gradient-to-r from-primary to-[#007aa3]">
+              <Button size="sm" onClick={onComplete} className="bg-gradient-primary-deep text-primary-foreground">
                 Terminer la formation <CheckCircle2 className="h-4 w-4 ml-1" />
               </Button>
             ) : (
@@ -1060,7 +1060,7 @@ export function TrainingPlayer({ assigned, userId, onComplete }: { assigned: any
       {quizOpen && hasQuiz && (
         <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" onClick={() => !submitting && (showResults ? closeResults() : setQuizOpen(false))}>
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-            <div className="bg-gradient-to-r from-primary to-[#007aa3] p-4 rounded-t-lg flex items-start justify-between gap-3">
+            <div className="bg-gradient-primary-deep text-primary-foreground p-4 rounded-t-lg flex items-start justify-between gap-3">
               <div>
                 <h3 className="text-white font-semibold">QCM — {t.title}</h3>
                 <p className="text-cyan-100 text-xs">Score minimum requis : {passingScore}%</p>
@@ -1175,7 +1175,7 @@ export function TrainingPlayer({ assigned, userId, onComplete }: { assigned: any
                       </Button>
                     </>
                   )}
-                  <Button size="sm" onClick={closeResults} className="bg-gradient-to-r from-primary to-[#007aa3]">
+                  <Button size="sm" onClick={closeResults} className="bg-gradient-primary-deep text-primary-foreground">
                     Fermer
                   </Button>
                 </div>
@@ -1230,11 +1230,11 @@ export function TrainingPlayer({ assigned, userId, onComplete }: { assigned: any
                   <div className="flex gap-2">
                     <Button size="sm" variant="ghost" onClick={() => setQuizOpen(false)} disabled={submitting}>Annuler</Button>
                     {quizPage < questions.length - 1 ? (
-                      <Button size="sm" onClick={() => setQuizPage(p => p + 1)} disabled={!currentAnswered} className="bg-gradient-to-r from-primary to-[#007aa3]">
+                      <Button size="sm" onClick={() => setQuizPage(p => p + 1)} disabled={!currentAnswered} className="bg-gradient-primary-deep text-primary-foreground">
                         Suivant <ChevronRight className="h-4 w-4 ml-1" />
                       </Button>
                     ) : (
-                      <Button size="sm" onClick={submitQuiz} disabled={!allAnswered || submitting} className="bg-gradient-to-r from-primary to-[#007aa3]">
+                      <Button size="sm" onClick={submitQuiz} disabled={!allAnswered || submitting} className="bg-gradient-primary-deep text-primary-foreground">
                         {submitting ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : null}
                         Soumettre
                       </Button>
