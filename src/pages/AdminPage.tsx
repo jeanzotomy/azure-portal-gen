@@ -722,10 +722,11 @@ function AdminContent() {
               {tab === "seo" && <SeoTab />}
               {tab === "integrations" && <IntegrationsTab />}
               {tab === "verify-certificates" && <CertificateVerifyDashboard />}
-              {tab === "service-clients" && <ServiceClientsTab />}
-              {tab === "service-catalog" && <ServiceCatalogTab />}
-              {tab === "service-invoices" && <ServiceInvoicesTab />}
-              {tab === "payment-methods" && <PaymentMethodsTab />}
+              {tab === "commerce" && <CommerceTab />}
+              {tab === "service-clients" && <CommerceTab initialSection="clients" />}
+              {tab === "service-catalog" && <CommerceTab initialSection="catalog" />}
+              {tab === "service-invoices" && <CommerceTab initialSection="invoices" />}
+              {tab === "payment-methods" && <CommerceTab initialSection="methods" />}
               {tab === "hr" && <HrTab />}
               {tab === "hr-recruitment" && <HrTab defaultTab="recruitment" />}
               {tab === "hr-contracts" && <HrTab defaultTab="contracts" />}
