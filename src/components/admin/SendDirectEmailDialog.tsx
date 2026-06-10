@@ -161,12 +161,21 @@ export default function SendDirectEmailDialog({
       ? "Message trop court (min. 5 caractères)"
       : "";
 
+  const totalSize = files.reduce((s, f) => s + f.size, 0);
+  const filesError =
+    files.length > MAX_FILES
+      ? `Trop de fichiers (max ${MAX_FILES})`
+      : totalSize > TOTAL_MAX_SIZE
+      ? `Taille totale dépassée (max ${formatBytes(TOTAL_MAX_SIZE)})`
+      : "";
+
   const canSend =
     !submitting &&
     subject.trim().length > 0 &&
     messageTrimmedLen >= MESSAGE_MIN &&
     !subjectError &&
-    !messageError;
+    !messageError &&
+    !filesError;
 
   const applyTemplate = (t: Template) => {
     setSubject(t.subject);
