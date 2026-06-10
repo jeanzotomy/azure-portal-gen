@@ -217,8 +217,19 @@ export default function PricingPage() {
         </div>
 
         {cinetpay.error && (
-          <div className="max-w-2xl mx-auto mb-6 p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800">
-            {cinetpay.error}
+          <div className="max-w-2xl mx-auto mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-sm text-red-800 space-y-2">
+            <p className="font-medium">{cinetpay.error}</p>
+            {isAdmin ? (
+              <p className="text-xs">
+                <Link to="/admin?tab=integrations" className="underline font-semibold">
+                  Configurer CinetPay dans Admin → Intégrations →
+                </Link>
+              </p>
+            ) : (
+              <p className="text-xs text-red-700">
+                Le paiement Mobile Money est temporairement indisponible. Choisis une devise internationale (CAD / USD / EUR) ou réessaie plus tard.
+              </p>
+            )}
           </div>
         )}
 
