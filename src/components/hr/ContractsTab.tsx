@@ -10,8 +10,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import {
-  FileSignature, Sparkles, Loader2, Download, RefreshCw, FileUp, CheckCircle2, Clock, Search, Briefcase,
+  FileSignature, Sparkles, Loader2, Download, RefreshCw, FileUp, CheckCircle2, Clock, Search, Briefcase, FileDown,
 } from "lucide-react";
+import { exportCsv } from "@/lib/csv-export";
 
 interface Row {
   process_id: string;
