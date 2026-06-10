@@ -90,14 +90,31 @@ export default function EmployeeTrainingManager() {
         subtitle="Assignez et suivez les formations continues du personnel. Cliquez sur un utilisateur pour gérer son parcours."
         breadcrumbs={[{ label: basePath === "/rh" ? "RH" : "Admin" }, { label: "Formations employés" }]}
         actions={
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={loadUsers}
-            className="bg-white/15 hover:bg-white/25 text-white border-white/20"
-          >
-            <RefreshCw className="h-4 w-4 mr-1" /> Actualiser
-          </Button>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button
+              size="sm"
+              onClick={() => setBulkOpen(true)}
+              className="bg-white text-primary hover:bg-white/90"
+            >
+              <UsersRound className="h-4 w-4 mr-1" /> Assigner en masse
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => navigate(`${basePath}/formations/groupes`)}
+              className="bg-white/15 hover:bg-white/25 text-white border-white/20"
+            >
+              <Layers className="h-4 w-4 mr-1" /> Groupes
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={loadUsers}
+              className="bg-white/15 hover:bg-white/25 text-white border-white/20"
+            >
+              <RefreshCw className="h-4 w-4 mr-1" /> Actualiser
+            </Button>
+          </div>
         }
       />
 
