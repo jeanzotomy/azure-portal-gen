@@ -662,17 +662,6 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
             <Card><CardContent className="p-8 text-center text-muted-foreground">Aucune candidature reçue.</CardContent></Card>
           )}
           {!loading && applications.length > 0 && (() => {
-            const filteredApps = applications.filter((a) => {
-              const job = jobs.find((j) => j.id === a.job_id);
-              const q = appSearch.trim().toLowerCase();
-              if (q) {
-                const haystack = [a.full_name, a.email, a.phone, job?.title, job?.location].filter(Boolean).join(" ").toLowerCase();
-                if (!haystack.includes(q)) return false;
-              }
-              if (appStatusFilter !== "all" && a.status !== appStatusFilter) return false;
-              if (appJobFilter !== "all" && a.job_id !== appJobFilter) return false;
-              return true;
-            });
             const hasAppFilters = !!appSearch || appStatusFilter !== "all" || appJobFilter !== "all";
             const resetAppFilters = () => { setAppSearch(""); setAppStatusFilter("all"); setAppJobFilter("all"); };
             const jobsWithApps = jobs.filter((j) => applications.some((a) => a.job_id === j.id));
