@@ -23,6 +23,8 @@ export type CommerceSection = "clients" | "catalog" | "invoices" | "methods" | "
 
 export default function CommerceTab({ initialSection = "catalog" }: CommerceTabProps) {
   const [section, setSection] = useState<CommerceSection>(initialSection);
+  const { value: pricingVisible, update: setPricingVisible, loading: pricingLoading } =
+    useSiteSetting<boolean>("nav.pricing_visible", true);
 
   return (
     <div className="space-y-4 p-4 md:p-6">
