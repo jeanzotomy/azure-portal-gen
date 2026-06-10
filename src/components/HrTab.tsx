@@ -701,22 +701,10 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
               </div>
             );
           })()}
-          {(() => {
-            const filteredApps = applications.filter((a) => {
-              const job = jobs.find((j) => j.id === a.job_id);
-              const q = appSearch.trim().toLowerCase();
-              if (q) {
-                const haystack = [a.full_name, a.email, a.phone, job?.title, job?.location].filter(Boolean).join(" ").toLowerCase();
-                if (!haystack.includes(q)) return false;
-              }
-              if (appStatusFilter !== "all" && a.status !== appStatusFilter) return false;
-              if (appJobFilter !== "all" && a.job_id !== appJobFilter) return false;
-              return true;
-            });
-            if (!loading && applications.length > 0 && filteredApps.length === 0) {
-              return <Card><CardContent className="p-8 text-center text-muted-foreground text-sm">Aucune candidature ne correspond aux filtres.</CardContent></Card>;
-            }
-            return filteredApps.map((app) => {
+          {!loading && applications.length > 0 && filteredApps.length === 0 && (
+            <Card><CardContent className="p-8 text-center text-muted-foreground text-sm">Aucune candidature ne correspond aux filtres.</CardContent></Card>
+          )}
+          {filteredApps.map((app) => {
             const job = jobs.find((j) => j.id === app.job_id);
             return (
               <Card key={app.id}>
