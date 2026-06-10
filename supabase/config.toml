@@ -31,3 +31,9 @@ project_id = "zwzazxebufydnaxezngx"
     verify_jwt = false
   [functions.payments-webhook]
     verify_jwt = false
+  [functions.create-cinetpay-payment]
+    verify_jwt = false
+  [functions.cinetpay-webhook]
+    verify_jwt = false
+  [functions.verify-cinetpay-payment]
+    verify_jwt = false
