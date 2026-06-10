@@ -19,10 +19,6 @@ const SUBS: { id: HrSubTab; label: string; icon: typeof Briefcase }[] = [
   { id: "onboarding", label: "Onboarding", icon: Users },
   { id: "trainings", label: "Formation (onboarding)", icon: GraduationCap },
 ];
-  { id: "contracts", label: "Générer le contrat", icon: FileSignature },
-  { id: "onboarding", label: "Onboarding", icon: Users },
-  { id: "trainings", label: "Formation (onboarding)", icon: GraduationCap },
-];
 
 export default function HrPortalPage() {
   const { user, ready } = useAuthSession();
