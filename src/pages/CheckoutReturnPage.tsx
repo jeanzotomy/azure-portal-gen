@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import { CheckCircle2, AlertCircle, Loader2, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { supabase } from "@/integrations/supabase/client";
 import { formatAmount, type AllCurrency } from "@/lib/cinetpay";
 
 type Status = "loading" | "paid" | "pending" | "failed" | "unknown";
