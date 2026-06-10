@@ -174,32 +174,106 @@ export default function SendDirectEmailDialog({
     setTab("edit");
   };
 
-  const handleSend = async () => {
-    if (!canSend) return;
-    setSubmitting(true);
-    const idempotencyKey = `direct-msg-${recipientUserId || recipientEmail}-${Date.now()}`;
-    const { error } = await supabase.functions.invoke("send-transactional-email", {
-      body: {
-        templateName: "direct-message",
-        recipientEmail,
-        idempotencyKey,
-        templateData: {
-          recipientName: recipientName || "",
-          senderName,
-          senderRole,
-          messageSubject: subject.trim(),
-          messageBody: message.trim(),
-        },
-      },
-    });
-    setSubmitting(false);
+  const totalSize = files.reduce((s, f) => s + f.size, 0);
+  const filesError =
+    files.length > MAX_FILES
+      ? `Trop de fichiers (max ${MAX_FILES})`
+      : totalSize > TOTAL_MAX_SIZE
+      ? `Taille totale dépassée (max ${formatBytes(TOTAL_MAX_SIZE)})`
+      : "";
 
-    if (error) {
-      toast.error(error.message || "Échec de l'envoi");
-      return;
+  const handleFiles = (incoming: FileList | null) => {
+    if (!incoming) return;
+    const added: File[] = [];
+    for (const f of Array.from(incoming)) {
+      if (!ACCEPTED_TYPES.includes(f.type)) {
+        toast.error(`Type non supporté : ${f.name}`);
+        continue;
+      }
+      if (f.size > MAX_FILE_SIZE) {
+        toast.error(`Fichier trop volumineux (>${formatBytes(MAX_FILE_SIZE)}) : ${f.name}`);
+        continue;
+      }
+      if (files.find((x) => x.name === f.name && x.size === f.size)) continue;
+      added.push(f);
     }
-    toast.success(`Email envoyé à ${recipientName || recipientEmail}`);
-    onOpenChange(false);
+    const next = [...files, ...added].slice(0, MAX_FILES);
+    setFiles(next);
+  };
+
+  const removeFile = (idx: number) => setFiles(files.filter((_, i) => i !== idx));
+
+  const uploadAttachments = async () => {
+    if (files.length === 0) return { attachments: [] as any[], expiresAt: null as string | null };
+    const { data: u } = await supabase.auth.getUser();
+    const senderId = u.user?.id || "anon";
+    const baseFolder = `${senderId}/${Date.now()}`;
+    const uploaded: { name: string; path: string; size: number; contentType: string }[] = [];
+
+    for (let i = 0; i < files.length; i++) {
+      const f = files[i];
+      setUploadProgress(`Envoi du fichier ${i + 1}/${files.length}…`);
+      const safeName = f.name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const path = `${baseFolder}/${safeName}`;
+      const { error: upErr } = await supabase.storage
+        .from("direct-message-attachments")
+        .upload(path, f, { contentType: f.type, upsert: false });
+      if (upErr) throw new Error(`Upload échoué (${f.name}) : ${upErr.message}`);
+      uploaded.push({ name: f.name, path, size: f.size, contentType: f.type });
+    }
+
+    setUploadProgress("Génération des liens sécurisés…");
+    const attachments: any[] = [];
+    for (const u of uploaded) {
+      const { data, error } = await supabase.storage
+        .from("direct-message-attachments")
+        .createSignedUrl(u.path, ATTACHMENT_EXPIRY_SECONDS);
+      if (error || !data?.signedUrl) {
+        throw new Error(`Lien sécurisé impossible : ${u.name}`);
+      }
+      attachments.push({
+        name: u.name,
+        url: data.signedUrl,
+        size: u.size,
+        contentType: u.contentType,
+      });
+    }
+    const expiresAt = new Date(Date.now() + ATTACHMENT_EXPIRY_SECONDS * 1000).toISOString();
+    return { attachments, expiresAt };
+  };
+
+  const handleSend = async () => {
+    if (!canSend || filesError) return;
+    setSubmitting(true);
+    try {
+      const { attachments, expiresAt } = await uploadAttachments();
+      setUploadProgress(attachments.length > 0 ? "Envoi de l'email…" : "");
+      const idempotencyKey = `direct-msg-${recipientUserId || recipientEmail}-${Date.now()}`;
+      const { error } = await supabase.functions.invoke("send-transactional-email", {
+        body: {
+          templateName: "direct-message",
+          recipientEmail,
+          idempotencyKey,
+          templateData: {
+            recipientName: recipientName || "",
+            senderName,
+            senderRole,
+            messageSubject: subject.trim(),
+            messageBody: message.trim(),
+            attachments,
+            attachmentsExpireAt: expiresAt,
+          },
+        },
+      });
+      if (error) throw new Error(error.message || "Échec de l'envoi");
+      toast.success(`Email envoyé à ${recipientName || recipientEmail}`);
+      onOpenChange(false);
+    } catch (e: any) {
+      toast.error(e?.message || "Échec de l'envoi");
+    } finally {
+      setSubmitting(false);
+      setUploadProgress("");
+    }
   };
 
   const messageCountColor =
