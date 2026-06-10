@@ -277,6 +277,7 @@ export default function ContractsTab({ readOnly = false }: { readOnly?: boolean 
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Générer le contrat - {openRow?.candidate_name}</DialogTitle>
+            <DialogDescription>Renseignez les informations contractuelles puis générez le document PDF.</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-5 pt-2">
