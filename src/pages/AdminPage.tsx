@@ -50,9 +50,10 @@ import SeoTab from "@/components/SeoTab";
 import IntegrationsTab from "@/components/admin/IntegrationsTab";
 import { CertificateVerifyDashboard } from "@/components/admin/CertificateVerifyDashboard";
 import EmployeeTrainingManager from "@/components/admin/EmployeeTrainingManager";
+import CommerceTab from "@/components/admin/CommerceTab";
 import { getDialCode, applyDialCode } from "@/lib/country-dial-codes";
 
-type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts" | "sharepoint" | "seo" | "integrations" | "verify-certificates" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods" | "hr" | "hr-recruitment" | "hr-contracts" | "hr-onboarding" | "hr-trainings" | "hr-employee-trainings";
+type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts" | "sharepoint" | "seo" | "integrations" | "verify-certificates" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods" | "commerce" | "hr" | "hr-recruitment" | "hr-contracts" | "hr-onboarding" | "hr-trainings" | "hr-employee-trainings";
 type AgentTab = "dashboard" | "tickets" | "contacts";
 type GestionnaireTab = "dashboard" | "projects" | "sharepoint" | "tickets" | "contacts" | "hr" | "hr-recruitment" | "hr-contracts" | "hr-onboarding" | "hr-trainings" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods";
 
@@ -590,30 +591,14 @@ function AdminContent() {
                 ))}
                 <SidebarMenuItem>
                   <SidebarMenuButton
-                    onClick={() => {
-                      setAdminServicesOpen((v) => !v);
-                      if (!isAdminServicesTab) setTab("service-clients");
-                    }}
-                    isActive={isAdminServicesTab}
-                    tooltip="Services aux clients" data-keep-mobile-open="true"
+                    onClick={() => setTab("commerce")}
+                    isActive={tab === "commerce" || isAdminServicesTab}
+                    tooltip="Commerce"
                     className="gap-3"
                   >
                     <Briefcase size={18} />
-                    <span className="flex-1 text-left">Services aux clients</span>
-                    {adminServicesOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                    <span>Commerce</span>
                   </SidebarMenuButton>
-                  {adminServicesOpen && (
-                    <SidebarMenuSub>
-                      {adminServicesGroup.map((s) => (
-                        <SidebarMenuSubItem key={s.id}>
-                          <SidebarMenuSubButton onClick={() => setTab(s.id)} isActive={tab === s.id} className="gap-2 cursor-pointer">
-                            <s.icon size={14} />
-                            <span>{s.label}</span>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
-                    </SidebarMenuSub>
-                  )}
                 </SidebarMenuItem>
                 {allNavItems.slice(3).map((item) => (
                   <SidebarMenuItem key={item.id}>
@@ -738,10 +723,11 @@ function AdminContent() {
               {tab === "seo" && <SeoTab />}
               {tab === "integrations" && <IntegrationsTab />}
               {tab === "verify-certificates" && <CertificateVerifyDashboard />}
-              {tab === "service-clients" && <ServiceClientsTab />}
-              {tab === "service-catalog" && <ServiceCatalogTab />}
-              {tab === "service-invoices" && <ServiceInvoicesTab />}
-              {tab === "payment-methods" && <PaymentMethodsTab />}
+              {tab === "commerce" && <CommerceTab />}
+              {tab === "service-clients" && <CommerceTab initialSection="clients" />}
+              {tab === "service-catalog" && <CommerceTab initialSection="catalog" />}
+              {tab === "service-invoices" && <CommerceTab initialSection="invoices" />}
+              {tab === "payment-methods" && <CommerceTab initialSection="methods" />}
               {tab === "hr" && <HrTab />}
               {tab === "hr-recruitment" && <HrTab defaultTab="recruitment" />}
               {tab === "hr-contracts" && <HrTab defaultTab="contracts" />}
