@@ -78,6 +78,7 @@ export default function PricingPage() {
   const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
   const { openCheckout, closeCheckout, isOpen, checkoutElement } = useStripeCheckout();
   const cinetpay = useCinetPayCheckout();
+  const { isAdmin } = useUserRoles();
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
