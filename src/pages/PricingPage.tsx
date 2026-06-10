@@ -314,7 +314,7 @@ export default function PricingPage() {
 
       <Dialog open={isOpen} onOpenChange={(o) => { if (!o) closeCheckout(); }}>
         <DialogContent className="max-w-2xl max-h-[90vh] p-0 overflow-hidden flex flex-col gap-0">
-          <DialogHeader className="shrink-0 px-8 pt-6 pb-5 pr-14 border-b bg-gradient-primary-deep text-primary-foreground space-y-1.5 text-left">
+          <DialogHeader className="shrink-0 px-5 sm:px-8 md:px-10 pt-5 sm:pt-6 md:pt-7 pb-4 sm:pb-5 pr-12 sm:pr-14 border-b bg-gradient-primary-deep text-primary-foreground space-y-1.5 text-left">
             <DialogTitle className="text-primary-foreground text-xl font-semibold leading-tight">
               Paiement sécurisé
             </DialogTitle>
