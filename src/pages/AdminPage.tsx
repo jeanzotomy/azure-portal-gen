@@ -545,8 +545,9 @@ function AdminContent() {
   const settingsGroup: { id: AdminTab; icon: typeof LayoutDashboard; label: string }[] = [
     { id: "users", icon: Users, label: t("admin.users") },
     { id: "seo", icon: Search, label: "SEO & AI Search" },
+    { id: "integrations", icon: Plug, label: "Intégrations" },
   ];
-  const SETTINGS_TABS: AdminTab[] = ["users", "seo"];
+  const SETTINGS_TABS: AdminTab[] = ["users", "seo", "integrations"];
   const isSettingsTab = SETTINGS_TABS.includes(tab);
   const [settingsOpen, setSettingsOpen] = useState(false);
   useEffect(() => { if (isSettingsTab) setSettingsOpen(true); }, [isSettingsTab]);
