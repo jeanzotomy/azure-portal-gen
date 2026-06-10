@@ -541,14 +541,21 @@ function AdminContent() {
   const [hrOpen, setHrOpen] = useState(true);
   useEffect(() => { if (isHrTab) setHrOpen(true); }, [isHrTab]);
 
+  const settingsGroup: { id: AdminTab; icon: typeof LayoutDashboard; label: string }[] = [
+    { id: "users", icon: Users, label: t("admin.users") },
+    { id: "seo", icon: Search, label: "SEO & AI Search" },
+  ];
+  const SETTINGS_TABS: AdminTab[] = ["users", "seo"];
+  const isSettingsTab = SETTINGS_TABS.includes(tab);
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  useEffect(() => { if (isSettingsTab) setSettingsOpen(true); }, [isSettingsTab]);
+
   const allNavItems: { id: AdminTab; icon: typeof LayoutDashboard; label: string }[] = [
     { id: "dashboard", icon: LayoutDashboard, label: t("admin.overview") },
     { id: "projects", icon: FolderOpen, label: t("admin.projects") },
     { id: "sharepoint", icon: HardDrive, label: "SharePoint" },
     { id: "tickets", icon: LifeBuoy, label: t("admin.tickets") },
     { id: "contacts", icon: MessageSquare, label: t("admin.contacts") },
-    { id: "users", icon: Users, label: t("admin.users") },
-    { id: "seo", icon: Search, label: "SEO" },
     { id: "verify-certificates", icon: ShieldCheck, label: "Vérif. certificats" },
   ];
 
