@@ -193,6 +193,13 @@ export default function EmployeeTrainingManager() {
           )}
         </ScrollArea>
       </Card>
+
+      <BulkAssignTrainingDialog
+        open={bulkOpen}
+        onOpenChange={setBulkOpen}
+        users={users.map((u) => ({ user_id: u.user_id, full_name: u.full_name, email: u.email }))}
+        onDone={loadUsers}
+      />
     </div>
   );
 }
