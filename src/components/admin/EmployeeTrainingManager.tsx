@@ -46,6 +46,8 @@ export default function EmployeeTrainingManager() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "with" | "without">("all");
   const [bulkOpen, setBulkOpen] = useState(false);
+  const [emailTarget, setEmailTarget] = useState<UserRow | null>(null);
+
 
 
   const loadUsers = useCallback(async () => {
