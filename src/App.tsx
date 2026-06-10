@@ -32,6 +32,7 @@ const EmployeeTrainingAssignmentPage = lazy(() => import("./pages/admin/Employee
 const EmployeeTrainingsListPage = lazy(() => import("./pages/portal/EmployeeTrainingsListPage.tsx"));
 const EmployeeTrainingPlayerPage = lazy(() => import("./pages/portal/EmployeeTrainingPlayerPage.tsx"));
 const EmployeeTrainingManager = lazy(() => import("./components/admin/EmployeeTrainingManager.tsx"));
+const TrainingGroupsManagerPage = lazy(() => import("./pages/admin/TrainingGroupsManagerPage.tsx"));
 
 const ScrollToTopOnNavigate = () => {
   const { pathname } = useLocation();
