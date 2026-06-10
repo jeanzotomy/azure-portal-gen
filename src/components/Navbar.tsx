@@ -7,6 +7,7 @@ import { useTranslation } from "@/i18n/LanguageContext";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { supabase } from "@/integrations/supabase/client";
 import { clearSmsMfaVerified } from "@/hooks/use-mfa";
+import { useSiteSetting } from "@/hooks/use-site-setting";
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
