@@ -25,7 +25,7 @@ export default function HrPortalPage() {
   const { isHr, loading } = useUserRoles();
   const navigate = useNavigate();
   const location = useLocation();
-  const [sub, setSub] = useState<HrSubTab>("recruitment");
+  const [sub, setSub] = useState<HrSubTab>("dashboard");
   const formationsMatch = useMatch("/rh/formations/*");
   const isFormationsRoute = !!formationsMatch || location.pathname === "/rh/formations";
 
