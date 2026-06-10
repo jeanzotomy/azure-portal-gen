@@ -33,6 +33,9 @@ const EmployeeTrainingsListPage = lazy(() => import("./pages/portal/EmployeeTrai
 const EmployeeTrainingPlayerPage = lazy(() => import("./pages/portal/EmployeeTrainingPlayerPage.tsx"));
 const EmployeeTrainingManager = lazy(() => import("./components/admin/EmployeeTrainingManager.tsx"));
 const TrainingGroupsManagerPage = lazy(() => import("./pages/admin/TrainingGroupsManagerPage.tsx"));
+const PricingPage = lazy(() => import("./pages/PricingPage.tsx"));
+const CheckoutReturnPage = lazy(() => import("./pages/CheckoutReturnPage.tsx"));
+const SubscriptionPage = lazy(() => import("./pages/portal/SubscriptionPage.tsx"));
 
 const ScrollToTopOnNavigate = () => {
   const { pathname } = useLocation();
@@ -56,7 +59,10 @@ const App = () => (
             <Route path="/portal" element={<AuthGuard><PortalPage /></AuthGuard>}>
               <Route path="formations" element={<EmployeeTrainingsListPage />} />
               <Route path="formations/:assignedId" element={<EmployeeTrainingPlayerPage />} />
+              <Route path="subscription" element={<SubscriptionPage />} />
             </Route>
+            <Route path="/pricing" element={<PricingPage />} />
+            <Route path="/checkout/return" element={<CheckoutReturnPage />} />
             <Route path="/reset-password" element={<ResetPasswordPage />} />
             <Route path="/mfa" element={<MfaPage />} />
             <Route path="/install" element={<InstallPage />} />
