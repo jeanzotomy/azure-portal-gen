@@ -308,9 +308,8 @@ Deno.serve(async (req) => {
     status: 'pending',
   })
 
-  // Direct messages should route replies to a monitored inbox instead of noreply
-  const replyTo =
-    templateName === 'direct-message' ? 'info@cloudmature.com' : undefined
+  // All emails are sent from and reply to info@cloudmature.com
+  const replyTo = `info@${FROM_DOMAIN}`
 
   const { error: enqueueError } = await supabase.rpc('enqueue_email', {
     queue_name: 'transactional_emails',
@@ -327,7 +326,7 @@ Deno.serve(async (req) => {
       idempotency_key: idempotencyKey,
       unsubscribe_token: unsubscribeToken,
       queued_at: new Date().toISOString(),
-      ...(replyTo ? { reply_to: replyTo } : {}),
+      reply_to: replyTo,
     },
   })
 
