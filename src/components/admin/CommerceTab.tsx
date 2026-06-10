@@ -55,6 +55,38 @@ export default function CommerceTab({ initialSection = "catalog" }: CommerceTabP
         <TabsContent value="pricing" className="mt-4 space-y-4">
           <Card>
             <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                {pricingVisible ? <Eye className="h-4 w-4 text-primary" /> : <EyeOff className="h-4 w-4 text-muted-foreground" />}
+                Visibilité du menu « Tarifs »
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex items-center justify-between gap-4">
+              <div className="space-y-1">
+                <Label htmlFor="pricing-visible" className="text-sm font-medium">
+                  Afficher le menu Tarifs dans la barre de navigation publique
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Désactive pour dépublier le lien « Tarifs / Pricing » de la navbar (la page <code>/pricing</code> reste accessible par URL directe).
+                </p>
+              </div>
+              <Switch
+                id="pricing-visible"
+                checked={pricingVisible}
+                disabled={pricingLoading}
+                onCheckedChange={async (checked) => {
+                  try {
+                    await setPricingVisible(checked);
+                    toast.success(checked ? "Menu Tarifs publié" : "Menu Tarifs dépublié");
+                  } catch (e: any) {
+                    toast.error(e?.message || "Erreur lors de la mise à jour");
+                  }
+                }}
+              />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader>
               <CardTitle className="text-base">Tarifs SaaS publics</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
