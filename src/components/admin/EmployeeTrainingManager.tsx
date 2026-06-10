@@ -167,10 +167,10 @@ export default function EmployeeTrainingManager() {
           ) : (
             <ul className="divide-y">
               {filteredUsers.map((u) => (
-                <li key={u.user_id}>
+                <li key={u.user_id} className="flex items-stretch">
                   <button
                     onClick={() => openUser(u.user_id)}
-                    className="w-full text-left p-3 hover:bg-accent/40 transition flex items-center gap-3 group"
+                    className="flex-1 text-left p-3 hover:bg-accent/40 transition flex items-center gap-3 group min-w-0"
                   >
                     <div className="h-10 w-10 rounded-full bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center font-semibold text-primary text-sm shrink-0">
                       {u.full_name?.[0]?.toUpperCase() || "?"}
@@ -190,6 +190,13 @@ export default function EmployeeTrainingManager() {
                       </div>
                     </div>
                     <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:text-primary transition" />
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setEmailTarget(u); }}
+                    title={`Envoyer un email à ${u.full_name}`}
+                    className="px-3 border-l hover:bg-primary/10 text-muted-foreground hover:text-primary transition flex items-center"
+                  >
+                    <Mail className="h-4 w-4" />
                   </button>
                 </li>
               ))}
