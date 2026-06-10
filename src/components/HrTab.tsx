@@ -1173,6 +1173,7 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto w-[95vw] sm:w-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2"><Calendar size={18} /> Inviter à un entretien</DialogTitle>
+            <DialogDescription>Le candidat recevra l'invitation par email avec votre message personnalisé.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 pt-1">
             {interviewApp && (
