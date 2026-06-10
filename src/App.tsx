@@ -33,6 +33,8 @@ const EmployeeTrainingsListPage = lazy(() => import("./pages/portal/EmployeeTrai
 const EmployeeTrainingPlayerPage = lazy(() => import("./pages/portal/EmployeeTrainingPlayerPage.tsx"));
 const EmployeeTrainingManager = lazy(() => import("./components/admin/EmployeeTrainingManager.tsx"));
 const TrainingGroupsManagerPage = lazy(() => import("./pages/admin/TrainingGroupsManagerPage.tsx"));
+const ServicesHubPage = lazy(() => import("./pages/MarketingPages.tsx").then((m) => ({ default: m.ServicesHubPage })));
+const ServiceDetailPage = lazy(() => import("./pages/MarketingPages.tsx").then((m) => ({ default: m.ServiceDetailPage })));
 
 const ScrollToTopOnNavigate = () => {
   const { pathname } = useLocation();
@@ -66,6 +68,8 @@ const App = () => (
             </Route>
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/terms" element={<TermsPage />} />
+            <Route path="/services" element={<ServicesHubPage />} />
+            <Route path="/services/:slug" element={<ServiceDetailPage />} />
             <Route path="/careers" element={<CareersPage />} />
             <Route path="/careers/:slug" element={<JobDetailPage />} />
             <Route path="/unsubscribe" element={<UnsubscribePage />} />

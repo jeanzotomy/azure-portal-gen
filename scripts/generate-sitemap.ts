@@ -15,6 +15,12 @@ const today = new Date().toISOString().slice(0, 10);
 
 const entries: SitemapEntry[] = [
   { path: "/", changefreq: "weekly", priority: "1.0", lastmod: today },
+  // Pages de contenu marketing (SEO)
+  { path: "/services", changefreq: "monthly", priority: "0.9", lastmod: today },
+  { path: "/services/migration-cloud", changefreq: "monthly", priority: "0.8", lastmod: today },
+  { path: "/services/devops", changefreq: "monthly", priority: "0.8", lastmod: today },
+  { path: "/services/intelligence-artificielle", changefreq: "monthly", priority: "0.8", lastmod: today },
+  { path: "/services/securite-conformite", changefreq: "monthly", priority: "0.8", lastmod: today },
   { path: "/careers", changefreq: "daily", priority: "0.9", lastmod: today },
   { path: "/privacy", changefreq: "yearly", priority: "0.3", lastmod: today },
   { path: "/terms", changefreq: "yearly", priority: "0.3", lastmod: today },
