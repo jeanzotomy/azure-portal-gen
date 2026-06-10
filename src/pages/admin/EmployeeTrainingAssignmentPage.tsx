@@ -23,6 +23,7 @@ import {
   Mail,
   User,
 } from "lucide-react";
+import SendDirectEmailDialog from "@/components/admin/SendDirectEmailDialog";
 
 type AssignedRow = {
   assigned_id: string;
@@ -75,6 +76,7 @@ export default function EmployeeTrainingAssignmentPage({
   const [filter, setFilter] = useState<"assigned" | "catalog">("assigned");
   const [search, setSearch] = useState("");
   const [busy, setBusy] = useState<string | null>(null);
+  const [emailOpen, setEmailOpen] = useState(false);
 
   const loadAll = useCallback(async () => {
     if (!userId) return;
@@ -222,6 +224,17 @@ export default function EmployeeTrainingAssignmentPage({
             </TabsList>
           </Tabs>
 
+          <Button
+            size="sm"
+            variant="outline"
+            disabled={!user}
+            onClick={() => setEmailOpen(true)}
+            className="gap-2 border-primary/30 text-primary hover:bg-primary/10 hover:text-primary"
+          >
+            <Mail className="h-4 w-4" /> Écrire un email
+          </Button>
+
+
           <div className="relative w-full sm:w-72">
             <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
             <Input
@@ -344,6 +357,16 @@ export default function EmployeeTrainingAssignmentPage({
           </ul>
         )}
       </Card>
+
+      {user && (
+        <SendDirectEmailDialog
+          open={emailOpen}
+          onOpenChange={setEmailOpen}
+          recipientEmail={user.email}
+          recipientName={user.full_name}
+          recipientUserId={user.user_id}
+        />
+      )}
     </div>
   );
 }
