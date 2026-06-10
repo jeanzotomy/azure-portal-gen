@@ -195,13 +195,29 @@ Deno.serve(async (req) => {
     const cW = fontBold.widthOfTextAtSize(certifiedText, cSize);
     page.drawText(certifiedText, { x: sx - cW / 2, y: sy - 4, size: cSize, font: fontBold, color: rgb(1, 1, 1) });
 
-    // QR block (right side)
+    // QR block (right side) — kept fully inside inner cyan border (x: 28..width-28)
     const qrImg = await pdf.embedPng(qrPngBytes);
-    const qrSize = 110;
-    page.drawImage(qrImg, { x: width - 60 - qrSize, y: 50, width: qrSize, height: qrSize });
-    page.drawText("Vérifier l'authenticité", { x: width - 60 - qrSize, y: 170, size: 9, font: fontBold, color: ink });
-    page.drawText(verifyUrl, { x: width - 60 - qrSize, y: 158, size: 7, font, color: muted });
-    page.drawText(`Code : ${code}`, { x: width - 60 - qrSize, y: 38, size: 9, font: fontBold, color: navy });
+    const qrSize = 92;
+    const qrRightMargin = 60;
+    const qrX = width - qrRightMargin - qrSize;
+    const qrY = 60;
+    page.drawImage(qrImg, { x: qrX, y: qrY, width: qrSize, height: qrSize });
+    // Label
+    const label = "Vérifier l'authenticité";
+    const labelW = fontBold.widthOfTextAtSize(label, 9);
+    page.drawText(label, { x: qrX + (qrSize - labelW) / 2, y: qrY + qrSize + 14, size: 9, font: fontBold, color: ink });
+    // URL — auto-shrink to fit qrSize
+    let urlSize = 6.5;
+    let urlW = font.widthOfTextAtSize(verifyUrl, urlSize);
+    while (urlW > qrSize && urlSize > 4) {
+      urlSize -= 0.5;
+      urlW = font.widthOfTextAtSize(verifyUrl, urlSize);
+    }
+    page.drawText(verifyUrl, { x: qrX + (qrSize - urlW) / 2, y: qrY + qrSize + 4, size: urlSize, font, color: muted });
+    // Code under QR, centered
+    const codeText = `Code : ${code}`;
+    const codeW = fontBold.widthOfTextAtSize(codeText, 9);
+    page.drawText(codeText, { x: qrX + (qrSize - codeW) / 2, y: qrY - 12, size: 9, font: fontBold, color: navy });
 
     const pdfBytes = await pdf.save();
     const path = `${user.id}/${code}.pdf`;
