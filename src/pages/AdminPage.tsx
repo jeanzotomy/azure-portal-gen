@@ -590,30 +590,14 @@ function AdminContent() {
                 ))}
                 <SidebarMenuItem>
                   <SidebarMenuButton
-                    onClick={() => {
-                      setAdminServicesOpen((v) => !v);
-                      if (!isAdminServicesTab) setTab("service-clients");
-                    }}
-                    isActive={isAdminServicesTab}
-                    tooltip="Services aux clients" data-keep-mobile-open="true"
+                    onClick={() => setTab("commerce")}
+                    isActive={tab === "commerce" || isAdminServicesTab}
+                    tooltip="Commerce"
                     className="gap-3"
                   >
                     <Briefcase size={18} />
-                    <span className="flex-1 text-left">Services aux clients</span>
-                    {adminServicesOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+                    <span>Commerce</span>
                   </SidebarMenuButton>
-                  {adminServicesOpen && (
-                    <SidebarMenuSub>
-                      {adminServicesGroup.map((s) => (
-                        <SidebarMenuSubItem key={s.id}>
-                          <SidebarMenuSubButton onClick={() => setTab(s.id)} isActive={tab === s.id} className="gap-2 cursor-pointer">
-                            <s.icon size={14} />
-                            <span>{s.label}</span>
-                          </SidebarMenuSubButton>
-                        </SidebarMenuSubItem>
-                      ))}
-                    </SidebarMenuSub>
-                  )}
                 </SidebarMenuItem>
                 {allNavItems.slice(3).map((item) => (
                   <SidebarMenuItem key={item.id}>
