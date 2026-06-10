@@ -736,6 +736,7 @@ function AdminContent() {
               {tab === "users" && <AdminUsers />}
               {tab === "sharepoint" && <SharePointTab />}
               {tab === "seo" && <SeoTab />}
+              {tab === "integrations" && <IntegrationsTab />}
               {tab === "verify-certificates" && <CertificateVerifyDashboard />}
               {tab === "service-clients" && <ServiceClientsTab />}
               {tab === "service-catalog" && <ServiceCatalogTab />}
