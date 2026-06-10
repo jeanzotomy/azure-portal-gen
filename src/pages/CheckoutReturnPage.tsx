@@ -32,11 +32,6 @@ export default function CheckoutReturnPage() {
     const poll = async () => {
       attempts += 1;
       try {
-        const { data } = await supabase.functions.invoke("verify-cinetpay-payment", {
-          body: null,
-          method: "GET" as any,
-        }).catch(() => ({ data: null }));
-        // The invoke helper doesn't support query strings nicely — fall back to fetch
         const url = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/verify-cinetpay-payment?transaction_id=${encodeURIComponent(txId)}`;
         const res = await fetch(url, {
           headers: {
@@ -68,8 +63,6 @@ export default function CheckoutReturnPage() {
         if (attempts >= maxAttempts) { setCpStatus("pending"); return; }
         setTimeout(poll, 3000);
       }
-      // suppress unused warning
-      void data;
     };
     poll();
     return () => { cancelled = true; };
