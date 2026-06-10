@@ -798,7 +798,7 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-auto">
           <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2">
               <Briefcase size={18} />
               {editing ? "Modifier l'offre" : "Nouvelle offre d'emploi"}
             </DialogTitle>
@@ -986,7 +986,7 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Annuler</Button>
             <Button
               onClick={handleSave}
-              className="bg-gradient-to-r from-primary to-[#007aa3] text-white shadow-sm hover:opacity-95"
+              className="bg-gradient-primary-deep text-primary-foreground shadow-sm hover:opacity-95"
             >
               {editing ? "Enregistrer" : "Créer l'offre"}
             </Button>
@@ -997,7 +997,7 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
       <Dialog open={deptDialogOpen} onOpenChange={setDeptDialogOpen}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto w-[95vw] sm:w-auto">
           <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2"><Building2 size={18} /> Gérer les départements</DialogTitle>
+            <DialogTitle className="flex items-center gap-2"><Building2 size={18} /> Gérer les départements</DialogTitle>
           </DialogHeader>
           <div className="space-y-5 pt-1">
             <FormSection
@@ -1012,7 +1012,7 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
                   size="sm"
                   onClick={handleAddDepartment}
                   disabled={!newDeptName.trim()}
-                  className="bg-gradient-to-r from-primary to-[#007aa3] text-white shadow-sm hover:opacity-95 disabled:opacity-50"
+                  className="bg-gradient-primary-deep text-primary-foreground shadow-sm hover:opacity-95 disabled:opacity-50"
                 >
                   <Plus size={14} /> Ajouter
                 </Button>
@@ -1040,7 +1040,7 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
                             size="sm"
                             onClick={handleUpdateDepartment}
                             disabled={!editDeptName.trim()}
-                            className="bg-gradient-to-r from-primary to-[#007aa3] text-white"
+                            className="bg-gradient-primary-deep text-primary-foreground"
                           >
                             Enregistrer
                           </Button>
@@ -1082,7 +1082,7 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
       <Dialog open={sectorDialogOpen} onOpenChange={setSectorDialogOpen}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto w-[95vw] sm:w-auto">
           <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2"><Briefcase size={18} /> Gérer les secteurs</DialogTitle>
+            <DialogTitle className="flex items-center gap-2"><Briefcase size={18} /> Gérer les secteurs</DialogTitle>
           </DialogHeader>
           <div className="space-y-5 pt-1">
             <FormSection
@@ -1097,7 +1097,7 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
                   size="sm"
                   onClick={handleAddSector}
                   disabled={!newSectorName.trim()}
-                  className="bg-gradient-to-r from-primary to-[#007aa3] text-white shadow-sm hover:opacity-95 disabled:opacity-50"
+                  className="bg-gradient-primary-deep text-primary-foreground shadow-sm hover:opacity-95 disabled:opacity-50"
                 >
                   <Plus size={14} /> Ajouter
                 </Button>
@@ -1125,7 +1125,7 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
                             size="sm"
                             onClick={handleUpdateSector}
                             disabled={!editSectorName.trim()}
-                            className="bg-gradient-to-r from-primary to-[#007aa3] text-white"
+                            className="bg-gradient-primary-deep text-primary-foreground"
                           >
                             Enregistrer
                           </Button>
@@ -1167,7 +1167,7 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
       <Dialog open={interviewDialogOpen} onOpenChange={setInterviewDialogOpen}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto w-[95vw] sm:w-auto">
           <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2"><Calendar size={18} /> Inviter à un entretien</DialogTitle>
+            <DialogTitle className="flex items-center gap-2"><Calendar size={18} /> Inviter à un entretien</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-1">
             {interviewApp && (
@@ -1202,7 +1202,7 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
             <Button variant="outline" onClick={() => setInterviewDialogOpen(false)}>Annuler</Button>
             <Button
               onClick={confirmInterview}
-              className="bg-gradient-to-r from-primary to-[#007aa3] text-white shadow-sm hover:opacity-95"
+              className="bg-gradient-primary-deep text-primary-foreground shadow-sm hover:opacity-95"
             >
               <Mail size={14} /> Envoyer l'invitation
             </Button>
