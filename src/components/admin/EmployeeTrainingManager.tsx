@@ -18,9 +18,12 @@ import {
   TrendingUp,
   BookOpen,
   RefreshCw,
+  UsersRound,
+  Layers,
 } from "lucide-react";
 import { TrainingPageHero } from "@/components/training/TrainingPageHero";
 import { TrainingStatsGrid } from "@/components/training/TrainingStatsGrid";
+import BulkAssignTrainingDialog from "@/components/admin/BulkAssignTrainingDialog";
 
 type UserRow = {
   user_id: string;
