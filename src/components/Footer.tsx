@@ -22,6 +22,16 @@ export function Footer() {
             <span className="gradient-text font-semibold">{t("hero.badge.ai")}</span>
           </div>
         </div>
+        <nav aria-label="Services" className="mt-8 pt-6 border-t border-secondary-foreground/20">
+          <p className="text-sm font-semibold text-secondary-foreground/90 mb-2">Nos services</p>
+          <div className="flex flex-wrap gap-x-4 gap-y-2">
+            <Link to="/services" className="text-sm text-secondary-foreground/85 hover:text-primary transition-colors">Tous les services</Link>
+            <Link to="/services/migration-cloud" className="text-sm text-secondary-foreground/85 hover:text-primary transition-colors">Migration Cloud</Link>
+            <Link to="/services/devops" className="text-sm text-secondary-foreground/85 hover:text-primary transition-colors">DevOps</Link>
+            <Link to="/services/intelligence-artificielle" className="text-sm text-secondary-foreground/85 hover:text-primary transition-colors">Intelligence Artificielle</Link>
+            <Link to="/services/securite-conformite" className="text-sm text-secondary-foreground/85 hover:text-primary transition-colors">Sécurité &amp; Conformité</Link>
+          </div>
+        </nav>
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 mt-8 pt-6 border-t border-secondary-foreground/20">
           <p className="text-sm text-secondary-foreground/85">
             {t("footer.copyright").replace("{year}", String(new Date().getFullYear()))}
