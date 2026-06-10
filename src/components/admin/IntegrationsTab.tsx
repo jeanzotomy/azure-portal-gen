@@ -233,6 +233,9 @@ export default function IntegrationsTab() {
         </CardContent>
       </Card>
 
+      {/* 1bis. CinetPay config */}
+      <CinetPayConfigCard />
+
       {/* 2. Webhooks entrants */}
       <Card>
         <CardHeader>
