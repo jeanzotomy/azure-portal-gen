@@ -616,19 +616,7 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
               </>
             );
           })()}
-          {(() => {
-            const filteredJobs = jobs.filter((j) => {
-              const q = jobSearch.trim().toLowerCase();
-              if (q) {
-                const haystack = [j.title, j.description, j.location, j.department, j.sector].filter(Boolean).join(" ").toLowerCase();
-                if (!haystack.includes(q)) return false;
-              }
-              if (jobStatusFilter !== "all" && j.status !== jobStatusFilter) return false;
-              if (jobContractFilter !== "all" && j.contract_type !== jobContractFilter) return false;
-              if (jobDeptFilter !== "all" && j.department !== jobDeptFilter) return false;
-              return true;
-            });
-            return filteredJobs.map((job) => {
+          {filteredJobs.map((job) => {
             const appCount = applications.filter((a) => a.job_id === job.id).length;
             return (
               <Card key={job.id}>
