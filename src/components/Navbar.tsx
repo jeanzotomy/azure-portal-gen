@@ -7,6 +7,7 @@ import { useTranslation } from "@/i18n/LanguageContext";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { supabase } from "@/integrations/supabase/client";
 import { clearSmsMfaVerified } from "@/hooks/use-mfa";
+import { useSiteSetting } from "@/hooks/use-site-setting";
 
 export function Navbar() {
   const [open, setOpen] = useState(false);
@@ -24,10 +25,13 @@ export function Navbar() {
     { label: t("nav.contact"), href: "#contact" },
   ];
 
+  const { value: pricingVisible } = useSiteSetting<boolean>("nav.pricing_visible", true);
+
   const routeLinks = [
-    { label: locale === "fr" ? "Tarifs" : "Pricing", to: "/pricing" },
+    ...(pricingVisible ? [{ label: locale === "fr" ? "Tarifs" : "Pricing", to: "/pricing" }] : []),
     { label: locale === "fr" ? "Formations" : "Trainings", to: "/formations" },
   ];
+
 
   const scrollTo = (id: string) => {
     setOpen(false);
