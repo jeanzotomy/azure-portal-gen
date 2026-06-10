@@ -111,17 +111,22 @@ Deno.serve(async (req) => {
       payload: { body, headers: { "x-token": receivedToken ? "[present]" : "[absent]" } },
     });
 
-    // Verify signature if token is present (CinetPay sends it; defensive default)
-    if (receivedToken) {
-      const ok = await verifyIpnSignature(creds.secretKey, body, receivedToken);
-      if (!ok) {
-        console.error("Invalid HMAC signature for", transactionId);
-        await sb.from("webhook_events").insert({
-          source: "cinetpay", event_type: "ipn", status: "failed",
-          error: "invalid_signature", payload: { transaction_id: transactionId },
-        });
-        return new Response("Invalid signature", { status: 401 });
-      }
+    // Verify signature — MANDATORY for all callers
+    if (!receivedToken) {
+      await sb.from("webhook_events").insert({
+        source: "cinetpay", event_type: "ipn", status: "failed",
+        error: "missing_signature", payload: { transaction_id: transactionId },
+      });
+      return new Response("Missing signature", { status: 401 });
+    }
+    const ok = await verifyIpnSignature(creds.secretKey, body, receivedToken);
+    if (!ok) {
+      console.error("Invalid HMAC signature for", transactionId);
+      await sb.from("webhook_events").insert({
+        source: "cinetpay", event_type: "ipn", status: "failed",
+        error: "invalid_signature", payload: { transaction_id: transactionId },
+      });
+      return new Response("Invalid signature", { status: 401 });
     }
 
     // Always verify status via API (defense in depth)

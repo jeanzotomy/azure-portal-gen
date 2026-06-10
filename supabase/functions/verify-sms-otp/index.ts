@@ -106,6 +106,12 @@ Deno.serve(async (req) => {
         }
       }
 
+      // Record server-side MFA verification (replaces sessionStorage trust)
+      await supabaseAdmin.from("mfa_verifications").insert({
+        user_id: userId,
+        method: phone.startsWith("email:") ? "email" : "sms",
+      });
+
       // Get user roles for redirect info
       const { data: roles } = await supabaseAdmin
         .from("user_roles")
@@ -121,20 +127,20 @@ Deno.serve(async (req) => {
     }
 
     if (purpose === "login") {
-      // Normalize phone: strip non-digits for profile lookup, keep E.164 for exact match
+      // Normalize phone: strip ALL non-digits for exact comparison only (no suffix/prefix match)
       const phoneDigits = phone.replace(/\D/g, "");
 
-      // Find user by phone in profiles table
+      // Find user by phone — exact digit-only match to prevent account takeover via suffix.
       const { data: profiles } = await supabaseAdmin
         .from("profiles")
         .select("user_id, phone, blocked")
         .not("phone", "is", null);
 
-      // Match phone: profile may store "5145597235" while input is "+15145597235"
       const matchedProfile = (profiles || []).find((p: { phone: string | null }) => {
         if (!p.phone) return false;
         const pDigits = p.phone.replace(/\D/g, "");
-        return phoneDigits.endsWith(pDigits) || pDigits.endsWith(phoneDigits) || pDigits === phoneDigits;
+        // STRICT: digits must be identical (no endsWith / startsWith)
+        return pDigits.length > 0 && pDigits === phoneDigits;
       });
 
       if (!matchedProfile) {
