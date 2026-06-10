@@ -38,7 +38,7 @@ export default function HrDashboardTab() {
     const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
     const sevenDaysAgo = new Date(Date.now() - 7 * 86400_000).toISOString();
     const fourteenDaysAgo = new Date(Date.now() - 14 * 86400_000).toISOString();
-    const sevenDaysAhead = new Date(Date.now() + 7 * 86400_000).toISOString();
+    
 
     const [appsMonthRes, appsAllStatusRes, processesRes, contractsRes, assignedRes] = await Promise.all([
       supabase.from("job_applications").select("id", { count: "exact", head: true }).gte("created_at", startOfMonth),
