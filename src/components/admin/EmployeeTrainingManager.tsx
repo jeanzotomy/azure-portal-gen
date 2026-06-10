@@ -18,9 +18,12 @@ import {
   TrendingUp,
   BookOpen,
   RefreshCw,
+  UsersRound,
+  Layers,
 } from "lucide-react";
 import { TrainingPageHero } from "@/components/training/TrainingPageHero";
 import { TrainingStatsGrid } from "@/components/training/TrainingStatsGrid";
+import BulkAssignTrainingDialog from "@/components/admin/BulkAssignTrainingDialog";
 
 type UserRow = {
   user_id: string;
@@ -40,6 +43,8 @@ export default function EmployeeTrainingManager() {
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "with" | "without">("all");
+  const [bulkOpen, setBulkOpen] = useState(false);
+
 
   const loadUsers = useCallback(async () => {
     setLoadingUsers(true);
@@ -85,14 +90,31 @@ export default function EmployeeTrainingManager() {
         subtitle="Assignez et suivez les formations continues du personnel. Cliquez sur un utilisateur pour gérer son parcours."
         breadcrumbs={[{ label: basePath === "/rh" ? "RH" : "Admin" }, { label: "Formations employés" }]}
         actions={
-          <Button
-            size="sm"
-            variant="secondary"
-            onClick={loadUsers}
-            className="bg-white/15 hover:bg-white/25 text-white border-white/20"
-          >
-            <RefreshCw className="h-4 w-4 mr-1" /> Actualiser
-          </Button>
+          <div className="flex items-center gap-2 flex-wrap">
+            <Button
+              size="sm"
+              onClick={() => setBulkOpen(true)}
+              className="bg-white text-primary hover:bg-white/90"
+            >
+              <UsersRound className="h-4 w-4 mr-1" /> Assigner en masse
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={() => navigate(`${basePath}/formations/groupes`)}
+              className="bg-white/15 hover:bg-white/25 text-white border-white/20"
+            >
+              <Layers className="h-4 w-4 mr-1" /> Groupes
+            </Button>
+            <Button
+              size="sm"
+              variant="secondary"
+              onClick={loadUsers}
+              className="bg-white/15 hover:bg-white/25 text-white border-white/20"
+            >
+              <RefreshCw className="h-4 w-4 mr-1" /> Actualiser
+            </Button>
+          </div>
         }
       />
 
@@ -171,6 +193,13 @@ export default function EmployeeTrainingManager() {
           )}
         </ScrollArea>
       </Card>
+
+      <BulkAssignTrainingDialog
+        open={bulkOpen}
+        onOpenChange={setBulkOpen}
+        users={users.map((u) => ({ user_id: u.user_id, full_name: u.full_name, email: u.email }))}
+        onDone={loadUsers}
+      />
     </div>
   );
 }

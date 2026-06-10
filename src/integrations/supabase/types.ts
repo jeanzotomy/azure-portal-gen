@@ -1910,9 +1910,17 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_user_to_training_group: {
+        Args: { _group_id: string; _user_id: string }
+        Returns: string
+      }
       assign_employee_training: {
         Args: { _training_id: string; _user_id: string }
         Returns: string
+      }
+      assign_employee_training_bulk: {
+        Args: { _training_id: string; _user_ids: string[] }
+        Returns: number
       }
       award_badge: {
         Args: { _code: string; _icon: string; _label: string; _user_id: string }
@@ -2020,6 +2028,17 @@ export type Database = {
           full_name: string
           role: string
           user_id: string
+        }[]
+      }
+      list_training_groups_summary: {
+        Args: never
+        Returns: {
+          created_at: string
+          description: string
+          id: string
+          member_count: number
+          name: string
+          training_count: number
         }[]
       }
       move_to_dlq: {
