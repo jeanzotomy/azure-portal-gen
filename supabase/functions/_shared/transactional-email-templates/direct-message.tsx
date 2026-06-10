@@ -91,7 +91,7 @@ const Email = ({
             <Link href="mailto:info@cloudmature.com" style={{ color: '#0099cc' }}>info@cloudmature.com</Link>
             {' '}— votre message sera transmis à l'expéditeur.
           </Text>
-          <Text style={footer}>L'équipe {SITE_NAME}</Text>
+          <Text style={footer}>Bien cordialement,<br />L'équipe {SITE_NAME}</Text>
         </Container>
       </Body>
     </Html>
