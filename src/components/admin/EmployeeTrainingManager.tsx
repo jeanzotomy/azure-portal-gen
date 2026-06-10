@@ -20,10 +20,12 @@ import {
   RefreshCw,
   UsersRound,
   Layers,
+  Mail,
 } from "lucide-react";
 import { TrainingPageHero } from "@/components/training/TrainingPageHero";
 import { TrainingStatsGrid } from "@/components/training/TrainingStatsGrid";
 import BulkAssignTrainingDialog from "@/components/admin/BulkAssignTrainingDialog";
+import SendDirectEmailDialog from "@/components/admin/SendDirectEmailDialog";
 
 type UserRow = {
   user_id: string;
