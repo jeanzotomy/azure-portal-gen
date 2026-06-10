@@ -211,6 +211,14 @@ export default function EmployeeTrainingManager() {
         users={users.map((u) => ({ user_id: u.user_id, full_name: u.full_name, email: u.email }))}
         onDone={loadUsers}
       />
+
+      <SendDirectEmailDialog
+        open={!!emailTarget}
+        onOpenChange={(v) => { if (!v) setEmailTarget(null); }}
+        recipientEmail={emailTarget?.email || ""}
+        recipientName={emailTarget?.full_name}
+        recipientUserId={emailTarget?.user_id}
+      />
     </div>
   );
 }
