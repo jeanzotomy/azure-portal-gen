@@ -348,11 +348,12 @@ function GroupDetailDialog({
   const toggleTraining = async (trainingId: string, checked: boolean) => {
     if (checked) {
       const { data: u } = await supabase.auth.getUser();
-      const { error } = await supabase.from("training_group_assignments").insert({
-        group_id: group.id,
-        training_id: trainingId,
-        assigned_by: u.user?.id,
-      });
+      const { error } = await supabase
+        .from("training_group_assignments")
+        .upsert(
+          { group_id: group.id, training_id: trainingId, assigned_by: u.user?.id },
+          { onConflict: "group_id,training_id", ignoreDuplicates: true },
+        );
       if (error) {
         toast.error(error.message);
         return;
