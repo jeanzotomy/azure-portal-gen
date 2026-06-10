@@ -23,7 +23,7 @@ import {
 } from "@/components/ui/sidebar";
 import {
   LayoutDashboard, FolderOpen, LifeBuoy, Users, LogOut, Shield, Clock, CheckCircle2,
-  AlertCircle, Bell, ChevronDown, ChevronUp, MessageSquare, Search, Send, UserCog, Settings,
+  AlertCircle, Bell, ChevronDown, ChevronUp, MessageSquare, Search, Send, UserCog, Settings, Plug,
   Flag, DollarSign, Calendar, Filter, TrendingUp, Activity, BarChart3, PieChart, ShieldBan, ShieldCheck, Trash2, RefreshCw,
   Smartphone, Phone, X, UserCheck, UserPlus, Upload, FileSpreadsheet, Pencil,
   LayoutGrid, List as ListIcon, Table as TableIcon, MapPin, Mail, Download,
@@ -47,11 +47,12 @@ import PaymentMethodsTab from "@/components/PaymentMethodsTab";
 import HrTab from "@/components/HrTab";
 import { ProfileSignatureDialog } from "@/components/ProfileSignatureDialog";
 import SeoTab from "@/components/SeoTab";
+import IntegrationsTab from "@/components/admin/IntegrationsTab";
 import { CertificateVerifyDashboard } from "@/components/admin/CertificateVerifyDashboard";
 import EmployeeTrainingManager from "@/components/admin/EmployeeTrainingManager";
 import { getDialCode, applyDialCode } from "@/lib/country-dial-codes";
 
-type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts" | "sharepoint" | "seo" | "verify-certificates" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods" | "hr" | "hr-recruitment" | "hr-contracts" | "hr-onboarding" | "hr-trainings" | "hr-employee-trainings";
+type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts" | "sharepoint" | "seo" | "integrations" | "verify-certificates" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods" | "hr" | "hr-recruitment" | "hr-contracts" | "hr-onboarding" | "hr-trainings" | "hr-employee-trainings";
 type AgentTab = "dashboard" | "tickets" | "contacts";
 type GestionnaireTab = "dashboard" | "projects" | "sharepoint" | "tickets" | "contacts" | "hr" | "hr-recruitment" | "hr-contracts" | "hr-onboarding" | "hr-trainings" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods";
 
@@ -544,8 +545,9 @@ function AdminContent() {
   const settingsGroup: { id: AdminTab; icon: typeof LayoutDashboard; label: string }[] = [
     { id: "users", icon: Users, label: t("admin.users") },
     { id: "seo", icon: Search, label: "SEO & AI Search" },
+    { id: "integrations", icon: Plug, label: "Intégrations" },
   ];
-  const SETTINGS_TABS: AdminTab[] = ["users", "seo"];
+  const SETTINGS_TABS: AdminTab[] = ["users", "seo", "integrations"];
   const isSettingsTab = SETTINGS_TABS.includes(tab);
   const [settingsOpen, setSettingsOpen] = useState(false);
   useEffect(() => { if (isSettingsTab) setSettingsOpen(true); }, [isSettingsTab]);
@@ -734,6 +736,7 @@ function AdminContent() {
               {tab === "users" && <AdminUsers />}
               {tab === "sharepoint" && <SharePointTab />}
               {tab === "seo" && <SeoTab />}
+              {tab === "integrations" && <IntegrationsTab />}
               {tab === "verify-certificates" && <CertificateVerifyDashboard />}
               {tab === "service-clients" && <ServiceClientsTab />}
               {tab === "service-catalog" && <ServiceCatalogTab />}

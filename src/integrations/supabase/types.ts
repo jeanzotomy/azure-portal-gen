@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      api_tokens: {
+        Row: {
+          created_at: string
+          created_by: string
+          expires_at: string | null
+          id: string
+          last_used_at: string | null
+          name: string
+          revoked_at: string | null
+          scopes: string[]
+          token_hash: string
+          token_prefix: string
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          expires_at?: string | null
+          id?: string
+          last_used_at?: string | null
+          name: string
+          revoked_at?: string | null
+          scopes?: string[]
+          token_hash: string
+          token_prefix: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          expires_at?: string | null
+          id?: string
+          last_used_at?: string | null
+          name?: string
+          revoked_at?: string | null
+          scopes?: string[]
+          token_hash?: string
+          token_prefix?: string
+        }
+        Relationships: []
+      }
       application_tracking_otp: {
         Row: {
           attempts: number
@@ -1902,6 +1941,36 @@ export type Database = {
           id?: number
           ip?: string
           ok?: boolean
+        }
+        Relationships: []
+      }
+      webhook_events: {
+        Row: {
+          error: string | null
+          event_type: string | null
+          id: string
+          payload: Json | null
+          received_at: string
+          source: string
+          status: string
+        }
+        Insert: {
+          error?: string | null
+          event_type?: string | null
+          id?: string
+          payload?: Json | null
+          received_at?: string
+          source: string
+          status?: string
+        }
+        Update: {
+          error?: string | null
+          event_type?: string | null
+          id?: string
+          payload?: Json | null
+          received_at?: string
+          source?: string
+          status?: string
         }
         Relationships: []
       }
