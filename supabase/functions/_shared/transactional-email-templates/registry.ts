@@ -13,10 +13,12 @@ import { template as applicationEnRevue } from './application-en-revue.tsx'
 import { template as applicationEntretien } from './application-entretien.tsx'
 import { template as applicationAcceptee } from './application-acceptee.tsx'
 import { template as applicationRefusee } from './application-refusee.tsx'
+import { template as directMessage } from './direct-message.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'application-en-revue': applicationEnRevue,
   'application-entretien': applicationEntretien,
   'application-acceptee': applicationAcceptee,
   'application-refusee': applicationRefusee,
+  'direct-message': directMessage,
 }
