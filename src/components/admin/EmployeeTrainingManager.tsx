@@ -43,6 +43,8 @@ export default function EmployeeTrainingManager() {
   const [loadingUsers, setLoadingUsers] = useState(true);
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "with" | "without">("all");
+  const [bulkOpen, setBulkOpen] = useState(false);
+
 
   const loadUsers = useCallback(async () => {
     setLoadingUsers(true);
