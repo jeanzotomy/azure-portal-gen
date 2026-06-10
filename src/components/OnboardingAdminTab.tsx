@@ -158,8 +158,8 @@ export default function OnboardingAdminTab({ readOnly = false }: { readOnly?: bo
 
       <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader className="bg-gradient-to-r from-primary to-[#007aa3] -m-6 mb-0 p-6 rounded-t-lg">
-            <DialogTitle className="text-white">{selected?.candidate_name}</DialogTitle>
+          <DialogHeader>
+            <DialogTitle>{selected?.candidate_name}</DialogTitle>
             <p className="text-cyan-100 text-sm">{selected?.candidate_email}</p>
           </DialogHeader>
 
@@ -209,7 +209,7 @@ export default function OnboardingAdminTab({ readOnly = false }: { readOnly?: bo
                 <p className="text-xs text-muted-foreground">Aucun contrat déposé.</p>
               ) : (
                 <div className="space-y-2">
-                  <Button onClick={generateContract} disabled={uploadingContract} className="bg-gradient-to-r from-primary to-[#007aa3]">
+                  <Button onClick={generateContract} disabled={uploadingContract} className="bg-gradient-primary-deep text-primary-foreground">
                     {uploadingContract ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
                     Générer le contrat automatiquement
                   </Button>

@@ -366,8 +366,8 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
       {/* AI Generation dialog */}
       <Dialog open={aiOpen} onOpenChange={setAiOpen}>
         <DialogContent className="max-w-md">
-          <DialogHeader className="bg-gradient-to-r from-primary to-[#007aa3] -m-6 mb-0 p-6 rounded-t-lg">
-            <DialogTitle className="text-white flex items-center gap-2"><Wand2 className="h-4 w-4" />Générer une formation avec IA</DialogTitle>
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2"><Wand2 className="h-4 w-4" />Générer une formation avec IA</DialogTitle>
             <DialogDescription className="text-cyan-100 text-xs">Contenu structuré + QCM générés par Gemini 2.5 Flash</DialogDescription>
           </DialogHeader>
           <div className="space-y-3 pt-6">
@@ -402,7 +402,7 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setAiOpen(false)} disabled={aiBusy}>Annuler</Button>
-            <Button onClick={generateAI} disabled={aiBusy} className="bg-gradient-to-r from-primary to-[#007aa3]">
+            <Button onClick={generateAI} disabled={aiBusy} className="bg-gradient-primary-deep text-primary-foreground">
               {aiBusy ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Sparkles className="h-4 w-4 mr-1" />}
               Générer
             </Button>
@@ -413,8 +413,8 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
       {/* Form dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader className="bg-gradient-to-r from-primary to-[#007aa3] -m-6 mb-0 p-6 rounded-t-lg">
-            <DialogTitle className="text-white">{editing ? "Modifier la formation" : "Nouvelle formation"}</DialogTitle>
+          <DialogHeader>
+            <DialogTitle>{editing ? "Modifier la formation" : "Nouvelle formation"}</DialogTitle>
             {form.ai_generated && <DialogDescription className="text-cyan-100 text-xs flex items-center gap-1"><Brain className="h-3 w-3" />Générée par IA — vérifiez avant publication</DialogDescription>}
           </DialogHeader>
           <div className="space-y-3 pt-6">
@@ -546,8 +546,8 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
       {/* Assign dialog */}
       <Dialog open={!!assignTarget} onOpenChange={o => !o && setAssignTarget(null)}>
         <DialogContent className="max-w-lg">
-          <DialogHeader className="bg-gradient-to-r from-primary to-[#007aa3] -m-6 mb-0 p-6 rounded-t-lg">
-            <DialogTitle className="text-white">Assigner des formations</DialogTitle>
+          <DialogHeader>
+            <DialogTitle>Assigner des formations</DialogTitle>
             <DialogDescription className="text-cyan-100 text-sm">{assignTarget?.candidate_name} · {assignTarget?.job_title}</DialogDescription>
           </DialogHeader>
           <div className="pt-6 space-y-2 max-h-[50vh] overflow-y-auto">
@@ -769,8 +769,8 @@ function GroupsManager({
       {/* Create group */}
       <Dialog open={createOpen} onOpenChange={setCreateOpen}>
         <DialogContent>
-          <DialogHeader className="bg-gradient-to-r from-primary to-[#007aa3] -m-6 mb-0 p-6 rounded-t-lg">
-            <DialogTitle className="text-white">Nouveau groupe</DialogTitle>
+          <DialogHeader>
+            <DialogTitle>Nouveau groupe</DialogTitle>
           </DialogHeader>
           <div className="space-y-3 pt-6">
             <div><Label>Nom *</Label><Input value={newGroup.name} onChange={e => setNewGroup({ ...newGroup, name: e.target.value })} /></div>
@@ -814,8 +814,8 @@ function PickerDialog({ open, onClose, title, items, initialSelected, onSave }: 
   return (
     <Dialog open={open} onOpenChange={o => !o && onClose()}>
       <DialogContent className="max-w-lg">
-        <DialogHeader className="bg-gradient-to-r from-primary to-[#007aa3] -m-6 mb-0 p-6 rounded-t-lg">
-          <DialogTitle className="text-white">{title}</DialogTitle>
+        <DialogHeader>
+          <DialogTitle>{title}</DialogTitle>
         </DialogHeader>
         <div className="pt-6 space-y-2 max-h-[50vh] overflow-y-auto">
           {items.length === 0 ? <p className="text-sm text-muted-foreground">Aucun élément.</p> :

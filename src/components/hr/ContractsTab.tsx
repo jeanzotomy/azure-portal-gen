@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import {
   FileSignature, Sparkles, Loader2, Download, RefreshCw, FileUp, CheckCircle2, Clock, Search, Briefcase,
@@ -252,7 +252,7 @@ export default function ContractsTab({ readOnly = false }: { readOnly?: boolean 
                     {!readOnly && !r.contract && (
                       <>
                         <Button size="sm" onClick={() => openGenerate(r)} disabled={busy === r.process_id}
-                          className="bg-gradient-to-r from-primary to-[#007aa3]">
+                          className="bg-gradient-primary-deep text-primary-foreground">
                           {busy === r.process_id ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Sparkles className="h-4 w-4 mr-1" />}
                           Générer
                         </Button>
@@ -275,8 +275,9 @@ export default function ContractsTab({ readOnly = false }: { readOnly?: boolean 
 
       <Dialog open={!!openRow} onOpenChange={(v) => !v && setOpenRow(null)}>
         <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader className="bg-gradient-to-r from-primary to-[#007aa3] -m-6 mb-2 p-6 rounded-t-lg">
-            <DialogTitle className="text-white">Générer le contrat - {openRow?.candidate_name}</DialogTitle>
+          <DialogHeader>
+            <DialogTitle>Générer le contrat - {openRow?.candidate_name}</DialogTitle>
+            <DialogDescription>Renseignez les informations contractuelles puis générez le document PDF.</DialogDescription>
           </DialogHeader>
 
           <div className="space-y-5 pt-2">
@@ -353,7 +354,7 @@ export default function ContractsTab({ readOnly = false }: { readOnly?: boolean 
 
           <DialogFooter>
             <Button variant="outline" onClick={() => setOpenRow(null)}>Annuler</Button>
-            <Button onClick={submitGenerate} disabled={busy === openRow?.process_id} className="bg-gradient-to-r from-primary to-[#007aa3]">
+            <Button onClick={submitGenerate} disabled={busy === openRow?.process_id} className="bg-gradient-primary-deep text-primary-foreground">
               {busy === openRow?.process_id ? <Loader2 className="h-4 w-4 animate-spin mr-1" /> : <Sparkles className="h-4 w-4 mr-1" />}
               Générer le contrat
             </Button>

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { useUserRoles } from "@/hooks/use-admin";
@@ -8,7 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { FormSection } from "@/components/ui/form-section";
 import { Label } from "@/components/ui/label";
 import { useConfirm } from "@/components/ui/confirm-dialog";
@@ -104,7 +104,9 @@ interface Sector {
   description: string | null;
 }
 
-export default function HrTab({ onboardingReadOnly = false, defaultTab }: { onboardingReadOnly?: boolean; defaultTab?: "recruitment" | "contracts" | "trainings" | "onboarding" } = {}) {
+type HrMainTab = "recruitment" | "contracts" | "trainings" | "onboarding";
+
+export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTab, onTabChange }: { onboardingReadOnly?: boolean; defaultTab?: HrMainTab; activeTab?: HrMainTab; onTabChange?: (t: HrMainTab) => void } = {}) {
   const { user } = useAuthSession();
   const { isAdmin } = useUserRoles();
   const { toast } = useToast();
@@ -497,6 +499,34 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab }: { onbo
     load();
   };
 
+  const filteredJobs = useMemo(() => {
+    const q = jobSearch.trim().toLowerCase();
+    return jobs.filter((j) => {
+      if (q) {
+        const haystack = [j.title, j.description, j.location, j.department, j.sector].filter(Boolean).join(" ").toLowerCase();
+        if (!haystack.includes(q)) return false;
+      }
+      if (jobStatusFilter !== "all" && j.status !== jobStatusFilter) return false;
+      if (jobContractFilter !== "all" && j.contract_type !== jobContractFilter) return false;
+      if (jobDeptFilter !== "all" && j.department !== jobDeptFilter) return false;
+      return true;
+    });
+  }, [jobs, jobSearch, jobStatusFilter, jobContractFilter, jobDeptFilter]);
+
+  const filteredApps = useMemo(() => {
+    const q = appSearch.trim().toLowerCase();
+    return applications.filter((a) => {
+      const job = jobs.find((j) => j.id === a.job_id);
+      if (q) {
+        const haystack = [a.full_name, a.email, a.phone, job?.title, job?.location].filter(Boolean).join(" ").toLowerCase();
+        if (!haystack.includes(q)) return false;
+      }
+      if (appStatusFilter !== "all" && a.status !== appStatusFilter) return false;
+      if (appJobFilter !== "all" && a.job_id !== appJobFilter) return false;
+      return true;
+    });
+  }, [applications, jobs, appSearch, appStatusFilter, appJobFilter]);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between flex-wrap gap-3">
@@ -512,9 +542,12 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab }: { onbo
         </div>
       </div>
 
-      <Tabs defaultValue={defaultTab || "recruitment"}>
+      <Tabs value={activeTab ?? defaultTab ?? "recruitment"} onValueChange={(v) => onTabChange?.(v as HrMainTab)} defaultValue={activeTab ? undefined : (defaultTab || "recruitment")}>
         <TabsList className="flex flex-wrap h-auto">
           <TabsTrigger value="recruitment"><Briefcase size={14} className="mr-1" />Recrutement</TabsTrigger>
+          <TabsTrigger value="contracts"><FileSignature size={14} className="mr-1" />Contrats</TabsTrigger>
+          <TabsTrigger value="trainings"><GraduationCap size={14} className="mr-1" />Formations</TabsTrigger>
+          <TabsTrigger value="onboarding"><Users size={14} className="mr-1" />Onboarding</TabsTrigger>
         </TabsList>
 
         <TabsContent value="recruitment" className="mt-4">
@@ -533,17 +566,6 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab }: { onbo
           {!loading && jobs.length > 0 && (() => {
             const jobDepartments = Array.from(new Set(jobs.map((j) => j.department).filter((d): d is string => !!d))).sort();
             const jobContracts = Array.from(new Set(jobs.map((j) => j.contract_type)));
-            const filteredJobs = jobs.filter((j) => {
-              const q = jobSearch.trim().toLowerCase();
-              if (q) {
-                const haystack = [j.title, j.description, j.location, j.department, j.sector].filter(Boolean).join(" ").toLowerCase();
-                if (!haystack.includes(q)) return false;
-              }
-              if (jobStatusFilter !== "all" && j.status !== jobStatusFilter) return false;
-              if (jobContractFilter !== "all" && j.contract_type !== jobContractFilter) return false;
-              if (jobDeptFilter !== "all" && j.department !== jobDeptFilter) return false;
-              return true;
-            });
             const hasJobFilters = !!jobSearch || jobStatusFilter !== "all" || jobContractFilter !== "all" || jobDeptFilter !== "all";
             const resetJobFilters = () => { setJobSearch(""); setJobStatusFilter("all"); setJobContractFilter("all"); setJobDeptFilter("all"); };
             return (
@@ -594,19 +616,7 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab }: { onbo
               </>
             );
           })()}
-          {(() => {
-            const filteredJobs = jobs.filter((j) => {
-              const q = jobSearch.trim().toLowerCase();
-              if (q) {
-                const haystack = [j.title, j.description, j.location, j.department, j.sector].filter(Boolean).join(" ").toLowerCase();
-                if (!haystack.includes(q)) return false;
-              }
-              if (jobStatusFilter !== "all" && j.status !== jobStatusFilter) return false;
-              if (jobContractFilter !== "all" && j.contract_type !== jobContractFilter) return false;
-              if (jobDeptFilter !== "all" && j.department !== jobDeptFilter) return false;
-              return true;
-            });
-            return filteredJobs.map((job) => {
+          {filteredJobs.map((job) => {
             const appCount = applications.filter((a) => a.job_id === job.id).length;
             return (
               <Card key={job.id}>
@@ -643,8 +653,7 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab }: { onbo
                 </CardContent>
               </Card>
             );
-          });
-          })()}
+          })}
         </TabsContent>
 
         <TabsContent value="applications" className="space-y-3 mt-4">
@@ -653,17 +662,6 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab }: { onbo
             <Card><CardContent className="p-8 text-center text-muted-foreground">Aucune candidature reçue.</CardContent></Card>
           )}
           {!loading && applications.length > 0 && (() => {
-            const filteredApps = applications.filter((a) => {
-              const job = jobs.find((j) => j.id === a.job_id);
-              const q = appSearch.trim().toLowerCase();
-              if (q) {
-                const haystack = [a.full_name, a.email, a.phone, job?.title, job?.location].filter(Boolean).join(" ").toLowerCase();
-                if (!haystack.includes(q)) return false;
-              }
-              if (appStatusFilter !== "all" && a.status !== appStatusFilter) return false;
-              if (appJobFilter !== "all" && a.job_id !== appJobFilter) return false;
-              return true;
-            });
             const hasAppFilters = !!appSearch || appStatusFilter !== "all" || appJobFilter !== "all";
             const resetAppFilters = () => { setAppSearch(""); setAppStatusFilter("all"); setAppJobFilter("all"); };
             const jobsWithApps = jobs.filter((j) => applications.some((a) => a.job_id === j.id));
@@ -703,22 +701,10 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab }: { onbo
               </div>
             );
           })()}
-          {(() => {
-            const filteredApps = applications.filter((a) => {
-              const job = jobs.find((j) => j.id === a.job_id);
-              const q = appSearch.trim().toLowerCase();
-              if (q) {
-                const haystack = [a.full_name, a.email, a.phone, job?.title, job?.location].filter(Boolean).join(" ").toLowerCase();
-                if (!haystack.includes(q)) return false;
-              }
-              if (appStatusFilter !== "all" && a.status !== appStatusFilter) return false;
-              if (appJobFilter !== "all" && a.job_id !== appJobFilter) return false;
-              return true;
-            });
-            if (!loading && applications.length > 0 && filteredApps.length === 0) {
-              return <Card><CardContent className="p-8 text-center text-muted-foreground text-sm">Aucune candidature ne correspond aux filtres.</CardContent></Card>;
-            }
-            return filteredApps.map((app) => {
+          {!loading && applications.length > 0 && filteredApps.length === 0 && (
+            <Card><CardContent className="p-8 text-center text-muted-foreground text-sm">Aucune candidature ne correspond aux filtres.</CardContent></Card>
+          )}
+          {filteredApps.map((app) => {
             const job = jobs.find((j) => j.id === app.job_id);
             return (
               <Card key={app.id}>
@@ -787,8 +773,7 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab }: { onbo
                 </CardContent>
               </Card>
             );
-          });
-          })()}
+          })}
         </TabsContent>
 
             <TabsContent value="email-log" className="mt-4">
@@ -813,10 +798,13 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab }: { onbo
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-auto">
           <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2">
+            <DialogTitle className="flex items-center gap-2">
               <Briefcase size={18} />
               {editing ? "Modifier l'offre" : "Nouvelle offre d'emploi"}
             </DialogTitle>
+            <DialogDescription>
+              {editing ? "Mettez à jour les informations de l'offre publiée." : "Renseignez le poste, le contrat et la description publique."}
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-5 max-h-[60vh] overflow-y-auto pr-1 pt-1">
             <FormSection
@@ -1001,7 +989,7 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab }: { onbo
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Annuler</Button>
             <Button
               onClick={handleSave}
-              className="bg-gradient-to-r from-primary to-[#007aa3] text-white shadow-sm hover:opacity-95"
+              className="bg-gradient-primary-deep text-primary-foreground shadow-sm hover:opacity-95"
             >
               {editing ? "Enregistrer" : "Créer l'offre"}
             </Button>
@@ -1012,7 +1000,8 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab }: { onbo
       <Dialog open={deptDialogOpen} onOpenChange={setDeptDialogOpen}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto w-[95vw] sm:w-auto">
           <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2"><Building2 size={18} /> Gérer les départements</DialogTitle>
+            <DialogTitle className="flex items-center gap-2"><Building2 size={18} /> Gérer les départements</DialogTitle>
+            <DialogDescription>Créez, renommez ou supprimez les départements proposés dans les offres.</DialogDescription>
           </DialogHeader>
           <div className="space-y-5 pt-1">
             <FormSection
@@ -1027,7 +1016,7 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab }: { onbo
                   size="sm"
                   onClick={handleAddDepartment}
                   disabled={!newDeptName.trim()}
-                  className="bg-gradient-to-r from-primary to-[#007aa3] text-white shadow-sm hover:opacity-95 disabled:opacity-50"
+                  className="bg-gradient-primary-deep text-primary-foreground shadow-sm hover:opacity-95 disabled:opacity-50"
                 >
                   <Plus size={14} /> Ajouter
                 </Button>
@@ -1055,7 +1044,7 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab }: { onbo
                             size="sm"
                             onClick={handleUpdateDepartment}
                             disabled={!editDeptName.trim()}
-                            className="bg-gradient-to-r from-primary to-[#007aa3] text-white"
+                            className="bg-gradient-primary-deep text-primary-foreground"
                           >
                             Enregistrer
                           </Button>
@@ -1097,7 +1086,8 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab }: { onbo
       <Dialog open={sectorDialogOpen} onOpenChange={setSectorDialogOpen}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto w-[95vw] sm:w-auto">
           <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2"><Briefcase size={18} /> Gérer les secteurs</DialogTitle>
+            <DialogTitle className="flex items-center gap-2"><Briefcase size={18} /> Gérer les secteurs</DialogTitle>
+            <DialogDescription>Définissez les secteurs d'activité utilisés dans la sélection des offres.</DialogDescription>
           </DialogHeader>
           <div className="space-y-5 pt-1">
             <FormSection
@@ -1112,7 +1102,7 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab }: { onbo
                   size="sm"
                   onClick={handleAddSector}
                   disabled={!newSectorName.trim()}
-                  className="bg-gradient-to-r from-primary to-[#007aa3] text-white shadow-sm hover:opacity-95 disabled:opacity-50"
+                  className="bg-gradient-primary-deep text-primary-foreground shadow-sm hover:opacity-95 disabled:opacity-50"
                 >
                   <Plus size={14} /> Ajouter
                 </Button>
@@ -1140,7 +1130,7 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab }: { onbo
                             size="sm"
                             onClick={handleUpdateSector}
                             disabled={!editSectorName.trim()}
-                            className="bg-gradient-to-r from-primary to-[#007aa3] text-white"
+                            className="bg-gradient-primary-deep text-primary-foreground"
                           >
                             Enregistrer
                           </Button>
@@ -1182,7 +1172,8 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab }: { onbo
       <Dialog open={interviewDialogOpen} onOpenChange={setInterviewDialogOpen}>
         <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto w-[95vw] sm:w-auto">
           <DialogHeader>
-            <DialogTitle className="text-white flex items-center gap-2"><Calendar size={18} /> Inviter à un entretien</DialogTitle>
+            <DialogTitle className="flex items-center gap-2"><Calendar size={18} /> Inviter à un entretien</DialogTitle>
+            <DialogDescription>Le candidat recevra l'invitation par email avec votre message personnalisé.</DialogDescription>
           </DialogHeader>
           <div className="space-y-4 pt-1">
             {interviewApp && (
@@ -1217,7 +1208,7 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab }: { onbo
             <Button variant="outline" onClick={() => setInterviewDialogOpen(false)}>Annuler</Button>
             <Button
               onClick={confirmInterview}
-              className="bg-gradient-to-r from-primary to-[#007aa3] text-white shadow-sm hover:opacity-95"
+              className="bg-gradient-primary-deep text-primary-foreground shadow-sm hover:opacity-95"
             >
               <Mail size={14} /> Envoyer l'invitation
             </Button>
