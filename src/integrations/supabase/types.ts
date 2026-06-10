@@ -980,6 +980,36 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_provider_settings: {
+        Row: {
+          config: Json
+          created_at: string
+          enabled: boolean
+          environment: string
+          provider: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          config?: Json
+          created_at?: string
+          enabled?: boolean
+          environment?: string
+          provider: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          config?: Json
+          created_at?: string
+          enabled?: boolean
+          environment?: string
+          provider?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address_line: string | null
