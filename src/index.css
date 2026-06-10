@@ -106,6 +106,9 @@
   .gradient-primary {
     background: var(--gradient-primary);
   }
+  .bg-gradient-primary-deep {
+    background-image: var(--gradient-primary-deep);
+  }
   .gradient-text {
     background: var(--gradient-primary);
     -webkit-background-clip: text;
