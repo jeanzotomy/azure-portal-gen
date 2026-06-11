@@ -141,6 +141,8 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
         const { data: its } = await supabase.from("service_invoice_items").select("*").eq("invoice_id", editId).order("position");
         if (inv) {
           setClientId(inv.client_id);
+          setAssignedUserId((inv as any).assigned_user_id ?? "");
+
           setInvoiceDate(inv.invoice_date);
           setDueDate(inv.due_date ?? "");
           setCurrency(inv.currency as Currency);
