@@ -82,7 +82,7 @@ export default function ServiceCatalogTab() {
     setLoading(true);
     const { data, error } = await supabase.from("service_catalog").select("*").order("display_order", { ascending: true }).order("name");
     if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
-    else setItems(data ?? []);
+    else setItems((data ?? []) as unknown as CatalogService[]);
     setLoading(false);
   };
 
