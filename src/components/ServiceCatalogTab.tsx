@@ -291,6 +291,7 @@ export default function ServiceCatalogTab() {
                 Plus le nombre est petit, plus le service apparaît en premier. À égalité, tri par nom.
               </p>
             </div>
+          </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Annuler</Button>
             <Button onClick={() => void save()} disabled={saving}>{saving ? "Enregistrement..." : "Enregistrer"}</Button>
