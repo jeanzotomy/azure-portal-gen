@@ -90,10 +90,29 @@ export default function ServiceInvoicesTab() {
     return (r.invoice_number ?? "").toLowerCase().includes(q) || (r.service_clients?.client_name ?? "").toLowerCase().includes(q);
   });
 
-  const totals = filtered.reduce((acc, r) => {
-    if (r.status !== "annulee") acc[r.currency] = (acc[r.currency] ?? 0) + Number(r.total);
-    return acc;
-  }, {} as Record<string, number>);
+  // Conversion vers la devise d'affichage choisie
+  const convertedTotal = filtered.reduce((sum, r) => {
+    if (r.status === "annulee") return sum;
+    return sum + convert(Number(r.total), r.currency, displayCurrency);
+  }, 0);
+  const paidTotal = filtered.reduce((sum, r) => {
+    if (r.status !== "payee") return sum;
+    return sum + convert(Number(r.total), r.currency, displayCurrency);
+  }, 0);
+  const pendingTotal = filtered.reduce((sum, r) => {
+    if (r.status !== "emise" && r.status !== "en_retard") return sum;
+    return sum + convert(Number(r.total), r.currency, displayCurrency);
+  }, 0);
+
+  const countBy = (st: InvoiceRow["status"]) => filtered.filter((r) => r.status === st).length;
+  const fmt = (val: number) => new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(Math.round(val));
+
+  const STAT_CARDS = [
+    { label: "Total factures", value: filtered.length.toString(), sub: `${countBy("brouillon")} brouillon · ${countBy("annulee")} annulée(s)`, icon: Receipt, tone: "text-foreground" },
+    { label: `Payées (${displayCurrency})`, value: fmt(paidTotal), sub: `${countBy("payee")} facture(s)`, icon: CheckCircle2, tone: "text-emerald-600" },
+    { label: `En attente (${displayCurrency})`, value: fmt(pendingTotal), sub: `${countBy("emise")} émise · ${countBy("en_retard")} en retard`, icon: Clock, tone: "text-blue-600" },
+    { label: `Total facturé (${displayCurrency})`, value: fmt(convertedTotal), sub: "Hors annulées", icon: FileEdit, tone: "text-primary" },
+  ];
 
   return (
     <div className="space-y-4">
@@ -108,11 +127,51 @@ export default function ServiceInvoicesTab() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <Card><CardContent className="p-4"><div className="text-xs text-muted-foreground">Total factures</div><div className="text-xl font-bold">{filtered.length}</div></CardContent></Card>
-        {Object.entries(totals).map(([cur, val]) => (
-          <Card key={cur}><CardContent className="p-4"><div className="text-xs text-muted-foreground">Total {cur}</div><div className="text-xl font-bold">{new Intl.NumberFormat("fr-FR").format(val)}</div></CardContent></Card>
-        ))}
+      {/* Sélecteur de devise d'affichage */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <span className="text-xs text-muted-foreground">Afficher en :</span>
+        <div className="inline-flex rounded-md border border-border overflow-hidden">
+          {(["GNF", "USD", "EUR"] as Currency[]).map((c) => (
+            <button
+              key={c}
+              type="button"
+              onClick={() => setDisplayCurrency(c)}
+              className={`px-3 py-1 text-xs font-semibold transition-colors ${
+                displayCurrency === c
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-background text-muted-foreground hover:bg-muted"
+              }`}
+            >
+              {c}
+            </button>
+          ))}
+        </div>
+        {rates && rates.timestamp > 0 && (
+          <span className="text-[10px] text-muted-foreground">
+            Taux : 1 USD ≈ {fmt(rates.rates.GNF ?? 0)} GNF · {(rates.rates.EUR ?? 0).toFixed(2)} EUR
+          </span>
+        )}
+        <Button variant="ghost" size="sm" className="h-6 px-2 text-[10px]" onClick={() => void refreshRates(true)} disabled={ratesLoading}>
+          <RefreshCw size={10} className={`mr-1 ${ratesLoading ? "animate-spin" : ""}`} /> Taux
+        </Button>
+      </div>
+
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {STAT_CARDS.map((s) => {
+          const Icon = s.icon;
+          return (
+            <Card key={s.label}>
+              <CardContent className="p-4">
+                <div className="flex items-center justify-between gap-2 mb-1">
+                  <span className="text-xs text-muted-foreground">{s.label}</span>
+                  <Icon size={14} className={s.tone} />
+                </div>
+                <div className={`text-xl font-bold ${s.tone}`}>{s.value}</div>
+                <div className="text-[10px] text-muted-foreground mt-1">{s.sub}</div>
+              </CardContent>
+            </Card>
+          );
+        })}
       </div>
 
       <div className="flex gap-2 flex-wrap">
