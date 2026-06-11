@@ -1588,18 +1588,26 @@ function ProfileTab({ user }: { user: SupaUser }) {
         </p>
         <Button
           variant="destructive"
-          onClick={async () => {
-            if (!window.confirm("Êtes-vous sûr de vouloir supprimer votre compte ? Cette action désactivera votre accès.")) return;
-            const { error } = await supabase.from("profiles").update({ deleted_at: new Date().toISOString() } as any).eq("user_id", user.id);
-            if (error) { toast({ title: "Erreur", description: error.message, variant: "destructive" }); return; }
-            toast({ title: "Compte supprimé", description: "Votre compte a été désactivé." });
-            await supabase.auth.signOut();
-            window.location.href = "/";
+          onClick={() => {
+            confirm({
+              title: "Supprimer votre compte ?",
+              description: "Votre accès sera immédiatement révoqué. Seul un administrateur pourra restaurer ce compte. Cette action est irréversible côté utilisateur.",
+              confirmLabel: "Supprimer mon compte",
+              variant: "destructive",
+              onConfirm: async () => {
+                const { error } = await supabase.from("profiles").update({ deleted_at: new Date().toISOString() } as any).eq("user_id", user.id);
+                if (error) { toast({ title: "Erreur", description: error.message, variant: "destructive" }); return; }
+                toast({ title: "Compte supprimé", description: "Votre compte a été désactivé." });
+                await supabase.auth.signOut();
+                window.location.href = "/";
+              },
+            });
           }}
         >
           <Trash2 size={14} className="mr-2" /> Supprimer mon compte
         </Button>
       </div>
+      {confirmDlg}
     </div>
   );
 }
