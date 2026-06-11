@@ -363,6 +363,31 @@ export default function ServiceCatalogTab() {
               <Switch checked={form.published ?? false} onCheckedChange={(v) => setForm({ ...form, published: v })} />
               <label className="text-xs">Publié sur le site (visible publiquement sur /pricing)</label>
             </div>
+            <div className="space-y-2 rounded-md border border-border/60 p-3">
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={form.is_subscription ?? false}
+                  onCheckedChange={(v) => setForm({ ...form, is_subscription: v, billing_frequency: v ? (form.billing_frequency ?? "mensuel") : null })}
+                />
+                <label className="text-xs font-medium">Abonnement / licence (facturation récurrente)</label>
+              </div>
+              {form.is_subscription && (
+                <div>
+                  <label className="text-xs text-muted-foreground">Fréquence de facturation</label>
+                  <Select
+                    value={form.billing_frequency ?? "mensuel"}
+                    onValueChange={(v) => setForm({ ...form, billing_frequency: v as BillingFrequency })}
+                  >
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {(Object.keys(FREQ_LABEL) as BillingFrequency[]).map((f) => (
+                        <SelectItem key={f} value={f}>{FREQ_LABEL[f]}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
             <div>
               <label className="text-xs font-medium">Ordre d'affichage sur /pricing</label>
               <Input
