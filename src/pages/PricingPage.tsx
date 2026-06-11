@@ -71,6 +71,15 @@ const PACKS = [
   { id: "pack_accompagnement", name: "Accompagnement Mensuel (20 h)", eur: 2150, stripe: { cad: 3200, usd: 2400, eur: 2150 } },
 ];
 
+type PublishedService = {
+  id: string;
+  name: string;
+  description: string | null;
+  default_unit_price: number;
+  default_currency: "GNF" | "USD" | "EUR";
+  default_unit: string;
+};
+
 export default function PricingPage() {
   const navigate = useNavigate();
   const [currency, setCurrency] = useState<AllCurrency>("CAD");
@@ -79,11 +88,19 @@ export default function PricingPage() {
   const { openCheckout, closeCheckout, isOpen, checkoutElement } = useStripeCheckout();
   const cinetpay = useCinetPayCheckout();
   const { isAdmin } = useUserRoles();
+  const [publishedServices, setPublishedServices] = useState<PublishedService[]>([]);
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
       if (data.user) setUser({ id: data.user.id, email: data.user.email });
     });
+    supabase
+      .from("service_catalog")
+      .select("id, name, description, default_unit_price, default_currency, default_unit")
+      .eq("published", true)
+      .eq("active", true)
+      .order("name")
+      .then(({ data }) => setPublishedServices((data ?? []) as PublishedService[]));
   }, []);
 
   const usingCinetPay = isAfricanCurrency(currency);
