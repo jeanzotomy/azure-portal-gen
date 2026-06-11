@@ -22,7 +22,19 @@ import { useExchangeRates, type Currency } from "@/hooks/use-exchange-rates";
 
 interface SClient { id: string; client_name: string; nif: string | null; rccm: string | null; address_line: string | null; city: string | null; country: string | null; phone: string | null; email: string | null; contact_person: string | null; }
 interface CatItem { id: string; name: string; description: string | null; default_unit_price: number; default_currency: Currency; default_unit: string; active: boolean; }
-interface LineItem { catalog_id?: string | null; description: string; subtitle?: string; quantity: number; unit: string; unit_price: number; discount_rate?: number; }
+type BillingFrequency = "mensuel" | "trimestriel" | "semestriel" | "annuel";
+interface LineItem {
+  catalog_id?: string | null;
+  description: string;
+  subtitle?: string;
+  quantity: number;
+  unit: string;
+  unit_price: number;
+  discount_rate?: number;
+  is_recurring?: boolean;
+  billing_frequency?: BillingFrequency | null;
+  periods?: number;
+}
 interface PMRow {
   id: string; label: string; type: "virement" | "mobile_money" | "especes" | "cheque" | "depot" | "autre";
   currency: Currency; bank: string | null; iban: string | null; swift: string | null;
@@ -30,11 +42,28 @@ interface PMRow {
 }
 
 const lineTotal = (it: LineItem) => {
-  const gross = (it.quantity || 0) * (it.unit_price || 0);
+  const periods = it.is_recurring ? Math.max(1, it.periods || 1) : 1;
+  const gross = (it.quantity || 0) * (it.unit_price || 0) * periods;
   return gross * (1 - (it.discount_rate || 0) / 100);
 };
 
-const UNIT_OPTIONS = ["unité", "heure", "jour", "mois", "année", "forfait"] as const;
+const FREQ_LABELS: Record<BillingFrequency, { adj: string; period: string; periodPlural: string }> = {
+  mensuel:     { adj: "mensuel",     period: "mois",      periodPlural: "mois" },
+  trimestriel: { adj: "trimestriel", period: "trimestre", periodPlural: "trimestres" },
+  semestriel:  { adj: "semestriel",  period: "semestre",  periodPlural: "semestres" },
+  annuel:      { adj: "annuel",      period: "an",        periodPlural: "ans" },
+};
+
+const buildRecurringSubtitle = (it: LineItem, currency: Currency): string => {
+  if (!it.is_recurring || !it.billing_frequency) return "";
+  const f = FREQ_LABELS[it.billing_frequency];
+  const periods = Math.max(1, it.periods || 1);
+  const unit = it.unit && it.unit !== "unité" ? it.unit : "utilisateur";
+  const fmt = new Intl.NumberFormat("fr-FR");
+  return `${it.quantity} ${unit}${it.quantity > 1 ? "s" : ""} × ${fmt.format(it.unit_price)} ${currency}/${unit}/${f.period} × ${periods} ${periods > 1 ? f.periodPlural : f.period}`;
+};
+
+const UNIT_OPTIONS = ["unité", "utilisateur", "licence", "poste", "heure", "jour", "mois", "année", "forfait"] as const;
 const DEFAULT_PAYMENT = { bank: "", iban: "", swift: "", mobile_money: "+224 626 441 150", reference: "" };
 
 const PM_TYPE_ICONS: Record<PMRow["type"], typeof CreditCard> = {
@@ -122,6 +151,9 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
           setItems(its.map((x) => ({
             catalog_id: x.catalog_id, description: x.description, subtitle: x.subtitle ?? "",
             quantity: Number(x.quantity), unit: x.unit, unit_price: Number(x.unit_price), discount_rate: Number(x.discount_rate),
+            is_recurring: Boolean((x as { is_recurring?: boolean }).is_recurring),
+            billing_frequency: ((x as { billing_frequency?: BillingFrequency | null }).billing_frequency) ?? null,
+            periods: Number((x as { periods?: number }).periods ?? 1),
           })));
         }
       } else {
@@ -129,7 +161,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
         setClientId(""); setInvoiceDate(new Date().toISOString().slice(0, 10)); setDueDate("");
         setCurrency("GNF"); setDiscountRate(0); setTaxRate(18); setEarlyPaymentDiscountRate(0);
         setNotes(""); setSelectedPaymentIds([]); setPayment({ ...DEFAULT_PAYMENT });
-        setItems([{ description: "", quantity: 1, unit: "unité", unit_price: 0, discount_rate: 0 }]);
+        setItems([{ description: "", quantity: 1, unit: "unité", unit_price: 0, discount_rate: 0, is_recurring: false, periods: 1 }]);
       }
     })();
   }, [open, user, editId]);
@@ -162,7 +194,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
     });
   };
 
-  const addLine = () => setItems((p) => [...p, { description: "", quantity: 1, unit: "unité", unit_price: 0, discount_rate: 0 }]);
+  const addLine = () => setItems((p) => [...p, { description: "", quantity: 1, unit: "unité", unit_price: 0, discount_rate: 0, is_recurring: false, periods: 1 }]);
   const removeLine = (idx: number) => setItems((p) => p.filter((_, i) => i !== idx));
 
   // Conversion automatique des prix unitaires quand la devise change
@@ -206,7 +238,11 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
     },
     payment_details: payment,
     payment_methods: selectedPaymentMethods,
-    items: items.map((it, i) => ({ position: i + 1, description: it.description, subtitle: it.subtitle ?? null, quantity: it.quantity, unit: it.unit, unit_price: it.unit_price, discount_rate: it.discount_rate ?? 0, total: lineTotal(it) })),
+    items: items.map((it, i) => {
+      const recurringNote = buildRecurringSubtitle(it, currency);
+      const combinedSubtitle = [it.subtitle, recurringNote].filter(Boolean).join(" — ") || null;
+      return { position: i + 1, description: it.description, subtitle: combinedSubtitle, quantity: it.quantity, unit: it.unit, unit_price: it.unit_price, discount_rate: it.discount_rate ?? 0, total: lineTotal(it) };
+    }),
     subtotal, discount_rate: discountRate, discount_amount: discountAmount, tax_rate: taxRate, tax_amount: taxAmount,
     early_payment_discount_rate: earlyPaymentDiscountRate, early_payment_discount_amount: earlyPaymentDiscountAmount,
     total, notes: notes || null,
@@ -262,7 +298,15 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
         inv = data;
       }
 
-      const itemsPayload = items.map((it, i) => ({ invoice_id: inv!.id, position: i + 1, catalog_id: it.catalog_id ?? null, description: it.description, subtitle: it.subtitle ?? null, quantity: it.quantity, unit: it.unit, unit_price: it.unit_price, discount_rate: it.discount_rate ?? 0, total: lineTotal(it) }));
+      const itemsPayload = items.map((it, i) => ({
+        invoice_id: inv!.id, position: i + 1, catalog_id: it.catalog_id ?? null,
+        description: it.description, subtitle: it.subtitle ?? null,
+        quantity: it.quantity, unit: it.unit, unit_price: it.unit_price,
+        discount_rate: it.discount_rate ?? 0, total: lineTotal(it),
+        is_recurring: !!it.is_recurring,
+        billing_frequency: it.is_recurring ? (it.billing_frequency ?? null) : null,
+        periods: it.is_recurring ? Math.max(1, it.periods || 1) : 1,
+      }));
       await supabase.from("service_invoice_items").insert(itemsPayload);
 
       // Generate documents according to chosen format
@@ -492,7 +536,52 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
                     <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">%</span>
                   </div>
                 </div>
-                <div className="col-span-9 md:col-span-3 flex items-center md:justify-end text-sm font-semibold">
+                <div className="col-span-12 border-t pt-2 mt-1">
+                  <label className="flex items-center gap-2 text-xs cursor-pointer select-none">
+                    <Checkbox
+                      checked={!!it.is_recurring}
+                      onCheckedChange={(v) => updateItem(idx, {
+                        is_recurring: !!v,
+                        billing_frequency: v ? (it.billing_frequency ?? "mensuel") : null,
+                        periods: v ? (it.periods || 12) : 1,
+                      })}
+                    />
+                    <span className="font-medium">Licence / abonnement (prix par période)</span>
+                  </label>
+                  {it.is_recurring && (
+                    <div className="grid grid-cols-12 gap-2 mt-2">
+                      <div className="col-span-6 md:col-span-4">
+                        <label className="text-[10px] uppercase text-muted-foreground">Fréquence</label>
+                        <Select
+                          value={it.billing_frequency ?? "mensuel"}
+                          onValueChange={(v) => updateItem(idx, { billing_frequency: v as BillingFrequency })}
+                        >
+                          <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="mensuel">Mensuel</SelectItem>
+                            <SelectItem value="trimestriel">Trimestriel</SelectItem>
+                            <SelectItem value="semestriel">Semestriel</SelectItem>
+                            <SelectItem value="annuel">Annuel</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="col-span-6 md:col-span-3">
+                        <label className="text-[10px] uppercase text-muted-foreground">Nb de périodes</label>
+                        <Input
+                          type="number" min={1}
+                          value={it.periods ?? 1}
+                          onChange={(e) => updateItem(idx, { periods: Math.max(1, Number(e.target.value) || 1) })}
+                        />
+                      </div>
+                      <div className="col-span-12 md:col-span-5 flex items-end">
+                        <p className="text-[11px] text-muted-foreground italic leading-snug">
+                          {buildRecurringSubtitle(it, currency) || "Le détail sera repris sur la facture."}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div className="col-span-9 md:col-span-11 flex items-center md:justify-end text-sm font-semibold">
                   Total : {new Intl.NumberFormat("fr-FR").format(lineTotal(it))} {currency}
                 </div>
                 <div className="col-span-3 md:col-span-1 flex items-center justify-end">

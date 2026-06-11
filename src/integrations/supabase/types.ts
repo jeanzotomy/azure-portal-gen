@@ -1371,12 +1371,15 @@ export type Database = {
       }
       service_invoice_items: {
         Row: {
+          billing_frequency: string | null
           catalog_id: string | null
           created_at: string
           description: string
           discount_rate: number
           id: string
           invoice_id: string
+          is_recurring: boolean
+          periods: number
           position: number
           quantity: number
           subtitle: string | null
@@ -1385,12 +1388,15 @@ export type Database = {
           unit_price: number
         }
         Insert: {
+          billing_frequency?: string | null
           catalog_id?: string | null
           created_at?: string
           description: string
           discount_rate?: number
           id?: string
           invoice_id: string
+          is_recurring?: boolean
+          periods?: number
           position?: number
           quantity?: number
           subtitle?: string | null
@@ -1399,12 +1405,15 @@ export type Database = {
           unit_price?: number
         }
         Update: {
+          billing_frequency?: string | null
           catalog_id?: string | null
           created_at?: string
           description?: string
           discount_rate?: number
           id?: string
           invoice_id?: string
+          is_recurring?: boolean
+          periods?: number
           position?: number
           quantity?: number
           subtitle?: string | null
