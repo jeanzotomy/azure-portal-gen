@@ -280,7 +280,17 @@ export default function ServiceCatalogTab() {
               <Switch checked={form.published ?? false} onCheckedChange={(v) => setForm({ ...form, published: v })} />
               <label className="text-xs">Publié sur le site (visible publiquement sur /pricing)</label>
             </div>
-          </div>
+            <div>
+              <label className="text-xs font-medium">Ordre d'affichage sur /pricing</label>
+              <Input
+                type="number"
+                value={form.display_order ?? 0}
+                onChange={(e) => setForm({ ...form, display_order: Number(e.target.value) })}
+              />
+              <p className="text-[10px] text-muted-foreground mt-1">
+                Plus le nombre est petit, plus le service apparaît en premier. À égalité, tri par nom.
+              </p>
+            </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Annuler</Button>
             <Button onClick={() => void save()} disabled={saving}>{saving ? "Enregistrement..." : "Enregistrer"}</Button>
