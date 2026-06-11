@@ -6,7 +6,8 @@ const corsHeaders = {
 };
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/twilio";
-const TWILIO_FROM = "+16413484830";
+// Set TWILIO_FROM_NUMBER (or TWILIO_MESSAGING_SERVICE_SID) in your project secrets.
+// Use a real SMS-capable sender from your Twilio account (E.164, e.g. +1XXXXXXXXXX).
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
