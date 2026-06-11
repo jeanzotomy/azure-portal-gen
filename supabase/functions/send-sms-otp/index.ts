@@ -80,11 +80,24 @@ Deno.serve(async (req) => {
         "X-Connection-Api-Key": TWILIO_API_KEY,
         "Content-Type": "application/x-www-form-urlencoded",
       },
-      body: new URLSearchParams({
-        To: phone,
-        From: TWILIO_FROM,
-        Body: `Votre code de vérification CloudMature : ${code}. Valide 5 minutes.`,
-      }),
+    const params = new URLSearchParams({
+      To: phone,
+      Body: `Votre code de vérification CloudMature : ${code}. Valide 5 minutes.`,
+    });
+    if (TWILIO_MESSAGING_SERVICE_SID) {
+      params.set("MessagingServiceSid", TWILIO_MESSAGING_SERVICE_SID);
+    } else {
+      params.set("From", TWILIO_FROM_NUMBER!);
+    }
+
+    const twilioRes = await fetch(`${GATEWAY_URL}/Messages.json`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${LOVABLE_API_KEY}`,
+        "X-Connection-Api-Key": TWILIO_API_KEY,
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: params,
     });
 
     const twilioData = await twilioRes.json();
