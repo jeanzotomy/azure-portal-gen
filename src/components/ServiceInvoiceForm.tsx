@@ -102,14 +102,17 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
   useEffect(() => {
     if (!open) return;
     void (async () => {
-      const [{ data: cls }, { data: cat }, { data: pms }] = await Promise.all([
+      const [{ data: cls }, { data: cat }, { data: pms }, { data: usrs }] = await Promise.all([
         supabase.from("service_clients").select("*").order("client_name"),
         supabase.from("service_catalog").select("*").eq("active", true).order("name"),
         supabase.from("payment_methods").select("*").eq("active", true).order("position", { ascending: true }),
+        (supabase as any).rpc("list_employee_assignable_users"),
       ]);
       setClients(cls ?? []);
       setCatalog(cat ?? []);
       setPaymentMethods((pms ?? []) as PMRow[]);
+      setUsers(((usrs ?? []) as any[]).map((u) => ({ user_id: u.user_id, full_name: u.full_name, email: u.email })));
+
       // Charger le profil + rôle de l'émetteur
       if (user) {
         const [{ data: prof }, { data: roles }] = await Promise.all([
