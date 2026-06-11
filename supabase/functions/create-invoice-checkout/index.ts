@@ -33,7 +33,7 @@ Deno.serve(async (req) => {
     // Load invoice using service-role (RLS bypass) but verify ownership manually
     const { data: invoice, error: invErr } = await sb
       .from("service_invoices")
-      .select("id, invoice_number, total, currency, client_id, status")
+      .select("id, invoice_number, total, currency, client_id, status, assigned_user_id")
       .eq("id", invoiceId)
       .maybeSingle();
     if (invErr || !invoice) return new Response(JSON.stringify({ error: "Invoice not found" }), { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -41,13 +41,16 @@ Deno.serve(async (req) => {
       return new Response(JSON.stringify({ error: "Invoice already paid" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
 
-    // Ownership: client_id -> service_clients.user_id == user.id OR admin
+    // Ownership: assigned_user_id == user.id OR service_clients.user_id == user.id OR staff
     const { data: client } = await sb.from("service_clients").select("user_id").eq("id", invoice.client_id).maybeSingle();
     const { data: isAdminRows } = await sb.from("user_roles").select("role").eq("user_id", user.id).in("role", ["admin","agent","comptable"]);
     const isStaff = (isAdminRows?.length ?? 0) > 0;
-    if (!isStaff && client?.user_id !== user.id) {
+    const isAssigned = invoice.assigned_user_id === user.id;
+    const isClientOwner = client?.user_id === user.id;
+    if (!isStaff && !isAssigned && !isClientOwner) {
       return new Response(JSON.stringify({ error: "Forbidden" }), { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } });
     }
+
 
     const amountCents = Math.round(Number(invoice.total) * 100);
     if (!amountCents || amountCents < 50) {
