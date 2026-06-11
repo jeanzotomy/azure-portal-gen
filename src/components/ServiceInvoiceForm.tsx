@@ -298,7 +298,15 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
         inv = data;
       }
 
-      const itemsPayload = items.map((it, i) => ({ invoice_id: inv!.id, position: i + 1, catalog_id: it.catalog_id ?? null, description: it.description, subtitle: it.subtitle ?? null, quantity: it.quantity, unit: it.unit, unit_price: it.unit_price, discount_rate: it.discount_rate ?? 0, total: lineTotal(it) }));
+      const itemsPayload = items.map((it, i) => ({
+        invoice_id: inv!.id, position: i + 1, catalog_id: it.catalog_id ?? null,
+        description: it.description, subtitle: it.subtitle ?? null,
+        quantity: it.quantity, unit: it.unit, unit_price: it.unit_price,
+        discount_rate: it.discount_rate ?? 0, total: lineTotal(it),
+        is_recurring: !!it.is_recurring,
+        billing_frequency: it.is_recurring ? (it.billing_frequency ?? null) : null,
+        periods: it.is_recurring ? Math.max(1, it.periods || 1) : 1,
+      }));
       await supabase.from("service_invoice_items").insert(itemsPayload);
 
       // Generate documents according to chosen format
