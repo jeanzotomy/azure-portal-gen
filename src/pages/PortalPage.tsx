@@ -105,7 +105,7 @@ function PortalContent() {
   const handleLogout = async () => {
     clearSmsMfaVerified();
     await supabase.auth.signOut();
-    navigate("/");
+    window.location.href = "/";
   };
 
   const navItems: { id: Tab; icon: typeof LayoutDashboard; label: string }[] = [

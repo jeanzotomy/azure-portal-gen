@@ -38,7 +38,7 @@ export default function HrPortalPage() {
   const handleLogout = async () => {
     clearSmsMfaVerified();
     await supabase.auth.signOut();
-    navigate("/");
+    window.location.href = "/";
   };
 
   if (!user || !isHr) return null;
