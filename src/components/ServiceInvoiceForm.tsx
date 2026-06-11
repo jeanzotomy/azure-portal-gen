@@ -166,7 +166,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
         }
       } else {
         // reset propre quand on ouvre en création
-        setClientId(""); setInvoiceDate(new Date().toISOString().slice(0, 10)); setDueDate("");
+        setClientId(""); setAssignedUserId(""); setInvoiceDate(new Date().toISOString().slice(0, 10)); setDueDate("");
         setCurrency("GNF"); setDiscountRate(0); setTaxRate(18); setEarlyPaymentDiscountRate(0);
         setNotes(""); setSelectedPaymentIds([]); setPayment({ ...DEFAULT_PAYMENT });
         setItems([{ description: "", quantity: 1, unit: "unité", unit_price: 0, discount_rate: 0, is_recurring: false, periods: 1 }]);
