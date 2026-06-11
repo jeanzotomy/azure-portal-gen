@@ -339,13 +339,16 @@ export default function PortalInvoicesTab({ user: _user }: { user: SupaUser }) {
 
       {/* Checkout dialog */}
       <Dialog open={isOpen} onOpenChange={(o) => { if (!o) closeCheckout(); }}>
-        <DialogContent className="max-w-2xl p-0 overflow-hidden max-h-[90vh] overflow-y-auto">
-          <DialogHeader className="px-6 pt-6 pb-2">
-            <DialogTitle>Paiement de la facture</DialogTitle>
+        <DialogContent className="max-w-2xl p-0 overflow-hidden max-h-[90vh] flex flex-col gap-0">
+          <DialogHeader className="sticky top-0 z-10 bg-gradient-to-r from-primary to-[#007aa3] text-primary-foreground px-6 py-5 shadow-md [&>button]:text-primary-foreground [&>button]:opacity-100 [&>button:hover]:opacity-80">
+            <DialogTitle className="text-primary-foreground text-lg font-semibold tracking-tight flex items-center gap-2">
+              <CreditCard size={20} /> Paiement de la facture
+            </DialogTitle>
           </DialogHeader>
-          <div className="p-4">{checkoutElement}</div>
+          <div className="p-4 overflow-y-auto flex-1">{checkoutElement}</div>
         </DialogContent>
       </Dialog>
     </div>
   );
 }
+
