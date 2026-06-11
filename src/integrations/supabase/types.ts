@@ -1273,6 +1273,7 @@ export type Database = {
       service_catalog: {
         Row: {
           active: boolean
+          billing_frequency: string | null
           created_at: string
           created_by: string
           default_currency: Database["public"]["Enums"]["invoice_currency"]
@@ -1281,12 +1282,14 @@ export type Database = {
           description: string | null
           display_order: number
           id: string
+          is_subscription: boolean
           name: string
           published: boolean
           updated_at: string
         }
         Insert: {
           active?: boolean
+          billing_frequency?: string | null
           created_at?: string
           created_by: string
           default_currency?: Database["public"]["Enums"]["invoice_currency"]
@@ -1295,12 +1298,14 @@ export type Database = {
           description?: string | null
           display_order?: number
           id?: string
+          is_subscription?: boolean
           name: string
           published?: boolean
           updated_at?: string
         }
         Update: {
           active?: boolean
+          billing_frequency?: string | null
           created_at?: string
           created_by?: string
           default_currency?: Database["public"]["Enums"]["invoice_currency"]
@@ -1309,6 +1314,7 @@ export type Database = {
           description?: string | null
           display_order?: number
           id?: string
+          is_subscription?: boolean
           name?: string
           published?: boolean
           updated_at?: string

@@ -9,7 +9,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Pencil, Trash2, Search, Package, RefreshCw, Copy, Globe, GlobeLock, GripVertical } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Package, RefreshCw, Copy, Globe, GlobeLock, GripVertical, Repeat } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import {
   DndContext,
@@ -29,6 +29,8 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
+type BillingFrequency = "mensuel" | "trimestriel" | "semestriel" | "annuel";
+
 interface CatalogService {
   id: string;
   name: string;
@@ -39,10 +41,18 @@ interface CatalogService {
   active: boolean;
   published: boolean;
   display_order: number;
+  is_subscription: boolean;
+  billing_frequency: BillingFrequency | null;
   created_at: string;
 }
 
 const UNIT_OPTIONS = ["unité", "heure", "jour", "mois", "année", "forfait"] as const;
+const FREQ_LABEL: Record<BillingFrequency, string> = {
+  mensuel: "Mensuel",
+  trimestriel: "Trimestriel",
+  semestriel: "Semestriel",
+  annuel: "Annuel",
+};
 
 const empty: Partial<CatalogService> = {
   name: "",
@@ -53,6 +63,8 @@ const empty: Partial<CatalogService> = {
   active: true,
   published: false,
   display_order: 0,
+  is_subscription: false,
+  billing_frequency: null,
 };
 
 export default function ServiceCatalogTab() {
@@ -70,7 +82,7 @@ export default function ServiceCatalogTab() {
     setLoading(true);
     const { data, error } = await supabase.from("service_catalog").select("*").order("display_order", { ascending: true }).order("name");
     if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
-    else setItems(data ?? []);
+    else setItems((data ?? []) as unknown as CatalogService[]);
     setLoading(false);
   };
 
@@ -109,6 +121,8 @@ export default function ServiceCatalogTab() {
           active: form.active ?? true,
           published: form.published ?? false,
           display_order: form.display_order ?? 0,
+          is_subscription: form.is_subscription ?? false,
+          billing_frequency: form.is_subscription ? (form.billing_frequency ?? "mensuel") : null,
         })
         .eq("id", editing.id);
       if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
@@ -127,8 +141,10 @@ export default function ServiceCatalogTab() {
         active: form.active ?? true,
         published: form.published ?? false,
         display_order: form.display_order ?? 0,
+        is_subscription: form.is_subscription ?? false,
+        billing_frequency: form.is_subscription ? (form.billing_frequency ?? "mensuel") : null,
         created_by: user.id,
-      });
+      } as never);
       if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
       else {
         toast({ title: "Service ajouté" });
@@ -150,8 +166,10 @@ export default function ServiceCatalogTab() {
       active: s.active,
       published: false,
       display_order: s.display_order,
+      is_subscription: s.is_subscription,
+      billing_frequency: s.billing_frequency,
       created_by: user.id,
-    });
+    } as never);
     if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
     else {
       toast({ title: "Service dupliqué" });
@@ -345,6 +363,31 @@ export default function ServiceCatalogTab() {
               <Switch checked={form.published ?? false} onCheckedChange={(v) => setForm({ ...form, published: v })} />
               <label className="text-xs">Publié sur le site (visible publiquement sur /pricing)</label>
             </div>
+            <div className="space-y-2 rounded-md border border-border/60 p-3">
+              <div className="flex items-center gap-2">
+                <Switch
+                  checked={form.is_subscription ?? false}
+                  onCheckedChange={(v) => setForm({ ...form, is_subscription: v, billing_frequency: v ? (form.billing_frequency ?? "mensuel") : null })}
+                />
+                <label className="text-xs font-medium">Abonnement / licence (facturation récurrente)</label>
+              </div>
+              {form.is_subscription && (
+                <div>
+                  <label className="text-xs text-muted-foreground">Fréquence de facturation</label>
+                  <Select
+                    value={form.billing_frequency ?? "mensuel"}
+                    onValueChange={(v) => setForm({ ...form, billing_frequency: v as BillingFrequency })}
+                  >
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      {(Object.keys(FREQ_LABEL) as BillingFrequency[]).map((f) => (
+                        <SelectItem key={f} value={f}>{FREQ_LABEL[f]}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+            </div>
             <div>
               <label className="text-xs font-medium">Ordre d'affichage sur /pricing</label>
               <Input
@@ -385,6 +428,11 @@ function ServiceCardContent({ service: s, onTogglePublish, onDuplicate, onEdit, 
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="font-semibold">{s.name}</span>
+              {s.is_subscription && (
+                <Badge className="gap-1 text-[10px] bg-primary/10 text-primary border border-primary/30 hover:bg-primary/10">
+                  <Repeat size={10} /> Abonnement{s.billing_frequency ? ` · ${FREQ_LABEL[s.billing_frequency]}` : ""}
+                </Badge>
+              )}
               {s.published && (
                 <Badge variant="secondary" className="gap-1 text-[10px]">
                   <Globe size={10} /> Publié
