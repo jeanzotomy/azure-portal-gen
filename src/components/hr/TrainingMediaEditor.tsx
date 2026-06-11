@@ -78,7 +78,8 @@ export function TrainingMediaEditor({
 
   const upload = async (file: File) => {
     if (!file) return;
-    if (!file.type.startsWith("image/")) return toast.error("Image uniquement");
+    const allowed = ["image/png", "image/jpeg", "image/webp", "image/gif"];
+    if (!allowed.includes(file.type)) return toast.error("Format accepté : PNG, JPEG, WEBP, GIF");
     if (file.size > 5 * 1024 * 1024) return toast.error("Image > 5 Mo");
     setUploading(true);
     try {

@@ -63,13 +63,16 @@ export default function PortalInvoicesTab({ user: _user }: { user: SupaUser }) {
 
   const load = useCallback(async () => {
     setLoading(true);
-    const { data } = await supabase
+    const { data, error } = await supabase
       .from("service_invoices")
       .select("id, invoice_number, invoice_date, due_date, currency, total, status, sharepoint_url, notes, paid_at")
       .order("invoice_date", { ascending: false });
+    if (error) {
+      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    }
     setInvoices((data ?? []) as InvoiceRow[]);
     setLoading(false);
-  }, []);
+  }, [toast]);
 
   useEffect(() => {
     void load();

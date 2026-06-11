@@ -379,7 +379,7 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
         <DialogContent className="max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2"><Wand2 className="h-4 w-4" />Générer une formation avec IA</DialogTitle>
-            <DialogDescription className="text-cyan-100 text-xs">Contenu structuré + QCM générés par Gemini 2.5 Flash</DialogDescription>
+            <DialogDescription className="text-xs">Contenu structuré + QCM générés par Gemini 2.5 Flash</DialogDescription>
           </DialogHeader>
           <div className="space-y-3 pt-6">
             <div>
@@ -426,7 +426,7 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editing ? "Modifier la formation" : "Nouvelle formation"}</DialogTitle>
-            {form.ai_generated && <DialogDescription className="text-cyan-100 text-xs flex items-center gap-1"><Brain className="h-3 w-3" />Générée par IA — vérifiez avant publication</DialogDescription>}
+            {form.ai_generated && <DialogDescription className="text-xs flex items-center gap-1"><Brain className="h-3 w-3" />Générée par IA — vérifiez avant publication</DialogDescription>}
           </DialogHeader>
           <div className="space-y-3 pt-6">
             <div><Label>Titre *</Label><Input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} /></div>
@@ -564,7 +564,7 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
         <DialogContent className="max-w-lg">
           <DialogHeader>
             <DialogTitle>Assigner des formations</DialogTitle>
-            <DialogDescription className="text-cyan-100 text-sm">{assignTarget?.candidate_name} · {assignTarget?.job_title}</DialogDescription>
+            <DialogDescription className="text-sm">{assignTarget?.candidate_name} · {assignTarget?.job_title}</DialogDescription>
           </DialogHeader>
           <div className="pt-6 space-y-2 max-h-[50vh] overflow-y-auto">
             {trainings.filter(t => t.active).length === 0 ? (

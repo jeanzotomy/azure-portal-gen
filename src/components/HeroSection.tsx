@@ -70,7 +70,7 @@ export function HeroSection() {
                 onClick={() => document.querySelector("#contact")?.scrollIntoView({ behavior: "smooth" })}>
                 {t("hero.cta")} <ArrowRight size={18} className="ml-2" />
               </Button>
-              <Button size="lg" className="gradient-primary text-primary-foreground border-0 hover:opacity-90 animate-pulse-glow w-full sm:w-auto"
+              <Button size="lg" variant="outline" className="border-primary/50 text-primary hover:bg-primary/10 w-full sm:w-auto"
                 onClick={() => window.location.href = "/auth"}>
                 <UserPlus size={18} className="mr-2" /> {t("hero.become")}
               </Button>
