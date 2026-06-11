@@ -6,7 +6,8 @@ const corsHeaders = {
 };
 
 const GATEWAY_URL = "https://connector-gateway.lovable.dev/twilio";
-const TWILIO_FROM = "+16413484830";
+// Set TWILIO_FROM_NUMBER (or TWILIO_MESSAGING_SERVICE_SID) in your project secrets.
+// Use a real SMS-capable sender from your Twilio account (E.164, e.g. +1XXXXXXXXXX).
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -18,6 +19,11 @@ Deno.serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
     const TWILIO_API_KEY = Deno.env.get("TWILIO_API_KEY");
     if (!TWILIO_API_KEY) throw new Error("TWILIO_API_KEY is not configured");
+    const TWILIO_FROM_NUMBER = Deno.env.get("TWILIO_FROM_NUMBER");
+    const TWILIO_MESSAGING_SERVICE_SID = Deno.env.get("TWILIO_MESSAGING_SERVICE_SID");
+    if (!TWILIO_FROM_NUMBER && !TWILIO_MESSAGING_SERVICE_SID) {
+      throw new Error("Configure TWILIO_FROM_NUMBER (E.164) or TWILIO_MESSAGING_SERVICE_SID in secrets");
+    }
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
@@ -67,6 +73,16 @@ Deno.serve(async (req) => {
     if (insertError) throw insertError;
 
     // Send SMS via Twilio gateway
+    const params = new URLSearchParams({
+      To: phone,
+      Body: `Votre code de vérification CloudMature : ${code}. Valide 5 minutes.`,
+    });
+    if (TWILIO_MESSAGING_SERVICE_SID) {
+      params.set("MessagingServiceSid", TWILIO_MESSAGING_SERVICE_SID);
+    } else {
+      params.set("From", TWILIO_FROM_NUMBER!);
+    }
+
     const twilioRes = await fetch(`${GATEWAY_URL}/Messages.json`, {
       method: "POST",
       headers: {
@@ -74,11 +90,7 @@ Deno.serve(async (req) => {
         "X-Connection-Api-Key": TWILIO_API_KEY,
         "Content-Type": "application/x-www-form-urlencoded",
       },
-      body: new URLSearchParams({
-        To: phone,
-        From: TWILIO_FROM,
-        Body: `Votre code de vérification CloudMature : ${code}. Valide 5 minutes.`,
-      }),
+      body: params,
     });
 
     const twilioData = await twilioRes.json();
