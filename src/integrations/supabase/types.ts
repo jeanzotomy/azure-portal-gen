@@ -2309,6 +2309,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_client_for_assigned_invoice: {
+        Args: { _client_id: string; _user_id: string }
+        Returns: boolean
+      }
       list_employee_assignable_users: {
         Args: never
         Returns: {
