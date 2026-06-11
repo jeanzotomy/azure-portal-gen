@@ -1279,6 +1279,7 @@ export type Database = {
           default_unit: string
           default_unit_price: number
           description: string | null
+          display_order: number
           id: string
           name: string
           published: boolean
@@ -1292,6 +1293,7 @@ export type Database = {
           default_unit?: string
           default_unit_price?: number
           description?: string | null
+          display_order?: number
           id?: string
           name: string
           published?: boolean
@@ -1305,6 +1307,7 @@ export type Database = {
           default_unit?: string
           default_unit_price?: number
           description?: string | null
+          display_order?: number
           id?: string
           name?: string
           published?: boolean
