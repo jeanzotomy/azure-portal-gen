@@ -269,18 +269,20 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
           </thead>
           <tbody>
             {data.items.map((item, idx) => {
-              const freq = item.is_recurring && item.billing_frequency ? FREQ_PERIOD_LABEL[item.billing_frequency] : null;
+              const freq = item.billing_frequency ? FREQ_PERIOD_LABEL[item.billing_frequency] : null;
               const periods = Math.max(1, item.periods ?? 1);
+              const isRecurring = !!(item.is_recurring || freq);
               return (
               <tr key={idx} style={{ borderBottom: "1px solid #E5E7EB" }}>
                 <td style={{ padding: "10px 8px", color: cyan, fontWeight: 700, verticalAlign: "top" }}>
                   {item.position}
                 </td>
                 <td style={{ padding: "10px 8px", verticalAlign: "top" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
-                    <span style={{ fontWeight: 600, color: navy }}>{item.description}</span>
-                    {freq && (
+                  <div style={{ fontWeight: 600, color: navy }}>{item.description}</div>
+                  {isRecurring && (
+                    <div style={{ marginTop: "3px" }}>
                       <span style={{
+                        display: "inline-block",
                         background: cyan,
                         color: "#fff",
                         padding: "1px 6px",
@@ -289,11 +291,12 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
                         fontWeight: 700,
                         textTransform: "uppercase",
                         letterSpacing: "0.3px",
+                        verticalAlign: "middle",
                       }}>
-                        Abonnement · {freq.adj}
+                        Abonnement{freq ? ` · ${freq.adj}` : ""} · {periods} {freq ? (periods > 1 ? freq.periodPlural : freq.period) : (periods > 1 ? "périodes" : "période")}
                       </span>
-                    )}
-                  </div>
+                    </div>
+                  )}
                   {item.subtitle && (
                     <div style={{ fontStyle: "italic", color: "#6B7280", marginTop: "2px", fontSize: "10px" }}>
                       {item.subtitle}
@@ -301,15 +304,15 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
                   )}
                 </td>
                 <td style={{ padding: "10px 8px", textAlign: "center", verticalAlign: "top" }}>
-                  {item.quantity}{item.unit && item.unit !== "unité" ? ` ${item.unit}` : ""}
-                  {freq && (
-                    <div style={{ fontSize: "9px", color: "#6B7280", marginTop: "2px" }}>
-                      × {periods} {periods > 1 ? freq.periodPlural : freq.period}
+                  <div>{item.quantity}{item.unit && item.unit !== "unité" ? ` ${item.unit}` : ""}</div>
+                  {isRecurring && (
+                    <div style={{ fontSize: "9px", color: "#6B7280", marginTop: "2px", fontWeight: 600 }}>
+                      × {periods} {freq ? (periods > 1 ? freq.periodPlural : freq.period) : (periods > 1 ? "périodes" : "période")}
                     </div>
                   )}
                 </td>
                 <td style={{ padding: "10px 8px", textAlign: "right", verticalAlign: "top" }}>
-                  {formatCurrency(item.unit_price, data.currency)}
+                  <div>{formatCurrency(item.unit_price, data.currency)}</div>
                   {freq && (
                     <div style={{ fontSize: "9px", color: "#6B7280", marginTop: "2px" }}>
                       /{item.unit && item.unit !== "unité" ? `${item.unit}/` : ""}{freq.period}
