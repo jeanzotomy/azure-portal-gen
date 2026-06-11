@@ -351,6 +351,4 @@ export default function PortalInvoicesTab({ user: _user }: { user: SupaUser }) {
     </div>
   );
 }
-    </div>
-  );
-}
+
