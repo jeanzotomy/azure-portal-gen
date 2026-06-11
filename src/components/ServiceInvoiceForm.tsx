@@ -82,6 +82,8 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
   const [paymentMethods, setPaymentMethods] = useState<PMRow[]>([]);
   const [selectedPaymentIds, setSelectedPaymentIds] = useState<string[]>([]);
   const [clientId, setClientId] = useState<string>("");
+  const [assignedUserId, setAssignedUserId] = useState<string>("");
+  const [users, setUsers] = useState<{ user_id: string; full_name: string; email: string }[]>([]);
   const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().slice(0, 10));
   const [dueDate, setDueDate] = useState("");
   const [currency, setCurrency] = useState<Currency>("GNF");
@@ -94,6 +96,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
   const [saving, setSaving] = useState(false);
   const [outputFormat, setOutputFormat] = useState<"pdf" | "docx" | "both">("both");
   const [issuer, setIssuer] = useState<{ full_name: string | null; role: string | null; signature_url: string | null }>({ full_name: null, role: null, signature_url: null });
+
   const pdfRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
