@@ -169,14 +169,24 @@ export default function TrainingsStorePage() {
                     </div>
                     <div className="flex items-center justify-between gap-2 pt-3 border-t">
                       <div>
-                        <div className="text-2xl font-bold text-primary">{formatPrice(price, cur)}</div>
-                        <div className="text-xs text-muted-foreground">{locale === "fr" ? "Paiement unique" : "One-time payment"}</div>
+                        {price > 0 ? (
+                          <>
+                            <div className="text-2xl font-bold text-primary">{formatPrice(price, cur)}</div>
+                            <div className="text-xs text-muted-foreground">{locale === "fr" ? "Paiement unique" : "One-time payment"}</div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="text-2xl font-bold text-primary">{locale === "fr" ? "Gratuit" : "Free"}</div>
+                            <div className="text-xs text-muted-foreground">{locale === "fr" ? "Accès immédiat" : "Instant access"}</div>
+                          </>
+                        )}
                       </div>
                       <Button size="sm" onClick={() => buy(t)} disabled={pendingId === t.id && isOpen}>
                         <ShoppingCart size={14} className="mr-1" />
-                        {locale === "fr" ? "Acheter" : "Buy"}
+                        {price > 0 ? (locale === "fr" ? "Acheter" : "Buy") : (locale === "fr" ? "Suivre" : "Enroll")}
                       </Button>
                     </div>
+
                   </CardContent>
                 </Card>
               );
