@@ -536,7 +536,52 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
                     <span className="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-muted-foreground pointer-events-none">%</span>
                   </div>
                 </div>
-                <div className="col-span-9 md:col-span-3 flex items-center md:justify-end text-sm font-semibold">
+                <div className="col-span-12 border-t pt-2 mt-1">
+                  <label className="flex items-center gap-2 text-xs cursor-pointer select-none">
+                    <Checkbox
+                      checked={!!it.is_recurring}
+                      onCheckedChange={(v) => updateItem(idx, {
+                        is_recurring: !!v,
+                        billing_frequency: v ? (it.billing_frequency ?? "mensuel") : null,
+                        periods: v ? (it.periods || 12) : 1,
+                      })}
+                    />
+                    <span className="font-medium">Licence / abonnement (prix par période)</span>
+                  </label>
+                  {it.is_recurring && (
+                    <div className="grid grid-cols-12 gap-2 mt-2">
+                      <div className="col-span-6 md:col-span-4">
+                        <label className="text-[10px] uppercase text-muted-foreground">Fréquence</label>
+                        <Select
+                          value={it.billing_frequency ?? "mensuel"}
+                          onValueChange={(v) => updateItem(idx, { billing_frequency: v as BillingFrequency })}
+                        >
+                          <SelectTrigger className="h-9"><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="mensuel">Mensuel</SelectItem>
+                            <SelectItem value="trimestriel">Trimestriel</SelectItem>
+                            <SelectItem value="semestriel">Semestriel</SelectItem>
+                            <SelectItem value="annuel">Annuel</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                      <div className="col-span-6 md:col-span-3">
+                        <label className="text-[10px] uppercase text-muted-foreground">Nb de périodes</label>
+                        <Input
+                          type="number" min={1}
+                          value={it.periods ?? 1}
+                          onChange={(e) => updateItem(idx, { periods: Math.max(1, Number(e.target.value) || 1) })}
+                        />
+                      </div>
+                      <div className="col-span-12 md:col-span-5 flex items-end">
+                        <p className="text-[11px] text-muted-foreground italic leading-snug">
+                          {buildRecurringSubtitle(it, currency) || "Le détail sera repris sur la facture."}
+                        </p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+                <div className="col-span-9 md:col-span-11 flex items-center md:justify-end text-sm font-semibold">
                   Total : {new Intl.NumberFormat("fr-FR").format(lineTotal(it))} {currency}
                 </div>
                 <div className="col-span-3 md:col-span-1 flex items-center justify-end">
