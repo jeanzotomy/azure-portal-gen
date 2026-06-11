@@ -63,7 +63,7 @@ export function MentionsBell({ userId }: { userId: string }) {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="relative h-8">
+        <Button variant="outline" size="sm" className="relative h-8 bg-white/10 text-white border-white/30 hover:bg-white/20 hover:text-white">
           <AtSign className="h-4 w-4" />
           <span className="ml-1 text-xs hidden sm:inline">Mentions</span>
           {unread > 0 && (
