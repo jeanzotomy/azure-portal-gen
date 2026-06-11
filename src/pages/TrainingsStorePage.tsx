@@ -12,6 +12,7 @@ import { useAuthSession } from "@/hooks/use-auth-session";
 import { useStripeCheckout } from "@/hooks/useStripeCheckout";
 import { useTranslation } from "@/i18n/LanguageContext";
 import { Link, useNavigate } from "react-router-dom";
+import { useSeo } from "@/hooks/use-seo";
 
 type Training = {
   id: string;
@@ -33,6 +34,13 @@ function formatPrice(cents: number, currency: string) {
 
 export default function TrainingsStorePage() {
   const { locale } = useTranslation();
+  useSeo({
+    title: locale === "fr" ? "Formations Cloud, DevOps & IA — CloudMature" : "Cloud, DevOps & AI Trainings — CloudMature",
+    description: locale === "fr"
+      ? "Catalogue de formations CloudMature : Cloud (Azure, AWS, GCP), DevOps et Intelligence Artificielle. Achetez en ligne, accédez immédiatement."
+      : "CloudMature training catalog: Cloud (Azure, AWS, GCP), DevOps and AI. Buy online, instant access.",
+    path: "/formations",
+  });
   const { user } = useAuthSession();
   const navigate = useNavigate();
   const [trainings, setTrainings] = useState<Training[]>([]);

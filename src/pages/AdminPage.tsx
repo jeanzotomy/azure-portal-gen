@@ -1321,8 +1321,12 @@ function AdminProjectsInner({ readOnly = false, assignedCount }: { readOnly?: bo
   useEffect(() => { load(); }, []);
 
   const saveProject = async (id: string) => {
+    if (!editName.trim()) {
+      toast({ title: "Nom requis", description: "Le nom du projet ne peut pas être vide.", variant: "destructive" });
+      return;
+    }
     const { error } = await supabase.from("projects").update({
-      name: editName, description: editDescription || null, budget: editBudget || null,
+      name: editName.trim(), description: editDescription || null, budget: editBudget || null,
       deadline: editDeadline || null, priority: editPriority, status: editStatus, progress: editProgress,
       technologies: editServices.length > 0 ? editServices.join(", ") : null,
       gestionnaire_id: editGestionnaire || null,
@@ -1821,7 +1825,7 @@ function AdminTickets() {
                       <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${
                         t.priority === "urgent" ? "text-destructive bg-destructive/10 border-destructive/20" : "text-orange-500 bg-orange-500/10 border-orange-500/20"
                       }`}>
-                        <Flag size={10} className="inline mr-1" />{t.priority}
+                        <Flag size={10} className="inline mr-1" />{t.priority === "urgent" ? "Urgent" : "Haute"}
                       </span>
                     )}
                     <Button variant="outline" size="sm" className="h-7 text-xs" onClick={() => {
@@ -1861,20 +1865,20 @@ function AdminTickets() {
                     <div>
                       <label className="text-sm font-medium text-card-foreground">Statut</label>
                       <div className="flex gap-2 mt-1">
-                        {["ouvert", "en_cours", "résolu"].map((s) => (
-                          <button key={s} onClick={() => setEditStatus(s)}
-                            className={`text-sm px-3 py-1.5 rounded-lg border transition-colors ${editStatus === s ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground border-border"}`}
-                          >{s}</button>
+                        {[{ v: "ouvert", label: "Ouvert" }, { v: "en_cours", label: "En cours" }, { v: "resolu", label: "Résolu" }, { v: "ferme", label: "Fermé" }].map((s) => (
+                          <button key={s.v} onClick={() => setEditStatus(s.v)}
+                            className={`text-sm px-3 py-1.5 rounded-lg border transition-colors ${editStatus === s.v ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground border-border"}`}
+                          >{s.label}</button>
                         ))}
                       </div>
                     </div>
                     <div>
                       <label className="text-sm font-medium text-card-foreground">Priorité</label>
                       <div className="flex gap-2 mt-1">
-                        {["normal", "haute", "urgent"].map((pr) => (
-                          <button key={pr} onClick={() => setEditPriority(pr)}
-                            className={`text-sm px-3 py-1.5 rounded-lg border transition-colors ${editPriority === pr ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground border-border"}`}
-                          >{pr}</button>
+                        {[{ v: "normal", label: "Normale" }, { v: "haute", label: "Haute" }, { v: "urgent", label: "Urgent" }].map((pr) => (
+                          <button key={pr.v} onClick={() => setEditPriority(pr.v)}
+                            className={`text-sm px-3 py-1.5 rounded-lg border transition-colors ${editPriority === pr.v ? "bg-primary text-primary-foreground border-primary" : "bg-card text-muted-foreground border-border"}`}
+                          >{pr.label}</button>
                         ))}
                       </div>
                     </div>
@@ -1995,6 +1999,7 @@ function AdminContacts() {
   };
 
   const deleteContact = async (id: string) => {
+    if (!window.confirm("Supprimer définitivement cette demande de contact ?")) return;
     const { error } = await supabase.from("contact_requests").delete().eq("id", id);
     if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
     else { toast({ title: "Demande supprimée" }); load(); }
@@ -2329,6 +2334,7 @@ function AdminUsers() {
   };
 
   const assignRole = async (userId: string, role: string) => {
+    if (!window.confirm(`Changer le rôle de cet utilisateur en "${role}" ? Tous ses rôles actuels seront remplacés.`)) return;
     setChangingRole(userId);
     const { error: delError } = await supabase.from("user_roles").delete().eq("user_id", userId);
     if (delError) { toast({ title: "Erreur", description: delError.message, variant: "destructive" }); setChangingRole(null); return; }
@@ -2346,6 +2352,10 @@ function AdminUsers() {
   };
 
   const toggleBlock = async (userId: string, currentlyBlocked: boolean) => {
+    const msg = currentlyBlocked
+      ? "Débloquer cet utilisateur et l'autoriser à se reconnecter ?"
+      : "Bloquer cet utilisateur ? Il ne pourra plus accéder à son espace.";
+    if (!window.confirm(msg)) return;
     const { error } = await supabase.from("profiles").update({ blocked: !currentlyBlocked }).eq("user_id", userId);
     if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
     else toast({ title: currentlyBlocked ? "Utilisateur débloqué" : "Utilisateur bloqué", description: currentlyBlocked ? "L'utilisateur peut maintenant se connecter." : "L'utilisateur ne pourra plus accéder à son espace." });

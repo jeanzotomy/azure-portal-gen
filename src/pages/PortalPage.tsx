@@ -1106,7 +1106,19 @@ function TicketsTab({ user }: { user: SupaUser }) {
   const filtered = filter === "all" ? tickets : tickets.filter(t => t.status === filter);
   const openCount = tickets.filter(t => t.status === "ouvert").length;
   const inProgressCount = tickets.filter(t => t.status === "en_cours").length;
-  const resolvedCount = tickets.filter(t => t.status === "résolu").length;
+  const resolvedCount = tickets.filter(t => t.status === "resolu").length;
+
+  const priorityConfig: Record<string, { label: string; cls: string }> = {
+    urgent: { label: "Urgent", cls: "bg-destructive/10 text-destructive" },
+    haute: { label: "Haute", cls: "bg-orange-500/10 text-orange-500" },
+    normal: { label: "Normale", cls: "bg-muted text-muted-foreground" },
+  };
+  const statusBadge: Record<string, { label: string; cls: string }> = {
+    ouvert: { label: "Ouvert", cls: "bg-primary/10 text-primary" },
+    en_cours: { label: "En cours", cls: "bg-accent/10 text-accent" },
+    resolu: { label: "Résolu", cls: "bg-teal-600/10 text-teal-600" },
+    ferme: { label: "Fermé", cls: "bg-muted text-muted-foreground" },
+  };
 
   return (
     <div className="space-y-6 animate-fade-up">
@@ -1165,15 +1177,20 @@ function TicketsTab({ user }: { user: SupaUser }) {
 
       <div className="flex items-center gap-2">
         <Filter size={16} className="text-muted-foreground" />
-        {["all", "ouvert", "en_cours", "résolu"].map((f) => (
+        {[
+          { v: "all", label: "Tous" },
+          { v: "ouvert", label: "Ouverts" },
+          { v: "en_cours", label: "En cours" },
+          { v: "resolu", label: "Résolus" },
+        ].map((f) => (
           <button
-            key={f}
-            onClick={() => setFilter(f)}
+            key={f.v}
+            onClick={() => setFilter(f.v)}
             className={`text-xs px-3 py-1.5 rounded-full transition-colors ${
-              filter === f ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"
+              filter === f.v ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/80"
             }`}
           >
-            {f === "all" ? "Tous" : f}
+            {f.label}
           </button>
         ))}
       </div>
@@ -1182,6 +1199,8 @@ function TicketsTab({ user }: { user: SupaUser }) {
         {filtered.map((t) => {
           const isExpanded = expandedId === t.id;
           const ticketReplies = replies[t.id] || [];
+          const prio = priorityConfig[t.priority] ?? priorityConfig.normal;
+          const stat = statusBadge[t.status] ?? statusBadge.ouvert;
 
           return (
             <div key={t.id} className="bg-card rounded-xl shadow-card border border-border/50 hover:shadow-card-hover transition-shadow">
@@ -1190,12 +1209,8 @@ function TicketsTab({ user }: { user: SupaUser }) {
                   {t.ticket_number && <span className="text-xs font-mono text-muted-foreground">{t.ticket_number}</span>}
                   <h4 className="font-medium text-card-foreground">{t.subject}</h4>
                   <div className="flex items-center gap-2">
-                    <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                      t.priority === "urgent" ? "bg-destructive/10 text-destructive" : t.priority === "haute" ? "bg-orange-100 text-orange-600" : "bg-muted text-muted-foreground"
-                    }`}>{t.priority}</span>
-                    <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${
-                      t.status === "ouvert" ? "bg-primary/10 text-primary" : t.status === "en_cours" ? "bg-accent/10 text-accent" : "bg-muted text-muted-foreground"
-                    }`}>{t.status}</span>
+                    <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${prio.cls}`}>{prio.label}</span>
+                    <span className={`text-xs px-2.5 py-1 rounded-full font-medium ${stat.cls}`}>{stat.label}</span>
                   </div>
                 </div>
                 <p className="text-sm text-muted-foreground">{t.message}</p>
@@ -1269,7 +1284,11 @@ function ProfileTab({ user }: { user: SupaUser }) {
   const { toast } = useToast();
 
   const loadProfile = () => {
-    supabase.from("profiles").select("*").eq("user_id", user.id).single().then(({ data }) => {
+    supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle().then(({ data, error }) => {
+      if (error) {
+        toast({ title: "Erreur", description: error.message, variant: "destructive" });
+        return;
+      }
       if (data) setProfile({
         first_name: (data as any).first_name || "",
         last_name: (data as any).last_name || "",
