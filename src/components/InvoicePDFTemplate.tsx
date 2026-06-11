@@ -304,11 +304,35 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
                       </span>
                     </div>
                   )}
-                  {item.subtitle && (
-                    <div style={{ fontStyle: "italic", color: "#6B7280", marginTop: "2px", fontSize: "10px" }}>
-                      {item.subtitle}
-                    </div>
-                  )}
+                  {item.subtitle && (() => {
+                    const long = isLongSubtitle(item.subtitle);
+                    return (
+                      <>
+                        <div
+                          style={{
+                            fontStyle: "italic",
+                            color: "#6B7280",
+                            marginTop: "2px",
+                            fontSize: "10px",
+                            display: "-webkit-box",
+                            WebkitLineClamp: long ? 3 : undefined,
+                            WebkitBoxOrient: "vertical",
+                            overflow: long ? "hidden" : "visible",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {item.subtitle}
+                        </div>
+                        {long && (
+                          <div style={{ marginTop: "3px", fontSize: "9px", color: cyan, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                            <span style={{ display: "inline-block", width: "6px", height: "6px", borderRadius: "50%", background: cyan }} />
+                            Détail complet — voir Annexe (p. 2)
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
+
                 </td>
                 <td style={{ padding: "10px 8px", textAlign: "center", verticalAlign: "top" }}>
                   <div>{item.quantity}{item.unit && item.unit !== "unité" ? ` ${item.unit}` : ""}</div>
