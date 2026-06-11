@@ -479,7 +479,68 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
           }}
         >
           Enregistré sous N° GN.TCC.2025.B18495 · Partenaire : Microsoft · Datadog · Google Cloud
+          {hasAnnex && <span style={{ float: "right", color: navy, fontWeight: 600 }}>Page 1 / 2</span>}
         </div>
+        </div>
+        {/* ───────── ANNEXE — Descriptions détaillées ───────── */}
+        {hasAnnex && (
+          <div className="invoice-page" style={{ ...pageStyle, pageBreakBefore: "always" }}>
+            {/* En-tête annexe */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: `2px solid ${cyan}`, paddingBottom: "12px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <img src={logo} alt="CloudMature" style={{ height: "34px" }} />
+                <div>
+                  <div style={{ fontSize: "11px", color: cyan, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase" }}>Annexe</div>
+                  <div style={{ fontSize: "16px", fontWeight: 800, color: navy }}>Descriptions détaillées</div>
+                </div>
+              </div>
+              <div style={{ textAlign: "right" }}>
+                <div style={{ fontSize: "11px", color: "#6B7280" }}>Facture</div>
+                <div style={{ fontSize: "14px", color: cyan, fontWeight: 700 }}>N° {data.invoice_number}</div>
+                <div style={{ fontSize: "10px", color: "#6B7280", marginTop: "2px" }}>{formatDate(data.invoice_date)}</div>
+              </div>
+            </div>
+
+            <div style={{ marginTop: "14px", fontSize: "10.5px", color: "#374151", background: "#EAF6FB", padding: "10px 14px", borderLeft: `3px solid ${cyan}` }}>
+              Cette annexe reprend in extenso la description des prestations dont le résumé figure dans le tableau principal.
+              Chaque entrée référence le numéro de ligne d'origine.
+            </div>
+
+            <div style={{ marginTop: "20px", display: "flex", flexDirection: "column", gap: "16px" }}>
+              {annexItems.map((it) => (
+                <div key={it.position} style={{ display: "grid", gridTemplateColumns: "44px 1fr", gap: "14px", padding: "14px 16px", border: `1px solid #E5E7EB`, borderLeft: `4px solid ${cyan}`, borderRadius: "4px", background: "#FBFEFF" }}>
+                  <div style={{ background: navy, color: "#fff", width: "32px", height: "32px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: "13px" }}>
+                    {it.position}
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 700, color: navy, fontSize: "12.5px" }}>{it.description}</div>
+                    <div style={{ marginTop: "6px", fontSize: "10.5px", color: "#374151", whiteSpace: "pre-line", lineHeight: 1.55 }}>
+                      {it.subtitle}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Footer annexe */}
+            <div
+              style={{
+                position: "absolute",
+                left: "40px",
+                right: "40px",
+                bottom: "24px",
+                paddingTop: "12px",
+                borderTop: `2px solid ${cyan}`,
+                fontSize: "9px",
+                color: "#6B7280",
+                textAlign: "center",
+              }}
+            >
+              Annexe à la facture N° {data.invoice_number} · Cloud Mature · www.cloudmature.com
+              <span style={{ float: "right", color: navy, fontWeight: 600 }}>Page 2 / 2</span>
+            </div>
+          </div>
+        )}
       </div>
     );
   }
