@@ -241,7 +241,19 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
     items: items.map((it, i) => {
       const recurringNote = buildRecurringSubtitle(it, currency);
       const combinedSubtitle = [it.subtitle, recurringNote].filter(Boolean).join(" — ") || null;
-      return { position: i + 1, description: it.description, subtitle: combinedSubtitle, quantity: it.quantity, unit: it.unit, unit_price: it.unit_price, discount_rate: it.discount_rate ?? 0, total: lineTotal(it) };
+      return {
+        position: i + 1,
+        description: it.description,
+        subtitle: combinedSubtitle,
+        quantity: it.quantity,
+        unit: it.unit,
+        unit_price: it.unit_price,
+        discount_rate: it.discount_rate ?? 0,
+        total: lineTotal(it),
+        is_recurring: !!it.is_recurring,
+        billing_frequency: it.is_recurring ? (it.billing_frequency ?? null) : null,
+        periods: it.is_recurring ? Math.max(1, it.periods || 1) : 1,
+      };
     }),
     subtotal, discount_rate: discountRate, discount_amount: discountAmount, tax_rate: taxRate, tax_amount: taxAmount,
     early_payment_discount_rate: earlyPaymentDiscountRate, early_payment_discount_amount: earlyPaymentDiscountAmount,
