@@ -151,6 +151,9 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
           setItems(its.map((x) => ({
             catalog_id: x.catalog_id, description: x.description, subtitle: x.subtitle ?? "",
             quantity: Number(x.quantity), unit: x.unit, unit_price: Number(x.unit_price), discount_rate: Number(x.discount_rate),
+            is_recurring: Boolean((x as { is_recurring?: boolean }).is_recurring),
+            billing_frequency: ((x as { billing_frequency?: BillingFrequency | null }).billing_frequency) ?? null,
+            periods: Number((x as { periods?: number }).periods ?? 1),
           })));
         }
       } else {
@@ -158,7 +161,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
         setClientId(""); setInvoiceDate(new Date().toISOString().slice(0, 10)); setDueDate("");
         setCurrency("GNF"); setDiscountRate(0); setTaxRate(18); setEarlyPaymentDiscountRate(0);
         setNotes(""); setSelectedPaymentIds([]); setPayment({ ...DEFAULT_PAYMENT });
-        setItems([{ description: "", quantity: 1, unit: "unité", unit_price: 0, discount_rate: 0 }]);
+        setItems([{ description: "", quantity: 1, unit: "unité", unit_price: 0, discount_rate: 0, is_recurring: false, periods: 1 }]);
       }
     })();
   }, [open, user, editId]);
