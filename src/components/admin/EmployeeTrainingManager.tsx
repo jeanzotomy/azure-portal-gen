@@ -20,6 +20,8 @@ import {
   RefreshCw,
   UsersRound,
   Layers,
+  Clock,
+  ChevronLeft,
 } from "lucide-react";
 import { TrainingPageHero } from "@/components/training/TrainingPageHero";
 import { TrainingStatsGrid } from "@/components/training/TrainingStatsGrid";
@@ -34,6 +36,18 @@ type UserRow = {
   process_id: string | null;
 };
 
+type TrainingRow = {
+  id: string;
+  title: string;
+  category: string | null;
+  level: string | null;
+  duration_minutes: number | null;
+  active: boolean;
+  published: boolean;
+};
+
+const TRAININGS_PER_PAGE = 10;
+
 export default function EmployeeTrainingManager() {
   const navigate = useNavigate();
   const location = useLocation();
@@ -44,9 +58,11 @@ export default function EmployeeTrainingManager() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "with" | "without">("all");
   const [bulkOpen, setBulkOpen] = useState(false);
-  
 
-
+  const [trainings, setTrainings] = useState<TrainingRow[]>([]);
+  const [loadingTrainings, setLoadingTrainings] = useState(true);
+  const [trainingSearch, setTrainingSearch] = useState("");
+  const [trainingPage, setTrainingPage] = useState(1);
 
   const loadUsers = useCallback(async () => {
     setLoadingUsers(true);
@@ -56,9 +72,42 @@ export default function EmployeeTrainingManager() {
     setLoadingUsers(false);
   }, []);
 
+  const loadTrainings = useCallback(async () => {
+    setLoadingTrainings(true);
+    const { data, error } = await supabase
+      .from("trainings")
+      .select("id,title,category,level,duration_minutes,active,published")
+      .order("created_at", { ascending: false });
+    if (error) toast.error(error.message);
+    else setTrainings((data || []) as TrainingRow[]);
+    setLoadingTrainings(false);
+  }, []);
+
   useEffect(() => {
     void loadUsers();
-  }, [loadUsers]);
+    void loadTrainings();
+  }, [loadUsers, loadTrainings]);
+
+  useEffect(() => {
+    setTrainingPage(1);
+  }, [trainingSearch]);
+
+  const filteredTrainings = useMemo(() => {
+    const q = trainingSearch.trim().toLowerCase();
+    if (!q) return trainings;
+    return trainings.filter(
+      (t) =>
+        t.title.toLowerCase().includes(q) ||
+        (t.category || "").toLowerCase().includes(q) ||
+        (t.level || "").toLowerCase().includes(q),
+    );
+  }, [trainings, trainingSearch]);
+
+  const trainingTotalPages = Math.max(1, Math.ceil(filteredTrainings.length / TRAININGS_PER_PAGE));
+  const paginatedTrainings = filteredTrainings.slice(
+    (trainingPage - 1) * TRAININGS_PER_PAGE,
+    trainingPage * TRAININGS_PER_PAGE,
+  );
 
   const filteredUsers = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -194,6 +243,100 @@ export default function EmployeeTrainingManager() {
             </ul>
           )}
         </ScrollArea>
+      </Card>
+
+      <Card className="p-4">
+        <div className="flex items-center justify-between gap-3 flex-wrap mb-3">
+          <h2 className="font-semibold flex items-center gap-2 text-sm md:text-base">
+            <BookOpen className="h-5 w-5 text-primary" /> Catalogue des formations
+            <Badge variant="outline" className="ml-2 text-[10px]">{filteredTrainings.length}</Badge>
+          </h2>
+          <div className="flex items-center gap-2">
+            <div className="relative w-full sm:w-72">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                placeholder="Rechercher une formation…"
+                value={trainingSearch}
+                onChange={(e) => setTrainingSearch(e.target.value)}
+                className="pl-8"
+              />
+            </div>
+            <Button size="sm" variant="outline" onClick={loadTrainings}>
+              <RefreshCw className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+
+        <div className="rounded-lg border divide-y">
+          {loadingTrainings ? (
+            <div className="p-12 flex justify-center">
+              <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+            </div>
+          ) : paginatedTrainings.length === 0 ? (
+            <div className="p-12 text-center text-sm text-muted-foreground">
+              Aucune formation trouvée.
+            </div>
+          ) : (
+            paginatedTrainings.map((t) => (
+              <div key={t.id} className="p-3 flex items-center gap-3 hover:bg-accent/40 transition">
+                <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-primary/20 to-primary/5 flex items-center justify-center shrink-0">
+                  <GraduationCap className="h-5 w-5 text-primary" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <div className="font-medium text-sm truncate">{t.title}</div>
+                  <div className="mt-1 flex items-center gap-1 flex-wrap">
+                    {t.category && (
+                      <Badge variant="outline" className="text-[10px]">{t.category}</Badge>
+                    )}
+                    {t.level && (
+                      <Badge variant="outline" className="text-[10px] capitalize">{t.level}</Badge>
+                    )}
+                    {t.duration_minutes ? (
+                      <Badge variant="outline" className="text-[10px] gap-1">
+                        <Clock className="h-3 w-3" /> {t.duration_minutes} min
+                      </Badge>
+                    ) : null}
+                    {t.published ? (
+                      <Badge className="bg-emerald-500/15 text-emerald-700 border-emerald-300 text-[10px]">Publiée</Badge>
+                    ) : (
+                      <Badge variant="outline" className="text-[10px]">Brouillon</Badge>
+                    )}
+                    {!t.active && (
+                      <Badge variant="outline" className="text-[10px] text-muted-foreground">Inactive</Badge>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+
+        {filteredTrainings.length > TRAININGS_PER_PAGE && (
+          <div className="flex items-center justify-between mt-3 text-xs text-muted-foreground">
+            <span>
+              Page {trainingPage} / {trainingTotalPages} · {filteredTrainings.length} résultat
+              {filteredTrainings.length > 1 ? "s" : ""}
+            </span>
+            <div className="flex items-center gap-1">
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={trainingPage <= 1}
+                onClick={() => setTrainingPage((p) => Math.max(1, p - 1))}
+              >
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={trainingPage >= trainingTotalPages}
+                onClick={() => setTrainingPage((p) => Math.min(trainingTotalPages, p + 1))}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        )}
       </Card>
 
       <BulkAssignTrainingDialog
