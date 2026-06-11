@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import { useNavigate, Link, useSearchParams, Outlet, useMatch } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Card, CardContent } from "@/components/ui/card";
@@ -1282,6 +1283,7 @@ function ProfileTab({ user }: { user: SupaUser }) {
   const [profile, setProfile] = useState({ first_name: "", last_name: "", full_name: "", company: "", phone: "", location: "", timezone: "", country: "", city: "", address_line: "" });
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
+  const { confirm, dialog: confirmDlg } = useConfirm();
 
   const loadProfile = () => {
     supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle().then(({ data, error }) => {
@@ -1586,18 +1588,26 @@ function ProfileTab({ user }: { user: SupaUser }) {
         </p>
         <Button
           variant="destructive"
-          onClick={async () => {
-            if (!window.confirm("Êtes-vous sûr de vouloir supprimer votre compte ? Cette action désactivera votre accès.")) return;
-            const { error } = await supabase.from("profiles").update({ deleted_at: new Date().toISOString() } as any).eq("user_id", user.id);
-            if (error) { toast({ title: "Erreur", description: error.message, variant: "destructive" }); return; }
-            toast({ title: "Compte supprimé", description: "Votre compte a été désactivé." });
-            await supabase.auth.signOut();
-            window.location.href = "/";
+          onClick={() => {
+            confirm({
+              title: "Supprimer votre compte ?",
+              description: "Votre accès sera immédiatement révoqué. Seul un administrateur pourra restaurer ce compte. Cette action est irréversible côté utilisateur.",
+              confirmLabel: "Supprimer mon compte",
+              variant: "destructive",
+              onConfirm: async () => {
+                const { error } = await supabase.from("profiles").update({ deleted_at: new Date().toISOString() } as any).eq("user_id", user.id);
+                if (error) { toast({ title: "Erreur", description: error.message, variant: "destructive" }); return; }
+                toast({ title: "Compte supprimé", description: "Votre compte a été désactivé." });
+                await supabase.auth.signOut();
+                window.location.href = "/";
+              },
+            });
           }}
         >
           <Trash2 size={14} className="mr-2" /> Supprimer mon compte
         </Button>
       </div>
+      {confirmDlg}
     </div>
   );
 }

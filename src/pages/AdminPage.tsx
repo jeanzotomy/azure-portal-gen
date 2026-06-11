@@ -32,6 +32,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { HardDrive, FileSignature, GraduationCap, UserCog as HrIcon } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
+import { useConfirm } from "@/components/ui/confirm-dialog";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import SharePointTab from "@/components/SharePointTab";
@@ -1982,6 +1983,7 @@ function AdminContacts() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { confirm, dialog: confirmDlg } = useConfirm();
 
   const load = async () => {
     setLoading(true);
@@ -1998,11 +2000,18 @@ function AdminContacts() {
     else { toast({ title: "Statut mis à jour" }); load(); }
   };
 
-  const deleteContact = async (id: string) => {
-    if (!window.confirm("Supprimer définitivement cette demande de contact ?")) return;
-    const { error } = await supabase.from("contact_requests").delete().eq("id", id);
-    if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
-    else { toast({ title: "Demande supprimée" }); load(); }
+  const deleteContact = (id: string) => {
+    confirm({
+      title: "Supprimer cette demande ?",
+      description: "Cette demande de contact sera définitivement supprimée. Cette action est irréversible.",
+      confirmLabel: "Supprimer",
+      variant: "destructive",
+      onConfirm: async () => {
+        const { error } = await supabase.from("contact_requests").delete().eq("id", id);
+        if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
+        else { toast({ title: "Demande supprimée" }); load(); }
+      },
+    });
   };
 
   const statusConfig: Record<string, { label: string; color: string }> = {
@@ -2073,6 +2082,7 @@ function AdminContacts() {
         })}
       </div>
       {filtered.length === 0 && <p className="text-center text-muted-foreground py-8">Aucune demande de contact trouvée.</p>}
+      {confirmDlg}
     </div>
   );
 }
@@ -2333,33 +2343,48 @@ function AdminUsers() {
     });
   };
 
-  const assignRole = async (userId: string, role: string) => {
-    if (!window.confirm(`Changer le rôle de cet utilisateur en "${role}" ? Tous ses rôles actuels seront remplacés.`)) return;
-    setChangingRole(userId);
-    const { error: delError } = await supabase.from("user_roles").delete().eq("user_id", userId);
-    if (delError) { toast({ title: "Erreur", description: delError.message, variant: "destructive" }); setChangingRole(null); return; }
-    const rolesToInsert: { user_id: string; role: "admin" | "agent" | "client" | "comptable" | "gestionnaire" | "hr" }[] = [{ user_id: userId, role: "client" }];
-    if (role === "admin") rolesToInsert.push({ user_id: userId, role: "admin" });
-    else if (role === "agent") rolesToInsert.push({ user_id: userId, role: "agent" });
-    else if (role === "comptable") rolesToInsert.push({ user_id: userId, role: "comptable" });
-    else if (role === "gestionnaire") rolesToInsert.push({ user_id: userId, role: "gestionnaire" });
-    else if (role === "hr") rolesToInsert.push({ user_id: userId, role: "hr" });
-    const { error } = await supabase.from("user_roles").insert(rolesToInsert);
-    if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
-    else toast({ title: "Rôle mis à jour!", description: `Rôle changé en ${role}.` });
-    setChangingRole(null);
-    load();
+  const assignRole = (userId: string, role: string) => {
+    setConfirmDialog({
+      open: true,
+      title: "Changer le rôle ?",
+      description: `Le rôle de cet utilisateur sera défini à "${role}". Tous ses rôles actuels seront remplacés.`,
+      confirmLabel: "Changer le rôle",
+      destructive: false,
+      onConfirm: async () => {
+        setChangingRole(userId);
+        const { error: delError } = await supabase.from("user_roles").delete().eq("user_id", userId);
+        if (delError) { toast({ title: "Erreur", description: delError.message, variant: "destructive" }); setChangingRole(null); return; }
+        const rolesToInsert: { user_id: string; role: "admin" | "agent" | "client" | "comptable" | "gestionnaire" | "hr" }[] = [{ user_id: userId, role: "client" }];
+        if (role === "admin") rolesToInsert.push({ user_id: userId, role: "admin" });
+        else if (role === "agent") rolesToInsert.push({ user_id: userId, role: "agent" });
+        else if (role === "comptable") rolesToInsert.push({ user_id: userId, role: "comptable" });
+        else if (role === "gestionnaire") rolesToInsert.push({ user_id: userId, role: "gestionnaire" });
+        else if (role === "hr") rolesToInsert.push({ user_id: userId, role: "hr" });
+        const { error } = await supabase.from("user_roles").insert(rolesToInsert);
+        if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
+        else toast({ title: "Rôle mis à jour!", description: `Rôle changé en ${role}.` });
+        setChangingRole(null);
+        load();
+      },
+    });
   };
 
-  const toggleBlock = async (userId: string, currentlyBlocked: boolean) => {
-    const msg = currentlyBlocked
-      ? "Débloquer cet utilisateur et l'autoriser à se reconnecter ?"
-      : "Bloquer cet utilisateur ? Il ne pourra plus accéder à son espace.";
-    if (!window.confirm(msg)) return;
-    const { error } = await supabase.from("profiles").update({ blocked: !currentlyBlocked }).eq("user_id", userId);
-    if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
-    else toast({ title: currentlyBlocked ? "Utilisateur débloqué" : "Utilisateur bloqué", description: currentlyBlocked ? "L'utilisateur peut maintenant se connecter." : "L'utilisateur ne pourra plus accéder à son espace." });
-    load();
+  const toggleBlock = (userId: string, currentlyBlocked: boolean) => {
+    setConfirmDialog({
+      open: true,
+      title: currentlyBlocked ? "Débloquer cet utilisateur ?" : "Bloquer cet utilisateur ?",
+      description: currentlyBlocked
+        ? "L'utilisateur pourra de nouveau se connecter et accéder à son espace."
+        : "L'utilisateur ne pourra plus accéder à son espace tant qu'il restera bloqué.",
+      confirmLabel: currentlyBlocked ? "Débloquer" : "Bloquer",
+      destructive: !currentlyBlocked,
+      onConfirm: async () => {
+        const { error } = await supabase.from("profiles").update({ blocked: !currentlyBlocked }).eq("user_id", userId);
+        if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
+        else toast({ title: currentlyBlocked ? "Utilisateur débloqué" : "Utilisateur bloqué", description: currentlyBlocked ? "L'utilisateur peut maintenant se connecter." : "L'utilisateur ne pourra plus accéder à son espace." });
+        load();
+      },
+    });
   };
 
   const restoreProfile = async (userId: string) => {
