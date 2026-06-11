@@ -292,19 +292,14 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
                 <td style={{ padding: "10px 8px", verticalAlign: "top" }}>
                   <div style={{ fontWeight: 600, color: navy }}>{item.description}</div>
                   {isRecurring && (
-                    <div style={{ marginTop: "5px", lineHeight: 1 }}>
+                    <div style={{ marginTop: "4px", lineHeight: 1.2 }}>
                       <span style={{
                         display: "inline-block",
-                        background: "#EAF6FB",
-                        color: navy,
-                        border: `1px solid ${cyan}`,
-                        padding: "2px 7px 3px",
-                        borderRadius: "10px",
+                        color: cyan,
                         fontSize: "9px",
                         fontWeight: 700,
                         textTransform: "uppercase",
                         letterSpacing: "0.5px",
-                        lineHeight: 1.3,
                         whiteSpace: "nowrap",
                       }}>
                         <span style={{ color: cyan }}>●</span>{" "}
