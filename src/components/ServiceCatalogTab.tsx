@@ -9,7 +9,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Pencil, Trash2, Search, Package, RefreshCw } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Package, RefreshCw, Copy, Globe, GlobeLock } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface CatalogService {
   id: string;
@@ -19,6 +20,7 @@ interface CatalogService {
   default_currency: "GNF" | "USD" | "EUR";
   default_unit: string;
   active: boolean;
+  published: boolean;
   created_at: string;
 }
 
@@ -31,6 +33,7 @@ const empty: Partial<CatalogService> = {
   default_currency: "GNF",
   default_unit: "unité",
   active: true,
+  published: false,
 };
 
 export default function ServiceCatalogTab() {
