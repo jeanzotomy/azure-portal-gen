@@ -100,7 +100,7 @@ export default function EmployeeTrainingsListPage() {
     const { data } = await supabase
       .from("onboarding_assigned_trainings")
       .select(
-        "id, training_id, completed_at, quiz_score, quiz_passed, course_page, training:trainings(title, description, duration_minutes, category, content, quiz)"
+        "id, training_id, completed_at, quiz_score, quiz_passed, course_page, training:trainings(title, description, duration_minutes, category, content)"
       )
       .eq("process_id", proc.id)
       .order("assigned_at", { ascending: false });
