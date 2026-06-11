@@ -49,7 +49,7 @@ export default function TrainingsStorePage() {
         .from("trainings")
         .select("id, title, description, duration_minutes, category, level, price_cents, currency")
         .eq("active", true)
-        .gt("price_cents", 0)
+        .eq("published", true)
         .order("created_at", { ascending: false });
       setTrainings((data ?? []) as Training[]);
       setLoading(false);
@@ -72,6 +72,12 @@ export default function TrainingsStorePage() {
       navigate("/auth?redirect=/formations");
       return;
     }
+    const price = t.price_cents ?? 0;
+    if (price <= 0) {
+      // Free training — redirect to portal trainings
+      navigate("/portal?tab=my-trainings");
+      return;
+    }
     setPendingId(t.id);
     openCheckout({
       trainingId: t.id,
@@ -81,6 +87,7 @@ export default function TrainingsStorePage() {
       returnUrl: `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
     });
   };
+
 
   return (
     <div className="min-h-screen bg-background">
