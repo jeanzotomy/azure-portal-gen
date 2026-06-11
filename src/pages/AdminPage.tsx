@@ -1983,6 +1983,7 @@ function AdminContacts() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { confirm, dialog: confirmDlg } = useConfirm();
 
   const load = async () => {
     setLoading(true);
