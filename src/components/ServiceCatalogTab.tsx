@@ -184,6 +184,40 @@ export default function ServiceCatalogTab() {
   };
 
   const filtered = items.filter((s) => s.name.toLowerCase().includes(search.toLowerCase()));
+  const publishedItems = filtered.filter((s) => s.published);
+  const otherItems = filtered.filter((s) => !s.published);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+  );
+
+  const handleDragEnd = async (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = publishedItems.findIndex((s) => s.id === active.id);
+    const newIndex = publishedItems.findIndex((s) => s.id === over.id);
+    if (oldIndex < 0 || newIndex < 0) return;
+    const reordered = arrayMove(publishedItems, oldIndex, newIndex);
+    // Optimistic update
+    const reorderedWithOrder = reordered.map((s, i) => ({ ...s, display_order: i }));
+    const byId = new Map(reorderedWithOrder.map((s) => [s.id, s]));
+    setItems((prev) => prev.map((s) => byId.get(s.id) ?? s).sort((a, b) => {
+      if (a.published !== b.published) return a.published ? -1 : 1;
+      return (a.display_order ?? 0) - (b.display_order ?? 0) || a.name.localeCompare(b.name);
+    }));
+    // Persist each updated display_order
+    const updates = await Promise.all(
+      reorderedWithOrder.map((s) =>
+        supabase.from("service_catalog").update({ display_order: s.display_order }).eq("id", s.id)
+      )
+    );
+    const firstErr = updates.find((u) => u.error);
+    if (firstErr?.error) {
+      toast({ title: "Erreur d'ordre", description: firstErr.error.message, variant: "destructive" });
+      void load();
+    }
+  };
 
   return (
     <div className="space-y-4">
@@ -213,39 +247,53 @@ export default function ServiceCatalogTab() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {filtered.map((s) => (
-            <Card key={s.id} className={!s.active ? "opacity-60" : ""}>
-              <CardContent className="p-4 space-y-2">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2 flex-wrap">
-                      <span className="font-semibold">{s.name}</span>
-                      {s.published && (
-                        <Badge variant="secondary" className="gap-1 text-[10px]">
-                          <Globe size={10} /> Publié
-                        </Badge>
-                      )}
-                    </div>
-                    {s.description && <div className="text-xs text-muted-foreground italic">{s.description}</div>}
+        <div className="space-y-6">
+          {publishedItems.length > 0 && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2 text-sm font-semibold text-primary">
+                <Globe size={14} /> Publiés sur /pricing
+                <span className="text-xs text-muted-foreground font-normal">· glissez-déposez pour réordonner</span>
+              </div>
+              <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                <SortableContext items={publishedItems.map((s) => s.id)} strategy={verticalListSortingStrategy}>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                    {publishedItems.map((s) => (
+                      <SortableServiceCard
+                        key={s.id}
+                        service={s}
+                        onTogglePublish={() => void togglePublish(s)}
+                        onDuplicate={() => void duplicate(s)}
+                        onEdit={() => openEdit(s)}
+                        onRemove={() => void remove(s.id)}
+                      />
+                    ))}
                   </div>
-                  <div className="flex gap-1 shrink-0">
-                    <Button size="icon" variant="ghost" onClick={() => void togglePublish(s)} title={s.published ? "Dépublier" : "Publier sur le site"}>
-                      {s.published ? <GlobeLock size={14} className="text-primary" /> : <Globe size={14} />}
-                    </Button>
-                    <Button size="icon" variant="ghost" onClick={() => void duplicate(s)} title="Dupliquer"><Copy size={14} /></Button>
-                    <Button size="icon" variant="ghost" onClick={() => openEdit(s)} title="Modifier"><Pencil size={14} /></Button>
-                    <Button size="icon" variant="ghost" onClick={() => void remove(s.id)} title="Supprimer"><Trash2 size={14} className="text-destructive" /></Button>
-                  </div>
+                </SortableContext>
+              </DndContext>
+            </div>
+          )}
+
+          {otherItems.length > 0 && (
+            <div className="space-y-2">
+              {publishedItems.length > 0 && (
+                <div className="flex items-center gap-2 text-sm font-semibold text-muted-foreground">
+                  <GlobeLock size={14} /> Non publiés
                 </div>
-                <div className="text-xs flex gap-2 items-center flex-wrap">
-                  <span className="font-medium">{new Intl.NumberFormat("fr-FR").format(s.default_unit_price)} {s.default_currency}</span>
-                  <span className="text-muted-foreground">/ {s.default_unit}</span>
-                  {!s.active && <span className="text-muted-foreground">· Inactif</span>}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+              )}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {otherItems.map((s) => (
+                  <ServiceCardView
+                    key={s.id}
+                    service={s}
+                    onTogglePublish={() => void togglePublish(s)}
+                    onDuplicate={() => void duplicate(s)}
+                    onEdit={() => openEdit(s)}
+                    onRemove={() => void remove(s.id)}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       )}
 
