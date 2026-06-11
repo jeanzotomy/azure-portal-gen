@@ -195,14 +195,25 @@ export default function ServiceCatalogTab() {
           {filtered.map((s) => (
             <Card key={s.id} className={!s.active ? "opacity-60" : ""}>
               <CardContent className="p-4 space-y-2">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div className="font-semibold">{s.name}</div>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-semibold">{s.name}</span>
+                      {s.published && (
+                        <Badge variant="secondary" className="gap-1 text-[10px]">
+                          <Globe size={10} /> Publié
+                        </Badge>
+                      )}
+                    </div>
                     {s.description && <div className="text-xs text-muted-foreground italic">{s.description}</div>}
                   </div>
-                  <div className="flex gap-1">
-                    <Button size="icon" variant="ghost" onClick={() => openEdit(s)}><Pencil size={14} /></Button>
-                    <Button size="icon" variant="ghost" onClick={() => void remove(s.id)}><Trash2 size={14} className="text-destructive" /></Button>
+                  <div className="flex gap-1 shrink-0">
+                    <Button size="icon" variant="ghost" onClick={() => void togglePublish(s)} title={s.published ? "Dépublier" : "Publier sur le site"}>
+                      {s.published ? <GlobeLock size={14} className="text-primary" /> : <Globe size={14} />}
+                    </Button>
+                    <Button size="icon" variant="ghost" onClick={() => void duplicate(s)} title="Dupliquer"><Copy size={14} /></Button>
+                    <Button size="icon" variant="ghost" onClick={() => openEdit(s)} title="Modifier"><Pencil size={14} /></Button>
+                    <Button size="icon" variant="ghost" onClick={() => void remove(s.id)} title="Supprimer"><Trash2 size={14} className="text-destructive" /></Button>
                   </div>
                 </div>
                 <div className="text-xs flex gap-2 items-center flex-wrap">
