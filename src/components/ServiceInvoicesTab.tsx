@@ -6,10 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Search, ExternalLink, RefreshCw, Receipt, Trash2, FileText, Pencil, CreditCard } from "lucide-react";
+import { Plus, Search, ExternalLink, RefreshCw, Receipt, Trash2, Pencil, CreditCard, CheckCircle2, Clock, AlertTriangle, FileEdit } from "lucide-react";
 import ServiceInvoiceForm from "@/components/ServiceInvoiceForm";
 import { useStripeCheckout } from "@/hooks/useStripeCheckout";
 import { useAuthSession } from "@/hooks/use-auth-session";
+import { useExchangeRates, type Currency } from "@/hooks/use-exchange-rates";
 
 interface InvoiceRow {
   id: string;
