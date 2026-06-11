@@ -1446,6 +1446,7 @@ export type Database = {
       }
       service_invoices: {
         Row: {
+          assigned_user_id: string | null
           client_id: string
           created_at: string
           created_by: string
@@ -1475,6 +1476,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          assigned_user_id?: string | null
           client_id: string
           created_at?: string
           created_by: string
@@ -1504,6 +1506,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          assigned_user_id?: string | null
           client_id?: string
           created_at?: string
           created_by?: string
@@ -2074,6 +2077,7 @@ export type Database = {
           level: string | null
           passing_score: number
           price_cents: number | null
+          published: boolean
           quiz: Json | null
           sectors: string[]
           target_job_titles: string[]
@@ -2097,6 +2101,7 @@ export type Database = {
           level?: string | null
           passing_score?: number
           price_cents?: number | null
+          published?: boolean
           quiz?: Json | null
           sectors?: string[]
           target_job_titles?: string[]
@@ -2120,6 +2125,7 @@ export type Database = {
           level?: string | null
           passing_score?: number
           price_cents?: number | null
+          published?: boolean
           quiz?: Json | null
           sectors?: string[]
           target_job_titles?: string[]
