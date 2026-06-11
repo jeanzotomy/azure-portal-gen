@@ -114,7 +114,9 @@ function PortalContent() {
     { id: "applications", icon: Briefcase, label: "Mes candidatures" },
     ...(isOnboarding ? [{ id: "onboarding" as Tab, icon: Sparkles, label: "Mon onboarding" }] : []),
     { id: "my-trainings", icon: GraduationCap, label: "Mes formations" },
+    { id: "invoices", icon: FileText, label: "Mes factures" },
     { id: "profile", icon: User, label: t("portal.profile") },
+
   ];
 
   return (
