@@ -21,6 +21,7 @@ interface CatalogService {
   default_unit: string;
   active: boolean;
   published: boolean;
+  display_order: number;
   created_at: string;
 }
 
@@ -34,6 +35,7 @@ const empty: Partial<CatalogService> = {
   default_unit: "unité",
   active: true,
   published: false,
+  display_order: 0,
 };
 
 export default function ServiceCatalogTab() {
@@ -49,7 +51,7 @@ export default function ServiceCatalogTab() {
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await supabase.from("service_catalog").select("*").order("name");
+    const { data, error } = await supabase.from("service_catalog").select("*").order("display_order", { ascending: true }).order("name");
     if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
     else setItems(data ?? []);
     setLoading(false);
@@ -89,6 +91,7 @@ export default function ServiceCatalogTab() {
           default_unit: form.default_unit ?? "unité",
           active: form.active ?? true,
           published: form.published ?? false,
+          display_order: form.display_order ?? 0,
         })
         .eq("id", editing.id);
       if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
@@ -106,6 +109,7 @@ export default function ServiceCatalogTab() {
         default_unit: form.default_unit ?? "unité",
         active: form.active ?? true,
         published: form.published ?? false,
+        display_order: form.display_order ?? 0,
         created_by: user.id,
       });
       if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
@@ -128,6 +132,7 @@ export default function ServiceCatalogTab() {
       default_unit: s.default_unit,
       active: s.active,
       published: false,
+      display_order: s.display_order,
       created_by: user.id,
     });
     if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
@@ -274,6 +279,17 @@ export default function ServiceCatalogTab() {
             <div className="flex items-center gap-2">
               <Switch checked={form.published ?? false} onCheckedChange={(v) => setForm({ ...form, published: v })} />
               <label className="text-xs">Publié sur le site (visible publiquement sur /pricing)</label>
+            </div>
+            <div>
+              <label className="text-xs font-medium">Ordre d'affichage sur /pricing</label>
+              <Input
+                type="number"
+                value={form.display_order ?? 0}
+                onChange={(e) => setForm({ ...form, display_order: Number(e.target.value) })}
+              />
+              <p className="text-[10px] text-muted-foreground mt-1">
+                Plus le nombre est petit, plus le service apparaît en premier. À égalité, tri par nom.
+              </p>
             </div>
           </div>
           <DialogFooter>

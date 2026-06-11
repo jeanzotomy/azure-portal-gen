@@ -1,0 +1,2 @@
+ALTER TABLE public.service_catalog ADD COLUMN IF NOT EXISTS display_order INTEGER NOT NULL DEFAULT 0;
+CREATE INDEX IF NOT EXISTS service_catalog_display_order_idx ON public.service_catalog (display_order);
