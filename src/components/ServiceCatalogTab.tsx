@@ -366,3 +366,84 @@ export default function ServiceCatalogTab() {
     </div>
   );
 }
+
+interface CardActionProps {
+  service: CatalogService;
+  onTogglePublish: () => void;
+  onDuplicate: () => void;
+  onEdit: () => void;
+  onRemove: () => void;
+  dragHandle?: React.ReactNode;
+}
+
+function ServiceCardContent({ service: s, onTogglePublish, onDuplicate, onEdit, onRemove, dragHandle }: CardActionProps) {
+  return (
+    <CardContent className="p-4 space-y-2">
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex items-start gap-2 min-w-0 flex-1">
+          {dragHandle}
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2 flex-wrap">
+              <span className="font-semibold">{s.name}</span>
+              {s.published && (
+                <Badge variant="secondary" className="gap-1 text-[10px]">
+                  <Globe size={10} /> Publié
+                </Badge>
+              )}
+            </div>
+            {s.description && <div className="text-xs text-muted-foreground italic">{s.description}</div>}
+          </div>
+        </div>
+        <div className="flex gap-1 shrink-0">
+          <Button size="icon" variant="ghost" onClick={onTogglePublish} title={s.published ? "Dépublier" : "Publier sur le site"}>
+            {s.published ? <GlobeLock size={14} className="text-primary" /> : <Globe size={14} />}
+          </Button>
+          <Button size="icon" variant="ghost" onClick={onDuplicate} title="Dupliquer"><Copy size={14} /></Button>
+          <Button size="icon" variant="ghost" onClick={onEdit} title="Modifier"><Pencil size={14} /></Button>
+          <Button size="icon" variant="ghost" onClick={onRemove} title="Supprimer"><Trash2 size={14} className="text-destructive" /></Button>
+        </div>
+      </div>
+      <div className="text-xs flex gap-2 items-center flex-wrap">
+        <span className="font-medium">{new Intl.NumberFormat("fr-FR").format(s.default_unit_price)} {s.default_currency}</span>
+        <span className="text-muted-foreground">/ {s.default_unit}</span>
+        {!s.active && <span className="text-muted-foreground">· Inactif</span>}
+      </div>
+    </CardContent>
+  );
+}
+
+function ServiceCardView(props: CardActionProps) {
+  return (
+    <Card className={!props.service.active ? "opacity-60" : ""}>
+      <ServiceCardContent {...props} />
+    </Card>
+  );
+}
+
+function SortableServiceCard(props: CardActionProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: props.service.id });
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+    zIndex: isDragging ? 50 : "auto",
+  };
+  const handle = (
+    <button
+      type="button"
+      className="text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing touch-none mt-0.5"
+      aria-label="Glisser pour réordonner"
+      {...attributes}
+      {...listeners}
+    >
+      <GripVertical size={16} />
+    </button>
+  );
+  return (
+    <div ref={setNodeRef} style={style}>
+      <Card className={!props.service.active ? "opacity-60" : ""}>
+        <ServiceCardContent {...props} dragHandle={handle} />
+      </Card>
+    </div>
+  );
+}
