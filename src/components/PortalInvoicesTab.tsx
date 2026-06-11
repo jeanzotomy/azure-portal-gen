@@ -147,7 +147,7 @@ export default function PortalInvoicesTab({ user: _user }: { user: SupaUser }) {
           discount_rate: Number(it.discount_rate ?? 0),
           total: Number(it.total),
           is_recurring: !!it.is_recurring,
-          billing_frequency: it.billing_frequency,
+          billing_frequency: (it.billing_frequency ?? null) as InvoicePDFData["items"][number]["billing_frequency"],
           periods: it.periods ?? 1,
         })),
         subtotal: Number(full.subtotal),
