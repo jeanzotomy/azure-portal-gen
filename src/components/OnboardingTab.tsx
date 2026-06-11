@@ -80,12 +80,19 @@ export default function OnboardingTab({ user }: { user: SupaUser }) {
       supabase.from("onboarding_steps").select("*").eq("process_id", proc.id).order("step_order"),
       supabase.from("onboarding_documents").select("*").eq("process_id", proc.id).order("uploaded_at", { ascending: false }),
       supabase.from("onboarding_contracts").select("*").eq("process_id", proc.id).order("uploaded_at", { ascending: false }).limit(1).maybeSingle(),
-      supabase.from("onboarding_assigned_trainings").select("id, training_id, completed_at, quiz_score, quiz_passed, quiz_submitted_at, course_page, quiz_page, quiz_draft_answers, quiz_answers, training:trainings(title, description, url, duration_minutes, category, content, quiz, passing_score)").eq("process_id", proc.id),
+      supabase.from("onboarding_assigned_trainings").select("id, training_id, completed_at, quiz_score, quiz_passed, quiz_submitted_at, course_page, quiz_page, quiz_draft_answers, quiz_answers, training:trainings(title, description, url, duration_minutes, category, content, passing_score)").eq("process_id", proc.id),
     ]);
     setSteps((stepsData || []) as any);
     setDocs((docsData || []) as any);
     setContract((contractData || null) as any);
-    setTrainings((trainingsData || []) as any);
+    // Fetch quizzes via secure RPC (answer keys redacted for candidates)
+    const rows = (trainingsData || []) as any[];
+    await Promise.all(rows.map(async (r) => {
+      if (!r?.training_id) return;
+      const { data: q } = await (supabase as any).rpc("get_training_quiz", { _training_id: r.training_id });
+      if (r.training) r.training.quiz = q ?? null;
+    }));
+    setTrainings(rows as any);
     setLoading(false);
 
     // Vérifier l'accessibilité réelle du fichier contrat (signed URL)
@@ -455,8 +462,7 @@ export default function OnboardingTab({ user }: { user: SupaUser }) {
                     onDownloadContract={downloadContract}
                     onMarkDone={() => updateStepStatus(step.id, "valide")}
                     onMarkTrainingDone={async (id: string) => {
-                      const { error } = await supabase.from("onboarding_assigned_trainings")
-                        .update({ completed_at: new Date().toISOString() }).eq("id", id);
+                      const { error } = await (supabase as any).rpc("mark_training_followed", { _assigned_id: id });
                       if (error) toast.error(error.message); else { toast.success("Formation marquée comme suivie"); load(); }
                     }}
                   />

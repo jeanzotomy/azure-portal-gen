@@ -85,13 +85,13 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
   const load = useCallback(async () => {
     setLoading(true);
     const [{ data: trs }, { data: procs }, { data: deps }, { data: secs }, { data: grps }] = await Promise.all([
-      supabase.from("trainings").select("*").order("created_at", { ascending: false }),
+      supabase.from("trainings").select("id, title, description, url, duration_minutes, category, target_job_titles, active, created_by, created_at, updated_at, departments, sectors, content, passing_score, ai_generated, topic, level, price_cents, currency").order("created_at", { ascending: false }),
       supabase.from("onboarding_processes").select("id, candidate_name, candidate_email, job_id, created_at").eq("kind", "onboarding").order("created_at", { ascending: false }),
       supabase.from("departments").select("name").order("name"),
       supabase.from("sectors").select("name").order("name"),
       supabase.from("training_groups").select("id, name, description").order("created_at", { ascending: false }),
     ]);
-    setTrainings((trs || []) as Training[]);
+    setTrainings(((trs || []) as any[]).map((t) => ({ ...t, quiz: null })) as Training[]);
     setDepartmentsList(((deps || []) as { name: string }[]).map(d => d.name));
     setSectorsList(((secs || []) as { name: string }[]).map(s => s.name));
     setGroups((grps || []) as Group[]);
@@ -116,8 +116,10 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
   useEffect(() => { load(); }, [load]);
 
   const openNew = () => { setEditing(null); setForm(emptyForm); setDialogOpen(true); };
-  const openEdit = (t: Training) => {
+  const openEdit = async (t: Training) => {
     setEditing(t);
+    // Quiz column is no longer readable directly; load it via the secure RPC.
+    const { data: quizData } = await (supabase as any).rpc("get_training_quiz", { _training_id: t.id });
     setForm({
       title: t.title,
       description: t.description || "",
@@ -128,7 +130,7 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
       sectors: t.sectors || [],
       active: t.active,
       content: t.content,
-      quiz: t.quiz,
+      quiz: quizData ?? null,
       passing_score: t.passing_score || 70,
       ai_generated: t.ai_generated,
       topic: t.topic || "",

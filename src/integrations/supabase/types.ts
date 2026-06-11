@@ -2275,6 +2275,7 @@ export type Database = {
         Args: { _user_id: string }
         Returns: string
       }
+      get_training_quiz: { Args: { _training_id: string }; Returns: Json }
       has_active_subscription: {
         Args: { check_env?: string; user_uuid: string }
         Returns: boolean
@@ -2331,6 +2332,10 @@ export type Database = {
           name: string
           training_count: number
         }[]
+      }
+      mark_training_followed: {
+        Args: { _assigned_id: string }
+        Returns: undefined
       }
       move_to_dlq: {
         Args: {

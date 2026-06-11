@@ -21,11 +21,16 @@ export default function EmployeeTrainingPlayerPage() {
     const { data } = await supabase
       .from("onboarding_assigned_trainings")
       .select(
-        "id, training_id, completed_at, quiz_score, quiz_passed, quiz_submitted_at, course_page, quiz_page, quiz_draft_answers, quiz_answers, process:onboarding_processes!inner(user_id), training:trainings(title, description, url, duration_minutes, category, content, quiz, passing_score)"
+        "id, training_id, completed_at, quiz_score, quiz_passed, quiz_submitted_at, course_page, quiz_page, quiz_draft_answers, quiz_answers, process:onboarding_processes!inner(user_id), training:trainings(title, description, url, duration_minutes, category, content, passing_score)"
       )
       .eq("id", assignedId)
       .eq("process.user_id", user.id)
       .maybeSingle();
+    if (data?.training_id) {
+      // Quiz is fetched via secure RPC (answer keys redacted for candidates).
+      const { data: quiz } = await (supabase as any).rpc("get_training_quiz", { _training_id: data.training_id });
+      if (data && (data as any).training) (data as any).training.quiz = quiz ?? null;
+    }
     setAssigned(data);
     setLoading(false);
   }, [assignedId, user]);
@@ -36,11 +41,7 @@ export default function EmployeeTrainingPlayerPage() {
 
   const onComplete = useCallback(async () => {
     if (!assignedId) return;
-    await supabase
-      .from("onboarding_assigned_trainings")
-      .update({ completed_at: new Date().toISOString() })
-      .eq("id", assignedId)
-      .is("completed_at", null);
+    await (supabase as any).rpc("mark_training_followed", { _assigned_id: assignedId });
     void load();
   }, [assignedId, load]);
 
