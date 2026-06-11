@@ -37,10 +37,12 @@ export default function ServiceInvoicesTab() {
   const { toast } = useToast();
   const { user } = useAuthSession();
   const { openCheckout, closeCheckout, isOpen, checkoutElement } = useStripeCheckout();
+  const { convert, rates, loading: ratesLoading, refresh: refreshRates } = useExchangeRates();
   const [rows, setRows] = useState<InvoiceRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState<string>("all");
+  const [displayCurrency, setDisplayCurrency] = useState<Currency>("GNF");
   const [formOpen, setFormOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
 
