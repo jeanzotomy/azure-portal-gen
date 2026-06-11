@@ -22,7 +22,19 @@ import { useExchangeRates, type Currency } from "@/hooks/use-exchange-rates";
 
 interface SClient { id: string; client_name: string; nif: string | null; rccm: string | null; address_line: string | null; city: string | null; country: string | null; phone: string | null; email: string | null; contact_person: string | null; }
 interface CatItem { id: string; name: string; description: string | null; default_unit_price: number; default_currency: Currency; default_unit: string; active: boolean; }
-interface LineItem { catalog_id?: string | null; description: string; subtitle?: string; quantity: number; unit: string; unit_price: number; discount_rate?: number; }
+type BillingFrequency = "mensuel" | "trimestriel" | "semestriel" | "annuel";
+interface LineItem {
+  catalog_id?: string | null;
+  description: string;
+  subtitle?: string;
+  quantity: number;
+  unit: string;
+  unit_price: number;
+  discount_rate?: number;
+  is_recurring?: boolean;
+  billing_frequency?: BillingFrequency | null;
+  periods?: number;
+}
 interface PMRow {
   id: string; label: string; type: "virement" | "mobile_money" | "especes" | "cheque" | "depot" | "autre";
   currency: Currency; bank: string | null; iban: string | null; swift: string | null;
@@ -30,11 +42,28 @@ interface PMRow {
 }
 
 const lineTotal = (it: LineItem) => {
-  const gross = (it.quantity || 0) * (it.unit_price || 0);
+  const periods = it.is_recurring ? Math.max(1, it.periods || 1) : 1;
+  const gross = (it.quantity || 0) * (it.unit_price || 0) * periods;
   return gross * (1 - (it.discount_rate || 0) / 100);
 };
 
-const UNIT_OPTIONS = ["unité", "heure", "jour", "mois", "année", "forfait"] as const;
+const FREQ_LABELS: Record<BillingFrequency, { adj: string; period: string; periodPlural: string }> = {
+  mensuel:     { adj: "mensuel",     period: "mois",      periodPlural: "mois" },
+  trimestriel: { adj: "trimestriel", period: "trimestre", periodPlural: "trimestres" },
+  semestriel:  { adj: "semestriel",  period: "semestre",  periodPlural: "semestres" },
+  annuel:      { adj: "annuel",      period: "an",        periodPlural: "ans" },
+};
+
+const buildRecurringSubtitle = (it: LineItem, currency: Currency): string => {
+  if (!it.is_recurring || !it.billing_frequency) return "";
+  const f = FREQ_LABELS[it.billing_frequency];
+  const periods = Math.max(1, it.periods || 1);
+  const unit = it.unit && it.unit !== "unité" ? it.unit : "utilisateur";
+  const fmt = new Intl.NumberFormat("fr-FR");
+  return `${it.quantity} ${unit}${it.quantity > 1 ? "s" : ""} × ${fmt.format(it.unit_price)} ${currency}/${unit}/${f.period} × ${periods} ${periods > 1 ? f.periodPlural : f.period}`;
+};
+
+const UNIT_OPTIONS = ["unité", "utilisateur", "licence", "poste", "heure", "jour", "mois", "année", "forfait"] as const;
 const DEFAULT_PAYMENT = { bank: "", iban: "", swift: "", mobile_money: "+224 626 441 150", reference: "" };
 
 const PM_TYPE_ICONS: Record<PMRow["type"], typeof CreditCard> = {
