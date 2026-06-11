@@ -99,6 +99,7 @@ export default function PricingPage() {
       .select("id, name, description, default_unit_price, default_currency, default_unit")
       .eq("published", true)
       .eq("active", true)
+      .order("display_order", { ascending: true })
       .order("name")
       .then(({ data }) => setPublishedServices((data ?? []) as PublishedService[]));
   }, []);
