@@ -320,6 +320,37 @@ export default function PricingPage() {
           </div>
         </div>
 
+        {publishedServices.length > 0 && (
+          <div className="mt-16 text-center">
+            <h2 className="text-2xl font-bold mb-2">Services à la carte</h2>
+            <p className="text-muted-foreground mb-6">Prestations issues de notre catalogue — contactez-nous pour un devis personnalisé.</p>
+            <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 text-left">
+              {publishedServices.map((s) => (
+                <Card key={s.id}>
+                  <CardHeader>
+                    <CardTitle className="text-base">{s.name}</CardTitle>
+                    {s.description && (
+                      <CardDescription className="italic text-xs">{s.description}</CardDescription>
+                    )}
+                  </CardHeader>
+                  <CardContent className="space-y-3">
+                    <div>
+                      <span className="text-2xl font-bold text-foreground">
+                        {new Intl.NumberFormat("fr-FR").format(s.default_unit_price)} {s.default_currency}
+                      </span>
+                      <span className="text-xs text-muted-foreground"> / {s.default_unit}</span>
+                    </div>
+                    <Button asChild variant="outline" size="sm" className="w-full">
+                      <Link to="/#contact">Demander un devis</Link>
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
+
+
         {usingCinetPay && (
           <p className="text-xs text-muted-foreground text-center mt-10 max-w-xl mx-auto">
             <strong>Note CinetPay :</strong> les abonnements en devises africaines sont facturés en paiements uniques (pas de renouvellement automatique). Tu recevras un rappel par email 7 jours avant la fin de période pour renouveler.
