@@ -1283,6 +1283,7 @@ function ProfileTab({ user }: { user: SupaUser }) {
   const [profile, setProfile] = useState({ first_name: "", last_name: "", full_name: "", company: "", phone: "", location: "", timezone: "", country: "", city: "", address_line: "" });
   const [saving, setSaving] = useState(false);
   const { toast } = useToast();
+  const { confirm, dialog: confirmDlg } = useConfirm();
 
   const loadProfile = () => {
     supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle().then(({ data, error }) => {
