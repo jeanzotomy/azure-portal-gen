@@ -141,8 +141,10 @@ export default function ServiceCatalogTab() {
         active: form.active ?? true,
         published: form.published ?? false,
         display_order: form.display_order ?? 0,
+        is_subscription: form.is_subscription ?? false,
+        billing_frequency: form.is_subscription ? (form.billing_frequency ?? "mensuel") : null,
         created_by: user.id,
-      });
+      } as never);
       if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
       else {
         toast({ title: "Service ajouté" });
