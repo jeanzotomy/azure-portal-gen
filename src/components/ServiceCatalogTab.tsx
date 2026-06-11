@@ -51,7 +51,7 @@ export default function ServiceCatalogTab() {
 
   const load = async () => {
     setLoading(true);
-    const { data, error } = await supabase.from("service_catalog").select("*").order("name");
+    const { data, error } = await supabase.from("service_catalog").select("*").order("display_order", { ascending: true }).order("name");
     if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
     else setItems(data ?? []);
     setLoading(false);
