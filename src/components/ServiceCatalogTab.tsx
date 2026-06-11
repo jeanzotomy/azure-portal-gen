@@ -88,6 +88,7 @@ export default function ServiceCatalogTab() {
           default_currency: form.default_currency ?? "GNF",
           default_unit: form.default_unit ?? "unité",
           active: form.active ?? true,
+          published: form.published ?? false,
         })
         .eq("id", editing.id);
       if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
@@ -104,6 +105,7 @@ export default function ServiceCatalogTab() {
         default_currency: form.default_currency ?? "GNF",
         default_unit: form.default_unit ?? "unité",
         active: form.active ?? true,
+        published: form.published ?? false,
         created_by: user.id,
       });
       if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
@@ -115,6 +117,39 @@ export default function ServiceCatalogTab() {
     }
     setSaving(false);
   };
+
+  const duplicate = async (s: CatalogService) => {
+    if (!user) return;
+    const { error } = await supabase.from("service_catalog").insert({
+      name: `${s.name} (copie)`,
+      description: s.description,
+      default_unit_price: s.default_unit_price,
+      default_currency: s.default_currency,
+      default_unit: s.default_unit,
+      active: s.active,
+      published: false,
+      created_by: user.id,
+    });
+    if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    else {
+      toast({ title: "Service dupliqué" });
+      void load();
+    }
+  };
+
+  const togglePublish = async (s: CatalogService) => {
+    const next = !s.published;
+    const { error } = await supabase
+      .from("service_catalog")
+      .update({ published: next })
+      .eq("id", s.id);
+    if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    else {
+      toast({ title: next ? "Publié sur le site" : "Retiré du site" });
+      void load();
+    }
+  };
+
 
   const remove = async (id: string) => {
     if (!confirm("Supprimer ce service du catalogue ?")) return;
