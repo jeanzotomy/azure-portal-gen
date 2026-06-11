@@ -91,6 +91,7 @@ export default function ServiceCatalogTab() {
           default_unit: form.default_unit ?? "unité",
           active: form.active ?? true,
           published: form.published ?? false,
+          display_order: form.display_order ?? 0,
         })
         .eq("id", editing.id);
       if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
