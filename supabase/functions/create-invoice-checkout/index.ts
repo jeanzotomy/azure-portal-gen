@@ -64,7 +64,7 @@ Deno.serve(async (req) => {
       line_items: [{
         price_data: {
           currency,
-          product_data: { name: description, tax_code: "txcd_20030000" },
+          product_data: { name: description, tax_code: "txcd_10000000" },
           unit_amount: amountCents,
         },
         quantity: 1,
@@ -74,9 +74,8 @@ Deno.serve(async (req) => {
       return_url: returnUrl,
       customer: customerId,
       payment_intent_data: { description },
-      managed_payments: { enabled: true },
       metadata: { userId: user.id, invoice_id: invoice.id, kind: "service_invoice" },
-    } as any);
+    });
 
     return new Response(JSON.stringify({ clientSecret: session.client_secret }), {
       status: 200,
