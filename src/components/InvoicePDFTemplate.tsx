@@ -93,30 +93,37 @@ const formatDate = (iso?: string | null) => {
   return d.toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" });
 };
 
-/**
- * Reproduit fidèlement le modèle CloudMature (PDF/Word).
- * Largeur fixe en pixels (794 = A4 à 96 dpi) pour rendu html2canvas constant.
- */
+/** Caractères au-delà desquels une description est considérée "longue" et renvoyée en annexe. */
+const SUBTITLE_MAX_CHARS = 180;
+
+const isLongSubtitle = (s?: string | null) => !!s && s.trim().length > SUBTITLE_MAX_CHARS;
+
 export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFData }>(
   ({ data }, ref) => {
     const cyan = "#1FB6E5";
     const navy = "#0B1F33";
 
+    // Items qui nécessitent une annexe (description / sous-titre trop long)
+    const annexItems = data.items.filter((it) => isLongSubtitle(it.subtitle));
+    const hasAnnex = annexItems.length > 0;
+
+    const pageStyle: React.CSSProperties = {
+      width: "794px",
+      minHeight: "1123px",
+      background: "#ffffff",
+      color: "#111827",
+      fontFamily: "'Helvetica Neue', Arial, sans-serif",
+      padding: "32px 40px",
+      boxSizing: "border-box",
+      fontSize: "12px",
+      lineHeight: 1.4,
+      position: "relative",
+    };
+
     return (
-      <div
-        ref={ref}
-        style={{
-          width: "794px",
-          minHeight: "1123px",
-          background: "#ffffff",
-          color: "#111827",
-          fontFamily: "'Helvetica Neue', Arial, sans-serif",
-          padding: "32px 40px",
-          boxSizing: "border-box",
-          fontSize: "12px",
-          lineHeight: 1.4,
-        }}
-      >
+      <div ref={ref} style={{ width: "794px", background: "#ffffff" }}>
+        <div className="invoice-page" style={pageStyle}>
+
         {/* En-tête */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
@@ -297,11 +304,35 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
                       </span>
                     </div>
                   )}
-                  {item.subtitle && (
-                    <div style={{ fontStyle: "italic", color: "#6B7280", marginTop: "2px", fontSize: "10px" }}>
-                      {item.subtitle}
-                    </div>
-                  )}
+                  {item.subtitle && (() => {
+                    const long = isLongSubtitle(item.subtitle);
+                    return (
+                      <>
+                        <div
+                          style={{
+                            fontStyle: "italic",
+                            color: "#6B7280",
+                            marginTop: "2px",
+                            fontSize: "10px",
+                            display: "-webkit-box",
+                            WebkitLineClamp: long ? 3 : undefined,
+                            WebkitBoxOrient: "vertical",
+                            overflow: long ? "hidden" : "visible",
+                            textOverflow: "ellipsis",
+                          }}
+                        >
+                          {item.subtitle}
+                        </div>
+                        {long && (
+                          <div style={{ marginTop: "3px", fontSize: "9px", color: cyan, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                            <span style={{ display: "inline-block", width: "6px", height: "6px", borderRadius: "50%", background: cyan }} />
+                            Détail complet — voir Annexe (p. 2)
+                          </div>
+                        )}
+                      </>
+                    );
+                  })()}
+
                 </td>
                 <td style={{ padding: "10px 8px", textAlign: "center", verticalAlign: "top" }}>
                   <div>{item.quantity}{item.unit && item.unit !== "unité" ? ` ${item.unit}` : ""}</div>
@@ -448,7 +479,68 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
           }}
         >
           Enregistré sous N° GN.TCC.2025.B18495 · Partenaire : Microsoft · Datadog · Google Cloud
+          {hasAnnex && <span style={{ float: "right", color: navy, fontWeight: 600 }}>Page 1 / 2</span>}
         </div>
+        </div>
+        {/* ───────── ANNEXE — Descriptions détaillées ───────── */}
+        {hasAnnex && (
+          <div className="invoice-page" style={{ ...pageStyle, pageBreakBefore: "always" }}>
+            {/* En-tête annexe */}
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: `2px solid ${cyan}`, paddingBottom: "12px" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <img src={logo} alt="CloudMature" style={{ height: "34px" }} />
+                <div>
+                  <div style={{ fontSize: "11px", color: cyan, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase" }}>Annexe</div>
+                  <div style={{ fontSize: "16px", fontWeight: 800, color: navy }}>Descriptions détaillées</div>
+                </div>
+              </div>
+              <div style={{ textAlign: "right" }}>
+                <div style={{ fontSize: "11px", color: "#6B7280" }}>Facture</div>
+                <div style={{ fontSize: "14px", color: cyan, fontWeight: 700 }}>N° {data.invoice_number}</div>
+                <div style={{ fontSize: "10px", color: "#6B7280", marginTop: "2px" }}>{formatDate(data.invoice_date)}</div>
+              </div>
+            </div>
+
+            <div style={{ marginTop: "14px", fontSize: "10.5px", color: "#374151", background: "#EAF6FB", padding: "10px 14px", borderLeft: `3px solid ${cyan}` }}>
+              Cette annexe reprend in extenso la description des prestations dont le résumé figure dans le tableau principal.
+              Chaque entrée référence le numéro de ligne d'origine.
+            </div>
+
+            <div style={{ marginTop: "20px", display: "flex", flexDirection: "column", gap: "16px" }}>
+              {annexItems.map((it) => (
+                <div key={it.position} style={{ display: "grid", gridTemplateColumns: "44px 1fr", gap: "14px", padding: "14px 16px", border: `1px solid #E5E7EB`, borderLeft: `4px solid ${cyan}`, borderRadius: "4px", background: "#FBFEFF" }}>
+                  <div style={{ background: navy, color: "#fff", width: "32px", height: "32px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: "13px" }}>
+                    {it.position}
+                  </div>
+                  <div>
+                    <div style={{ fontWeight: 700, color: navy, fontSize: "12.5px" }}>{it.description}</div>
+                    <div style={{ marginTop: "6px", fontSize: "10.5px", color: "#374151", whiteSpace: "pre-line", lineHeight: 1.55 }}>
+                      {it.subtitle}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Footer annexe */}
+            <div
+              style={{
+                position: "absolute",
+                left: "40px",
+                right: "40px",
+                bottom: "24px",
+                paddingTop: "12px",
+                borderTop: `2px solid ${cyan}`,
+                fontSize: "9px",
+                color: "#6B7280",
+                textAlign: "center",
+              }}
+            >
+              Annexe à la facture N° {data.invoice_number} · Cloud Mature · www.cloudmature.com
+              <span style={{ float: "right", color: navy, fontWeight: 600 }}>Page 2 / 2</span>
+            </div>
+          </div>
+        )}
       </div>
     );
   }

@@ -31,29 +31,37 @@ const formatDate = (iso?: string | null) => {
   return d.toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" });
 };
 
-/** Convertit l'élément HTML en Blob PDF (A4). */
+/** Convertit l'élément HTML en Blob PDF (A4). Supporte plusieurs `.invoice-page` enfants. */
 export async function generateInvoicePDFBlob(element: HTMLElement): Promise<Blob> {
-  const canvas = await html2canvas(element, {
-    scale: 2,
-    backgroundColor: "#ffffff",
-    useCORS: true,
-    logging: false,
-  });
-  const imgData = canvas.toDataURL("image/png");
+  const pages = Array.from(element.querySelectorAll<HTMLElement>(".invoice-page"));
+  const targets: HTMLElement[] = pages.length > 0 ? pages : [element];
+
   const pdf = new jsPDF({ orientation: "p", unit: "mm", format: "a4" });
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
-  const imgProps = pdf.getImageProperties(imgData);
-  const ratio = imgProps.width / imgProps.height;
-  let imgWidth = pageWidth;
-  let imgHeight = pageWidth / ratio;
-  if (imgHeight > pageHeight) {
-    imgHeight = pageHeight;
-    imgWidth = pageHeight * ratio;
+
+  for (let i = 0; i < targets.length; i++) {
+    const canvas = await html2canvas(targets[i], {
+      scale: 2,
+      backgroundColor: "#ffffff",
+      useCORS: true,
+      logging: false,
+    });
+    const imgData = canvas.toDataURL("image/png");
+    const imgProps = pdf.getImageProperties(imgData);
+    const ratio = imgProps.width / imgProps.height;
+    let imgWidth = pageWidth;
+    let imgHeight = pageWidth / ratio;
+    if (imgHeight > pageHeight) {
+      imgHeight = pageHeight;
+      imgWidth = pageHeight * ratio;
+    }
+    if (i > 0) pdf.addPage();
+    pdf.addImage(imgData, "PNG", (pageWidth - imgWidth) / 2, 0, imgWidth, imgHeight);
   }
-  pdf.addImage(imgData, "PNG", (pageWidth - imgWidth) / 2, 0, imgWidth, imgHeight);
   return pdf.output("blob");
 }
+
 
 const NAVY = "0B1F33";
 const CYAN = "1FB6E5";
