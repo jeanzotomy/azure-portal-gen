@@ -1,6 +1,8 @@
 import { forwardRef } from "react";
 import logo from "@/assets/cloudmature-logo.png";
 
+export type BillingFrequency = "mensuel" | "trimestriel" | "semestriel" | "annuel";
+
 export interface InvoiceItemData {
   position: number;
   description: string;
@@ -10,7 +12,17 @@ export interface InvoiceItemData {
   unit_price: number;
   discount_rate?: number;
   total: number;
+  is_recurring?: boolean;
+  billing_frequency?: BillingFrequency | null;
+  periods?: number;
 }
+
+const FREQ_PERIOD_LABEL: Record<BillingFrequency, { adj: string; period: string; periodPlural: string }> = {
+  mensuel:     { adj: "Mensuel",     period: "mois",      periodPlural: "mois" },
+  trimestriel: { adj: "Trimestriel", period: "trimestre", periodPlural: "trimestres" },
+  semestriel:  { adj: "Semestriel",  period: "semestre",  periodPlural: "semestres" },
+  annuel:      { adj: "Annuel",      period: "an",        periodPlural: "ans" },
+};
 
 export interface InvoicePaymentDetails {
   bank?: string;
