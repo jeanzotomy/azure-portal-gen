@@ -544,6 +544,11 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
               <Switch checked={form.active} onCheckedChange={v => setForm({ ...form, active: v })} />
               <Label>Actif</Label>
             </div>
+            <div className="flex items-center gap-2">
+              <Switch checked={form.published} onCheckedChange={v => setForm({ ...form, published: v })} />
+              <Label>Publier sur le site (menu Formations)</Label>
+            </div>
+
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Annuler</Button>
