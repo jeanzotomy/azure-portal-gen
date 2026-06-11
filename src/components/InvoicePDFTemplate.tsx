@@ -1,6 +1,8 @@
 import { forwardRef } from "react";
 import logo from "@/assets/cloudmature-logo.png";
 
+export type BillingFrequency = "mensuel" | "trimestriel" | "semestriel" | "annuel";
+
 export interface InvoiceItemData {
   position: number;
   description: string;
@@ -10,7 +12,17 @@ export interface InvoiceItemData {
   unit_price: number;
   discount_rate?: number;
   total: number;
+  is_recurring?: boolean;
+  billing_frequency?: BillingFrequency | null;
+  periods?: number;
 }
+
+const FREQ_PERIOD_LABEL: Record<BillingFrequency, { adj: string; period: string; periodPlural: string }> = {
+  mensuel:     { adj: "Mensuel",     period: "mois",      periodPlural: "mois" },
+  trimestriel: { adj: "Trimestriel", period: "trimestre", periodPlural: "trimestres" },
+  semestriel:  { adj: "Semestriel",  period: "semestre",  periodPlural: "semestres" },
+  annuel:      { adj: "Annuel",      period: "an",        periodPlural: "ans" },
+};
 
 export interface InvoicePaymentDetails {
   bank?: string;
@@ -256,13 +268,32 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
             </tr>
           </thead>
           <tbody>
-            {data.items.map((item, idx) => (
+            {data.items.map((item, idx) => {
+              const freq = item.is_recurring && item.billing_frequency ? FREQ_PERIOD_LABEL[item.billing_frequency] : null;
+              const periods = Math.max(1, item.periods ?? 1);
+              return (
               <tr key={idx} style={{ borderBottom: "1px solid #E5E7EB" }}>
                 <td style={{ padding: "10px 8px", color: cyan, fontWeight: 700, verticalAlign: "top" }}>
                   {item.position}
                 </td>
                 <td style={{ padding: "10px 8px", verticalAlign: "top" }}>
-                  <div style={{ fontWeight: 600, color: navy }}>{item.description}</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "6px", flexWrap: "wrap" }}>
+                    <span style={{ fontWeight: 600, color: navy }}>{item.description}</span>
+                    {freq && (
+                      <span style={{
+                        background: cyan,
+                        color: "#fff",
+                        padding: "1px 6px",
+                        borderRadius: "3px",
+                        fontSize: "9px",
+                        fontWeight: 700,
+                        textTransform: "uppercase",
+                        letterSpacing: "0.3px",
+                      }}>
+                        Abonnement · {freq.adj}
+                      </span>
+                    )}
+                  </div>
                   {item.subtitle && (
                     <div style={{ fontStyle: "italic", color: "#6B7280", marginTop: "2px", fontSize: "10px" }}>
                       {item.subtitle}
@@ -271,9 +302,19 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
                 </td>
                 <td style={{ padding: "10px 8px", textAlign: "center", verticalAlign: "top" }}>
                   {item.quantity}{item.unit && item.unit !== "unité" ? ` ${item.unit}` : ""}
+                  {freq && (
+                    <div style={{ fontSize: "9px", color: "#6B7280", marginTop: "2px" }}>
+                      × {periods} {periods > 1 ? freq.periodPlural : freq.period}
+                    </div>
+                  )}
                 </td>
                 <td style={{ padding: "10px 8px", textAlign: "right", verticalAlign: "top" }}>
                   {formatCurrency(item.unit_price, data.currency)}
+                  {freq && (
+                    <div style={{ fontSize: "9px", color: "#6B7280", marginTop: "2px" }}>
+                      /{item.unit && item.unit !== "unité" ? `${item.unit}/` : ""}{freq.period}
+                    </div>
+                  )}
                 </td>
                 <td style={{ padding: "10px 8px", textAlign: "center", verticalAlign: "top", color: item.discount_rate ? "#DC2626" : "#9CA3AF" }}>
                   {item.discount_rate ? `−${item.discount_rate}%` : "—"}
@@ -282,7 +323,8 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
                   {formatCurrency(item.total, data.currency)}
                 </td>
               </tr>
-            ))}
+              );
+            })}
           </tbody>
         </table>
 

@@ -220,28 +220,58 @@ export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blo
     ],
   });
 
-  const itemRows = data.items.map(
-    (item) =>
-      new TableRow({
+  const FREQ_ADJ: Record<string, string> = {
+    mensuel: "Mensuel", trimestriel: "Trimestriel", semestriel: "Semestriel", annuel: "Annuel",
+  };
+  const FREQ_PERIOD: Record<string, { p: string; pl: string }> = {
+    mensuel: { p: "mois", pl: "mois" },
+    trimestriel: { p: "trimestre", pl: "trimestres" },
+    semestriel: { p: "semestre", pl: "semestres" },
+    annuel: { p: "an", pl: "ans" },
+  };
+
+  const itemRows = data.items.map((item) => {
+    const freqAdj = item.is_recurring && item.billing_frequency ? FREQ_ADJ[item.billing_frequency] : null;
+    const freqPer = item.is_recurring && item.billing_frequency ? FREQ_PERIOD[item.billing_frequency] : null;
+    const periods = Math.max(1, item.periods ?? 1);
+    return new TableRow({
         children: [
           cell(String(item.position), { color: CYAN, bold: true, width: colWidths[0] }),
           new TableCell({
             width: { size: colWidths[1], type: WidthType.DXA },
             margins: { top: 80, bottom: 80, left: 120, right: 120 },
             children: [
-              new Paragraph({ children: [new TextRun({ text: item.description, bold: true, size: 20, color: NAVY, font: "Arial" })] }),
+              new Paragraph({
+                children: [
+                  new TextRun({ text: item.description, bold: true, size: 20, color: NAVY, font: "Arial" }),
+                  ...(freqAdj ? [new TextRun({ text: `  [Abonnement · ${freqAdj}]`, bold: true, size: 14, color: CYAN, font: "Arial" })] : []),
+                ],
+              }),
               ...(item.subtitle
                 ? [new Paragraph({ children: [new TextRun({ text: item.subtitle, italics: true, size: 16, color: "6B7280", font: "Arial" })] })]
                 : []),
             ],
           }),
-          cell(`${item.quantity}${item.unit && item.unit !== "unité" ? ` ${item.unit}` : ""}`, { align: AlignmentType.CENTER, width: colWidths[2] }),
-          cell(formatCurrency(item.unit_price, data.currency), { align: AlignmentType.RIGHT, width: colWidths[3] }),
+          new TableCell({
+            width: { size: colWidths[2], type: WidthType.DXA },
+            margins: { top: 80, bottom: 80, left: 120, right: 120 },
+            children: [
+              new Paragraph({
+                alignment: AlignmentType.CENTER,
+                children: [new TextRun({ text: `${item.quantity}${item.unit && item.unit !== "unité" ? ` ${item.unit}` : ""}`, size: 20, font: "Arial" })],
+              }),
+              ...(freqPer ? [new Paragraph({
+                alignment: AlignmentType.CENTER,
+                children: [new TextRun({ text: `× ${periods} ${periods > 1 ? freqPer.pl : freqPer.p}`, size: 14, color: "6B7280", font: "Arial" })],
+              })] : []),
+            ],
+          }),
+          cell(formatCurrency(item.unit_price, data.currency) + (freqPer ? `/${freqPer.p}` : ""), { align: AlignmentType.RIGHT, width: colWidths[3] }),
           cell(item.discount_rate ? `−${item.discount_rate}%` : "—", { align: AlignmentType.CENTER, width: colWidths[4] }),
           cell(formatCurrency(item.total, data.currency), { align: AlignmentType.RIGHT, bold: true, width: colWidths[5] }),
         ],
-      })
-  );
+      });
+  });
 
   const itemsTable = new Table({
     width: { size: tableWidth, type: WidthType.DXA },
