@@ -297,7 +297,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
     setSaving(true);
     try {
       const payloadCommon = {
-        client_id: clientId, invoice_date: invoiceDate, due_date: dueDate || null, currency,
+        client_id: clientId, assigned_user_id: assignedUserId || null, invoice_date: invoiceDate, due_date: dueDate || null, currency,
         payment_details: payment as never, payment_method_ids: selectedPaymentIds,
         subtotal, discount_rate: discountRate, discount_amount: discountAmount,
         tax_rate: taxRate, tax_amount: taxAmount,
