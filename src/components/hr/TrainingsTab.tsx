@@ -91,7 +91,7 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
       supabase.from("sectors").select("name").order("name"),
       supabase.from("training_groups").select("id, name, description").order("created_at", { ascending: false }),
     ]);
-    setTrainings((trs || []) as Training[]);
+    setTrainings(((trs || []) as any[]).map((t) => ({ ...t, quiz: null })) as Training[]);
     setDepartmentsList(((deps || []) as { name: string }[]).map(d => d.name));
     setSectorsList(((secs || []) as { name: string }[]).map(s => s.name));
     setGroups((grps || []) as Group[]);
