@@ -9,7 +9,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import { Plus, Pencil, Trash2, Search, Package, RefreshCw } from "lucide-react";
+import { Plus, Pencil, Trash2, Search, Package, RefreshCw, Copy, Globe, GlobeLock } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 
 interface CatalogService {
   id: string;
@@ -19,6 +20,7 @@ interface CatalogService {
   default_currency: "GNF" | "USD" | "EUR";
   default_unit: string;
   active: boolean;
+  published: boolean;
   created_at: string;
 }
 
@@ -31,6 +33,7 @@ const empty: Partial<CatalogService> = {
   default_currency: "GNF",
   default_unit: "unité",
   active: true,
+  published: false,
 };
 
 export default function ServiceCatalogTab() {
@@ -85,6 +88,7 @@ export default function ServiceCatalogTab() {
           default_currency: form.default_currency ?? "GNF",
           default_unit: form.default_unit ?? "unité",
           active: form.active ?? true,
+          published: form.published ?? false,
         })
         .eq("id", editing.id);
       if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
@@ -101,6 +105,7 @@ export default function ServiceCatalogTab() {
         default_currency: form.default_currency ?? "GNF",
         default_unit: form.default_unit ?? "unité",
         active: form.active ?? true,
+        published: form.published ?? false,
         created_by: user.id,
       });
       if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
@@ -112,6 +117,39 @@ export default function ServiceCatalogTab() {
     }
     setSaving(false);
   };
+
+  const duplicate = async (s: CatalogService) => {
+    if (!user) return;
+    const { error } = await supabase.from("service_catalog").insert({
+      name: `${s.name} (copie)`,
+      description: s.description,
+      default_unit_price: s.default_unit_price,
+      default_currency: s.default_currency,
+      default_unit: s.default_unit,
+      active: s.active,
+      published: false,
+      created_by: user.id,
+    });
+    if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    else {
+      toast({ title: "Service dupliqué" });
+      void load();
+    }
+  };
+
+  const togglePublish = async (s: CatalogService) => {
+    const next = !s.published;
+    const { error } = await supabase
+      .from("service_catalog")
+      .update({ published: next })
+      .eq("id", s.id);
+    if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    else {
+      toast({ title: next ? "Publié sur le site" : "Retiré du site" });
+      void load();
+    }
+  };
+
 
   const remove = async (id: string) => {
     if (!confirm("Supprimer ce service du catalogue ?")) return;
@@ -157,14 +195,25 @@ export default function ServiceCatalogTab() {
           {filtered.map((s) => (
             <Card key={s.id} className={!s.active ? "opacity-60" : ""}>
               <CardContent className="p-4 space-y-2">
-                <div className="flex items-start justify-between">
-                  <div>
-                    <div className="font-semibold">{s.name}</div>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-semibold">{s.name}</span>
+                      {s.published && (
+                        <Badge variant="secondary" className="gap-1 text-[10px]">
+                          <Globe size={10} /> Publié
+                        </Badge>
+                      )}
+                    </div>
                     {s.description && <div className="text-xs text-muted-foreground italic">{s.description}</div>}
                   </div>
-                  <div className="flex gap-1">
-                    <Button size="icon" variant="ghost" onClick={() => openEdit(s)}><Pencil size={14} /></Button>
-                    <Button size="icon" variant="ghost" onClick={() => void remove(s.id)}><Trash2 size={14} className="text-destructive" /></Button>
+                  <div className="flex gap-1 shrink-0">
+                    <Button size="icon" variant="ghost" onClick={() => void togglePublish(s)} title={s.published ? "Dépublier" : "Publier sur le site"}>
+                      {s.published ? <GlobeLock size={14} className="text-primary" /> : <Globe size={14} />}
+                    </Button>
+                    <Button size="icon" variant="ghost" onClick={() => void duplicate(s)} title="Dupliquer"><Copy size={14} /></Button>
+                    <Button size="icon" variant="ghost" onClick={() => openEdit(s)} title="Modifier"><Pencil size={14} /></Button>
+                    <Button size="icon" variant="ghost" onClick={() => void remove(s.id)} title="Supprimer"><Trash2 size={14} className="text-destructive" /></Button>
                   </div>
                 </div>
                 <div className="text-xs flex gap-2 items-center flex-wrap">
@@ -221,6 +270,10 @@ export default function ServiceCatalogTab() {
             <div className="flex items-center gap-2">
               <Switch checked={form.active ?? true} onCheckedChange={(v) => setForm({ ...form, active: v })} />
               <label className="text-xs">Service actif (visible dans le formulaire de facture)</label>
+            </div>
+            <div className="flex items-center gap-2">
+              <Switch checked={form.published ?? false} onCheckedChange={(v) => setForm({ ...form, published: v })} />
+              <label className="text-xs">Publié sur le site (visible publiquement sur /pricing)</label>
             </div>
           </div>
           <DialogFooter>
