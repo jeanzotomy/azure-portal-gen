@@ -20,6 +20,8 @@ import {
   RefreshCw,
   UsersRound,
   Layers,
+  Clock,
+  ChevronLeft,
 } from "lucide-react";
 import { TrainingPageHero } from "@/components/training/TrainingPageHero";
 import { TrainingStatsGrid } from "@/components/training/TrainingStatsGrid";
@@ -33,6 +35,18 @@ type UserRow = {
   total_completed: number;
   process_id: string | null;
 };
+
+type TrainingRow = {
+  id: string;
+  title: string;
+  category: string | null;
+  level: string | null;
+  duration_minutes: number | null;
+  active: boolean;
+  published: boolean;
+};
+
+const TRAININGS_PER_PAGE = 10;
 
 export default function EmployeeTrainingManager() {
   const navigate = useNavigate();
