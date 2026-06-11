@@ -132,6 +132,7 @@ export default function ServiceCatalogTab() {
       default_unit: s.default_unit,
       active: s.active,
       published: false,
+      display_order: s.display_order,
       created_by: user.id,
     });
     if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
