@@ -103,8 +103,13 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
     const cyan = "#1FB6E5";
     const navy = "#0B1F33";
 
-    // Items qui nécessitent une annexe (description / sous-titre trop long)
-    const annexItems = data.items.filter((it) => isLongSubtitle(it.subtitle));
+    // Items qui nécessitent une annexe : abonnements/licences avec un sous-titre long.
+    // Les services sans description (ou description courte) ne sont pas renvoyés en annexe.
+    const isSubscriptionLike = (it: InvoiceItemData) =>
+      !!(it.is_recurring || it.billing_frequency);
+    const annexItems = data.items.filter(
+      (it) => isSubscriptionLike(it) && isLongSubtitle(it.subtitle)
+    );
     const hasAnnex = annexItems.length > 0;
 
     const pageStyle: React.CSSProperties = {
