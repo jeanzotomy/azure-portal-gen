@@ -2082,6 +2082,7 @@ function AdminContacts() {
         })}
       </div>
       {filtered.length === 0 && <p className="text-center text-muted-foreground py-8">Aucune demande de contact trouvée.</p>}
+      {confirmDlg}
     </div>
   );
 }
