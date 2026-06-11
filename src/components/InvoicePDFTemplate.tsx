@@ -103,8 +103,13 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
     const cyan = "#1FB6E5";
     const navy = "#0B1F33";
 
-    // Items qui nécessitent une annexe (description / sous-titre trop long)
-    const annexItems = data.items.filter((it) => isLongSubtitle(it.subtitle));
+    // Items qui nécessitent une annexe : abonnements/licences avec un sous-titre long.
+    // Les services sans description (ou description courte) ne sont pas renvoyés en annexe.
+    const isSubscriptionLike = (it: InvoiceItemData) =>
+      !!(it.is_recurring || it.billing_frequency);
+    const annexItems = data.items.filter(
+      (it) => isSubscriptionLike(it) && isLongSubtitle(it.subtitle)
+    );
     const hasAnnex = annexItems.length > 0;
 
     const pageStyle: React.CSSProperties = {
@@ -287,43 +292,48 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
                 <td style={{ padding: "10px 8px", verticalAlign: "top" }}>
                   <div style={{ fontWeight: 600, color: navy }}>{item.description}</div>
                   {isRecurring && (
-                    <div style={{ marginTop: "4px" }}>
+                    <div style={{ marginTop: "5px", lineHeight: 1 }}>
                       <span style={{
                         display: "inline-block",
-                        background: navy,
-                        color: "#FFFFFF",
-                        padding: "3px 8px",
-                        borderRadius: "4px",
-                        fontSize: "10px",
+                        background: "#EAF6FB",
+                        color: navy,
+                        border: `1px solid ${cyan}`,
+                        padding: "2px 7px 3px",
+                        borderRadius: "10px",
+                        fontSize: "9px",
                         fontWeight: 700,
                         textTransform: "uppercase",
-                        letterSpacing: "0.4px",
-                        lineHeight: 1.2,
+                        letterSpacing: "0.5px",
+                        lineHeight: 1.3,
+                        whiteSpace: "nowrap",
                       }}>
-                        Abonnement{freq ? ` · ${freq.adj}` : ""} · {periods} {freq ? (periods > 1 ? freq.periodPlural : freq.period) : (periods > 1 ? "périodes" : "période")}
+                        <span style={{ color: cyan }}>●</span>{" "}
+                        Abonnement{freq ? ` · ${freq.adj}` : ""} · {periods}{" "}
+                        {freq ? (periods > 1 ? freq.periodPlural : freq.period) : (periods > 1 ? "périodes" : "période")}
                       </span>
                     </div>
                   )}
                   {item.subtitle && (() => {
                     const long = isLongSubtitle(item.subtitle);
+                    const goesToAnnex = isRecurring && long;
                     return (
                       <>
                         <div
                           style={{
                             fontStyle: "italic",
                             color: "#6B7280",
-                            marginTop: "2px",
+                            marginTop: "4px",
                             fontSize: "10px",
                             display: "-webkit-box",
-                            WebkitLineClamp: long ? 3 : undefined,
+                            WebkitLineClamp: goesToAnnex ? 3 : undefined,
                             WebkitBoxOrient: "vertical",
-                            overflow: long ? "hidden" : "visible",
+                            overflow: goesToAnnex ? "hidden" : "visible",
                             textOverflow: "ellipsis",
                           }}
                         >
                           {item.subtitle}
                         </div>
-                        {long && (
+                        {goesToAnnex && (
                           <div style={{ marginTop: "3px", fontSize: "9px", color: cyan, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "4px" }}>
                             <span style={{ display: "inline-block", width: "6px", height: "6px", borderRadius: "50%", background: cyan }} />
                             Détail complet — voir Annexe (p. 2)
