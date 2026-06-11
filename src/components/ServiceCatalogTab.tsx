@@ -21,6 +21,7 @@ interface CatalogService {
   default_unit: string;
   active: boolean;
   published: boolean;
+  display_order: number;
   created_at: string;
 }
 
@@ -34,6 +35,7 @@ const empty: Partial<CatalogService> = {
   default_unit: "unité",
   active: true,
   published: false,
+  display_order: 0,
 };
 
 export default function ServiceCatalogTab() {
