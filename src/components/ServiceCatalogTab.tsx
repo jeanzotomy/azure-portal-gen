@@ -271,6 +271,10 @@ export default function ServiceCatalogTab() {
               <Switch checked={form.active ?? true} onCheckedChange={(v) => setForm({ ...form, active: v })} />
               <label className="text-xs">Service actif (visible dans le formulaire de facture)</label>
             </div>
+            <div className="flex items-center gap-2">
+              <Switch checked={form.published ?? false} onCheckedChange={(v) => setForm({ ...form, published: v })} />
+              <label className="text-xs">Publié sur le site (visible publiquement sur /pricing)</label>
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Annuler</Button>
