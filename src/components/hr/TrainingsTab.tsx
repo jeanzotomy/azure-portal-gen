@@ -132,6 +132,8 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
       departments: t.departments || [],
       sectors: t.sectors || [],
       active: t.active,
+      published: !!t.published,
+
       content: t.content,
       quiz: quizData ?? null,
       passing_score: t.passing_score || 70,
