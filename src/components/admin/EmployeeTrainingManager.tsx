@@ -58,9 +58,11 @@ export default function EmployeeTrainingManager() {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<"all" | "with" | "without">("all");
   const [bulkOpen, setBulkOpen] = useState(false);
-  
 
-
+  const [trainings, setTrainings] = useState<TrainingRow[]>([]);
+  const [loadingTrainings, setLoadingTrainings] = useState(true);
+  const [trainingSearch, setTrainingSearch] = useState("");
+  const [trainingPage, setTrainingPage] = useState(1);
 
   const loadUsers = useCallback(async () => {
     setLoadingUsers(true);
@@ -70,9 +72,42 @@ export default function EmployeeTrainingManager() {
     setLoadingUsers(false);
   }, []);
 
+  const loadTrainings = useCallback(async () => {
+    setLoadingTrainings(true);
+    const { data, error } = await supabase
+      .from("trainings")
+      .select("id,title,category,level,duration_minutes,active,published")
+      .order("created_at", { ascending: false });
+    if (error) toast.error(error.message);
+    else setTrainings((data || []) as TrainingRow[]);
+    setLoadingTrainings(false);
+  }, []);
+
   useEffect(() => {
     void loadUsers();
-  }, [loadUsers]);
+    void loadTrainings();
+  }, [loadUsers, loadTrainings]);
+
+  useEffect(() => {
+    setTrainingPage(1);
+  }, [trainingSearch]);
+
+  const filteredTrainings = useMemo(() => {
+    const q = trainingSearch.trim().toLowerCase();
+    if (!q) return trainings;
+    return trainings.filter(
+      (t) =>
+        t.title.toLowerCase().includes(q) ||
+        (t.category || "").toLowerCase().includes(q) ||
+        (t.level || "").toLowerCase().includes(q),
+    );
+  }, [trainings, trainingSearch]);
+
+  const trainingTotalPages = Math.max(1, Math.ceil(filteredTrainings.length / TRAININGS_PER_PAGE));
+  const paginatedTrainings = filteredTrainings.slice(
+    (trainingPage - 1) * TRAININGS_PER_PAGE,
+    trainingPage * TRAININGS_PER_PAGE,
+  );
 
   const filteredUsers = useMemo(() => {
     const q = search.trim().toLowerCase();
