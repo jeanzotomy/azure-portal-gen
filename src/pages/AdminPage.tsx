@@ -2000,13 +2000,12 @@ function AdminContacts() {
     else { toast({ title: "Statut mis à jour" }); load(); }
   };
 
-  const deleteContact = async (id: string) => {
-    setConfirmDialog({
-      open: true,
+  const deleteContact = (id: string) => {
+    confirm({
       title: "Supprimer cette demande ?",
       description: "Cette demande de contact sera définitivement supprimée. Cette action est irréversible.",
       confirmLabel: "Supprimer",
-      destructive: true,
+      variant: "destructive",
       onConfirm: async () => {
         const { error } = await supabase.from("contact_requests").delete().eq("id", id);
         if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
