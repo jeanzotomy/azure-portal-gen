@@ -82,6 +82,8 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
   const [paymentMethods, setPaymentMethods] = useState<PMRow[]>([]);
   const [selectedPaymentIds, setSelectedPaymentIds] = useState<string[]>([]);
   const [clientId, setClientId] = useState<string>("");
+  const [assignedUserId, setAssignedUserId] = useState<string>("");
+  const [users, setUsers] = useState<{ user_id: string; full_name: string; email: string }[]>([]);
   const [invoiceDate, setInvoiceDate] = useState(new Date().toISOString().slice(0, 10));
   const [dueDate, setDueDate] = useState("");
   const [currency, setCurrency] = useState<Currency>("GNF");
@@ -94,19 +96,23 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
   const [saving, setSaving] = useState(false);
   const [outputFormat, setOutputFormat] = useState<"pdf" | "docx" | "both">("both");
   const [issuer, setIssuer] = useState<{ full_name: string | null; role: string | null; signature_url: string | null }>({ full_name: null, role: null, signature_url: null });
+
   const pdfRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) return;
     void (async () => {
-      const [{ data: cls }, { data: cat }, { data: pms }] = await Promise.all([
+      const [{ data: cls }, { data: cat }, { data: pms }, { data: usrs }] = await Promise.all([
         supabase.from("service_clients").select("*").order("client_name"),
         supabase.from("service_catalog").select("*").eq("active", true).order("name"),
         supabase.from("payment_methods").select("*").eq("active", true).order("position", { ascending: true }),
+        (supabase as any).rpc("list_employee_assignable_users"),
       ]);
       setClients(cls ?? []);
       setCatalog(cat ?? []);
       setPaymentMethods((pms ?? []) as PMRow[]);
+      setUsers(((usrs ?? []) as any[]).map((u) => ({ user_id: u.user_id, full_name: u.full_name, email: u.email })));
+
       // Charger le profil + rôle de l'émetteur
       if (user) {
         const [{ data: prof }, { data: roles }] = await Promise.all([
@@ -135,6 +141,8 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
         const { data: its } = await supabase.from("service_invoice_items").select("*").eq("invoice_id", editId).order("position");
         if (inv) {
           setClientId(inv.client_id);
+          setAssignedUserId((inv as any).assigned_user_id ?? "");
+
           setInvoiceDate(inv.invoice_date);
           setDueDate(inv.due_date ?? "");
           setCurrency(inv.currency as Currency);
@@ -158,7 +166,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
         }
       } else {
         // reset propre quand on ouvre en création
-        setClientId(""); setInvoiceDate(new Date().toISOString().slice(0, 10)); setDueDate("");
+        setClientId(""); setAssignedUserId(""); setInvoiceDate(new Date().toISOString().slice(0, 10)); setDueDate("");
         setCurrency("GNF"); setDiscountRate(0); setTaxRate(18); setEarlyPaymentDiscountRate(0);
         setNotes(""); setSelectedPaymentIds([]); setPayment({ ...DEFAULT_PAYMENT });
         setItems([{ description: "", quantity: 1, unit: "unité", unit_price: 0, discount_rate: 0, is_recurring: false, periods: 1 }]);
@@ -289,7 +297,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
     setSaving(true);
     try {
       const payloadCommon = {
-        client_id: clientId, invoice_date: invoiceDate, due_date: dueDate || null, currency,
+        client_id: clientId, assigned_user_id: assignedUserId || null, invoice_date: invoiceDate, due_date: dueDate || null, currency,
         payment_details: payment as never, payment_method_ids: selectedPaymentIds,
         subtotal, discount_rate: discountRate, discount_amount: discountAmount,
         tax_rate: taxRate, tax_amount: taxAmount,
@@ -382,7 +390,25 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
                 {selectedClient.phone && <div>{selectedClient.phone}</div>}
               </CardContent></Card>
             )}
+            <div className="mt-2">
+              <label className="text-xs font-medium">Attribuer à un utilisateur (portail)</label>
+              <Select value={assignedUserId || "__none__"} onValueChange={(v) => setAssignedUserId(v === "__none__" ? "" : v)}>
+                <SelectTrigger><SelectValue placeholder="Aucun — visible uniquement par l'admin" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">Aucun</SelectItem>
+                  {users.map((u) => (
+                    <SelectItem key={u.user_id} value={u.user_id}>
+                      {u.full_name} — {u.email}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-[11px] text-muted-foreground mt-1">
+                L'utilisateur verra cette facture dans son portail et pourra la payer en ligne.
+              </p>
+            </div>
           </div>
+
           <div className="col-span-6 md:col-span-2">
             <label className="text-xs font-medium">Date</label>
             <Popover>

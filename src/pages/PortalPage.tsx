@@ -43,9 +43,11 @@ import { NotificationBell } from "@/components/NotificationBell";
 import ApplicationsTab from "@/components/ApplicationsTab";
 import OnboardingTab from "@/components/OnboardingTab";
 import EmployeeTrainingsTab from "@/components/EmployeeTrainingsTab";
+import PortalInvoicesTab from "@/components/PortalInvoicesTab";
 import { getDialCode, applyDialCode } from "@/lib/country-dial-codes";
 
-type Tab = "dashboard" | "projects" | "tickets" | "applications" | "onboarding" | "my-trainings" | "profile";
+type Tab = "dashboard" | "projects" | "tickets" | "applications" | "onboarding" | "my-trainings" | "invoices" | "profile";
+
 
 function PortalContent() {
   const { user, ready } = useAuthSession();
@@ -68,7 +70,7 @@ function PortalContent() {
   // Sync tab when URL ?tab= changes (e.g. from MobileBottomNav while already on /portal)
   useEffect(() => {
     const urlTab = searchParams.get("tab") as Tab | null;
-    const valid: Tab[] = ["dashboard", "projects", "tickets", "applications", "onboarding", "my-trainings", "profile"];
+    const valid: Tab[] = ["dashboard", "projects", "tickets", "applications", "onboarding", "my-trainings", "invoices", "profile"];
     if (urlTab && valid.includes(urlTab) && urlTab !== tab) {
       setTab(urlTab);
     }
@@ -112,7 +114,9 @@ function PortalContent() {
     { id: "applications", icon: Briefcase, label: "Mes candidatures" },
     ...(isOnboarding ? [{ id: "onboarding" as Tab, icon: Sparkles, label: "Mon onboarding" }] : []),
     { id: "my-trainings", icon: GraduationCap, label: "Mes formations" },
+    { id: "invoices", icon: FileText, label: "Mes factures" },
     { id: "profile", icon: User, label: t("portal.profile") },
+
   ];
 
   return (
@@ -214,7 +218,9 @@ function PortalContent() {
               {tab === "applications" && <ApplicationsTab user={user} />}
               {tab === "onboarding" && <OnboardingTab user={user} />}
               {tab === "my-trainings" && <EmployeeTrainingsTab user={user} />}
+              {tab === "invoices" && <PortalInvoicesTab user={user} />}
               {tab === "profile" && <ProfileTab user={user} />}
+
             </>
           )}
         </main>

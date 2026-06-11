@@ -36,6 +36,7 @@ interface Training {
   ai_generated: boolean;
   topic: string | null;
   level: string | null;
+  published?: boolean;
 }
 
 interface CandidateRow {
@@ -57,6 +58,7 @@ const emptyForm = {
   departments: [] as string[],
   sectors: [] as string[],
   active: true,
+  published: false,
   content: null as any,
   quiz: null as any,
   passing_score: 70,
@@ -64,6 +66,7 @@ const emptyForm = {
   topic: "",
   level: "",
 };
+
 
 export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean }) {
   const { confirm, dialog: confirmDialog } = useConfirm();
@@ -85,7 +88,7 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
   const load = useCallback(async () => {
     setLoading(true);
     const [{ data: trs }, { data: procs }, { data: deps }, { data: secs }, { data: grps }] = await Promise.all([
-      supabase.from("trainings").select("id, title, description, url, duration_minutes, category, target_job_titles, active, created_by, created_at, updated_at, departments, sectors, content, passing_score, ai_generated, topic, level, price_cents, currency").order("created_at", { ascending: false }),
+      supabase.from("trainings").select("id, title, description, url, duration_minutes, category, target_job_titles, active, published, created_by, created_at, updated_at, departments, sectors, content, passing_score, ai_generated, topic, level, price_cents, currency").order("created_at", { ascending: false }),
       supabase.from("onboarding_processes").select("id, candidate_name, candidate_email, job_id, created_at").eq("kind", "onboarding").order("created_at", { ascending: false }),
       supabase.from("departments").select("name").order("name"),
       supabase.from("sectors").select("name").order("name"),
@@ -129,6 +132,8 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
       departments: t.departments || [],
       sectors: t.sectors || [],
       active: t.active,
+      published: !!t.published,
+
       content: t.content,
       quiz: quizData ?? null,
       passing_score: t.passing_score || 70,
@@ -186,6 +191,8 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
       departments: form.departments,
       sectors: form.sectors,
       active: form.active,
+      published: form.published,
+
       content: form.content,
       quiz: form.quiz,
       passing_score: form.passing_score,
@@ -289,6 +296,8 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
                         {t.ai_generated && <Badge variant="outline" className="text-xs border-primary text-primary"><Brain className="h-2.5 w-2.5 mr-1" />IA</Badge>}
                         {t.quiz?.questions?.length > 0 && <Badge variant="outline" className="text-xs"><FileQuestion className="h-2.5 w-2.5 mr-1" />QCM {t.quiz.questions.length}q</Badge>}
                         {!t.active && <Badge variant="outline">Inactif</Badge>}
+                        {t.published && <Badge className="text-xs bg-emerald-600 hover:bg-emerald-600">Publié</Badge>}
+
                         {t.duration_minutes && <Badge variant="outline" className="text-xs">{t.duration_minutes} min</Badge>}
                       </div>
                       {t.description && <p className="text-sm text-muted-foreground line-clamp-2">{t.description}</p>}
@@ -537,6 +546,11 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
               <Switch checked={form.active} onCheckedChange={v => setForm({ ...form, active: v })} />
               <Label>Actif</Label>
             </div>
+            <div className="flex items-center gap-2">
+              <Switch checked={form.published} onCheckedChange={v => setForm({ ...form, published: v })} />
+              <Label>Publier sur le site (menu Formations)</Label>
+            </div>
+
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>Annuler</Button>

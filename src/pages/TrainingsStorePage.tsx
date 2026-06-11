@@ -49,7 +49,7 @@ export default function TrainingsStorePage() {
         .from("trainings")
         .select("id, title, description, duration_minutes, category, level, price_cents, currency")
         .eq("active", true)
-        .gt("price_cents", 0)
+        .eq("published", true)
         .order("created_at", { ascending: false });
       setTrainings((data ?? []) as Training[]);
       setLoading(false);
@@ -72,6 +72,12 @@ export default function TrainingsStorePage() {
       navigate("/auth?redirect=/formations");
       return;
     }
+    const price = t.price_cents ?? 0;
+    if (price <= 0) {
+      // Free training — redirect to portal trainings
+      navigate("/portal?tab=my-trainings");
+      return;
+    }
     setPendingId(t.id);
     openCheckout({
       trainingId: t.id,
@@ -81,6 +87,7 @@ export default function TrainingsStorePage() {
       returnUrl: `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
     });
   };
+
 
   return (
     <div className="min-h-screen bg-background">
@@ -162,14 +169,24 @@ export default function TrainingsStorePage() {
                     </div>
                     <div className="flex items-center justify-between gap-2 pt-3 border-t">
                       <div>
-                        <div className="text-2xl font-bold text-primary">{formatPrice(price, cur)}</div>
-                        <div className="text-xs text-muted-foreground">{locale === "fr" ? "Paiement unique" : "One-time payment"}</div>
+                        {price > 0 ? (
+                          <>
+                            <div className="text-2xl font-bold text-primary">{formatPrice(price, cur)}</div>
+                            <div className="text-xs text-muted-foreground">{locale === "fr" ? "Paiement unique" : "One-time payment"}</div>
+                          </>
+                        ) : (
+                          <>
+                            <div className="text-2xl font-bold text-primary">{locale === "fr" ? "Gratuit" : "Free"}</div>
+                            <div className="text-xs text-muted-foreground">{locale === "fr" ? "Accès immédiat" : "Instant access"}</div>
+                          </>
+                        )}
                       </div>
                       <Button size="sm" onClick={() => buy(t)} disabled={pendingId === t.id && isOpen}>
                         <ShoppingCart size={14} className="mr-1" />
-                        {locale === "fr" ? "Acheter" : "Buy"}
+                        {price > 0 ? (locale === "fr" ? "Acheter" : "Buy") : (locale === "fr" ? "Suivre" : "Enroll")}
                       </Button>
                     </div>
+
                   </CardContent>
                 </Card>
               );
