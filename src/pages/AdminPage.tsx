@@ -1999,10 +1999,18 @@ function AdminContacts() {
   };
 
   const deleteContact = async (id: string) => {
-    if (!window.confirm("Supprimer définitivement cette demande de contact ?")) return;
-    const { error } = await supabase.from("contact_requests").delete().eq("id", id);
-    if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
-    else { toast({ title: "Demande supprimée" }); load(); }
+    setConfirmDialog({
+      open: true,
+      title: "Supprimer cette demande ?",
+      description: "Cette demande de contact sera définitivement supprimée. Cette action est irréversible.",
+      confirmLabel: "Supprimer",
+      destructive: true,
+      onConfirm: async () => {
+        const { error } = await supabase.from("contact_requests").delete().eq("id", id);
+        if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
+        else { toast({ title: "Demande supprimée" }); load(); }
+      },
+    });
   };
 
   const statusConfig: Record<string, { label: string; color: string }> = {
