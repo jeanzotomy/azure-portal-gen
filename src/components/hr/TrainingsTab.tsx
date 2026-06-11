@@ -36,6 +36,7 @@ interface Training {
   ai_generated: boolean;
   topic: string | null;
   level: string | null;
+  published?: boolean;
 }
 
 interface CandidateRow {
@@ -57,6 +58,7 @@ const emptyForm = {
   departments: [] as string[],
   sectors: [] as string[],
   active: true,
+  published: false,
   content: null as any,
   quiz: null as any,
   passing_score: 70,
@@ -64,6 +66,7 @@ const emptyForm = {
   topic: "",
   level: "",
 };
+
 
 export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean }) {
   const { confirm, dialog: confirmDialog } = useConfirm();
