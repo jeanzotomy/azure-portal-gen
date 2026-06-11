@@ -166,8 +166,10 @@ export default function ServiceCatalogTab() {
       active: s.active,
       published: false,
       display_order: s.display_order,
+      is_subscription: s.is_subscription,
+      billing_frequency: s.billing_frequency,
       created_by: user.id,
-    });
+    } as never);
     if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
     else {
       toast({ title: "Service dupliqué" });
