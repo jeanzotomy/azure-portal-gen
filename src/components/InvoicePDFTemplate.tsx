@@ -93,30 +93,37 @@ const formatDate = (iso?: string | null) => {
   return d.toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" });
 };
 
-/**
- * Reproduit fidèlement le modèle CloudMature (PDF/Word).
- * Largeur fixe en pixels (794 = A4 à 96 dpi) pour rendu html2canvas constant.
- */
+/** Caractères au-delà desquels une description est considérée "longue" et renvoyée en annexe. */
+const SUBTITLE_MAX_CHARS = 180;
+
+const isLongSubtitle = (s?: string | null) => !!s && s.trim().length > SUBTITLE_MAX_CHARS;
+
 export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFData }>(
   ({ data }, ref) => {
     const cyan = "#1FB6E5";
     const navy = "#0B1F33";
 
+    // Items qui nécessitent une annexe (description / sous-titre trop long)
+    const annexItems = data.items.filter((it) => isLongSubtitle(it.subtitle));
+    const hasAnnex = annexItems.length > 0;
+
+    const pageStyle: React.CSSProperties = {
+      width: "794px",
+      minHeight: "1123px",
+      background: "#ffffff",
+      color: "#111827",
+      fontFamily: "'Helvetica Neue', Arial, sans-serif",
+      padding: "32px 40px",
+      boxSizing: "border-box",
+      fontSize: "12px",
+      lineHeight: 1.4,
+      position: "relative",
+    };
+
     return (
-      <div
-        ref={ref}
-        style={{
-          width: "794px",
-          minHeight: "1123px",
-          background: "#ffffff",
-          color: "#111827",
-          fontFamily: "'Helvetica Neue', Arial, sans-serif",
-          padding: "32px 40px",
-          boxSizing: "border-box",
-          fontSize: "12px",
-          lineHeight: 1.4,
-        }}
-      >
+      <div ref={ref} style={{ width: "794px", background: "#ffffff" }}>
+        <div className="invoice-page" style={pageStyle}>
+
         {/* En-tête */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
           <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
