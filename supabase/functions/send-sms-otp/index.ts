@@ -19,6 +19,11 @@ Deno.serve(async (req) => {
     if (!LOVABLE_API_KEY) throw new Error("LOVABLE_API_KEY is not configured");
     const TWILIO_API_KEY = Deno.env.get("TWILIO_API_KEY");
     if (!TWILIO_API_KEY) throw new Error("TWILIO_API_KEY is not configured");
+    const TWILIO_FROM_NUMBER = Deno.env.get("TWILIO_FROM_NUMBER");
+    const TWILIO_MESSAGING_SERVICE_SID = Deno.env.get("TWILIO_MESSAGING_SERVICE_SID");
+    if (!TWILIO_FROM_NUMBER && !TWILIO_MESSAGING_SERVICE_SID) {
+      throw new Error("Configure TWILIO_FROM_NUMBER (E.164) or TWILIO_MESSAGING_SERVICE_SID in secrets");
+    }
 
     const supabase = createClient(
       Deno.env.get("SUPABASE_URL")!,
