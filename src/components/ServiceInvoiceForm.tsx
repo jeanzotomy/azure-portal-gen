@@ -390,7 +390,25 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
                 {selectedClient.phone && <div>{selectedClient.phone}</div>}
               </CardContent></Card>
             )}
+            <div className="mt-2">
+              <label className="text-xs font-medium">Attribuer à un utilisateur (portail)</label>
+              <Select value={assignedUserId || "__none__"} onValueChange={(v) => setAssignedUserId(v === "__none__" ? "" : v)}>
+                <SelectTrigger><SelectValue placeholder="Aucun — visible uniquement par l'admin" /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">Aucun</SelectItem>
+                  {users.map((u) => (
+                    <SelectItem key={u.user_id} value={u.user_id}>
+                      {u.full_name} — {u.email}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-[11px] text-muted-foreground mt-1">
+                L'utilisateur verra cette facture dans son portail et pourra la payer en ligne.
+              </p>
+            </div>
           </div>
+
           <div className="col-span-6 md:col-span-2">
             <label className="text-xs font-medium">Date</label>
             <Popover>
