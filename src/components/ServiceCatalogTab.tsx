@@ -428,6 +428,11 @@ function ServiceCardContent({ service: s, onTogglePublish, onDuplicate, onEdit, 
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 flex-wrap">
               <span className="font-semibold">{s.name}</span>
+              {s.is_subscription && (
+                <Badge className="gap-1 text-[10px] bg-primary/10 text-primary border border-primary/30 hover:bg-primary/10">
+                  <Repeat size={10} /> Abonnement{s.billing_frequency ? ` · ${FREQ_LABEL[s.billing_frequency]}` : ""}
+                </Badge>
+              )}
               {s.published && (
                 <Badge variant="secondary" className="gap-1 text-[10px]">
                   <Globe size={10} /> Publié
