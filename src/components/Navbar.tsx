@@ -48,7 +48,7 @@ export function Navbar() {
   const handleLogout = async () => {
     clearSmsMfaVerified();
     await supabase.auth.signOut();
-    navigate("/");
+    window.location.href = "/";
   };
 
   const fullName = user?.user_metadata?.full_name || user?.email?.split("@")[0] || "";

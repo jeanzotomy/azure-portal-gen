@@ -259,7 +259,7 @@ function AdminContent() {
   const handleLogout = async () => {
     clearSmsMfaVerified();
     await supabase.auth.signOut();
-    navigate("/");
+    window.location.href = "/";
   };
 
   if (isComptable && !isAdmin && !isAgent && !isGestionnaire) {
