@@ -29,6 +29,8 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
+type BillingFrequency = "mensuel" | "trimestriel" | "semestriel" | "annuel";
+
 interface CatalogService {
   id: string;
   name: string;
@@ -39,10 +41,18 @@ interface CatalogService {
   active: boolean;
   published: boolean;
   display_order: number;
+  is_subscription: boolean;
+  billing_frequency: BillingFrequency | null;
   created_at: string;
 }
 
 const UNIT_OPTIONS = ["unité", "heure", "jour", "mois", "année", "forfait"] as const;
+const FREQ_LABEL: Record<BillingFrequency, string> = {
+  mensuel: "Mensuel",
+  trimestriel: "Trimestriel",
+  semestriel: "Semestriel",
+  annuel: "Annuel",
+};
 
 const empty: Partial<CatalogService> = {
   name: "",
@@ -53,6 +63,8 @@ const empty: Partial<CatalogService> = {
   active: true,
   published: false,
   display_order: 0,
+  is_subscription: false,
+  billing_frequency: null,
 };
 
 export default function ServiceCatalogTab() {
