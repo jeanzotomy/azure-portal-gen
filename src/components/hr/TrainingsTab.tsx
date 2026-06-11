@@ -296,6 +296,8 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
                         {t.ai_generated && <Badge variant="outline" className="text-xs border-primary text-primary"><Brain className="h-2.5 w-2.5 mr-1" />IA</Badge>}
                         {t.quiz?.questions?.length > 0 && <Badge variant="outline" className="text-xs"><FileQuestion className="h-2.5 w-2.5 mr-1" />QCM {t.quiz.questions.length}q</Badge>}
                         {!t.active && <Badge variant="outline">Inactif</Badge>}
+                        {t.published && <Badge className="text-xs bg-emerald-600 hover:bg-emerald-600">Publié</Badge>}
+
                         {t.duration_minutes && <Badge variant="outline" className="text-xs">{t.duration_minutes} min</Badge>}
                       </div>
                       {t.description && <p className="text-sm text-muted-foreground line-clamp-2">{t.description}</p>}
