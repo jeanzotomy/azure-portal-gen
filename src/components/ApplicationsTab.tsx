@@ -70,7 +70,7 @@ export default function ApplicationsTab({ user }: { user: SupaUser }) {
     const email = user.email || "";
     const { data: appsData } = await supabase
       .from("job_applications")
-      .select("id, job_id, full_name, email, user_id, status, created_at, years_experience, salary_expectation")
+      .select("id, job_id, full_name, email, user_id, status, created_at")
       .or(`user_id.eq.${user.id}${email ? `,email.eq.${email}` : ""}`)
       .order("created_at", { ascending: false });
 
