@@ -227,6 +227,48 @@ export type Database = {
         }
         Relationships: []
       }
+      contact_email_otps: {
+        Row: {
+          attempts: number
+          code_hash: string
+          created_at: string
+          email: string
+          expires_at: string
+          id: string
+          ip_address: string | null
+          token_consumed_at: string | null
+          token_expires_at: string | null
+          verification_token: string | null
+          verified_at: string | null
+        }
+        Insert: {
+          attempts?: number
+          code_hash: string
+          created_at?: string
+          email: string
+          expires_at: string
+          id?: string
+          ip_address?: string | null
+          token_consumed_at?: string | null
+          token_expires_at?: string | null
+          verification_token?: string | null
+          verified_at?: string | null
+        }
+        Update: {
+          attempts?: number
+          code_hash?: string
+          created_at?: string
+          email?: string
+          expires_at?: string
+          id?: string
+          ip_address?: string | null
+          token_consumed_at?: string | null
+          token_expires_at?: string | null
+          verification_token?: string | null
+          verified_at?: string | null
+        }
+        Relationships: []
+      }
       contact_requests: {
         Row: {
           company: string | null

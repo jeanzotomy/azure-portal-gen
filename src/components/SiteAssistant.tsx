@@ -65,6 +65,9 @@ export default function SiteAssistant() {
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const enabled = isPublicRoute(pathname);
+  const MAX_USER_QUESTIONS = 5;
+  const userMessageCount = messages.filter((m) => m.role === "user").length;
+  const limitReached = userMessageCount >= MAX_USER_QUESTIONS;
 
   const i18n = locale === "en"
     ? {
@@ -77,6 +80,9 @@ export default function SiteAssistant() {
         welcome: "Hi! I'm Mature, the Cloud Mature virtual assistant. I can help you discover our services, expertise (Cloud, DevOps, Data, AI), sectors, methodology and trainings. How can I help?",
         disclaimer: "Scope limited to Cloud Mature. Do not share personal or confidential data.",
         error: "Sorry, something went wrong. Please try again.",
+        limitTitle: "Thank you for our exchange.",
+        limitBody: `To keep our conversations focused, this assistant is limited to ${MAX_USER_QUESTIONS} questions per session. For a deeper discussion, our team will gladly take over via the contact form.`,
+        limitCta: "Go to contact form",
       }
     : {
         title: "Mature — Assistant Cloud Mature",
@@ -88,6 +94,9 @@ export default function SiteAssistant() {
         welcome: "Bonjour ! Je suis Mature, l'assistant virtuel de Cloud Mature. Je peux vous présenter nos services, expertises (Cloud, DevOps, Data, IA), secteurs, méthodologie et formations. Comment puis-je vous aider ?",
         disclaimer: "Périmètre limité à Cloud Mature. Ne partagez pas de données personnelles ou confidentielles.",
         error: "Désolé, une erreur est survenue. Merci de réessayer.",
+        limitTitle: "Merci pour cet échange.",
+        limitBody: `Pour garder nos conversations ciblées, cet assistant est limité à ${MAX_USER_QUESTIONS} questions par session. Pour aller plus loin, notre équipe se fera un plaisir de prendre le relais via le formulaire de contact.`,
+        limitCta: "Accéder au formulaire de contact",
       };
 
   useEffect(() => {
@@ -98,16 +107,26 @@ export default function SiteAssistant() {
   }, [messages, open, loading]);
 
   useEffect(() => {
-    if (open) inputRef.current?.focus();
-  }, [open]);
+    if (open && !limitReached) inputRef.current?.focus();
+  }, [open, limitReached]);
 
   const suggested = locale === "en"
     ? ["What services do you offer?", "How do you ensure security and quality?", "Do you offer trainings?", "How can I contact you?"]
     : ["Quels sont vos services ?", "Comment garantissez-vous sécurité et qualité ?", "Proposez-vous des formations ?", "Comment vous contacter ?"];
 
+  const goToContact = () => {
+    setOpen(false);
+    // Navigate to the contact section on the home page.
+    if (pathname === "/") {
+      document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+    } else {
+      window.location.href = "/#contact";
+    }
+  };
+
   const send = async (text?: string) => {
     const content = (text ?? input).trim();
-    if (!content || loading) return;
+    if (!content || loading || limitReached) return;
     const next: Msg[] = [...messages, { role: "user", content }];
     setMessages(next);
     setInput("");
@@ -127,6 +146,7 @@ export default function SiteAssistant() {
   };
 
   if (!enabled) return null;
+
 
   return (
     <>
@@ -223,38 +243,56 @@ export default function SiteAssistant() {
             )}
           </div>
 
-          {/* Composer */}
-          <form
-            onSubmit={(e) => { e.preventDefault(); send(); }}
-            className="border-t border-border bg-background/80 p-2.5"
-          >
-            <div className="flex items-end gap-2">
-              <textarea
-                ref={inputRef}
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
-                }}
-                rows={1}
-                placeholder={i18n.placeholder}
-                maxLength={1000}
-                className="flex-1 resize-none rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 max-h-32"
-              />
+          {/* Composer ou bloc de limite atteinte */}
+          {limitReached ? (
+            <div className="border-t border-border bg-gradient-to-br from-primary/5 to-accent/5 p-4 space-y-2.5">
+              <p className="text-sm font-semibold text-foreground">{i18n.limitTitle}</p>
+              <p className="text-xs text-muted-foreground leading-relaxed">{i18n.limitBody}</p>
               <Button
-                type="submit"
-                size="icon"
-                disabled={!input.trim() || loading}
-                className="h-9 w-9 shrink-0 bg-gradient-to-br from-primary to-[#007aa3]"
-                aria-label={i18n.send}
+                type="button"
+                onClick={goToContact}
+                className="w-full bg-gradient-to-br from-primary to-[#007aa3] text-white"
               >
-                {loading ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+                {i18n.limitCta}
               </Button>
             </div>
-            <p className="text-[10px] text-muted-foreground mt-1.5 px-1 leading-snug">
-              {i18n.disclaimer}
-            </p>
-          </form>
+          ) : (
+            <form
+              onSubmit={(e) => { e.preventDefault(); send(); }}
+              className="border-t border-border bg-background/80 p-2.5"
+            >
+              <div className="flex items-end gap-2">
+                <textarea
+                  ref={inputRef}
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
+                  }}
+                  rows={1}
+                  placeholder={i18n.placeholder}
+                  maxLength={1000}
+                  className="flex-1 resize-none rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 max-h-32"
+                />
+                <Button
+                  type="submit"
+                  size="icon"
+                  disabled={!input.trim() || loading}
+                  className="h-9 w-9 shrink-0 bg-gradient-to-br from-primary to-[#007aa3]"
+                  aria-label={i18n.send}
+                >
+                  {loading ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+                </Button>
+              </div>
+              <p className="text-[10px] text-muted-foreground mt-1.5 px-1 leading-snug">
+                {i18n.disclaimer}
+              </p>
+              <p className="text-[10px] text-muted-foreground/80 mt-0.5 px-1 leading-snug text-right">
+                {userMessageCount} / {MAX_USER_QUESTIONS}
+              </p>
+            </form>
+          )}
+
         </div>
       )}
     </>
