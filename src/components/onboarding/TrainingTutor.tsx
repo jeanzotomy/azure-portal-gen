@@ -1,10 +1,77 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Bot, Send, X, Loader2, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 
 interface Msg { role: "user" | "assistant"; content: string; }
+
+// Linkify URLs and internal paths
+function linkify(text: string): ReactNode[] {
+  const regex = /(https?:\/\/[^\s)]+|(?<![\w/])\/(?:#?[a-z][a-z0-9\-/_#]*))/gi;
+  const out: ReactNode[] = [];
+  let last = 0;
+  let m: RegExpExecArray | null;
+  let key = 0;
+  while ((m = regex.exec(text)) !== null) {
+    if (m.index > last) out.push(text.slice(last, m.index));
+    const url = m[0].replace(/[.,;:!?)]+$/, "");
+    const trailing = m[0].slice(url.length);
+    const isInternal = url.startsWith("/");
+    out.push(
+      <a key={`l${key++}`} href={url} target={isInternal ? undefined : "_blank"} rel={isInternal ? undefined : "noopener noreferrer"} className="text-primary underline underline-offset-2 hover:opacity-80">{url}</a>
+    );
+    if (trailing) out.push(trailing);
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) out.push(text.slice(last));
+  return out;
+}
+
+// Inline markdown: **bold**, *italic*, `code`
+function renderInline(text: string): ReactNode[] {
+  const cleaned = text.replace(/—/g, "-");
+  const tokens: ReactNode[] = [];
+  const regex = /(\*\*([^*]+)\*\*|\*([^*]+)\*|`([^`]+)`)/g;
+  let last = 0;
+  let m: RegExpExecArray | null;
+  let key = 0;
+  while ((m = regex.exec(cleaned)) !== null) {
+    if (m.index > last) tokens.push(...linkify(cleaned.slice(last, m.index)));
+    if (m[2] !== undefined) tokens.push(<strong key={`b${key++}`} className="font-semibold text-foreground">{linkify(m[2])}</strong>);
+    else if (m[3] !== undefined) tokens.push(<em key={`i${key++}`}>{linkify(m[3])}</em>);
+    else if (m[4] !== undefined) tokens.push(<code key={`c${key++}`} className="px-1 py-0.5 rounded bg-cyan-100 text-cyan-900 text-[0.85em] font-mono">{m[4]}</code>);
+    last = m.index + m[0].length;
+  }
+  if (last < cleaned.length) tokens.push(...linkify(cleaned.slice(last)));
+  return tokens;
+}
+
+function renderRich(text: string) {
+  const lines = text.split("\n");
+  const blocks: ReactNode[] = [];
+  let buf: string[] = [];
+  let mode: "ul" | "ol" | "p" | null = null;
+  const flush = (key: number) => {
+    if (!mode || buf.length === 0) { buf = []; mode = null; return; }
+    if (mode === "ul") blocks.push(<ul key={key} className="list-disc pl-5 space-y-1 my-1">{buf.map((b, i) => <li key={i}>{renderInline(b)}</li>)}</ul>);
+    else if (mode === "ol") blocks.push(<ol key={key} className="list-decimal pl-5 space-y-1 my-1">{buf.map((b, i) => <li key={i}>{renderInline(b)}</li>)}</ol>);
+    else blocks.push(<p key={key} className="leading-relaxed">{renderInline(buf.join(" "))}</p>);
+    buf = []; mode = null;
+  };
+  lines.forEach((raw, idx) => {
+    const t = raw.trim();
+    if (!t) { flush(idx); return; }
+    const ul = t.match(/^[-•*]\s+(.+)$/);
+    const ol = t.match(/^\d{1,2}[.)]\s+(.+)$/);
+    if (ul) { if (mode !== "ul") flush(idx); mode = "ul"; buf.push(ul[1]); return; }
+    if (ol) { if (mode !== "ol") flush(idx); mode = "ol"; buf.push(ol[1]); return; }
+    if (mode !== "p") flush(idx);
+    mode = "p"; buf.push(t);
+  });
+  flush(lines.length);
+  return <div className="space-y-2">{blocks}</div>;
+}
 
 export function TrainingTutor({ trainingId, trainingTitle, onClose }: { trainingId: string; trainingTitle: string; onClose: () => void }) {
   const [messages, setMessages] = useState<Msg[]>([
