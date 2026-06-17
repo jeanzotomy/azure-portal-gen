@@ -275,12 +275,6 @@ export default function ApplicationsTab({ user }: { user: SupaUser }) {
                   </div>
                 )}
 
-                {(app.years_experience !== null || app.salary_expectation) && (
-                  <div className="mt-3 pt-3 border-t flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                    {app.years_experience !== null && <span>💼 {app.years_experience} ans d'expérience</span>}
-                    {app.salary_expectation && <span>💰 Prétention : {app.salary_expectation}</span>}
-                  </div>
-                )}
               </CardContent>
             </Card>
           );
