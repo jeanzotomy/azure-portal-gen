@@ -20,8 +20,6 @@ interface Application {
   email: string;
   status: AppStatus;
   created_at: string;
-  years_experience: number | null;
-  salary_expectation: string | null;
 }
 
 interface Job {
