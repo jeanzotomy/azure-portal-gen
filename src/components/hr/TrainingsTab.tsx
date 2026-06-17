@@ -200,7 +200,10 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
       departments: form.departments,
       sectors: form.sectors,
       active: form.active,
-      published: form.published,
+      published: form.audience === "public",
+      audience: form.audience,
+      price_cents: form.audience === "public" && form.price_cents ? Math.max(0, Math.round(parseFloat(form.price_cents) * 100)) : null,
+      currency: form.audience === "public" ? (form.currency || "CAD").toLowerCase() : null,
 
       content: form.content,
       quiz: form.quiz,
