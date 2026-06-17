@@ -6,8 +6,8 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-// JobApplicationDialog moved to JobDetailPage
-import { Briefcase, MapPin, Calendar, Clock, ChevronDown, ChevronUp, Share2, Linkedin, Facebook, Mail, Link2, MessageCircle, Search, X } from "lucide-react";
+import { JobApplicationDialog } from "@/components/JobApplicationDialog";
+import { Briefcase, MapPin, Calendar, Clock, ChevronDown, Share2, Linkedin, Facebook, Mail, Link2, MessageCircle, Search, X, Sparkles, GraduationCap, Code2 } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
@@ -47,7 +47,14 @@ export default function CareersPage() {
   const [departmentFilter, setDepartmentFilter] = useState<string>("all");
   const [locationFilter, setLocationFilter] = useState<string>("all");
   const [sectorFilter, setSectorFilter] = useState<string>("all");
+  const [spontaneous, setSpontaneous] = useState<{ id: string; title: string } | null>(null);
   const { toast } = useToast();
+
+  const SPONTANEOUS_TYPES = [
+    { id: "11111111-1111-1111-1111-111111111101", title: "Candidature spontanée — Emploi", label: "Emploi", desc: "CDI · CDD · Alternance", icon: Briefcase },
+    { id: "11111111-1111-1111-1111-111111111102", title: "Candidature spontanée — Stage", label: "Stage", desc: "Stagiaire · Apprenti", icon: GraduationCap },
+    { id: "11111111-1111-1111-1111-111111111103", title: "Candidature spontanée — Freelance", label: "Freelance", desc: "Mission · Consultant", icon: Code2 },
+  ] as const;
 
   const uniqueValues = (key: keyof JobPosting) =>
     Array.from(new Set(jobs.map((j) => j[key]).filter((v): v is string => !!v && typeof v === "string"))).sort();
@@ -314,6 +321,42 @@ export default function CareersPage() {
             ))}
           </div>
 
+          {/* Candidature spontanée */}
+          <div className="mt-10 rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background p-6 sm:p-8">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-5">
+              <div className="inline-flex items-center justify-center w-11 h-11 rounded-xl bg-primary/10 text-primary shrink-0">
+                <Sparkles size={20} />
+              </div>
+              <div>
+                <h2 className="text-xl sm:text-2xl font-bold">Candidature spontanée</h2>
+                <p className="text-sm text-muted-foreground">
+                  Vous n'avez pas trouvé d'offre qui vous correspond&nbsp;? Envoyez-nous votre candidature directement.
+                </p>
+              </div>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {SPONTANEOUS_TYPES.map((t) => {
+                const Icon = t.icon;
+                return (
+                  <button
+                    key={t.id}
+                    type="button"
+                    onClick={() => setSpontaneous({ id: t.id, title: t.title })}
+                    className="group text-left p-4 rounded-xl border bg-card hover:border-primary/50 hover:shadow-md transition-all"
+                  >
+                    <div className="flex items-center gap-3 mb-1.5">
+                      <div className="w-9 h-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
+                        <Icon size={18} />
+                      </div>
+                      <span className="font-semibold">{t.label}</span>
+                    </div>
+                    <p className="text-xs text-muted-foreground">{t.desc}</p>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
           {jobs.length > 0 && (
             <p className="text-center text-xs text-muted-foreground mt-6">
               Postulez en quelques clics, sans inscription requise.
@@ -321,6 +364,14 @@ export default function CareersPage() {
           )}
         </div>
       </main>
+      {spontaneous && (
+        <JobApplicationDialog
+          open={!!spontaneous}
+          onOpenChange={(v) => { if (!v) setSpontaneous(null); }}
+          jobId={spontaneous.id}
+          jobTitle={spontaneous.title}
+        />
+      )}
       <Footer />
     </div>
   );
