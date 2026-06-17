@@ -1021,9 +1021,9 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
                 <Label htmlFor="job-start">Date de prise de poste</Label>
                 <Input
                   id="job-start"
+                  type="date"
                   value={form.start_date}
                   onChange={(e) => setForm({ ...form, start_date: e.target.value })}
-                  placeholder="Ex: Dès que possible"
                 />
               </div>
             </FormSection>
