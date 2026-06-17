@@ -341,53 +341,8 @@ export default function CareersPage() {
                 )}
               </div>
 
-              {/* ============ COLONNE DROITE STICKY : filtres + spontanée ============ */}
+              {/* ============ COLONNE DROITE STICKY : candidature spontanée ============ */}
               <aside className="lg:sticky lg:top-24 space-y-4">
-                {jobs.length > 0 && (
-                  <div className="p-4 rounded-xl border bg-card/60 backdrop-blur-sm space-y-3">
-                    <div className="flex items-center justify-between">
-                      <h3 className="text-sm font-semibold">Filtres</h3>
-                      {hasActiveFilters && (
-                        <button type="button" onClick={resetFilters} className="text-xs text-primary hover:underline font-medium">
-                          Réinitialiser
-                        </button>
-                      )}
-                    </div>
-                    <div className="space-y-2">
-                      <Select value={contractFilter} onValueChange={setContractFilter}>
-                        <SelectTrigger><SelectValue placeholder="Type de contrat" /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">Tous les contrats</SelectItem>
-                          {contractTypes.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                      <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
-                        <SelectTrigger><SelectValue placeholder="Département" /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">Tous les départements</SelectItem>
-                          {departments.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                      <Select value={locationFilter} onValueChange={setLocationFilter}>
-                        <SelectTrigger><SelectValue placeholder="Lieu" /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">Tous les lieux</SelectItem>
-                          {locations.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                      <Select value={sectorFilter} onValueChange={setSectorFilter}>
-                        <SelectTrigger><SelectValue placeholder="Secteur" /></SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="all">Tous les secteurs</SelectItem>
-                          {sectors.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <p className="text-xs text-muted-foreground pt-1">
-                      {filteredJobs.length} offre{filteredJobs.length > 1 ? "s" : ""} sur {jobs.length}
-                    </p>
-                  </div>
-                )}
 
                 {/* Candidature spontanée */}
                 <div className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background p-5">
