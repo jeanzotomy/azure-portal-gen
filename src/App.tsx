@@ -8,6 +8,7 @@ import Index from "./pages/Index.tsx";
 import { AuthGuard } from "./components/AuthGuard";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { MobileBottomNav } from "./components/MobileBottomNav";
+import SiteAssistant from "./components/SiteAssistant";
 
 // Lazy-load non-landing routes to drastically reduce initial JS bundle
 // (improves Total Blocking Time and LCP). The landing page (Index) stays
