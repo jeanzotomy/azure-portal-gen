@@ -269,10 +269,10 @@ export default function SiteAssistant() {
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
                   }}
-                  rows={1}
+                  rows={3}
                   placeholder={i18n.placeholder}
                   maxLength={1000}
-                  className="flex-1 resize-none rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 max-h-32"
+                  className="flex-1 resize-none rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 min-h-[80px] max-h-48"
                 />
                 <Button
                   type="submit"
