@@ -27,19 +27,19 @@ export const FormSection = React.forwardRef<HTMLElement, FormSectionProps>(
         {...props}
       >
         {(title || description || icon || action) && (
-          <header className="flex items-start justify-between gap-3 pb-4 border-b border-border/50">
-            <div className="flex items-start gap-3">
+          <header className="flex flex-col sm:flex-row sm:items-start justify-between gap-4 pb-5 border-b border-border/50">
+            <div className="flex items-start gap-3 min-w-0 flex-1">
               {icon && (
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-[#007aa3] text-white shadow-sm">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-[#007aa3] text-white shadow-sm">
                   {icon}
                 </div>
               )}
-              <div className="space-y-0.5">
-                {title && <h3 className="text-base font-semibold tracking-tight text-foreground">{title}</h3>}
-                {description && <p className="text-sm text-muted-foreground">{description}</p>}
+              <div className="space-y-1 min-w-0">
+                {title && <h3 className="text-base font-semibold tracking-tight text-foreground leading-tight">{title}</h3>}
+                {description && <p className="text-sm text-muted-foreground leading-snug">{description}</p>}
               </div>
             </div>
-            {action && <div className="shrink-0">{action}</div>}
+            {action && <div className="shrink-0 sm:ml-auto">{action}</div>}
           </header>
         )}
         <div className="space-y-4">{children}</div>
