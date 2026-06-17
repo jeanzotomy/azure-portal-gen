@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import {
   GraduationCap, Plus, Pencil, Trash2, ExternalLink, Loader2, RefreshCw, Users, Sparkles, CheckCircle2, Clock,
-  Brain, FileQuestion, Layers, UserPlus, Wand2, BookOpen,
+  Brain, FileQuestion, Layers, UserPlus, Wand2, BookOpen, Globe, Building2, UsersRound,
 } from "lucide-react";
 import { TrainingMediaEditor, type MediaCapsule } from "./TrainingMediaEditor";
 import { useConfirm } from "@/components/ui/confirm-dialog";
