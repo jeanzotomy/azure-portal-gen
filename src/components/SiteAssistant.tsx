@@ -56,7 +56,7 @@ function renderRich(text: string) {
 
 export default function SiteAssistant() {
   const { pathname } = useLocation();
-  const { locale, t } = useLanguage();
+  const { locale } = useTranslation();
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
