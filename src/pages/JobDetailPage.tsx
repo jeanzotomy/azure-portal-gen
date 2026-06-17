@@ -409,9 +409,7 @@ export default function JobDetailPage() {
 
               <div>
                 <h2 className="text-lg font-semibold mb-3">Description du poste</h2>
-                <p className="text-sm text-foreground/85 whitespace-pre-line leading-relaxed">
-                  {job.description}
-                </p>
+                <JobDescription text={job.description} />
               </div>
 
               <div className="pt-4 border-t flex flex-wrap gap-3 items-center justify-between">
