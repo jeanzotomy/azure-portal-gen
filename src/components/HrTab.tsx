@@ -60,8 +60,6 @@ interface JobApplication {
   phone: string | null;
   linkedin_url: string | null;
   portfolio_url: string | null;
-  years_experience: number | null;
-  salary_expectation: string | null;
   cv_path: string;
   cover_letter_path: string | null;
   status: AppStatus;
@@ -703,8 +701,6 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
                     telephone: a.phone || "",
                     offre: job?.title || "",
                     statut: APP_STATUS_LABELS[a.status],
-                    experience_annees: a.years_experience ?? "",
-                    salaire_attendu: a.salary_expectation || "",
                     score_ia: a.ai_score ?? "",
                     match_ia: a.ai_match_percentage ?? "",
                     recommandation_ia: a.ai_recommendation || "",
@@ -789,8 +785,6 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
                       <div className="text-sm mt-2 grid sm:grid-cols-2 gap-x-4 gap-y-1">
                         <span>📧 {app.email}</span>
                         {app.phone && <span>📞 {app.phone}</span>}
-                        {app.years_experience !== null && <span>💼 {app.years_experience} ans d'expérience</span>}
-                        {app.salary_expectation && <span>💰 {app.salary_expectation}</span>}
                         {app.linkedin_url && <a href={app.linkedin_url} target="_blank" rel="noreferrer" className="text-primary hover:underline truncate">🔗 LinkedIn</a>}
                         {app.portfolio_url && <a href={app.portfolio_url} target="_blank" rel="noreferrer" className="text-primary hover:underline truncate">🌐 Portfolio</a>}
                       </div>

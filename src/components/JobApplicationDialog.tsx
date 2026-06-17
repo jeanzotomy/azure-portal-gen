@@ -34,8 +34,6 @@ const schema = z.object({
   phone: z.string().trim().max(30).optional().or(z.literal("")),
   linkedin_url: z.string().trim().url("URL invalide").max(255).optional().or(z.literal("")),
   portfolio_url: z.string().trim().url("URL invalide").max(255).optional().or(z.literal("")),
-  years_experience: z.string().refine((v) => v === "" || (parseInt(v) >= 0 && parseInt(v) <= 60), "0–60").optional(),
-  salary_expectation: z.string().trim().max(100).optional(),
   cover_letter_text: z.string().trim().max(2000, "Max. 2000 caractères").optional(),
 });
 
@@ -109,8 +107,6 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
     phone: "",
     linkedin_url: "",
     portfolio_url: "",
-    years_experience: "",
-    salary_expectation: "",
     cover_letter_text: "",
   });
   const [cvFile, setCvFile] = useState<File | null>(null);
@@ -278,8 +274,6 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
       p_phone: form.phone.trim() || null,
       p_linkedin_url: form.linkedin_url.trim() || null,
       p_portfolio_url: form.portfolio_url.trim() || null,
-      p_years_experience: form.years_experience ? parseInt(form.years_experience) : null,
-      p_salary_expectation: form.salary_expectation.trim() || null,
       p_cover_letter_path: letterPath,
       p_notes: [
         form.cover_letter_text?.trim() || null,
@@ -314,8 +308,7 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
     // Reset form for potential next application
     setForm({
       first_name: "", last_name: "", email: user?.email || "", phone: "",
-      linkedin_url: "", portfolio_url: "", years_experience: "",
-      salary_expectation: "", cover_letter_text: "",
+      linkedin_url: "", portfolio_url: "", cover_letter_text: "",
     });
     setCvFile(null);
     setLetterFile(null);

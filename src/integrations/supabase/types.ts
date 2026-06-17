@@ -467,12 +467,10 @@ export type Database = {
           notes: string | null
           phone: string | null
           portfolio_url: string | null
-          salary_expectation: string | null
           status: Database["public"]["Enums"]["application_status"]
           tracking_id: string | null
           updated_at: string
           user_id: string | null
-          years_experience: number | null
         }
         Insert: {
           ai_analyzed_at?: string | null
@@ -498,12 +496,10 @@ export type Database = {
           notes?: string | null
           phone?: string | null
           portfolio_url?: string | null
-          salary_expectation?: string | null
           status?: Database["public"]["Enums"]["application_status"]
           tracking_id?: string | null
           updated_at?: string
           user_id?: string | null
-          years_experience?: number | null
         }
         Update: {
           ai_analyzed_at?: string | null
@@ -529,12 +525,10 @@ export type Database = {
           notes?: string | null
           phone?: string | null
           portfolio_url?: string | null
-          salary_expectation?: string | null
           status?: Database["public"]["Enums"]["application_status"]
           tracking_id?: string | null
           updated_at?: string
           user_id?: string | null
-          years_experience?: number | null
         }
         Relationships: [
           {
@@ -2406,9 +2400,7 @@ export type Database = {
           p_notes?: string
           p_phone?: string
           p_portfolio_url?: string
-          p_salary_expectation?: string
           p_user_id?: string
-          p_years_experience?: number
         }
         Returns: {
           already_exists: boolean

@@ -20,8 +20,6 @@ interface Application {
   email: string;
   status: AppStatus;
   created_at: string;
-  years_experience: number | null;
-  salary_expectation: string | null;
 }
 
 interface Job {
@@ -72,7 +70,7 @@ export default function ApplicationsTab({ user }: { user: SupaUser }) {
     const email = user.email || "";
     const { data: appsData } = await supabase
       .from("job_applications")
-      .select("id, job_id, full_name, email, user_id, status, created_at, years_experience, salary_expectation")
+      .select("id, job_id, full_name, email, user_id, status, created_at")
       .or(`user_id.eq.${user.id}${email ? `,email.eq.${email}` : ""}`)
       .order("created_at", { ascending: false });
 
@@ -277,12 +275,6 @@ export default function ApplicationsTab({ user }: { user: SupaUser }) {
                   </div>
                 )}
 
-                {(app.years_experience !== null || app.salary_expectation) && (
-                  <div className="mt-3 pt-3 border-t flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                    {app.years_experience !== null && <span>💼 {app.years_experience} ans d'expérience</span>}
-                    {app.salary_expectation && <span>💰 Prétention : {app.salary_expectation}</span>}
-                  </div>
-                )}
               </CardContent>
             </Card>
           );
