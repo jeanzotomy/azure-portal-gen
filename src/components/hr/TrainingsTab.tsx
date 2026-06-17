@@ -252,16 +252,6 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
       },
     });
   };
-        const { error } = await supabase.from("trainings").delete().eq("id", id);
-        if (error) {
-          toast.error(error.message);
-          return;
-        }
-        toast.success("Formation supprimée");
-        load();
-      },
-    });
-  };
 
   const openAssign = (c: CandidateRow) => {
     setAssignTarget(c);
