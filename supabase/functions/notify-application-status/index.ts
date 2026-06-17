@@ -256,18 +256,20 @@ Deno.serve(async (req) => {
     }
 
     let hasAccount = !!app.user_id
-    if (!hasAccount && emailType === 'received') {
+    if (!hasAccount && emailType === 'received' && app.email) {
       try {
-        const { data: list } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1 } as any)
-        // listUsers doesn't filter by email; fallback: try getUserByEmail-style via profiles
-        const { data: pr } = await supabase
-          .from('profiles')
-          .select('user_id')
-          .limit(1)
-        // Best-effort: query auth.users via RPC unavailable; assume no account if user_id null.
-        hasAccount = false
-      } catch { hasAccount = false }
+        const r = await fetch(
+          `${supabaseUrl}/auth/v1/admin/users?email=${encodeURIComponent(app.email)}`,
+          { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` } },
+        )
+        if (r.ok) {
+          const j = await r.json()
+          const users = Array.isArray(j?.users) ? j.users : []
+          hasAccount = users.some((u: any) => (u?.email || '').toLowerCase() === app.email.toLowerCase())
+        }
+      } catch { /* keep hasAccount=false */ }
     }
+
 
     const templateName = emailType === 'received' ? 'application-received' : `application-${emailType.replace('_', '-')}`
     const { subject, html } = buildEmail(emailType, {
