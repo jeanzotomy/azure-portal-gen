@@ -935,7 +935,10 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
                   <Label>Département</Label>
                   <Select
                     value={form.department || "__none__"}
-                    onValueChange={(v) => setForm({ ...form, department: v === "__none__" ? "" : v })}
+                    onValueChange={(v) => {
+                      if (v === "__add__") { setDeptDialogOpen(true); return; }
+                      setForm({ ...form, department: v === "__none__" ? "" : v });
+                    }}
                   >
                     <SelectTrigger><SelectValue placeholder="Sélectionner..." /></SelectTrigger>
                     <SelectContent>
@@ -943,16 +946,11 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
                       {departments.map((d) => (
                         <SelectItem key={d.id} value={d.name}>{d.name}</SelectItem>
                       ))}
+                      <SelectItem value="__add__" className="text-primary font-medium">
+                        + Ajouter un département…
+                      </SelectItem>
                     </SelectContent>
                   </Select>
-                  {departments.length === 0 && (
-                    <p className="text-xs text-muted-foreground">
-                      Aucun département.{" "}
-                      <button type="button" className="text-primary hover:underline" onClick={() => setDeptDialogOpen(true)}>
-                        Créer
-                      </button>
-                    </p>
-                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="job-location" required>Lieu</Label>
