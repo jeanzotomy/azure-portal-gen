@@ -239,6 +239,30 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
     });
   };
 
+  const assignToAll = (t: Training) => {
+    confirm({
+      title: `Assigner « ${t.title} » à tous les inscrits ?`,
+      description: "Tous les utilisateurs enregistrés sur la plateforme se verront attribuer cette formation. L'opération est idempotente (aucun doublon).",
+      confirmLabel: "Assigner à tous",
+      onConfirm: async () => {
+        const { data, error } = await (supabase as any).rpc("assign_training_to_all_users", { _training_id: t.id });
+        if (error) return toast.error(error.message);
+        toast.success(`Formation assignée à ${data ?? 0} utilisateur(s)`);
+        load();
+      },
+    });
+  };
+        const { error } = await supabase.from("trainings").delete().eq("id", id);
+        if (error) {
+          toast.error(error.message);
+          return;
+        }
+        toast.success("Formation supprimée");
+        load();
+      },
+    });
+  };
+
   const openAssign = (c: CandidateRow) => {
     setAssignTarget(c);
     setAssignSel(new Set(c.assigned.map(a => a.training_id)));
