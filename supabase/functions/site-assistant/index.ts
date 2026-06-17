@@ -99,10 +99,12 @@ PAGES PRINCIPALES DU SITE (liens internes autorisés)
 - Pourquoi nous: /#why-us
 - Industries: /#industries
 - Carrières / Offres de stages et d'emploi: /careers
-- Catalogue de formations: /trainings
+- Suivi de candidature: /candidature
+- Catalogue de formations: /formations
 - Tarifs: /pricing
 - Contact: /#contact
-- Vérification de certificat: /verify-certificate
+- Politique de confidentialité: /privacy
+- Conditions d'utilisation: /terms
 - Portail client / connexion: /auth
 
 RÈGLES DE PÉRIMÈTRE (STRICT)
