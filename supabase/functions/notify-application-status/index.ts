@@ -39,13 +39,25 @@ function trackingBlock(trackingId?: string): string {
     </div>`
 }
 
+function signupBlock(email?: string, hasAccount?: boolean): string {
+  if (!email || hasAccount) return ''
+  const url = `${SITE_URL}/auth?signup=1&email=${encodeURIComponent(email)}`
+  return `
+    <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:14px 18px;margin:0 0 20px;">
+      <p style="font-size:14px;color:#9a3412;margin:0 0 10px;font-weight:600;">Suivez votre candidature en temps réel</p>
+      <p style="font-size:13px;color:#7c2d12;line-height:1.6;margin:0 0 12px;">Créez un compte avec cette même adresse email pour accéder à votre espace candidat et consulter l'avancement, échanger avec le recruteur et recevoir les notifications importantes.</p>
+      <a href="${url}" style="display:inline-block;background:#ea580c;color:#fff;padding:9px 16px;border-radius:8px;text-decoration:none;font-weight:600;font-size:13px;">Créer mon compte</a>
+    </div>`
+}
+
 function buildEmail(
   status: 'received' | 'en_revue' | 'entretien' | 'acceptee' | 'refusee',
-  data: { candidateName?: string; jobTitle?: string; interviewMessage?: string; activationUrl?: string; trackingId?: string },
+  data: { candidateName?: string; jobTitle?: string; interviewMessage?: string; activationUrl?: string; trackingId?: string; recipientEmail?: string; hasAccount?: boolean },
 ): { subject: string; html: string } {
   const name = escapeHtml(data.candidateName || '')
   const job = escapeHtml(data.jobTitle || 'le poste')
   const tracking = trackingBlock(data.trackingId)
+  const signup = signupBlock(data.recipientEmail, data.hasAccount)
 
   if (status === 'received') {
     const subject = `Nous avons bien reçu votre candidature - ${data.jobTitle || 'CloudMature'}`
@@ -55,6 +67,7 @@ function buildEmail(
       <p style="font-size:14px;color:#4a5568;line-height:1.6;margin:0 0 16px;">Merci pour votre candidature au poste de <strong>${job}</strong>. Nous l'avons bien reçue et notre équipe RH va l'examiner dans les meilleurs délais.</p>
       ${tracking}
       <p style="font-size:13px;color:#64748b;line-height:1.6;margin:0 0 16px;">Conservez ce numéro : il vous permettra de consulter à tout moment l'état d'avancement de votre dossier.</p>
+      ${signup}
     `)
     return { subject, html }
   }
@@ -242,6 +255,22 @@ Deno.serve(async (req) => {
       }
     }
 
+    let hasAccount = !!app.user_id
+    if (!hasAccount && emailType === 'received' && app.email) {
+      try {
+        const r = await fetch(
+          `${supabaseUrl}/auth/v1/admin/users?email=${encodeURIComponent(app.email)}`,
+          { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` } },
+        )
+        if (r.ok) {
+          const j = await r.json()
+          const users = Array.isArray(j?.users) ? j.users : []
+          hasAccount = users.some((u: any) => (u?.email || '').toLowerCase() === app.email.toLowerCase())
+        }
+      } catch { /* keep hasAccount=false */ }
+    }
+
+
     const templateName = emailType === 'received' ? 'application-received' : `application-${emailType.replace('_', '-')}`
     const { subject, html } = buildEmail(emailType, {
       candidateName: app.full_name,
@@ -249,6 +278,8 @@ Deno.serve(async (req) => {
       interviewMessage: app.interview_message || undefined,
       activationUrl,
       trackingId: app.tracking_id || undefined,
+      recipientEmail: app.email,
+      hasAccount,
     })
 
     try {
