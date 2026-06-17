@@ -37,6 +37,9 @@ interface Training {
   topic: string | null;
   level: string | null;
   published?: boolean;
+  audience?: "public" | "employee";
+  price_cents?: number | null;
+  currency?: string | null;
 }
 
 interface CandidateRow {
