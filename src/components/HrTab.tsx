@@ -342,10 +342,12 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
       if (error) throw new Error(error.message);
       const res = (data as any)?.result;
       if (!res?.description) throw new Error("Réponse IA vide");
+      const cleaned = sanitizeAiText(res.description);
+      const cleanedTitle = res.title_suggestion ? sanitizeAiText(res.title_suggestion).replace(/\n+/g, " ").trim() : "";
       setForm((f) => ({
         ...f,
-        description: res.description,
-        title: !f.title.trim() && res.title_suggestion ? res.title_suggestion : f.title,
+        description: cleaned,
+        title: !f.title.trim() && cleanedTitle ? cleanedTitle : f.title,
       }));
       toast({ title: "✓ Description mise à jour par l'IA" });
     } catch (e) {
