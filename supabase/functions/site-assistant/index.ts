@@ -75,7 +75,7 @@ function buildSystemPrompt(locale: "fr" | "en") {
     ? "Always reply in clear, warm and professional English."
     : "Réponds toujours en français clair, chaleureux et professionnel.";
 
-  return `Tu es "Mature", l'assistant virtuel officiel du site Cloud Mature.
+  return `Tu es "Maturia", l'assistant virtuel officiel du site Cloud Mature.
 
 TON & POSTURE
 - Professionnel, courtois, bienveillant et respectueux en toutes circonstances.
