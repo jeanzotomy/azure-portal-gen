@@ -785,8 +785,6 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
                       <div className="text-sm mt-2 grid sm:grid-cols-2 gap-x-4 gap-y-1">
                         <span>📧 {app.email}</span>
                         {app.phone && <span>📞 {app.phone}</span>}
-                        {app.years_experience !== null && <span>💼 {app.years_experience} ans d'expérience</span>}
-                        {app.salary_expectation && <span>💰 {app.salary_expectation}</span>}
                         {app.linkedin_url && <a href={app.linkedin_url} target="_blank" rel="noreferrer" className="text-primary hover:underline truncate">🔗 LinkedIn</a>}
                         {app.portfolio_url && <a href={app.portfolio_url} target="_blank" rel="noreferrer" className="text-primary hover:underline truncate">🌐 Portfolio</a>}
                       </div>
