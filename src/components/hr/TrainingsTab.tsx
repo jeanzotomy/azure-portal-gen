@@ -330,8 +330,9 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
                     </div>
                     {!readOnly && (
                       <div className="flex flex-col gap-1">
-                        <Button size="icon" variant="ghost" onClick={() => openEdit(t)}><Pencil className="h-4 w-4" /></Button>
-                        <Button size="icon" variant="ghost" onClick={() => remove(t.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                        <Button size="icon" variant="ghost" onClick={() => openEdit(t)} title="Modifier"><Pencil className="h-4 w-4" /></Button>
+                        <Button size="icon" variant="ghost" onClick={() => assignToAll(t)} title="Assigner à tous les inscrits"><UsersRound className="h-4 w-4 text-primary" /></Button>
+                        <Button size="icon" variant="ghost" onClick={() => remove(t.id)} title="Supprimer"><Trash2 className="h-4 w-4 text-destructive" /></Button>
                       </div>
                     )}
                   </div>
