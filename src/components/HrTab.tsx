@@ -764,7 +764,15 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
           {!loading && applications.length > 0 && filteredApps.length === 0 && (
             <Card><CardContent className="p-8 text-center text-muted-foreground text-sm">Aucune candidature ne correspond aux filtres.</CardContent></Card>
           )}
-          {filteredApps.map((app) => {
+          {!loading && appView === "kanban" && filteredApps.length > 0 && (
+            <CandidatesKanban
+              applications={filteredApps as any}
+              jobs={jobs}
+              onMove={(id, status) => updateAppStatus(id, status as AppStatus)}
+              onOpenDetail={(id) => setDetailId(id)}
+            />
+          )}
+          {appView === "list" && filteredApps.map((app) => {
             const job = jobs.find((j) => j.id === app.job_id);
             return (
               <Card key={app.id}>
@@ -800,6 +808,9 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
                     const spUrl = extractSharePointUrl(app.notes);
                     return (
                       <div className="flex gap-2 flex-wrap pt-2 border-t">
+                        <Button variant="default" size="sm" onClick={() => setDetailId(app.id)}>
+                          <Eye size={14} className="mr-1" /> Détails
+                        </Button>
                         <Button variant="outline" size="sm" onClick={() => downloadFile(app.cv_path)}><FileText size={14} /> CV</Button>
                         {app.cover_letter_path && (
                           <Button variant="outline" size="sm" onClick={() => downloadFile(app.cover_letter_path!)}><Download size={14} /> Lettre de motivation</Button>
@@ -828,8 +839,6 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
                   {(app.ai_analyzed_at || app.ai_status === "processing" || app.ai_status === "error") && (
                     <AiAnalysisBlock app={app} />
                   )}
-
-
                 </CardContent>
               </Card>
             );
