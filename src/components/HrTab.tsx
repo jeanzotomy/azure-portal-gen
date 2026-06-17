@@ -146,6 +146,9 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
   const [appJobFilter, setAppJobFilter] = useState<string>("all");
   const [appView, setAppView] = useState<"list" | "kanban">("kanban");
   const [detailId, setDetailId] = useState<string | null>(null);
+  // AI assistant (job creation form)
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [aiAction, setAiAction] = useState<null | "generate" | "improve" | "shorten" | "translate_en">(null);
   const [form, setForm] = useState({
     title: "",
     department: "",
@@ -307,8 +310,51 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
   const openNew = () => {
     setEditing(null);
     setForm({ title: "", department: "", location: "", contract_type: "CDI", description: "", closing_date: "", status: "brouillon", sector: "", start_date: "", salary_range: "", contract_duration: "", renewable: false });
+    setAiPrompt("");
+    setAiAction(null);
     setDialogOpen(true);
   };
+
+  const runJobAssistant = async (action: "generate" | "improve" | "shorten" | "translate_en") => {
+    if (action !== "generate" && !form.description.trim()) {
+      toast({ title: "Description vide", description: "Rédigez ou générez d'abord une description.", variant: "destructive" });
+      return;
+    }
+    setAiAction(action);
+    try {
+      const { data, error } = await supabase.functions.invoke("hr-job-assistant", {
+        body: {
+          action,
+          instructions: aiPrompt.trim() || undefined,
+          context: {
+            title: form.title,
+            department: form.department,
+            sector: form.sector,
+            location: form.location,
+            contract_type: form.contract_type,
+            contract_duration: form.contract_duration,
+            start_date: form.start_date,
+            salary_range: form.salary_range,
+            description: form.description,
+          },
+        },
+      });
+      if (error) throw new Error(error.message);
+      const res = (data as any)?.result;
+      if (!res?.description) throw new Error("Réponse IA vide");
+      setForm((f) => ({
+        ...f,
+        description: res.description,
+        title: !f.title.trim() && res.title_suggestion ? res.title_suggestion : f.title,
+      }));
+      toast({ title: "✓ Description mise à jour par l'IA" });
+    } catch (e) {
+      toast({ title: "IA indisponible", description: (e as Error).message, variant: "destructive" });
+    } finally {
+      setAiAction(null);
+    }
+  };
+
 
   const openEdit = (job: JobPosting) => {
     setEditing(job);
@@ -1025,14 +1071,50 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
               title="Description & publication"
               description="Détails du poste et visibilité."
             >
+              <div className="space-y-3 rounded-lg border border-primary/30 bg-gradient-to-br from-primary/5 via-primary/[0.03] to-transparent p-4">
+                <div className="flex items-start gap-2">
+                  <div className="h-8 w-8 shrink-0 rounded-md bg-primary/15 text-primary flex items-center justify-center">
+                    <Sparkles size={16} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold">Assistant IA RH</p>
+                    <p className="text-xs text-muted-foreground">Spécialisé en rédaction d'offres IT / Cloud / DevOps. Génère ou améliore la description à partir du contexte saisi.</p>
+                  </div>
+                </div>
+                <Textarea
+                  rows={2}
+                  value={aiPrompt}
+                  onChange={(e) => setAiPrompt(e.target.value)}
+                  placeholder="Instructions optionnelles : ton, public cible, compétences à mettre en avant…"
+                  className="text-sm bg-background/60"
+                />
+                <div className="flex flex-wrap gap-2">
+                  <Button type="button" size="sm" onClick={() => runJobAssistant("generate")} disabled={!!aiAction} className="bg-gradient-primary-deep text-primary-foreground hover:opacity-95">
+                    {aiAction === "generate" ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
+                    Générer la description
+                  </Button>
+                  <Button type="button" size="sm" variant="outline" onClick={() => runJobAssistant("improve")} disabled={!!aiAction || !form.description.trim()}>
+                    {aiAction === "improve" ? <Loader2 size={13} className="animate-spin" /> : <Pencil size={13} />}
+                    Améliorer
+                  </Button>
+                  <Button type="button" size="sm" variant="outline" onClick={() => runJobAssistant("shorten")} disabled={!!aiAction || !form.description.trim()}>
+                    {aiAction === "shorten" ? <Loader2 size={13} className="animate-spin" /> : <FileText size={13} />}
+                    Raccourcir
+                  </Button>
+                  <Button type="button" size="sm" variant="outline" onClick={() => runJobAssistant("translate_en")} disabled={!!aiAction || !form.description.trim()}>
+                    {aiAction === "translate_en" ? <Loader2 size={13} className="animate-spin" /> : <FileText size={13} />}
+                    Traduire EN
+                  </Button>
+                </div>
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="job-desc" required>Description</Label>
                 <Textarea
                   id="job-desc"
-                  rows={6}
+                  rows={8}
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  placeholder="Missions, profil recherché, compétences requises..."
+                  placeholder="Missions, profil recherché, compétences requises… ou utilisez l'assistant IA ci-dessus."
                 />
               </div>
               <div className="space-y-2">
