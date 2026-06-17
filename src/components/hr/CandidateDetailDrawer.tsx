@@ -40,8 +40,6 @@ interface AppDetail {
   phone: string | null;
   linkedin_url: string | null;
   portfolio_url: string | null;
-  years_experience: number | null;
-  salary_expectation: string | null;
   cv_path: string;
   cover_letter_path: string | null;
   status: AppStatus;
