@@ -1034,7 +1034,10 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
                 <Label>Secteur</Label>
                 <Select
                   value={form.sector || "__none__"}
-                  onValueChange={(v) => setForm({ ...form, sector: v === "__none__" ? "" : v })}
+                  onValueChange={(v) => {
+                    if (v === "__add__") { setSectorDialogOpen(true); return; }
+                    setForm({ ...form, sector: v === "__none__" ? "" : v });
+                  }}
                 >
                   <SelectTrigger><SelectValue placeholder="Sélectionner..." /></SelectTrigger>
                   <SelectContent>
@@ -1042,16 +1045,11 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
                     {sectors.map((s) => (
                       <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
                     ))}
+                    <SelectItem value="__add__" className="text-primary font-medium">
+                      + Ajouter un secteur…
+                    </SelectItem>
                   </SelectContent>
                 </Select>
-                {sectors.length === 0 && (
-                  <p className="text-xs text-muted-foreground">
-                    Aucun secteur.{" "}
-                    <button type="button" className="text-primary hover:underline" onClick={() => setSectorDialogOpen(true)}>
-                      Créer
-                    </button>
-                  </p>
-                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="job-salary">Rémunération</Label>
