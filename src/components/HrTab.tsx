@@ -310,8 +310,51 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
   const openNew = () => {
     setEditing(null);
     setForm({ title: "", department: "", location: "", contract_type: "CDI", description: "", closing_date: "", status: "brouillon", sector: "", start_date: "", salary_range: "", contract_duration: "", renewable: false });
+    setAiPrompt("");
+    setAiAction(null);
     setDialogOpen(true);
   };
+
+  const runJobAssistant = async (action: "generate" | "improve" | "shorten" | "translate_en") => {
+    if (action !== "generate" && !form.description.trim()) {
+      toast({ title: "Description vide", description: "Rédigez ou générez d'abord une description.", variant: "destructive" });
+      return;
+    }
+    setAiAction(action);
+    try {
+      const { data, error } = await supabase.functions.invoke("hr-job-assistant", {
+        body: {
+          action,
+          instructions: aiPrompt.trim() || undefined,
+          context: {
+            title: form.title,
+            department: form.department,
+            sector: form.sector,
+            location: form.location,
+            contract_type: form.contract_type,
+            contract_duration: form.contract_duration,
+            start_date: form.start_date,
+            salary_range: form.salary_range,
+            description: form.description,
+          },
+        },
+      });
+      if (error) throw new Error(error.message);
+      const res = (data as any)?.result;
+      if (!res?.description) throw new Error("Réponse IA vide");
+      setForm((f) => ({
+        ...f,
+        description: res.description,
+        title: !f.title.trim() && res.title_suggestion ? res.title_suggestion : f.title,
+      }));
+      toast({ title: "✓ Description mise à jour par l'IA" });
+    } catch (e) {
+      toast({ title: "IA indisponible", description: (e as Error).message, variant: "destructive" });
+    } finally {
+      setAiAction(null);
+    }
+  };
+
 
   const openEdit = (job: JobPosting) => {
     setEditing(job);
