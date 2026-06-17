@@ -246,7 +246,7 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
       confirmLabel: "Assigner à tous",
       onConfirm: async () => {
         const { data, error } = await (supabase as any).rpc("assign_training_to_all_users", { _training_id: t.id });
-        if (error) return toast.error(error.message);
+        if (error) { toast.error(error.message); return; }
         toast.success(`Formation assignée à ${data ?? 0} utilisateur(s)`);
         load();
       },
