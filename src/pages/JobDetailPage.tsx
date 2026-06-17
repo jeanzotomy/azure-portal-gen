@@ -12,6 +12,7 @@ import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { extractJobId, jobPath, slugify } from "@/lib/slug";
+import JobDescription from "@/components/JobDescription";
 
 interface JobPosting {
   id: string;
