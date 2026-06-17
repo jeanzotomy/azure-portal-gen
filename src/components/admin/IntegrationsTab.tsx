@@ -26,8 +26,8 @@ const CONNECTOR_DEFS = [
   { id: "microsoft", label: "Microsoft Graph", desc: "Outlook / OneDrive / SharePoint", manageUrl: "https://entra.microsoft.com" },
   { id: "twilio", label: "Twilio", desc: "SMS OTP (MFA)", manageUrl: "https://console.twilio.com" },
   { id: "google_search_console", label: "Google Search Console", desc: "Données SEO", manageUrl: "https://search.google.com/search-console" },
-  { id: "lovable_ai", label: "Lovable AI Gateway", desc: "Tuteur IA, analyse de CV", manageUrl: null },
-  { id: "email_domain", label: "Emails (Lovable)", desc: "Envoi via notify.cloudmature.com", manageUrl: null },
+  { id: "lovable_ai", label: "AI Gateway", desc: "Tuteur IA, analyse de CV", manageUrl: null },
+  { id: "email_domain", label: "Emails", desc: "Envoi via notify.cloudmature.com", manageUrl: null },
 ];
 
 const INBOUND_WEBHOOKS = [
