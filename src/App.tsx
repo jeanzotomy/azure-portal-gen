@@ -93,6 +93,7 @@ const App = () => (
         </Suspense>
         <ScrollToTop />
         <MobileBottomNav />
+        <SiteAssistant />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
