@@ -140,7 +140,7 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
       active: t.active,
       published: !!t.published,
       audience: (t.audience as any) || (t.published ? "public" : "employee"),
-      price_cents: t.price_cents != null ? String(t.price_cents) : "",
+      price_cents: t.price_cents != null ? String((t.price_cents / 100).toFixed(2)) : "",
       currency: t.currency || "CAD",
 
       content: t.content,
