@@ -107,8 +107,6 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
     phone: "",
     linkedin_url: "",
     portfolio_url: "",
-    years_experience: "",
-    salary_expectation: "",
     cover_letter_text: "",
   });
   const [cvFile, setCvFile] = useState<File | null>(null);
