@@ -676,11 +676,28 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
 
         <TabsContent value="applications" className="space-y-3 mt-4">
           {!loading && applications.length > 0 && (
-            <div className="flex justify-end">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div className="inline-flex rounded-md border p-0.5 bg-card">
+                <button
+                  type="button"
+                  onClick={() => setAppView("kanban")}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-colors ${appView === "kanban" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                >
+                  <LayoutGrid size={13} /> Kanban
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAppView("list")}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-colors ${appView === "list" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                >
+                  <List size={13} /> Liste
+                </button>
+              </div>
               <Button size="sm" variant="outline" onClick={() => {
                 const rows = filteredApps.map(a => {
                   const job = jobs.find(j => j.id === a.job_id);
                   return {
+                    tracking_id: (a as any).tracking_id || "",
                     nom: a.full_name,
                     email: a.email,
                     telephone: a.phone || "",
