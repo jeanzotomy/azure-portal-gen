@@ -56,6 +56,7 @@ const fr = {
       { title: "Sécurité & Conformité", desc: "Microsoft Defender & Sentinel, AWS Security Hub, Google Chronicle. Politiques Zero Trust, gestion des identités et conformité ISO 27001, SOC 2, RGPD." },
       { title: "Infogérance & Support Managé", desc: "Surveillance proactive 24/7 multi-cloud, support N1 à N3, gestion des incidents, monitoring des performances et suivi SLA contractuel." },
       { title: "IA & Automatisation Intelligente", desc: "Microsoft Copilot, Azure OpenAI, AWS Bedrock et Google Vertex AI. Automatisation des processus et intégration IA dans vos outils métiers." },
+      { title: "Cloud Souverain & Résidence des Données", desc: "Conception d'architectures orientées cloud souverain : choix de régions et zones de disponibilité conformes, chiffrement géré par le client (BYOK/HYOK), cloisonnement réseau, traçabilité et hébergement local lorsque la réglementation l'exige. Une priorité forte de Cloud Mature pour les acteurs publics, financiers et stratégiques." },
     ],
   },
   industries: {
