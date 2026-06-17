@@ -6,8 +6,8 @@ import { Footer } from "@/components/Footer";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-// JobApplicationDialog moved to JobDetailPage
-import { Briefcase, MapPin, Calendar, Clock, ChevronDown, ChevronUp, Share2, Linkedin, Facebook, Mail, Link2, MessageCircle, Search, X } from "lucide-react";
+import { JobApplicationDialog } from "@/components/JobApplicationDialog";
+import { Briefcase, MapPin, Calendar, Clock, ChevronDown, Share2, Linkedin, Facebook, Mail, Link2, MessageCircle, Search, X, Sparkles, GraduationCap, Code2 } from "lucide-react";
 import { format } from "date-fns";
 import { useToast } from "@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
