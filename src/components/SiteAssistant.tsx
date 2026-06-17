@@ -71,13 +71,13 @@ export default function SiteAssistant() {
 
   const i18n = locale === "en"
     ? {
-        title: "Mature — Cloud Mature Assistant",
+        title: "Maturia — Cloud Mature Assistant",
         subtitle: "Ask anything about our services.",
         placeholder: "Ask about our services, expertise, training…",
         send: "Send",
         open: "Open assistant",
         close: "Close",
-        welcome: "Hi! I'm Mature, the Cloud Mature virtual assistant. I can help you discover our services, expertise (Cloud, DevOps, Data, AI), sectors, methodology and trainings. How can I help?",
+        welcome: "Hi! I'm Maturia, the Cloud Mature virtual assistant. I can help you discover our services, expertise (Cloud, DevOps, Data, AI), sectors, methodology and trainings. How can I help?",
         disclaimer: "Scope limited to Cloud Mature. Do not share personal or confidential data.",
         error: "Sorry, something went wrong. Please try again.",
         limitTitle: "Thank you for our exchange.",
@@ -85,13 +85,13 @@ export default function SiteAssistant() {
         limitCta: "Go to contact form",
       }
     : {
-        title: "Mature — Assistant Cloud Mature",
+        title: "Maturia — Assistant Cloud Mature",
         subtitle: "Posez vos questions sur nos services.",
         placeholder: "Posez votre question sur nos services, expertises, formations…",
         send: "Envoyer",
         open: "Ouvrir l'assistant",
         close: "Fermer",
-        welcome: "Bonjour ! Je suis Mature, l'assistant virtuel de Cloud Mature. Je peux vous présenter nos services, expertises (Cloud, DevOps, Data, IA), secteurs, méthodologie et formations. Comment puis-je vous aider ?",
+        welcome: "Bonjour ! Je suis Maturia, l'assistant virtuel de Cloud Mature. Je peux vous présenter nos services, expertises (Cloud, DevOps, Data, IA), secteurs, méthodologie et formations. Comment puis-je vous aider ?",
         disclaimer: "Périmètre limité à Cloud Mature. Ne partagez pas de données personnelles ou confidentielles.",
         error: "Désolé, une erreur est survenue. Merci de réessayer.",
         limitTitle: "Merci pour cet échange.",
@@ -269,10 +269,10 @@ export default function SiteAssistant() {
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); }
                   }}
-                  rows={1}
+                  rows={3}
                   placeholder={i18n.placeholder}
                   maxLength={1000}
-                  className="flex-1 resize-none rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 max-h-32"
+                  className="flex-1 resize-none rounded-lg border border-input bg-background px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 min-h-[80px] max-h-48"
                 />
                 <Button
                   type="submit"
