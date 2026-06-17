@@ -75,6 +75,13 @@ export function ServicesSection() {
 
         {/* Desktop: wrapped layout */}
         <div className="hidden lg:flex flex-col gap-6">
+          {firstFull && (
+            <div className="grid grid-cols-3 gap-6">
+              <div className="col-span-3">
+                <ServiceCard s={firstFull} />
+              </div>
+            </div>
+          )}
           <div className="grid grid-cols-3 gap-6">
             {topRow.map((s) => (
               <ServiceCard key={s.title} s={s} />
