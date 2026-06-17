@@ -31,10 +31,12 @@ export function ServicesSection() {
   const items: { title: string; desc: string }[] = t("services.items");
   const services = items.map((item, i) => ({ ...item, icon: icons[i] }));
 
-  const topRow = services.slice(0, 3);
-  const middleLeft = [services[3]];
-  const middleRight = [services[4]];
-  const bottomRow = services.slice(5);
+  const reordered = services.length > 0 ? [services[services.length - 1], ...services.slice(0, services.length - 1)] : services;
+  const firstFull = reordered[0];
+  const topRow = reordered.slice(1, 4);
+  const middleLeft = [reordered[4]];
+  const middleRight = [reordered[5]];
+  const bottomRow = reordered.slice(6);
   
 
   return (
@@ -73,6 +75,13 @@ export function ServicesSection() {
 
         {/* Desktop: wrapped layout */}
         <div className="hidden lg:flex flex-col gap-6">
+          {firstFull && (
+            <div className="grid grid-cols-3 gap-6">
+              <div className="col-span-3">
+                <ServiceCard s={firstFull} />
+              </div>
+            </div>
+          )}
           <div className="grid grid-cols-3 gap-6">
             {topRow.map((s) => (
               <ServiceCard key={s.title} s={s} />
