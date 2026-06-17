@@ -175,13 +175,17 @@ export function TrainingTutor({ trainingId, trainingTitle, onClose }: { training
         <div ref={scrollRef} className="flex-1 overflow-y-auto p-3 space-y-2 bg-gradient-to-b from-cyan-50/30 to-white">
           {messages.map((m, i) => (
             <div key={i} className={`flex ${m.role === "user" ? "justify-end" : "justify-start"}`}>
-              <div className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm whitespace-pre-wrap ${m.role === "user" ? "bg-primary text-white" : "bg-white border shadow-sm"}`}>
-                {m.role === "assistant" && i === 0 ? null : m.role === "assistant" && (
-                  <div className="flex items-center gap-1 mb-0.5 text-[10px] text-muted-foreground uppercase font-semibold">
+              <div className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${m.role === "user" ? "bg-primary text-white whitespace-pre-wrap" : "bg-white border shadow-sm text-foreground"}`}>
+                {m.role === "assistant" && i !== 0 && (
+                  <div className="flex items-center gap-1 mb-1 text-[10px] text-muted-foreground uppercase font-semibold tracking-wide">
                     <Bot className="h-3 w-3" /> Tuteur
                   </div>
                 )}
-                {m.content || (streaming && i === messages.length - 1 ? <Loader2 className="h-3 w-3 animate-spin" /> : null)}
+                {m.role === "assistant"
+                  ? (m.content
+                      ? renderRich(m.content)
+                      : (streaming && i === messages.length - 1 ? <Loader2 className="h-3 w-3 animate-spin" /> : null))
+                  : m.content}
               </div>
             </div>
           ))}
