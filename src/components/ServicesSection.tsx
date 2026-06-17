@@ -100,8 +100,10 @@ export function ServicesSection() {
           </div>
 
           <div className="grid grid-cols-3 gap-6">
-            {bottomRow.map((s) => (
-              <ServiceCard key={s.title} s={s} />
+            {bottomRow.map((s, i) => (
+              <div key={s.title} className={i === bottomRow.length - 1 && (bottomRow.length % 3 === 1) ? "col-span-3" : ""}>
+                <ServiceCard s={s} />
+              </div>
             ))}
           </div>
         </div>
