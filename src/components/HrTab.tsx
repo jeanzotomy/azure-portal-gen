@@ -1286,6 +1286,13 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
       </Dialog>
 
       {confirmDialog}
+
+      <CandidateDetailDrawer
+        applicationId={detailId}
+        onOpenChange={(v) => { if (!v) setDetailId(null); }}
+        onUpdated={load}
+        onChangeStatus={(id, status) => updateAppStatus(id, status)}
+      />
     </div>
   );
 }
