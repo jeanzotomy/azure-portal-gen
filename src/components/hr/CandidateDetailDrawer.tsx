@@ -154,8 +154,6 @@ export default function CandidateDetailDrawer({ applicationId, onOpenChange, onU
               {/* Candidature */}
               <Section icon={<Briefcase size={14} />} title="Candidature">
                 <Row icon={<Briefcase size={13} />} label="Poste" value={jobTitle} />
-                {app.years_experience != null && <Row icon={<TrendingUp size={13} />} label="Expérience" value={`${app.years_experience} an${app.years_experience > 1 ? "s" : ""}`} />}
-                {app.salary_expectation && <Row icon={<Hash size={13} />} label="Salaire souhaité" value={app.salary_expectation} />}
                 <Row icon={<Calendar size={13} />} label="Reçue le" value={format(new Date(app.created_at), "dd/MM/yyyy 'à' HH:mm")} />
                 <div className="pt-2">
                   <label className="text-xs font-medium text-muted-foreground block mb-1">Statut</label>
