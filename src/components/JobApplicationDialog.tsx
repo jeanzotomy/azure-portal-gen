@@ -316,7 +316,7 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
     onOpenChange(false);
   };
 
-  const fieldClass = (k: string) => errors[k] ? "border-destructive focus-visible:ring-destructive" : "";
+  const fieldClass = (k: string) => `text-primary font-medium ${errors[k] ? "border-destructive focus-visible:ring-destructive" : ""}`;
   const ErrMsg = ({ k }: { k: string }) => errors[k] ? <p className="text-xs text-destructive mt-1">{errors[k]}</p> : null;
 
   return (
