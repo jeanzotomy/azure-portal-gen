@@ -432,17 +432,6 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
           <SectionTitle icon={Briefcase} title="Profil professionnel" />
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label className="text-sm font-medium">Années d'expérience</label>
-              <Input type="number" min="0" max="60" className={fieldClass("years_experience")} value={form.years_experience} onChange={(e) => update("years_experience", e.target.value)} />
-              <ErrMsg k="years_experience" />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Prétention salariale</label>
-              <Input placeholder="Ex: 1M GNF/mois" value={form.salary_expectation} onChange={(e) => update("salary_expectation", e.target.value)} />
-            </div>
-          </div>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
               <label className="text-sm font-medium">LinkedIn</label>
               <Input placeholder="https://linkedin.com/in/..." className={fieldClass("linkedin_url")} value={form.linkedin_url} onChange={(e) => update("linkedin_url", e.target.value)} />
               <ErrMsg k="linkedin_url" />
