@@ -65,7 +65,7 @@ export function HeroScreenCarousel() {
               aria-label="Lire la vidéo de présentation CloudMature"
               className="absolute inset-0 w-full h-full group cursor-pointer"
             >
-              {/* Lightweight thumbnail facade — no YouTube JS loaded until clicked */}
+              {/* Lightweight thumbnail facade - no YouTube JS loaded until clicked */}
               <img
                 src={`https://i.ytimg.com/vi/${YOUTUBE_VIDEO_ID}/hqdefault.jpg`}
                 alt="CloudMature Présentation"

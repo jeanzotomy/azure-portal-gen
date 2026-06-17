@@ -177,8 +177,8 @@ export function NotificationBell({ role = "client", onNavigate }: NotificationBe
             type: "invoice",
             title: inv.invoice_number || inv.vendor || (isFr ? "Facture" : "Invoice"),
             description: isFr
-              ? `En attente — ${Number(inv.amount).toLocaleString("fr-FR")} GNF`
-              : `Pending — ${Number(inv.amount).toLocaleString("en-US")} GNF`,
+              ? `En attente - ${Number(inv.amount).toLocaleString("fr-FR")} GNF`
+              : `Pending - ${Number(inv.amount).toLocaleString("en-US")} GNF`,
             time: inv.created_at,
           });
         });

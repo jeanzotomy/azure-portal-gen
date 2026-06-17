@@ -20,7 +20,7 @@ interface AuthGuardProps {
  * rendering children. Always returns a node (never null), eliminating any race
  * that could produce a white page during initial hydration.
  *
- * No "early return between hooks" — every hook runs on every render.
+ * No "early return between hooks" - every hook runs on every render.
  */
 export function AuthGuard({ children, requireRoles, fallbackRoute = "/portal" }: AuthGuardProps) {
   const { user, ready } = useAuthSession();

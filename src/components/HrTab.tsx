@@ -46,8 +46,8 @@ function sanitizeAiText(input: string): string {
   s = s.replace(/\*+/g, "");
   // Remove markdown headings #, ##, ### etc. (keep the text)
   s = s.replace(/^\s{0,3}#{1,6}\s+/gm, "");
-  // Normalize bullet markers (•, *, –, —) to "- "
-  s = s.replace(/^\s*[•·–—]\s+/gm, "- ");
+  // Normalize bullet markers (•, *, –, -) to "- "
+  s = s.replace(/^\s*[•·–-]\s+/gm, "- ");
   // Collapse 3+ blank lines
   s = s.replace(/\n{3,}/g, "\n\n");
   // Trim trailing spaces per line
@@ -968,7 +968,7 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
                   >
                     <SelectTrigger><SelectValue placeholder="Sélectionner..." /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="__none__">— Aucun —</SelectItem>
+                      <SelectItem value="__none__">- Aucun -</SelectItem>
                       {departments.map((d) => (
                         <SelectItem key={d.id} value={d.name}>{d.name}</SelectItem>
                       ))}
@@ -1067,7 +1067,7 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
                 >
                   <SelectTrigger><SelectValue placeholder="Sélectionner..." /></SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="__none__">— Aucun —</SelectItem>
+                    <SelectItem value="__none__">- Aucun -</SelectItem>
                     {sectors.map((s) => (
                       <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
                     ))}
@@ -1083,7 +1083,7 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
                   id="job-salary"
                   value={form.salary_range}
                   onChange={(e) => setForm({ ...form, salary_range: e.target.value })}
-                  placeholder="Ex: Selon profil et expérience — package attractif"
+                  placeholder="Ex: Selon profil et expérience - package attractif"
                 />
               </div>
             </FormSection>

@@ -14,7 +14,7 @@ export function extractSignaturePath(stored: string | null | undefined): string 
   if (!value) return null;
   const m = value.match(/\/storage\/v1\/object\/(?:public|sign)\/signatures\/(.+)$/);
   if (m) return m[1];
-  if (value.startsWith("http")) return null; // unknown URL — cannot resolve
+  if (value.startsWith("http")) return null; // unknown URL - cannot resolve
   return value; // already a path
 }
 

@@ -65,7 +65,7 @@ Deno.serve(async (req) => {
     const userPrompt = `Génère 3 questions de RATTRAPAGE adaptatives pour un candidat qui a obtenu ${score}% au QCM.
 Difficulté visée: ${difficulty}.
 Les questions doivent porter sur les SUJETS RATÉS suivants et tester la compréhension réelle (pas du par cœur) :
-${missedTopics.slice(0, 8).map((q, i) => `${i + 1}. ${q}`).join('\n') || '(aucun sujet précis — couvrir l\'ensemble)'}
+${missedTopics.slice(0, 8).map((q, i) => `${i + 1}. ${q}`).join('\n') || '(aucun sujet précis - couvrir l\'ensemble)'}
 
 CONTENU DE RÉFÉRENCE :
 ${context}

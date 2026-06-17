@@ -3,7 +3,7 @@ import { Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 /**
- * FormStepper — premium glassmorphism stepper for multi-step forms.
+ * FormStepper - premium glassmorphism stepper for multi-step forms.
  * Renders the step indicator only. Parent controls active step + content.
  */
 export interface FormStep {

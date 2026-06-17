@@ -803,7 +803,7 @@ export function TrainingPlayer({ assigned, userId, onComplete }: { assigned: any
           openGradesLocal[g.index] = { score: Number(g.score) || 0, feedback: g.feedback || "" };
         });
       } catch (e: any) {
-        toast.error("Correction IA indisponible — questions ouvertes notées à 0");
+        toast.error("Correction IA indisponible - questions ouvertes notées à 0");
       }
     }
     const openTotal = opens.reduce((s, { i }) => s + (openGradesLocal[i]?.score ?? 0), 0);
@@ -815,7 +815,7 @@ export function TrainingPlayer({ assigned, userId, onComplete }: { assigned: any
 
     if (inAdaptive) {
       if (passed) {
-        // Adaptive remediation pass — write grading via secure RPC
+        // Adaptive remediation pass - write grading via secure RPC
         const { error } = await (supabase as any).rpc("submit_training_quiz_attempt", {
           _assigned_id: assigned.id,
           _quiz_score: score,
@@ -830,7 +830,7 @@ export function TrainingPlayer({ assigned, userId, onComplete }: { assigned: any
         if (error) { setSubmitting(false); return toast.error(error.message); }
       }
     } else {
-      // Standard submit — grading fields go through the secure RPC (RLS-protected),
+      // Standard submit - grading fields go through the secure RPC (RLS-protected),
       // remaining progress fields are updated directly.
       const { error: rpcError } = await (supabase as any).rpc("submit_training_quiz_attempt", {
         _assigned_id: assigned.id,
@@ -850,14 +850,14 @@ export function TrainingPlayer({ assigned, userId, onComplete }: { assigned: any
     setResult({ score, passed });
     setShowResults(true);
     if (passed) toast.success(inAdaptive ? `Rattrapage réussi (${score}%) 🎉` : `QCM réussi (${score}%) en ${fmtTime(quizDuration)}`);
-    else toast.error(`Score ${score}% — minimum requis ${passingScore}%.`);
+    else toast.error(`Score ${score}% - minimum requis ${passingScore}%.`);
   };
 
   // Auto-submit when countdown hits 0
   useEffect(() => {
     if (!quizOpen || !quizTimeLimitSec) return;
     if (quizTimeLeft === 0 && !showResults && !submitting) {
-      toast.error("⏰ Temps écoulé — soumission automatique");
+      toast.error("⏰ Temps écoulé - soumission automatique");
       submitQuiz();
     }
   }, [quizTimeLeft, quizOpen, quizTimeLimitSec, showResults, submitting]);
@@ -897,7 +897,7 @@ export function TrainingPlayer({ assigned, userId, onComplete }: { assigned: any
       setShowResults(false);
       setQuizStartedAt(Date.now());
       setQuizElapsed(0);
-      toast.success(`Mode adaptatif activé — ${data.questions.length} questions ciblées (${data.difficulty})`);
+      toast.success(`Mode adaptatif activé - ${data.questions.length} questions ciblées (${data.difficulty})`);
     } catch (e: any) {
       toast.error(e.message || "Erreur lors de la génération du rattrapage");
     } finally {
@@ -944,7 +944,7 @@ export function TrainingPlayer({ assigned, userId, onComplete }: { assigned: any
       const m = page.data;
       return (
         <div className="border-l-2 border-primary/30 pl-3 space-y-2">
-          <div className="font-semibold text-base">Module {m.idx + 1} — {m.title}</div>
+          <div className="font-semibold text-base">Module {m.idx + 1} - {m.title}</div>
           {m.summary && <p className="text-xs text-muted-foreground italic">{m.summary}</p>}
           {m.sections?.map((s: any, k: number) => (
             <div key={k} className="space-y-1">
@@ -1082,7 +1082,7 @@ export function TrainingPlayer({ assigned, userId, onComplete }: { assigned: any
           <div className="bg-white rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
             <div className="bg-gradient-primary-deep text-primary-foreground p-4 rounded-t-lg flex items-start justify-between gap-3">
               <div>
-                <h3 className="text-white font-semibold">QCM — {t.title}</h3>
+                <h3 className="text-white font-semibold">QCM - {t.title}</h3>
                 <p className="text-cyan-100 text-xs">Score minimum requis : {passingScore}%</p>
               </div>
               {!showResults && (
@@ -1119,7 +1119,7 @@ export function TrainingPlayer({ assigned, userId, onComplete }: { assigned: any
                     {coursePages.map((p, idx) => {
                       const key = p.kind === "module" ? `m${p.data.idx}` : p.kind;
                       const sec = moduleTimesRef.current[key] || 0;
-                      const label = p.kind === "intro" ? "Introduction" : p.kind === "conclusion" ? "Conclusion" : `Module ${p.data.idx + 1} — ${p.data.title}`;
+                      const label = p.kind === "intro" ? "Introduction" : p.kind === "conclusion" ? "Conclusion" : `Module ${p.data.idx + 1} - ${p.data.title}`;
                       const pct = sessionSeconds ? Math.round((sec / sessionSeconds) * 100) : 0;
                       return (
                         <div key={idx} className="flex items-center gap-2 text-xs">

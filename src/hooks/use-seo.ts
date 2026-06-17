@@ -26,9 +26,9 @@ const setMeta = (selector: string, attr: "content" | "href", value: string) => {
 };
 
 const DEFAULTS = {
-  title: "CloudMature | Cloud · DevOps · IA — Conakry, Guinée",
+  title: "CloudMature | Cloud · DevOps · IA - Conakry, Guinée",
   description:
-    "Cloud Mature — Entreprise de technologies spécialisée en Cloud (Azure, AWS, GCP), DevOps et Intelligence Artificielle. Conakry, Guinée.",
+    "Cloud Mature - Entreprise de technologies spécialisée en Cloud (Azure, AWS, GCP), DevOps et Intelligence Artificielle. Conakry, Guinée.",
   url: `${BASE}/`,
 };
 

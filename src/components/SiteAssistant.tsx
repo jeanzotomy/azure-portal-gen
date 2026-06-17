@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
 /**
- * "Mature" — Assistant virtuel public du site Cloud Mature.
+ * "Mature" - Assistant virtuel public du site Cloud Mature.
  * - Affiché uniquement sur les routes publiques (marketing).
  * - Périmètre strict: Cloud Mature uniquement. Aucune donnée personnelle/confidentielle.
  * - Historique conservé en mémoire (pas de persistance).
@@ -71,7 +71,7 @@ export default function SiteAssistant() {
 
   const i18n = locale === "en"
     ? {
-        title: "Maturia — Cloud Mature Assistant",
+        title: "Maturia - Cloud Mature Assistant",
         subtitle: "Ask anything about our services.",
         placeholder: "Ask about our services, expertise, training…",
         send: "Send",
@@ -85,7 +85,7 @@ export default function SiteAssistant() {
         limitCta: "Go to contact form",
       }
     : {
-        title: "Maturia — Assistant Cloud Mature",
+        title: "Maturia - Assistant Cloud Mature",
         subtitle: "Posez vos questions sur nos services.",
         placeholder: "Posez votre question sur nos services, expertises, formations…",
         send: "Envoyer",

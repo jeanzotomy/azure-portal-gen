@@ -88,7 +88,7 @@ const formatCurrency = (n: number, currency: string) => {
 };
 
 const formatDate = (iso?: string | null) => {
-  if (!iso) return "—";
+  if (!iso) return "-";
   const d = new Date(iso);
   return d.toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" });
 };
@@ -331,7 +331,7 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
                         {goesToAnnex && (
                           <div style={{ marginTop: "3px", fontSize: "9px", color: cyan, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "4px" }}>
                             <span style={{ display: "inline-block", width: "6px", height: "6px", borderRadius: "50%", background: cyan }} />
-                            Détail complet — voir Annexe (p. 2)
+                            Détail complet - voir Annexe (p. 2)
                           </div>
                         )}
                       </>
@@ -356,7 +356,7 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
                   )}
                 </td>
                 <td style={{ padding: "10px 8px", textAlign: "center", verticalAlign: "top", color: item.discount_rate ? "#DC2626" : "#9CA3AF" }}>
-                  {item.discount_rate ? `−${item.discount_rate}%` : "—"}
+                  {item.discount_rate ? `−${item.discount_rate}%` : "-"}
                 </td>
                 <td style={{ padding: "10px 8px", textAlign: "right", fontWeight: 700, verticalAlign: "top" }}>
                   {formatCurrency(item.total, data.currency)}
@@ -396,7 +396,7 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
               }}
             >
               <span>Remise ({data.discount_rate}%)</span>
-              <span>— {formatCurrency(data.discount_amount, data.currency)}</span>
+              <span>- {formatCurrency(data.discount_amount, data.currency)}</span>
             </div>
             <div
               style={{
@@ -422,7 +422,7 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
                 }}
               >
                 <span>Escompte paiement anticipé ({data.early_payment_discount_rate}%)</span>
-                <span>— {formatCurrency(data.early_payment_discount_amount ?? 0, data.currency)}</span>
+                <span>- {formatCurrency(data.early_payment_discount_amount ?? 0, data.currency)}</span>
               </div>
             )}
             <div
@@ -460,7 +460,7 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
               )}
               <div style={{ borderTop: `1px solid ${navy}`, marginTop: "4px", paddingTop: "4px" }}>
                 <div style={{ fontSize: "12px", fontWeight: 700, color: navy }}>
-                  {data.issuer.full_name || "—"}
+                  {data.issuer.full_name || "-"}
                 </div>
                 {data.issuer.role && (
                   <div style={{ fontSize: "10px", color: cyan, fontWeight: 600, textTransform: "capitalize" }}>
@@ -487,7 +487,7 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
           {hasAnnex && <span style={{ float: "right", color: navy, fontWeight: 600 }}>Page 1 / 2</span>}
         </div>
         </div>
-        {/* ───────── ANNEXE — Descriptions détaillées ───────── */}
+        {/* ───────── ANNEXE - Descriptions détaillées ───────── */}
         {hasAnnex && (
           <div className="invoice-page" style={{ ...pageStyle, pageBreakBefore: "always" }}>
             {/* En-tête annexe */}

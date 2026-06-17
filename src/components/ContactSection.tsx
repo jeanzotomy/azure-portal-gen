@@ -8,7 +8,7 @@ import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "@/i18n/LanguageContext";
 
-// Limits — also enforced by audit on contact_requests table
+// Limits - also enforced by audit on contact_requests table
 const LIMITS = { name: 100, email: 255, company: 150, message: 2000 };
 
 export function ContactSection() {
@@ -16,7 +16,7 @@ export function ContactSection() {
   const { t, locale } = useTranslation();
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({ name: "", email: "", company: "", message: "" });
-  // Honeypot — bots tend to fill every visible-or-not input
+  // Honeypot - bots tend to fill every visible-or-not input
   const [hp, setHp] = useState("");
   const [mountedAt] = useState(() => Date.now());
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -218,7 +218,7 @@ export function ContactSection() {
           </div>
 
           <form onSubmit={handleSubmit} className="glass rounded-2xl p-8 space-y-4">
-            {/* Honeypot — hidden from real users, visible to bots */}
+            {/* Honeypot - hidden from real users, visible to bots */}
             <div aria-hidden="true" style={{ position: "absolute", left: "-9999px", width: 1, height: 1, overflow: "hidden" }}>
               <label htmlFor="website">Site web</label>
               <input id="website" name="website" type="text" tabIndex={-1} autoComplete="off" value={hp} onChange={(e) => setHp(e.target.value)} />

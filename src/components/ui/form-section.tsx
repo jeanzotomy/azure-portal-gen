@@ -2,7 +2,7 @@ import * as React from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * FormSection — glassmorphism card to group related form fields.
+ * FormSection - glassmorphism card to group related form fields.
  * Used to refactor long forms into clear, accessible sections.
  */
 interface FormSectionProps extends Omit<React.HTMLAttributes<HTMLElement>, "title"> {
@@ -50,7 +50,7 @@ export const FormSection = React.forwardRef<HTMLElement, FormSectionProps>(
 FormSection.displayName = "FormSection";
 
 /**
- * FormGrid — responsive 1/2 column grid for paired fields inside a section.
+ * FormGrid - responsive 1/2 column grid for paired fields inside a section.
  */
 export const FormGrid: React.FC<React.HTMLAttributes<HTMLDivElement> & { columns?: 1 | 2 | 3 }> = ({
   className,

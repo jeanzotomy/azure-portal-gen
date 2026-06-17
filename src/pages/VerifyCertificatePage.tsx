@@ -43,10 +43,10 @@ export default function VerifyCertificatePage() {
   }, [code]);
 
   const pageTitle = cert
-    ? `Certificat de ${cert.candidate_name} — ${cert.training_title} | CloudMature`
+    ? `Certificat de ${cert.candidate_name} - ${cert.training_title} | CloudMature`
     : "Vérification certificat | CloudMature";
   const pageDesc = cert
-    ? `${cert.candidate_name} a validé la formation « ${cert.training_title} » avec CloudMature. Authenticité vérifiée — code ${cert.verification_code}.`
+    ? `${cert.candidate_name} a validé la formation « ${cert.training_title} » avec CloudMature. Authenticité vérifiée - code ${cert.verification_code}.`
     : "Vérifiez l'authenticité d'un certificat de formation délivré par CloudMature.";
   const canonical = `${APP_URL}/verify/${(code || "").toUpperCase()}`;
 

@@ -89,7 +89,7 @@ const Email = ({
             Ce message vous a été adressé par {senderName || 'l\'équipe CloudMature'}
             {senderRole ? ` (${senderRole})` : ''}. Pour toute réponse, écrivez à{' '}
             <Link href="mailto:info@cloudmature.com" style={{ color: '#0099cc' }}>info@cloudmature.com</Link>
-            {' '}— votre message sera transmis à l'expéditeur.
+            {' '}- votre message sera transmis à l'expéditeur.
           </Text>
           <Text style={footer}>Bien cordialement,<br />L'équipe {SITE_NAME}</Text>
         </Container>
@@ -106,7 +106,7 @@ export const template = {
     recipientName: 'Mamadou Diallo',
     senderName: 'Aïssatou Bah',
     senderRole: 'Responsable RH',
-    messageSubject: 'Rappel — formation sécurité à finaliser',
+    messageSubject: 'Rappel - formation sécurité à finaliser',
     messageBody: "Bonjour,\n\nMerci de bien vouloir compléter la formation \"Sécurité de l'information\" avant vendredi.\n\nN'hésitez pas à revenir vers moi si vous avez la moindre question.",
     attachments: [
       { name: 'guide-securite.pdf', url: 'https://example.com/file.pdf', size: 245678, contentType: 'application/pdf' },

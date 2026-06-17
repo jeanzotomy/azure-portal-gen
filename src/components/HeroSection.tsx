@@ -44,7 +44,7 @@ export function HeroSection() {
             </div>
             <h1
               className="text-4xl md:text-6xl lg:text-7xl font-extrabold leading-tight text-primary-foreground mb-6"
-              aria-label="Cloud Mature — Conseil Cloud, DevOps et Intelligence Artificielle en Guinée"
+              aria-label="Cloud Mature - Conseil Cloud, DevOps et Intelligence Artificielle en Guinée"
             >
               {words.map((word: string, i: number) => (
                 <span

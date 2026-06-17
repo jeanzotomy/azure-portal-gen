@@ -34,7 +34,7 @@ interface JobPosting {
 
 export default function CareersPage() {
   useSeo({
-    title: "Carrières — Offres d'emploi Tech | CloudMature",
+    title: "Carrières - Offres d'emploi Tech | CloudMature",
     description:
       "Découvrez les offres d'emploi CloudMature à Conakry : Cloud, DevOps, IA. Postulez en ligne, sans inscription requise.",
     path: "/careers",
@@ -51,9 +51,9 @@ export default function CareersPage() {
   const { toast } = useToast();
 
   const SPONTANEOUS_TYPES = [
-    { id: "11111111-1111-1111-1111-111111111101", title: "Candidature spontanée — Emploi", label: "Emploi", desc: "CDI · CDD · Alternance", icon: Briefcase },
-    { id: "11111111-1111-1111-1111-111111111102", title: "Candidature spontanée — Stage", label: "Stage", desc: "Stagiaire · Apprenti", icon: GraduationCap },
-    { id: "11111111-1111-1111-1111-111111111103", title: "Candidature spontanée — Freelance", label: "Freelance", desc: "Mission · Consultant", icon: Code2 },
+    { id: "11111111-1111-1111-1111-111111111101", title: "Candidature spontanée - Emploi", label: "Emploi", desc: "CDI · CDD · Alternance", icon: Briefcase },
+    { id: "11111111-1111-1111-1111-111111111102", title: "Candidature spontanée - Stage", label: "Stage", desc: "Stagiaire · Apprenti", icon: GraduationCap },
+    { id: "11111111-1111-1111-1111-111111111103", title: "Candidature spontanée - Freelance", label: "Freelance", desc: "Mission · Consultant", icon: Code2 },
   ] as const;
 
   const uniqueValues = (key: keyof JobPosting) =>
@@ -92,7 +92,7 @@ export default function CareersPage() {
     `${window.location.origin}${jobPath(job.id, job.title)}`;
 
   const buildShareText = (job: JobPosting) =>
-    `Offre d'emploi chez Cloud Mature : ${job.title} (${job.contract_type}) — ${job.location}`;
+    `Offre d'emploi chez Cloud Mature : ${job.title} (${job.contract_type}) - ${job.location}`;
 
   const shareTo = (network: "linkedin" | "facebook" | "x" | "whatsapp" | "email", job: JobPosting) => {
     const url = encodeURIComponent(buildShareUrl(job));
@@ -117,7 +117,7 @@ export default function CareersPage() {
   };
 
   useEffect(() => {
-    document.title = "Carrières — CloudMature";
+    document.title = "Carrières - CloudMature";
     (async () => {
       const { data } = await supabase
         .from("job_postings")

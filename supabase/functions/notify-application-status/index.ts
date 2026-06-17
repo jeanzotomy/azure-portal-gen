@@ -48,7 +48,7 @@ function buildEmail(
   const tracking = trackingBlock(data.trackingId)
 
   if (status === 'received') {
-    const subject = `Nous avons bien reçu votre candidature — ${data.jobTitle || 'CloudMature'}`
+    const subject = `Nous avons bien reçu votre candidature - ${data.jobTitle || 'CloudMature'}`
     const html = wrap(subject, `
       <h1 style="font-size:22px;color:#161f2e;margin:0 0 20px;">Candidature bien reçue 🎯</h1>
       <p style="font-size:14px;color:#4a5568;line-height:1.6;margin:0 0 16px;">Bonjour ${name},</p>
@@ -72,7 +72,7 @@ function buildEmail(
   }
 
   if (status === 'entretien') {
-    const subject = `Invitation à un entretien — ${data.jobTitle || 'votre candidature'}`
+    const subject = `Invitation à un entretien - ${data.jobTitle || 'votre candidature'}`
     const msg = escapeHtml(data.interviewMessage || '').replace(/\n/g, '<br/>')
     const msgBlock = msg
       ? `<div style="background:#f5fafd;border-left:4px solid #0099cc;padding:16px 18px;margin:0 0 20px;border-radius:6px;font-size:14px;color:#2d3748;line-height:1.6;">${msg}</div>`
@@ -88,7 +88,7 @@ function buildEmail(
   }
 
   if (status === 'refusee') {
-    const subject = `Suite donnée à votre candidature — ${data.jobTitle || 'le poste'}`
+    const subject = `Suite donnée à votre candidature - ${data.jobTitle || 'le poste'}`
     const html = wrap(subject, `
       <h1 style="font-size:22px;color:#161f2e;margin:0 0 20px;">Suite donnée à votre candidature</h1>
       <p style="font-size:14px;color:#4a5568;line-height:1.6;margin:0 0 16px;">Bonjour ${name},</p>
@@ -101,7 +101,7 @@ function buildEmail(
   }
 
   // acceptee
-  const subject = `Bienvenue chez ${SITE_NAME} — votre candidature est acceptée 🎉`
+  const subject = `Bienvenue chez ${SITE_NAME} - votre candidature est acceptée 🎉`
   const url = escapeHtml(data.activationUrl || `${SITE_URL}/auth?welcome=1`)
   const html = wrap(subject, `
     <h1 style="font-size:22px;color:#161f2e;margin:0 0 20px;">Félicitations ${name} !</h1>

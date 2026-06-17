@@ -252,7 +252,7 @@ serve(async (req) => {
         });
         graphHeaders["Content-Type"] = "application/json";
         
-        // Try to create; if conflict (409), folder already exists — find it
+        // Try to create; if conflict (409), folder already exists - find it
         const ensureResponse = await fetch(`${GRAPH_BASE}/${graphPath}`, {
           method: "POST",
           headers: graphHeaders,

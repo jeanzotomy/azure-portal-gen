@@ -49,8 +49,8 @@ const setMeta = (selector: string, attr: "content" | "href", value: string) => {
 };
 
 const DEFAULT_META = {
-  title: "CloudMature | Cloud · DevOps · IA — Conakry, Guinée",
-  description: "Cloud Mature — Entreprise de technologies spécialisée en Cloud (Azure, AWS, GCP), DevOps et Intelligence Artificielle. Conakry, Guinée.",
+  title: "CloudMature | Cloud · DevOps · IA - Conakry, Guinée",
+  description: "Cloud Mature - Entreprise de technologies spécialisée en Cloud (Azure, AWS, GCP), DevOps et Intelligence Artificielle. Conakry, Guinée.",
   url: "https://cloudmature.com/",
   image: "https://cloudmature.com/og-image.jpg",
 };
@@ -146,14 +146,14 @@ export default function JobDetailPage() {
     if (!job) return;
     const path = jobPath(job.id, job.title);
     const url = `https://cloudmature.com${path}`;
-    const title = `${job.title} — ${job.contract_type} · ${job.location} | CloudMature`;
+    const title = `${job.title} - ${job.contract_type} · ${job.location} | CloudMature`;
     const desc = (job.description || "")
       .replace(/\s+/g, " ")
       .trim()
       .slice(0, 160);
     const description = desc
       ? `${desc}${desc.length === 160 ? "…" : ""}`
-      : `Offre d'emploi chez CloudMature : ${job.title} (${job.contract_type}) — ${job.location}.`;
+      : `Offre d'emploi chez CloudMature : ${job.title} (${job.contract_type}) - ${job.location}.`;
 
     document.title = title;
     setMeta('meta[name="description"]', "content", description);
@@ -220,7 +220,7 @@ export default function JobDetailPage() {
     ? `https://zwzazxebufydnaxezngx.supabase.co/functions/v1/job-share?slug=${slugify(job.title)}`
     : "";
   const shareText = job
-    ? `Offre d'emploi chez Cloud Mature : ${job.title} (${job.contract_type}) — ${job.location}`
+    ? `Offre d'emploi chez Cloud Mature : ${job.title} (${job.contract_type}) - ${job.location}`
     : "";
 
   const shareTo = (network: "linkedin" | "facebook" | "x" | "whatsapp" | "email") => {

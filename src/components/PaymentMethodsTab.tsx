@@ -36,7 +36,7 @@ const TYPE_META: Record<PaymentType, { label: string; icon: typeof CreditCard; h
   virement: { label: "Virement bancaire", icon: Building2, hint: "Renseignez les coordonnées bancaires complètes (banque, IBAN, SWIFT)." },
   mobile_money: { label: "Mobile Money", icon: Smartphone, hint: "Indiquez l'opérateur (Orange, MTN…) et le numéro à créditer." },
   depot: { label: "Dépôt en espèces", icon: PiggyBank, hint: "Banque destinataire et numéro de compte à créditer en agence." },
-  especes: { label: "Espèces", icon: Banknote, hint: "Aucune coordonnée bancaire requise — précisez le bénéficiaire et le lieu de remise." },
+  especes: { label: "Espèces", icon: Banknote, hint: "Aucune coordonnée bancaire requise - précisez le bénéficiaire et le lieu de remise." },
   cheque: { label: "Chèque", icon: FileText, hint: "Indiquez le bénéficiaire (à l'ordre de) et la banque émettrice si nécessaire." },
   autre: { label: "Autre", icon: CreditCard, hint: "Mode personnalisé : remplissez uniquement les champs pertinents." },
 };
@@ -146,7 +146,7 @@ export default function PaymentMethodsTab() {
       <div className="flex items-center justify-between flex-wrap gap-2">
         <div>
           <h2 className="text-xl font-bold flex items-center gap-2"><CreditCard size={20} /> Modes de paiement</h2>
-          <p className="text-sm text-muted-foreground">Catalogue centralisé — apparaîtra dans le formulaire de facture.</p>
+          <p className="text-sm text-muted-foreground">Catalogue centralisé - apparaîtra dans le formulaire de facture.</p>
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
@@ -252,9 +252,9 @@ export default function PaymentMethodsTab() {
                   <Select value={editing?.currency ?? "GNF"} onValueChange={(v) => setEditing({ ...editing, currency: v as Currency })}>
                     <SelectTrigger><SelectValue /></SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="GNF">GNF — Franc guinéen</SelectItem>
-                      <SelectItem value="USD">USD — Dollar US</SelectItem>
-                      <SelectItem value="EUR">EUR — Euro</SelectItem>
+                      <SelectItem value="GNF">GNF - Franc guinéen</SelectItem>
+                      <SelectItem value="USD">USD - Dollar US</SelectItem>
+                      <SelectItem value="EUR">EUR - Euro</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>

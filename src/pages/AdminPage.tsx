@@ -814,7 +814,7 @@ function AgentDashboard({ user }: { user: SupaUser }) {
         <div className="relative flex items-center justify-between">
           <div>
             <h1 className="text-2xl font-bold text-foreground">Bonjour, {user.user_metadata?.full_name || user.email?.split("@")[0]}</h1>
-            <p className="text-muted-foreground mt-1">Voici votre espace agent — gérez les tickets clients.</p>
+            <p className="text-muted-foreground mt-1">Voici votre espace agent - gérez les tickets clients.</p>
           </div>
            <div className="hidden md:flex items-center gap-3 text-sm text-muted-foreground">
             <Button variant="outline" size="sm" onClick={loadData} className="gap-1.5">
@@ -1491,7 +1491,7 @@ function AdminProjectsInner({ readOnly = false, assignedCount }: { readOnly?: bo
                 {p.gestionnaire_id && profiles[p.gestionnaire_id] && (
                   <div className="flex items-center gap-2 mb-3">
                     <UserCheck size={14} className="text-accent shrink-0" />
-                    <span className="text-xs text-accent font-medium">Gestionnaire : {profiles[p.gestionnaire_id]?.full_name || "—"}</span>
+                    <span className="text-xs text-accent font-medium">Gestionnaire : {profiles[p.gestionnaire_id]?.full_name || "-"}</span>
                   </div>
                 )}
 
@@ -2595,7 +2595,7 @@ function AdminUsers() {
     { v: "gestionnaire", l: "Gestionnaire" }, { v: "agent", l: "Agent" }, { v: "hr", l: "RH" }, { v: "admin", l: "Admin" },
   ];
 
-  const renderEmail = (uid: string) => mfaStatus[uid]?.email || "—";
+  const renderEmail = (uid: string) => mfaStatus[uid]?.email || "-";
 
   return (
     <div className="space-y-6 animate-fade-up">
@@ -2813,11 +2813,11 @@ function AdminUsers() {
                         <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-sm font-bold flex-shrink-0">
                           {(p.full_name || "?").charAt(0).toUpperCase()}
                         </div>
-                        <span className="font-medium">{p.full_name || "—"}</span>
+                        <span className="font-medium">{p.full_name || "-"}</span>
                       </div>
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">{renderEmail(p.user_id)}</TableCell>
-                    <TableCell className="text-xs text-muted-foreground">{p.company || "—"}</TableCell>
+                    <TableCell className="text-xs text-muted-foreground">{p.company || "-"}</TableCell>
                     <TableCell><span className={`text-[11px] px-2 py-0.5 rounded-full font-semibold border ${badge.color}`}>{badge.label}</span></TableCell>
                     <TableCell>
                       {p.deleted_at ? <span className="text-xs text-destructive">Supprimé</span>
@@ -2825,7 +2825,7 @@ function AdminUsers() {
                         : <span className="text-xs text-emerald-600 flex items-center gap-1"><ShieldCheck size={11} />Actif</span>}
                     </TableCell>
                     <TableCell>
-                      {enrolled ? <Shield size={14} className="text-emerald-600" /> : <span className="text-xs text-muted-foreground/40">—</span>}
+                      {enrolled ? <Shield size={14} className="text-emerald-600" /> : <span className="text-xs text-muted-foreground/40">-</span>}
                     </TableCell>
                     <TableCell className="text-right">
                       <Button size="sm" variant="outline" className="h-7 gap-1" onClick={() => openEditUser(p)}>
@@ -2886,7 +2886,7 @@ function AdminUsers() {
             <div className="flex items-center justify-between">
               <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
                 <Shield size={20} className="text-primary" />
-                MFA — {mfaDialogUser.full_name || "Utilisateur"}
+                MFA - {mfaDialogUser.full_name || "Utilisateur"}
               </h3>
               <button onClick={() => setMfaDialogUser(null)} className="p-1 rounded-lg hover:bg-muted transition-colors">
                 <X size={18} className="text-muted-foreground" />
@@ -2976,7 +2976,7 @@ function AdminUsers() {
         <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <Pencil size={18} /> Gérer l'utilisateur — {editForm.full_name || "Utilisateur"}
+              <Pencil size={18} /> Gérer l'utilisateur - {editForm.full_name || "Utilisateur"}
             </DialogTitle>
           </DialogHeader>
           <Tabs defaultValue="profile" className="mt-2">
@@ -2989,7 +2989,7 @@ function AdminUsers() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="md:col-span-2">
               <label className="text-sm font-medium text-muted-foreground">Email (non modifiable)</label>
-              <Input value={editingUser ? (mfaStatus[editingUser.user_id]?.email || "—") : ""} disabled className="mt-1 bg-muted/50 cursor-not-allowed" />
+              <Input value={editingUser ? (mfaStatus[editingUser.user_id]?.email || "-") : ""} disabled className="mt-1 bg-muted/50 cursor-not-allowed" />
             </div>
             <div>
               <label className="text-sm font-medium text-foreground">Nom complet</label>
@@ -3332,7 +3332,7 @@ function AdminUsers() {
                       <div key={i} className="px-3 py-2 flex items-center justify-between text-sm">
                         <div>
                           <span className="font-medium text-foreground">{u.email}</span>
-                          {u.full_name && <span className="text-muted-foreground ml-2">— {u.full_name}</span>}
+                          {u.full_name && <span className="text-muted-foreground ml-2">- {u.full_name}</span>}
                         </div>
                         <span className="text-xs px-2 py-0.5 rounded-full bg-muted text-muted-foreground">{u.role}</span>
                       </div>

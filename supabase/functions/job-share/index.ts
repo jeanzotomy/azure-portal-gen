@@ -1,4 +1,4 @@
-// Public edge function — serves OpenGraph HTML for job postings
+// Public edge function - serves OpenGraph HTML for job postings
 // so social networks (LinkedIn, Facebook, WhatsApp, X) can read the
 // correct title/description when sharing /careers/:id links.
 //
@@ -106,7 +106,7 @@ Deno.serve(async (req) => {
 
   let title = "Offres d'emploi | CloudMature";
   let description =
-    "Découvrez les offres d'emploi de CloudMature — Cloud, DevOps et IA à Conakry, Guinée.";
+    "Découvrez les offres d'emploi de CloudMature - Cloud, DevOps et IA à Conakry, Guinée.";
 
   try {
     const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -128,11 +128,11 @@ Deno.serve(async (req) => {
     if (job) {
       const slug = slugify(job.title);
       targetUrl = `${SITE_URL}/careers/${slug || job.id}`;
-      title = `${job.title} — ${job.contract_type} · ${job.location} | CloudMature`;
+      title = `${job.title} - ${job.contract_type} · ${job.location} | CloudMature`;
       const cleaned = (job.description || "").replace(/\s+/g, " ").trim();
       description = cleaned
         ? cleaned.slice(0, 200) + (cleaned.length > 200 ? "…" : "")
-        : `Offre d'emploi chez CloudMature : ${job.title} (${job.contract_type}) — ${job.location}.`;
+        : `Offre d'emploi chez CloudMature : ${job.title} (${job.contract_type}) - ${job.location}.`;
     } else if (id) {
       targetUrl = `${SITE_URL}/careers/${id}`;
     } else if (titleSlug) {

@@ -144,7 +144,7 @@ export default function EmployeeTrainingAssignmentPage({
     const inProgress = total - done;
     const avg = (() => {
       const scored = assigned.filter((a) => a.quiz_score != null);
-      if (!scored.length) return "—";
+      if (!scored.length) return "-";
       return `${Math.round(scored.reduce((s, a) => s + (a.quiz_score || 0), 0) / scored.length)}%`;
     })();
     return [

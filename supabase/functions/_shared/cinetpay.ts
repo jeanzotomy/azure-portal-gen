@@ -42,7 +42,7 @@ export async function loadCinetPayCreds(): Promise<CinetPayCredentials | null> {
         siteId = cfg.site_id || siteId;
         secretKey = cfg.secret_key || secretKey;
       }
-    } catch (_) { /* ignore — fall back to env */ }
+    } catch (_) { /* ignore - fall back to env */ }
   }
 
   if (!apiKey || !siteId || !secretKey) return null;
