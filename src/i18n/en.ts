@@ -24,7 +24,7 @@ const en = {
       { title: "Operational Excellence", desc: "CI/CD automation, Infrastructure-as-Code (Terraform, Bicep, CloudFormation), advanced monitoring and FinOps governance to maximize your ROI." },
       { title: "Artificial Intelligence", desc: "Deploy AI solutions on Azure OpenAI, AWS Bedrock and Google Vertex AI. Microsoft Copilot integration and intelligent automation of your business processes." },
       { title: "Tailored Partnership", desc: "Hands-on partnership with certified local teams that are available and committed. Customized solutions adapted to every industry." },
-      { title: "Security & Compliance", desc: "Zero Trust policies, Microsoft Defender, AWS Security Hub, Google Chronicle. ISO 27001, SOC 2 and GDPR compliance to protect your digital assets." },
+      { title: "Security, Sovereignty & Compliance", desc: "Sovereign-cloud oriented architectures and data residency, Zero Trust policies, Microsoft Defender, AWS Security Hub, Google Chronicle. ISO 27001, SOC 2 and GDPR compliance to protect your digital assets." },
       { title: "Skills Development", desc: "Training and coaching on Microsoft, AWS and GCP ecosystems to ensure technological autonomy and long-term success of your transformation." },
     ],
   },
