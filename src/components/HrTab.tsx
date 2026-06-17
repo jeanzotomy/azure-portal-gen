@@ -31,6 +31,30 @@ import CandidatesKanban from "./hr/CandidatesKanban";
 import CandidateDetailDrawer from "./hr/CandidateDetailDrawer";
 import { exportCsv } from "@/lib/csv-export";
 
+/**
+ * Nettoie une sortie IA pour un rendu professionnel:
+ * - retire les emphases markdown (** *** *) et titres `#`
+ * - normalise les puces en "- " et conserve les listes numérotées "1. "
+ * - réduit les espaces/sauts de ligne superflus
+ */
+function sanitizeAiText(input: string): string {
+  if (!input) return "";
+  let s = input.replace(/\r\n/g, "\n");
+  // Remove markdown emphasis markers while keeping the inner text
+  s = s.replace(/\*{1,3}([^*\n]+?)\*{1,3}/g, "$1");
+  // Strip any remaining stray asterisks
+  s = s.replace(/\*+/g, "");
+  // Remove markdown headings #, ##, ### etc. (keep the text)
+  s = s.replace(/^\s{0,3}#{1,6}\s+/gm, "");
+  // Normalize bullet markers (•, *, –, —) to "- "
+  s = s.replace(/^\s*[•·–—]\s+/gm, "- ");
+  // Collapse 3+ blank lines
+  s = s.replace(/\n{3,}/g, "\n\n");
+  // Trim trailing spaces per line
+  s = s.split("\n").map((l) => l.replace(/\s+$/g, "")).join("\n");
+  return s.trim();
+}
+
 type JobStatus = "brouillon" | "publiee" | "fermee";
 type ContractType = "CDI" | "CDD" | "Stage" | "Freelance" | "Alternance";
 type AppStatus = "nouvelle" | "en_revue" | "entretien" | "acceptee" | "refusee";
