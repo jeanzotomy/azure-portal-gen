@@ -47,7 +47,14 @@ export default function CareersPage() {
   const [departmentFilter, setDepartmentFilter] = useState<string>("all");
   const [locationFilter, setLocationFilter] = useState<string>("all");
   const [sectorFilter, setSectorFilter] = useState<string>("all");
+  const [spontaneous, setSpontaneous] = useState<{ id: string; title: string } | null>(null);
   const { toast } = useToast();
+
+  const SPONTANEOUS_TYPES = [
+    { id: "11111111-1111-1111-1111-111111111101", title: "Candidature spontanée — Emploi", label: "Emploi", desc: "CDI · CDD · Alternance", icon: Briefcase },
+    { id: "11111111-1111-1111-1111-111111111102", title: "Candidature spontanée — Stage", label: "Stage", desc: "Stagiaire · Apprenti", icon: GraduationCap },
+    { id: "11111111-1111-1111-1111-111111111103", title: "Candidature spontanée — Freelance", label: "Freelance", desc: "Mission · Consultant", icon: Code2 },
+  ] as const;
 
   const uniqueValues = (key: keyof JobPosting) =>
     Array.from(new Set(jobs.map((j) => j[key]).filter((v): v is string => !!v && typeof v === "string"))).sort();
