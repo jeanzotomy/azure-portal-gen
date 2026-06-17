@@ -146,6 +146,9 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
   const [appJobFilter, setAppJobFilter] = useState<string>("all");
   const [appView, setAppView] = useState<"list" | "kanban">("kanban");
   const [detailId, setDetailId] = useState<string | null>(null);
+  // AI assistant (job creation form)
+  const [aiPrompt, setAiPrompt] = useState("");
+  const [aiAction, setAiAction] = useState<null | "generate" | "improve" | "shorten" | "translate_en">(null);
   const [form, setForm] = useState({
     title: "",
     department: "",
