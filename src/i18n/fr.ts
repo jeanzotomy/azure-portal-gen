@@ -82,7 +82,7 @@ const fr = {
       { title: "Expertise Microsoft & Multi-Cloud", desc: "Partenaire Microsoft certifié, avec des compétences avancées sur AWS et Google Cloud pour des architectures hybrides et multi-cloud." },
       { title: "Solutions sur mesure", desc: "De l'architecture à la livraison — licences, équipements, développement applicatif et intégration IA adaptés à votre métier." },
       { title: "Résultats mesurables", desc: "KPIs contractuels, SLA garantis, reporting FinOps et tableaux de bord en temps réel pour un suivi transparent." },
-      { title: "Sécurité de bout en bout", desc: "Zero Trust, SIEM/SOAR (Sentinel, Security Hub), conformité ISO 27001, SOC 2 et RGPD sur toutes les plateformes." },
+      { title: "Sécurité & Souveraineté", desc: "Zero Trust, SIEM/SOAR (Sentinel, Security Hub), architectures orientées cloud souverain et résidence des données, conformité ISO 27001, SOC 2 et RGPD sur toutes les plateformes." },
       { title: "Équipe locale certifiée", desc: "Ingénieurs basés à Conakry, certifiés Azure, AWS et GCP, disponibles et réactifs pour un accompagnement de proximité." },
       { title: "Bilingue FR/EN", desc: "Documentation, support et formation en français et en anglais pour une couverture régionale et internationale." },
     ],
