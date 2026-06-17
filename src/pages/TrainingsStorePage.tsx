@@ -58,6 +58,7 @@ export default function TrainingsStorePage() {
         .select("id, title, description, duration_minutes, category, level, price_cents, currency")
         .eq("active", true)
         .eq("published", true)
+        .eq("audience", "public")
         .order("created_at", { ascending: false });
       setTrainings((data ?? []) as Training[]);
       setLoading(false);

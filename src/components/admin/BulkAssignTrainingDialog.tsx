@@ -62,6 +62,7 @@ export default function BulkAssignTrainingDialog({
         .from("trainings")
         .select("id, title, category")
         .eq("active", true)
+        .eq("audience", "employee")
         .order("title");
       if (error) toast.error(error.message);
       else setTrainings((data || []) as Training[]);

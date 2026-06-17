@@ -2107,6 +2107,7 @@ export type Database = {
         Row: {
           active: boolean
           ai_generated: boolean
+          audience: string
           category: string | null
           content: Json | null
           created_at: string
@@ -2131,6 +2132,7 @@ export type Database = {
         Insert: {
           active?: boolean
           ai_generated?: boolean
+          audience?: string
           category?: string | null
           content?: Json | null
           created_at?: string
@@ -2155,6 +2157,7 @@ export type Database = {
         Update: {
           active?: boolean
           ai_generated?: boolean
+          audience?: string
           category?: string | null
           content?: Json | null
           created_at?: string
@@ -2268,6 +2271,10 @@ export type Database = {
       }
       assign_employee_training_bulk: {
         Args: { _training_id: string; _user_ids: string[] }
+        Returns: number
+      }
+      assign_training_to_all_users: {
+        Args: { _training_id: string }
         Returns: number
       }
       award_badge: {

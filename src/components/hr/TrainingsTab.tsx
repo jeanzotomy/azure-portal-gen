@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { toast } from "sonner";
 import {
   GraduationCap, Plus, Pencil, Trash2, ExternalLink, Loader2, RefreshCw, Users, Sparkles, CheckCircle2, Clock,
-  Brain, FileQuestion, Layers, UserPlus, Wand2, BookOpen,
+  Brain, FileQuestion, Layers, UserPlus, Wand2, BookOpen, Globe, Building2, UsersRound,
 } from "lucide-react";
 import { TrainingMediaEditor, type MediaCapsule } from "./TrainingMediaEditor";
 import { useConfirm } from "@/components/ui/confirm-dialog";
@@ -37,6 +37,9 @@ interface Training {
   topic: string | null;
   level: string | null;
   published?: boolean;
+  audience?: "public" | "employee";
+  price_cents?: number | null;
+  currency?: string | null;
 }
 
 interface CandidateRow {
@@ -59,6 +62,9 @@ const emptyForm = {
   sectors: [] as string[],
   active: true,
   published: false,
+  audience: "employee" as "public" | "employee",
+  price_cents: "" as string,
+  currency: "CAD",
   content: null as any,
   quiz: null as any,
   passing_score: 70,
@@ -88,7 +94,7 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
   const load = useCallback(async () => {
     setLoading(true);
     const [{ data: trs }, { data: procs }, { data: deps }, { data: secs }, { data: grps }] = await Promise.all([
-      supabase.from("trainings").select("id, title, description, url, duration_minutes, category, target_job_titles, active, published, created_by, created_at, updated_at, departments, sectors, content, passing_score, ai_generated, topic, level, price_cents, currency").order("created_at", { ascending: false }),
+      supabase.from("trainings").select("id, title, description, url, duration_minutes, category, target_job_titles, active, published, audience, created_by, created_at, updated_at, departments, sectors, content, passing_score, ai_generated, topic, level, price_cents, currency").order("created_at", { ascending: false }),
       supabase.from("onboarding_processes").select("id, candidate_name, candidate_email, job_id, created_at").eq("kind", "onboarding").order("created_at", { ascending: false }),
       supabase.from("departments").select("name").order("name"),
       supabase.from("sectors").select("name").order("name"),
@@ -133,6 +139,9 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
       sectors: t.sectors || [],
       active: t.active,
       published: !!t.published,
+      audience: (t.audience as any) || (t.published ? "public" : "employee"),
+      price_cents: t.price_cents != null ? String((t.price_cents / 100).toFixed(2)) : "",
+      currency: t.currency || "CAD",
 
       content: t.content,
       quiz: quizData ?? null,
@@ -191,7 +200,10 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
       departments: form.departments,
       sectors: form.sectors,
       active: form.active,
-      published: form.published,
+      published: form.audience === "public",
+      audience: form.audience,
+      price_cents: form.audience === "public" && form.price_cents ? Math.max(0, Math.round(parseFloat(form.price_cents) * 100)) : null,
+      currency: form.audience === "public" ? (form.currency || "CAD").toLowerCase() : null,
 
       content: form.content,
       quiz: form.quiz,
@@ -222,6 +234,20 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
           return;
         }
         toast.success("Formation supprimée");
+        load();
+      },
+    });
+  };
+
+  const assignToAll = (t: Training) => {
+    confirm({
+      title: `Assigner « ${t.title} » à tous les inscrits ?`,
+      description: "Tous les utilisateurs enregistrés sur la plateforme se verront attribuer cette formation. L'opération est idempotente (aucun doublon).",
+      confirmLabel: "Assigner à tous",
+      onConfirm: async () => {
+        const { data, error } = await (supabase as any).rpc("assign_training_to_all_users", { _training_id: t.id });
+        if (error) { toast.error(error.message); return; }
+        toast.success(`Formation assignée à ${data ?? 0} utilisateur(s)`);
         load();
       },
     });
@@ -296,8 +322,11 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
                         {t.ai_generated && <Badge variant="outline" className="text-xs border-primary text-primary"><Brain className="h-2.5 w-2.5 mr-1" />IA</Badge>}
                         {t.quiz?.questions?.length > 0 && <Badge variant="outline" className="text-xs"><FileQuestion className="h-2.5 w-2.5 mr-1" />QCM {t.quiz.questions.length}q</Badge>}
                         {!t.active && <Badge variant="outline">Inactif</Badge>}
-                        {t.published && <Badge className="text-xs bg-emerald-600 hover:bg-emerald-600">Publié</Badge>}
-
+                        {(t.audience || (t.published ? "public" : "employee")) === "public" ? (
+                          <Badge className="text-xs bg-sky-600 hover:bg-sky-600"><Globe className="h-2.5 w-2.5 mr-1" />Catalogue public</Badge>
+                        ) : (
+                          <Badge className="text-xs bg-indigo-600 hover:bg-indigo-600"><Building2 className="h-2.5 w-2.5 mr-1" />Employés</Badge>
+                        )}
                         {t.duration_minutes && <Badge variant="outline" className="text-xs">{t.duration_minutes} min</Badge>}
                       </div>
                       {t.description && <p className="text-sm text-muted-foreground line-clamp-2">{t.description}</p>}
@@ -315,8 +344,9 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
                     </div>
                     {!readOnly && (
                       <div className="flex flex-col gap-1">
-                        <Button size="icon" variant="ghost" onClick={() => openEdit(t)}><Pencil className="h-4 w-4" /></Button>
-                        <Button size="icon" variant="ghost" onClick={() => remove(t.id)}><Trash2 className="h-4 w-4 text-destructive" /></Button>
+                        <Button size="icon" variant="ghost" onClick={() => openEdit(t)} title="Modifier"><Pencil className="h-4 w-4" /></Button>
+                        <Button size="icon" variant="ghost" onClick={() => assignToAll(t)} title="Assigner à tous les inscrits"><UsersRound className="h-4 w-4 text-primary" /></Button>
+                        <Button size="icon" variant="ghost" onClick={() => remove(t.id)} title="Supprimer"><Trash2 className="h-4 w-4 text-destructive" /></Button>
                       </div>
                     )}
                   </div>
@@ -546,10 +576,35 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
               <Switch checked={form.active} onCheckedChange={v => setForm({ ...form, active: v })} />
               <Label>Actif</Label>
             </div>
-            <div className="flex items-center gap-2">
-              <Switch checked={form.published} onCheckedChange={v => setForm({ ...form, published: v })} />
-              <Label>Publier sur le site (menu Formations)</Label>
+            <div className="space-y-2">
+              <Label className="text-xs">Audience</Label>
+              <Select value={form.audience} onValueChange={(v) => setForm({ ...form, audience: v as "public" | "employee", published: v === "public" })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="employee">Employés (assignée via HR)</SelectItem>
+                  <SelectItem value="public">Catalogue public (visible par tous les inscrits)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
+            {form.audience === "public" && (
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1">
+                  <Label className="text-xs">Prix (laisser vide = gratuit)</Label>
+                  <Input type="number" min="0" step="0.01" value={form.price_cents} onChange={(e) => setForm({ ...form, price_cents: e.target.value })} placeholder="0.00" />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Devise</Label>
+                  <Select value={form.currency} onValueChange={(v) => setForm({ ...form, currency: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="CAD">CAD</SelectItem>
+                      <SelectItem value="USD">USD</SelectItem>
+                      <SelectItem value="EUR">EUR</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
 
           </div>
           <DialogFooter>
