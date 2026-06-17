@@ -414,7 +414,7 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
               </label>
               <Input
                 placeholder="+224 ..."
-                className={lockedFields.phone ? "bg-muted cursor-not-allowed" : ""}
+                className={`text-primary font-medium ${lockedFields.phone ? "bg-muted cursor-not-allowed" : ""}`}
                 value={form.phone}
                 onChange={(e) => update("phone", e.target.value)}
                 readOnly={lockedFields.phone}
