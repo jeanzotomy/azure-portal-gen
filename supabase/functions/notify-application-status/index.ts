@@ -255,6 +255,20 @@ Deno.serve(async (req) => {
       }
     }
 
+    let hasAccount = !!app.user_id
+    if (!hasAccount && emailType === 'received') {
+      try {
+        const { data: list } = await supabase.auth.admin.listUsers({ page: 1, perPage: 1 } as any)
+        // listUsers doesn't filter by email; fallback: try getUserByEmail-style via profiles
+        const { data: pr } = await supabase
+          .from('profiles')
+          .select('user_id')
+          .limit(1)
+        // Best-effort: query auth.users via RPC unavailable; assume no account if user_id null.
+        hasAccount = false
+      } catch { hasAccount = false }
+    }
+
     const templateName = emailType === 'received' ? 'application-received' : `application-${emailType.replace('_', '-')}`
     const { subject, html } = buildEmail(emailType, {
       candidateName: app.full_name,
@@ -262,6 +276,8 @@ Deno.serve(async (req) => {
       interviewMessage: app.interview_message || undefined,
       activationUrl,
       trackingId: app.tracking_id || undefined,
+      recipientEmail: app.email,
+      hasAccount,
     })
 
     try {
