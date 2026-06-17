@@ -306,13 +306,13 @@ export default function SeoTab() {
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground text-xs">Dernière soumission</span>
                 <span className="text-xs text-foreground">
-                  {live.sitemap.lastSubmitted ? new Date(live.sitemap.lastSubmitted).toLocaleDateString("fr-FR") : "—"}
+                  {live.sitemap.lastSubmitted ? new Date(live.sitemap.lastSubmitted).toLocaleDateString("fr-FR") : "-"}
                 </span>
               </div>
               <div className="flex justify-between items-center">
                 <span className="text-muted-foreground text-xs">Dernier crawl Google</span>
                 <span className="text-xs text-foreground">
-                  {live.sitemap.lastDownloaded ? new Date(live.sitemap.lastDownloaded).toLocaleDateString("fr-FR") : "—"}
+                  {live.sitemap.lastDownloaded ? new Date(live.sitemap.lastDownloaded).toLocaleDateString("fr-FR") : "-"}
                 </span>
               </div>
               <div className="flex justify-between items-center pt-2 border-t border-border/50">

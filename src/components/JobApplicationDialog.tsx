@@ -174,7 +174,7 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
     if (errors[k]) setErrors((e) => { const n = { ...e }; delete n[k]; return n; });
   };
 
-  // Upload to public Supabase Storage bucket — works for anonymous users
+  // Upload to public Supabase Storage bucket - works for anonymous users
   const uploadFile = async (file: File, fileName: string): Promise<string | null> => {
     if (file.size > MAX_FILE) {
       toast({ title: "Fichier trop volumineux", description: `${file.name} dépasse 5 Mo.`, variant: "destructive" });

@@ -48,7 +48,7 @@ const STATUS_MAP: Record<string, { label: string; state: PayState; cls: string; 
 const fmtMoney = (n: number, c: string) =>
   `${new Intl.NumberFormat("fr-FR").format(Math.round(Number(n) || 0))} ${c}`;
 const fmtDate = (iso?: string | null) =>
-  iso ? new Date(iso).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" }) : "—";
+  iso ? new Date(iso).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" }) : "-";
 
 export default function PortalInvoicesTab({ user: _user }: { user: SupaUser }) {
   const [invoices, setInvoices] = useState<InvoiceRow[]>([]);

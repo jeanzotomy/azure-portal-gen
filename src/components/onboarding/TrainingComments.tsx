@@ -162,7 +162,7 @@ export function TrainingComments({
   const submit = async () => {
     if (!body.trim()) return;
     setPosting(true);
-    // Resolve mentions from text — only keep those referenced by `@Name` (handle uses underscores)
+    // Resolve mentions from text - only keep those referenced by `@Name` (handle uses underscores)
     const used = Object.entries(selectedMentions)
       .filter(([, name]) => new RegExp(`@${name.replace(/\s+/g, "_")}\\b`).test(body))
       .map(([id]) => id);
@@ -177,7 +177,7 @@ export function TrainingComments({
     if (error) return toast.error(error.message);
     setBody("");
     setSelectedMentions({});
-    if (used.length > 0) toast.success(`Commentaire publié — ${used.length} personne(s) notifiée(s)`);
+    if (used.length > 0) toast.success(`Commentaire publié - ${used.length} personne(s) notifiée(s)`);
     else toast.success("Commentaire publié");
   };
 

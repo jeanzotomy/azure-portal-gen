@@ -181,7 +181,7 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
       setEditing(null);
       setAiOpen(false);
       setDialogOpen(true);
-      toast.success("Formation générée — vérifiez et enregistrez");
+      toast.success("Formation générée - vérifiez et enregistrez");
     } catch (e: any) {
       toast.error(e?.message || "Échec de la génération");
     } finally { setAiBusy(false); }
@@ -456,7 +456,7 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>{editing ? "Modifier la formation" : "Nouvelle formation"}</DialogTitle>
-            {form.ai_generated && <DialogDescription className="text-xs flex items-center gap-1"><Brain className="h-3 w-3" />Générée par IA — vérifiez avant publication</DialogDescription>}
+            {form.ai_generated && <DialogDescription className="text-xs flex items-center gap-1"><Brain className="h-3 w-3" />Générée par IA - vérifiez avant publication</DialogDescription>}
           </DialogHeader>
           <div className="space-y-3 pt-6">
             <div><Label>Titre *</Label><Input value={form.title} onChange={e => setForm({ ...form, title: e.target.value })} /></div>
@@ -504,7 +504,7 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
                       )}
                       {(c.modules || []).map((m: any, i: number) => (
                         <div key={i} className="border-l-2 border-primary/30 pl-3 space-y-1">
-                          <div className="text-xs font-medium">Module {i + 1} — {m.title}</div>
+                          <div className="text-xs font-medium">Module {i + 1} - {m.title}</div>
                           {m.sections?.length > 0 ? (
                             <div className="text-xs text-muted-foreground">{m.sections.length} section(s) · {m.key_points?.length || 0} points clés</div>
                           ) : (
@@ -745,7 +745,7 @@ function GroupsManager({
       const { error } = await supabase.from("training_group_members").delete().eq("group_id", selectedGroup.id).in("process_id", toRemove);
       if (error) return toast.error(error.message);
     }
-    toast.success("Membres mis à jour — formations propagées automatiquement");
+    toast.success("Membres mis à jour - formations propagées automatiquement");
     setMemberDialogOpen(false);
     loadGroupDetail(selectedGroup);
     reload();
@@ -767,7 +767,7 @@ function GroupsManager({
       const { error } = await supabase.from("training_group_assignments").delete().eq("group_id", selectedGroup.id).in("training_id", toRemove);
       if (error) return toast.error(error.message);
     }
-    toast.success("Formations du groupe mises à jour — propagées aux membres");
+    toast.success("Formations du groupe mises à jour - propagées aux membres");
     setTrainingDialogOpen(false);
     loadGroupDetail(selectedGroup);
     reload();
@@ -858,7 +858,7 @@ function GroupsManager({
       <PickerDialog
         open={memberDialogOpen} onClose={() => setMemberDialogOpen(false)}
         title="Membres du groupe"
-        items={candidates.map(c => ({ id: c.process_id, label: c.candidate_name, sub: `${c.candidate_email} · ${c.job_title || "—"}` }))}
+        items={candidates.map(c => ({ id: c.process_id, label: c.candidate_name, sub: `${c.candidate_email} · ${c.job_title || "-"}` }))}
         initialSelected={new Set(groupMembers)}
         onSave={saveMembers}
       />

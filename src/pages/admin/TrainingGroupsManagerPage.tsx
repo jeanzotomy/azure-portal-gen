@@ -359,7 +359,7 @@ function GroupDetailDialog({
         return;
       }
       setAssignedTrainingIds((s) => new Set([...s, trainingId]));
-      toast.success("Formation ajoutée — propagée aux membres");
+      toast.success("Formation ajoutée - propagée aux membres");
     } else {
       const { error } = await supabase
         .from("training_group_assignments")
@@ -390,7 +390,7 @@ function GroupDetailDialog({
         return;
       }
       setMemberUserIds((s) => new Set([...s, userId]));
-      toast.success("Membre ajouté — formations propagées");
+      toast.success("Membre ajouté - formations propagées");
     } else {
       // Find the process_id and delete
       const { data: proc } = await supabase

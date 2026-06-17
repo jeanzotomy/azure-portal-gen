@@ -16,7 +16,7 @@ interface Props {
 const Email = ({ candidateName, jobTitle }: Props) => (
   <Html lang="fr" dir="ltr">
     <Head />
-    <Preview>Réponse à votre candidature — {SITE_NAME}</Preview>
+    <Preview>Réponse à votre candidature - {SITE_NAME}</Preview>
     <Body style={main}>
       <Container style={container}>
         <Img src={LOGO_URL} alt={SITE_NAME} width="48" height="48" style={{ margin: '0 0 20px' }} />
@@ -45,7 +45,7 @@ const Email = ({ candidateName, jobTitle }: Props) => (
 
 export const template = {
   component: Email,
-  subject: (d: Record<string, any>) => `Réponse à votre candidature — ${d.jobTitle || SITE_NAME}`,
+  subject: (d: Record<string, any>) => `Réponse à votre candidature - ${d.jobTitle || SITE_NAME}`,
   displayName: 'Candidature non retenue',
   previewData: { candidateName: 'Mamadou Diallo', jobTitle: 'Ingénieur Cloud DevOps' },
 } satisfies TemplateEntry

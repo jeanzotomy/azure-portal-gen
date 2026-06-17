@@ -26,7 +26,7 @@ const formatCurrency = (n: number, currency: string) => {
 };
 
 const formatDate = (iso?: string | null) => {
-  if (!iso) return "—";
+  if (!iso) return "-";
   const d = new Date(iso);
   return d.toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" });
 };
@@ -114,7 +114,7 @@ export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blo
   const tableWidth = 9360;
   const colWidths = [500, 4060, 700, 1500, 900, 1700];
 
-  // En-tête (logo placé via texte/branding simple — Word ne charge pas l'image facilement sans assets binaires)
+  // En-tête (logo placé via texte/branding simple - Word ne charge pas l'image facilement sans assets binaires)
   const headerTable = new Table({
     width: { size: tableWidth, type: WidthType.DXA },
     columnWidths: [4680, 4680],
@@ -275,7 +275,7 @@ export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blo
             ],
           }),
           cell(formatCurrency(item.unit_price, data.currency) + (freqPer ? `/${freqPer.p}` : ""), { align: AlignmentType.RIGHT, width: colWidths[3] }),
-          cell(item.discount_rate ? `−${item.discount_rate}%` : "—", { align: AlignmentType.CENTER, width: colWidths[4] }),
+          cell(item.discount_rate ? `−${item.discount_rate}%` : "-", { align: AlignmentType.CENTER, width: colWidths[4] }),
           cell(formatCurrency(item.total, data.currency), { align: AlignmentType.RIGHT, bold: true, width: colWidths[5] }),
         ],
       });
@@ -321,7 +321,7 @@ export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blo
                 alignment: AlignmentType.RIGHT,
                 children: [
                   new TextRun({ text: `Remise globale (${data.discount_rate}%) : `, size: 18, font: "Arial", color: "DC2626" }),
-                  new TextRun({ text: `— ${formatCurrency(data.discount_amount, data.currency)}`, size: 18, font: "Arial", color: "DC2626" }),
+                  new TextRun({ text: `- ${formatCurrency(data.discount_amount, data.currency)}`, size: 18, font: "Arial", color: "DC2626" }),
                 ],
               })] : []),
               new Paragraph({
@@ -335,7 +335,7 @@ export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blo
                 alignment: AlignmentType.RIGHT,
                 children: [
                   new TextRun({ text: `Escompte paiement anticipé (${data.early_payment_discount_rate}%) : `, size: 18, font: "Arial", color: "DC2626" }),
-                  new TextRun({ text: `— ${formatCurrency(data.early_payment_discount_amount ?? 0, data.currency)}`, size: 18, font: "Arial", color: "DC2626" }),
+                  new TextRun({ text: `- ${formatCurrency(data.early_payment_discount_amount ?? 0, data.currency)}`, size: 18, font: "Arial", color: "DC2626" }),
                 ],
               })] : []),
               new Paragraph({
@@ -393,7 +393,7 @@ export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blo
       }),
       new Paragraph({
         alignment: AlignmentType.RIGHT,
-        children: [new TextRun({ text: data.issuer.full_name || "—", bold: true, size: 22, color: NAVY, font: "Arial" })],
+        children: [new TextRun({ text: data.issuer.full_name || "-", bold: true, size: 22, color: NAVY, font: "Arial" })],
       })
     );
     if (data.issuer.role) {

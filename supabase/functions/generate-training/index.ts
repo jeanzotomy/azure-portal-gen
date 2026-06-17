@@ -108,7 +108,7 @@ Contraintes IMPORTANTES :
     if (!aiRes.ok) {
       const t = await aiRes.text();
       if (aiRes.status === 429) return new Response(JSON.stringify({ error: 'Quota IA atteint, réessayez plus tard' }), { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
-      if (aiRes.status === 402) return new Response(JSON.stringify({ error: 'Crédits IA insuffisants — ajoutez des crédits dans Lovable Cloud' }), { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
+      if (aiRes.status === 402) return new Response(JSON.stringify({ error: 'Crédits IA insuffisants - ajoutez des crédits dans Lovable Cloud' }), { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
       return new Response(JSON.stringify({ error: 'AI error', detail: t }), { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } });
     }
     const aiJson = await aiRes.json();

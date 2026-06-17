@@ -157,7 +157,7 @@ Deno.serve(async (req) => {
     const tWidth = fontBold.widthOfTextAtSize(trainingTitle, tSize);
     page.drawText(trainingTitle, { x: (width - tWidth) / 2, y: height - 345, size: tSize, font: fontBold, color: ink });
 
-    // Footer: date (left) — seal (center) — QR (right)
+    // Footer: date (left) - seal (center) - QR (right)
     const issued = new Date();
     const issuedStr = issued.toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" });
     page.drawText(`Délivré le ${issuedStr}`, { x: 60, y: 90, size: 11, font, color: ink });
@@ -165,7 +165,7 @@ Deno.serve(async (req) => {
     page.drawLine({ start: { x: 60, y: 60 }, end: { x: 220, y: 60 }, thickness: 0.6, color: ink });
     page.drawText("Directeur Formation – CloudMature", { x: 60, y: 48, size: 9, font, color: muted });
 
-    // "CERTIFIED" seal stamp — drawn vectorially in PDF
+    // "CERTIFIED" seal stamp - drawn vectorially in PDF
     const sx = width / 2;
     const sy = 95;
     // Outer scalloped ring (24 small circles around)
@@ -195,7 +195,7 @@ Deno.serve(async (req) => {
     const cW = fontBold.widthOfTextAtSize(certifiedText, cSize);
     page.drawText(certifiedText, { x: sx - cW / 2, y: sy - 4, size: cSize, font: fontBold, color: rgb(1, 1, 1) });
 
-    // QR block (right side) — kept fully inside inner cyan border (x: 28..width-28)
+    // QR block (right side) - kept fully inside inner cyan border (x: 28..width-28)
     const qrImg = await pdf.embedPng(qrPngBytes);
     const qrSize = 92;
     const qrRightMargin = 60;

@@ -2,7 +2,7 @@
 // - Strict input format check (returns neutral failure on malformed input)
 // - Per-IP sliding-window throttle (10 attempts / 60s, 60 / 10min)
 // - Constant minimum response time to limit timing oracles
-// - Never reveals whether a code "exists" — only "valid" or "invalid"
+// - Never reveals whether a code "exists" - only "valid" or "invalid"
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 
 const cors = {
@@ -58,7 +58,7 @@ Deno.serve(async (req) => {
     const body = await req.json();
     code = typeof body?.code === "string" ? body.code.trim().toUpperCase() : "";
   } catch {
-    // ignore — treated as invalid below
+    // ignore - treated as invalid below
   }
 
   // Throttle BEFORE doing any DB lookup

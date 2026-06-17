@@ -130,7 +130,7 @@ Deno.serve(async (req) => {
       // Normalize phone: strip ALL non-digits for exact comparison only (no suffix/prefix match)
       const phoneDigits = phone.replace(/\D/g, "");
 
-      // Find user by phone — exact digit-only match to prevent account takeover via suffix.
+      // Find user by phone - exact digit-only match to prevent account takeover via suffix.
       const { data: profiles } = await supabaseAdmin
         .from("profiles")
         .select("user_id, phone, blocked")

@@ -70,7 +70,7 @@ const TEMPLATES: Template[] = [
   {
     id: "reminder",
     label: "Rappel formation",
-    subject: "Rappel — formation à finaliser",
+    subject: "Rappel - formation à finaliser",
     body: (n) =>
       `Bonjour ${n || ""},\n\nNous avons remarqué qu'une formation reste à finaliser dans votre espace.\n\nMerci de bien vouloir la compléter dans les meilleurs délais.\n\nCordialement,`,
   },
@@ -93,7 +93,7 @@ const TEMPLATES: Template[] = [
     label: "Information importante",
     subject: "Information importante",
     body: (n) =>
-      `Bonjour ${n || ""},\n\nNous souhaitions vous transmettre une information importante :\n\n— \n\nN'hésitez pas à revenir vers nous pour toute question.\n\nCordialement,`,
+      `Bonjour ${n || ""},\n\nNous souhaitions vous transmettre une information importante :\n\n- \n\nN'hésitez pas à revenir vers nous pour toute question.\n\nCordialement,`,
   },
 ];
 
@@ -300,7 +300,7 @@ export default function SendDirectEmailDialog({
                 Envoyer un email
               </DialogTitle>
               <DialogDescription className="text-white/80 text-xs mt-1 leading-relaxed">
-                Message direct — la réponse sera envoyée à info@cloudmature.com
+                Message direct - la réponse sera envoyée à info@cloudmature.com
               </DialogDescription>
             </div>
           </div>

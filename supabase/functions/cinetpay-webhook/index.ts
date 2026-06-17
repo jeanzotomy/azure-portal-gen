@@ -41,7 +41,7 @@ async function applyBusinessLogic(sb: ReturnType<typeof createClient>, tx: any) 
     const periodEnd = new Date();
     periodEnd.setMonth(periodEnd.getMonth() + months);
 
-    // CinetPay has no native recurring — we record a "manual" subscription window.
+    // CinetPay has no native recurring - we record a "manual" subscription window.
     await sb.from("subscriptions").upsert({
       user_id: userId,
       stripe_subscription_id: `cinetpay_${tx.transaction_id}`,
@@ -111,7 +111,7 @@ Deno.serve(async (req) => {
       payload: { body, headers: { "x-token": receivedToken ? "[present]" : "[absent]" } },
     });
 
-    // Verify signature — MANDATORY for all callers
+    // Verify signature - MANDATORY for all callers
     if (!receivedToken) {
       await sb.from("webhook_events").insert({
         source: "cinetpay", event_type: "ipn", status: "failed",

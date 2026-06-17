@@ -21,7 +21,7 @@ async function sendOtpEmail(to: string, code: string, trackingId: string) {
   const outlookKey = Deno.env.get('MICROSOFT_OUTLOOK_API_KEY')
   if (!lovableKey || !outlookKey) throw new Error('Email gateway keys missing')
 
-  const subject = `Votre code de suivi de candidature — ${trackingId}`
+  const subject = `Votre code de suivi de candidature - ${trackingId}`
   const html = `<!DOCTYPE html><html lang="fr"><body style="background:#fff;font-family:'Inter',Arial,sans-serif;margin:0;padding:0;">
     <div style="max-width:520px;margin:0 auto;padding:24px;">
       <img src="${LOGO_URL}" alt="${SITE_NAME}" width="48" height="48" style="margin:0 0 16px"/>

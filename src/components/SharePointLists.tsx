@@ -127,7 +127,7 @@ export default function SharePointLists({ siteId, siteName, onBack }: Props) {
                   <TableRow key={item.id}>
                     {columns.map(col => (
                       <TableCell key={col} className="whitespace-nowrap max-w-[200px] truncate">
-                        {item.fields?.[col] != null ? String(item.fields[col]) : "—"}
+                        {item.fields?.[col] != null ? String(item.fields[col]) : "-"}
                       </TableCell>
                     ))}
                   </TableRow>
@@ -147,7 +147,7 @@ export default function SharePointLists({ siteId, siteName, onBack }: Props) {
           <ArrowLeft size={16} />
         </Button>
         <List className="h-5 w-5 text-primary" />
-        <h3 className="text-lg font-semibold">{t("sharepoint.listsTitle")} — {siteName}</h3>
+        <h3 className="text-lg font-semibold">{t("sharepoint.listsTitle")} - {siteName}</h3>
         <Button variant="ghost" size="icon" onClick={loadLists} className="ml-auto">
           <RefreshCw size={14} />
         </Button>

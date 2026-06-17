@@ -14,8 +14,8 @@ import { useSeo } from "@/hooks/use-seo";
 
 const Index = () => {
   useSeo({
-    title: "CloudMature | Cloud · DevOps · IA — Conakry, Guinée",
-    description: "Cloud Mature — Conseil Cloud (Azure, AWS, GCP), DevOps et Intelligence Artificielle pour entreprises. Conakry, Guinée.",
+    title: "CloudMature | Cloud · DevOps · IA - Conakry, Guinée",
+    description: "Cloud Mature - Conseil Cloud (Azure, AWS, GCP), DevOps et Intelligence Artificielle pour entreprises. Conakry, Guinée.",
     path: "/",
   });
   const location = useLocation();

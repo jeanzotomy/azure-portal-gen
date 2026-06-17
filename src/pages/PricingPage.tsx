@@ -182,7 +182,7 @@ export default function PricingPage() {
         <div className="text-center mb-10">
           <h1 className="text-3xl md:text-5xl font-bold mb-3">Choisis ton plan CloudMature</h1>
           <p className="text-muted-foreground max-w-2xl mx-auto">
-            Accès au portail client, suivi de projets, SharePoint et support — abonnement mensuel ou annuel (économise ~17 %).
+            Accès au portail client, suivi de projets, SharePoint et support - abonnement mensuel ou annuel (économise ~17 %).
           </p>
         </div>
 
@@ -324,7 +324,7 @@ export default function PricingPage() {
         {publishedServices.length > 0 && (
           <div className="mt-16 text-center">
             <h2 className="text-2xl font-bold mb-2">Services à la carte</h2>
-            <p className="text-muted-foreground mb-6">Prestations issues de notre catalogue — contactez-nous pour un devis personnalisé.</p>
+            <p className="text-muted-foreground mb-6">Prestations issues de notre catalogue - contactez-nous pour un devis personnalisé.</p>
             <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 text-left">
               {publishedServices.map((s) => (
                 <Card key={s.id}>
@@ -368,7 +368,7 @@ export default function PricingPage() {
               Paiement sécurisé
             </DialogTitle>
             <DialogDescription className="text-primary-foreground/85 text-sm leading-relaxed">
-              Powered by Stripe — données chiffrées de bout en bout.
+              Powered by Stripe - données chiffrées de bout en bout.
             </DialogDescription>
           </DialogHeader>
           <div className="flex-1 overflow-y-auto p-2">{checkoutElement}</div>

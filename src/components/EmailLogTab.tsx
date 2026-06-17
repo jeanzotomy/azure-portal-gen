@@ -119,7 +119,7 @@ export default function EmailLogTab() {
     if (error) {
       const msg = error.message || "Erreur inconnue";
       const hint = /row-level security|permission|policy/i.test(msg)
-        ? " (permissions insuffisantes — rôle admin ou gestionnaire requis)"
+        ? " (permissions insuffisantes - rôle admin ou gestionnaire requis)"
         : "";
       toast({
         title: "Échec de la suppression",
@@ -280,7 +280,7 @@ export default function EmailLogTab() {
             <SelectItem value="all">Toutes candidatures</SelectItem>
             {applications.map((a) => (
               <SelectItem key={a.id} value={a.id}>
-                {a.full_name} — {a.email}
+                {a.full_name} - {a.email}
               </SelectItem>
             ))}
           </SelectContent>
@@ -319,7 +319,7 @@ export default function EmailLogTab() {
                     <td className="px-4 py-2 whitespace-nowrap text-xs">{r.template_name}</td>
                     <td className="px-4 py-2 whitespace-nowrap">{statusBadge(r.status)}</td>
                     <td className="px-4 py-2 whitespace-nowrap text-xs text-muted-foreground">
-                      {r.metadata?.job_title || "—"}
+                      {r.metadata?.job_title || "-"}
                     </td>
                     <td className="px-4 py-2 text-xs">
                       {r.error_message ? (
@@ -328,7 +328,7 @@ export default function EmailLogTab() {
                         </span>
                       ) : (
                         <span className="text-muted-foreground">
-                          {r.metadata?.provider ? `via ${r.metadata.provider}` : "—"}
+                          {r.metadata?.provider ? `via ${r.metadata.provider}` : "-"}
                         </span>
                       )}
                     </td>

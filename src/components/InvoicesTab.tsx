@@ -529,7 +529,7 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
             <Card className="border">
               <CardHeader className="pb-2">
                 <CardTitle className="text-sm font-medium">
-                  {filterProject === "all" ? "Répartition financière par projet" : `Consommation budgétaire — ${visibleProjects[0]?.project_number || ""}`}
+                  {filterProject === "all" ? "Répartition financière par projet" : `Consommation budgétaire - ${visibleProjects[0]?.project_number || ""}`}
                 </CardTitle>
               </CardHeader>
               <CardContent>
@@ -599,7 +599,7 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
                       await supabase.from("invoices").update({ status: v }).eq("id", inv.id);
                       loadInvoices();
                       loadProjects();
-                      toast({ title: "Statut mis à jour", description: v === "validee" ? "Facture validée — solde projet ajusté" : `Statut : ${v.replace("_", " ")}` });
+                      toast({ title: "Statut mis à jour", description: v === "validee" ? "Facture validée - solde projet ajusté" : `Statut : ${v.replace("_", " ")}` });
                     }}>
                       <SelectTrigger className="w-[150px] h-8 text-xs">
                         <SelectValue />

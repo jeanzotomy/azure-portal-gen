@@ -35,7 +35,7 @@ function formatPrice(cents: number, currency: string) {
 export default function TrainingsStorePage() {
   const { locale } = useTranslation();
   useSeo({
-    title: locale === "fr" ? "Formations Cloud, DevOps & IA — CloudMature" : "Cloud, DevOps & AI Trainings — CloudMature",
+    title: locale === "fr" ? "Formations Cloud, DevOps & IA - CloudMature" : "Cloud, DevOps & AI Trainings - CloudMature",
     description: locale === "fr"
       ? "Catalogue de formations CloudMature : Cloud (Azure, AWS, GCP), DevOps et Intelligence Artificielle. Achetez en ligne, accédez immédiatement."
       : "CloudMature training catalog: Cloud (Azure, AWS, GCP), DevOps and AI. Buy online, instant access.",
@@ -83,7 +83,7 @@ export default function TrainingsStorePage() {
     }
     const price = t.price_cents ?? 0;
     if (price <= 0) {
-      // Free training — redirect to portal trainings
+      // Free training - redirect to portal trainings
       navigate("/portal?tab=my-trainings");
       return;
     }
@@ -113,8 +113,8 @@ export default function TrainingsStorePage() {
           </h1>
           <p className="text-muted-foreground mt-2 max-w-2xl mx-auto">
             {locale === "fr"
-              ? "Achetez une formation à l'unité — accès immédiat depuis votre portail dès le paiement confirmé."
-              : "Buy any course as a one-shot — instant access from your portal as soon as payment is confirmed."}
+              ? "Achetez une formation à l'unité - accès immédiat depuis votre portail dès le paiement confirmé."
+              : "Buy any course as a one-shot - instant access from your portal as soon as payment is confirmed."}
           </p>
         </div>
 

@@ -45,7 +45,7 @@ export const template = {
   component: Email,
   subject: (d: Record<string, any>) =>
     `Votre code de vérification ${SITE_NAME} : ${d.code || ''}`.trim(),
-  displayName: 'Code de vérification — formulaire de contact',
+  displayName: 'Code de vérification - formulaire de contact',
   previewData: { code: '482913', expiresInMinutes: 10 },
 } satisfies TemplateEntry
 

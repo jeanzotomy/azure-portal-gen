@@ -294,7 +294,7 @@ export default function IntegrationsTab() {
                       <TableCell className="font-medium">{t.name}</TableCell>
                       <TableCell><code className="text-xs">{t.token_prefix}…</code></TableCell>
                       <TableCell className="text-xs">{new Date(t.created_at).toLocaleDateString("fr-FR")}</TableCell>
-                      <TableCell className="text-xs">{t.last_used_at ? new Date(t.last_used_at).toLocaleString("fr-FR") : "—"}</TableCell>
+                      <TableCell className="text-xs">{t.last_used_at ? new Date(t.last_used_at).toLocaleString("fr-FR") : "-"}</TableCell>
                       <TableCell>
                         {revoked ? <Badge variant="destructive">Révoqué</Badge>
                           : expired ? <Badge variant="outline" className="text-amber-600 border-amber-600">Expiré</Badge>
@@ -354,7 +354,7 @@ export default function IntegrationsTab() {
                   <TableRow key={e.id}>
                     <TableCell className="text-xs">{new Date(e.received_at).toLocaleString("fr-FR")}</TableCell>
                     <TableCell><Badge variant="outline">{e.source}</Badge></TableCell>
-                    <TableCell className="text-xs">{e.event_type || "—"}</TableCell>
+                    <TableCell className="text-xs">{e.event_type || "-"}</TableCell>
                     <TableCell>
                       {e.status === "processed" ? <Badge className="bg-emerald-600 hover:bg-emerald-600">processed</Badge>
                        : e.status === "failed" ? <Badge variant="destructive">failed</Badge>
@@ -376,7 +376,7 @@ export default function IntegrationsTab() {
             <DialogTitle>{revealedToken ? "Token créé" : "Nouveau token API"}</DialogTitle>
             <DialogDescription>
               {revealedToken
-                ? "Copie ce token maintenant — il ne sera plus jamais affiché."
+                ? "Copie ce token maintenant - il ne sera plus jamais affiché."
                 : "Le token donne accès à nos Edge Functions. Donne-lui un nom descriptif (ex: « Intégration Zapier »)."}
             </DialogDescription>
           </DialogHeader>

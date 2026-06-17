@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    // Resolve current user (optional — paying anonymously not allowed for SaaS)
+    // Resolve current user (optional - paying anonymously not allowed for SaaS)
     const sb = createClient(SUPABASE_URL, SERVICE_KEY);
     const authHeader = req.headers.get("Authorization");
     let userId: string | null = null;

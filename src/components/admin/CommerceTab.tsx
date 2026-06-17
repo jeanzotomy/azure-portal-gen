@@ -33,7 +33,7 @@ export default function CommerceTab({ initialSection = "catalog" }: CommerceTabP
           <Tag className="text-primary" /> Commerce
         </h1>
         <p className="text-sm text-muted-foreground">
-          Catalogue, tarification, facturation et providers de paiement — un seul écran.
+          Catalogue, tarification, facturation et providers de paiement - un seul écran.
         </p>
       </div>
 

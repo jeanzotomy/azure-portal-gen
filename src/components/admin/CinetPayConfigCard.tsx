@@ -111,7 +111,7 @@ export default function CinetPayConfigCard() {
             <CreditCard className="h-4 w-4 text-primary" /> CinetPay (paiements Afrique)
           </CardTitle>
           <p className="text-xs text-muted-foreground mt-1">
-            Mobile Money & cartes — GNF / XOF / XAF / CDF
+            Mobile Money & cartes - GNF / XOF / XAF / CDF
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -158,7 +158,7 @@ export default function CinetPayConfigCard() {
             {/* Credentials */}
             <div className="grid gap-3">
               <div className="grid gap-1.5">
-                <Label className="text-xs">API Key {state?.has_api_key && <span className="text-muted-foreground">— actuel: <code>{state.api_key_mask}</code></span>}</Label>
+                <Label className="text-xs">API Key {state?.has_api_key && <span className="text-muted-foreground">- actuel: <code>{state.api_key_mask}</code></span>}</Label>
                 <div className="flex gap-2">
                   <Input
                     type={showApi ? "text" : "password"}
@@ -178,7 +178,7 @@ export default function CinetPayConfigCard() {
               </div>
 
               <div className="grid gap-1.5">
-                <Label className="text-xs">Secret Key (HMAC) {state?.has_secret_key && <span className="text-muted-foreground">— actuel: <code>{state.secret_key_mask}</code></span>}</Label>
+                <Label className="text-xs">Secret Key (HMAC) {state?.has_secret_key && <span className="text-muted-foreground">- actuel: <code>{state.secret_key_mask}</code></span>}</Label>
                 <div className="flex gap-2">
                   <Input
                     type={showSecret ? "text" : "password"}

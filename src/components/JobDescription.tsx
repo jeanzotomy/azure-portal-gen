@@ -58,7 +58,7 @@ function parse(input: string): Block[] {
       blocks.push({ kind: "heading", text: trimmed.replace(/[:：]\s*$/, "") });
       continue;
     }
-    const bullet = trimmed.match(/^[-*•·–—]\s+(.+)$/);
+    const bullet = trimmed.match(/^[-*•·–-]\s+(.+)$/);
     if (bullet) {
       if (mode !== "ul") flush();
       mode = "ul";

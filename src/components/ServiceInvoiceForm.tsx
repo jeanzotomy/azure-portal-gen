@@ -248,7 +248,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
     payment_methods: selectedPaymentMethods,
     items: items.map((it, i) => {
       const recurringNote = buildRecurringSubtitle(it, currency);
-      const combinedSubtitle = [it.subtitle, recurringNote].filter(Boolean).join(" — ") || null;
+      const combinedSubtitle = [it.subtitle, recurringNote].filter(Boolean).join(" - ") || null;
       return {
         position: i + 1,
         description: it.description,
@@ -393,12 +393,12 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
             <div className="mt-2">
               <label className="text-xs font-medium">Attribuer à un utilisateur (portail)</label>
               <Select value={assignedUserId || "__none__"} onValueChange={(v) => setAssignedUserId(v === "__none__" ? "" : v)}>
-                <SelectTrigger><SelectValue placeholder="Aucun — visible uniquement par l'admin" /></SelectTrigger>
+                <SelectTrigger><SelectValue placeholder="Aucun - visible uniquement par l'admin" /></SelectTrigger>
                 <SelectContent>
                   <SelectItem value="__none__">Aucun</SelectItem>
                   {users.map((u) => (
                     <SelectItem key={u.user_id} value={u.user_id}>
-                      {u.full_name} — {u.email}
+                      {u.full_name} - {u.email}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -649,11 +649,11 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
             <div className="border-t pt-2 text-sm space-y-1">
               <div className="flex justify-between"><span>Sous-total</span><span>{new Intl.NumberFormat("fr-FR").format(subtotal)} {currency}</span></div>
               {discountRate > 0 && (
-                <div className="flex justify-between text-destructive"><span>Remise globale ({discountRate}%)</span><span>— {new Intl.NumberFormat("fr-FR").format(discountAmount)} {currency}</span></div>
+                <div className="flex justify-between text-destructive"><span>Remise globale ({discountRate}%)</span><span>- {new Intl.NumberFormat("fr-FR").format(discountAmount)} {currency}</span></div>
               )}
               <div className="flex justify-between"><span>TVA ({taxRate}%)</span><span>{new Intl.NumberFormat("fr-FR").format(taxAmount)} {currency}</span></div>
               {earlyPaymentDiscountRate > 0 && (
-                <div className="flex justify-between text-destructive"><span>Escompte ({earlyPaymentDiscountRate}%)</span><span>— {new Intl.NumberFormat("fr-FR").format(earlyPaymentDiscountAmount)} {currency}</span></div>
+                <div className="flex justify-between text-destructive"><span>Escompte ({earlyPaymentDiscountRate}%)</span><span>- {new Intl.NumberFormat("fr-FR").format(earlyPaymentDiscountAmount)} {currency}</span></div>
               )}
               <div className="flex justify-between font-bold text-base border-t pt-1"><span>NET À PAYER</span><span>{new Intl.NumberFormat("fr-FR").format(total)} {currency}</span></div>
             </div>

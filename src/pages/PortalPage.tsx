@@ -552,7 +552,7 @@ function ProjectsTab({ user }: { user: SupaUser }) {
     if (gIds.length > 0) {
       const { data: profs } = await supabase.from("profiles").select("user_id, full_name").in("user_id", gIds);
       const map: Record<string, string> = {};
-      (profs || []).forEach((pr: any) => { map[pr.user_id] = pr.full_name || "—"; });
+      (profs || []).forEach((pr: any) => { map[pr.user_id] = pr.full_name || "-"; });
       setGestionnaireProfiles(map);
     }
   };
@@ -886,7 +886,7 @@ function ProjectsTab({ user }: { user: SupaUser }) {
               <div onClick={() => fileInputRef.current?.click()} className="border-2 border-dashed border-border rounded-lg p-6 text-center cursor-pointer hover:border-primary/50 hover:bg-muted/30 transition-colors">
                 <Upload size={24} className="mx-auto text-muted-foreground mb-2" />
                 <p className="text-sm text-muted-foreground">Cliquez pour ajouter des fichiers</p>
-                <p className="text-xs text-muted-foreground/60 mt-1">PDF, images, documents — max 20 Mo par fichier</p>
+                <p className="text-xs text-muted-foreground/60 mt-1">PDF, images, documents - max 20 Mo par fichier</p>
               </div>
               <input ref={fileInputRef} type="file" multiple className="hidden" onChange={handleFileChange} />
               {files.length > 0 && (

@@ -265,7 +265,7 @@ export default function HrDashboardTab() {
           ))}
         </div>
         {alertItems.every(a => a.value === 0) && (
-          <p className="text-sm text-muted-foreground text-center py-3 mt-2">Aucune alerte — tout est à jour 🎉</p>
+          <p className="text-sm text-muted-foreground text-center py-3 mt-2">Aucune alerte - tout est à jour 🎉</p>
         )}
       </Card>
     </div>

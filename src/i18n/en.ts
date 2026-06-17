@@ -18,9 +18,9 @@ const en = {
     badge: "About Us",
     title: "Who is",
     titleHighlight: "Cloud Mature?",
-    description: "Cloud Mature is an information technology company based in Conakry, dedicated to guiding its partners toward Cloud maturity — whether public, hybrid or private. Certified Microsoft, AWS and Google Cloud experts, we design robust multi-cloud architectures and support organizations through their digital transformation with rigor, proximity and commitment.",
+    description: "Cloud Mature is an information technology company based in Conakry, dedicated to guiding its partners toward Cloud maturity - whether public, hybrid or private. Certified Microsoft, AWS and Google Cloud experts, we design robust multi-cloud architectures and support organizations through their digital transformation with rigor, proximity and commitment.",
     missions: [
-      { title: "Multi-Cloud Architectures", desc: "Design infrastructures on Azure, AWS and GCP — from public to private cloud — with resilient, scalable architectures optimized for your business context." },
+      { title: "Multi-Cloud Architectures", desc: "Design infrastructures on Azure, AWS and GCP - from public to private cloud - with resilient, scalable architectures optimized for your business context." },
       { title: "Operational Excellence", desc: "CI/CD automation, Infrastructure-as-Code (Terraform, Bicep, CloudFormation), advanced monitoring and FinOps governance to maximize your ROI." },
       { title: "Artificial Intelligence", desc: "Deploy AI solutions on Azure OpenAI, AWS Bedrock and Google Vertex AI. Microsoft Copilot integration and intelligent automation of your business processes." },
       { title: "Tailored Partnership", desc: "Hands-on partnership with certified local teams that are available and committed. Customized solutions adapted to every industry." },
@@ -45,7 +45,7 @@ const en = {
     badge: "Our Services",
     title: "What we",
     titleHighlight: "actually deliver",
-    subtitle: "Licenses, hardware, tailored solutions — we provide all the products and services needed for your Cloud, hybrid or private infrastructure.",
+    subtitle: "Licenses, hardware, tailored solutions - we provide all the products and services needed for your Cloud, hybrid or private infrastructure.",
     imageCaption: "Expertise at the service of your transformation",
     items: [
       { title: "Microsoft 365 & Azure Ecosystem", desc: "Deployment and management of Microsoft 365, Azure, Entra ID, Intune, Defender and Power Platform. CSP/EA licensing, Exchange/SharePoint migrations and user adoption." },
@@ -80,7 +80,7 @@ const en = {
     titleHighlight: "Cloud Mature?",
     items: [
       { title: "Microsoft & Multi-Cloud Expertise", desc: "Certified Microsoft partner with advanced skills on AWS and Google Cloud for hybrid and multi-cloud architectures." },
-      { title: "Tailored Solutions", desc: "From architecture to delivery — licenses, hardware, application development and AI integration adapted to your business." },
+      { title: "Tailored Solutions", desc: "From architecture to delivery - licenses, hardware, application development and AI integration adapted to your business." },
       { title: "Measurable Results", desc: "Contractual KPIs, guaranteed SLAs, FinOps reporting and real-time dashboards for transparent tracking." },
       { title: "Security & Sovereignty", desc: "Zero Trust, SIEM/SOAR (Sentinel, Security Hub), sovereign-cloud oriented architectures and data residency, ISO 27001, SOC 2 and GDPR compliance across all platforms." },
       { title: "Certified Local Team", desc: "Conakry-based engineers certified in Azure, AWS and GCP, available and responsive for hands-on support." },
@@ -125,7 +125,7 @@ const en = {
       { title: "6. Data Retention", content: "Your data is retained as long as necessary to provide our services or comply with our legal obligations. Account data is deleted within 30 days of account closure." },
       { title: "7. Your Rights", content: "In accordance with applicable regulations, you have the following rights:\n• Access to your personal data\n• Rectification of inaccurate information\n• Deletion of your data\n• Objection to processing\n• Data portability\n\nTo exercise these rights, contact us at info@cloudmature.com." },
       { title: "8. Cookies", content: "Our site uses essential cookies for functionality (session, language preferences). No advertising or third-party tracking cookies are used." },
-      { title: "9. Contact", content: "For any questions about this policy, contact us:\nCloud Mature — Conakry, Guinea\nEmail: info@cloudmature.com" },
+      { title: "9. Contact", content: "For any questions about this policy, contact us:\nCloud Mature - Conakry, Guinea\nEmail: info@cloudmature.com" },
     ],
   },
   terms: {
@@ -142,7 +142,7 @@ const en = {
       { title: "8. Confidentiality", content: "Information exchanged in the course of our services is strictly confidential. Each party undertakes not to disclose the other party's confidential information without prior written authorization." },
       { title: "9. Termination", content: "You may delete your account at any time from your profile. Cloud Mature reserves the right to suspend or terminate an account in case of violation of these Terms, without notice." },
       { title: "10. Governing Law", content: "These Terms are governed by the applicable laws of the Republic of Guinea. Any dispute shall be submitted to the competent courts of Conakry." },
-      { title: "11. Contact", content: "For any questions about these terms:\nCloud Mature — Conakry, Guinea\nEmail: info@cloudmature.com" },
+      { title: "11. Contact", content: "For any questions about these terms:\nCloud Mature - Conakry, Guinea\nEmail: info@cloudmature.com" },
     ],
   },
   auth: {
@@ -187,7 +187,7 @@ const en = {
     smsVerifiedDesc: "You are now logged in.",
     smsInvalidCode: "Invalid or expired code",
     smsRateLimit: "Too many attempts. Please wait 10 minutes.",
-    twilioTrial: "Note: Twilio trial — only verified numbers can receive SMS.",
+    twilioTrial: "Note: Twilio trial - only verified numbers can receive SMS.",
   },
   mfa: {
     title: "MFA Verification",
@@ -365,7 +365,7 @@ const en = {
     admin: "Admin",
     agent: "Agent",
     hello: "Hello,",
-    agentDesc: "Here's your agent space — manage client tickets.",
+    agentDesc: "Here's your agent space - manage client tickets.",
     overviewTitle: "Overview",
     overviewDesc: "Track your platform activity in real time.",
     refresh: "Refresh",

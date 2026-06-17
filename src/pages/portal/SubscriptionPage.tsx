@@ -90,7 +90,7 @@ export default function SubscriptionPage() {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
-            <span>{tier} <span className="text-muted-foreground font-normal text-sm">— {billing}</span></span>
+            <span>{tier} <span className="text-muted-foreground font-normal text-sm">- {billing}</span></span>
             {sub.status === "active" && !sub.cancel_at_period_end && <Badge className="bg-emerald-600">Actif</Badge>}
             {sub.status === "trialing" && <Badge className="bg-blue-600">Essai</Badge>}
             {sub.status === "past_due" && <Badge variant="destructive">Paiement en retard</Badge>}

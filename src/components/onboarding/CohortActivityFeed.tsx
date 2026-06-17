@@ -51,7 +51,7 @@ export function CohortActivityFeed() {
       {loading ? (
         <div className="flex justify-center py-4"><Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /></div>
       ) : items.length === 0 ? (
-        <div className="text-xs text-muted-foreground italic">Pas encore d'activité — sois le premier à terminer une formation !</div>
+        <div className="text-xs text-muted-foreground italic">Pas encore d'activité - sois le premier à terminer une formation !</div>
       ) : (
         <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
           {items.map((it, i) => (

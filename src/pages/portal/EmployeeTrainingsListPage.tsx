@@ -180,7 +180,7 @@ export default function EmployeeTrainingsListPage() {
     <div className="space-y-6">
         <TrainingPageHero
           title="Mes formations"
-          subtitle="Modules continus assignés par votre RH ou administrateur — suivez votre progression et obtenez vos certificats."
+          subtitle="Modules continus assignés par votre RH ou administrateur - suivez votre progression et obtenez vos certificats."
           icon={<GraduationCap className="h-6 w-6 text-white" />}
           backTo="/portal"
           breadcrumbs={[

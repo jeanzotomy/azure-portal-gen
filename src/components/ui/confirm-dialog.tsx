@@ -22,7 +22,7 @@ interface ConfirmState {
 }
 
 /**
- * useConfirm — imperative replacement for window.confirm() with glass styling.
+ * useConfirm - imperative replacement for window.confirm() with glass styling.
  *
  *   const { confirm, dialog } = useConfirm();
  *   ...

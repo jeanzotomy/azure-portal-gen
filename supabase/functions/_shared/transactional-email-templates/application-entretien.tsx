@@ -17,7 +17,7 @@ interface Props {
 const Email = ({ candidateName, jobTitle, interviewMessage }: Props) => (
   <Html lang="fr" dir="ltr">
     <Head />
-    <Preview>Invitation à un entretien — {jobTitle || 'CloudMature'}</Preview>
+    <Preview>Invitation à un entretien - {jobTitle || 'CloudMature'}</Preview>
     <Body style={main}>
       <Container style={container}>
         <Img src={LOGO_URL} alt={SITE_NAME} width="48" height="48" style={{ margin: '0 0 20px' }} />
@@ -44,7 +44,7 @@ const Email = ({ candidateName, jobTitle, interviewMessage }: Props) => (
 
 export const template = {
   component: Email,
-  subject: (d: Record<string, any>) => `Invitation à un entretien — ${d.jobTitle || 'CloudMature'}`,
+  subject: (d: Record<string, any>) => `Invitation à un entretien - ${d.jobTitle || 'CloudMature'}`,
   displayName: 'Invitation entretien',
   previewData: {
     candidateName: 'Mamadou Diallo',

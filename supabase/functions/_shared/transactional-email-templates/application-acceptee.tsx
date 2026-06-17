@@ -49,7 +49,7 @@ const Email = ({ candidateName, jobTitle, activationUrl }: Props) => (
 
 export const template = {
   component: Email,
-  subject: (d: Record<string, any>) => `🎉 Félicitations — Votre candidature pour ${d.jobTitle || 'CloudMature'} a été acceptée`,
+  subject: (d: Record<string, any>) => `🎉 Félicitations - Votre candidature pour ${d.jobTitle || 'CloudMature'} a été acceptée`,
   displayName: 'Candidature acceptée',
   previewData: {
     candidateName: 'Mamadou Diallo',

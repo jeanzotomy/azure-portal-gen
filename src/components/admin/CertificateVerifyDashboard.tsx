@@ -164,7 +164,7 @@ export function CertificateVerifyDashboard() {
           <h2 className="text-lg font-semibold flex items-center gap-2">
             <ShieldCheck className="h-5 w-5 text-primary" /> Vérifications de certificats
           </h2>
-          <p className="text-xs text-muted-foreground">Tentatives, taux de succès et blocages par fenêtre — {WINDOW_LABEL[win]}.</p>
+          <p className="text-xs text-muted-foreground">Tentatives, taux de succès et blocages par fenêtre - {WINDOW_LABEL[win]}.</p>
         </div>
         <div className="flex items-center gap-2">
           <Tabs value={win} onValueChange={(v) => setWin(v as Window)}>
@@ -215,7 +215,7 @@ export function CertificateVerifyDashboard() {
 
       <Card>
         <CardHeader className="pb-2">
-          <CardTitle className="text-sm">Top IP — activité & blocages</CardTitle>
+          <CardTitle className="text-sm">Top IP - activité & blocages</CardTitle>
         </CardHeader>
         <CardContent className="p-0">
           <div className="overflow-x-auto">
@@ -458,7 +458,7 @@ function AttemptDetailDialog({ filter, onClose }: { filter: Filter; onClose: () 
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <ShieldCheck className="h-5 w-5 text-primary" />
-            Détail — <span className="font-mono">{title}</span>
+            Détail - <span className="font-mono">{title}</span>
           </DialogTitle>
           <DialogDescription>
             Historique complet des tentatives de vérification et raison de chaque résultat.
@@ -482,13 +482,13 @@ function AttemptDetailDialog({ filter, onClose }: { filter: Filter; onClose: () 
                       <div className="text-xs grid grid-cols-2 gap-x-4 gap-y-1 mt-1">
                         <div><span className="text-muted-foreground">Titulaire :</span> {cert.candidate_name}</div>
                         <div><span className="text-muted-foreground">Formation :</span> {cert.training_title}</div>
-                        <div><span className="text-muted-foreground">Score :</span> {cert.score ?? "—"}{cert.score != null ? "%" : ""}</div>
+                        <div><span className="text-muted-foreground">Score :</span> {cert.score ?? "-"}{cert.score != null ? "%" : ""}</div>
                         <div><span className="text-muted-foreground">Émis le :</span> {new Date(cert.issued_at).toLocaleDateString("fr-FR")}</div>
                       </div>
                     </div>
                   ) : (
                     <div className="flex items-center gap-2 text-amber-700">
-                      <AlertTriangle className="h-4 w-4" /> Aucun certificat n'existe pour ce code — toutes les tentatives sont des échecs.
+                      <AlertTriangle className="h-4 w-4" /> Aucun certificat n'existe pour ce code - toutes les tentatives sont des échecs.
                     </div>
                   )}
                 </CardContent>
@@ -523,7 +523,7 @@ function AttemptDetailDialog({ filter, onClose }: { filter: Filter; onClose: () 
                       <tr key={i} className="border-t">
                         <td className="px-3 py-1.5 text-xs whitespace-nowrap">{fmtDate(new Date(a.attempted_at))}</td>
                         <td className="px-3 py-1.5 font-mono text-xs">{a.ip}</td>
-                        {filter?.kind === "ip" && <td className="px-3 py-1.5 font-mono text-xs">{a.code ?? <span className="text-muted-foreground italic">—</span>}</td>}
+                        {filter?.kind === "ip" && <td className="px-3 py-1.5 font-mono text-xs">{a.code ?? <span className="text-muted-foreground italic">-</span>}</td>}
                         <td className="px-3 py-1.5">
                           {a.ok ? (
                             <Badge className="bg-emerald-100 text-emerald-700 border-emerald-300">OK</Badge>

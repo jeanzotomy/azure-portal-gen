@@ -27,7 +27,7 @@ export const CURRENCY_FULL_NAME: Record<AllCurrency, string> = {
   CDF: "Franc congolais",
 };
 
-// Conversion rates from EUR (base reference) — indicative, to be refreshed via
+// Conversion rates from EUR (base reference) - indicative, to be refreshed via
 // the exchange-rates edge function in production. Used only for display fallback.
 const RATES_FROM_EUR: Record<AllCurrency, number> = {
   EUR: 1,
