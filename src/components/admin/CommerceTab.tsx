@@ -127,7 +127,7 @@ export default function CommerceTab({ initialSection = "catalog" }: CommerceTabP
             <CardContent className="space-y-2 text-sm text-muted-foreground">
               <p>
                 Stripe gère les paiements en CAD, USD et EUR pour les clients hors zone Afrique francophone.
-                Les clés sont configurées via le connecteur Lovable (secrets <code>STRIPE_SANDBOX_API_KEY</code>).
+                Les clés sont configurées via le connecteur (secrets <code>STRIPE_SANDBOX_API_KEY</code>).
               </p>
               <Button asChild variant="outline" size="sm">
                 <a href="https://dashboard.stripe.com" target="_blank" rel="noreferrer">

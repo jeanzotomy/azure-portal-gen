@@ -4,7 +4,7 @@ export function PaymentTestModeBanner() {
   if (!clientToken) {
     return (
       <div className="w-full bg-red-100 border-b border-red-300 px-4 py-2 text-center text-sm text-red-800">
-        Le checkout en production n'est pas configuré. Termine le passage en live dans Lovable pour accepter les paiements réels.
+        Le checkout en production n'est pas configuré. Termine le passage en live pour accepter les paiements réels.
       </div>
     );
   }
