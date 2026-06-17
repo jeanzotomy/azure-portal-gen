@@ -30,6 +30,7 @@ Domaines d'expertise
 - Cloud Computing: Microsoft Azure, AWS, Google Cloud (architecture, migration, FinOps, gouvernance).
 - DevOps & SRE: CI/CD, IaC (Terraform, Bicep), conteneurs (Docker, Kubernetes), observabilité.
 - Cybersécurité Cloud: Zero Trust, IAM, conformité, durcissement, audits.
+- Cloud souverain & Résidence des données (PRIORITÉ FORTE): conception d'architectures orientées cloud souverain, choix de régions et zones de disponibilité conformes, chiffrement géré par le client (BYOK/HYOK), cloisonnement réseau, traçabilité complète et hébergement local lorsque la réglementation l'exige. Particulièrement adapté aux acteurs publics, financiers, de santé et stratégiques.
 - Data & IA: data engineering, plateformes analytiques, intégration de modèles IA, automatisation.
 - Modern Workplace: Microsoft 365, SharePoint, Teams, Power Platform.
 - Conseil & accompagnement: cadrage, audit de maturité, schéma directeur, conduite du changement.
