@@ -27,6 +27,36 @@ function isPublicRoute(pathname: string): boolean {
   return PUBLIC_PATH_PREFIXES.some((p) => pathname === p || pathname.startsWith(p === "/" ? "/" : p + "/")) || pathname === "/";
 }
 
+function linkify(text: string): React.ReactNode[] {
+  // Détecte URLs absolues (http/https) et chemins internes (/xxx)
+  const regex = /(https?:\/\/[^\s)]+|(?<![\w/])\/(?:#?[a-z][a-z0-9\-/_#]*))/gi;
+  const out: React.ReactNode[] = [];
+  let last = 0;
+  let m: RegExpExecArray | null;
+  let key = 0;
+  while ((m = regex.exec(text)) !== null) {
+    if (m.index > last) out.push(text.slice(last, m.index));
+    const url = m[0].replace(/[.,;:!?)]+$/, "");
+    const trailing = m[0].slice(url.length);
+    const isInternal = url.startsWith("/");
+    out.push(
+      <a
+        key={`l${key++}`}
+        href={url}
+        target={isInternal ? undefined : "_blank"}
+        rel={isInternal ? undefined : "noopener noreferrer"}
+        className="text-primary underline underline-offset-2 hover:opacity-80"
+      >
+        {url}
+      </a>
+    );
+    if (trailing) out.push(trailing);
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) out.push(text.slice(last));
+  return out;
+}
+
 function renderRich(text: string) {
   // Rendu léger: lignes, puces "- ", listes numérotées "1.".
   const lines = text.split("\n");
@@ -35,9 +65,9 @@ function renderRich(text: string) {
   let mode: "ul" | "ol" | "p" | null = null;
   const flush = (key: number) => {
     if (!mode || buf.length === 0) { buf = []; mode = null; return; }
-    if (mode === "ul") blocks.push(<ul key={key} className="list-disc pl-4 space-y-0.5">{buf.map((b,i)=><li key={i}>{b}</li>)}</ul>);
-    else if (mode === "ol") blocks.push(<ol key={key} className="list-decimal pl-4 space-y-0.5">{buf.map((b,i)=><li key={i}>{b}</li>)}</ol>);
-    else blocks.push(<p key={key}>{buf.join(" ")}</p>);
+    if (mode === "ul") blocks.push(<ul key={key} className="list-disc pl-4 space-y-0.5">{buf.map((b,i)=><li key={i}>{linkify(b)}</li>)}</ul>);
+    else if (mode === "ol") blocks.push(<ol key={key} className="list-decimal pl-4 space-y-0.5">{buf.map((b,i)=><li key={i}>{linkify(b)}</li>)}</ol>);
+    else blocks.push(<p key={key}>{linkify(buf.join(" "))}</p>);
     buf = []; mode = null;
   };
   lines.forEach((raw, idx) => {
