@@ -139,6 +139,9 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
       sectors: t.sectors || [],
       active: t.active,
       published: !!t.published,
+      audience: (t.audience as any) || (t.published ? "public" : "employee"),
+      price_cents: t.price_cents != null ? String(t.price_cents) : "",
+      currency: t.currency || "CAD",
 
       content: t.content,
       quiz: quizData ?? null,
