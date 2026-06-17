@@ -701,8 +701,6 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
                     telephone: a.phone || "",
                     offre: job?.title || "",
                     statut: APP_STATUS_LABELS[a.status],
-                    experience_annees: a.years_experience ?? "",
-                    salaire_attendu: a.salary_expectation || "",
                     score_ia: a.ai_score ?? "",
                     match_ia: a.ai_match_percentage ?? "",
                     recommandation_ia: a.ai_recommendation || "",
