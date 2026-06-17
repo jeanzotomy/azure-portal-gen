@@ -274,8 +274,6 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
       p_phone: form.phone.trim() || null,
       p_linkedin_url: form.linkedin_url.trim() || null,
       p_portfolio_url: form.portfolio_url.trim() || null,
-      p_years_experience: form.years_experience ? parseInt(form.years_experience) : null,
-      p_salary_expectation: form.salary_expectation.trim() || null,
       p_cover_letter_path: letterPath,
       p_notes: [
         form.cover_letter_text?.trim() || null,
