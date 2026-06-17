@@ -1071,14 +1071,50 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
               title="Description & publication"
               description="Détails du poste et visibilité."
             >
+              <div className="space-y-3 rounded-lg border border-primary/30 bg-gradient-to-br from-primary/5 via-primary/[0.03] to-transparent p-4">
+                <div className="flex items-start gap-2">
+                  <div className="h-8 w-8 shrink-0 rounded-md bg-primary/15 text-primary flex items-center justify-center">
+                    <Sparkles size={16} />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold">Assistant IA RH</p>
+                    <p className="text-xs text-muted-foreground">Spécialisé en rédaction d'offres IT / Cloud / DevOps. Génère ou améliore la description à partir du contexte saisi.</p>
+                  </div>
+                </div>
+                <Textarea
+                  rows={2}
+                  value={aiPrompt}
+                  onChange={(e) => setAiPrompt(e.target.value)}
+                  placeholder="Instructions optionnelles : ton, public cible, compétences à mettre en avant…"
+                  className="text-sm bg-background/60"
+                />
+                <div className="flex flex-wrap gap-2">
+                  <Button type="button" size="sm" onClick={() => runJobAssistant("generate")} disabled={!!aiAction} className="bg-gradient-primary-deep text-primary-foreground hover:opacity-95">
+                    {aiAction === "generate" ? <Loader2 size={13} className="animate-spin" /> : <Sparkles size={13} />}
+                    Générer la description
+                  </Button>
+                  <Button type="button" size="sm" variant="outline" onClick={() => runJobAssistant("improve")} disabled={!!aiAction || !form.description.trim()}>
+                    {aiAction === "improve" ? <Loader2 size={13} className="animate-spin" /> : <Pencil size={13} />}
+                    Améliorer
+                  </Button>
+                  <Button type="button" size="sm" variant="outline" onClick={() => runJobAssistant("shorten")} disabled={!!aiAction || !form.description.trim()}>
+                    {aiAction === "shorten" ? <Loader2 size={13} className="animate-spin" /> : <FileText size={13} />}
+                    Raccourcir
+                  </Button>
+                  <Button type="button" size="sm" variant="outline" onClick={() => runJobAssistant("translate_en")} disabled={!!aiAction || !form.description.trim()}>
+                    {aiAction === "translate_en" ? <Loader2 size={13} className="animate-spin" /> : <FileText size={13} />}
+                    Traduire EN
+                  </Button>
+                </div>
+              </div>
               <div className="space-y-2">
                 <Label htmlFor="job-desc" required>Description</Label>
                 <Textarea
                   id="job-desc"
-                  rows={6}
+                  rows={8}
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
-                  placeholder="Missions, profil recherché, compétences requises..."
+                  placeholder="Missions, profil recherché, compétences requises… ou utilisez l'assistant IA ci-dessus."
                 />
               </div>
               <div className="space-y-2">
