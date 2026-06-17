@@ -175,6 +175,55 @@ export default function CareersPage() {
                   </div>
                 )}
 
+                {/* ============ FILTRES HORIZONTAUX (sous la barre de recherche) ============ */}
+                {jobs.length > 0 && (
+                  <div className="p-3 sm:p-4 rounded-xl border bg-card/60 backdrop-blur-sm">
+                    <div className="flex items-center justify-between mb-2.5">
+                      <h3 className="text-xs sm:text-sm font-semibold text-muted-foreground uppercase tracking-wide">Filtres</h3>
+                      <div className="flex items-center gap-3">
+                        <p className="text-xs text-muted-foreground">
+                          {filteredJobs.length} offre{filteredJobs.length > 1 ? "s" : ""} sur {jobs.length}
+                        </p>
+                        {hasActiveFilters && (
+                          <button type="button" onClick={resetFilters} className="text-xs text-primary hover:underline font-medium">
+                            Réinitialiser
+                          </button>
+                        )}
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
+                      <Select value={contractFilter} onValueChange={setContractFilter}>
+                        <SelectTrigger className="h-9"><SelectValue placeholder="Type de contrat" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Tous les contrats</SelectItem>
+                          {contractTypes.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                      <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
+                        <SelectTrigger className="h-9"><SelectValue placeholder="Département" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Tous les départements</SelectItem>
+                          {departments.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                      <Select value={locationFilter} onValueChange={setLocationFilter}>
+                        <SelectTrigger className="h-9"><SelectValue placeholder="Lieu" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Tous les lieux</SelectItem>
+                          {locations.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                      <Select value={sectorFilter} onValueChange={setSectorFilter}>
+                        <SelectTrigger className="h-9"><SelectValue placeholder="Secteur" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Tous les secteurs</SelectItem>
+                          {sectors.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                )}
+
                 {jobs.length === 0 && (
                   <Card>
                     <CardContent className="p-12 text-center">
