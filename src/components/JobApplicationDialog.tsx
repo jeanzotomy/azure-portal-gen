@@ -185,9 +185,9 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
       return null;
     }
     // Per-applicant unique subdirectory to prevent enumeration between applicants.
-    // Authenticated users keep their userId for traceability; anonymous applicants
-    // get a fresh UUID per upload session.
-    const folder = user?.id || (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `anon-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`);
+    // Authenticated users keep their userId; anonymous applicants use a fresh UUID
+    // shared across all files of the same submission (stable via ref).
+    const folder = user?.id || anonFolderRef.current || crypto.randomUUID();
     const path = `public/${jobId}/${folder}/${Date.now()}-${fileName}`;
     const { data, error } = await supabase.storage
       .from("cv-applications")
