@@ -31,6 +31,30 @@ import CandidatesKanban from "./hr/CandidatesKanban";
 import CandidateDetailDrawer from "./hr/CandidateDetailDrawer";
 import { exportCsv } from "@/lib/csv-export";
 
+/**
+ * Nettoie une sortie IA pour un rendu professionnel:
+ * - retire les emphases markdown (** *** *) et titres `#`
+ * - normalise les puces en "- " et conserve les listes numérotées "1. "
+ * - réduit les espaces/sauts de ligne superflus
+ */
+function sanitizeAiText(input: string): string {
+  if (!input) return "";
+  let s = input.replace(/\r\n/g, "\n");
+  // Remove markdown emphasis markers while keeping the inner text
+  s = s.replace(/\*{1,3}([^*\n]+?)\*{1,3}/g, "$1");
+  // Strip any remaining stray asterisks
+  s = s.replace(/\*+/g, "");
+  // Remove markdown headings #, ##, ### etc. (keep the text)
+  s = s.replace(/^\s{0,3}#{1,6}\s+/gm, "");
+  // Normalize bullet markers (•, *, –, —) to "- "
+  s = s.replace(/^\s*[•·–—]\s+/gm, "- ");
+  // Collapse 3+ blank lines
+  s = s.replace(/\n{3,}/g, "\n\n");
+  // Trim trailing spaces per line
+  s = s.split("\n").map((l) => l.replace(/\s+$/g, "")).join("\n");
+  return s.trim();
+}
+
 type JobStatus = "brouillon" | "publiee" | "fermee";
 type ContractType = "CDI" | "CDD" | "Stage" | "Freelance" | "Alternance";
 type AppStatus = "nouvelle" | "en_revue" | "entretien" | "acceptee" | "refusee";
@@ -342,10 +366,12 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
       if (error) throw new Error(error.message);
       const res = (data as any)?.result;
       if (!res?.description) throw new Error("Réponse IA vide");
+      const cleaned = sanitizeAiText(res.description);
+      const cleanedTitle = res.title_suggestion ? sanitizeAiText(res.title_suggestion).replace(/\n+/g, " ").trim() : "";
       setForm((f) => ({
         ...f,
-        description: res.description,
-        title: !f.title.trim() && res.title_suggestion ? res.title_suggestion : f.title,
+        description: cleaned,
+        title: !f.title.trim() && cleanedTitle ? cleanedTitle : f.title,
       }));
       toast({ title: "✓ Description mise à jour par l'IA" });
     } catch (e) {
@@ -935,7 +961,10 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
                   <Label>Département</Label>
                   <Select
                     value={form.department || "__none__"}
-                    onValueChange={(v) => setForm({ ...form, department: v === "__none__" ? "" : v })}
+                    onValueChange={(v) => {
+                      if (v === "__add__") { setDeptDialogOpen(true); return; }
+                      setForm({ ...form, department: v === "__none__" ? "" : v });
+                    }}
                   >
                     <SelectTrigger><SelectValue placeholder="Sélectionner..." /></SelectTrigger>
                     <SelectContent>
@@ -943,16 +972,11 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
                       {departments.map((d) => (
                         <SelectItem key={d.id} value={d.name}>{d.name}</SelectItem>
                       ))}
+                      <SelectItem value="__add__" className="text-primary font-medium">
+                        + Ajouter un département…
+                      </SelectItem>
                     </SelectContent>
                   </Select>
-                  {departments.length === 0 && (
-                    <p className="text-xs text-muted-foreground">
-                      Aucun département.{" "}
-                      <button type="button" className="text-primary hover:underline" onClick={() => setDeptDialogOpen(true)}>
-                        Créer
-                      </button>
-                    </p>
-                  )}
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="job-location" required>Lieu</Label>
@@ -1021,9 +1045,9 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
                 <Label htmlFor="job-start">Date de prise de poste</Label>
                 <Input
                   id="job-start"
+                  type="date"
                   value={form.start_date}
                   onChange={(e) => setForm({ ...form, start_date: e.target.value })}
-                  placeholder="Ex: Dès que possible"
                 />
               </div>
             </FormSection>
@@ -1036,7 +1060,10 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
                 <Label>Secteur</Label>
                 <Select
                   value={form.sector || "__none__"}
-                  onValueChange={(v) => setForm({ ...form, sector: v === "__none__" ? "" : v })}
+                  onValueChange={(v) => {
+                    if (v === "__add__") { setSectorDialogOpen(true); return; }
+                    setForm({ ...form, sector: v === "__none__" ? "" : v });
+                  }}
                 >
                   <SelectTrigger><SelectValue placeholder="Sélectionner..." /></SelectTrigger>
                   <SelectContent>
@@ -1044,16 +1071,11 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
                     {sectors.map((s) => (
                       <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
                     ))}
+                    <SelectItem value="__add__" className="text-primary font-medium">
+                      + Ajouter un secteur…
+                    </SelectItem>
                   </SelectContent>
                 </Select>
-                {sectors.length === 0 && (
-                  <p className="text-xs text-muted-foreground">
-                    Aucun secteur.{" "}
-                    <button type="button" className="text-primary hover:underline" onClick={() => setSectorDialogOpen(true)}>
-                      Créer
-                    </button>
-                  </p>
-                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="job-salary">Rémunération</Label>
