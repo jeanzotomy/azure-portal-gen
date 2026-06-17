@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthSession } from "@/hooks/use-auth-session";
@@ -92,6 +92,16 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [lockedFields, setLockedFields] = useState({ first_name: false, last_name: false, phone: false });
+  // Stable per-dialog-session unique folder for anonymous uploads (prevents enumeration).
+  const anonFolderRef = useRef<string>("");
+  useEffect(() => {
+    if (open && !anonFolderRef.current) {
+      anonFolderRef.current = typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : `anon-${Date.now()}-${Math.random().toString(36).slice(2, 12)}`;
+    }
+    if (!open) anonFolderRef.current = "";
+  }, [open]);
   const [form, setForm] = useState({
     first_name: "",
     last_name: "",
@@ -174,9 +184,10 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
       toast({ title: "Fichier trop volumineux", description: `${file.name} dépasse 5 Mo.`, variant: "destructive" });
       return null;
     }
-    // Folder: 'public/<jobId>/<lastname>-<firstname>-<timestamp>/<fileName>' for anonymous users
-    // Or 'public/<jobId>/<userId-or-anon>/<fileName>'
-    const folder = user?.id || "anon";
+    // Per-applicant unique subdirectory to prevent enumeration between applicants.
+    // Authenticated users keep their userId; anonymous applicants use a fresh UUID
+    // shared across all files of the same submission (stable via ref).
+    const folder = user?.id || anonFolderRef.current || crypto.randomUUID();
     const path = `public/${jobId}/${folder}/${Date.now()}-${fileName}`;
     const { data, error } = await supabase.storage
       .from("cv-applications")
