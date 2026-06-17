@@ -34,8 +34,6 @@ const schema = z.object({
   phone: z.string().trim().max(30).optional().or(z.literal("")),
   linkedin_url: z.string().trim().url("URL invalide").max(255).optional().or(z.literal("")),
   portfolio_url: z.string().trim().url("URL invalide").max(255).optional().or(z.literal("")),
-  years_experience: z.string().refine((v) => v === "" || (parseInt(v) >= 0 && parseInt(v) <= 60), "0–60").optional(),
-  salary_expectation: z.string().trim().max(100).optional(),
   cover_letter_text: z.string().trim().max(2000, "Max. 2000 caractères").optional(),
 });
 
