@@ -308,8 +308,7 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
     // Reset form for potential next application
     setForm({
       first_name: "", last_name: "", email: user?.email || "", phone: "",
-      linkedin_url: "", portfolio_url: "", years_experience: "",
-      salary_expectation: "", cover_letter_text: "",
+      linkedin_url: "", portfolio_url: "", cover_letter_text: "",
     });
     setCvFile(null);
     setLetterFile(null);
