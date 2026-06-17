@@ -317,8 +317,8 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl p-0 gap-0 overflow-hidden flex flex-col max-h-[90vh] [&>button]:bg-white/15 [&>button]:hover:bg-white/25 [&>button]:text-primary-foreground [&>button]:opacity-100 [&>button]:rounded-full [&>button]:p-2 [&>button]:top-4 [&>button]:right-4 [&>button>svg]:h-5 [&>button>svg]:w-5">
-        <DialogHeader className="relative bg-gradient-to-br from-primary via-primary to-[#005f80] text-primary-foreground px-6 sm:px-8 py-7 sm:py-8 pr-16 overflow-hidden">
+      <DialogContent className="max-w-3xl p-0 gap-0 overflow-hidden flex flex-col max-h-[90vh] [&>button]:z-20 [&>button]:bg-white/20 [&>button]:hover:bg-white/30 [&>button]:text-primary-foreground [&>button]:opacity-100 [&>button]:rounded-full [&>button]:p-2 [&>button]:top-5 [&>button]:right-5 [&>button]:border [&>button]:border-white/30 [&>button]:shadow-md [&>button>svg]:h-5 [&>button>svg]:w-5">
+        <DialogHeader className="relative bg-gradient-to-br from-primary via-primary to-[#005f80] text-primary-foreground px-6 sm:px-8 py-7 sm:py-8 pr-20 sm:pr-24 overflow-hidden">
           <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-white/10 blur-2xl pointer-events-none" />
           <div className="absolute -bottom-16 -left-8 w-52 h-52 rounded-full bg-white/10 blur-3xl pointer-events-none" />
           <div className="relative space-y-4">
