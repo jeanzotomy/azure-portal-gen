@@ -174,9 +174,10 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
       toast({ title: "Fichier trop volumineux", description: `${file.name} dépasse 5 Mo.`, variant: "destructive" });
       return null;
     }
-    // Folder: 'public/<jobId>/<lastname>-<firstname>-<timestamp>/<fileName>' for anonymous users
-    // Or 'public/<jobId>/<userId-or-anon>/<fileName>'
-    const folder = user?.id || "anon";
+    // Per-applicant unique subdirectory to prevent enumeration between applicants.
+    // Authenticated users keep their userId for traceability; anonymous applicants
+    // get a fresh UUID per upload session.
+    const folder = user?.id || (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `anon-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`);
     const path = `public/${jobId}/${folder}/${Date.now()}-${fileName}`;
     const { data, error } = await supabase.storage
       .from("cv-applications")
