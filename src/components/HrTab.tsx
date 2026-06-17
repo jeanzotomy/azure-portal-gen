@@ -146,6 +146,8 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
   const [appSearch, setAppSearch] = useState("");
   const [appStatusFilter, setAppStatusFilter] = useState<string>("all");
   const [appJobFilter, setAppJobFilter] = useState<string>("all");
+  const [appView, setAppView] = useState<"list" | "kanban">("kanban");
+  const [detailId, setDetailId] = useState<string | null>(null);
   const [form, setForm] = useState({
     title: "",
     department: "",
