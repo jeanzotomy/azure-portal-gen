@@ -576,10 +576,35 @@ export default function TrainingsTab({ readOnly = false }: { readOnly?: boolean 
               <Switch checked={form.active} onCheckedChange={v => setForm({ ...form, active: v })} />
               <Label>Actif</Label>
             </div>
-            <div className="flex items-center gap-2">
-              <Switch checked={form.published} onCheckedChange={v => setForm({ ...form, published: v })} />
-              <Label>Publier sur le site (menu Formations)</Label>
+            <div className="space-y-2">
+              <Label className="text-xs">Audience</Label>
+              <Select value={form.audience} onValueChange={(v) => setForm({ ...form, audience: v as "public" | "employee", published: v === "public" })}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="employee">Employés (assignée via HR)</SelectItem>
+                  <SelectItem value="public">Catalogue public (visible par tous les inscrits)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
+            {form.audience === "public" && (
+              <div className="grid grid-cols-2 gap-2">
+                <div className="space-y-1">
+                  <Label className="text-xs">Prix (laisser vide = gratuit)</Label>
+                  <Input type="number" min="0" step="0.01" value={form.price_cents} onChange={(e) => setForm({ ...form, price_cents: e.target.value })} placeholder="0.00" />
+                </div>
+                <div className="space-y-1">
+                  <Label className="text-xs">Devise</Label>
+                  <Select value={form.currency} onValueChange={(v) => setForm({ ...form, currency: v })}>
+                    <SelectTrigger><SelectValue /></SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="CAD">CAD</SelectItem>
+                      <SelectItem value="USD">USD</SelectItem>
+                      <SelectItem value="EUR">EUR</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+            )}
 
           </div>
           <DialogFooter>
