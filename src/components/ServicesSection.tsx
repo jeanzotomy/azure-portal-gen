@@ -34,7 +34,7 @@ export function ServicesSection() {
   const topRow = services.slice(0, 3);
   const middleLeft = [services[3]];
   const middleRight = [services[4]];
-  const bottomRow = services.slice(5, 8);
+  const bottomRow = services.slice(5);
   
 
   return (
