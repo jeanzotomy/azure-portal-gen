@@ -151,6 +151,19 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Hard limit: 5 user questions per session.
+    const userCount = cleaned.filter((m) => m.role === "user").length;
+    const MAX_USER = 5;
+    if (userCount > MAX_USER) {
+      const reply = locale === "en"
+        ? `Thank you for our exchange. To keep our conversations focused, this assistant is limited to ${MAX_USER} questions per session. For a deeper discussion, please reach out via the contact form on the site and our team will gladly take over.`
+        : `Merci pour cet échange. Pour garder nos conversations ciblées, cet assistant est limité à ${MAX_USER} questions par session. Pour aller plus loin, merci de poursuivre via le formulaire de contact du site — notre équipe se fera un plaisir de prendre le relais.`;
+      return new Response(JSON.stringify({ reply, limitReached: true }), {
+        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
+
     const resp = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {

@@ -56,7 +56,7 @@ const en = {
       { title: "Security & Compliance", desc: "Microsoft Defender & Sentinel, AWS Security Hub, Google Chronicle. Zero Trust policies, identity management and ISO 27001, SOC 2, GDPR compliance." },
       { title: "Managed Services & Support", desc: "Proactive 24/7 multi-cloud monitoring, L1 to L3 support, incident management, performance monitoring and contractual SLA tracking." },
       { title: "AI & Intelligent Automation", desc: "Microsoft Copilot, Azure OpenAI, AWS Bedrock and Google Vertex AI. Process automation and AI integration into your business tools." },
-      { title: "Sovereign Cloud & Data Residency", desc: "Design of sovereign-cloud oriented architectures: compliant region and availability-zone selection, customer-managed encryption (BYOK/HYOK), network isolation, full auditability and local hosting when regulation requires it. A strong priority of Cloud Mature for public sector, financial and strategic organizations." },
+      { title: "Sovereign Cloud & Data Residency", desc: "A strong priority of Cloud Mature. We design sovereign-cloud oriented architectures: compliant region and availability-zone selection, customer-managed encryption (BYOK/HYOK), network isolation, full auditability and local hosting when regulation requires it. Tailored to public sector, financial, healthcare and strategic organizations." },
     ],
   },
   industries: {
