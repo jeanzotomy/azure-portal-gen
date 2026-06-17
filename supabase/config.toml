@@ -37,3 +37,5 @@ project_id = "zwzazxebufydnaxezngx"
     verify_jwt = false
   [functions.verify-cinetpay-payment]
     verify_jwt = false
+  [functions.site-assistant]
+    verify_jwt = false
