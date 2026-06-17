@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { z } from "zod";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthSession } from "@/hooks/use-auth-session";
@@ -92,6 +92,16 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [profileLoaded, setProfileLoaded] = useState(false);
   const [lockedFields, setLockedFields] = useState({ first_name: false, last_name: false, phone: false });
+  // Stable per-dialog-session unique folder for anonymous uploads (prevents enumeration).
+  const anonFolderRef = useRef<string>("");
+  useEffect(() => {
+    if (open && !anonFolderRef.current) {
+      anonFolderRef.current = typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : `anon-${Date.now()}-${Math.random().toString(36).slice(2, 12)}`;
+    }
+    if (!open) anonFolderRef.current = "";
+  }, [open]);
   const [form, setForm] = useState({
     first_name: "",
     last_name: "",
