@@ -20,13 +20,15 @@ const toast = (opts: { title?: string; description?: string; variant?: string })
   const fn = opts.variant === "destructive" ? sonnerToast.error : sonnerToast.success;
   fn(opts.title || "", opts.description ? { description: opts.description } : undefined);
 };
-import { Briefcase, Plus, Pencil, Trash2, FileText, Download, Calendar, MapPin, RefreshCw, Building2, X, Search, FolderOpen, FolderX, Mail, FileSignature, GraduationCap, Users, Sparkles, Loader2, AlertCircle, TrendingUp, ThumbsUp, ThumbsDown, LayoutDashboard, FileDown } from "lucide-react";
+import { Briefcase, Plus, Pencil, Trash2, FileText, Download, Calendar, MapPin, RefreshCw, Building2, X, Search, FolderOpen, FolderX, Mail, FileSignature, GraduationCap, Users, Sparkles, Loader2, AlertCircle, TrendingUp, ThumbsUp, ThumbsDown, LayoutDashboard, FileDown, LayoutGrid, List, Eye } from "lucide-react";
 import { format } from "date-fns";
 import EmailLogTab from "./EmailLogTab";
 import OnboardingAdminTab from "./OnboardingAdminTab";
 import ContractsTab from "./hr/ContractsTab";
 import TrainingsTab from "./hr/TrainingsTab";
 import HrDashboardTab from "./hr/HrDashboardTab";
+import CandidatesKanban from "./hr/CandidatesKanban";
+import CandidateDetailDrawer from "./hr/CandidateDetailDrawer";
 import { exportCsv } from "@/lib/csv-export";
 
 type JobStatus = "brouillon" | "publiee" | "fermee";
@@ -144,6 +146,8 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
   const [appSearch, setAppSearch] = useState("");
   const [appStatusFilter, setAppStatusFilter] = useState<string>("all");
   const [appJobFilter, setAppJobFilter] = useState<string>("all");
+  const [appView, setAppView] = useState<"list" | "kanban">("kanban");
+  const [detailId, setDetailId] = useState<string | null>(null);
   const [form, setForm] = useState({
     title: "",
     department: "",
@@ -672,11 +676,28 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
 
         <TabsContent value="applications" className="space-y-3 mt-4">
           {!loading && applications.length > 0 && (
-            <div className="flex justify-end">
+            <div className="flex items-center justify-between gap-3 flex-wrap">
+              <div className="inline-flex rounded-md border p-0.5 bg-card">
+                <button
+                  type="button"
+                  onClick={() => setAppView("kanban")}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-colors ${appView === "kanban" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                >
+                  <LayoutGrid size={13} /> Kanban
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setAppView("list")}
+                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded transition-colors ${appView === "list" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground"}`}
+                >
+                  <List size={13} /> Liste
+                </button>
+              </div>
               <Button size="sm" variant="outline" onClick={() => {
                 const rows = filteredApps.map(a => {
                   const job = jobs.find(j => j.id === a.job_id);
                   return {
+                    tracking_id: (a as any).tracking_id || "",
                     nom: a.full_name,
                     email: a.email,
                     telephone: a.phone || "",
@@ -743,7 +764,15 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
           {!loading && applications.length > 0 && filteredApps.length === 0 && (
             <Card><CardContent className="p-8 text-center text-muted-foreground text-sm">Aucune candidature ne correspond aux filtres.</CardContent></Card>
           )}
-          {filteredApps.map((app) => {
+          {!loading && appView === "kanban" && filteredApps.length > 0 && (
+            <CandidatesKanban
+              applications={filteredApps as any}
+              jobs={jobs}
+              onMove={(id, status) => updateAppStatus(id, status as AppStatus)}
+              onOpenDetail={(id) => setDetailId(id)}
+            />
+          )}
+          {appView === "list" && filteredApps.map((app) => {
             const job = jobs.find((j) => j.id === app.job_id);
             return (
               <Card key={app.id}>
@@ -779,6 +808,9 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
                     const spUrl = extractSharePointUrl(app.notes);
                     return (
                       <div className="flex gap-2 flex-wrap pt-2 border-t">
+                        <Button variant="default" size="sm" onClick={() => setDetailId(app.id)}>
+                          <Eye size={14} className="mr-1" /> Détails
+                        </Button>
                         <Button variant="outline" size="sm" onClick={() => downloadFile(app.cv_path)}><FileText size={14} /> CV</Button>
                         {app.cover_letter_path && (
                           <Button variant="outline" size="sm" onClick={() => downloadFile(app.cover_letter_path!)}><Download size={14} /> Lettre de motivation</Button>
@@ -807,8 +839,6 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
                   {(app.ai_analyzed_at || app.ai_status === "processing" || app.ai_status === "error") && (
                     <AiAnalysisBlock app={app} />
                   )}
-
-
                 </CardContent>
               </Card>
             );
@@ -1256,6 +1286,13 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
       </Dialog>
 
       {confirmDialog}
+
+      <CandidateDetailDrawer
+        applicationId={detailId}
+        onOpenChange={(v) => { if (!v) setDetailId(null); }}
+        onUpdated={load}
+        onChangeStatus={(id, status) => updateAppStatus(id, status)}
+      />
     </div>
   );
 }

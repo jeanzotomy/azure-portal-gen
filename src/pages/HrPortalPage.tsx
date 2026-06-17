@@ -45,23 +45,33 @@ export default function HrPortalPage() {
 
   return (
     <div className="min-h-screen bg-background flex flex-col">
-      <header className="h-14 flex items-center justify-between border-b border-border bg-card px-4">
-        <div className="flex items-center gap-3">
-          <img src={cmLogo} alt="CloudMature" className="h-8 w-auto" />
-          <h1 className="text-sm font-semibold flex items-center gap-2">
-            <Briefcase size={16} className="text-primary" /> Portail RH
-          </h1>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-xs bg-primary/10 text-primary px-2.5 py-1 rounded-full font-medium flex items-center gap-1">
-            <Shield size={12} /> Ressources Humaines
-          </span>
-          <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold">
-            {(user.user_metadata?.full_name || user.email || "R").charAt(0).toUpperCase()}
+      <header className="h-16 flex items-center border-b border-border bg-card px-4 sm:px-6">
+        <div className="max-w-[1400px] mx-auto w-full flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3 min-w-0">
+            <img src={cmLogo} alt="CloudMature" className="h-9 w-auto shrink-0" />
+            <div className="hidden sm:block h-8 w-px bg-border" />
+            <h1 className="text-sm font-semibold flex items-center gap-2 min-w-0">
+              <Briefcase size={16} className="text-primary shrink-0" />
+              <span className="truncate">Portail RH</span>
+            </h1>
           </div>
-          <Button variant="ghost" size="sm" onClick={handleLogout} className="text-destructive">
-            <LogOut size={14} />
-          </Button>
+          <div className="flex items-center gap-3 shrink-0">
+            <span className="hidden md:inline-flex text-xs bg-primary/10 text-primary px-3 py-1.5 rounded-full font-medium items-center gap-1.5">
+              <Shield size={12} /> Ressources Humaines
+            </span>
+            <div className="flex items-center gap-2 pl-3 sm:border-l border-border">
+              <div className="w-9 h-9 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-sm font-bold shrink-0">
+                {(user.user_metadata?.full_name || user.email || "R").charAt(0).toUpperCase()}
+              </div>
+              <span className="hidden lg:block text-sm text-foreground truncate max-w-[140px]">
+                {user.user_metadata?.full_name || user.email}
+              </span>
+              <Button variant="ghost" size="sm" onClick={handleLogout} className="text-destructive gap-1.5">
+                <LogOut size={14} />
+                <span className="hidden md:inline">Déconnexion</span>
+              </Button>
+            </div>
+          </div>
         </div>
       </header>
       <PortalInfoBar />

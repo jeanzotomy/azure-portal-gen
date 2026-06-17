@@ -135,8 +135,8 @@ export default function CareersPage() {
     <div className="min-h-screen flex flex-col">
       <Navbar />
       <main className="flex-1 pt-24 pb-16">
-        <div className="container max-w-5xl">
-          <div className="text-center mb-12">
+        <div className="container max-w-7xl">
+          <div className="text-center mb-10">
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-4">
               <Briefcase size={14} className="text-primary" />
               <span className="text-sm font-medium text-primary">Carrières</span>
@@ -149,218 +149,232 @@ export default function CareersPage() {
 
           {loading && <p className="text-center text-muted-foreground">Chargement des offres...</p>}
 
-          {!loading && jobs.length > 0 && (
-            <div className="mb-8 p-4 rounded-xl border bg-card/50 backdrop-blur-sm space-y-3">
-              <div className="relative">
-                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  placeholder="Rechercher par titre, mot-clé, lieu..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="pl-9 pr-9"
-                />
-                {search && (
-                  <button
-                    type="button"
-                    onClick={() => setSearch("")}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                    aria-label="Effacer"
-                  >
-                    <X size={14} />
-                  </button>
+          {!loading && (
+            <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6 lg:gap-8 items-start">
+              {/* ============ COLONNE GAUCHE : recherche + liste ============ */}
+              <div className="space-y-5 min-w-0">
+                {jobs.length > 0 && (
+                  <div className="relative">
+                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    <Input
+                      placeholder="Rechercher par titre, mot-clé, lieu..."
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      className="pl-9 pr-9 h-11"
+                    />
+                    {search && (
+                      <button
+                        type="button"
+                        onClick={() => setSearch("")}
+                        className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                        aria-label="Effacer"
+                      >
+                        <X size={14} />
+                      </button>
+                    )}
+                  </div>
                 )}
-              </div>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-                <Select value={contractFilter} onValueChange={setContractFilter}>
-                  <SelectTrigger><SelectValue placeholder="Type de contrat" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tous les contrats</SelectItem>
-                    {contractTypes.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-                <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
-                  <SelectTrigger><SelectValue placeholder="Département" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tous les départements</SelectItem>
-                    {departments.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-                <Select value={locationFilter} onValueChange={setLocationFilter}>
-                  <SelectTrigger><SelectValue placeholder="Lieu" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tous les lieux</SelectItem>
-                    {locations.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-                <Select value={sectorFilter} onValueChange={setSectorFilter}>
-                  <SelectTrigger><SelectValue placeholder="Secteur" /></SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">Tous les secteurs</SelectItem>
-                    {sectors.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>{filteredJobs.length} offre{filteredJobs.length > 1 ? "s" : ""} trouvée{filteredJobs.length > 1 ? "s" : ""} sur {jobs.length}</span>
-                {hasActiveFilters && (
-                  <button type="button" onClick={resetFilters} className="text-primary hover:underline font-medium">
-                    Réinitialiser les filtres
-                  </button>
+
+                {jobs.length === 0 && (
+                  <Card>
+                    <CardContent className="p-12 text-center">
+                      <Briefcase className="mx-auto mb-3 text-muted-foreground" size={40} />
+                      <h3 className="font-semibold mb-1">Aucune offre publiée pour le moment</h3>
+                      <p className="text-sm text-muted-foreground mb-4">Revenez bientôt ou envoyez une candidature spontanée ci-contre.</p>
+                      <Link to="/#contact"><Button variant="outline">Nous contacter</Button></Link>
+                    </CardContent>
+                  </Card>
                 )}
-              </div>
-            </div>
-          )}
 
-          {!loading && jobs.length === 0 && (
-            <Card>
-              <CardContent className="p-12 text-center">
-                <Briefcase className="mx-auto mb-3 text-muted-foreground" size={40} />
-                <h3 className="font-semibold mb-1">Aucune offre publiée pour le moment</h3>
-                <p className="text-sm text-muted-foreground mb-4">Revenez bientôt ou envoyez-nous une candidature spontanée via le formulaire de contact.</p>
-                <Link to="/#contact"><Button variant="outline">Nous contacter</Button></Link>
-              </CardContent>
-            </Card>
-          )}
+                {jobs.length > 0 && filteredJobs.length === 0 && (
+                  <Card>
+                    <CardContent className="p-10 text-center">
+                      <Search className="mx-auto mb-3 text-muted-foreground" size={36} />
+                      <h3 className="font-semibold mb-1">Aucune offre ne correspond à votre recherche</h3>
+                      <p className="text-sm text-muted-foreground mb-4">Essayez d'autres mots-clés ou réinitialisez les filtres.</p>
+                      <Button variant="outline" onClick={resetFilters}>Réinitialiser</Button>
+                    </CardContent>
+                  </Card>
+                )}
 
-          {!loading && jobs.length > 0 && filteredJobs.length === 0 && (
-            <Card>
-              <CardContent className="p-10 text-center">
-                <Search className="mx-auto mb-3 text-muted-foreground" size={36} />
-                <h3 className="font-semibold mb-1">Aucune offre ne correspond à votre recherche</h3>
-                <p className="text-sm text-muted-foreground mb-4">Essayez d'autres mots-clés ou réinitialisez les filtres.</p>
-                <Button variant="outline" onClick={resetFilters}>Réinitialiser</Button>
-              </CardContent>
-            </Card>
-          )}
-
-          <div className="space-y-4">
-            {filteredJobs.map((job) => (
-              <Card key={job.id} className="hover:shadow-md hover:border-primary/40 transition-all group">
-                <CardContent className="p-4 sm:p-6">
-                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 flex-wrap mb-2">
-                        <Link
-                          to={jobPath(job.id, job.title)}
-                          className="text-base sm:text-xl font-semibold hover:text-primary transition-colors break-words"
-                        >
-                          {job.title}
-                        </Link>
-                        <Badge variant="outline" className="text-[11px] sm:text-xs">
-                          {job.contract_type}
-                          {job.contract_type === "CDD" && job.contract_duration ? ` · ${job.contract_duration}` : ""}
-                          {job.contract_type === "CDD" && job.renewable ? " · renouvelable" : ""}
-                        </Badge>
-                        {job.department && <Badge variant="secondary" className="text-[11px] sm:text-xs">{job.department}</Badge>}
-                      </div>
-                      <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-xs sm:text-sm text-muted-foreground mb-3">
-                        <span className="flex items-center gap-1"><MapPin size={14} /> {job.location}</span>
-                        <span className="flex items-center gap-1"><Clock size={14} /> Publié le {format(new Date(job.created_at), "dd/MM/yyyy")}</span>
-                        {job.closing_date && (
-                          <span className="flex items-center gap-1 text-destructive">
-                            <Calendar size={14} /> Clôture le {format(new Date(job.closing_date), "dd/MM/yyyy")}
-                          </span>
-                        )}
-                      </div>
-                      {(job.sector || job.start_date || job.salary_range) && (
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5 sm:gap-2 text-xs mb-3 p-2.5 sm:p-3 rounded-lg bg-muted/40 border">
-                          {job.sector && <div><span className="font-semibold text-foreground">Secteur :</span> <span className="text-muted-foreground">{job.sector}</span></div>}
-                          {job.start_date && <div><span className="font-semibold text-foreground">Prise de poste :</span> <span className="text-muted-foreground">{job.start_date}</span></div>}
-                          {job.salary_range && <div><span className="font-semibold text-foreground">Rémunération :</span> <span className="text-muted-foreground">{job.salary_range}</span></div>}
+                <div className="space-y-4">
+                  {filteredJobs.map((job) => (
+                    <Card key={job.id} className="hover:shadow-md hover:border-primary/40 transition-all group">
+                      <CardContent className="p-4 sm:p-6">
+                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap mb-2">
+                              <Link
+                                to={jobPath(job.id, job.title)}
+                                className="text-base sm:text-xl font-semibold hover:text-primary transition-colors break-words"
+                              >
+                                {job.title}
+                              </Link>
+                              <Badge variant="outline" className="text-[11px] sm:text-xs">
+                                {job.contract_type}
+                                {job.contract_type === "CDD" && job.contract_duration ? ` · ${job.contract_duration}` : ""}
+                                {job.contract_type === "CDD" && job.renewable ? " · renouvelable" : ""}
+                              </Badge>
+                              {job.department && <Badge variant="secondary" className="text-[11px] sm:text-xs">{job.department}</Badge>}
+                            </div>
+                            <div className="flex flex-wrap gap-x-4 gap-y-1.5 text-xs sm:text-sm text-muted-foreground mb-3">
+                              <span className="flex items-center gap-1"><MapPin size={14} /> {job.location}</span>
+                              <span className="flex items-center gap-1"><Clock size={14} /> Publié le {format(new Date(job.created_at), "dd/MM/yyyy")}</span>
+                              {job.closing_date && (
+                                <span className="flex items-center gap-1 text-destructive">
+                                  <Calendar size={14} /> Clôture le {format(new Date(job.closing_date), "dd/MM/yyyy")}
+                                </span>
+                              )}
+                            </div>
+                            {(job.sector || job.start_date || job.salary_range) && (
+                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-1.5 sm:gap-2 text-xs mb-3 p-2.5 sm:p-3 rounded-lg bg-muted/40 border">
+                                {job.sector && <div><span className="font-semibold text-foreground">Secteur :</span> <span className="text-muted-foreground">{job.sector}</span></div>}
+                                {job.start_date && <div><span className="font-semibold text-foreground">Prise de poste :</span> <span className="text-muted-foreground">{job.start_date}</span></div>}
+                                {job.salary_range && <div><span className="font-semibold text-foreground">Rémunération :</span> <span className="text-muted-foreground">{job.salary_range}</span></div>}
+                              </div>
+                            )}
+                            <h4 className="text-sm font-semibold mb-1 text-foreground">Description du poste</h4>
+                            <p className={`text-sm text-foreground/80 whitespace-pre-line ${expanded[job.id] ? "" : "line-clamp-3 sm:line-clamp-4"}`}>{job.description}</p>
+                            {job.description.length > 200 && (
+                              <Link
+                                to={jobPath(job.id, job.title)}
+                                className="mt-1 text-xs font-medium text-primary hover:underline inline-flex items-center gap-1"
+                              >
+                                Lire tout <ChevronDown size={12} />
+                              </Link>
+                            )}
+                          </div>
+                          <div className="flex flex-row sm:flex-col gap-2 sm:shrink-0 sm:w-40">
+                            <Link to={jobPath(job.id, job.title)} className="flex-1 sm:flex-none">
+                              <Button className="gradient-primary text-primary-foreground border-0 w-full">
+                                Voir & Postuler
+                              </Button>
+                            </Link>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="outline" size="sm" className="gap-1.5 w-full h-10 sm:h-9">
+                                  <Share2 size={14} /> Partager
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-48">
+                                <DropdownMenuItem onClick={() => shareTo("linkedin", job)}>
+                                  <Linkedin size={14} className="mr-2 text-[#0A66C2]" /> LinkedIn
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => shareTo("whatsapp", job)}>
+                                  <MessageCircle size={14} className="mr-2 text-[#25D366]" /> WhatsApp
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => shareTo("facebook", job)}>
+                                  <Facebook size={14} className="mr-2 text-[#1877F2]" /> Facebook
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => shareTo("x", job)}>
+                                  <span className="mr-2 font-bold text-foreground w-3.5 text-center">𝕏</span> X (Twitter)
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => shareTo("email", job)}>
+                                  <Mail size={14} className="mr-2" /> Email
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem onClick={() => copyLink(job)}>
+                                  <Link2 size={14} className="mr-2" /> Copier le lien
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
                         </div>
-                      )}
-                      <h4 className="text-sm font-semibold mb-1 text-foreground">Description du poste</h4>
-                      <p className={`text-sm text-foreground/80 whitespace-pre-line ${expanded[job.id] ? "" : "line-clamp-3 sm:line-clamp-4"}`}>{job.description}</p>
-                      {job.description.length > 200 && (
-                        <Link
-                          to={jobPath(job.id, job.title)}
-                          className="mt-1 text-xs font-medium text-primary hover:underline inline-flex items-center gap-1"
-                        >
-                          Lire tout <ChevronDown size={12} />
-                        </Link>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+
+                {jobs.length > 0 && (
+                  <p className="text-center text-xs text-muted-foreground pt-2">
+                    Postulez en quelques clics, sans inscription requise.
+                  </p>
+                )}
+              </div>
+
+              {/* ============ COLONNE DROITE STICKY : filtres + spontanée ============ */}
+              <aside className="lg:sticky lg:top-24 space-y-4">
+                {jobs.length > 0 && (
+                  <div className="p-4 rounded-xl border bg-card/60 backdrop-blur-sm space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-sm font-semibold">Filtres</h3>
+                      {hasActiveFilters && (
+                        <button type="button" onClick={resetFilters} className="text-xs text-primary hover:underline font-medium">
+                          Réinitialiser
+                        </button>
                       )}
                     </div>
-                    <div className="flex flex-row sm:flex-col gap-2 sm:shrink-0 sm:w-40">
-                      <Link to={jobPath(job.id, job.title)} className="flex-1 sm:flex-none">
-                        <Button className="gradient-primary text-primary-foreground border-0 w-full">
-                          Voir & Postuler
-                        </Button>
-                      </Link>
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="outline" size="sm" className="gap-1.5 w-full h-10 sm:h-9">
-                            <Share2 size={14} /> Partager
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-48">
-                          <DropdownMenuItem onClick={() => shareTo("linkedin", job)}>
-                            <Linkedin size={14} className="mr-2 text-[#0A66C2]" /> LinkedIn
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => shareTo("whatsapp", job)}>
-                            <MessageCircle size={14} className="mr-2 text-[#25D366]" /> WhatsApp
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => shareTo("facebook", job)}>
-                            <Facebook size={14} className="mr-2 text-[#1877F2]" /> Facebook
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => shareTo("x", job)}>
-                            <span className="mr-2 font-bold text-foreground w-3.5 text-center">𝕏</span> X (Twitter)
-                          </DropdownMenuItem>
-                          <DropdownMenuItem onClick={() => shareTo("email", job)}>
-                            <Mail size={14} className="mr-2" /> Email
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem onClick={() => copyLink(job)}>
-                            <Link2 size={14} className="mr-2" /> Copier le lien
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                    <div className="space-y-2">
+                      <Select value={contractFilter} onValueChange={setContractFilter}>
+                        <SelectTrigger><SelectValue placeholder="Type de contrat" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Tous les contrats</SelectItem>
+                          {contractTypes.map((c) => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                      <Select value={departmentFilter} onValueChange={setDepartmentFilter}>
+                        <SelectTrigger><SelectValue placeholder="Département" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Tous les départements</SelectItem>
+                          {departments.map((d) => <SelectItem key={d} value={d}>{d}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                      <Select value={locationFilter} onValueChange={setLocationFilter}>
+                        <SelectTrigger><SelectValue placeholder="Lieu" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Tous les lieux</SelectItem>
+                          {locations.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                      <Select value={sectorFilter} onValueChange={setSectorFilter}>
+                        <SelectTrigger><SelectValue placeholder="Secteur" /></SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="all">Tous les secteurs</SelectItem>
+                          {sectors.map((s) => <SelectItem key={s} value={s}>{s}</SelectItem>)}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                    <p className="text-xs text-muted-foreground pt-1">
+                      {filteredJobs.length} offre{filteredJobs.length > 1 ? "s" : ""} sur {jobs.length}
+                    </p>
+                  </div>
+                )}
+
+                {/* Candidature spontanée */}
+                <div className="rounded-xl border border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background p-5">
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 text-primary shrink-0">
+                      <Sparkles size={18} />
+                    </div>
+                    <div className="min-w-0">
+                      <h2 className="text-base font-bold leading-tight">Candidature spontanée</h2>
+                      <p className="text-xs text-muted-foreground mt-0.5">Aucune offre ne vous correspond&nbsp;?</p>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          {/* Candidature spontanée */}
-          <div className="mt-10 rounded-2xl border border-primary/20 bg-gradient-to-br from-primary/5 via-background to-background p-6 sm:p-8">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-5">
-              <div className="inline-flex items-center justify-center w-11 h-11 rounded-xl bg-primary/10 text-primary shrink-0">
-                <Sparkles size={20} />
-              </div>
-              <div>
-                <h2 className="text-xl sm:text-2xl font-bold">Candidature spontanée</h2>
-                <p className="text-sm text-muted-foreground">
-                  Vous n'avez pas trouvé d'offre qui vous correspond&nbsp;? Envoyez-nous votre candidature directement.
-                </p>
-              </div>
+                  <div className="space-y-2">
+                    {SPONTANEOUS_TYPES.map((t) => {
+                      const Icon = t.icon;
+                      return (
+                        <button
+                          key={t.id}
+                          type="button"
+                          onClick={() => setSpontaneous({ id: t.id, title: t.title })}
+                          className="group w-full text-left p-3 rounded-lg border bg-card hover:border-primary/50 hover:shadow-sm transition-all flex items-center gap-3"
+                        >
+                          <div className="w-9 h-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors shrink-0">
+                            <Icon size={16} />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="font-semibold text-sm">{t.label}</div>
+                            <p className="text-[11px] text-muted-foreground truncate">{t.desc}</p>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              </aside>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {SPONTANEOUS_TYPES.map((t) => {
-                const Icon = t.icon;
-                return (
-                  <button
-                    key={t.id}
-                    type="button"
-                    onClick={() => setSpontaneous({ id: t.id, title: t.title })}
-                    className="group text-left p-4 rounded-xl border bg-card hover:border-primary/50 hover:shadow-md transition-all"
-                  >
-                    <div className="flex items-center gap-3 mb-1.5">
-                      <div className="w-9 h-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors">
-                        <Icon size={18} />
-                      </div>
-                      <span className="font-semibold">{t.label}</span>
-                    </div>
-                    <p className="text-xs text-muted-foreground">{t.desc}</p>
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          {jobs.length > 0 && (
-            <p className="text-center text-xs text-muted-foreground mt-6">
-              Postulez en quelques clics, sans inscription requise.
-            </p>
           )}
         </div>
       </main>
