@@ -206,7 +206,7 @@ export default function MfaPage() {
                   <label className="text-sm text-secondary-foreground/60 mb-1 block">{t("mfa.enterCode")}</label>
                   <Input type="text" inputMode="numeric" pattern="[0-9]{6}" maxLength={6} placeholder="000000" value={otp}
                     onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                    className="bg-secondary/30 border-border/30 text-primary-foreground text-center text-2xl tracking-[0.5em] placeholder:text-secondary-foreground/70 placeholder:tracking-[0.5em]" required />
+                    className="bg-white border-border/30 text-slate-900 text-center text-2xl font-semibold tracking-[0.5em] placeholder:text-slate-400 placeholder:tracking-[0.5em]" required />
                 </div>
                 <Button type="submit" className="w-full gradient-primary text-primary-foreground border-0" disabled={loading || otp.length !== 6}>
                   <ShieldCheck size={16} className="mr-2" /> {loading ? t("mfa.verifying") : t("mfa.activateMfa")}
@@ -226,7 +226,7 @@ export default function MfaPage() {
               <form onSubmit={handleVerify} className="space-y-4">
                 <Input type="text" inputMode="numeric" pattern="[0-9]{6}" maxLength={6} placeholder="000000" value={otp}
                   onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                  className="bg-secondary/30 border-border/30 text-primary-foreground text-center text-2xl tracking-[0.5em] placeholder:text-secondary-foreground/70 placeholder:tracking-[0.5em]" autoFocus required />
+                  className="bg-white border-border/30 text-slate-900 text-center text-2xl font-semibold tracking-[0.5em] placeholder:text-slate-400 placeholder:tracking-[0.5em]" autoFocus required />
                 <Button type="submit" className="w-full gradient-primary text-primary-foreground border-0" disabled={loading || otp.length !== 6}>
                   <ShieldCheck size={16} className="mr-2" /> {loading ? t("mfa.verifying") : t("mfa.verify")}
                 </Button>
@@ -256,7 +256,7 @@ export default function MfaPage() {
                   <p className="text-sm text-secondary-foreground/60">{t("mfa.enterSmsCode")}</p>
                   <Input type="text" inputMode="numeric" pattern="[0-9]{6}" maxLength={6} placeholder="000000" value={otp}
                     onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
-                    className="bg-secondary/30 border-border/30 text-primary-foreground text-center text-2xl tracking-[0.5em] placeholder:text-secondary-foreground/70 placeholder:tracking-[0.5em]" autoFocus required />
+                    className="bg-white border-border/30 text-slate-900 text-center text-2xl font-semibold tracking-[0.5em] placeholder:text-slate-400 placeholder:tracking-[0.5em]" autoFocus required />
                   <Button type="submit" className="w-full gradient-primary text-primary-foreground border-0" disabled={loading || otp.length !== 6}>
                     <Phone size={16} className="mr-2" /> {loading ? t("mfa.verifying") : t("mfa.smsVerify")}
                   </Button>
