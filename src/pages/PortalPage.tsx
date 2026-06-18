@@ -45,6 +45,7 @@ import ApplicationsTab from "@/components/ApplicationsTab";
 import OnboardingTab from "@/components/OnboardingTab";
 import EmployeeTrainingsTab from "@/components/EmployeeTrainingsTab";
 import PortalInvoicesTab from "@/components/PortalInvoicesTab";
+import MyDocumentsCard from "@/components/MyDocumentsCard";
 import { getDialCode, applyDialCode } from "@/lib/country-dial-codes";
 
 type Tab = "dashboard" | "projects" | "tickets" | "applications" | "onboarding" | "my-trainings" | "invoices" | "profile";
@@ -1577,6 +1578,10 @@ function ProfileTab({ user }: { user: SupaUser }) {
           {saving ? "Sauvegarde..." : "Sauvegarder"}
         </Button>
       </form>
+
+      <MyDocumentsCard userId={user.id} />
+
+
 
       {/* Delete account section */}
       <div className="bg-card rounded-xl p-6 shadow-card border border-destructive/20 max-w-lg space-y-4">
