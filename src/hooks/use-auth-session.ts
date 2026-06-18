@@ -13,7 +13,7 @@ const AuthSessionContext = createContext<AuthSessionContextValue>({
   ready: false,
 });
 
-const IDLE_TIMEOUT_MS = 15 * 60 * 1000; // 15 minutes
+const IDLE_TIMEOUT_MS = 4 * 60 * 60 * 1000; // 4 heures
 const IDLE_STORAGE_KEY = "cm_last_activity_at";
 
 export function AuthSessionProvider({ children }: { children: React.ReactNode }) {
