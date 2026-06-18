@@ -50,7 +50,7 @@ export function AuthSessionProvider({ children }: { children: React.ReactNode })
     };
   }, []);
 
-  // Auto sign-out after 15 minutes of inactivity
+  // Auto sign-out after 4 hours of inactivity
   useEffect(() => {
     if (!user) return;
 
