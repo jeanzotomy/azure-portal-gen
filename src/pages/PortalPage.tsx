@@ -45,6 +45,7 @@ import ApplicationsTab from "@/components/ApplicationsTab";
 import OnboardingTab from "@/components/OnboardingTab";
 import EmployeeTrainingsTab from "@/components/EmployeeTrainingsTab";
 import PortalInvoicesTab from "@/components/PortalInvoicesTab";
+import MyDocumentsCard from "@/components/MyDocumentsCard";
 import { getDialCode, applyDialCode } from "@/lib/country-dial-codes";
 
 type Tab = "dashboard" | "projects" | "tickets" | "applications" | "onboarding" | "my-trainings" | "invoices" | "profile";
