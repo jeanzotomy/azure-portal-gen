@@ -1592,10 +1592,6 @@ function ProfileTab({ user }: { user: SupaUser }) {
         </Button>
       </form>
 
-      <MyDocumentsCard userId={user.id} />
-
-
-
       {/* Delete account section */}
       <div className="bg-card rounded-xl p-6 shadow-card border border-destructive/20 max-w-lg space-y-4">
         <h3 className="font-semibold text-destructive flex items-center gap-2">
