@@ -1621,6 +1621,13 @@ function ProfileTab({ user }: { user: SupaUser }) {
           <Trash2 size={14} className="mr-2" /> Supprimer mon compte
         </Button>
       </div>
+        </TabsContent>
+
+        <TabsContent value="docs" className="mt-4">
+          <MyDocumentsCard userId={user.id} />
+        </TabsContent>
+      </Tabs>
+
       {confirmDlg}
     </div>
   );
