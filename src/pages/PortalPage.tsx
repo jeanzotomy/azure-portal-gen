@@ -46,8 +46,9 @@ import OnboardingTab from "@/components/OnboardingTab";
 import EmployeeTrainingsTab from "@/components/EmployeeTrainingsTab";
 import PortalInvoicesTab from "@/components/PortalInvoicesTab";
 import MyDocumentsCard from "@/components/MyDocumentsCard";
+import ChangePasswordCard from "@/components/ChangePasswordCard";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { IdCard } from "lucide-react";
+import { IdCard, Lock as LockIcon } from "lucide-react";
 import { getDialCode, applyDialCode } from "@/lib/country-dial-codes";
 
 type Tab = "dashboard" | "projects" | "tickets" | "applications" | "onboarding" | "my-trainings" | "invoices" | "profile";
