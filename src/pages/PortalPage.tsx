@@ -1343,12 +1343,15 @@ function ProfileTab({ user }: { user: SupaUser }) {
       </div>
 
       <Tabs defaultValue="infos" className="w-full">
-        <TabsList className="grid w-full sm:w-auto sm:inline-grid grid-cols-2 h-auto">
+        <TabsList className="grid w-full sm:w-auto sm:inline-grid grid-cols-3 h-auto">
           <TabsTrigger value="infos" className="gap-1.5 py-2">
             <User size={14} /> Mes informations
           </TabsTrigger>
           <TabsTrigger value="docs" className="gap-1.5 py-2">
             <IdCard size={14} /> Mes documents
+          </TabsTrigger>
+          <TabsTrigger value="security" className="gap-1.5 py-2">
+            <LockIcon size={14} /> Sécurité
           </TabsTrigger>
         </TabsList>
 
