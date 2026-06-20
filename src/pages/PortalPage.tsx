@@ -46,8 +46,9 @@ import OnboardingTab from "@/components/OnboardingTab";
 import EmployeeTrainingsTab from "@/components/EmployeeTrainingsTab";
 import PortalInvoicesTab from "@/components/PortalInvoicesTab";
 import MyDocumentsCard from "@/components/MyDocumentsCard";
+import ChangePasswordCard from "@/components/ChangePasswordCard";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { IdCard } from "lucide-react";
+import { IdCard, Lock as LockIcon } from "lucide-react";
 import { getDialCode, applyDialCode } from "@/lib/country-dial-codes";
 
 type Tab = "dashboard" | "projects" | "tickets" | "applications" | "onboarding" | "my-trainings" | "invoices" | "profile";
@@ -1342,12 +1343,15 @@ function ProfileTab({ user }: { user: SupaUser }) {
       </div>
 
       <Tabs defaultValue="infos" className="w-full">
-        <TabsList className="grid w-full sm:w-auto sm:inline-grid grid-cols-2 h-auto">
+        <TabsList className="grid w-full sm:w-auto sm:inline-grid grid-cols-3 h-auto">
           <TabsTrigger value="infos" className="gap-1.5 py-2">
             <User size={14} /> Mes informations
           </TabsTrigger>
           <TabsTrigger value="docs" className="gap-1.5 py-2">
             <IdCard size={14} /> Mes documents
+          </TabsTrigger>
+          <TabsTrigger value="security" className="gap-1.5 py-2">
+            <LockIcon size={14} /> Sécurité
           </TabsTrigger>
         </TabsList>
 
@@ -1625,6 +1629,10 @@ function ProfileTab({ user }: { user: SupaUser }) {
 
         <TabsContent value="docs" className="mt-4">
           <MyDocumentsCard userId={user.id} />
+        </TabsContent>
+
+        <TabsContent value="security" className="mt-4">
+          <ChangePasswordCard email={user.email || ""} />
         </TabsContent>
       </Tabs>
 
