@@ -1341,6 +1341,17 @@ function ProfileTab({ user }: { user: SupaUser }) {
         </div>
       </div>
 
+      <Tabs defaultValue="infos" className="w-full">
+        <TabsList className="grid w-full sm:w-auto sm:inline-grid grid-cols-2 h-auto">
+          <TabsTrigger value="infos" className="gap-1.5 py-2">
+            <User size={14} /> Mes informations
+          </TabsTrigger>
+          <TabsTrigger value="docs" className="gap-1.5 py-2">
+            <IdCard size={14} /> Mes documents
+          </TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="infos" className="space-y-6 mt-4">
       <form onSubmit={handleSave} className="bg-card rounded-xl p-6 shadow-card border border-border/50 space-y-6">
         <h3 className="font-semibold text-card-foreground mb-2">Modifier mes informations</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
