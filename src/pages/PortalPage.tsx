@@ -1630,6 +1630,10 @@ function ProfileTab({ user }: { user: SupaUser }) {
         <TabsContent value="docs" className="mt-4">
           <MyDocumentsCard userId={user.id} />
         </TabsContent>
+
+        <TabsContent value="security" className="mt-4">
+          <ChangePasswordCard email={user.email || ""} />
+        </TabsContent>
       </Tabs>
 
       {confirmDlg}
