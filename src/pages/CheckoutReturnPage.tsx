@@ -4,10 +4,17 @@ import { CheckCircle2, AlertCircle, Loader2, Clock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { formatAmount, type AllCurrency } from "@/lib/cinetpay";
+import { useSeo } from "@/hooks/use-seo";
 
 type Status = "loading" | "paid" | "pending" | "failed" | "unknown";
 
 export default function CheckoutReturnPage() {
+  useSeo({
+    title: "Confirmation de paiement | CloudMature",
+    description:
+      "Page de confirmation après votre paiement CloudMature. Vérifiez le statut de votre transaction Stripe ou CinetPay et accédez à votre portail client.",
+    path: "/checkout/return",
+  });
   const [searchParams] = useSearchParams();
   const provider = searchParams.get("provider");
   const sessionId = searchParams.get("session_id");

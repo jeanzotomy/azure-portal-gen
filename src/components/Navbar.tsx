@@ -60,7 +60,7 @@ export function Navbar() {
         <Link to="/" className="flex items-center gap-2 shrink-0" style={{ width: 220, height: 48 }}>
           <img
             src={logo}
-            alt="CloudMature"
+            alt="CloudMature - Conseil Cloud, DevOps et Intelligence Artificielle"
             width={220}
             height={48}
             fetchPriority="high"

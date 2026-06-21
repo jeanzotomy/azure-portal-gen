@@ -64,7 +64,7 @@ export function ServicesSection() {
             <ServiceCard key={s.title} s={s} />
           ))}
           <div className="relative group overflow-hidden rounded-2xl">
-            <img src={servicesImage} alt="Cloud Mature" className="w-full h-64 object-cover rounded-2xl" />
+            <img src={servicesImage} alt="Équipe CloudMature accompagnant un client en transformation Cloud et DevOps" className="w-full h-64 object-cover rounded-2xl" />
             <div className="absolute inset-0 bg-gradient-to-t from-secondary/90 via-secondary/30 to-transparent rounded-2xl" />
             <div className="absolute bottom-0 left-0 right-0 p-6">
               <p className="text-sm font-semibold uppercase tracking-wider text-primary">Cloud Mature</p>
@@ -95,7 +95,7 @@ export function ServicesSection() {
             <div className="relative group overflow-hidden rounded-2xl">
               <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-primary/30 via-accent/20 to-primary/10 blur-lg opacity-60 group-hover:opacity-90 transition-opacity duration-500" />
               <div className="relative overflow-hidden rounded-2xl h-full border border-primary/20">
-                <img src={servicesImage} alt="Cloud Mature" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
+                <img src={servicesImage} alt="Consultants CloudMature en session de travail sur un projet Cloud et IA" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
                 <div className="absolute inset-0 bg-gradient-to-t from-secondary/90 via-secondary/30 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-6">
                   <p className="text-sm font-semibold uppercase tracking-wider text-primary">Cloud Mature</p>

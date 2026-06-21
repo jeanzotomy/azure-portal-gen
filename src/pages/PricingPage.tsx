@@ -12,6 +12,7 @@ import { PaymentTestModeBanner } from "@/components/PaymentTestModeBanner";
 import { useStripeCheckout } from "@/hooks/useStripeCheckout";
 import { useCinetPayCheckout } from "@/hooks/useCinetPayCheckout";
 import { useUserRoles } from "@/hooks/use-admin";
+import { useSeo } from "@/hooks/use-seo";
 
 import { supabase } from "@/integrations/supabase/client";
 import {
@@ -81,6 +82,12 @@ type PublishedService = {
 };
 
 export default function PricingPage() {
+  useSeo({
+    title: "Tarifs Cloud, DevOps & IA | CloudMature",
+    description:
+      "Découvrez les forfaits CloudMature : conseil Cloud (Azure, AWS, GCP), DevOps et IA. Tarifs mensuels et annuels en EUR, USD, CAD, GNF, XOF, XAF, CDF.",
+    path: "/pricing",
+  });
   const navigate = useNavigate();
   const [currency, setCurrency] = useState<AllCurrency>("CAD");
   const [interval, setInterval] = useState<Interval>("monthly");
