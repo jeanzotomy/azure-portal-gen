@@ -51,6 +51,7 @@ export default function ServiceClientsTab() {
   const [editing, setEditing] = useState<ServiceClient | null>(null);
   const [form, setForm] = useState<Partial<ServiceClient>>(empty);
   const [saving, setSaving] = useState(false);
+  const [view, setView] = useViewMode("service-clients", "table");
 
   const load = async () => {
     setLoading(true);
