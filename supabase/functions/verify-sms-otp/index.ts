@@ -134,68 +134,13 @@ Deno.serve(async (req) => {
     }
 
     if (purpose === "login") {
-      // Normalize phone: strip ALL non-digits for exact comparison only (no suffix/prefix match)
-      const phoneDigits = phone.replace(/\D/g, "");
-
-      // Find user by phone - exact digit-only match to prevent account takeover via suffix.
-      const { data: profiles } = await supabaseAdmin
-        .from("profiles")
-        .select("user_id, phone, blocked")
-        .not("phone", "is", null);
-
-      const matchedProfile = (profiles || []).find((p: { phone: string | null }) => {
-        if (!p.phone) return false;
-        const pDigits = p.phone.replace(/\D/g, "");
-        // STRICT: digits must be identical (no endsWith / startsWith)
-        return pDigits.length > 0 && pDigits === phoneDigits;
-      });
-
-      if (!matchedProfile) {
-        return new Response(JSON.stringify({ error: "No account found with this phone number" }), {
-          status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      if (matchedProfile.blocked) {
-        return new Response(JSON.stringify({ error: "Account blocked" }), {
-          status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      const userId = matchedProfile.user_id;
-
-      // Get user's real email from auth
-      const { data: userData, error: userError } = await supabaseAdmin.auth.admin.getUserById(userId);
-      if (userError || !userData?.user?.email) {
-        return new Response(JSON.stringify({ error: "User account not found" }), {
-          status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
-        });
-      }
-
-      // Set a temporary one-time password for session creation
-      const tempPassword = crypto.randomUUID() + "-Tmp!";
-      const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
-        password: tempPassword,
-      });
-      if (updateError) throw updateError;
-
-      // Get roles
-      const { data: roles } = await supabaseAdmin
-        .from("user_roles")
-        .select("role")
-        .eq("user_id", userId);
-
-      const roleList = (roles || []).map((r: { role: string }) => r.role);
-      const redirectTo = roleList.includes("admin") || roleList.includes("agent") ? "/admin" : "/portal";
-
-      return new Response(JSON.stringify({
-        success: true,
-        purpose: "login",
-        email: userData.user.email,
-        tempPassword,
-        redirectTo,
-      }), {
-        status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      // SMS phone-login is intentionally disabled.
+      // The previous implementation overwrote the user's real password with a
+      // throwaway temp password and returned it in the response — that destroyed
+      // the user's credentials and exposed plaintext secrets over the wire.
+      // Use email + password (with MFA) or the password-reset flow instead.
+      return new Response(JSON.stringify({ error: "SMS login is disabled. Please sign in with email and password." }), {
+        status: 410, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
 

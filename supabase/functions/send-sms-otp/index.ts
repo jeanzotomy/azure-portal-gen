@@ -39,7 +39,7 @@ Deno.serve(async (req) => {
       });
     }
 
-    if (!purpose || !["login", "mfa"].includes(purpose)) {
+    if (!purpose || !["mfa"].includes(purpose)) {
       return new Response(JSON.stringify({ error: "Invalid purpose" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
