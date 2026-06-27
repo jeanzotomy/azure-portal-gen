@@ -710,12 +710,23 @@ function AdminContent() {
               {tab === "service-catalog" && <CommerceTab initialSection="catalog" />}
               {tab === "service-invoices" && <CommerceTab initialSection="invoices" />}
               {tab === "payment-methods" && <CommerceTab initialSection="methods" />}
+              {isHrTab && (
+                <Tabs value={tab} onValueChange={(v) => setTab(v as AdminTab)} className="w-full">
+                  <TabsList className="flex flex-wrap h-auto mb-4">
+                    {hrGroup.map((s) => (
+                      <TabsTrigger key={s.id} value={s.id} className="gap-1.5">
+                        <s.icon className="h-3.5 w-3.5" /> {s.label}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                  <TabsContent value="hr-recruitment"><HrTab defaultTab="recruitment" /></TabsContent>
+                  <TabsContent value="hr-contracts"><HrTab defaultTab="contracts" /></TabsContent>
+                  <TabsContent value="hr-onboarding"><HrTab defaultTab="onboarding" /></TabsContent>
+                  <TabsContent value="hr-trainings"><HrTab defaultTab="trainings" /></TabsContent>
+                  <TabsContent value="hr-employee-trainings"><EmployeeTrainingManager /></TabsContent>
+                </Tabs>
+              )}
               {tab === "hr" && <HrTab />}
-              {tab === "hr-recruitment" && <HrTab defaultTab="recruitment" />}
-              {tab === "hr-contracts" && <HrTab defaultTab="contracts" />}
-              {tab === "hr-onboarding" && <HrTab defaultTab="onboarding" />}
-              {tab === "hr-trainings" && <HrTab defaultTab="trainings" />}
-              {tab === "hr-employee-trainings" && <EmployeeTrainingManager />}
             </>
           )}
         </main>
