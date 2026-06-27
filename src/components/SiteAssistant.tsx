@@ -93,11 +93,15 @@ export default function SiteAssistant() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const hpRef = useRef<HTMLInputElement>(null);
+  const openedAtRef = useRef<number>(0);
 
   const enabled = isPublicRoute(pathname);
   const MAX_USER_QUESTIONS = 5;
+  const SOFT_CTA_AT = 3; // show "leave your contact" CTA after this many questions
   const userMessageCount = messages.filter((m) => m.role === "user").length;
   const limitReached = userMessageCount >= MAX_USER_QUESTIONS;
+  const showSoftCta = userMessageCount >= SOFT_CTA_AT && !limitReached;
 
   const i18n = locale === "en"
     ? {
