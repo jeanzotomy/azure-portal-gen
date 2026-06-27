@@ -146,6 +146,8 @@ export default function SiteAssistant() {
 
   useEffect(() => {
     if (open && !limitReached) inputRef.current?.focus();
+    if (open && openedAtRef.current === 0) openedAtRef.current = Date.now();
+    if (!open) openedAtRef.current = 0;
   }, [open, limitReached]);
 
   const suggested = locale === "en"
