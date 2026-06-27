@@ -14,6 +14,42 @@ export type Database = {
   }
   public: {
     Tables: {
+      admin_audit_log: {
+        Row: {
+          action: string
+          actor_email: string | null
+          actor_id: string | null
+          created_at: string
+          id: string
+          ip: string | null
+          payload: Json | null
+          target_id: string | null
+          target_type: string | null
+        }
+        Insert: {
+          action: string
+          actor_email?: string | null
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          ip?: string | null
+          payload?: Json | null
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Update: {
+          action?: string
+          actor_email?: string | null
+          actor_id?: string | null
+          created_at?: string
+          id?: string
+          ip?: string | null
+          payload?: Json | null
+          target_id?: string | null
+          target_type?: string | null
+        }
+        Relationships: []
+      }
       api_tokens: {
         Row: {
           created_at: string
@@ -2699,6 +2735,15 @@ export type Database = {
           name: string
           training_count: number
         }[]
+      }
+      log_admin_action: {
+        Args: {
+          _action: string
+          _payload?: Json
+          _target_id?: string
+          _target_type?: string
+        }
+        Returns: string
       }
       mark_all_notifications_read: { Args: never; Returns: number }
       mark_training_comment_official: {
