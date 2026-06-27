@@ -18,7 +18,7 @@ import { format, differenceInDays, isPast } from "date-fns";
 import { fr } from "date-fns/locale";
 import { cn } from "@/lib/utils";
 import {
-  SidebarProvider, Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent,
+  SidebarProvider, Sidebar, SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
   SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarMenuSub, SidebarMenuSubItem, SidebarMenuSubButton, SidebarTrigger, useSidebar,
 } from "@/components/ui/sidebar";
 import {
