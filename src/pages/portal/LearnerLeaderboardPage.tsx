@@ -153,6 +153,7 @@ export default function LearnerLeaderboardPage() {
                       <div className="font-bold text-sm">{r.total_xp}</div>
                       <div className="text-[10px] text-muted-foreground uppercase tracking-wider">XP</div>
                     </div>
+                    {!isMe && <LearnerFollowButton userId={r.user_id} size="sm" variant="outline" />}
                   </li>
                 );
               })}
