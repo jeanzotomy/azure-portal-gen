@@ -223,7 +223,28 @@ function PortalContent() {
           ) : (
             <>
               {tab === "dashboard" && (
-                <div className="space-y-4">
+                <div className="space-y-4 animate-fade-up">
+                  {/* Welcome banner — au-dessus du tableau de bord intelligent */}
+                  <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-accent/5 to-primary/10 rounded-2xl p-6 border border-primary/10">
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
+                    <div className="relative flex items-center justify-between gap-3 flex-wrap">
+                      <div>
+                        <h1 className="text-lg sm:text-2xl font-bold text-foreground">
+                          Bienvenue, {user.user_metadata?.full_name || user.email?.split("@")[0]}
+                        </h1>
+                        <p className="text-muted-foreground mt-1">Voici un aperçu de votre espace client.</p>
+                      </div>
+                      <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                        <Button variant="outline" size="sm" onClick={() => window.location.reload()} className="gap-1.5">
+                          <RefreshCw size={14} /> Actualiser
+                        </Button>
+                        <span className="hidden md:flex items-center gap-2">
+                          <Activity size={16} className="text-primary" />
+                          {new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
                   <PortalDashboardSmart />
                   <DashboardTab user={user} />
                 </div>
@@ -325,26 +346,6 @@ function DashboardTab({ user }: { user: SupaUser }) {
 
   return (
     <div className="space-y-6 animate-fade-up">
-      {/* Welcome banner */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-accent/5 to-primary/10 rounded-2xl p-6 border border-primary/10">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
-        <div className="relative flex items-center justify-between">
-          <div>
-            <h1 className="text-lg sm:text-2xl font-bold text-foreground">Bienvenue, {user.user_metadata?.full_name || user.email?.split("@")[0]}</h1>
-            <p className="text-muted-foreground mt-1">Voici un aperçu de votre espace client.</p>
-          </div>
-           <div className="hidden md:flex items-center gap-3 text-sm text-muted-foreground">
-            <Button variant="outline" size="sm" onClick={loadData} className="gap-1.5">
-              <RefreshCw size={14} /> Actualiser
-            </Button>
-            <span className="flex items-center gap-2">
-              <Activity size={16} className="text-primary" />
-              {new Date().toLocaleDateString("fr-FR", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
-            </span>
-          </div>
-        </div>
-      </div>
-
       {/* Stats grid */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard icon={FolderOpen} label="Projets actifs" value={projects.filter(p => p.status === "en_cours").length} color="gradient-primary" subtitle={`${projects.length} total`} />
