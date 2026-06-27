@@ -176,23 +176,44 @@ export function TrainingComments({
       .filter(([, name]) => new RegExp(`@${name.replace(/\s+/g, "_")}\\b`).test(body))
       .map(([id]) => id);
 
-    const { error } = await supabase.rpc("post_training_comment" as any, {
+    const { data: newId, error } = await (supabase.rpc as any)("post_training_comment", {
       _training_id: trainingId,
       _module_index: moduleIndex ?? null,
       _body: body.trim(),
       _mentions: used,
     });
+    if (error) {
+      setPosting(false);
+      return toast.error(error.message);
+    }
+    // Tag as question if requested (owner can update their own comment via RLS).
+    if (postKind === "question" && newId) {
+      await (supabase.from("training_comments") as any)
+        .update({ is_question: true })
+        .eq("id", newId);
+    }
     setPosting(false);
-    if (error) return toast.error(error.message);
     setBody("");
     setSelectedMentions({});
-    if (used.length > 0) toast.success(`Commentaire publié - ${used.length} personne(s) notifiée(s)`);
-    else toast.success("Commentaire publié");
+    setPostKind("comment");
+    if (used.length > 0) toast.success(`${postKind === "question" ? "Question" : "Commentaire"} publié(e) - ${used.length} personne(s) notifiée(s)`);
+    else toast.success(postKind === "question" ? "Question publiée" : "Commentaire publié");
   };
 
   const remove = async (id: string) => {
     const { error } = await (supabase.from("training_comments") as any).delete().eq("id", id);
     if (error) toast.error(error.message);
+  };
+
+  const toggleOfficialAnswer = async (id: string, current: boolean) => {
+    const { error } = await (supabase.rpc as any)("mark_training_comment_official", {
+      _comment_id: id,
+      _is_official: !current,
+    });
+    if (error) return toast.error(error.message);
+    toast.success(!current ? "Marqué comme réponse officielle" : "Marquage retiré");
+    // Optimistic local update (realtime won't fire because this is an UPDATE event we don't subscribe to).
+    setComments((prev) => prev.map((c) => (c.id === id ? { ...c, is_official_answer: !current } : c)));
   };
 
   const toggleReaction = async (commentId: string, emoji: string) => {
