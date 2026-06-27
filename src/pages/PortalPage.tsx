@@ -48,6 +48,7 @@ import OnboardingTab from "@/components/OnboardingTab";
 import EmployeeTrainingsTab from "@/components/EmployeeTrainingsTab";
 import PortalInvoicesTab from "@/components/PortalInvoicesTab";
 import MyDocumentsCard from "@/components/MyDocumentsCard";
+import PortalWhatsAppButton from "@/components/PortalWhatsAppButton";
 import ChangePasswordCard from "@/components/ChangePasswordCard";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { IdCard, Lock as LockIcon } from "lucide-react";
