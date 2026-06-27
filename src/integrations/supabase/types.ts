@@ -2717,14 +2717,23 @@ export type Database = {
           training_id: string
         }[]
       }
-      list_training_co_learners: {
-        Args: { _training_id: string }
-        Returns: {
-          full_name: string
-          role: string
-          user_id: string
-        }[]
-      }
+      list_training_co_learners:
+        | {
+            Args: { _training_id: string }
+            Returns: {
+              full_name: string
+              role: string
+              user_id: string
+            }[]
+          }
+        | {
+            Args: { _limit?: number; _query?: string; _training_id: string }
+            Returns: {
+              full_name: string
+              role: string
+              user_id: string
+            }[]
+          }
       list_training_groups_summary: {
         Args: never
         Returns: {
