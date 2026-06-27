@@ -24,7 +24,7 @@ export default function SecurityAuditCard() {
   const runScan = async () => {
     setLoading(true);
     try {
-      const { data, error } = await supabase.rpc("admin_security_audit");
+      const { data, error } = await (supabase.rpc as any)("admin_security_audit");
       if (error) throw error;
       setResult(data as unknown as AuditResult);
       toast({ title: "Analyse terminée", description: `${(data as any).findings} anomalie(s) détectée(s).` });
