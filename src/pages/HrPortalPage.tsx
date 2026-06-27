@@ -10,7 +10,7 @@ import HrTab from "@/components/HrTab";
 import { PortalInfoBar } from "@/components/PortalInfoBar";
 import cmLogo from "@/assets/cloudmature-logo.png";
 
-type HrSubTab = "dashboard" | "recruitment" | "contracts" | "onboarding" | "trainings";
+type HrSubTab = "dashboard" | "recruitment" | "contracts" | "onboarding" | "trainings" | "employee-trainings";
 
 const SUBS: { id: HrSubTab; label: string; icon: typeof Briefcase }[] = [
   { id: "dashboard", label: "Vue d'ensemble", icon: LayoutDashboard },
