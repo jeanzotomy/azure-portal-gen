@@ -34,6 +34,8 @@ interface ChatMessage { role: Role; content: string }
 interface Body {
   messages: ChatMessage[];
   locale?: "fr" | "en";
+  hp?: string;          // honeypot — must be empty
+  elapsed_ms?: number;  // time since panel opened — < 1500ms = bot
 }
 
 const KNOWLEDGE = `
