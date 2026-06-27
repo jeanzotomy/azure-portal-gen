@@ -211,7 +211,9 @@ function AdminContent() {
   const [gestionnaireHrOpen, setGestionnaireHrOpen] = useState(true);
   const { t } = useTranslation();
   const formationsMatch = useMatch("/admin/formations/*");
+  const userDetailMatch = useMatch("/admin/users/:userId");
   const isFormationsRoute = !!formationsMatch;
+  const isUserDetailRoute = !!userDetailMatch;
 
   // Auto-open services submenu when a services tab is active. Must run before any early return to keep hook order stable.
   const ADMIN_SERVICES_TABS: AdminTab[] = ["service-clients", "service-catalog", "service-invoices", "payment-methods"];
