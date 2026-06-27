@@ -2431,6 +2431,15 @@ export type Database = {
         Args: { _code: string; _icon: string; _label: string; _user_id: string }
         Returns: undefined
       }
+      award_learner_xp: {
+        Args: {
+          _event_type: string
+          _metadata?: Json
+          _training_id?: string
+          _xp: number
+        }
+        Returns: string
+      }
       can_access_training: {
         Args: { _training_id: string; _user_id: string }
         Returns: boolean
@@ -2490,6 +2499,25 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      get_learner_leaderboard: {
+        Args: { _limit?: number }
+        Returns: {
+          avatar_url: string
+          full_name: string
+          rank: number
+          total_xp: number
+          user_id: string
+        }[]
+      }
+      get_learner_rank: {
+        Args: never
+        Returns: {
+          league: string
+          rank_week: number
+          total_xp_alltime: number
+          total_xp_week: number
+        }[]
       }
       get_or_create_employee_process: {
         Args: { _user_id: string }
@@ -2653,6 +2681,7 @@ export type Database = {
         Args: { _user_id: string }
         Returns: undefined
       }
+      toggle_learner_follow: { Args: { _followee: string }; Returns: boolean }
       unassign_employee_training: {
         Args: { _training_id: string; _user_id: string }
         Returns: boolean
