@@ -740,7 +740,7 @@ function AdminContent() {
         <PortalInfoBar />
 
         <main className="flex-1 p-3 sm:p-6 pb-[calc(80px+env(safe-area-inset-bottom))] md:pb-6 overflow-auto">
-          {isFormationsRoute ? (
+          {isFormationsRoute || isUserDetailRoute ? (
             <Outlet />
           ) : (
             <>
