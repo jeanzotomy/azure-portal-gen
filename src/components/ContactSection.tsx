@@ -7,6 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "@/i18n/LanguageContext";
+import { SocialChannels } from "@/components/SocialChannels";
+
 
 // Limits - also enforced by audit on contact_requests table
 const LIMITS = { name: 100, email: 255, company: 150, message: 2000 };
