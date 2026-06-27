@@ -248,6 +248,22 @@ Deno.serve(async (req) => {
     const locale = body.locale === "en" ? "en" : "fr";
     const incoming = Array.isArray(body.messages) ? body.messages : [];
 
+    // ===== Honeypot anti-bot =====
+    // 1. Hidden field must be empty (bots fill all inputs).
+    // 2. Form interaction must take at least ~1.5s (bots submit instantly).
+    if (typeof body.hp === "string" && body.hp.trim().length > 0) {
+      console.warn("site-assistant: honeypot triggered");
+      return new Response(JSON.stringify({
+        reply: locale === "en" ? "Thanks, your message has been received." : "Merci, votre message a bien été reçu.",
+      }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+    if (typeof body.elapsed_ms === "number" && body.elapsed_ms >= 0 && body.elapsed_ms < 1500) {
+      console.warn("site-assistant: submitted too fast", body.elapsed_ms);
+      return new Response(JSON.stringify({
+        reply: locale === "en" ? "Thanks, your message has been received." : "Merci, votre message a bien été reçu.",
+      }), { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } });
+    }
+
     // ===== Input validation =====
     const cleaned = incoming
       .filter((m) => m && (m.role === "user" || m.role === "assistant") && typeof m.content === "string")
