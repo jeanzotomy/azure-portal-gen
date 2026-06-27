@@ -50,7 +50,7 @@ import { ProfileSignatureDialog } from "@/components/ProfileSignatureDialog";
 import SeoTab from "@/components/SeoTab";
 import IntegrationsTab from "@/components/admin/IntegrationsTab";
 import { CertificateVerifyDashboard } from "@/components/admin/CertificateVerifyDashboard";
-import EmployeeTrainingManager from "@/components/admin/EmployeeTrainingManager";
+
 import CommerceTab from "@/components/admin/CommerceTab";
 import SendWhatsAppDialog from "@/components/admin/SendWhatsAppDialog";
 
