@@ -2198,7 +2198,7 @@ function AdminUsers() {
   const [editingUser, setEditingUser] = useState<any | null>(null);
   const [editForm, setEditForm] = useState({ full_name: "", company: "", phone: "", country: "", city: "", address_line: "", timezone: "" });
   const [viewMode, setViewMode] = useState<"cards" | "table" | "list">(() => {
-    const v = searchParams.get("view"); return v === "table" || v === "list" ? v : "cards";
+    const v = searchParams.get("view"); return v === "cards" || v === "list" ? v : "table";
   });
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "blocked" | "deleted">(() => {
     const v = searchParams.get("status"); return (["active","blocked","deleted"].includes(v || "") ? v : "all") as any;
