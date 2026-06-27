@@ -649,6 +649,26 @@ export function TrainingPlayer({ assigned, userId, onComplete }: { assigned: any
 
   const [expanded, setExpanded] = useState(false);
   const [coursePage, setCoursePage] = useState<number>(Math.min(assigned.course_page ?? 0, Math.max(0, coursePages.length - 1)));
+  // Track chapter pages already rewarded this session to avoid duplicate XP (server also caps daily).
+  const xpAwardedPagesRef = useRef<Set<number>>(new Set([Math.min(assigned.course_page ?? 0, Math.max(0, coursePages.length - 1))]));
+  const advanceCoursePage = useCallback((next: number) => {
+    setCoursePage((prev) => {
+      const clamped = Math.max(0, Math.min(coursePages.length - 1, next));
+      if (clamped > prev && !xpAwardedPagesRef.current.has(clamped)) {
+        const page = coursePages[clamped];
+        if (page?.kind === "module") {
+          xpAwardedPagesRef.current.add(clamped);
+          void awardLearnerXp("chapter_completed", {
+            trainingId: assigned.training_id,
+            metadata: { moduleIndex: page.data?.idx ?? clamped, assignedId: assigned.id },
+          }).then((id) => {
+            if (id) toast.success("+20 XP — chapitre validé", { duration: 1800 });
+          });
+        }
+      }
+      return clamped;
+    });
+  }, [coursePages, assigned.id, assigned.training_id]);
   const [quizOpen, setQuizOpen] = useState(false);
   const [quizPage, setQuizPage] = useState<number>(assigned.quiz_page ?? 0);
   const [answers, setAnswers] = useState<Record<number, number>>(() => {
