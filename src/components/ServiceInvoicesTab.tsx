@@ -11,6 +11,8 @@ import ServiceInvoiceForm from "@/components/ServiceInvoiceForm";
 import { useStripeCheckout } from "@/hooks/useStripeCheckout";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { useExchangeRates, type Currency } from "@/hooks/use-exchange-rates";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ViewModeToggle, useViewMode } from "@/components/ui/view-mode-toggle";
 
 interface InvoiceRow {
   id: string;
