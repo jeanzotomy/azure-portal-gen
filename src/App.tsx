@@ -76,6 +76,7 @@ const App = () => (
               <Route path="formations" element={<EmployeeTrainingManager />} />
               <Route path="formations/assignations/:userId" element={<EmployeeTrainingAssignmentPage basePath="/admin" parentLabel="Admin" />} />
               <Route path="formations/groupes" element={<TrainingGroupsManagerPage basePath="/admin" parentLabel="Admin" />} />
+              <Route path="users/:userId" element={<UserDetailPage />} />
             </Route>
             <Route path="/privacy" element={<PrivacyPage />} />
             <Route path="/terms" element={<TermsPage />} />
