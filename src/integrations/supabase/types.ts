@@ -666,6 +666,51 @@ export type Database = {
         }
         Relationships: []
       }
+      kb_articles: {
+        Row: {
+          body: string
+          created_at: string
+          created_by: string | null
+          excerpt: string | null
+          id: string
+          lang: string
+          published: boolean
+          search_tsv: unknown
+          slug: string
+          tags: string[]
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          created_by?: string | null
+          excerpt?: string | null
+          id?: string
+          lang?: string
+          published?: boolean
+          search_tsv?: unknown
+          slug: string
+          tags?: string[]
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          excerpt?: string | null
+          id?: string
+          lang?: string
+          published?: boolean
+          search_tsv?: unknown
+          slug?: string
+          tags?: string[]
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       learner_follows: {
         Row: {
           created_at: string
@@ -1203,6 +1248,33 @@ export type Database = {
         }
         Relationships: []
       }
+      portal_assistant_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          meta: Json | null
+          role: string
+          user_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          meta?: Json | null
+          role: string
+          user_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          meta?: Json | null
+          role?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address_line: string | null
@@ -1217,6 +1289,7 @@ export type Database = {
           id: string
           last_name: string | null
           location: string | null
+          notification_prefs: Json
           phone: string | null
           plan_tier: string | null
           signature_url: string | null
@@ -1237,6 +1310,7 @@ export type Database = {
           id?: string
           last_name?: string | null
           location?: string | null
+          notification_prefs?: Json
           phone?: string | null
           plan_tier?: string | null
           signature_url?: string | null
@@ -1257,6 +1331,7 @@ export type Database = {
           id?: string
           last_name?: string | null
           location?: string | null
+          notification_prefs?: Json
           phone?: string | null
           plan_tier?: string | null
           signature_url?: string | null
@@ -2330,6 +2405,45 @@ export type Database = {
         }
         Relationships: []
       }
+      user_notifications: {
+        Row: {
+          body: string | null
+          category: string
+          created_at: string
+          id: string
+          level: string
+          link: string | null
+          meta: Json | null
+          read_at: string | null
+          title: string
+          user_id: string
+        }
+        Insert: {
+          body?: string | null
+          category?: string
+          created_at?: string
+          id?: string
+          level?: string
+          link?: string | null
+          meta?: Json | null
+          read_at?: string | null
+          title: string
+          user_id: string
+        }
+        Update: {
+          body?: string | null
+          category?: string
+          created_at?: string
+          id?: string
+          level?: string
+          link?: string | null
+          meta?: Json | null
+          read_at?: string | null
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_roles: {
         Row: {
           created_at: string
@@ -2523,6 +2637,7 @@ export type Database = {
         Args: { _user_id: string }
         Returns: string
       }
+      get_portal_context: { Args: never; Returns: Json }
       get_training_quiz: { Args: { _training_id: string }; Returns: Json }
       has_active_subscription: {
         Args: { check_env?: string; user_uuid: string }
@@ -2585,6 +2700,7 @@ export type Database = {
           training_count: number
         }[]
       }
+      mark_all_notifications_read: { Args: never; Returns: number }
       mark_training_comment_official: {
         Args: { _comment_id: string; _is_official: boolean }
         Returns: undefined
@@ -2617,6 +2733,17 @@ export type Database = {
           message: Json
           msg_id: number
           read_ct: number
+        }[]
+      }
+      search_kb_articles: {
+        Args: { _lang?: string; _limit?: number; _q: string }
+        Returns: {
+          excerpt: string
+          id: string
+          rank: number
+          slug: string
+          tags: string[]
+          title: string
         }[]
       }
       slugify_text: { Args: { input: string }; Returns: string }
