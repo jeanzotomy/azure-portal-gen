@@ -193,6 +193,14 @@ export default function EmployeeTrainingsListPage() {
               <Button
                 size="sm"
                 variant="outline"
+                onClick={() => navigate("/portal/formations/classement")}
+                className="bg-white/10 text-white border-white/30 hover:bg-white/20"
+              >
+                <Trophy className="h-4 w-4 mr-1" /> Classement
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
                 onClick={load}
                 className="bg-white/10 text-white border-white/30 hover:bg-white/20"
               >
