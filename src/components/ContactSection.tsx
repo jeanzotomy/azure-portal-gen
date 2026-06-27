@@ -189,7 +189,7 @@ export function ContactSection() {
                 {[
                   { icon: Mail, text: "info@cloudmature.com", href: "mailto:info@cloudmature.com" },
                   { icon: Phone, text: "+224 626 441 150", href: "tel:+224626441150" },
-                  { icon: MessageCircle, text: "WhatsApp : +224 626 441 150", href: buildWhatsappUrl("224626441150", "Bonjour CloudMature, j'aimerais en savoir plus sur vos services.") || "#" },
+                  { icon: MessageCircle, text: "WhatsApp : +1 873 437 1229", href: buildWhatsappUrl("18734371229", "Bonjour CloudMature, j'aimerais en savoir plus sur vos services.") || "#" },
                   { icon: MapPin, text: "Kipé Centre Émetteur, C/Ratoma, Conakry, Guinée", href: null as string | null },
                 ].map((item) => {
                   const content = (
