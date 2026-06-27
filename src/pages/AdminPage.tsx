@@ -49,6 +49,7 @@ import HrTab from "@/components/HrTab";
 import { ProfileSignatureDialog } from "@/components/ProfileSignatureDialog";
 import SeoTab from "@/components/SeoTab";
 import IntegrationsTab from "@/components/admin/IntegrationsTab";
+import SecurityAuditCard from "@/components/admin/SecurityAuditCard";
 import { CertificateVerifyDashboard } from "@/components/admin/CertificateVerifyDashboard";
 
 import CommerceTab from "@/components/admin/CommerceTab";
