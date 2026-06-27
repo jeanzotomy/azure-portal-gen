@@ -83,6 +83,7 @@ export default function PaymentMethodsTab() {
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [editing, setEditing] = useState<Partial<PMRow> | null>(null);
+  const [view, setView] = useViewMode("payment-methods", "table");
 
   const load = async () => {
     setLoading(true);
