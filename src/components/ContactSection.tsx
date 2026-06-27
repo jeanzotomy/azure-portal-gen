@@ -7,6 +7,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useTranslation } from "@/i18n/LanguageContext";
+import { SocialChannels } from "@/components/SocialChannels";
+
 
 // Limits - also enforced by audit on contact_requests table
 const LIMITS = { name: 100, email: 255, company: 150, message: 2000 };
@@ -198,7 +200,15 @@ export function ContactSection() {
               </div>
             </div>
 
+            <div className="rounded-xl border border-border/30 bg-background/20 backdrop-blur-sm p-4">
+              <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-3">
+                {locale === "en" ? "Chat with us" : "Discutez avec nous"}
+              </p>
+              <SocialChannels variant="inline" />
+            </div>
+
             <div className="relative group overflow-hidden rounded-2xl">
+
               <div className="absolute -inset-1 rounded-2xl bg-gradient-to-br from-primary/30 via-accent/20 to-primary/10 blur-lg opacity-60" />
               <img
                 src={contactImage}

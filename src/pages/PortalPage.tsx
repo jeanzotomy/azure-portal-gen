@@ -41,6 +41,8 @@ import { PieChart as RePieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area
 import type { User as SupaUser } from "@supabase/supabase-js";
 import { PortalInfoBar } from "@/components/PortalInfoBar";
 import { NotificationBell } from "@/components/NotificationBell";
+import { SocialChannels } from "@/components/SocialChannels";
+
 import ApplicationsTab from "@/components/ApplicationsTab";
 import OnboardingTab from "@/components/OnboardingTab";
 import EmployeeTrainingsTab from "@/components/EmployeeTrainingsTab";
@@ -1161,6 +1163,18 @@ function TicketsTab({ user }: { user: SupaUser }) {
           </div>
         ))}
       </div>
+
+      {/* Canaux alternatifs */}
+      <div className="bg-card rounded-xl p-4 border border-border/50 shadow-card">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <div>
+            <p className="text-sm font-semibold text-foreground">Canaux alternatifs</p>
+            <p className="text-xs text-muted-foreground">Joignez-nous directement sur vos messageries préférées.</p>
+          </div>
+          <SocialChannels variant="icons" message="Bonjour, j'ai besoin d'aide sur mon espace CloudMature." />
+        </div>
+      </div>
+
 
       {/* New ticket form */}
       {showForm && (

@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import CinetPayConfigCard from "./CinetPayConfigCard";
+import SocialChannelsCard from "./SocialChannelsCard";
+
 
 const PROJECT_ID = "zwzazxebufydnaxezngx";
 const FUNCTIONS_BASE = `https://${PROJECT_ID}.supabase.co/functions/v1`;
@@ -235,6 +237,10 @@ export default function IntegrationsTab() {
 
       {/* 1bis. CinetPay config */}
       <CinetPayConfigCard />
+
+      {/* 1ter. Social channels */}
+      <SocialChannelsCard />
+
 
       {/* 2. Webhooks entrants */}
       <Card>
