@@ -705,6 +705,7 @@ function AdminContent() {
               {tab === "projects" && <AdminProjects />}
               {tab === "tickets" && <AdminTickets />}
               {tab === "contacts" && <AdminContacts />}
+              {tab === "sharepoint" && <SharePointTab />}
               {isSettingsTab && (
                 <Tabs value={tab} onValueChange={(v) => setTab(v as AdminTab)} className="w-full">
                   <TabsList className="flex flex-wrap h-auto mb-4">
