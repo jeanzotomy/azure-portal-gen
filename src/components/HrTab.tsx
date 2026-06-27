@@ -927,6 +927,11 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
           <TrainingsTab readOnly={onboardingReadOnly} />
         </TabsContent>
 
+        <TabsContent value="employee-trainings" className="mt-4">
+          <EmployeeTrainingManager />
+        </TabsContent>
+
+
         <TabsContent value="onboarding" className="mt-4">
           <OnboardingAdminTab readOnly={onboardingReadOnly} />
         </TabsContent>
