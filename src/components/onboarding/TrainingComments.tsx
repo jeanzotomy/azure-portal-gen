@@ -2,9 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, MessageSquare, Send, AtSign, Trash2, SmilePlus } from "lucide-react";
+import { Loader2, MessageSquare, Send, AtSign, Trash2, SmilePlus, HelpCircle, CheckCircle2, MessageCircle } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "sonner";
+import { useUserRoles } from "@/hooks/use-admin";
+import { LearnerFollowButton } from "@/components/training/LearnerFollowButton";
 
 interface CoLearner { user_id: string; full_name: string; role: string; }
 interface Comment {
@@ -16,6 +18,9 @@ interface Comment {
   body: string;
   mentions: string[];
   created_at: string;
+  is_question?: boolean | null;
+  is_official_answer?: boolean | null;
+  parent_comment_id?: string | null;
 }
 
 const initials = (name: string) =>
@@ -43,9 +48,13 @@ export function TrainingComments({
   const [loading, setLoading] = useState(true);
   const [posting, setPosting] = useState(false);
   const [body, setBody] = useState("");
+  const [postKind, setPostKind] = useState<"comment" | "question">("comment");
+  const [filterKind, setFilterKind] = useState<"all" | "questions">("all");
   const [mentionQuery, setMentionQuery] = useState<string | null>(null);
   const [mentionStart, setMentionStart] = useState<number>(-1);
   const [selectedMentions, setSelectedMentions] = useState<Record<string, string>>({});
+  const { isAdmin, isHr, isGestionnaire } = useUserRoles();
+  const isStaff = isAdmin || isHr || isGestionnaire;
   // reactions: commentId -> emoji -> { count, mine }
   const [reactions, setReactions] = useState<Record<string, Record<string, { count: number; mine: boolean }>>>({});
   const taRef = useRef<HTMLTextAreaElement>(null);
@@ -167,23 +176,44 @@ export function TrainingComments({
       .filter(([, name]) => new RegExp(`@${name.replace(/\s+/g, "_")}\\b`).test(body))
       .map(([id]) => id);
 
-    const { error } = await supabase.rpc("post_training_comment" as any, {
+    const { data: newId, error } = await (supabase.rpc as any)("post_training_comment", {
       _training_id: trainingId,
       _module_index: moduleIndex ?? null,
       _body: body.trim(),
       _mentions: used,
     });
+    if (error) {
+      setPosting(false);
+      return toast.error(error.message);
+    }
+    // Tag as question if requested (owner can update their own comment via RLS).
+    if (postKind === "question" && newId) {
+      await (supabase.from("training_comments") as any)
+        .update({ is_question: true })
+        .eq("id", newId);
+    }
     setPosting(false);
-    if (error) return toast.error(error.message);
     setBody("");
     setSelectedMentions({});
-    if (used.length > 0) toast.success(`Commentaire publié - ${used.length} personne(s) notifiée(s)`);
-    else toast.success("Commentaire publié");
+    setPostKind("comment");
+    if (used.length > 0) toast.success(`${postKind === "question" ? "Question" : "Commentaire"} publié(e) - ${used.length} personne(s) notifiée(s)`);
+    else toast.success(postKind === "question" ? "Question publiée" : "Commentaire publié");
   };
 
   const remove = async (id: string) => {
     const { error } = await (supabase.from("training_comments") as any).delete().eq("id", id);
     if (error) toast.error(error.message);
+  };
+
+  const toggleOfficialAnswer = async (id: string, current: boolean) => {
+    const { error } = await (supabase.rpc as any)("mark_training_comment_official", {
+      _comment_id: id,
+      _is_official: !current,
+    });
+    if (error) return toast.error(error.message);
+    toast.success(!current ? "Marqué comme réponse officielle" : "Marquage retiré");
+    // Optimistic local update (realtime won't fire because this is an UPDATE event we don't subscribe to).
+    setComments((prev) => prev.map((c) => (c.id === id ? { ...c, is_official_answer: !current } : c)));
   };
 
   const toggleReaction = async (commentId: string, emoji: string) => {
@@ -227,39 +257,90 @@ export function TrainingComments({
     return <span className="whitespace-pre-wrap">{nodes.map((n, i) => <span key={i}>{n}</span>)}</span>;
   };
 
+  const visibleComments = filterKind === "questions" ? comments.filter((c) => c.is_question) : comments;
+  const questionsCount = comments.filter((c) => c.is_question).length;
+
   return (
     <div className="border-t bg-white">
       <div className="p-4">
-        <div className="flex items-center gap-2 mb-3">
+        <div className="flex items-center gap-2 mb-3 flex-wrap">
           <MessageSquare className="h-4 w-4 text-primary" />
           <span className="font-semibold text-sm">Discussion entre apprenants</span>
           <Badge variant="outline" className="text-[10px]">{comments.length}</Badge>
+          {questionsCount > 0 && (
+            <Badge variant="outline" className="text-[10px] bg-amber-50 text-amber-700 border-amber-300">
+              <HelpCircle className="h-3 w-3 mr-0.5" /> {questionsCount} question{questionsCount > 1 ? "s" : ""}
+            </Badge>
+          )}
+          <div className="ml-auto inline-flex rounded-md border border-border overflow-hidden">
+            <button
+              type="button"
+              onClick={() => setFilterKind("all")}
+              className={`px-2 py-0.5 text-[10px] font-medium ${filterKind === "all" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:bg-muted"}`}
+            >
+              Tout
+            </button>
+            <button
+              type="button"
+              onClick={() => setFilterKind("questions")}
+              className={`px-2 py-0.5 text-[10px] font-medium border-l ${filterKind === "questions" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:bg-muted"}`}
+            >
+              Q&R
+            </button>
+          </div>
         </div>
 
         {loading ? (
           <div className="flex justify-center py-4"><Loader2 className="h-4 w-4 animate-spin text-muted-foreground" /></div>
-        ) : comments.length === 0 ? (
+        ) : visibleComments.length === 0 ? (
           <div className="text-xs text-muted-foreground italic py-2">
-            Aucun commentaire. Lance la discussion et mentionne un co-apprenant avec <code className="bg-muted px-1 rounded">@</code>.
+            {filterKind === "questions"
+              ? "Aucune question publiée pour le moment."
+              : <>Aucun commentaire. Lance la discussion et mentionne un co-apprenant avec <code className="bg-muted px-1 rounded">@</code>.</>}
           </div>
         ) : (
           <div className="space-y-2 max-h-72 overflow-y-auto pr-1">
-            {comments.map(c => (
-              <div key={c.id} className="flex gap-2 group">
+            {visibleComments.map(c => (
+              <div key={c.id} className={`flex gap-2 group rounded-md p-2 ${c.is_official_answer ? "bg-emerald-50/60 border border-emerald-200" : c.is_question ? "bg-amber-50/40 border border-amber-200" : ""}`}>
                 <div className="h-7 w-7 rounded-full bg-gradient-to-br from-primary to-[#007aa3] text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0">
                   {initials(c.author_name)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-baseline gap-2">
+                  <div className="flex items-baseline gap-2 flex-wrap">
                     <span className="text-xs font-semibold">{c.author_name}</span>
-                    <span className="text-[10px] text-muted-foreground">{timeAgo(c.created_at)}</span>
-                    {c.user_id === currentUserId && (
-                      <button onClick={() => remove(c.id)} className="ml-auto opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-rose-600 transition">
-                        <Trash2 className="h-3 w-3" />
-                      </button>
+                    {c.is_question && (
+                      <Badge variant="outline" className="text-[9px] bg-amber-100 text-amber-700 border-amber-300 gap-0.5">
+                        <HelpCircle className="h-2.5 w-2.5" /> Question
+                      </Badge>
                     )}
+                    {c.is_official_answer && (
+                      <Badge variant="outline" className="text-[9px] bg-emerald-100 text-emerald-700 border-emerald-300 gap-0.5">
+                        <CheckCircle2 className="h-2.5 w-2.5" /> Réponse officielle
+                      </Badge>
+                    )}
+                    <span className="text-[10px] text-muted-foreground">{timeAgo(c.created_at)}</span>
+                    <div className="ml-auto flex items-center gap-1">
+                      {c.user_id !== currentUserId && (
+                        <LearnerFollowButton userId={c.user_id} size="sm" variant="ghost" className="h-6 text-[10px] px-1.5 opacity-0 group-hover:opacity-100 transition" />
+                      )}
+                      {(isStaff || c.user_id === currentUserId) && !c.is_question && (
+                        <button
+                          onClick={() => toggleOfficialAnswer(c.id, !!c.is_official_answer)}
+                          className="opacity-0 group-hover:opacity-100 text-[10px] text-emerald-700 hover:text-emerald-900 transition"
+                          title={c.is_official_answer ? "Retirer le marquage" : "Marquer comme réponse officielle"}
+                          disabled={!isStaff}
+                        >
+                          <CheckCircle2 className="h-3.5 w-3.5" />
+                        </button>
+                      )}
+                      {c.user_id === currentUserId && (
+                        <button onClick={() => remove(c.id)} className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-rose-600 transition">
+                          <Trash2 className="h-3 w-3" />
+                        </button>
+                      )}
+                    </div>
                   </div>
-                  <div className="text-xs leading-relaxed">{renderBody(c.body, c.mentions || [])}</div>
+                  <div className="text-xs leading-relaxed mt-0.5">{renderBody(c.body, c.mentions || [])}</div>
                   <div className="flex items-center gap-1 mt-1 flex-wrap">
                     {Object.entries(reactions[c.id] || {}).map(([em, info]) => (
                       <button
@@ -296,11 +377,30 @@ export function TrainingComments({
         )}
 
         <div className="mt-3 relative">
+          <div className="flex items-center gap-2 mb-1.5">
+            <span className="text-[10px] font-medium text-muted-foreground">Type :</span>
+            <div className="inline-flex rounded-md border border-border overflow-hidden">
+              <button
+                type="button"
+                onClick={() => setPostKind("comment")}
+                className={`px-2 py-0.5 text-[10px] font-medium inline-flex items-center gap-1 ${postKind === "comment" ? "bg-primary text-primary-foreground" : "bg-background text-muted-foreground hover:bg-muted"}`}
+              >
+                <MessageCircle className="h-3 w-3" /> Commentaire
+              </button>
+              <button
+                type="button"
+                onClick={() => setPostKind("question")}
+                className={`px-2 py-0.5 text-[10px] font-medium inline-flex items-center gap-1 border-l ${postKind === "question" ? "bg-amber-500 text-white" : "bg-background text-muted-foreground hover:bg-muted"}`}
+              >
+                <HelpCircle className="h-3 w-3" /> Question
+              </button>
+            </div>
+          </div>
           <textarea
             ref={taRef}
             value={body}
             onChange={onChangeBody}
-            placeholder="Écris un commentaire… utilise @ pour mentionner un co-apprenant"
+            placeholder={postKind === "question" ? "Posez votre question — les formateurs et co-apprenants pourront y répondre" : "Écris un commentaire… utilise @ pour mentionner un co-apprenant"}
             className="w-full min-h-[70px] border rounded-md p-2 text-xs focus:outline-none focus:ring-2 focus:ring-primary/30 resize-none"
             disabled={posting}
           />
@@ -330,7 +430,7 @@ export function TrainingComments({
             </div>
             <Button size="sm" onClick={submit} disabled={posting || !body.trim()} className="bg-gradient-primary-deep text-primary-foreground h-7 text-xs">
               {posting ? <Loader2 className="h-3 w-3 animate-spin mr-1" /> : <Send className="h-3 w-3 mr-1" />}
-              Publier
+              {postKind === "question" ? "Publier la question" : "Publier"}
             </Button>
           </div>
         </div>

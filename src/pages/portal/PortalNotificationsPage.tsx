@@ -1,0 +1,171 @@
+import { useEffect, useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuthSession } from "@/hooks/use-auth-session";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Bell, CheckCheck, Trash2, Loader2, ExternalLink, ArrowLeft, Circle } from "lucide-react";
+import { toast } from "sonner";
+
+interface Notif {
+  id: string;
+  category: string;
+  level: string;
+  title: string;
+  body: string | null;
+  link: string | null;
+  read_at: string | null;
+  created_at: string;
+}
+
+const CATEGORY_LABEL: Record<string, string> = {
+  general: "Général",
+  invoice: "Facturation",
+  ticket: "Support",
+  training: "Formation",
+  system: "Système",
+};
+
+const LEVEL_CLS: Record<string, string> = {
+  info: "bg-blue-50 text-blue-700 border-blue-200",
+  warning: "bg-amber-50 text-amber-700 border-amber-200",
+  danger: "bg-rose-50 text-rose-700 border-rose-200",
+  success: "bg-emerald-50 text-emerald-700 border-emerald-200",
+};
+
+const timeAgo = (iso: string) => {
+  const d = (Date.now() - new Date(iso).getTime()) / 1000;
+  if (d < 60) return "à l'instant";
+  if (d < 3600) return `il y a ${Math.floor(d / 60)} min`;
+  if (d < 86400) return `il y a ${Math.floor(d / 3600)} h`;
+  return new Date(iso).toLocaleDateString("fr-FR", { day: "2-digit", month: "short" });
+};
+
+export default function PortalNotificationsPage() {
+  const { user } = useAuthSession();
+  const navigate = useNavigate();
+  const [rows, setRows] = useState<Notif[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [filter, setFilter] = useState<"all" | "unread">("all");
+
+  const load = useCallback(async () => {
+    if (!user) return;
+    setLoading(true);
+    const { data, error } = await (supabase.from("user_notifications") as any)
+      .select("id, category, level, title, body, link, read_at, created_at")
+      .order("created_at", { ascending: false })
+      .limit(100);
+    if (error) toast.error(error.message);
+    else setRows((data ?? []) as Notif[]);
+    setLoading(false);
+  }, [user]);
+
+  useEffect(() => {
+    void load();
+    if (!user) return;
+    const ch = supabase
+      .channel(`notifs-${user.id}`)
+      .on("postgres_changes",
+        { event: "*", schema: "public", table: "user_notifications", filter: `user_id=eq.${user.id}` },
+        () => void load(),
+      )
+      .subscribe();
+    return () => { supabase.removeChannel(ch); };
+  }, [user, load]);
+
+  const markRead = async (id: string) => {
+    await (supabase.from("user_notifications") as any).update({ read_at: new Date().toISOString() }).eq("id", id);
+  };
+  const markAll = async () => {
+    const { data } = await (supabase.rpc as any)("mark_all_notifications_read");
+    if (typeof data === "number") toast.success(`${data} notification(s) marquée(s) comme lues`);
+  };
+  const remove = async (id: string) => {
+    await (supabase.from("user_notifications") as any).delete().eq("id", id);
+  };
+
+  const visible = filter === "unread" ? rows.filter((r) => !r.read_at) : rows;
+  const unreadCount = rows.filter((r) => !r.read_at).length;
+
+  return (
+    <div className="container mx-auto px-3 sm:px-4 py-6 max-w-3xl space-y-4">
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="flex items-center gap-2">
+          <Button variant="ghost" size="icon" onClick={() => navigate("/portal")}>
+            <ArrowLeft className="h-4 w-4" />
+          </Button>
+          <div>
+            <h1 className="text-xl font-bold flex items-center gap-2"><Bell className="h-5 w-5 text-primary" /> Notifications</h1>
+            <p className="text-xs text-muted-foreground">
+              {unreadCount > 0 ? `${unreadCount} non lue${unreadCount > 1 ? "s" : ""}` : "Tout est à jour"}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="inline-flex rounded-md border border-border overflow-hidden">
+            <button onClick={() => setFilter("all")} className={`px-3 py-1 text-xs ${filter === "all" ? "bg-primary text-primary-foreground" : "bg-background"}`}>
+              Toutes
+            </button>
+            <button onClick={() => setFilter("unread")} className={`px-3 py-1 text-xs border-l ${filter === "unread" ? "bg-primary text-primary-foreground" : "bg-background"}`}>
+              Non lues
+            </button>
+          </div>
+          {unreadCount > 0 && (
+            <Button size="sm" variant="outline" onClick={markAll}>
+              <CheckCheck className="h-3.5 w-3.5 mr-1" /> Tout marquer lu
+            </Button>
+          )}
+        </div>
+      </div>
+
+      <Card>
+        <CardContent className="p-0">
+          {loading ? (
+            <div className="p-8 flex justify-center"><Loader2 className="h-5 w-5 animate-spin text-muted-foreground" /></div>
+          ) : visible.length === 0 ? (
+            <div className="p-10 text-center text-sm text-muted-foreground">
+              <Bell className="h-10 w-10 mx-auto opacity-30 mb-2" />
+              {filter === "unread" ? "Aucune notification non lue" : "Aucune notification pour le moment"}
+            </div>
+          ) : (
+            <ul className="divide-y">
+              {visible.map((n) => (
+                <li key={n.id} className={`p-3 sm:p-4 transition ${!n.read_at ? "bg-primary/5" : ""}`}>
+                  <div className="flex items-start gap-3">
+                    {!n.read_at && <Circle className="h-2 w-2 fill-primary text-primary mt-2 shrink-0" />}
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-semibold text-sm">{n.title}</span>
+                        <Badge variant="outline" className={`text-[10px] ${LEVEL_CLS[n.level] ?? ""}`}>
+                          {CATEGORY_LABEL[n.category] ?? n.category}
+                        </Badge>
+                        <span className="text-[10px] text-muted-foreground ml-auto">{timeAgo(n.created_at)}</span>
+                      </div>
+                      {n.body && <p className="text-xs text-muted-foreground mt-1 whitespace-pre-wrap">{n.body}</p>}
+                      <div className="flex items-center gap-2 mt-2">
+                        {n.link && (
+                          <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => { if (!n.read_at) void markRead(n.id); window.location.href = n.link!; }}>
+                            <ExternalLink className="h-3 w-3 mr-1" /> Ouvrir
+                          </Button>
+                        )}
+                        {!n.read_at && (
+                          <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => void markRead(n.id)}>
+                            <CheckCheck className="h-3 w-3 mr-1" /> Marquer lu
+                          </Button>
+                        )}
+                        <Button size="sm" variant="ghost" className="h-7 text-xs text-muted-foreground hover:text-rose-600 ml-auto" onClick={() => void remove(n.id)}>
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

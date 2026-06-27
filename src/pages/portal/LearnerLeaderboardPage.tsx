@@ -12,6 +12,7 @@ import {
   type LeaderboardRow,
   type LearnerRank,
 } from "@/lib/learner-xp";
+import { LearnerFollowButton } from "@/components/training/LearnerFollowButton";
 import { useSeo } from "@/hooks/use-seo";
 
 export default function LearnerLeaderboardPage() {
@@ -152,6 +153,7 @@ export default function LearnerLeaderboardPage() {
                       <div className="font-bold text-sm">{r.total_xp}</div>
                       <div className="text-[10px] text-muted-foreground uppercase tracking-wider">XP</div>
                     </div>
+                    {!isMe && <LearnerFollowButton userId={r.user_id} size="sm" variant="outline" />}
                   </li>
                 );
               })}

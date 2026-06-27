@@ -50,6 +50,7 @@ import { ProfileSignatureDialog } from "@/components/ProfileSignatureDialog";
 import SeoTab from "@/components/SeoTab";
 import IntegrationsTab from "@/components/admin/IntegrationsTab";
 import SecurityAuditCard from "@/components/admin/SecurityAuditCard";
+import AdminAuditLogCard from "@/components/admin/AdminAuditLogCard";
 import { CertificateVerifyDashboard } from "@/components/admin/CertificateVerifyDashboard";
 
 import CommerceTab from "@/components/admin/CommerceTab";
@@ -763,7 +764,10 @@ function AdminContent() {
                   <TabsContent value="users"><AdminUsers /></TabsContent>
                   <TabsContent value="seo"><SeoTab /></TabsContent>
                   <TabsContent value="integrations"><IntegrationsTab /></TabsContent>
-                  <TabsContent value="security"><SecurityAuditCard /></TabsContent>
+                  <TabsContent value="security" className="space-y-4">
+                    <SecurityAuditCard />
+                    <AdminAuditLogCard />
+                  </TabsContent>
                 </Tabs>
               )}
               {tab === "verify-certificates" && <CertificateVerifyDashboard />}

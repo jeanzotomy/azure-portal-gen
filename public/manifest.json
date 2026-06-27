@@ -6,10 +6,26 @@
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
+  "orientation": "any",
   "background_color": "#0a0f1e",
   "theme_color": "#0a0f1e",
   "icons": [
-    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png" },
-    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png" }
-  ]
+    { "src": "/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Portail client", "url": "/portal", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Mes formations", "url": "/portal/formations", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Notifications", "url": "/portal/notifications", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] },
+    { "name": "Centre d'aide", "url": "/portal/aide", "icons": [{ "src": "/icon-192.png", "sizes": "192x192" }] }
+  ],
+  "share_target": {
+    "action": "/portal?share=1",
+    "method": "GET",
+    "params": {
+      "title": "title",
+      "text": "text",
+      "url": "url"
+    }
+  }
 }

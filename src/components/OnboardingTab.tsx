@@ -26,6 +26,7 @@ import { TrainingComments } from "@/components/onboarding/TrainingComments";
 import { MentionsBell } from "@/components/onboarding/MentionsBell";
 import { CohortActivityFeed } from "@/components/onboarding/CohortActivityFeed";
 import { CertificateShareDialog } from "@/components/onboarding/CertificateShareDialog";
+import { awardLearnerXp } from "@/lib/learner-xp";
 import type { User as SupaUser } from "@supabase/supabase-js";
 
 const STEP_ICONS: Record<string, any> = {
@@ -648,6 +649,26 @@ export function TrainingPlayer({ assigned, userId, onComplete }: { assigned: any
 
   const [expanded, setExpanded] = useState(false);
   const [coursePage, setCoursePage] = useState<number>(Math.min(assigned.course_page ?? 0, Math.max(0, coursePages.length - 1)));
+  // Track chapter pages already rewarded this session to avoid duplicate XP (server also caps daily).
+  const xpAwardedPagesRef = useRef<Set<number>>(new Set([Math.min(assigned.course_page ?? 0, Math.max(0, coursePages.length - 1))]));
+  const advanceCoursePage = useCallback((next: number) => {
+    setCoursePage((prev) => {
+      const clamped = Math.max(0, Math.min(coursePages.length - 1, next));
+      if (clamped > prev && !xpAwardedPagesRef.current.has(clamped)) {
+        const page = coursePages[clamped];
+        if (page?.kind === "module") {
+          xpAwardedPagesRef.current.add(clamped);
+          void awardLearnerXp("chapter_completed", {
+            trainingId: assigned.training_id,
+            metadata: { moduleIndex: page.data?.idx ?? clamped, assignedId: assigned.id },
+          }).then((id) => {
+            if (id) toast.success("+20 XP — chapitre validé", { duration: 1800 });
+          });
+        }
+      }
+      return clamped;
+    });
+  }, [coursePages, assigned.id, assigned.training_id]);
   const [quizOpen, setQuizOpen] = useState(false);
   const [quizPage, setQuizPage] = useState<number>(assigned.quiz_page ?? 0);
   const [answers, setAnswers] = useState<Record<number, number>>(() => {
@@ -849,8 +870,26 @@ export function TrainingPlayer({ assigned, userId, onComplete }: { assigned: any
     setOpenGrades(openGradesLocal);
     setResult({ score, passed });
     setShowResults(true);
-    if (passed) toast.success(inAdaptive ? `Rattrapage réussi (${score}%) 🎉` : `QCM réussi (${score}%) en ${fmtTime(quizDuration)}`);
-    else toast.error(`Score ${score}% - minimum requis ${passingScore}%.`);
+    if (passed) {
+      toast.success(inAdaptive ? `Rattrapage réussi (${score}%) 🎉` : `QCM réussi (${score}%) en ${fmtTime(quizDuration)}`);
+      // Award XP: perfect score gets bonus, otherwise standard quiz pass
+      const perfect = score >= 100;
+      void awardLearnerXp(perfect ? "quiz_perfect" : "quiz_passed", {
+        trainingId: assigned.training_id,
+        metadata: { assignedId: assigned.id, score, adaptive: inAdaptive },
+      }).then((id) => {
+        if (id) toast.success(perfect ? "+100 XP — score parfait !" : "+50 XP — quiz validé", { duration: 2200 });
+      });
+      // If the training is fully done (passed + standard mode), credit completion XP once.
+      if (!inAdaptive) {
+        void awardLearnerXp("training_completed", {
+          trainingId: assigned.training_id,
+          metadata: { assignedId: assigned.id },
+        });
+      }
+    } else {
+      toast.error(`Score ${score}% - minimum requis ${passingScore}%.`);
+    }
   };
 
   // Auto-submit when countdown hits 0
@@ -1059,7 +1098,7 @@ export function TrainingPlayer({ assigned, userId, onComplete }: { assigned: any
               <ChevronLeft className="h-4 w-4 mr-1" /> Précédent
             </Button>
             {!onLastCoursePage ? (
-              <Button size="sm" onClick={() => setCoursePage(p => Math.min(coursePages.length - 1, p + 1))} className="bg-gradient-primary-deep text-primary-foreground">
+              <Button size="sm" onClick={() => advanceCoursePage(coursePage + 1)} className="bg-gradient-primary-deep text-primary-foreground">
                 Suivant <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             ) : hasQuiz && !assigned.completed_at ? (

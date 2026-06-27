@@ -42,6 +42,9 @@ const PricingPage = lazy(() => import("./pages/PricingPage.tsx"));
 const CheckoutReturnPage = lazy(() => import("./pages/CheckoutReturnPage.tsx"));
 const SubscriptionPage = lazy(() => import("./pages/portal/SubscriptionPage.tsx"));
 const TrainingsStorePage = lazy(() => import("./pages/TrainingsStorePage.tsx"));
+const PortalNotificationsPage = lazy(() => import("./pages/portal/PortalNotificationsPage.tsx"));
+const PortalHelpPage = lazy(() => import("./pages/portal/PortalHelpPage.tsx"));
+const PortalSettingsPage = lazy(() => import("./pages/portal/PortalSettingsPage.tsx"));
 
 const ScrollToTopOnNavigate = () => {
   const { pathname } = useLocation();
@@ -67,6 +70,9 @@ const App = () => (
               <Route path="formations/classement" element={<LearnerLeaderboardPage />} />
               <Route path="formations/:assignedId" element={<EmployeeTrainingPlayerPage />} />
               <Route path="subscription" element={<SubscriptionPage />} />
+              <Route path="notifications" element={<PortalNotificationsPage />} />
+              <Route path="aide" element={<PortalHelpPage />} />
+              <Route path="parametres" element={<PortalSettingsPage />} />
             </Route>
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/formations" element={<TrainingsStorePage />} />

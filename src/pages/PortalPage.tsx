@@ -49,6 +49,8 @@ import EmployeeTrainingsTab from "@/components/EmployeeTrainingsTab";
 import PortalInvoicesTab from "@/components/PortalInvoicesTab";
 import MyDocumentsCard from "@/components/MyDocumentsCard";
 import PortalWhatsAppButton from "@/components/PortalWhatsAppButton";
+import { PortalAssistantLauncher } from "@/components/portal/PortalAssistantDrawer";
+import { PortalDashboardSmart } from "@/components/portal/PortalDashboardSmart";
 import ChangePasswordCard from "@/components/ChangePasswordCard";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { IdCard, Lock as LockIcon } from "lucide-react";
@@ -220,7 +222,12 @@ function PortalContent() {
             <Outlet />
           ) : (
             <>
-              {tab === "dashboard" && <DashboardTab user={user} />}
+              {tab === "dashboard" && (
+                <div className="space-y-4">
+                  <PortalDashboardSmart />
+                  <DashboardTab user={user} />
+                </div>
+              )}
               {tab === "projects" && <ProjectsTab user={user} />}
               {tab === "tickets" && <TicketsTab user={user} />}
               {tab === "applications" && <ApplicationsTab user={user} />}
@@ -234,6 +241,7 @@ function PortalContent() {
         </main>
       </div>
       <PortalWhatsAppButton />
+      <PortalAssistantLauncher />
     </div>
   );
 }
