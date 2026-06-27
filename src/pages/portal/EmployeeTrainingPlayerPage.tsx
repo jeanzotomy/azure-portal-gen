@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { TrainingPageHero } from "@/components/training/TrainingPageHero";
 import { TrainingPlayer } from "@/components/OnboardingTab";
+import { AdaptiveRecommendationBanner } from "@/components/training/AdaptiveRecommendationBanner";
 import { useAuthSession } from "@/hooks/use-auth-session";
 
 export default function EmployeeTrainingPlayerPage() {
