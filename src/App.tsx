@@ -34,6 +34,7 @@ const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 const EmployeeTrainingAssignmentPage = lazy(() => import("./pages/admin/EmployeeTrainingAssignmentPage.tsx"));
 const EmployeeTrainingsListPage = lazy(() => import("./pages/portal/EmployeeTrainingsListPage.tsx"));
 const EmployeeTrainingPlayerPage = lazy(() => import("./pages/portal/EmployeeTrainingPlayerPage.tsx"));
+const LearnerLeaderboardPage = lazy(() => import("./pages/portal/LearnerLeaderboardPage.tsx"));
 const EmployeeTrainingManager = lazy(() => import("./components/admin/EmployeeTrainingManager.tsx"));
 const TrainingGroupsManagerPage = lazy(() => import("./pages/admin/TrainingGroupsManagerPage.tsx"));
 const UserDetailPage = lazy(() => import("./pages/admin/UserDetailPage.tsx"));
