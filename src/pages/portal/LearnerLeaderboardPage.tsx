@@ -12,6 +12,7 @@ import {
   type LeaderboardRow,
   type LearnerRank,
 } from "@/lib/learner-xp";
+import { LearnerFollowButton } from "@/components/training/LearnerFollowButton";
 import { useSeo } from "@/hooks/use-seo";
 
 export default function LearnerLeaderboardPage() {
