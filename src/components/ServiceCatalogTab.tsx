@@ -28,6 +28,8 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ViewModeToggle, useViewMode } from "@/components/ui/view-mode-toggle";
 
 type BillingFrequency = "mensuel" | "trimestriel" | "semestriel" | "annuel";
 
