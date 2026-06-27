@@ -52,6 +52,8 @@ import IntegrationsTab from "@/components/admin/IntegrationsTab";
 import { CertificateVerifyDashboard } from "@/components/admin/CertificateVerifyDashboard";
 import EmployeeTrainingManager from "@/components/admin/EmployeeTrainingManager";
 import CommerceTab from "@/components/admin/CommerceTab";
+import SendWhatsAppDialog from "@/components/admin/SendWhatsAppDialog";
+
 import { getDialCode, applyDialCode } from "@/lib/country-dial-codes";
 
 type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts" | "sharepoint" | "seo" | "integrations" | "verify-certificates" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods" | "commerce" | "hr" | "hr-recruitment" | "hr-contracts" | "hr-onboarding" | "hr-trainings" | "hr-employee-trainings";
@@ -1694,7 +1696,9 @@ function AdminTickets() {
   const [replies, setReplies] = useState<Record<string, any[]>>({});
   const [replyText, setReplyText] = useState("");
   const [sendingReply, setSendingReply] = useState(false);
+  const [waTarget, setWaTarget] = useState<{ ticketId: string; phone: string | null; name: string | null; subject: string } | null>(null);
   const { toast } = useToast();
+
 
   const [unrepliedIds, setUnrepliedIds] = useState<Set<string>>(new Set());
 
@@ -1909,10 +1913,28 @@ function AdminTickets() {
                   )}
                   <div className="flex gap-2">
                     <Textarea placeholder="Écrire une réponse..." value={replyText} onChange={(e) => setReplyText(e.target.value)} rows={2} className="flex-1" />
-                    <Button onClick={() => sendReply(t.id)} disabled={sendingReply || !replyText.trim()} className="gradient-primary text-primary-foreground border-0 self-end" size="sm">
-                      <Send size={14} />
-                    </Button>
+                    <div className="flex flex-col gap-2 self-end">
+                      <Button onClick={() => sendReply(t.id)} disabled={sendingReply || !replyText.trim()} className="gradient-primary text-primary-foreground border-0" size="sm" title="Répondre dans le ticket">
+                        <Send size={14} />
+                      </Button>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="outline"
+                        className="border-[#25D366]/40 text-[#25D366] hover:bg-[#25D366]/10"
+                        title="Envoyer par WhatsApp"
+                        onClick={() => setWaTarget({
+                          ticketId: t.id,
+                          phone: profile?.phone || null,
+                          name: profile?.full_name || null,
+                          subject: t.subject,
+                        })}
+                      >
+                        <MessageSquare size={14} />
+                      </Button>
+                    </div>
                   </div>
+
                 </div>
               )}
             </div>
@@ -1920,9 +1942,20 @@ function AdminTickets() {
         })}
         {filtered.length === 0 && <p className="text-center text-muted-foreground py-8">Aucun ticket trouvé.</p>}
       </div>
+
+      <SendWhatsAppDialog
+        open={!!waTarget}
+        onOpenChange={(o) => { if (!o) setWaTarget(null); }}
+        defaultPhone={waTarget?.phone || null}
+        recipientName={waTarget?.name || null}
+        ticketId={waTarget?.ticketId || null}
+        defaultMessage={waTarget ? `Bonjour${waTarget.name ? ` ${waTarget.name.split(" ")[0]}` : ""},\n\nNous donnons suite à votre ticket « ${waTarget.subject} ».\n\nL'équipe CloudMature` : ""}
+        onSent={() => { if (waTarget) loadReplies(waTarget.ticketId); }}
+      />
     </div>
   );
 }
+
 
 /* ─── Expandable Text Component ─── */
 function ExpandableText({ text, className, maxLines = "line-clamp-2" }: { text: string; className?: string; maxLines?: string }) {
