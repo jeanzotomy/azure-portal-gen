@@ -2932,13 +2932,13 @@ function AdminUsers() {
             const badge = getRoleBadge(roles);
             const enrolled = !!mfaStatus[p.user_id]?.enrolled;
             return (
-              <button key={p.id} onClick={() => openEditUser(p)} className="w-full flex items-center gap-3 p-3 hover:bg-muted/40 transition text-left">
+              <button key={p.id} onClick={() => openEditUser(p)} className="w-full flex items-center gap-3 p-3 hover:bg-muted/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 transition text-left group" aria-label={`Gérer ${p.full_name || "utilisateur"}`}>
                 <div className="w-9 h-9 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-sm font-bold flex-shrink-0">
                   {(p.full_name || "?").charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-medium text-sm">{p.full_name || "Non renseigné"}</span>
+                    <span className="font-medium text-sm text-card-foreground group-hover:text-primary group-hover:underline underline-offset-4 transition-colors">{p.full_name || "Non renseigné"}</span>
                     <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold border ${badge.color}`}>{badge.label}</span>
                     {enrolled && <Shield size={11} className="text-emerald-600" />}
                     {billableLinks[p.user_id] && <Receipt size={11} className="text-teal-600" />}
@@ -2946,7 +2946,7 @@ function AdminUsers() {
                   </div>
                   <div className="text-xs text-muted-foreground truncate">{renderEmail(p.user_id)}{p.company ? ` · ${p.company}` : ""}</div>
                 </div>
-                <Pencil size={14} className="text-muted-foreground/50" />
+                <Pencil size={14} className="text-muted-foreground/50 group-hover:text-primary transition-colors" />
               </button>
             );
           })}
