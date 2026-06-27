@@ -30,15 +30,12 @@ export function useMfaCheck() {
   const { user, ready } = useAuthSession();
   const userId = user?.id ?? null;
 
+  // sessionStorage is NEVER treated as authoritative. We always defer to the server
+  // (Supabase AAL2 or has_recent_sms_mfa RPC) before granting access.
   const [mfaVerified, setMfaVerified] = useState<boolean | null>(() => {
     if (!ready) return null;
     if (!userId) return false;
     if (mfaStatusCache.has(userId)) return mfaStatusCache.get(userId) ?? false;
-    // Fast path: sessionStorage flag from any previous MFA verification
-    if (sessionStorage.getItem(MFA_VERIFIED_KEY) === "true") {
-      mfaStatusCache.set(userId, true);
-      return true;
-    }
     return null;
   });
 
@@ -54,7 +51,9 @@ export function useMfaCheck() {
       if (!active || resolvedRef.current) return;
       resolvedRef.current = true;
       if (userId) mfaStatusCache.set(userId, value);
+      // sessionStorage is only a UX hint — clear it when the server says not verified.
       if (value) sessionStorage.setItem(MFA_VERIFIED_KEY, "true");
+      else sessionStorage.removeItem(MFA_VERIFIED_KEY);
       setMfaVerified(value);
     };
 
@@ -68,16 +67,12 @@ export function useMfaCheck() {
       return () => { active = false; };
     }
 
-    // Fast path: cached or sessionStorage
+    // In-memory cache only — populated by a prior server check in this tab.
     if (mfaStatusCache.has(userId)) {
       resolve(mfaStatusCache.get(userId) ?? false);
       return () => { active = false; };
     }
 
-    if (sessionStorage.getItem(MFA_VERIFIED_KEY) === "true") {
-      resolve(true);
-      return () => { active = false; };
-    }
 
     // Timeout fallback
     const timer = setTimeout(() => {
