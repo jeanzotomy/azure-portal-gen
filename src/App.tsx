@@ -9,7 +9,7 @@ import { AuthGuard } from "./components/AuthGuard";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { MobileBottomNav } from "./components/MobileBottomNav";
 import SiteAssistant from "./components/SiteAssistant";
-import { FloatingWhatsAppButton } from "./components/FloatingWhatsAppButton";
+
 
 
 // Lazy-load non-landing routes to drastically reduce initial JS bundle
@@ -106,7 +106,6 @@ const App = () => (
         <ScrollToTop />
         <MobileBottomNav />
         <SiteAssistant />
-        <FloatingWhatsAppButton />
 
       </BrowserRouter>
     </TooltipProvider>
