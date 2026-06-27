@@ -49,6 +49,7 @@ import HrTab from "@/components/HrTab";
 import { ProfileSignatureDialog } from "@/components/ProfileSignatureDialog";
 import SeoTab from "@/components/SeoTab";
 import IntegrationsTab from "@/components/admin/IntegrationsTab";
+import SecurityAuditCard from "@/components/admin/SecurityAuditCard";
 import { CertificateVerifyDashboard } from "@/components/admin/CertificateVerifyDashboard";
 
 import CommerceTab from "@/components/admin/CommerceTab";
@@ -56,7 +57,7 @@ import SendWhatsAppDialog from "@/components/admin/SendWhatsAppDialog";
 
 import { getDialCode, applyDialCode } from "@/lib/country-dial-codes";
 
-type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts" | "sharepoint" | "seo" | "integrations" | "verify-certificates" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods" | "commerce" | "hr" | "hr-recruitment" | "hr-contracts" | "hr-onboarding" | "hr-trainings" | "hr-employee-trainings";
+type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts" | "sharepoint" | "seo" | "integrations" | "security" | "verify-certificates" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods" | "commerce" | "hr" | "hr-recruitment" | "hr-contracts" | "hr-onboarding" | "hr-trainings" | "hr-employee-trainings";
 type AgentTab = "dashboard" | "tickets" | "contacts";
 type GestionnaireTab = "dashboard" | "projects" | "sharepoint" | "tickets" | "contacts" | "hr" | "hr-recruitment" | "hr-contracts" | "hr-onboarding" | "hr-trainings" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods";
 
@@ -552,8 +553,9 @@ function AdminContent() {
     { id: "users", icon: Users, label: t("admin.users") },
     { id: "integrations", icon: Plug, label: "Intégrations" },
     { id: "seo", icon: Search, label: "SEO & AI Search" },
+    { id: "security", icon: Shield, label: "Sécurité" },
   ];
-  const SETTINGS_TABS: AdminTab[] = ["users", "seo", "integrations"];
+  const SETTINGS_TABS: AdminTab[] = ["users", "seo", "integrations", "security"];
   const isSettingsTab = SETTINGS_TABS.includes(tab);
   const [settingsOpen, setSettingsOpen] = useState(false);
   useEffect(() => { if (isSettingsTab) setSettingsOpen(true); }, [isSettingsTab]);
@@ -761,6 +763,7 @@ function AdminContent() {
                   <TabsContent value="users"><AdminUsers /></TabsContent>
                   <TabsContent value="seo"><SeoTab /></TabsContent>
                   <TabsContent value="integrations"><IntegrationsTab /></TabsContent>
+                  <TabsContent value="security"><SecurityAuditCard /></TabsContent>
                 </Tabs>
               )}
               {tab === "verify-certificates" && <CertificateVerifyDashboard />}
