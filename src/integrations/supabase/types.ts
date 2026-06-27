@@ -2292,6 +2292,7 @@ export type Database = {
         Args: { _group_id: string; _user_id: string }
         Returns: string
       }
+      admin_security_audit: { Args: never; Returns: Json }
       assign_employee_training: {
         Args: { _training_id: string; _user_id: string }
         Returns: string
