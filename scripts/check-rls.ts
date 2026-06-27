@@ -63,8 +63,9 @@ async function main() {
       : null);
 
   if (!connectionString) {
-    console.error("❌ DATABASE_URL (ou variables PG*) manquante.");
-    process.exit(2);
+    console.warn("⚠️  DATABASE_URL (ou variables PG*) manquante — audit RLS ignoré.");
+    console.warn("    Pour activer l'audit, ajoutez le secret GitHub SUPABASE_DB_URL.");
+    process.exit(0);
   }
 
   const client = new Client({ connectionString, ssl: { rejectUnauthorized: false } });
