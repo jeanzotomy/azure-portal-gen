@@ -117,6 +117,8 @@ export default function SiteAssistant() {
         limitTitle: "Thank you for our exchange.",
         limitBody: `To keep our conversations focused, this assistant is limited to ${MAX_USER_QUESTIONS} questions per session. For a deeper discussion, our team will gladly take over via the contact form.`,
         limitCta: "Go to contact form",
+        softCta: "Want a dedicated answer? Leave your contact info — our team will get back to you.",
+        softCtaBtn: "Leave my contact info",
       }
     : {
         title: "Maturia - Assistant Cloud Mature",
