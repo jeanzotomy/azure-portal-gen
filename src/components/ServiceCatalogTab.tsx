@@ -79,6 +79,7 @@ export default function ServiceCatalogTab() {
   const [editing, setEditing] = useState<CatalogService | null>(null);
   const [form, setForm] = useState<Partial<CatalogService>>(empty);
   const [saving, setSaving] = useState(false);
+  const [view, setView] = useViewMode("service-catalog", "table");
 
   const load = async () => {
     setLoading(true);
