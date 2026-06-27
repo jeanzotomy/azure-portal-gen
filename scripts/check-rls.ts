@@ -133,7 +133,13 @@ async function main() {
   for (const p of policies) {
     const cmd = String(p.cmd);
     if (cmd === "SELECT") continue;
-    const roles = (p.roles as string[]) ?? [];
+    const rawRoles = p.roles;
+    const roles: string[] = Array.isArray(rawRoles)
+      ? (rawRoles as string[])
+      : String(rawRoles ?? "")
+          .replace(/^[{"]+|[}"]+$/g, "")
+          .split(/[,\s]+/)
+          .filter(Boolean);
     const reachable = roles.some((r) => r === "anon" || r === "authenticated" || r === "public");
     if (!reachable) continue;
 
