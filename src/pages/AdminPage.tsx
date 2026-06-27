@@ -764,7 +764,10 @@ function AdminContent() {
                   <TabsContent value="users"><AdminUsers /></TabsContent>
                   <TabsContent value="seo"><SeoTab /></TabsContent>
                   <TabsContent value="integrations"><IntegrationsTab /></TabsContent>
-                  <TabsContent value="security"><SecurityAuditCard /></TabsContent>
+                  <TabsContent value="security" className="space-y-4">
+                    <SecurityAuditCard />
+                    <AdminAuditLogCard />
+                  </TabsContent>
                 </Tabs>
               )}
               {tab === "verify-certificates" && <CertificateVerifyDashboard />}
