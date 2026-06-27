@@ -176,6 +176,26 @@ serve(async (req) => {
     }
 
     // === UPLOAD action (multipart) ===
+    // Require an authenticated caller. Anonymous applicants authenticate via the
+    // job-application flow which provisions a Supabase session beforehand.
+    const authHeader = req.headers.get("Authorization") || "";
+    const jwt = authHeader.replace("Bearer ", "").trim();
+    if (!jwt) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const authClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
+    const { data: authUser, error: authErr } = await authClient.auth.getUser(jwt);
+    if (authErr || !authUser?.user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
     const formData = await req.formData();
     const jobId = String(formData.get("jobId") || "").trim();
     const firstName = sanitize(String(formData.get("firstName") || ""));
@@ -193,6 +213,19 @@ serve(async (req) => {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Validate the job posting actually exists and is published before accepting files.
+    const { data: job } = await authClient
+      .from("job_postings")
+      .select("id, status")
+      .eq("id", jobId)
+      .maybeSingle();
+    if (!job || job.status !== "publiee") {
+      return new Response(JSON.stringify({ error: "Job posting not found or not published" }), {
+        status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
 
     // File type & size validation (public endpoint)
     const ALLOWED_EXTS = ["pdf", "doc", "docx", "odt", "rtf", "txt", "jpg", "jpeg", "png"];
