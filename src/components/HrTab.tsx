@@ -630,7 +630,8 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
           <TabsTrigger value="dashboard"><LayoutDashboard size={14} className="mr-1" />Vue d'ensemble</TabsTrigger>
           <TabsTrigger value="recruitment"><Briefcase size={14} className="mr-1" />Recrutement</TabsTrigger>
           <TabsTrigger value="contracts"><FileSignature size={14} className="mr-1" />Contrats</TabsTrigger>
-          <TabsTrigger value="trainings"><GraduationCap size={14} className="mr-1" />Formations</TabsTrigger>
+          <TabsTrigger value="trainings"><GraduationCap size={14} className="mr-1" />Catalogue formations</TabsTrigger>
+          <TabsTrigger value="employee-trainings"><GraduationCap size={14} className="mr-1" />Formations employés</TabsTrigger>
           <TabsTrigger value="onboarding"><Users size={14} className="mr-1" />Onboarding</TabsTrigger>
         </TabsList>
 
