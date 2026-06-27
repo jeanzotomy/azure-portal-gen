@@ -581,17 +581,71 @@ function AdminContent() {
               )}
             </Link>
           </div>
+          {/* Vue d'ensemble */}
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu>
-                {allNavItems.slice(0, 3).map((item) => (
-                  <SidebarMenuItem key={item.id}>
-                    <SidebarMenuButton onClick={() => setTab(item.id)} isActive={tab === item.id} tooltip={item.label} className="gap-3">
-                      <item.icon size={18} />
-                      <span>{item.label}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+                <SidebarMenuItem>
+                  <SidebarMenuButton onClick={() => setTab("dashboard")} isActive={tab === "dashboard"} tooltip={t("admin.overview")} className="gap-3">
+                    <LayoutDashboard size={18} />
+                    <span>{t("admin.overview")}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+
+          {/* Opérations : delivery & support */}
+          <SidebarGroup>
+            {!collapsed && <SidebarGroupLabel>Opérations</SidebarGroupLabel>}
+            <SidebarGroupContent>
+              <SidebarMenu>
+                <SidebarMenuItem>
+                  <SidebarMenuButton onClick={() => setTab("projects")} isActive={tab === "projects"} tooltip={t("admin.projects")} className="gap-3">
+                    <FolderOpen size={18} />
+                    <span>{t("admin.projects")}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton onClick={() => setTab("tickets")} isActive={tab === "tickets"} tooltip={t("admin.tickets")} className="gap-3">
+                    <div className="relative">
+                      <LifeBuoy size={18} />
+                      {unrepliedCount > 0 && (
+                        <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold px-1" aria-label={`${unrepliedCount} tickets non répondus`}>
+                          {unrepliedCount}
+                        </span>
+                      )}
+                    </div>
+                    <span>{t("admin.tickets")}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton onClick={() => setTab("contacts")} isActive={tab === "contacts"} tooltip={t("admin.contacts")} className="gap-3">
+                    <MessageSquare size={18} />
+                    <span>{t("admin.contacts")}</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton onClick={() => setTab("sharepoint")} isActive={tab === "sharepoint"} tooltip="SharePoint" className="gap-3">
+                    <HardDrive size={18} />
+                    <span>SharePoint</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+                <SidebarMenuItem>
+                  <SidebarMenuButton onClick={() => setTab("verify-certificates")} isActive={tab === "verify-certificates"} tooltip="Vérif. certificats" className="gap-3">
+                    <ShieldCheck size={18} />
+                    <span>Vérif. certificats</span>
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+
+          {/* Commercial */}
+          <SidebarGroup>
+            {!collapsed && <SidebarGroupLabel>Commercial</SidebarGroupLabel>}
+            <SidebarGroupContent>
+              <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     onClick={() => setTab("commerce")}
@@ -603,21 +657,15 @@ function AdminContent() {
                     <span>Commerce</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
-                {allNavItems.slice(3).map((item) => (
-                  <SidebarMenuItem key={item.id}>
-                    <SidebarMenuButton onClick={() => setTab(item.id)} isActive={tab === item.id} tooltip={item.label} className="gap-3">
-                      <div className="relative">
-                        <item.icon size={18} />
-                        {item.id === "tickets" && unrepliedCount > 0 && (
-                          <span className="absolute -top-1.5 -right-1.5 min-w-[16px] h-4 flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold px-1">
-                            {unrepliedCount}
-                          </span>
-                        )}
-                      </div>
-                      <span>{item.label}</span>
-                    </SidebarMenuButton>
-                  </SidebarMenuItem>
-                ))}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+
+          {/* Ressources humaines */}
+          <SidebarGroup>
+            {!collapsed && <SidebarGroupLabel>Ressources humaines</SidebarGroupLabel>}
+            <SidebarGroupContent>
+              <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     onClick={() => { if (!isHrTab) setTab("hr-recruitment"); }}
@@ -629,6 +677,15 @@ function AdminContent() {
                     <span>RH</span>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+
+          {/* Système */}
+          <SidebarGroup>
+            {!collapsed && <SidebarGroupLabel>Système</SidebarGroupLabel>}
+            <SidebarGroupContent>
+              <SidebarMenu>
                 <SidebarMenuItem>
                   <SidebarMenuButton
                     onClick={() => { if (!isSettingsTab) setTab("users"); }}
