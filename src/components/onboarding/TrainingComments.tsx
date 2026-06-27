@@ -48,9 +48,13 @@ export function TrainingComments({
   const [loading, setLoading] = useState(true);
   const [posting, setPosting] = useState(false);
   const [body, setBody] = useState("");
+  const [postKind, setPostKind] = useState<"comment" | "question">("comment");
+  const [filterKind, setFilterKind] = useState<"all" | "questions">("all");
   const [mentionQuery, setMentionQuery] = useState<string | null>(null);
   const [mentionStart, setMentionStart] = useState<number>(-1);
   const [selectedMentions, setSelectedMentions] = useState<Record<string, string>>({});
+  const { isAdmin, isHr, isGestionnaire } = useUserRoles();
+  const isStaff = isAdmin || isHr || isGestionnaire;
   // reactions: commentId -> emoji -> { count, mine }
   const [reactions, setReactions] = useState<Record<string, Record<string, { count: number; mine: boolean }>>>({});
   const taRef = useRef<HTMLTextAreaElement>(null);
