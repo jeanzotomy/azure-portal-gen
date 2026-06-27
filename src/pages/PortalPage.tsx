@@ -233,6 +233,7 @@ function PortalContent() {
           )}
         </main>
       </div>
+      <PortalWhatsAppButton />
     </div>
   );
 }
