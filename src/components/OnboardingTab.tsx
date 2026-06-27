@@ -26,6 +26,7 @@ import { TrainingComments } from "@/components/onboarding/TrainingComments";
 import { MentionsBell } from "@/components/onboarding/MentionsBell";
 import { CohortActivityFeed } from "@/components/onboarding/CohortActivityFeed";
 import { CertificateShareDialog } from "@/components/onboarding/CertificateShareDialog";
+import { awardLearnerXp } from "@/lib/learner-xp";
 import type { User as SupaUser } from "@supabase/supabase-js";
 
 const STEP_ICONS: Record<string, any> = {
