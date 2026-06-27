@@ -92,7 +92,8 @@ export type Database = {
       application_tracking_otp: {
         Row: {
           attempts: number
-          code: string
+          code: string | null
+          code_hash: string | null
           created_at: string
           email: string
           expires_at: string
@@ -101,7 +102,8 @@ export type Database = {
         }
         Insert: {
           attempts?: number
-          code: string
+          code?: string | null
+          code_hash?: string | null
           created_at?: string
           email: string
           expires_at?: string
@@ -110,7 +112,8 @@ export type Database = {
         }
         Update: {
           attempts?: number
-          code?: string
+          code?: string | null
+          code_hash?: string | null
           created_at?: string
           email?: string
           expires_at?: string
@@ -1884,7 +1887,8 @@ export type Database = {
       }
       sms_otp_codes: {
         Row: {
-          code: string
+          code: string | null
+          code_hash: string | null
           created_at: string
           expires_at: string
           id: string
@@ -1894,7 +1898,8 @@ export type Database = {
           user_id: string | null
         }
         Insert: {
-          code: string
+          code?: string | null
+          code_hash?: string | null
           created_at?: string
           expires_at?: string
           id?: string
@@ -1904,7 +1909,8 @@ export type Database = {
           user_id?: string | null
         }
         Update: {
-          code?: string
+          code?: string | null
+          code_hash?: string | null
           created_at?: string
           expires_at?: string
           id?: string
