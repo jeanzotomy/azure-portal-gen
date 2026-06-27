@@ -1080,7 +1080,7 @@ export function TrainingPlayer({ assigned, userId, onComplete }: { assigned: any
               <ChevronLeft className="h-4 w-4 mr-1" /> Précédent
             </Button>
             {!onLastCoursePage ? (
-              <Button size="sm" onClick={() => setCoursePage(p => Math.min(coursePages.length - 1, p + 1))} className="bg-gradient-primary-deep text-primary-foreground">
+              <Button size="sm" onClick={() => advanceCoursePage(coursePage + 1)} className="bg-gradient-primary-deep text-primary-foreground">
                 Suivant <ChevronRight className="h-4 w-4 ml-1" />
               </Button>
             ) : hasQuiz && !assigned.completed_at ? (
