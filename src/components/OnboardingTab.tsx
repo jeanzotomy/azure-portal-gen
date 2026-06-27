@@ -870,8 +870,26 @@ export function TrainingPlayer({ assigned, userId, onComplete }: { assigned: any
     setOpenGrades(openGradesLocal);
     setResult({ score, passed });
     setShowResults(true);
-    if (passed) toast.success(inAdaptive ? `Rattrapage réussi (${score}%) 🎉` : `QCM réussi (${score}%) en ${fmtTime(quizDuration)}`);
-    else toast.error(`Score ${score}% - minimum requis ${passingScore}%.`);
+    if (passed) {
+      toast.success(inAdaptive ? `Rattrapage réussi (${score}%) 🎉` : `QCM réussi (${score}%) en ${fmtTime(quizDuration)}`);
+      // Award XP: perfect score gets bonus, otherwise standard quiz pass
+      const perfect = score >= 100;
+      void awardLearnerXp(perfect ? "quiz_perfect" : "quiz_passed", {
+        trainingId: assigned.training_id,
+        metadata: { assignedId: assigned.id, score, adaptive: inAdaptive },
+      }).then((id) => {
+        if (id) toast.success(perfect ? "+100 XP — score parfait !" : "+50 XP — quiz validé", { duration: 2200 });
+      });
+      // If the training is fully done (passed + standard mode), credit completion XP once.
+      if (!inAdaptive) {
+        void awardLearnerXp("training_completed", {
+          trainingId: assigned.training_id,
+          metadata: { assignedId: assigned.id },
+        });
+      }
+    } else {
+      toast.error(`Score ${score}% - minimum requis ${passingScore}%.`);
+    }
   };
 
   // Auto-submit when countdown hits 0
