@@ -222,7 +222,12 @@ function PortalContent() {
             <Outlet />
           ) : (
             <>
-              {tab === "dashboard" && <DashboardTab user={user} />}
+              {tab === "dashboard" && (
+                <div className="space-y-4">
+                  <PortalDashboardSmart />
+                  <DashboardTab user={user} />
+                </div>
+              )}
               {tab === "projects" && <ProjectsTab user={user} />}
               {tab === "tickets" && <TicketsTab user={user} />}
               {tab === "applications" && <ApplicationsTab user={user} />}
@@ -236,6 +241,7 @@ function PortalContent() {
         </main>
       </div>
       <PortalWhatsAppButton />
+      <PortalAssistantLauncher />
     </div>
   );
 }
