@@ -47,6 +47,7 @@ export default function ServiceInvoicesTab() {
   const [displayCurrency, setDisplayCurrency] = useState<Currency>("GNF");
   const [formOpen, setFormOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
+  const [view, setView] = useViewMode("service-invoices", "table");
 
   const payInvoice = (id: string) => {
     openCheckout({
