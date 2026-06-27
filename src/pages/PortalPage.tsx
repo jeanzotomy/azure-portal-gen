@@ -240,7 +240,6 @@ function PortalContent() {
           )}
         </main>
       </div>
-      <PortalWhatsAppButton />
       <PortalAssistantLauncher />
     </div>
   );
