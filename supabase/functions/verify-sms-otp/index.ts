@@ -29,12 +29,19 @@ Deno.serve(async (req) => {
       });
     }
 
+    // Compute hash to match stored code_hash (never query by plaintext)
+    const enc = new TextEncoder().encode(`${phone}:${code}`);
+    const digest = await crypto.subtle.digest("SHA-256", enc);
+    const code_hash = Array.from(new Uint8Array(digest))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+
     // Find valid OTP
     const { data: otpRows, error: otpError } = await supabaseAdmin
       .from("sms_otp_codes")
       .select("*")
       .eq("phone", phone)
-      .eq("code", code)
+      .eq("code_hash", code_hash)
       .eq("purpose", purpose)
       .eq("used", false)
       .gte("expires_at", new Date().toISOString())
