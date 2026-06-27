@@ -11,6 +11,8 @@ import ServiceInvoiceForm from "@/components/ServiceInvoiceForm";
 import { useStripeCheckout } from "@/hooks/useStripeCheckout";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { useExchangeRates, type Currency } from "@/hooks/use-exchange-rates";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ViewModeToggle, useViewMode } from "@/components/ui/view-mode-toggle";
 
 interface InvoiceRow {
   id: string;
@@ -45,6 +47,7 @@ export default function ServiceInvoicesTab() {
   const [displayCurrency, setDisplayCurrency] = useState<Currency>("GNF");
   const [formOpen, setFormOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
+  const [view, setView] = useViewMode("service-invoices", "table");
 
   const payInvoice = (id: string) => {
     openCheckout({
@@ -174,7 +177,7 @@ export default function ServiceInvoicesTab() {
         })}
       </div>
 
-      <div className="flex gap-2 flex-wrap">
+      <div className="flex gap-2 flex-wrap items-center">
         <div className="relative flex-1 min-w-[200px]">
           <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
           <Input placeholder="Rechercher par N° ou client..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
@@ -190,6 +193,7 @@ export default function ServiceInvoicesTab() {
             <SelectItem value="annulee">Annulée</SelectItem>
           </SelectContent>
         </Select>
+        <ViewModeToggle value={view} onChange={setView} />
       </div>
 
       {loading ? (
@@ -199,6 +203,68 @@ export default function ServiceInvoicesTab() {
           <Receipt size={36} className="mx-auto mb-2 opacity-40" />
           Aucune facture. Cliquez sur "Nouvelle facture" pour créer la première.
         </CardContent></Card>
+      ) : view === "table" ? (
+        <Card>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>N°</TableHead>
+                  <TableHead>Client</TableHead>
+                  <TableHead className="hidden md:table-cell">Date</TableHead>
+                  <TableHead className="hidden lg:table-cell">Échéance</TableHead>
+                  <TableHead className="text-right">Total</TableHead>
+                  <TableHead>Statut</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filtered.map((r) => {
+                  const s = STATUS_LABELS[r.status];
+                  return (
+                    <TableRow key={r.id}>
+                      <TableCell className="font-bold text-primary whitespace-nowrap">{r.invoice_number}</TableCell>
+                      <TableCell className="font-medium">{r.service_clients?.client_name ?? "Client supprimé"}</TableCell>
+                      <TableCell className="hidden md:table-cell text-muted-foreground whitespace-nowrap">{new Date(r.invoice_date).toLocaleDateString("fr-FR")}</TableCell>
+                      <TableCell className="hidden lg:table-cell text-muted-foreground whitespace-nowrap">{r.due_date ? new Date(r.due_date).toLocaleDateString("fr-FR") : "—"}</TableCell>
+                      <TableCell className="text-right font-mono font-semibold whitespace-nowrap">{new Intl.NumberFormat("fr-FR").format(Number(r.total))} {r.currency}</TableCell>
+                      <TableCell>
+                        <Select value={r.status} onValueChange={(v) => void updateStatus(r.id, v as InvoiceRow["status"])}>
+                          <SelectTrigger className={`w-[120px] h-7 text-xs ${s.cls} border-0`}><SelectValue /></SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="brouillon">Brouillon</SelectItem>
+                            <SelectItem value="emise">Émise</SelectItem>
+                            <SelectItem value="payee">Payée</SelectItem>
+                            <SelectItem value="en_retard">En retard</SelectItem>
+                            <SelectItem value="annulee">Annulée</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="inline-flex">
+                          {(r.status === "emise" || r.status === "en_retard") && (
+                            <Button size="icon" variant="ghost" onClick={() => payInvoice(r.id)} title="Payer en ligne">
+                              <CreditCard size={14} className="text-primary" />
+                            </Button>
+                          )}
+                          {r.sharepoint_url && (
+                            <Button size="icon" variant="ghost" asChild>
+                              <a href={r.sharepoint_url} target="_blank" rel="noreferrer" title="SharePoint"><ExternalLink size={14} /></a>
+                            </Button>
+                          )}
+                          <Button size="icon" variant="ghost" onClick={() => { setEditId(r.id); setFormOpen(true); }} title="Modifier">
+                            <Pencil size={14} className="text-primary" />
+                          </Button>
+                          <Button size="icon" variant="ghost" onClick={() => void remove(r.id)} title="Supprimer"><Trash2 size={14} className="text-destructive" /></Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        </Card>
       ) : (
         <div className="space-y-2">
           {filtered.map((r) => {

@@ -10,6 +10,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Plus, Pencil, Trash2, Search, Building2, RefreshCw, User, FileText, MapPin, Phone, Mail, StickyNote, Hash } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { getDialCode, applyDialCode } from "@/lib/country-dial-codes";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ViewModeToggle, useViewMode } from "@/components/ui/view-mode-toggle";
 
 interface ServiceClient {
   id: string;
@@ -49,6 +51,7 @@ export default function ServiceClientsTab() {
   const [editing, setEditing] = useState<ServiceClient | null>(null);
   const [form, setForm] = useState<Partial<ServiceClient>>(empty);
   const [saving, setSaving] = useState(false);
+  const [view, setView] = useViewMode("service-clients", "table");
 
   const load = async () => {
     setLoading(true);
@@ -169,9 +172,12 @@ export default function ServiceClientsTab() {
         </div>
       </div>
 
-      <div className="relative max-w-md">
-        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-        <Input placeholder="Rechercher par nom, email, NIF..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="relative max-w-md flex-1 min-w-[200px]">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input placeholder="Rechercher par nom, email, NIF..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+        </div>
+        <ViewModeToggle value={view} onChange={setView} />
       </div>
 
       {loading ? (
@@ -182,6 +188,44 @@ export default function ServiceClientsTab() {
             <Building2 size={36} className="mx-auto mb-2 opacity-40" />
             Aucun client trouvé. Cliquez sur "Nouveau client" pour commencer.
           </CardContent>
+        </Card>
+      ) : view === "table" ? (
+        <Card>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Client</TableHead>
+                  <TableHead className="hidden md:table-cell">Contact</TableHead>
+                  <TableHead className="hidden lg:table-cell">Email</TableHead>
+                  <TableHead className="hidden lg:table-cell">Téléphone</TableHead>
+                  <TableHead className="hidden xl:table-cell">NIF</TableHead>
+                  <TableHead className="hidden md:table-cell">Ville</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filtered.map((c) => (
+                  <TableRow key={c.id}>
+                    <TableCell className="font-medium">{c.client_name}</TableCell>
+                    <TableCell className="hidden md:table-cell text-muted-foreground">{c.contact_person ?? "—"}</TableCell>
+                    <TableCell className="hidden lg:table-cell text-muted-foreground">{c.email ?? "—"}</TableCell>
+                    <TableCell className="hidden lg:table-cell text-muted-foreground">{c.phone ?? "—"}</TableCell>
+                    <TableCell className="hidden xl:table-cell text-muted-foreground">{c.nif ?? "—"}</TableCell>
+                    <TableCell className="hidden md:table-cell text-muted-foreground">
+                      {c.city ? `${c.city}${c.country ? `, ${c.country}` : ""}` : "—"}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="inline-flex">
+                        <Button size="icon" variant="ghost" onClick={() => openEdit(c)}><Pencil size={14} /></Button>
+                        <Button size="icon" variant="ghost" onClick={() => void remove(c.id)}><Trash2 size={14} className="text-destructive" /></Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
