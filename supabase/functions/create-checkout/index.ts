@@ -1,3 +1,4 @@
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { type StripeEnv, createStripeClient, resolveOrCreateCustomer } from "../_shared/stripe.ts";
 
 const corsHeaders = {
@@ -11,8 +12,30 @@ Deno.serve(async (req) => {
   if (req.method !== "POST") return new Response("Method not allowed", { status: 405, headers: corsHeaders });
 
   try {
+    // --- Require an authenticated caller ---
+    const authHeader = req.headers.get("Authorization") || "";
+    const jwt = authHeader.replace("Bearer ", "").trim();
+    if (!jwt) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    const adminClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
+    const { data: userData, error: userErr } = await adminClient.auth.getUser(jwt);
+    if (userErr || !userData?.user) {
+      return new Response(JSON.stringify({ error: "Unauthorized" }), {
+        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+    // Trust ONLY the server-derived identity. Never trust client-supplied userId/email.
+    const verifiedUserId = userData.user.id;
+    const verifiedEmail = userData.user.email ?? undefined;
+
     const body = await req.json();
-    const { priceId, quantity, customerEmail, userId, returnUrl, environment } = body;
+    const { priceId, quantity, returnUrl, environment } = body;
 
     if (!priceId || !/^[a-zA-Z0-9_-]+$/.test(priceId)) {
       return new Response(JSON.stringify({ error: "Invalid priceId" }), { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } });
@@ -34,9 +57,7 @@ Deno.serve(async (req) => {
     const stripePrice = prices.data[0];
     const isRecurring = stripePrice.type === "recurring";
 
-    const customerId = (customerEmail || userId)
-      ? await resolveOrCreateCustomer(stripe, { email: customerEmail, userId })
-      : undefined;
+    const customerId = await resolveOrCreateCustomer(stripe, { email: verifiedEmail, userId: verifiedUserId });
 
     let productDescription: string | undefined;
     if (!isRecurring) {
@@ -55,10 +76,8 @@ Deno.serve(async (req) => {
       ...(customerId && { customer: customerId }),
       ...(!isRecurring && { payment_intent_data: { description: productDescription } }),
       managed_payments: { enabled: true },
-      ...(userId && {
-        metadata: { userId, priceId },
-        ...(isRecurring && { subscription_data: { metadata: { userId, priceId } } }),
-      }),
+      metadata: { userId: verifiedUserId, priceId },
+      ...(isRecurring && { subscription_data: { metadata: { userId: verifiedUserId, priceId } } }),
     } as any);
 
     return new Response(JSON.stringify({ clientSecret: session.client_secret }), {
