@@ -1,99 +1,68 @@
-## Objectif
+# Plan de livraison — Lots 1 (fin) → 2 → 3
 
-Ajouter des fonctionnalités concurrentielles et innovantes sur 3 axes (Formations, Portail client, Paramètres), puis garantir un responsive complet (mobile / tablette / desktop large / PWA renforcée).
+La demande couvre 3 lots fonctionnels lourds. Je vais livrer en **3 itérations distinctes** (1 itération = 1 message agent) pour rester ciblé, testable, et éviter une mégamigration ingérable.
 
-Le périmètre est large : je le livre en **3 lots** indépendants déployables l'un après l'autre. Vous validez ce plan, puis chaque lot est livré et testable avant d'enchaîner le suivant.
+## Itération A — Fin du Lot 1 (Formations)
 
----
+### A1. Edge function `training-learning-path` (IA adaptative)
+- `supabase/functions/training-learning-path/index.ts` (Lovable AI, `google/gemini-3-flash-preview`, `verify_jwt = false` + validation JWT en code).
+- Entrée : `{ trainingId }`. Lit côté serveur (service role) : modules, scores du quiz, temps passé, `learner_progress_state`.
+- Sortie : `{ nextModuleId, recommendedLevel: "revision"|"standard"|"avance", rationale }`. Met à jour `learner_progress_state.adaptive_level`.
+- Pas de secret supplémentaire (LOVABLE_API_KEY déjà présent).
 
-## Lot 1 — Formations : innovations pédagogiques
+### A2. Wiring XP automatique dans le player
+- `EmployeeTrainingPlayerPage.tsx` : appel `awardLearnerXp("chapter_completed", chapterId)` à la fin d'un chapitre, `awardLearnerXp("quiz_passed", quizId, score)` quand quiz ≥ seuil, anti-double via clé `(user_id, event_key)` déjà gérée par RPC.
+- Toast "XP +N" discret + badge level-up.
+- Bouton "Reprendre intelligemment" qui invoke `training-learning-path` et navigue vers `nextModuleId`.
 
-### 1.1 Parcours adaptatif IA renforcé
-- Nouvel edge function `training-learning-path` : à partir des scores de quiz et du temps passé, recommande le prochain module/chapitre (niveau : révision, standard, avancé).
-- Carte « Recommandé pour vous » sur `EmployeeTrainingsListPage` avec raison ("Tu as 62% en réseaux — révise le module X").
-- Stockage du niveau courant dans une nouvelle table `learner_progress_state` (RLS scope `auth.uid()`).
+### A3. Social learning UI
+- `LearnerFollowButton.tsx` (toggle follow/unfollow via RPC `toggle_learner_follow`), affiché dans `LeaderboardPage` (à côté de chaque entrée) et dans le hero du joueur.
+- `TrainingComments.tsx` : ajout d'un sélecteur `Commentaire / Question` (set `is_question=true`), badge "Question" + bouton "Marquer comme réponse officielle" (visible pour Admin/HR/auteur formation, set `is_official_answer=true`), threading via `parent_comment_id` (réponses indentées 1 niveau).
 
-### 1.2 Gamification + classements
-- Extension de `candidate_gamification` (déjà présent) : ajout d'une table `learner_xp_events` (event_type, xp, training_id).
-- Triggers : +XP à chaque chapitre terminé, quiz réussi, certificat obtenu, commentaire utile.
-- Page `/portal/formations/classement` : Top 20 hebdo + ligue personnelle (Bronze / Argent / Or / Platine selon XP).
-- Widget « Mon rang » dans `GamificationWidget` existant.
+## Itération B — Lot 2 (Portail client)
 
-### 1.3 Social learning
-- Réutilisation de `training_comments` + `training_mention_notifications` existants.
-- Ajout d'un **fil d'activité cohorte** déjà ébauché (`CohortActivityFeed.tsx`) : on l'enrichit avec filtres (mes amis, ma cohorte, tous) et réactions emoji.
-- Nouvelle table `learner_follows` (follower_id, followee_id) + bouton "Suivre" sur les profils apprenants.
-- Q&R : un commentaire peut être marqué « question », les staff/auteurs peuvent marquer une réponse comme « réponse officielle ».
+### B1. Notifications enrichies
+- Migration : `user_notifications` (id, user_id, type, title, body, link, meta jsonb, read_at, created_at), `profiles.notification_prefs jsonb`.
+- `/portal/notifications` (liste, filtre lu/non-lu, marquer tout lu), realtime sur `user_notifications` (déjà sur la publication), badge dans `NotificationBell`.
+- Edge function `send-weekly-digest` (planifiée côté Lovable scheduler) qui agrège tickets, factures, formations.
 
-### 1.4 Certificats vérifiables + partage LinkedIn
-- La page `/verify/:code` existe déjà. Ajout :
-  - Bouton **« Ajouter à mon profil LinkedIn »** (URL `https://www.linkedin.com/profile/add` pré-remplie avec name, issuer, issue date, cert URL).
-  - QR code téléchargeable (lib `qrcode` déjà compatible) sur le certificat PDF.
-  - Lien de partage one-click vers LinkedIn / WhatsApp / X.
+### B2. Assistant IA personnel
+- Migration : `portal_assistant_messages` (id, user_id, role, content, created_at).
+- Edge function `portal-assistant` (Lovable AI streaming, `gemini-3-flash-preview`), reçoit historique, contexte utilisateur (factures impayées, tickets ouverts, formations en cours via RPC dédiée).
+- `PortalAssistantDrawer.tsx` (bouton flottant dans `PortalPage`, conversation persistée).
 
----
+### B3. Dashboard prédictif
+- `PortalDashboardSmart.tsx` : KPIs (factures à payer, tickets en cours, formations à terminer, prochain certificat), alertes proactives (échéance < 7j, ticket SLA dépassé), mini-graphe Recharts "engagement formations 30j".
+- Intégré en tête de `PortalPage` (au-dessus de l'onglet courant).
 
-## Lot 2 — Portail client : fonctions concurrentielles
+### B4. Self-service avancé
+- Migration : `kb_articles` (id, title, body, tags[], lang, search_tsv, published_at).
+- `/portal/aide` (recherche full-text), création ticket enrichie (catégorie auto-suggérée via IA si le titre est rempli), affichage SLA.
 
-### 2.1 Centre de notifications enrichi
-- Nouvelle table `user_notifications` (user_id, type, title, body, link, read_at, channel).
-- Préférences par canal (email / push / in-app) dans `profiles.notification_prefs` (jsonb).
-- Page `/portal/notifications` : liste filtrable, marquage lu/non-lu en masse, digest hebdo (edge function cron `send-weekly-digest`).
-- Cloche existante (`NotificationBell`) branchée sur cette table avec realtime Supabase.
+## Itération C — Lot 3 (Paramètres + responsive)
 
-### 2.2 Assistant IA personnel contextuel
-- Nouvel edge function `portal-assistant` (Lovable AI, modèle `google/gemini-3-flash-preview`).
-- Contexte injecté : projets de l'utilisateur, factures impayées, formations en cours, tickets ouverts (requêtes server-side scope `auth.uid()`).
-- Composant `PortalAssistantDrawer` accessible via bouton flottant (à côté du bouton WhatsApp) — différencié visuellement.
-- Historique conversation persisté dans `portal_assistant_messages`.
+### C1. Paramètres admin
+- Migration : `admin_audit_log` (action, actor_id, target, payload jsonb, created_at), trigger générique sur tables sensibles.
+- `AdminSettingsTab.tsx` enrichi : préférences (thème, langue par défaut), notifications, journal d'audit (table avec recherche/filtre), gestion d'équipe (réinvitation, suspendre).
 
-### 2.3 Tableau de bord prédictif
-- Nouveau composant `PortalDashboardSmart` : KPIs projets (avancement, retard prédit), factures (à venir, en retard), formations (% complétion, deadline).
-- Alertes proactives : "3 factures arrivent à échéance cette semaine", "Formation X expire dans 5j".
-- Graphique d'engagement (Recharts) sur 30j.
+### C2. Préférences utilisateur portail
+- `/portal/parametres` : `notification_prefs` (email/push toggle par catégorie), langue, fuseau (relie au profile.timezone), avatar.
 
-### 2.4 Self-service avancé
-- Création ticket enrichie : catégorie, priorité, fichiers joints, capture d'écran.
-- Affichage SLA visuel (barre de progression colorée selon priorité).
-- Base de connaissances `kb_articles` (admin écrit, client lit) avec recherche full-text.
+### C3. Responsive complet
+- Audit + correctifs ciblés sur : `AdminPage`, `HrPortalPage`, `PortalPage`, `EmployeeTrainingPlayerPage`, `CareersPage`, dialogs RH, forms candidature.
+- Breakpoints : sm/md (mobile), lg (tablette), 2xl/3xl (desktop large, container max 1600px).
+- PWA renforcée : ajout `share_target` au manifest, splash screens iOS, page `/install` enrichie (déjà existante — à compléter).
 
----
+## Détails techniques transverses
+- Toutes les nouvelles tables `public.*` : `GRANT` explicites + RLS `auth.uid()` ou `has_role`.
+- Toutes les edge functions : validation Zod, CORS, gestion `429/402` Lovable AI.
+- Aucune dépendance lourde ajoutée (Recharts déjà installé).
+- i18n : clés FR/EN ajoutées dans `src/i18n/fr.ts` et `en.ts`.
+- Realtime : publication `supabase_realtime` étendue à `user_notifications` uniquement.
 
-## Lot 3 — Paramètres app + Responsive complet
+## Ordre de livraison
+1. **Maintenant** : Itération A (Lot 1 final).
+2. Message suivant : Itération B (portail).
+3. Message d'après : Itération C (paramètres + responsive).
 
-### 3.1 Paramètres admin enrichis
-- Onglet **Préférences globales** (déjà partiellement) : thème par défaut, langue par défaut, fuseau, devise.
-- Onglet **Notifications** : règles fines par type d'événement, templates editables.
-- Onglet **Audit log** : nouvelle table `admin_audit_log`, vue paginée filtrable (acteur, action, cible, date).
-- Onglet **Gestion équipe** : invitations en masse, attribution de rôles, désactivation.
-
-### 3.2 Préférences utilisateur
-- Page `/portal/parametres` : thème (clair/sombre/auto), langue, fuseau, préférences notifications, MFA, sessions actives.
-
-### 3.3 Responsive complet
-Audit + refonte sur :
-- **Mobile (<768)** : tables → cards empilées, dialogs → full-screen sheets, navigation bottom déjà OK.
-- **Tablette (768–1024)** : grilles 2 colonnes, sidebars repliables (RH, Admin, Portail).
-- **Desktop large (>1440)** : `max-w-[1600px]` sur les pages denses (Admin, RH, Finance), augmentation des espacements.
-- **PWA renforcée** : amélioration manifest (shortcuts, share_target), icônes haute déf, splash screens iOS, page `/install` enrichie. Pas de service worker offline (hors scope demandé).
-
-Pages prioritaires pour la passe responsive : `AdminPage`, `HrPortalPage`, `PortalPage`, `EmployeeTrainingPlayerPage`, `CareersPage`, formulaires de candidature, dialogs RH.
-
----
-
-## Détails techniques
-
-- Toutes les nouvelles tables : RLS strict scopé `auth.uid()` ou rôle staff via `has_role`, GRANTs explicites (authenticated + service_role).
-- Edge functions : `verify_jwt` validé en code, CORS standard, Lovable AI Gateway pour IA.
-- Realtime activé sur `user_notifications` et `portal_assistant_messages`.
-- Aucune dépendance lourde ajoutée ; réutilisation de `@dnd-kit`, Recharts, shadcn.
-- i18n : nouvelles clés ajoutées dans `src/i18n/fr.ts` + `en.ts`.
-
----
-
-## Livraison
-
-Je propose de **commencer par le Lot 1 (Formations)** car c'est l'axe le plus innovant et différenciant. Confirmez-moi :
-
-1. On valide ce plan global et j'enchaîne Lot 1 → 2 → 3 ?
-2. Ou vous préférez réordonner / réduire un lot ?
+Je commence par l'**Itération A** dès validation.
