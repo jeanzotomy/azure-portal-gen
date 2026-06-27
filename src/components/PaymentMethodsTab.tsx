@@ -13,6 +13,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge";
 import { Plus, Pencil, Trash2, CreditCard, RefreshCw, Building2, Smartphone, Banknote, FileText, PiggyBank, Info, User, Hash, Globe } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ViewModeToggle, useViewMode } from "@/components/ui/view-mode-toggle";
 
 type PaymentType = "virement" | "mobile_money" | "especes" | "cheque" | "depot" | "autre";
 type Currency = "GNF" | "USD" | "EUR";
