@@ -666,6 +666,112 @@ export type Database = {
         }
         Relationships: []
       }
+      learner_follows: {
+        Row: {
+          created_at: string
+          followee_id: string
+          follower_id: string
+          id: string
+        }
+        Insert: {
+          created_at?: string
+          followee_id: string
+          follower_id: string
+          id?: string
+        }
+        Update: {
+          created_at?: string
+          followee_id?: string
+          follower_id?: string
+          id?: string
+        }
+        Relationships: []
+      }
+      learner_progress_state: {
+        Row: {
+          average_score: number | null
+          created_at: string
+          current_level: string
+          id: string
+          last_computed_at: string | null
+          last_recommendation: Json | null
+          total_time_seconds: number | null
+          training_id: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          average_score?: number | null
+          created_at?: string
+          current_level?: string
+          id?: string
+          last_computed_at?: string | null
+          last_recommendation?: Json | null
+          total_time_seconds?: number | null
+          training_id: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          average_score?: number | null
+          created_at?: string
+          current_level?: string
+          id?: string
+          last_computed_at?: string | null
+          last_recommendation?: Json | null
+          total_time_seconds?: number | null
+          training_id?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learner_progress_state_training_id_fkey"
+            columns: ["training_id"]
+            isOneToOne: false
+            referencedRelation: "trainings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      learner_xp_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          metadata: Json | null
+          training_id: string | null
+          user_id: string
+          xp: number
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          metadata?: Json | null
+          training_id?: string | null
+          user_id: string
+          xp: number
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          metadata?: Json | null
+          training_id?: string | null
+          user_id?: string
+          xp?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learner_xp_events_training_id_fkey"
+            columns: ["training_id"]
+            isOneToOne: false
+            referencedRelation: "trainings"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       mfa_verifications: {
         Row: {
           expires_at: string
@@ -1942,8 +2048,11 @@ export type Database = {
           body: string
           created_at: string
           id: string
+          is_official_answer: boolean
+          is_question: boolean
           mentions: string[]
           module_index: number | null
+          parent_comment_id: string | null
           training_id: string
           updated_at: string
           user_id: string
@@ -1953,8 +2062,11 @@ export type Database = {
           body: string
           created_at?: string
           id?: string
+          is_official_answer?: boolean
+          is_question?: boolean
           mentions?: string[]
           module_index?: number | null
+          parent_comment_id?: string | null
           training_id: string
           updated_at?: string
           user_id: string
@@ -1964,13 +2076,23 @@ export type Database = {
           body?: string
           created_at?: string
           id?: string
+          is_official_answer?: boolean
+          is_question?: boolean
           mentions?: string[]
           module_index?: number | null
+          parent_comment_id?: string | null
           training_id?: string
           updated_at?: string
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "training_comments_parent_comment_id_fkey"
+            columns: ["parent_comment_id"]
+            isOneToOne: false
+            referencedRelation: "training_comments"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "training_comments_training_id_fkey"
             columns: ["training_id"]
@@ -2309,6 +2431,15 @@ export type Database = {
         Args: { _code: string; _icon: string; _label: string; _user_id: string }
         Returns: undefined
       }
+      award_learner_xp: {
+        Args: {
+          _event_type: string
+          _metadata?: Json
+          _training_id?: string
+          _xp: number
+        }
+        Returns: string
+      }
       can_access_training: {
         Args: { _training_id: string; _user_id: string }
         Returns: boolean
@@ -2368,6 +2499,25 @@ export type Database = {
           isOneToOne: false
           isSetofReturn: true
         }
+      }
+      get_learner_leaderboard: {
+        Args: { _limit?: number }
+        Returns: {
+          avatar_url: string
+          full_name: string
+          rank: number
+          total_xp: number
+          user_id: string
+        }[]
+      }
+      get_learner_rank: {
+        Args: never
+        Returns: {
+          league: string
+          rank_week: number
+          total_xp_alltime: number
+          total_xp_week: number
+        }[]
       }
       get_or_create_employee_process: {
         Args: { _user_id: string }
@@ -2531,6 +2681,7 @@ export type Database = {
         Args: { _user_id: string }
         Returns: undefined
       }
+      toggle_learner_follow: { Args: { _followee: string }; Returns: boolean }
       unassign_employee_training: {
         Args: { _training_id: string; _user_id: string }
         Returns: boolean
