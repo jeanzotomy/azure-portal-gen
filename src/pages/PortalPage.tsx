@@ -1144,10 +1144,19 @@ function TicketsTab({ user }: { user: SupaUser }) {
           <h1 className="text-xl sm:text-2xl font-bold text-foreground">Support</h1>
           <p className="text-xs sm:text-sm text-muted-foreground mt-1">Gérez vos demandes d'assistance</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
           <Button variant="outline" size="sm" onClick={loadTickets} className="gap-1.5">
             <RefreshCw size={14} /> <span className="hidden sm:inline">Actualiser</span>
           </Button>
+          <a
+            href="https://wa.me/18734371229?text=Bonjour%20CloudMature%2C%20j%27ai%20besoin%20d%27aide%20depuis%20mon%20espace%20support."
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 h-9 px-3 rounded-md bg-[#25D366] hover:bg-[#1ebe57] text-white text-sm font-medium shadow-sm transition-colors"
+            aria-label="Contacter le support sur WhatsApp"
+          >
+            <MessageCircle size={14} /> <span className="hidden sm:inline">WhatsApp</span>
+          </a>
           <Button
             onClick={() => setShowForm(!showForm)}
             size="sm"
