@@ -106,7 +106,6 @@ const App = () => (
         <ScrollToTop />
         <MobileBottomNav />
         <SiteAssistant />
-        <FloatingWhatsAppButton />
 
       </BrowserRouter>
     </TooltipProvider>
