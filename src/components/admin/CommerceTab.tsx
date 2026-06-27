@@ -38,7 +38,7 @@ export default function CommerceTab({ initialSection = "catalog" }: CommerceTabP
       </div>
 
       <Tabs value={section} onValueChange={(v) => setSection(v as CommerceSection)} className="w-full">
-        <TabsList className="flex flex-wrap h-auto">
+        <TabsList className="inline-flex flex-wrap h-auto w-fit max-w-full">
           <TabsTrigger value="catalog" className="gap-1.5"><BookOpen className="h-3.5 w-3.5" /> Catalogue</TabsTrigger>
           <TabsTrigger value="clients" className="gap-1.5"><Briefcase className="h-3.5 w-3.5" /> Clients</TabsTrigger>
           <TabsTrigger value="invoices" className="gap-1.5"><Receipt className="h-3.5 w-3.5" /> Facturation</TabsTrigger>

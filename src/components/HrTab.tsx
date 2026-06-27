@@ -626,7 +626,7 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
       </div>
 
       <Tabs value={activeTab ?? defaultTab ?? "dashboard"} onValueChange={(v) => onTabChange?.(v as HrMainTab)} defaultValue={activeTab ? undefined : (defaultTab || "dashboard")}>
-        <TabsList className="flex flex-wrap h-auto">
+        <TabsList className="inline-flex flex-wrap h-auto w-fit max-w-full">
           <TabsTrigger value="dashboard"><LayoutDashboard size={14} className="mr-1" />Vue d'ensemble</TabsTrigger>
           <TabsTrigger value="recruitment"><Briefcase size={14} className="mr-1" />Recrutement</TabsTrigger>
           <TabsTrigger value="onboarding"><Users size={14} className="mr-1" />Onboarding</TabsTrigger>
