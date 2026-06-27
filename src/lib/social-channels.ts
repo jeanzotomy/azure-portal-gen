@@ -32,8 +32,18 @@ export function sanitizeE164(input: string): string {
 export function buildWhatsappUrl(e164: string, message?: string): string | null {
   const num = sanitizeE164(e164);
   if (!num) return null;
-  const base = `https://wa.me/${num}`;
-  return message ? `${base}?text=${encodeURIComponent(message)}` : base;
+  // Detect mobile: wa.me works natively. On desktop, wa.me redirects to
+  // api.whatsapp.com/send which is blocked by some browsers/extensions
+  // (ERR_BLOCKED_BY_RESPONSE). Use web.whatsapp.com directly on desktop.
+  const isMobile =
+    typeof navigator !== "undefined" &&
+    /Android|iPhone|iPad|iPod|Mobile/i.test(navigator.userAgent || "");
+  const base = isMobile
+    ? `https://wa.me/${num}`
+    : `https://web.whatsapp.com/send?phone=${num}`;
+  if (!message) return base;
+  const sep = base.includes("?") ? "&" : "?";
+  return `${base}${sep}text=${encodeURIComponent(message)}`;
 }
 
 export function buildMessengerUrl(page: string): string | null {
