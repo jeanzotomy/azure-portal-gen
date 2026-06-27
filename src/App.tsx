@@ -69,6 +69,8 @@ const App = () => (
               <Route path="formations/classement" element={<LearnerLeaderboardPage />} />
               <Route path="formations/:assignedId" element={<EmployeeTrainingPlayerPage />} />
               <Route path="subscription" element={<SubscriptionPage />} />
+              <Route path="notifications" element={<PortalNotificationsPage />} />
+              <Route path="aide" element={<PortalHelpPage />} />
             </Route>
             <Route path="/pricing" element={<PricingPage />} />
             <Route path="/formations" element={<TrainingsStorePage />} />
