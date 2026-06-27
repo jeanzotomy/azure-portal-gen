@@ -2585,6 +2585,10 @@ export type Database = {
           training_count: number
         }[]
       }
+      mark_training_comment_official: {
+        Args: { _comment_id: string; _is_official: boolean }
+        Returns: undefined
+      }
       mark_training_followed: {
         Args: { _assigned_id: string }
         Returns: undefined
