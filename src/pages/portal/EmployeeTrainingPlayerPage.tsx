@@ -82,6 +82,8 @@ export default function EmployeeTrainingPlayerPage() {
         ]}
       />
 
+      <AdaptiveRecommendationBanner assignedId={assigned.id} />
+
       <TrainingPlayer assigned={assigned} userId={user.id} onComplete={onComplete} />
     </div>
   );
