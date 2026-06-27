@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Mail, Phone, MapPin, Send, ShieldCheck, CheckCircle2, Loader2 } from "lucide-react";
+import { Mail, Phone, MapPin, Send, ShieldCheck, CheckCircle2, Loader2, MessageCircle } from "lucide-react";
+import { buildWhatsappUrl } from "@/lib/social-channels";
 import { Button } from "@/components/ui/button";
 import contactImage from "@/assets/business-woman-talking-phone-side-view-2.jpg";
 import { Input } from "@/components/ui/input";
