@@ -2934,7 +2934,7 @@ function AdminUsers() {
             const badge = getRoleBadge(roles);
             const enrolled = !!mfaStatus[p.user_id]?.enrolled;
             return (
-              <button key={p.id} onClick={() => openEditUser(p)} className="w-full flex items-center gap-3 p-3 hover:bg-muted/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 transition text-left group" aria-label={`Gérer ${p.full_name || "utilisateur"}`}>
+              <Link key={p.id} to={`/admin/users/${p.user_id}`} className="w-full flex items-center gap-3 p-3 hover:bg-muted/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 transition text-left group" aria-label={`Voir le profil de ${p.full_name || "utilisateur"}`}>
                 <div className="w-9 h-9 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-sm font-bold flex-shrink-0">
                   {(p.full_name || "?").charAt(0).toUpperCase()}
                 </div>
@@ -2949,7 +2949,7 @@ function AdminUsers() {
                   <div className="text-xs text-muted-foreground truncate">{renderEmail(p.user_id)}{p.company ? ` · ${p.company}` : ""}</div>
                 </div>
                 <Pencil size={14} className="text-muted-foreground/50 group-hover:text-primary transition-colors" />
-              </button>
+              </Link>
             );
           })}
         </div>
