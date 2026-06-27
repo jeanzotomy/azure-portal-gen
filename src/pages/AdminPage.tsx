@@ -749,7 +749,7 @@ function AdminContent() {
               {tab === "sharepoint" && <SharePointTab />}
               {isSettingsTab && (
                 <Tabs value={tab} onValueChange={(v) => setTab(v as AdminTab)} className="w-full">
-                  <TabsList className="flex flex-wrap h-auto mb-4">
+                  <TabsList className="inline-flex flex-wrap h-auto w-fit max-w-full mb-4">
                     {settingsGroup.map((s) => (
                       <TabsTrigger key={s.id} value={s.id} className="gap-1.5">
                         <s.icon className="h-3.5 w-3.5" /> {s.label}
