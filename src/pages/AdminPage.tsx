@@ -2253,7 +2253,7 @@ function AdminUsers() {
     setOrDel("status", statusFilter, "all");
     setOrDel("mfa", mfaFilter, "all");
     setOrDel("billable", billableFilter, "all");
-    setOrDel("view", viewMode, "cards");
+    setOrDel("view", viewMode, "table");
     setOrDel("size", String(pageSize), "24");
     if (next.toString() !== searchParams.toString()) {
       setSearchParams(next, { replace: true });
