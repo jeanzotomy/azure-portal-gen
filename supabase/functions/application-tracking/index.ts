@@ -91,7 +91,12 @@ Deno.serve(async (req) => {
         })
       }
       const code = String(Math.floor(100000 + Math.random() * 900000))
-      await supabase.from('application_tracking_otp').insert({ email, code })
+      const enc = new TextEncoder().encode(`${email}:${code}`)
+      const digestBuf = await crypto.subtle.digest('SHA-256', enc)
+      const code_hash = Array.from(new Uint8Array(digestBuf))
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('')
+      await supabase.from('application_tracking_otp').insert({ email, code_hash })
       try {
         await sendOtpEmail(email, code, trackingId)
       } catch (e) {
@@ -109,17 +114,23 @@ Deno.serve(async (req) => {
           status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         })
       }
+      const enc = new TextEncoder().encode(`${email}:${code}`)
+      const digestBuf = await crypto.subtle.digest('SHA-256', enc)
+      const code_hash = Array.from(new Uint8Array(digestBuf))
+        .map((b) => b.toString(16).padStart(2, '0'))
+        .join('')
       const { data: otp } = await supabase
         .from('application_tracking_otp')
-        .select('id, code, expires_at, used, attempts')
+        .select('id, code_hash, expires_at, used, attempts')
         .eq('email', email)
+        .eq('code_hash', code_hash)
         .eq('used', false)
         .gt('expires_at', new Date().toISOString())
         .order('created_at', { ascending: false })
         .limit(1)
         .maybeSingle()
 
-      if (!otp || otp.code !== code) {
+      if (!otp) {
         if (otp) await supabase.from('application_tracking_otp').update({ attempts: (otp.attempts || 0) + 1 }).eq('id', otp.id)
         return new Response(JSON.stringify({ error: 'Code incorrect ou expiré' }), {
           status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
