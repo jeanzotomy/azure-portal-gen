@@ -2898,12 +2898,12 @@ function AdminUsers() {
                 return (
                   <TableRow key={p.id} className={`${p.blocked ? "bg-destructive/5" : ""} hover:bg-muted/40 transition-colors`}>
                     <TableCell>
-                      <button type="button" onClick={() => openEditUser(p)} className="flex items-center gap-2 text-left group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 rounded-md" aria-label={`Gérer ${p.full_name || "utilisateur"}`}>
+                      <Link to={`/admin/users/${p.user_id}`} className="flex items-center gap-2 text-left group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 rounded-md" aria-label={`Voir le profil de ${p.full_name || "utilisateur"}`}>
                         <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-sm font-bold flex-shrink-0">
                           {(p.full_name || "?").charAt(0).toUpperCase()}
                         </div>
                         <span className="font-medium text-card-foreground group-hover:text-primary group-hover:underline underline-offset-4 transition-colors">{p.full_name || "-"}</span>
-                      </button>
+                      </Link>
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">{renderEmail(p.user_id)}</TableCell>
                     <TableCell className="text-xs text-muted-foreground">{p.company || "-"}</TableCell>
