@@ -1,0 +1,29 @@
+name: Security — RLS audit
+
+on:
+  pull_request:
+    paths:
+      - "supabase/migrations/**"
+      - "scripts/check-rls.ts"
+      - ".github/workflows/security-rls.yml"
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  rls-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - name: Install pg client
+        run: bun add -d pg @types/pg
+
+      - name: Run RLS audit
+        env:
+          DATABASE_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: bun scripts/check-rls.ts
