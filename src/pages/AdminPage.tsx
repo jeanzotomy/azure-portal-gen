@@ -52,6 +52,8 @@ import IntegrationsTab from "@/components/admin/IntegrationsTab";
 import { CertificateVerifyDashboard } from "@/components/admin/CertificateVerifyDashboard";
 import EmployeeTrainingManager from "@/components/admin/EmployeeTrainingManager";
 import CommerceTab from "@/components/admin/CommerceTab";
+import SendWhatsAppDialog from "@/components/admin/SendWhatsAppDialog";
+
 import { getDialCode, applyDialCode } from "@/lib/country-dial-codes";
 
 type AdminTab = "dashboard" | "projects" | "tickets" | "users" | "contacts" | "sharepoint" | "seo" | "integrations" | "verify-certificates" | "service-clients" | "service-catalog" | "service-invoices" | "payment-methods" | "commerce" | "hr" | "hr-recruitment" | "hr-contracts" | "hr-onboarding" | "hr-trainings" | "hr-employee-trainings";
@@ -1694,7 +1696,9 @@ function AdminTickets() {
   const [replies, setReplies] = useState<Record<string, any[]>>({});
   const [replyText, setReplyText] = useState("");
   const [sendingReply, setSendingReply] = useState(false);
+  const [waTarget, setWaTarget] = useState<{ ticketId: string; phone: string | null; name: string | null; subject: string } | null>(null);
   const { toast } = useToast();
+
 
   const [unrepliedIds, setUnrepliedIds] = useState<Set<string>>(new Set());
 
