@@ -61,17 +61,28 @@ export const CertificateBadge = forwardRef<HTMLDivElement, { data: BadgeData }>(
         />
 
         {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-          <ShieldCheck size={36} color="#7fe7ff" />
+        <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
+          <img
+            src="/logo.webp"
+            alt="CloudMature"
+            crossOrigin="anonymous"
+            style={{
+              height: 56,
+              width: "auto",
+              filter: "brightness(0) invert(1)",
+            }}
+          />
           <div
             style={{
-              fontSize: 14,
+              fontSize: 13,
               letterSpacing: 4,
               textTransform: "uppercase",
               color: "#cdeefd",
+              borderLeft: "1px solid rgba(255,255,255,0.25)",
+              paddingLeft: 16,
             }}
           >
-            Certificat officiel · CloudMature
+            Certificat officiel
           </div>
         </div>
 
