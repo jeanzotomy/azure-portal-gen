@@ -42,6 +42,8 @@ const PricingPage = lazy(() => import("./pages/PricingPage.tsx"));
 const CheckoutReturnPage = lazy(() => import("./pages/CheckoutReturnPage.tsx"));
 const SubscriptionPage = lazy(() => import("./pages/portal/SubscriptionPage.tsx"));
 const TrainingsStorePage = lazy(() => import("./pages/TrainingsStorePage.tsx"));
+const PortalNotificationsPage = lazy(() => import("./pages/portal/PortalNotificationsPage.tsx"));
+const PortalHelpPage = lazy(() => import("./pages/portal/PortalHelpPage.tsx"));
 
 const ScrollToTopOnNavigate = () => {
   const { pathname } = useLocation();
