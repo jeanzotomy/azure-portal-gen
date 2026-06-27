@@ -253,9 +253,12 @@ export default function ServiceCatalogTab() {
         </div>
       </div>
 
-      <div className="relative max-w-md">
-        <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-        <Input placeholder="Rechercher..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+      <div className="flex items-center justify-between gap-2 flex-wrap">
+        <div className="relative max-w-md flex-1 min-w-[200px]">
+          <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
+          <Input placeholder="Rechercher..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+        </div>
+        <ViewModeToggle value={view} onChange={setView} />
       </div>
 
       {loading ? (
@@ -266,6 +269,60 @@ export default function ServiceCatalogTab() {
             <Package size={36} className="mx-auto mb-2 opacity-40" />
             Aucun service. Ajoutez-en un pour gagner du temps lors de la facturation.
           </CardContent>
+        </Card>
+      ) : view === "table" ? (
+        <Card>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Service</TableHead>
+                  <TableHead className="hidden lg:table-cell">Description</TableHead>
+                  <TableHead className="text-right">Prix</TableHead>
+                  <TableHead className="hidden md:table-cell">Unité</TableHead>
+                  <TableHead className="hidden md:table-cell">Type</TableHead>
+                  <TableHead>Statut</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filtered.map((s) => (
+                  <TableRow key={s.id} className={!s.active ? "opacity-60" : ""}>
+                    <TableCell className="font-medium">{s.name}</TableCell>
+                    <TableCell className="hidden lg:table-cell text-muted-foreground italic max-w-xs truncate">{s.description ?? "—"}</TableCell>
+                    <TableCell className="text-right font-mono text-sm">
+                      {new Intl.NumberFormat("fr-FR").format(s.default_unit_price)} {s.default_currency}
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell text-muted-foreground">{s.default_unit}</TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      {s.is_subscription ? (
+                        <Badge variant="outline" className="gap-1 text-[10px]">
+                          <Repeat size={10} /> {s.billing_frequency ? FREQ_LABEL[s.billing_frequency] : "Abonnement"}
+                        </Badge>
+                      ) : <span className="text-muted-foreground text-xs">Ponctuel</span>}
+                    </TableCell>
+                    <TableCell>
+                      {s.published ? (
+                        <Badge variant="secondary" className="gap-1 text-[10px]"><Globe size={10} /> Publié</Badge>
+                      ) : (
+                        <span className="text-xs text-muted-foreground">Privé</span>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="inline-flex">
+                        <Button size="icon" variant="ghost" onClick={() => void togglePublish(s)} title={s.published ? "Dépublier" : "Publier"}>
+                          {s.published ? <GlobeLock size={14} className="text-primary" /> : <Globe size={14} />}
+                        </Button>
+                        <Button size="icon" variant="ghost" onClick={() => void duplicate(s)} title="Dupliquer"><Copy size={14} /></Button>
+                        <Button size="icon" variant="ghost" onClick={() => openEdit(s)}><Pencil size={14} /></Button>
+                        <Button size="icon" variant="ghost" onClick={() => void remove(s.id)}><Trash2 size={14} className="text-destructive" /></Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         </Card>
       ) : (
         <div className="space-y-6">
