@@ -133,6 +133,8 @@ export default function SiteAssistant() {
         limitTitle: "Merci pour cet échange.",
         limitBody: `Pour garder nos conversations ciblées, cet assistant est limité à ${MAX_USER_QUESTIONS} questions par session. Pour aller plus loin, notre équipe se fera un plaisir de prendre le relais via le formulaire de contact.`,
         limitCta: "Accéder au formulaire de contact",
+        softCta: "Envie d'une réponse personnalisée ? Laissez-nous vos coordonnées, notre équipe vous recontacte.",
+        softCtaBtn: "Laisser mes coordonnées",
       };
 
   useEffect(() => {
