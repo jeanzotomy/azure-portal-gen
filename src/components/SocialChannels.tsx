@@ -13,9 +13,10 @@ type Channel = {
   key: string;
   label: string;
   href: string;
-  icon: React.ComponentType<{ size?: number; className?: string }>;
+  icon: React.ComponentType<any>;
   colorClass: string;
 };
+
 
 // Reusable X (Twitter) glyph since lucide doesn't ship one.
 function XIcon({ size = 16, className }: { size?: number; className?: string }) {
