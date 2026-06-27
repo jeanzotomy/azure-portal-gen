@@ -13,6 +13,7 @@ import { FormSection } from "@/components/ui/form-section";
 import { Label } from "@/components/ui/label";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import EmployeeTrainingManager from "@/components/admin/EmployeeTrainingManager";
 import { toast as sonnerToast } from "sonner";
 
 // Adapter: keep legacy `toast({ title, description, variant })` calls while using sonner under the hood.
