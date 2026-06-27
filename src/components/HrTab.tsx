@@ -137,7 +137,7 @@ interface Sector {
   description: string | null;
 }
 
-type HrMainTab = "dashboard" | "recruitment" | "contracts" | "trainings" | "onboarding";
+type HrMainTab = "dashboard" | "recruitment" | "contracts" | "trainings" | "onboarding" | "employee-trainings";
 
 export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTab, onTabChange }: { onboardingReadOnly?: boolean; defaultTab?: HrMainTab; activeTab?: HrMainTab; onTabChange?: (t: HrMainTab) => void } = {}) {
   const { user } = useAuthSession();
