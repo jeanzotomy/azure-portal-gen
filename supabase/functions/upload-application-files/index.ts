@@ -176,25 +176,15 @@ serve(async (req) => {
     }
 
     // === UPLOAD action (multipart) ===
-    // Require an authenticated caller. Anonymous applicants authenticate via the
-    // job-application flow which provisions a Supabase session beforehand.
-    const authHeader = req.headers.get("Authorization") || "";
-    const jwt = authHeader.replace("Bearer ", "").trim();
-    if (!jwt) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+    // Anonymous job applicants must be able to upload, but we tightly gate:
+    // 1) the jobId must reference a published job posting
+    // 2) file extensions and sizes are validated below
+    // 3) names are sanitized before being used as folder paths
     const authClient = createClient(
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
     );
-    const { data: authUser, error: authErr } = await authClient.auth.getUser(jwt);
-    if (authErr || !authUser?.user) {
-      return new Response(JSON.stringify({ error: "Unauthorized" }), {
-        status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
-      });
-    }
+
 
     const formData = await req.formData();
     const jobId = String(formData.get("jobId") || "").trim();
