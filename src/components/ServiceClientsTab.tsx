@@ -10,6 +10,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Plus, Pencil, Trash2, Search, Building2, RefreshCw, User, FileText, MapPin, Phone, Mail, StickyNote, Hash } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { getDialCode, applyDialCode } from "@/lib/country-dial-codes";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { ViewModeToggle, useViewMode } from "@/components/ui/view-mode-toggle";
 
 interface ServiceClient {
   id: string;
