@@ -64,6 +64,7 @@ const App = () => (
             <Route path="/auth" element={<AuthPage />} />
             <Route path="/portal" element={<AuthGuard><PortalPage /></AuthGuard>}>
               <Route path="formations" element={<EmployeeTrainingsListPage />} />
+              <Route path="formations/classement" element={<LearnerLeaderboardPage />} />
               <Route path="formations/:assignedId" element={<EmployeeTrainingPlayerPage />} />
               <Route path="subscription" element={<SubscriptionPage />} />
             </Route>
