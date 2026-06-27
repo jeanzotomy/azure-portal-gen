@@ -93,11 +93,15 @@ export default function SiteAssistant() {
   const [messages, setMessages] = useState<Msg[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  const hpRef = useRef<HTMLInputElement>(null);
+  const openedAtRef = useRef<number>(0);
 
   const enabled = isPublicRoute(pathname);
   const MAX_USER_QUESTIONS = 5;
+  const SOFT_CTA_AT = 3; // show "leave your contact" CTA after this many questions
   const userMessageCount = messages.filter((m) => m.role === "user").length;
   const limitReached = userMessageCount >= MAX_USER_QUESTIONS;
+  const showSoftCta = userMessageCount >= SOFT_CTA_AT && !limitReached;
 
   const i18n = locale === "en"
     ? {
@@ -113,6 +117,8 @@ export default function SiteAssistant() {
         limitTitle: "Thank you for our exchange.",
         limitBody: `To keep our conversations focused, this assistant is limited to ${MAX_USER_QUESTIONS} questions per session. For a deeper discussion, our team will gladly take over via the contact form.`,
         limitCta: "Go to contact form",
+        softCta: "Want a dedicated answer? Leave your contact info — our team will get back to you.",
+        softCtaBtn: "Leave my contact info",
       }
     : {
         title: "Maturia - Assistant Cloud Mature",
@@ -127,6 +133,8 @@ export default function SiteAssistant() {
         limitTitle: "Merci pour cet échange.",
         limitBody: `Pour garder nos conversations ciblées, cet assistant est limité à ${MAX_USER_QUESTIONS} questions par session. Pour aller plus loin, notre équipe se fera un plaisir de prendre le relais via le formulaire de contact.`,
         limitCta: "Accéder au formulaire de contact",
+        softCta: "Envie d'une réponse personnalisée ? Laissez-nous vos coordonnées, notre équipe vous recontacte.",
+        softCtaBtn: "Laisser mes coordonnées",
       };
 
   useEffect(() => {
@@ -138,6 +146,8 @@ export default function SiteAssistant() {
 
   useEffect(() => {
     if (open && !limitReached) inputRef.current?.focus();
+    if (open && openedAtRef.current === 0) openedAtRef.current = Date.now();
+    if (!open) openedAtRef.current = 0;
   }, [open, limitReached]);
 
   const suggested = locale === "en"
@@ -162,8 +172,10 @@ export default function SiteAssistant() {
     setInput("");
     setLoading(true);
     try {
+      const elapsed_ms = openedAtRef.current ? Date.now() - openedAtRef.current : 9999;
+      const hp = hpRef.current?.value ?? "";
       const { data, error } = await supabase.functions.invoke("site-assistant", {
-        body: { messages: next, locale },
+        body: { messages: next, locale, hp, elapsed_ms },
       });
       if (error) throw new Error(error.message);
       const reply = (data as any)?.reply || (data as any)?.error || i18n.error;
@@ -291,6 +303,28 @@ export default function SiteAssistant() {
               onSubmit={(e) => { e.preventDefault(); send(); }}
               className="border-t border-border bg-background/80 p-2.5"
             >
+              {/* Honeypot — invisible to humans, filled by bots */}
+              <input
+                ref={hpRef}
+                type="text"
+                name="website"
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+                className="absolute -left-[9999px] h-0 w-0 opacity-0"
+              />
+              {showSoftCta && (
+                <div className="mb-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 flex items-center gap-2">
+                  <p className="text-[11px] text-foreground/80 leading-snug flex-1">{i18n.softCta}</p>
+                  <button
+                    type="button"
+                    onClick={goToContact}
+                    className="text-[11px] font-semibold text-primary hover:underline shrink-0"
+                  >
+                    {i18n.softCtaBtn}
+                  </button>
+                </div>
+              )}
               <div className="flex items-end gap-2">
                 <textarea
                   ref={inputRef}
