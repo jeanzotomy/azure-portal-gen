@@ -211,7 +211,9 @@ function AdminContent() {
   const [gestionnaireHrOpen, setGestionnaireHrOpen] = useState(true);
   const { t } = useTranslation();
   const formationsMatch = useMatch("/admin/formations/*");
+  const userDetailMatch = useMatch("/admin/users/:userId");
   const isFormationsRoute = !!formationsMatch;
+  const isUserDetailRoute = !!userDetailMatch;
 
   // Auto-open services submenu when a services tab is active. Must run before any early return to keep hook order stable.
   const ADMIN_SERVICES_TABS: AdminTab[] = ["service-clients", "service-catalog", "service-invoices", "payment-methods"];
@@ -738,7 +740,7 @@ function AdminContent() {
         <PortalInfoBar />
 
         <main className="flex-1 p-3 sm:p-6 pb-[calc(80px+env(safe-area-inset-bottom))] md:pb-6 overflow-auto">
-          {isFormationsRoute ? (
+          {isFormationsRoute || isUserDetailRoute ? (
             <Outlet />
           ) : (
             <>
@@ -2198,7 +2200,7 @@ function AdminUsers() {
   const [editingUser, setEditingUser] = useState<any | null>(null);
   const [editForm, setEditForm] = useState({ full_name: "", company: "", phone: "", country: "", city: "", address_line: "", timezone: "" });
   const [viewMode, setViewMode] = useState<"cards" | "table" | "list">(() => {
-    const v = searchParams.get("view"); return v === "table" || v === "list" ? v : "cards";
+    const v = searchParams.get("view"); return v === "cards" || v === "list" ? v : "table";
   });
   const [statusFilter, setStatusFilter] = useState<"all" | "active" | "blocked" | "deleted">(() => {
     const v = searchParams.get("status"); return (["active","blocked","deleted"].includes(v || "") ? v : "all") as any;
@@ -2253,7 +2255,7 @@ function AdminUsers() {
     setOrDel("status", statusFilter, "all");
     setOrDel("mfa", mfaFilter, "all");
     setOrDel("billable", billableFilter, "all");
-    setOrDel("view", viewMode, "cards");
+    setOrDel("view", viewMode, "table");
     setOrDel("size", String(pageSize), "24");
     if (next.toString() !== searchParams.toString()) {
       setSearchParams(next, { replace: true });
@@ -2823,7 +2825,7 @@ function AdminUsers() {
 
             return (
               <div key={p.id} className={`group bg-card rounded-2xl p-5 shadow-card border transition-all duration-300 hover:shadow-card-hover hover:border-primary/30 ${p.blocked ? "border-destructive/30 bg-destructive/5" : "border-border/50"}`}>
-                <button type="button" onClick={() => openEditUser(p)} className="flex items-center gap-4 w-full text-left rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50" aria-label={`Gérer ${p.full_name || "utilisateur"}`}>
+                <Link to={`/admin/users/${p.user_id}`} className="flex items-center gap-4 w-full text-left rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50" aria-label={`Voir le profil de ${p.full_name || "utilisateur"}`}>
                   <div className="w-12 h-12 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-lg font-bold flex-shrink-0">
                     {(p.full_name || "?").charAt(0).toUpperCase()}
                   </div>
@@ -2841,7 +2843,7 @@ function AdminUsers() {
                       {p.phone && <span className="text-xs text-muted-foreground flex items-center gap-1"><Phone size={11} /> {p.phone}</span>}
                     </div>
                   </div>
-                </button>
+                </Link>
                 <div className="flex items-center justify-between mt-4 pt-3 border-t border-border/30">
                   <p className="text-[11px] text-muted-foreground/60">
                     Inscrit le {new Date(p.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
@@ -2896,12 +2898,12 @@ function AdminUsers() {
                 return (
                   <TableRow key={p.id} className={`${p.blocked ? "bg-destructive/5" : ""} hover:bg-muted/40 transition-colors`}>
                     <TableCell>
-                      <button type="button" onClick={() => openEditUser(p)} className="flex items-center gap-2 text-left group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 rounded-md" aria-label={`Gérer ${p.full_name || "utilisateur"}`}>
+                      <Link to={`/admin/users/${p.user_id}`} className="flex items-center gap-2 text-left group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 rounded-md" aria-label={`Voir le profil de ${p.full_name || "utilisateur"}`}>
                         <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-sm font-bold flex-shrink-0">
                           {(p.full_name || "?").charAt(0).toUpperCase()}
                         </div>
                         <span className="font-medium text-card-foreground group-hover:text-primary group-hover:underline underline-offset-4 transition-colors">{p.full_name || "-"}</span>
-                      </button>
+                      </Link>
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">{renderEmail(p.user_id)}</TableCell>
                     <TableCell className="text-xs text-muted-foreground">{p.company || "-"}</TableCell>
@@ -2932,7 +2934,7 @@ function AdminUsers() {
             const badge = getRoleBadge(roles);
             const enrolled = !!mfaStatus[p.user_id]?.enrolled;
             return (
-              <button key={p.id} onClick={() => openEditUser(p)} className="w-full flex items-center gap-3 p-3 hover:bg-muted/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 transition text-left group" aria-label={`Gérer ${p.full_name || "utilisateur"}`}>
+              <Link key={p.id} to={`/admin/users/${p.user_id}`} className="w-full flex items-center gap-3 p-3 hover:bg-muted/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 transition text-left group" aria-label={`Voir le profil de ${p.full_name || "utilisateur"}`}>
                 <div className="w-9 h-9 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-sm font-bold flex-shrink-0">
                   {(p.full_name || "?").charAt(0).toUpperCase()}
                 </div>
@@ -2947,7 +2949,7 @@ function AdminUsers() {
                   <div className="text-xs text-muted-foreground truncate">{renderEmail(p.user_id)}{p.company ? ` · ${p.company}` : ""}</div>
                 </div>
                 <Pencil size={14} className="text-muted-foreground/50 group-hover:text-primary transition-colors" />
-              </button>
+              </Link>
             );
           })}
         </div>
