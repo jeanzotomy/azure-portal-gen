@@ -62,10 +62,17 @@ Deno.serve(async (req) => {
     // Generate 6-digit code
     const code = String(Math.floor(100000 + Math.random() * 900000));
 
-    // Store in DB
+    // Hash before persisting (never store plaintext OTP)
+    const enc = new TextEncoder().encode(`${phone}:${code}`);
+    const digest = await crypto.subtle.digest("SHA-256", enc);
+    const code_hash = Array.from(new Uint8Array(digest))
+      .map((b) => b.toString(16).padStart(2, "0"))
+      .join("");
+
+    // Store in DB (hash only)
     const { error: insertError } = await supabase.from("sms_otp_codes").insert({
       phone,
-      code,
+      code_hash,
       purpose,
       user_id: user_id || null,
     });
