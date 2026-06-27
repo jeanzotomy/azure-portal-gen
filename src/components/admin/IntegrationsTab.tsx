@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 import CinetPayConfigCard from "./CinetPayConfigCard";
+import SocialChannelsCard from "./SocialChannelsCard";
+
 
 const PROJECT_ID = "zwzazxebufydnaxezngx";
 const FUNCTIONS_BASE = `https://${PROJECT_ID}.supabase.co/functions/v1`;
