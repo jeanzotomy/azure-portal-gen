@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Loader2, MessageSquare, Send, AtSign, Trash2, SmilePlus, HelpCircle, CheckCircle2, MessageCircle } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "sonner";
-import { useUserRole } from "@/hooks/useUserRole";
+import { useUserRoles } from "@/hooks/use-admin";
 import { LearnerFollowButton } from "@/components/training/LearnerFollowButton";
 
 interface CoLearner { user_id: string; full_name: string; role: string; }
