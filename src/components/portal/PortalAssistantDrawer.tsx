@@ -132,8 +132,8 @@ export function PortalAssistantLauncher() {
       <button
         onClick={() => setOpen(true)}
         className="fixed bottom-20 right-4 sm:bottom-6 sm:right-6 z-40 h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-gradient-to-br from-primary to-[#007aa3] text-white shadow-xl hover:scale-105 transition-transform inline-flex items-center justify-center"
-        aria-label="Ouvrir l'assistant IA"
         title="Assistant CloudMature"
+        aria-label="Ouvrir l'assistant IA"
       >
         <Sparkles className="h-5 w-5 sm:h-6 sm:w-6" />
       </button>
