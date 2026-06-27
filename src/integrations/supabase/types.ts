@@ -83,6 +83,33 @@ export type Database = {
         }
         Relationships: []
       }
+      assistant_usage: {
+        Row: {
+          created_at: string
+          day: string
+          id: string
+          last_question_at: string
+          question_count: number
+          visitor_hash: string
+        }
+        Insert: {
+          created_at?: string
+          day?: string
+          id?: string
+          last_question_at?: string
+          question_count?: number
+          visitor_hash: string
+        }
+        Update: {
+          created_at?: string
+          day?: string
+          id?: string
+          last_question_at?: string
+          question_count?: number
+          visitor_hash?: string
+        }
+        Relationships: []
+      }
       candidate_badges: {
         Row: {
           badge_code: string
