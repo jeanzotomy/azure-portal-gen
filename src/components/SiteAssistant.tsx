@@ -172,8 +172,10 @@ export default function SiteAssistant() {
     setInput("");
     setLoading(true);
     try {
+      const elapsed_ms = openedAtRef.current ? Date.now() - openedAtRef.current : 9999;
+      const hp = hpRef.current?.value ?? "";
       const { data, error } = await supabase.functions.invoke("site-assistant", {
-        body: { messages: next, locale },
+        body: { messages: next, locale, hp, elapsed_ms },
       });
       if (error) throw new Error(error.message);
       const reply = (data as any)?.reply || (data as any)?.error || i18n.error;
