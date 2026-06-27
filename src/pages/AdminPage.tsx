@@ -50,6 +50,7 @@ import { ProfileSignatureDialog } from "@/components/ProfileSignatureDialog";
 import SeoTab from "@/components/SeoTab";
 import IntegrationsTab from "@/components/admin/IntegrationsTab";
 import SecurityAuditCard from "@/components/admin/SecurityAuditCard";
+import AdminAuditLogCard from "@/components/admin/AdminAuditLogCard";
 import { CertificateVerifyDashboard } from "@/components/admin/CertificateVerifyDashboard";
 
 import CommerceTab from "@/components/admin/CommerceTab";
