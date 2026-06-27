@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Mail, Phone, MapPin, Send, ShieldCheck, CheckCircle2, Loader2 } from "lucide-react";
+import { Mail, Phone, MapPin, Send, ShieldCheck, CheckCircle2, Loader2, MessageCircle } from "lucide-react";
+import { buildWhatsappUrl } from "@/lib/social-channels";
 import { Button } from "@/components/ui/button";
 import contactImage from "@/assets/business-woman-talking-phone-side-view-2.jpg";
 import { Input } from "@/components/ui/input";
@@ -186,17 +187,35 @@ export function ContactSection() {
               </p>
               <div className="space-y-4">
                 {[
-                  { icon: Mail, text: "info@cloudmature.com" },
-                  { icon: Phone, text: "+224 626 441 150" },
-                  { icon: MapPin, text: "Kipé Centre Émetteur, C/Ratoma, Conakry, Guinée" },
-                ].map((item) => (
-                  <div key={item.text} className="flex items-center gap-3 text-secondary-foreground/80">
-                    <div className="p-2 rounded-lg gradient-primary">
-                      <item.icon size={18} className="text-primary-foreground" />
+                  { icon: Mail, text: "info@cloudmature.com", href: "mailto:info@cloudmature.com" },
+                  { icon: Phone, text: "+224 626 441 150", href: "tel:+224626441150" },
+                  { icon: MessageCircle, text: "WhatsApp : +224 626 441 150", href: buildWhatsappUrl("224626441150", "Bonjour CloudMature, j'aimerais en savoir plus sur vos services.") || "#" },
+                  { icon: MapPin, text: "Kipé Centre Émetteur, C/Ratoma, Conakry, Guinée", href: null as string | null },
+                ].map((item) => {
+                  const content = (
+                    <>
+                      <div className="p-2 rounded-lg gradient-primary">
+                        <item.icon size={18} className="text-primary-foreground" />
+                      </div>
+                      {item.text}
+                    </>
+                  );
+                  return item.href ? (
+                    <a
+                      key={item.text}
+                      href={item.href}
+                      target={item.href.startsWith("http") ? "_blank" : undefined}
+                      rel={item.href.startsWith("http") ? "noopener noreferrer" : undefined}
+                      className="flex items-center gap-3 text-secondary-foreground/80 hover:text-primary-foreground transition-colors"
+                    >
+                      {content}
+                    </a>
+                  ) : (
+                    <div key={item.text} className="flex items-center gap-3 text-secondary-foreground/80">
+                      {content}
                     </div>
-                    {item.text}
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
