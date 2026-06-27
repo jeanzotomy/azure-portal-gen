@@ -303,6 +303,28 @@ export default function SiteAssistant() {
               onSubmit={(e) => { e.preventDefault(); send(); }}
               className="border-t border-border bg-background/80 p-2.5"
             >
+              {/* Honeypot — invisible to humans, filled by bots */}
+              <input
+                ref={hpRef}
+                type="text"
+                name="website"
+                tabIndex={-1}
+                autoComplete="off"
+                aria-hidden="true"
+                className="absolute -left-[9999px] h-0 w-0 opacity-0"
+              />
+              {showSoftCta && (
+                <div className="mb-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 flex items-center gap-2">
+                  <p className="text-[11px] text-foreground/80 leading-snug flex-1">{i18n.softCta}</p>
+                  <button
+                    type="button"
+                    onClick={goToContact}
+                    className="text-[11px] font-semibold text-primary hover:underline shrink-0"
+                  >
+                    {i18n.softCtaBtn}
+                  </button>
+                </div>
+              )}
               <div className="flex items-end gap-2">
                 <textarea
                   ref={inputRef}
