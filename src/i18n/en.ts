@@ -243,7 +243,7 @@ const en = {
   portal: {
     loading: "Loading...",
     dashboard: "Dashboard",
-    projects: "Projects",
+    projects: "My Projects",
     support: "Support",
     profile: "Profile",
     admin: "Administration",

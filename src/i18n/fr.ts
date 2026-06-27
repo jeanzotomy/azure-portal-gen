@@ -243,7 +243,7 @@ const fr = {
   portal: {
     loading: "Chargement...",
     dashboard: "Tableau de bord",
-    projects: "Projets",
+    projects: "Mes Projets",
     support: "Support",
     profile: "Profil",
     admin: "Administration",
