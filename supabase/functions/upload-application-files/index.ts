@@ -176,6 +176,16 @@ serve(async (req) => {
     }
 
     // === UPLOAD action (multipart) ===
+    // Anonymous job applicants must be able to upload, but we tightly gate:
+    // 1) the jobId must reference a published job posting
+    // 2) file extensions and sizes are validated below
+    // 3) names are sanitized before being used as folder paths
+    const authClient = createClient(
+      Deno.env.get("SUPABASE_URL")!,
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!,
+    );
+
+
     const formData = await req.formData();
     const jobId = String(formData.get("jobId") || "").trim();
     const firstName = sanitize(String(formData.get("firstName") || ""));
@@ -193,6 +203,19 @@ serve(async (req) => {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
     }
+
+    // Validate the job posting actually exists and is published before accepting files.
+    const { data: job } = await authClient
+      .from("job_postings")
+      .select("id, status")
+      .eq("id", jobId)
+      .maybeSingle();
+    if (!job || job.status !== "publiee") {
+      return new Response(JSON.stringify({ error: "Job posting not found or not published" }), {
+        status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    }
+
 
     // File type & size validation (public endpoint)
     const ALLOWED_EXTS = ["pdf", "doc", "docx", "odt", "rtf", "txt", "jpg", "jpeg", "png"];
