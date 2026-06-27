@@ -705,10 +705,20 @@ function AdminContent() {
               {tab === "projects" && <AdminProjects />}
               {tab === "tickets" && <AdminTickets />}
               {tab === "contacts" && <AdminContacts />}
-              {tab === "users" && <AdminUsers />}
-              {tab === "sharepoint" && <SharePointTab />}
-              {tab === "seo" && <SeoTab />}
-              {tab === "integrations" && <IntegrationsTab />}
+              {isSettingsTab && (
+                <Tabs value={tab} onValueChange={(v) => setTab(v as AdminTab)} className="w-full">
+                  <TabsList className="flex flex-wrap h-auto mb-4">
+                    {settingsGroup.map((s) => (
+                      <TabsTrigger key={s.id} value={s.id} className="gap-1.5">
+                        <s.icon className="h-3.5 w-3.5" /> {s.label}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+                  <TabsContent value="users"><AdminUsers /></TabsContent>
+                  <TabsContent value="seo"><SeoTab /></TabsContent>
+                  <TabsContent value="integrations"><IntegrationsTab /></TabsContent>
+                </Tabs>
+              )}
               {tab === "verify-certificates" && <CertificateVerifyDashboard />}
               {tab === "commerce" && <CommerceTab />}
               {tab === "service-clients" && <CommerceTab initialSection="clients" />}
