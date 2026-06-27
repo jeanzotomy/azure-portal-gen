@@ -161,51 +161,114 @@ export default function PaymentMethodsTab() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-        {rows.map((r) => {
-          const Icon = TYPE_META[r.type].icon;
-          return (
-            <Card key={r.id} className={r.active ? "" : "opacity-60"}>
-              <CardContent className="p-4 space-y-2">
-                <div className="flex items-start justify-between gap-2">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <Icon size={18} className="text-primary shrink-0" />
-                    <div className="min-w-0">
-                      <div className="font-semibold truncate">{r.label}</div>
-                      <div className="text-xs text-muted-foreground">{TYPE_META[r.type].label} · {r.currency}</div>
+      <div className="flex items-center justify-end">
+        <ViewModeToggle value={view} onChange={setView} />
+      </div>
+
+      {view === "table" ? (
+        <Card>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Libellé</TableHead>
+                  <TableHead className="hidden md:table-cell">Type</TableHead>
+                  <TableHead>Devise</TableHead>
+                  <TableHead className="hidden lg:table-cell">Banque / Opérateur</TableHead>
+                  <TableHead className="hidden lg:table-cell">IBAN / N° / Mobile</TableHead>
+                  <TableHead className="hidden xl:table-cell">Titulaire</TableHead>
+                  <TableHead>Statut</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {rows.map((r) => {
+                  const Icon = TYPE_META[r.type].icon;
+                  return (
+                    <TableRow key={r.id} className={r.active ? "" : "opacity-60"}>
+                      <TableCell className="font-medium">
+                        <span className="inline-flex items-center gap-2"><Icon size={14} className="text-primary" /> {r.label}</span>
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell text-muted-foreground">{TYPE_META[r.type].label}</TableCell>
+                      <TableCell className="font-mono text-xs">{r.currency}</TableCell>
+                      <TableCell className="hidden lg:table-cell text-muted-foreground">{r.bank ?? "—"}</TableCell>
+                      <TableCell className="hidden lg:table-cell text-muted-foreground font-mono text-xs break-all">
+                        {r.iban ?? r.mobile_number ?? "—"}
+                      </TableCell>
+                      <TableCell className="hidden xl:table-cell text-muted-foreground">{r.account_holder ?? "—"}</TableCell>
+                      <TableCell>
+                        <Badge variant={r.active ? "default" : "secondary"}>{r.active ? "Actif" : "Inactif"}</Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="inline-flex items-center">
+                          <Button size="icon" variant="ghost" onClick={() => { setEditing(r); setOpen(true); }}><Pencil size={14} /></Button>
+                          <Button size="icon" variant="ghost" onClick={() => toggleActive(r)} title={r.active ? "Désactiver" : "Activer"}>
+                            <Switch checked={r.active} className="pointer-events-none" />
+                          </Button>
+                          <Button size="icon" variant="ghost" onClick={() => void remove(r.id)} className="text-destructive"><Trash2 size={14} /></Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+                {!rows.length && !loading && (
+                  <TableRow>
+                    <TableCell colSpan={8} className="text-center text-muted-foreground p-8 text-sm">
+                      Aucun mode de paiement. Cliquez sur « Ajouter » pour en créer un.
+                    </TableCell>
+                  </TableRow>
+                )}
+              </TableBody>
+            </Table>
+          </div>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+          {rows.map((r) => {
+            const Icon = TYPE_META[r.type].icon;
+            return (
+              <Card key={r.id} className={r.active ? "" : "opacity-60"}>
+                <CardContent className="p-4 space-y-2">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <Icon size={18} className="text-primary shrink-0" />
+                      <div className="min-w-0">
+                        <div className="font-semibold truncate">{r.label}</div>
+                        <div className="text-xs text-muted-foreground">{TYPE_META[r.type].label} · {r.currency}</div>
+                      </div>
                     </div>
+                    <Badge variant={r.active ? "default" : "secondary"}>{r.active ? "Actif" : "Inactif"}</Badge>
                   </div>
-                  <Badge variant={r.active ? "default" : "secondary"}>{r.active ? "Actif" : "Inactif"}</Badge>
-                </div>
-                <div className="text-xs space-y-0.5 text-muted-foreground break-words">
-                  {r.bank && <div>Banque : {r.bank}</div>}
-                  {r.iban && <div className="break-all">IBAN : {r.iban}</div>}
-                  {r.mobile_number && <div>Mobile : {r.mobile_number}</div>}
-                  {r.account_holder && <div>Titulaire : {r.account_holder}</div>}
-                </div>
-                <div className="flex items-center gap-2 pt-2 border-t">
-                  <Button size="sm" variant="ghost" onClick={() => { setEditing(r); setOpen(true); }}>
-                    <Pencil size={14} />
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={() => toggleActive(r)}>
-                    <Switch checked={r.active} />
-                  </Button>
-                  <Button size="sm" variant="ghost" onClick={() => void remove(r.id)} className="text-destructive ml-auto">
-                    <Trash2 size={14} />
-                  </Button>
-                </div>
+                  <div className="text-xs space-y-0.5 text-muted-foreground break-words">
+                    {r.bank && <div>Banque : {r.bank}</div>}
+                    {r.iban && <div className="break-all">IBAN : {r.iban}</div>}
+                    {r.mobile_number && <div>Mobile : {r.mobile_number}</div>}
+                    {r.account_holder && <div>Titulaire : {r.account_holder}</div>}
+                  </div>
+                  <div className="flex items-center gap-2 pt-2 border-t">
+                    <Button size="sm" variant="ghost" onClick={() => { setEditing(r); setOpen(true); }}>
+                      <Pencil size={14} />
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => toggleActive(r)}>
+                      <Switch checked={r.active} />
+                    </Button>
+                    <Button size="sm" variant="ghost" onClick={() => void remove(r.id)} className="text-destructive ml-auto">
+                      <Trash2 size={14} />
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+          {!rows.length && !loading && (
+            <Card className="sm:col-span-2 lg:col-span-3">
+              <CardContent className="p-8 text-center text-muted-foreground text-sm">
+                Aucun mode de paiement. Cliquez sur « Ajouter » pour en créer un.
               </CardContent>
             </Card>
-          );
-        })}
-        {!rows.length && !loading && (
-          <Card className="sm:col-span-2 lg:col-span-3">
-            <CardContent className="p-8 text-center text-muted-foreground text-sm">
-              Aucun mode de paiement. Cliquez sur « Ajouter » pour en créer un.
-            </CardContent>
-          </Card>
-        )}
-      </div>
+          )}
+        </div>
+      )}
 
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="w-[calc(100vw-1rem)] sm:w-auto max-w-2xl max-h-[92vh] overflow-y-auto">
