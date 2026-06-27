@@ -2823,13 +2823,13 @@ function AdminUsers() {
 
             return (
               <div key={p.id} className={`group bg-card rounded-2xl p-5 shadow-card border transition-all duration-300 hover:shadow-card-hover hover:border-primary/30 ${p.blocked ? "border-destructive/30 bg-destructive/5" : "border-border/50"}`}>
-                <div className="flex items-center gap-4">
+                <button type="button" onClick={() => openEditUser(p)} className="flex items-center gap-4 w-full text-left rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50" aria-label={`Gérer ${p.full_name || "utilisateur"}`}>
                   <div className="w-12 h-12 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-lg font-bold flex-shrink-0">
                     {(p.full_name || "?").charAt(0).toUpperCase()}
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 mb-0.5 flex-wrap">
-                      <p className="font-bold text-card-foreground">{p.full_name || "Non renseigné"}</p>
+                      <span className="font-bold text-card-foreground hover:text-primary hover:underline underline-offset-4 transition-colors">{p.full_name || "Non renseigné"}</span>
                       <span className={`text-[11px] px-2 py-0.5 rounded-full font-semibold border ${badge.color}`}>{badge.label}</span>
                       {enrolled && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 flex items-center gap-1"><Shield size={9} /> MFA</span>}
                       {billableLinks[p.user_id] && <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-teal-500/10 text-teal-600 border border-teal-500/20 flex items-center gap-1"><Receipt size={9} /> Facturable</span>}
@@ -2837,11 +2837,11 @@ function AdminUsers() {
                     </div>
                     <div className="flex flex-wrap gap-x-3 gap-y-0.5">
                       {mfaStatus[p.user_id]?.email && <span className="text-xs text-muted-foreground flex items-center gap-1"><Mail size={11} /> {mfaStatus[p.user_id].email}</span>}
-                      {p.company && <span className="text-xs text-muted-foreground">🏢 {p.company}</span>}
-                      {p.phone && <span className="text-xs text-muted-foreground">📱 {p.phone}</span>}
+                      {p.company && <span className="text-xs text-muted-foreground flex items-center gap-1"><Briefcase size={11} /> {p.company}</span>}
+                      {p.phone && <span className="text-xs text-muted-foreground flex items-center gap-1"><Phone size={11} /> {p.phone}</span>}
                     </div>
                   </div>
-                </div>
+                </button>
                 <div className="flex items-center justify-between mt-4 pt-3 border-t border-border/30">
                   <p className="text-[11px] text-muted-foreground/60">
                     Inscrit le {new Date(p.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
@@ -2894,14 +2894,14 @@ function AdminUsers() {
                 const badge = getRoleBadge(roles);
                 const enrolled = !!mfaStatus[p.user_id]?.enrolled;
                 return (
-                  <TableRow key={p.id} className={p.blocked ? "bg-destructive/5" : ""}>
+                  <TableRow key={p.id} className={`${p.blocked ? "bg-destructive/5" : ""} hover:bg-muted/40 transition-colors`}>
                     <TableCell>
-                      <div className="flex items-center gap-2">
+                      <button type="button" onClick={() => openEditUser(p)} className="flex items-center gap-2 text-left group focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 rounded-md" aria-label={`Gérer ${p.full_name || "utilisateur"}`}>
                         <div className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-sm font-bold flex-shrink-0">
                           {(p.full_name || "?").charAt(0).toUpperCase()}
                         </div>
-                        <span className="font-medium">{p.full_name || "-"}</span>
-                      </div>
+                        <span className="font-medium text-card-foreground group-hover:text-primary group-hover:underline underline-offset-4 transition-colors">{p.full_name || "-"}</span>
+                      </button>
                     </TableCell>
                     <TableCell className="text-xs text-muted-foreground">{renderEmail(p.user_id)}</TableCell>
                     <TableCell className="text-xs text-muted-foreground">{p.company || "-"}</TableCell>
@@ -2932,13 +2932,13 @@ function AdminUsers() {
             const badge = getRoleBadge(roles);
             const enrolled = !!mfaStatus[p.user_id]?.enrolled;
             return (
-              <button key={p.id} onClick={() => openEditUser(p)} className="w-full flex items-center gap-3 p-3 hover:bg-muted/40 transition text-left">
+              <button key={p.id} onClick={() => openEditUser(p)} className="w-full flex items-center gap-3 p-3 hover:bg-muted/40 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 transition text-left group" aria-label={`Gérer ${p.full_name || "utilisateur"}`}>
                 <div className="w-9 h-9 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-sm font-bold flex-shrink-0">
                   {(p.full_name || "?").charAt(0).toUpperCase()}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-medium text-sm">{p.full_name || "Non renseigné"}</span>
+                    <span className="font-medium text-sm text-card-foreground group-hover:text-primary group-hover:underline underline-offset-4 transition-colors">{p.full_name || "Non renseigné"}</span>
                     <span className={`text-[10px] px-1.5 py-0.5 rounded-full font-semibold border ${badge.color}`}>{badge.label}</span>
                     {enrolled && <Shield size={11} className="text-emerald-600" />}
                     {billableLinks[p.user_id] && <Receipt size={11} className="text-teal-600" />}
@@ -2946,7 +2946,7 @@ function AdminUsers() {
                   </div>
                   <div className="text-xs text-muted-foreground truncate">{renderEmail(p.user_id)}{p.company ? ` · ${p.company}` : ""}</div>
                 </div>
-                <Pencil size={14} className="text-muted-foreground/50" />
+                <Pencil size={14} className="text-muted-foreground/50 group-hover:text-primary transition-colors" />
               </button>
             );
           })}
