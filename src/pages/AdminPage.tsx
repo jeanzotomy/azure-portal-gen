@@ -50,7 +50,7 @@ import { ProfileSignatureDialog } from "@/components/ProfileSignatureDialog";
 import SeoTab from "@/components/SeoTab";
 import IntegrationsTab from "@/components/admin/IntegrationsTab";
 import { CertificateVerifyDashboard } from "@/components/admin/CertificateVerifyDashboard";
-import EmployeeTrainingManager from "@/components/admin/EmployeeTrainingManager";
+
 import CommerceTab from "@/components/admin/CommerceTab";
 import SendWhatsAppDialog from "@/components/admin/SendWhatsAppDialog";
 
@@ -710,23 +710,30 @@ function AdminContent() {
               {tab === "service-catalog" && <CommerceTab initialSection="catalog" />}
               {tab === "service-invoices" && <CommerceTab initialSection="invoices" />}
               {tab === "payment-methods" && <CommerceTab initialSection="methods" />}
-              {isHrTab && (
-                <Tabs value={tab} onValueChange={(v) => setTab(v as AdminTab)} className="w-full">
-                  <TabsList className="flex flex-wrap h-auto mb-4">
-                    {hrGroup.map((s) => (
-                      <TabsTrigger key={s.id} value={s.id} className="gap-1.5">
-                        <s.icon className="h-3.5 w-3.5" /> {s.label}
-                      </TabsTrigger>
-                    ))}
-                  </TabsList>
-                  <TabsContent value="hr-recruitment"><HrTab defaultTab="recruitment" /></TabsContent>
-                  <TabsContent value="hr-contracts"><HrTab defaultTab="contracts" /></TabsContent>
-                  <TabsContent value="hr-onboarding"><HrTab defaultTab="onboarding" /></TabsContent>
-                  <TabsContent value="hr-trainings"><HrTab defaultTab="trainings" /></TabsContent>
-                  <TabsContent value="hr-employee-trainings"><EmployeeTrainingManager /></TabsContent>
-                </Tabs>
-              )}
-              {tab === "hr" && <HrTab />}
+              {isHrTab && (() => {
+                const hrTabMap: Record<string, "dashboard" | "recruitment" | "contracts" | "trainings" | "onboarding" | "employee-trainings"> = {
+                  "hr": "dashboard",
+                  "hr-recruitment": "recruitment",
+                  "hr-contracts": "contracts",
+                  "hr-onboarding": "onboarding",
+                  "hr-trainings": "trainings",
+                  "hr-employee-trainings": "employee-trainings",
+                };
+                const reverseMap: Record<string, AdminTab> = {
+                  "dashboard": "hr",
+                  "recruitment": "hr-recruitment",
+                  "contracts": "hr-contracts",
+                  "onboarding": "hr-onboarding",
+                  "trainings": "hr-trainings",
+                  "employee-trainings": "hr-employee-trainings",
+                };
+                return (
+                  <HrTab
+                    activeTab={hrTabMap[tab]}
+                    onTabChange={(t) => setTab(reverseMap[t])}
+                  />
+                );
+              })()}
             </>
           )}
         </main>

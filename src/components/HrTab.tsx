@@ -13,6 +13,7 @@ import { FormSection } from "@/components/ui/form-section";
 import { Label } from "@/components/ui/label";
 import { useConfirm } from "@/components/ui/confirm-dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import EmployeeTrainingManager from "@/components/admin/EmployeeTrainingManager";
 import { toast as sonnerToast } from "sonner";
 
 // Adapter: keep legacy `toast({ title, description, variant })` calls while using sonner under the hood.
@@ -136,7 +137,7 @@ interface Sector {
   description: string | null;
 }
 
-type HrMainTab = "dashboard" | "recruitment" | "contracts" | "trainings" | "onboarding";
+type HrMainTab = "dashboard" | "recruitment" | "contracts" | "trainings" | "onboarding" | "employee-trainings";
 
 export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTab, onTabChange }: { onboardingReadOnly?: boolean; defaultTab?: HrMainTab; activeTab?: HrMainTab; onTabChange?: (t: HrMainTab) => void } = {}) {
   const { user } = useAuthSession();
@@ -629,7 +630,8 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
           <TabsTrigger value="dashboard"><LayoutDashboard size={14} className="mr-1" />Vue d'ensemble</TabsTrigger>
           <TabsTrigger value="recruitment"><Briefcase size={14} className="mr-1" />Recrutement</TabsTrigger>
           <TabsTrigger value="contracts"><FileSignature size={14} className="mr-1" />Contrats</TabsTrigger>
-          <TabsTrigger value="trainings"><GraduationCap size={14} className="mr-1" />Formations</TabsTrigger>
+          <TabsTrigger value="trainings"><GraduationCap size={14} className="mr-1" />Catalogue formations</TabsTrigger>
+          <TabsTrigger value="employee-trainings"><GraduationCap size={14} className="mr-1" />Formations employés</TabsTrigger>
           <TabsTrigger value="onboarding"><Users size={14} className="mr-1" />Onboarding</TabsTrigger>
         </TabsList>
 
@@ -924,6 +926,11 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
         <TabsContent value="trainings" className="mt-4">
           <TrainingsTab readOnly={onboardingReadOnly} />
         </TabsContent>
+
+        <TabsContent value="employee-trainings" className="mt-4">
+          <EmployeeTrainingManager />
+        </TabsContent>
+
 
         <TabsContent value="onboarding" className="mt-4">
           <OnboardingAdminTab readOnly={onboardingReadOnly} />
