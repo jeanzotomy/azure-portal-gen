@@ -2825,7 +2825,7 @@ function AdminUsers() {
 
             return (
               <div key={p.id} className={`group bg-card rounded-2xl p-5 shadow-card border transition-all duration-300 hover:shadow-card-hover hover:border-primary/30 ${p.blocked ? "border-destructive/30 bg-destructive/5" : "border-border/50"}`}>
-                <button type="button" onClick={() => openEditUser(p)} className="flex items-center gap-4 w-full text-left rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50" aria-label={`Gérer ${p.full_name || "utilisateur"}`}>
+                <Link to={`/admin/users/${p.user_id}`} className="flex items-center gap-4 w-full text-left rounded-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/50" aria-label={`Voir le profil de ${p.full_name || "utilisateur"}`}>
                   <div className="w-12 h-12 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-lg font-bold flex-shrink-0">
                     {(p.full_name || "?").charAt(0).toUpperCase()}
                   </div>
@@ -2843,7 +2843,7 @@ function AdminUsers() {
                       {p.phone && <span className="text-xs text-muted-foreground flex items-center gap-1"><Phone size={11} /> {p.phone}</span>}
                     </div>
                   </div>
-                </button>
+                </Link>
                 <div className="flex items-center justify-between mt-4 pt-3 border-t border-border/30">
                   <p className="text-[11px] text-muted-foreground/60">
                     Inscrit le {new Date(p.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })}
