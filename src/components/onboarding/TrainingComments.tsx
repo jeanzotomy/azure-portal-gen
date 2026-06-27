@@ -2,9 +2,11 @@ import { useEffect, useRef, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Loader2, MessageSquare, Send, AtSign, Trash2, SmilePlus } from "lucide-react";
+import { Loader2, MessageSquare, Send, AtSign, Trash2, SmilePlus, HelpCircle, CheckCircle2, MessageCircle } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { toast } from "sonner";
+import { useUserRole } from "@/hooks/useUserRole";
+import { LearnerFollowButton } from "@/components/training/LearnerFollowButton";
 
 interface CoLearner { user_id: string; full_name: string; role: string; }
 interface Comment {
@@ -16,6 +18,9 @@ interface Comment {
   body: string;
   mentions: string[];
   created_at: string;
+  is_question?: boolean | null;
+  is_official_answer?: boolean | null;
+  parent_comment_id?: string | null;
 }
 
 const initials = (name: string) =>
