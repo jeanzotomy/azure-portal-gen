@@ -515,8 +515,8 @@ function DashboardTab({ user }: { user: SupaUser }) {
  {projects.length === 0 && tickets.length === 0 && (
  <div className="bg-card rounded-xl p-12 shadow-card border border-border/50 text-center">
  <LayoutDashboard size={48} className="mx-auto text-muted-foreground/30 mb-4"/>
- <p className="text-muted-foreground">Aucun projet ou ticket pour le moment.</p>
- <p className="text-sm text-muted-foreground/60 mt-1">Votre équipe CloudMature ajoutera vos projets ici.</p>
+  <p className="text-muted-foreground">Aucun portefeuille ou ticket pour le moment.</p>
+  <p className="text-sm text-muted-foreground/60 mt-1">Votre équipe CloudMature ajoutera vos portefeuilles ici.</p>
  </div>
  )}
  </div>
@@ -740,12 +740,12 @@ function ProjectsTab({ user }: { user: SupaUser }) {
  const { error } = await supabase.from("projects").update(payload).eq("id", editingProject.id);
  if (error) { toast({ title:"Erreur", description: error.message, variant:"destructive"}); setSubmitting(false); return; }
  if (files.length > 0) await uploadFiles(editingProject.id);
- toast({ title:"Projet modifié!", description:"Les modifications ont été enregistrées."});
- } else {
- const { data: project, error } = await supabase.from("projects").insert({ user_id: user.id, ...payload }).select().single();
- if (error) { toast({ title:"Erreur", description: error.message, variant:"destructive"}); setSubmitting(false); return; }
- if (files.length > 0 && project) await uploadFiles(project.id);
- toast({ title:"Projet soumis!", description:"Votre projet a été envoyé avec succès."});
+  toast({ title:"Portefeuille modifié!", description:"Les modifications ont été enregistrées."});
+  } else {
+  const { data: project, error } = await supabase.from("projects").insert({ user_id: user.id, ...payload }).select().single();
+  if (error) { toast({ title:"Erreur", description: error.message, variant:"destructive"}); setSubmitting(false); return; }
+  if (files.length > 0 && project) await uploadFiles(project.id);
+  toast({ title:"Portefeuille soumis!", description:"Votre portefeuille a été envoyé avec succès."});
  }
 
  closeForm();
@@ -788,7 +788,7 @@ function ProjectsTab({ user }: { user: SupaUser }) {
  return (
  <div className="space-y-6 animate-fade-up">
  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
- <h1 className="text-xl sm:text-2xl font-bold text-foreground">Mes Projets</h1>
+ <h1 className="text-xl sm:text-2xl font-bold text-foreground">Mon Portefeuille</h1>
  <div className="flex items-center gap-2">
  <Button variant="outline"size="sm"onClick={loadProjects} className="gap-1.5">
  <RefreshCw size={14} /> <span className="hidden sm:inline">Actualiser</span>
@@ -803,7 +803,7 @@ function ProjectsTab({ user }: { user: SupaUser }) {
  <>
  <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
  {[
- { label:"Total projets", value: totalProjects, helper:"Tous vos projets"},
+ { label:"Total portefeuille", value: totalProjects, helper:"Tous vos portefeuilles"},
  { label:"En cours", value: activeProjects, helper:"Travail actif"},
  { label:"En attente", value: pendingProjects, helper:"À démarrer"},
  { label:"Terminés", value: completedProjects, helper:"Livrés"},
