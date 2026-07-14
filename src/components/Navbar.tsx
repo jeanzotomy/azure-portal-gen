@@ -82,7 +82,7 @@ export function Navbar() {
         </Link>
 
         {/* Desktop */}
-        <div className="hidden md:flex items-center gap-6">
+        <div className="hidden lg:flex items-center gap-6">
           {navLinks.map((l) => (
             <button key={l.href} onClick={() => scrollTo(l.href)} className="text-sm font-medium text-secondary-foreground/80 hover:text-primary transition-colors">
               {l.label}
@@ -131,7 +131,7 @@ export function Navbar() {
 
         {/* Mobile hamburger */}
         <button
-          className="md:hidden p-2 rounded-lg text-white bg-white/10 hover:bg-white/20 border border-white/20 transition-colors"
+          className="lg:hidden p-2 rounded-lg text-white bg-white/10 hover:bg-white/20 border border-white/20 transition-colors"
           onClick={() => setOpen(!open)}
           aria-label={open ? "Fermer le menu" : "Ouvrir le menu"}
           aria-expanded={open}
@@ -141,7 +141,7 @@ export function Navbar() {
       </div>
 
       {open && (
-        <div className="md:hidden gradient-hero border-t border-border/20 pb-4">
+        <div className="lg:hidden gradient-hero border-t border-border/20 pb-4">
           {navLinks.map((l) => (
             <button key={l.href} onClick={() => scrollTo(l.href)} className="block w-full text-left px-6 py-3 text-sm text-secondary-foreground hover:bg-secondary/50">
               {l.label}
