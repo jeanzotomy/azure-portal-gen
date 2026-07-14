@@ -224,7 +224,8 @@ function PortalContent() {
  {tab ==="dashboard"&& (
  <div className="space-y-4 animate-fade-up">
  {/* Welcome banner — au-dessus du tableau de bord intelligent */}
- <div className="relative overflow-hidden bg-primary rounded-2xl p-6 border border-primary/10">
+ <div className="relative overflow-hidden bg-gradient-to-br from-card via-card to-primary/5 rounded-2xl p-6 border border-border shadow-sm">
+ <div className="absolute -top-16 -right-16 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
  <div className="relative flex items-center justify-between gap-3 flex-wrap">
  <div>
  <h1 className="text-lg sm:text-2xl font-bold text-foreground">
