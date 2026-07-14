@@ -157,9 +157,11 @@ export default function InstallPage() {
               </div>
               <span className="pt-1">{t("install.android2")}</span>
             </li>
-          </ol>
-        </section>
-      </main>
+ </ol>
+ </section>
+ </>
+ )}
+ </main>
       <Footer />
     </div>
   );
