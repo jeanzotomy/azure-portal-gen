@@ -704,14 +704,14 @@ function ProjectsTab({ user }: { user: SupaUser }) {
  if (!prof?.full_name || !prof?.company || !(prof as any).country) {
  toast({
  title:"Profil incomplet",
- description:"Veuillez compléter votre nom complet, entreprise et pays dans votre profil avant de soumettre un projet.",
+ description:"Veuillez compléter votre nom complet, entreprise et pays dans votre profil avant de soumettre un portefeuille.",
  variant:"destructive",
  });
  return;
  }
  }
  if (!name.trim()) {
- toast({ title:"Champ requis", description:"Le nom du projet est obligatoire.", variant:"destructive"}); return;
+ toast({ title:"Champ requis", description:"Le nom du portefeuille est obligatoire.", variant:"destructive"}); return;
  }
  if (!description.trim()) {
  toast({ title:"Champ requis", description:"La description est obligatoire.", variant:"destructive"}); return;
