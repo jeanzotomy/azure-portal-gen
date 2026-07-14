@@ -526,17 +526,19 @@ function DashboardTab({ user }: { user: SupaUser }) {
 }
 
 function ProjectsTab({ user }: { user: SupaUser }) {
- const [projects, setProjects] = useState<any[]>([]);
- const [gestionnaireProfiles, setGestionnaireProfiles] = useState<Record<string, string>>({});
- const [showForm, setShowForm] = useState(false);
- const [editingProject, setEditingProject] = useState<any>(null);
- const [searchQuery, setSearchQuery] = useState("");
- const [statusFilter, setStatusFilter] = useState("all");
- const [name, setName] = useState("");
- const [description, setDescription] = useState("");
- const [budget, setBudget] = useState("");
- const [deadline, setDeadline] = useState("");
- const [selectedServices, setSelectedServices] = useState<string[]>([]);
+  const [projects, setProjects] = useState<any[]>([]);
+  const [gestionnaireProfiles, setGestionnaireProfiles] = useState<Record<string, string>>({});
+  const [showForm, setShowForm] = useState(false);
+  const [editingProject, setEditingProject] = useState<any>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [viewMode, setViewMode] = useState<"table" | "cards">("table");
+  const [name, setName] = useState("");
+  const [description, setDescription] = useState("");
+  const [budget, setBudget] = useState("");
+  const [deadline, setDeadline] = useState("");
+  const [selectedServices, setSelectedServices] = useState<string[]>([]);
+
 
  const serviceOptions = [
 "Écosystème Microsoft 365 & Azure",
