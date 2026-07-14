@@ -1,472 +1,468 @@
-import { useEffect, useRef, useState } from "react";
-import { z } from "zod";
-import { supabase } from "@/integrations/supabase/client";
-import { useAuthSession } from "@/hooks/use-auth-session";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
-import { Badge } from "@/components/ui/badge";
-import { useToast } from "@/hooks/use-toast";
-import { Upload, User, Mail, Briefcase, FileText, CheckCircle2, X, Loader2, Cloud, Lock, Eye } from "lucide-react";
-import { Link } from "react-router-dom";
+import { useEffect, useRef, useState } from"react";
+import { z } from"zod";
+import { supabase } from"@/integrations/supabase/client";
+import { useAuthSession } from"@/hooks/use-auth-session";
+import { Button } from"@/components/ui/button";
+import { Input } from"@/components/ui/input";
+import { Textarea } from"@/components/ui/textarea";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from"@/components/ui/dialog";
+import { Badge } from"@/components/ui/badge";
+import { useToast } from"@/hooks/use-toast";
+import { Upload, User, Mail, Briefcase, FileText, CheckCircle2, X, Loader2, Cloud, Lock, Eye } from"lucide-react";
+import { Link } from"react-router-dom";
 
 interface Props {
-  open: boolean;
-  onOpenChange: (v: boolean) => void;
-  jobId: string;
-  jobTitle: string;
+ open: boolean;
+ onOpenChange: (v: boolean) => void;
+ jobId: string;
+ jobTitle: string;
 }
 
 const MAX_FILE = 5 * 1024 * 1024;
-const ACCEPTED = [".pdf", ".doc", ".docx"];
+const ACCEPTED = [".pdf",".doc",".docx"];
 
 const sanitize = (s: string) =>
-  s.normalize("NFD").replace(/[\u0300-\u036f]/g, "")
-    .replace(/[<>:"/\\|?*]/g, "")
-    .replace(/\s+/g, "-")
-    .trim() || "anon";
+ s.normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+ .replace(/[<>:"/\\|?*]/g,"")
+ .replace(/\s+/g,"-")
+ .trim() ||"anon";
 
 const schema = z.object({
-  first_name: z.string().trim().min(2, "Min. 2 caractères").max(50),
-  last_name: z.string().trim().min(2, "Min. 2 caractères").max(50),
-  email: z.string().trim().email("Email invalide").max(255),
-  phone: z.string().trim().max(30).optional().or(z.literal("")),
-  linkedin_url: z.string().trim().url("URL invalide").max(255).optional().or(z.literal("")),
-  portfolio_url: z.string().trim().url("URL invalide").max(255).optional().or(z.literal("")),
-  cover_letter_text: z.string().trim().max(2000, "Max. 2000 caractères").optional(),
+ first_name: z.string().trim().min(2,"Min. 2 caractères").max(50),
+ last_name: z.string().trim().min(2,"Min. 2 caractères").max(50),
+ email: z.string().trim().email("Email invalide").max(255),
+ phone: z.string().trim().max(30).optional().or(z.literal("")),
+ linkedin_url: z.string().trim().url("URL invalide").max(255).optional().or(z.literal("")),
+ portfolio_url: z.string().trim().url("URL invalide").max(255).optional().or(z.literal("")),
+ cover_letter_text: z.string().trim().max(2000,"Max. 2000 caractères").optional(),
 });
 
 const SectionTitle = ({ icon: Icon, title }: { icon: React.ElementType; title: string }) => (
-  <div className="flex items-center gap-2 pt-1">
-    <div className="p-1.5 rounded-md bg-primary/10 text-primary"><Icon size={14} /></div>
-    <h3 className="text-sm font-semibold">{title}</h3>
-    <div className="flex-1 h-px bg-border" />
-  </div>
+ <div className="flex items-center gap-2 pt-1">
+ <div className="p-1.5 rounded-md bg-primary/10 text-primary"><Icon size={14} /></div>
+ <h3 className="text-sm font-semibold">{title}</h3>
+ <div className="flex-1 h-px bg-border"/>
+ </div>
 );
 
 const FileDrop = ({ file, onChange, onClear, label, required }: {
-  file: File | null;
-  onChange: (f: File | null) => void;
-  onClear: () => void;
-  label: string;
-  required?: boolean;
+ file: File | null;
+ onChange: (f: File | null) => void;
+ onClear: () => void;
+ label: string;
+ required?: boolean;
 }) => (
-  <div>
-    <label className="text-sm font-medium flex items-center gap-1">
-      {label} {required && <span className="text-destructive">*</span>}
-      <span className="text-xs text-muted-foreground font-normal ml-auto">PDF/DOC · max 5 Mo</span>
-    </label>
-    {file ? (
-      <div className="mt-1 flex items-center gap-2 p-2.5 rounded-md border border-primary/30 bg-primary/5">
-        <CheckCircle2 size={16} className="text-primary shrink-0" />
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium truncate">{file.name}</p>
-          <p className="text-xs text-muted-foreground">{(file.size / 1024).toFixed(0)} Ko</p>
-        </div>
-        <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={onClear}>
-          <X size={14} />
-        </Button>
-      </div>
-    ) : (
-      <label className="mt-1 flex flex-col items-center justify-center gap-1 p-4 rounded-md border-2 border-dashed border-border hover:border-primary/50 hover:bg-muted/30 cursor-pointer transition-colors">
-        <Upload size={18} className="text-muted-foreground" />
-        <span className="text-xs text-muted-foreground">Cliquez pour sélectionner un fichier</span>
-        <input
-          type="file"
-          accept={ACCEPTED.join(",")}
-          className="hidden"
-          onChange={(e) => onChange(e.target.files?.[0] || null)}
-        />
-      </label>
-    )}
-  </div>
+ <div>
+ <label className="text-sm font-medium flex items-center gap-1">
+ {label} {required && <span className="text-destructive">*</span>}
+ <span className="text-xs text-muted-foreground font-normal ml-auto">PDF/DOC · max 5 Mo</span>
+ </label>
+ {file ? (
+ <div className="mt-1 flex items-center gap-2 p-2.5 rounded-md border border-primary/30 bg-primary/5">
+ <CheckCircle2 size={16} className="text-primary shrink-0"/>
+ <div className="flex-1 min-w-0">
+ <p className="text-sm font-medium truncate">{file.name}</p>
+ <p className="text-xs text-muted-foreground">{(file.size / 1024).toFixed(0)} Ko</p>
+ </div>
+ <Button type="button"size="icon"variant="ghost"className="h-7 w-7"onClick={onClear}>
+ <X size={14} />
+ </Button>
+ </div>
+ ) : (
+ <label className="mt-1 flex flex-col items-center justify-center gap-1 p-4 rounded-md border-2 border-dashed border-border hover:border-primary/50 hover:bg-muted/30 cursor-pointer transition-colors">
+ <Upload size={18} className="text-muted-foreground"/>
+ <span className="text-xs text-muted-foreground">Cliquez pour sélectionner un fichier</span>
+ <input
+ type="file" accept={ACCEPTED.join(",")}
+ className="hidden" onChange={(e) => onChange(e.target.files?.[0] || null)}
+ />
+ </label>
+ )}
+ </div>
 );
 
 export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Props) {
-  const { user } = useAuthSession();
-  const { toast } = useToast();
-  const [submitting, setSubmitting] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [profileLoaded, setProfileLoaded] = useState(false);
-  const [lockedFields, setLockedFields] = useState({ first_name: false, last_name: false, phone: false });
-  // Stable per-dialog-session unique folder for anonymous uploads (prevents enumeration).
-  const anonFolderRef = useRef<string>("");
-  useEffect(() => {
-    if (open && !anonFolderRef.current) {
-      anonFolderRef.current = typeof crypto !== "undefined" && "randomUUID" in crypto
-        ? crypto.randomUUID()
-        : `anon-${Date.now()}-${Math.random().toString(36).slice(2, 12)}`;
-    }
-    if (!open) anonFolderRef.current = "";
-  }, [open]);
-  const [form, setForm] = useState({
-    first_name: "",
-    last_name: "",
-    email: user?.email || "",
-    phone: "",
-    linkedin_url: "",
-    portfolio_url: "",
-    cover_letter_text: "",
-  });
-  const [cvFile, setCvFile] = useState<File | null>(null);
-  const [letterFile, setLetterFile] = useState<File | null>(null);
-  const [existingApp, setExistingApp] = useState<{ tracking_id: string | null; status: string } | null>(null);
+ const { user } = useAuthSession();
+ const { toast } = useToast();
+ const [submitting, setSubmitting] = useState(false);
+ const [errors, setErrors] = useState<Record<string, string>>({});
+ const [profileLoaded, setProfileLoaded] = useState(false);
+ const [lockedFields, setLockedFields] = useState({ first_name: false, last_name: false, phone: false });
+ // Stable per-dialog-session unique folder for anonymous uploads (prevents enumeration).
+ const anonFolderRef = useRef<string>("");
+ useEffect(() => {
+ if (open && !anonFolderRef.current) {
+ anonFolderRef.current = typeof crypto !=="undefined"&&"randomUUID"in crypto
+ ? crypto.randomUUID()
+ : `anon-${Date.now()}-${Math.random().toString(36).slice(2, 12)}`;
+ }
+ if (!open) anonFolderRef.current ="";
+ }, [open]);
+ const [form, setForm] = useState({
+ first_name:"",
+ last_name:"",
+ email: user?.email ||"",
+ phone:"",
+ linkedin_url:"",
+ portfolio_url:"",
+ cover_letter_text:"",
+ });
+ const [cvFile, setCvFile] = useState<File | null>(null);
+ const [letterFile, setLetterFile] = useState<File | null>(null);
+ const [existingApp, setExistingApp] = useState<{ tracking_id: string | null; status: string } | null>(null);
 
-  // Detect existing application for this job (by user or by email)
-  useEffect(() => {
-    if (!open) { setExistingApp(null); return; }
-    const email = (user?.email || form.email || "").trim();
-    if (!user?.id && !email) return;
-    (async () => {
-      let q = supabase
-        .from("job_applications")
-        .select("tracking_id, status")
-        .eq("job_id", jobId)
-        .limit(1);
-      q = user?.id ? q.eq("user_id", user.id) : q.ilike("email", email);
-      const { data } = await q;
-      if (data && data.length > 0) {
-        setExistingApp({ tracking_id: data[0].tracking_id, status: data[0].status });
-      } else {
-        setExistingApp(null);
-      }
-    })();
-  }, [open, jobId, user?.id, user?.email, form.email]);
+ // Detect existing application for this job (by user or by email)
+ useEffect(() => {
+ if (!open) { setExistingApp(null); return; }
+ const email = (user?.email || form.email ||"").trim();
+ if (!user?.id && !email) return;
+ (async () => {
+ let q = supabase
+ .from("job_applications")
+ .select("tracking_id, status")
+ .eq("job_id", jobId)
+ .limit(1);
+ q = user?.id ? q.eq("user_id", user.id) : q.ilike("email", email);
+ const { data } = await q;
+ if (data && data.length > 0) {
+ setExistingApp({ tracking_id: data[0].tracking_id, status: data[0].status });
+ } else {
+ setExistingApp(null);
+ }
+ })();
+ }, [open, jobId, user?.id, user?.email, form.email]);
 
-  // Préremplir depuis le profil utilisateur (uniquement si connecté)
-  useEffect(() => {
-    if (!user || !open || profileLoaded) return;
-    supabase
-      .from("profiles")
-      .select("first_name, last_name, full_name, phone")
-      .eq("user_id", user.id)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (!data) { setProfileLoaded(true); return; }
-        const d = data as any;
-        let first = (d.first_name || "").trim();
-        let last = (d.last_name || "").trim();
-        if ((!first || !last) && d.full_name) {
-          const parts = String(d.full_name).trim().split(/\s+/);
-          if (!first) first = parts.shift() || "";
-          if (!last) last = parts.join(" ");
-        }
-        const phone = (d.phone || "").trim();
-        setForm((f) => ({
-          ...f,
-          first_name: first || f.first_name,
-          last_name: last || f.last_name,
-          email: f.email || user.email || "",
-          phone: phone || f.phone,
-        }));
-        setLockedFields({
-          first_name: !!first,
-          last_name: !!last,
-          phone: !!phone,
-        });
-        setProfileLoaded(true);
-      });
-  }, [user, open, profileLoaded]);
+ // Préremplir depuis le profil utilisateur (uniquement si connecté)
+ useEffect(() => {
+ if (!user || !open || profileLoaded) return;
+ supabase
+ .from("profiles")
+ .select("first_name, last_name, full_name, phone")
+ .eq("user_id", user.id)
+ .maybeSingle()
+ .then(({ data }) => {
+ if (!data) { setProfileLoaded(true); return; }
+ const d = data as any;
+ let first = (d.first_name ||"").trim();
+ let last = (d.last_name ||"").trim();
+ if ((!first || !last) && d.full_name) {
+ const parts = String(d.full_name).trim().split(/\s+/);
+ if (!first) first = parts.shift() ||"";
+ if (!last) last = parts.join("");
+ }
+ const phone = (d.phone ||"").trim();
+ setForm((f) => ({
+ ...f,
+ first_name: first || f.first_name,
+ last_name: last || f.last_name,
+ email: f.email || user.email ||"",
+ phone: phone || f.phone,
+ }));
+ setLockedFields({
+ first_name: !!first,
+ last_name: !!last,
+ phone: !!phone,
+ });
+ setProfileLoaded(true);
+ });
+ }, [user, open, profileLoaded]);
 
-  const update = (k: keyof typeof form, v: string) => {
-    setForm((f) => ({ ...f, [k]: v }));
-    if (errors[k]) setErrors((e) => { const n = { ...e }; delete n[k]; return n; });
-  };
+ const update = (k: keyof typeof form, v: string) => {
+ setForm((f) => ({ ...f, [k]: v }));
+ if (errors[k]) setErrors((e) => { const n = { ...e }; delete n[k]; return n; });
+ };
 
-  // Upload to public Supabase Storage bucket - works for anonymous users
-  const uploadFile = async (file: File, fileName: string): Promise<string | null> => {
-    if (file.size > MAX_FILE) {
-      toast({ title: "Fichier trop volumineux", description: `${file.name} dépasse 5 Mo.`, variant: "destructive" });
-      return null;
-    }
-    // Per-applicant unique subdirectory to prevent enumeration between applicants.
-    // Authenticated users keep their userId; anonymous applicants use a fresh UUID
-    // shared across all files of the same submission (stable via ref).
-    const folder = user?.id || anonFolderRef.current || crypto.randomUUID();
-    const path = `public/${jobId}/${folder}/${Date.now()}-${fileName}`;
-    const { data, error } = await supabase.storage
-      .from("cv-applications")
-      .upload(path, file, { contentType: file.type || "application/octet-stream", upsert: false });
-    if (error) {
-      toast({ title: "Erreur d'envoi", description: error.message, variant: "destructive" });
-      return null;
-    }
-    return data.path;
-  };
+ // Upload to public Supabase Storage bucket - works for anonymous users
+ const uploadFile = async (file: File, fileName: string): Promise<string | null> => {
+ if (file.size > MAX_FILE) {
+ toast({ title:"Fichier trop volumineux", description: `${file.name} dépasse 5 Mo.`, variant:"destructive"});
+ return null;
+ }
+ // Per-applicant unique subdirectory to prevent enumeration between applicants.
+ // Authenticated users keep their userId; anonymous applicants use a fresh UUID
+ // shared across all files of the same submission (stable via ref).
+ const folder = user?.id || anonFolderRef.current || crypto.randomUUID();
+ const path = `public/${jobId}/${folder}/${Date.now()}-${fileName}`;
+ const { data, error } = await supabase.storage
+ .from("cv-applications")
+ .upload(path, file, { contentType: file.type ||"application/octet-stream", upsert: false });
+ if (error) {
+ toast({ title:"Erreur d'envoi", description: error.message, variant:"destructive"});
+ return null;
+ }
+ return data.path;
+ };
 
-  const handleSubmit = async () => {
-    const parsed = schema.safeParse(form);
-    if (!parsed.success) {
-      const errs: Record<string, string> = {};
-      parsed.error.errors.forEach((e) => { if (e.path[0]) errs[e.path[0] as string] = e.message; });
-      setErrors(errs);
-      toast({ title: "Formulaire incomplet", description: "Corrigez les champs en rouge.", variant: "destructive" });
-      return;
-    }
-    if (!cvFile) {
-      toast({ title: "CV requis", description: "Veuillez joindre votre CV.", variant: "destructive" });
-      return;
-    }
+ const handleSubmit = async () => {
+ const parsed = schema.safeParse(form);
+ if (!parsed.success) {
+ const errs: Record<string, string> = {};
+ parsed.error.errors.forEach((e) => { if (e.path[0]) errs[e.path[0] as string] = e.message; });
+ setErrors(errs);
+ toast({ title:"Formulaire incomplet", description:"Corrigez les champs en rouge.", variant:"destructive"});
+ return;
+ }
+ if (!cvFile) {
+ toast({ title:"CV requis", description:"Veuillez joindre votre CV.", variant:"destructive"});
+ return;
+ }
 
-    setSubmitting(true);
+ setSubmitting(true);
 
-    // Prevent duplicate applications to the same job
-    {
-      let dupQuery = supabase
-        .from("job_applications")
-        .select("id, tracking_id", { count: "exact", head: false })
-        .eq("job_id", jobId)
-        .limit(1);
-      dupQuery = user?.id
-        ? dupQuery.eq("user_id", user.id)
-        : dupQuery.ilike("email", form.email.trim());
-      const { data: existing } = await dupQuery;
-      if (existing && existing.length > 0) {
-        setSubmitting(false);
-        toast({
-          title: "Candidature déjà envoyée",
-          description: existing[0].tracking_id
-            ? `Vous avez déjà postulé à cette offre (suivi : ${existing[0].tracking_id}).`
-            : "Vous avez déjà postulé à cette offre.",
-          variant: "destructive",
-        });
-        return;
-      }
-    }
+ // Prevent duplicate applications to the same job
+ {
+ let dupQuery = supabase
+ .from("job_applications")
+ .select("id, tracking_id", { count:"exact", head: false })
+ .eq("job_id", jobId)
+ .limit(1);
+ dupQuery = user?.id
+ ? dupQuery.eq("user_id", user.id)
+ : dupQuery.ilike("email", form.email.trim());
+ const { data: existing } = await dupQuery;
+ if (existing && existing.length > 0) {
+ setSubmitting(false);
+ toast({
+ title:"Candidature déjà envoyée",
+ description: existing[0].tracking_id
+ ? `Vous avez déjà postulé à cette offre (suivi : ${existing[0].tracking_id}).`
+ :"Vous avez déjà postulé à cette offre.",
+ variant:"destructive",
+ });
+ return;
+ }
+ }
 
-    const fullName = `${form.first_name.trim()} ${form.last_name.trim()}`;
-    const baseName = `${sanitize(form.last_name)}-${sanitize(form.first_name)}`;
-    const cvExt = cvFile.name.split(".").pop() || "pdf";
-    const cvPath = await uploadFile(cvFile, `CV-${baseName}.${cvExt}`);
-    if (!cvPath) { setSubmitting(false); return; }
-    let letterPath: string | null = null;
-    if (letterFile) {
-      const lExt = letterFile.name.split(".").pop() || "pdf";
-      letterPath = await uploadFile(letterFile, `Lettre-${baseName}.${lExt}`);
-    }
+ const fullName = `${form.first_name.trim()} ${form.last_name.trim()}`;
+ const baseName = `${sanitize(form.last_name)}-${sanitize(form.first_name)}`;
+ const cvExt = cvFile.name.split(".").pop() ||"pdf";
+ const cvPath = await uploadFile(cvFile, `CV-${baseName}.${cvExt}`);
+ if (!cvPath) { setSubmitting(false); return; }
+ let letterPath: string | null = null;
+ if (letterFile) {
+ const lExt = letterFile.name.split(".").pop() ||"pdf";
+ letterPath = await uploadFile(letterFile, `Lettre-${baseName}.${lExt}`);
+ }
 
-    // Push files to SharePoint (best-effort, non-blocking for the application save)
-    let sharepointFolderUrl: string | null = null;
-    try {
-      const fd = new FormData();
-      fd.append("jobId", jobId);
-      fd.append("firstName", form.first_name.trim());
-      fd.append("lastName", form.last_name.trim());
-      fd.append("cv", cvFile);
-      if (letterFile) fd.append("letter", letterFile);
-      const { data: spData, error: spError } = await supabase.functions.invoke("upload-application-files", { body: fd });
-      if (spError) {
-        console.warn("SharePoint upload failed:", spError);
-      } else if (spData?.folder?.webUrl) {
-        sharepointFolderUrl = spData.folder.webUrl;
-      }
-    } catch (e) {
-      console.warn("SharePoint upload exception:", e);
-    }
+ // Push files to SharePoint (best-effort, non-blocking for the application save)
+ let sharepointFolderUrl: string | null = null;
+ try {
+ const fd = new FormData();
+ fd.append("jobId", jobId);
+ fd.append("firstName", form.first_name.trim());
+ fd.append("lastName", form.last_name.trim());
+ fd.append("cv", cvFile);
+ if (letterFile) fd.append("letter", letterFile);
+ const { data: spData, error: spError } = await supabase.functions.invoke("upload-application-files", { body: fd });
+ if (spError) {
+ console.warn("SharePoint upload failed:", spError);
+ } else if (spData?.folder?.webUrl) {
+ sharepointFolderUrl = spData.folder.webUrl;
+ }
+ } catch (e) {
+ console.warn("SharePoint upload exception:", e);
+ }
 
-    const { data: rpcData, error } = await supabase.rpc("submit_job_application", {
-      p_job_id: jobId,
-      p_full_name: fullName,
-      p_email: form.email.trim(),
-      p_cv_path: cvPath,
-      p_user_id: user?.id ?? null,
-      p_phone: form.phone.trim() || null,
-      p_linkedin_url: form.linkedin_url.trim() || null,
-      p_portfolio_url: form.portfolio_url.trim() || null,
-      p_cover_letter_path: letterPath,
-      p_notes: [
-        form.cover_letter_text?.trim() || null,
-        sharepointFolderUrl ? `SharePoint: ${sharepointFolderUrl}` : null,
-      ].filter(Boolean).join("\n\n") || null,
-    });
-    setSubmitting(false);
+ const { data: rpcData, error } = await supabase.rpc("submit_job_application", {
+ p_job_id: jobId,
+ p_full_name: fullName,
+ p_email: form.email.trim(),
+ p_cv_path: cvPath,
+ p_user_id: user?.id ?? null,
+ p_phone: form.phone.trim() || null,
+ p_linkedin_url: form.linkedin_url.trim() || null,
+ p_portfolio_url: form.portfolio_url.trim() || null,
+ p_cover_letter_path: letterPath,
+ p_notes: [
+ form.cover_letter_text?.trim() || null,
+ sharepointFolderUrl ? `SharePoint: ${sharepointFolderUrl}` : null,
+ ].filter(Boolean).join("\n\n") || null,
+ });
+ setSubmitting(false);
 
-    if (error) {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
-      return;
-    }
-    const row = Array.isArray(rpcData) ? rpcData[0] : rpcData;
-    const trackId = row?.tracking_id as string | undefined;
-    if (row?.already_exists) {
-      toast({
-        title: "Candidature déjà envoyée",
-        description: trackId
-          ? `Vous avez déjà postulé à cette offre (suivi : ${trackId}).`
-          : "Vous avez déjà postulé à cette offre.",
-        variant: "destructive",
-      });
-      onOpenChange(false);
-      return;
-    }
-    toast({
-      title: "✓ Candidature envoyée",
-      description: trackId
-        ? `Numéro de suivi : ${trackId}. Un email de confirmation vous a été envoyé.`
-        : "Nous vous recontacterons rapidement.",
-    });
-    // Reset form for potential next application
-    setForm({
-      first_name: "", last_name: "", email: user?.email || "", phone: "",
-      linkedin_url: "", portfolio_url: "", cover_letter_text: "",
-    });
-    setCvFile(null);
-    setLetterFile(null);
-    setProfileLoaded(false);
-    onOpenChange(false);
-  };
+ if (error) {
+ toast({ title:"Erreur", description: error.message, variant:"destructive"});
+ return;
+ }
+ const row = Array.isArray(rpcData) ? rpcData[0] : rpcData;
+ const trackId = row?.tracking_id as string | undefined;
+ if (row?.already_exists) {
+ toast({
+ title:"Candidature déjà envoyée",
+ description: trackId
+ ? `Vous avez déjà postulé à cette offre (suivi : ${trackId}).`
+ :"Vous avez déjà postulé à cette offre.",
+ variant:"destructive",
+ });
+ onOpenChange(false);
+ return;
+ }
+ toast({
+ title:"✓ Candidature envoyée",
+ description: trackId
+ ? `Numéro de suivi : ${trackId}. Un email de confirmation vous a été envoyé.`
+ :"Nous vous recontacterons rapidement.",
+ });
+ // Reset form for potential next application
+ setForm({
+ first_name:"", last_name:"", email: user?.email ||"", phone:"",
+ linkedin_url:"", portfolio_url:"", cover_letter_text:"",
+ });
+ setCvFile(null);
+ setLetterFile(null);
+ setProfileLoaded(false);
+ onOpenChange(false);
+ };
 
-  const fieldClass = (k: string) => `text-primary font-medium ${errors[k] ? "border-destructive focus-visible:ring-destructive" : ""}`;
-  const ErrMsg = ({ k }: { k: string }) => errors[k] ? <p className="text-xs text-destructive mt-1">{errors[k]}</p> : null;
+ const fieldClass = (k: string) => `text-primary font-medium ${errors[k] ?"border-destructive focus-visible:ring-destructive":""}`;
+ const ErrMsg = ({ k }: { k: string }) => errors[k] ? <p className="text-xs text-destructive mt-1">{errors[k]}</p> : null;
 
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl p-0 gap-0 overflow-hidden flex flex-col max-h-[90vh]">
-        <DialogHeader className="relative mx-0 mt-0 mb-0 bg-gradient-to-br from-primary via-primary to-[#005f80] text-primary-foreground border-b-0 shadow-none px-6 sm:px-8 py-7 sm:py-8 pr-20 sm:pr-24 overflow-hidden [&>button]:z-20 [&>button]:right-5 [&>button]:top-5 [&>button]:bg-white/20 [&>button]:hover:bg-white/30 [&>button]:border [&>button]:border-white/30 [&>button]:shadow-md [&>button>svg]:h-5 [&>button>svg]:w-5">
-          <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-white/10 blur-2xl pointer-events-none" />
-          <div className="absolute -bottom-16 -left-8 w-52 h-52 rounded-full bg-white/10 blur-3xl pointer-events-none" />
-          <div className="relative space-y-4">
-            <div className="flex items-start gap-4">
-              <div className="shrink-0 h-14 w-14 rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center shadow-lg">
-                <Briefcase size={26} className="text-primary-foreground" />
-              </div>
-              <div className="flex-1 min-w-0 pt-0.5">
-                <DialogTitle className="text-primary-foreground text-xl sm:text-2xl font-bold leading-tight">
-                  Postuler à cette offre
-                </DialogTitle>
-                <p className="text-primary-foreground/90 text-sm sm:text-base font-normal mt-1.5 break-words">{jobTitle}</p>
-              </div>
-            </div>
-            <div className="flex flex-wrap items-center gap-2">
-              <Badge className="bg-white/15 hover:bg-white/20 text-primary-foreground border border-white/20 backdrop-blur-sm gap-1.5 font-normal px-2.5 py-1">
-                <CheckCircle2 size={12} /> Sans inscription
-              </Badge>
-              <Badge className="bg-white/15 hover:bg-white/20 text-primary-foreground border border-white/20 backdrop-blur-sm gap-1.5 font-normal px-2.5 py-1">
-                <Cloud size={12} /> Données sécurisées
-              </Badge>
-            </div>
-          </div>
-        </DialogHeader>
+ return (
+ <Dialog open={open} onOpenChange={onOpenChange}>
+ <DialogContent className="max-w-3xl p-0 gap-0 overflow-hidden flex flex-col max-h-[90vh]">
+ <DialogHeader className="relative mx-0 mt-0 mb-0 bg-primary text-primary-foreground border-b-0 shadow-none px-6 sm:px-8 py-7 sm:py-8 pr-20 sm:pr-24 overflow-hidden [&>button]:z-20 [&>button]:right-5 [&>button]:top-5 [&>button]:bg-white/20 [&>button]:hover:bg-white/30 [&>button]:border [&>button]:border-white/30 [&>button]:shadow-md [&>button>svg]:h-5 [&>button>svg]:w-5">
+ <div className="absolute -top-12 -right-12 w-48 h-48 rounded-full bg-white/10 blur-2xl pointer-events-none"/>
+ <div className="absolute -bottom-16 -left-8 w-52 h-52 rounded-full bg-white/10 blur-3xl pointer-events-none"/>
+ <div className="relative space-y-4">
+ <div className="flex items-start gap-4">
+ <div className="shrink-0 h-14 w-14 rounded-xl bg-white/15 backdrop-blur-sm border border-white/20 flex items-center justify-center shadow-lg">
+ <Briefcase size={26} className="text-primary-foreground"/>
+ </div>
+ <div className="flex-1 min-w-0 pt-0.5">
+ <DialogTitle className="text-primary-foreground text-xl sm:text-2xl font-bold leading-tight">
+ Postuler à cette offre
+ </DialogTitle>
+ <p className="text-primary-foreground/90 text-sm sm:text-base font-normal mt-1.5 break-words">{jobTitle}</p>
+ </div>
+ </div>
+ <div className="flex flex-wrap items-center gap-2">
+ <Badge className="bg-white/15 hover:bg-white/20 text-primary-foreground border border-white/20 backdrop-blur-sm gap-1.5 font-normal px-2.5 py-1">
+ <CheckCircle2 size={12} /> Sans inscription
+ </Badge>
+ <Badge className="bg-white/15 hover:bg-white/20 text-primary-foreground border border-white/20 backdrop-blur-sm gap-1.5 font-normal px-2.5 py-1">
+ <Cloud size={12} /> Données sécurisées
+ </Badge>
+ </div>
+ </div>
+ </DialogHeader>
 
-        <div className="flex-1 min-h-0 overflow-y-auto px-6 py-4 space-y-4">
-          {existingApp && (
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-md border border-primary/30 bg-primary/5 px-4 py-3">
-              <div className="text-sm">
-                <p className="font-medium text-foreground">Vous avez déjà postulé à cette offre.</p>
-                {existingApp.tracking_id && (
-                  <p className="text-xs text-muted-foreground mt-0.5">Numéro de suivi : <span className="font-mono">{existingApp.tracking_id}</span></p>
-                )}
-              </div>
-              <Button asChild size="sm" variant="default">
-                <Link to={existingApp.tracking_id ? `/candidature/${existingApp.tracking_id}` : "/candidature"} onClick={() => onOpenChange(false)}>
-                  <Eye size={14} className="mr-1.5" /> Voir ma candidature
-                </Link>
-              </Button>
-            </div>
-          )}
-          <SectionTitle icon={User} title="Identité" />
-          {(lockedFields.first_name || lockedFields.last_name || lockedFields.phone) && (
-            <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/40 border border-border rounded-md px-3 py-2">
-              <Lock size={12} className="shrink-0 text-primary" />
-              <span>Ces informations proviennent de votre profil. Pour les modifier, mettez à jour votre profil dans l'espace client.</span>
-            </div>
-          )}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="text-sm font-medium flex items-center gap-1">
-                Prénom <span className="text-destructive">*</span>
-                {lockedFields.first_name && <Lock size={11} className="text-muted-foreground" />}
-              </label>
-              <Input
-                className={`${fieldClass("first_name")} ${lockedFields.first_name ? "bg-muted cursor-not-allowed" : ""}`}
-                value={form.first_name}
-                onChange={(e) => update("first_name", e.target.value)}
-                readOnly={lockedFields.first_name}
-              />
-              <ErrMsg k="first_name" />
-            </div>
-            <div>
-              <label className="text-sm font-medium flex items-center gap-1">
-                Nom <span className="text-destructive">*</span>
-                {lockedFields.last_name && <Lock size={11} className="text-muted-foreground" />}
-              </label>
-              <Input
-                className={`${fieldClass("last_name")} ${lockedFields.last_name ? "bg-muted cursor-not-allowed" : ""}`}
-                value={form.last_name}
-                onChange={(e) => update("last_name", e.target.value)}
-                readOnly={lockedFields.last_name}
-              />
-              <ErrMsg k="last_name" />
-            </div>
-          </div>
+ <div className="flex-1 min-h-0 overflow-y-auto px-6 py-4 space-y-4">
+ {existingApp && (
+ <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-md border border-primary/30 bg-primary/5 px-4 py-3">
+ <div className="text-sm">
+ <p className="font-medium text-foreground">Vous avez déjà postulé à cette offre.</p>
+ {existingApp.tracking_id && (
+ <p className="text-xs text-muted-foreground mt-0.5">Numéro de suivi : <span className="font-mono">{existingApp.tracking_id}</span></p>
+ )}
+ </div>
+ <Button asChild size="sm"variant="default">
+ <Link to={existingApp.tracking_id ? `/candidature/${existingApp.tracking_id}` :"/candidature"} onClick={() => onOpenChange(false)}>
+ <Eye size={14} className="mr-1.5"/> Voir ma candidature
+ </Link>
+ </Button>
+ </div>
+ )}
+ <SectionTitle icon={User} title="Identité"/>
+ {(lockedFields.first_name || lockedFields.last_name || lockedFields.phone) && (
+ <div className="flex items-center gap-2 text-xs text-muted-foreground bg-muted/40 border border-border rounded-md px-3 py-2">
+ <Lock size={12} className="shrink-0 text-primary"/>
+ <span>Ces informations proviennent de votre profil. Pour les modifier, mettez à jour votre profil dans l'espace client.</span>
+ </div>
+ )}
+ <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+ <div>
+ <label className="text-sm font-medium flex items-center gap-1">
+ Prénom <span className="text-destructive">*</span>
+ {lockedFields.first_name && <Lock size={11} className="text-muted-foreground"/>}
+ </label>
+ <Input
+ className={`${fieldClass("first_name")} ${lockedFields.first_name ?"bg-muted cursor-not-allowed":""}`}
+ value={form.first_name}
+ onChange={(e) => update("first_name", e.target.value)}
+ readOnly={lockedFields.first_name}
+ />
+ <ErrMsg k="first_name"/>
+ </div>
+ <div>
+ <label className="text-sm font-medium flex items-center gap-1">
+ Nom <span className="text-destructive">*</span>
+ {lockedFields.last_name && <Lock size={11} className="text-muted-foreground"/>}
+ </label>
+ <Input
+ className={`${fieldClass("last_name")} ${lockedFields.last_name ?"bg-muted cursor-not-allowed":""}`}
+ value={form.last_name}
+ onChange={(e) => update("last_name", e.target.value)}
+ readOnly={lockedFields.last_name}
+ />
+ <ErrMsg k="last_name"/>
+ </div>
+ </div>
 
-          <SectionTitle icon={Mail} title="Contact" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="text-sm font-medium">Email <span className="text-destructive">*</span></label>
-              <Input type="email" className={fieldClass("email")} value={form.email} onChange={(e) => update("email", e.target.value)} />
-              <ErrMsg k="email" />
-            </div>
-            <div>
-              <label className="text-sm font-medium flex items-center gap-1">
-                Téléphone
-                {lockedFields.phone && <Lock size={11} className="text-muted-foreground" />}
-              </label>
-              <Input
-                placeholder="+224 ..."
-                className={`text-primary font-medium ${lockedFields.phone ? "bg-muted cursor-not-allowed" : ""}`}
-                value={form.phone}
-                onChange={(e) => update("phone", e.target.value)}
-                readOnly={lockedFields.phone}
-              />
-            </div>
-          </div>
+ <SectionTitle icon={Mail} title="Contact"/>
+ <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+ <div>
+ <label className="text-sm font-medium">Email <span className="text-destructive">*</span></label>
+ <Input type="email"className={fieldClass("email")} value={form.email} onChange={(e) => update("email", e.target.value)} />
+ <ErrMsg k="email"/>
+ </div>
+ <div>
+ <label className="text-sm font-medium flex items-center gap-1">
+ Téléphone
+ {lockedFields.phone && <Lock size={11} className="text-muted-foreground"/>}
+ </label>
+ <Input
+ placeholder="+224 ..." className={`text-primary font-medium ${lockedFields.phone ?"bg-muted cursor-not-allowed":""}`}
+ value={form.phone}
+ onChange={(e) => update("phone", e.target.value)}
+ readOnly={lockedFields.phone}
+ />
+ </div>
+ </div>
 
-          <SectionTitle icon={Briefcase} title="Profil professionnel" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="text-sm font-medium">LinkedIn</label>
-              <Input placeholder="https://linkedin.com/in/..." className={fieldClass("linkedin_url")} value={form.linkedin_url} onChange={(e) => update("linkedin_url", e.target.value)} />
-              <ErrMsg k="linkedin_url" />
-            </div>
-            <div>
-              <label className="text-sm font-medium">Portfolio</label>
-              <Input placeholder="https://..." className={fieldClass("portfolio_url")} value={form.portfolio_url} onChange={(e) => update("portfolio_url", e.target.value)} />
-              <ErrMsg k="portfolio_url" />
-            </div>
-          </div>
+ <SectionTitle icon={Briefcase} title="Profil professionnel"/>
+ <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+ <div>
+ <label className="text-sm font-medium">LinkedIn</label>
+ <Input placeholder="https://linkedin.com/in/..."className={fieldClass("linkedin_url")} value={form.linkedin_url} onChange={(e) => update("linkedin_url", e.target.value)} />
+ <ErrMsg k="linkedin_url"/>
+ </div>
+ <div>
+ <label className="text-sm font-medium">Portfolio</label>
+ <Input placeholder="https://..."className={fieldClass("portfolio_url")} value={form.portfolio_url} onChange={(e) => update("portfolio_url", e.target.value)} />
+ <ErrMsg k="portfolio_url"/>
+ </div>
+ </div>
 
-          <SectionTitle icon={FileText} title="Documents" />
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <FileDrop file={cvFile} onChange={setCvFile} onClear={() => setCvFile(null)} label="CV" required />
-            <FileDrop file={letterFile} onChange={setLetterFile} onClear={() => setLetterFile(null)} label="Lettre de motivation" />
-          </div>
+ <SectionTitle icon={FileText} title="Documents"/>
+ <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+ <FileDrop file={cvFile} onChange={setCvFile} onClear={() => setCvFile(null)} label="CV"required />
+ <FileDrop file={letterFile} onChange={setLetterFile} onClear={() => setLetterFile(null)} label="Lettre de motivation"/>
+ </div>
 
-          <div>
-            <label className="text-sm font-medium flex justify-between">
-              <span>Message complémentaire</span>
-              <span className="text-xs text-muted-foreground font-normal">{form.cover_letter_text.length}/2000</span>
-            </label>
-            <Textarea
-              rows={4}
-              maxLength={2000}
-              className={fieldClass("cover_letter_text")}
-              value={form.cover_letter_text}
-              onChange={(e) => update("cover_letter_text", e.target.value)}
-              placeholder="Présentez-vous brièvement, vos motivations…"
-            />
-            <ErrMsg k="cover_letter_text" />
-          </div>
+ <div>
+ <label className="text-sm font-medium flex justify-between">
+ <span>Message complémentaire</span>
+ <span className="text-xs text-muted-foreground font-normal">{form.cover_letter_text.length}/2000</span>
+ </label>
+ <Textarea
+ rows={4}
+ maxLength={2000}
+ className={fieldClass("cover_letter_text")}
+ value={form.cover_letter_text}
+ onChange={(e) => update("cover_letter_text", e.target.value)}
+ placeholder="Présentez-vous brièvement, vos motivations…" />
+ <ErrMsg k="cover_letter_text"/>
+ </div>
 
-        </div>
+ </div>
 
-        <DialogFooter className="shrink-0 px-6 py-4 border-t bg-muted/30">
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={submitting}>Annuler</Button>
-          <Button onClick={handleSubmit} disabled={submitting} className="min-w-[180px]">
-            {submitting ? (<><Loader2 size={14} className="mr-2 animate-spin" /> Envoi en cours…</>) : "Envoyer ma candidature"}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
+ <DialogFooter className="shrink-0 px-6 py-4 border-t bg-muted/30">
+ <Button variant="outline"onClick={() => onOpenChange(false)} disabled={submitting}>Annuler</Button>
+ <Button onClick={handleSubmit} disabled={submitting} className="min-w-[180px]">
+ {submitting ? (<><Loader2 size={14} className="mr-2 animate-spin"/> Envoi en cours…</>) :"Envoyer ma candidature"}
+ </Button>
+ </DialogFooter>
+ </DialogContent>
+ </Dialog>
+ );
 }
