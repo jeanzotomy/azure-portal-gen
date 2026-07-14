@@ -101,6 +101,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
   const [saving, setSaving] = useState(false);
   const [outputFormat, setOutputFormat] = useState<"pdf" | "docx" | "both">("both");
   const [issuer, setIssuer] = useState<{ full_name: string | null; role: string | null; signature_url: string | null }>({ full_name: null, role: null, signature_url: null });
+  const [pdfInvoiceNumber, setPdfInvoiceNumber] = useState<string>("APERÇU");
 
   const pdfRef = useRef<HTMLDivElement>(null);
 
