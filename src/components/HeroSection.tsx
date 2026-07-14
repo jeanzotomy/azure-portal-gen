@@ -26,7 +26,7 @@ export function HeroSection() {
  }, [words[0]]);
 
  return (
- <section id="hero"className="relative min-h-screen flex items-center overflow-hidden">
+ <section id="hero" className="relative lg:min-h-screen flex items-center overflow-hidden">
  <div className="absolute inset-0 gradient-hero"/>
 
  <div className="container relative z-10 py-24">
