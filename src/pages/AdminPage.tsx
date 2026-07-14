@@ -1313,7 +1313,7 @@ function AdminDashboard() {
  ))}
  {projects.length === 0 && (
  <div className="p-8 text-center">
- <p className="text-sm text-muted-foreground">Aucun projet</p>
+ <p className="text-sm text-muted-foreground">Aucun portefeuille</p>
  </div>
  )}
  </div>
@@ -1380,7 +1380,7 @@ function AdminProjectsInner({ readOnly = false, assignedCount }: { readOnly?: bo
 
  const saveProject = async (id: string) => {
  if (!editName.trim()) {
- toast({ title:"Nom requis", description:"Le nom du projet ne peut pas être vide.", variant:"destructive"});
+ toast({ title:"Nom requis", description:"Le nom du portefeuille ne peut pas être vide.", variant:"destructive"});
  return;
  }
  const { error } = await supabase.from("projects").update({
@@ -1390,7 +1390,7 @@ function AdminProjectsInner({ readOnly = false, assignedCount }: { readOnly?: bo
  gestionnaire_id: editGestionnaire || null,
  }).eq("id", id);
  if (error) toast({ title:"Erreur", description: error.message, variant:"destructive"});
- else { toast({ title:"Projet mis à jour!"}); setEditingId(null); load(); }
+ else { toast({ title:"Portefeuille mis à jour!"}); setEditingId(null); load(); }
  };
 
  const filtered = projects.filter(p => {
@@ -1433,21 +1433,21 @@ function AdminProjectsInner({ readOnly = false, assignedCount }: { readOnly?: bo
  return (
  <div className="space-y-6 animate-fade-up">
  <div className="flex items-center justify-between">
- <h1 className="text-2xl font-bold text-foreground">Gestion des projets</h1>
- <div className="flex items-center gap-3">
- <Button variant="outline"size="sm"onClick={load} className="gap-1.5">
- <RefreshCw size={14} /> Actualiser
- </Button>
- <span className="text-sm text-muted-foreground">{filtered.length}/{projects.length} projet(s)</span>
- </div>
+  <h1 className="text-2xl font-bold text-foreground">Gestion du portefeuille</h1>
+  <div className="flex items-center gap-3">
+  <Button variant="outline"size="sm"onClick={load} className="gap-1.5">
+  <RefreshCw size={14} /> Actualiser
+  </Button>
+  <span className="text-sm text-muted-foreground">{filtered.length}/{projects.length} portefeuille(s)</span>
+  </div>
  </div>
 
  <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
  {[
- { label:"Total projets", value: totalProjects, helper:"Vue globale"},
- { label:"En cours", value: activeProjects, helper:"Suivi actif"},
- { label:"Terminés", value: completedProjects, helper:"Livrés"},
- { label:"Budget cumulé", value: totalBudget.toLocaleString("fr-CA", { style:"currency", currency:"CAD"}), helper:"Tous projets"},
+  { label:"Total portefeuille", value: totalProjects, helper:"Vue globale"},
+  { label:"En cours", value: activeProjects, helper:"Suivi actif"},
+  { label:"Terminés", value: completedProjects, helper:"Livrés"},
+  { label:"Budget cumulé", value: totalBudget.toLocaleString("fr-CA", { style:"currency", currency:"CAD"}), helper:"Tous portefeuilles"},
  ].map((stat) => (
  <Card key={stat.label} className="border-border/50 shadow-card">
  <CardContent className="p-4">
