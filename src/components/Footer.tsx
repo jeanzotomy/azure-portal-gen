@@ -7,9 +7,9 @@ export function Footer() {
   const { t } = useTranslation();
 
   return (
-    <footer className="bg-secondary py-12">
-      <div className="container">
-        <div className="flex flex-col md:flex-row items-center justify-between gap-6">
+    <footer className="bg-secondary py-10 md:py-12">
+      <div className="container px-4 sm:px-6 lg:px-8">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8">
           <div className="flex items-center gap-2">
             <img src={logo} alt="CloudMature - Conseil Cloud, DevOps et Intelligence Artificielle" width={220} height={48} className="h-12 w-auto" />
           </div>
@@ -26,7 +26,7 @@ export function Footer() {
             <span className="gradient-text font-semibold">{t("hero.badge.ai")}</span>
           </div>
         </div>
-        <div className="flex flex-col md:flex-row items-center justify-between gap-4 mt-8 pt-6 border-t border-secondary-foreground/20">
+        <div className="flex flex-col md:flex-row items-center justify-between gap-4 mt-8 md:mt-10 pt-6 border-t border-secondary-foreground/20">
 
           <p className="text-sm text-secondary-foreground/85">
             {t("footer.copyright").replace("{year}", String(new Date().getFullYear()))}
