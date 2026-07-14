@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "@/i18n/LanguageContext";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { Share, MoreVertical, PlusSquare, Download, Smartphone, Check } from "lucide-react";
+import { Share, MoreVertical, PlusSquare, Download, Smartphone, Check, ArrowDown, Home, SquarePlus } from "lucide-react";
 import iconIphone from "@/assets/icon-iphone.png";
 import iconAndroid from "@/assets/icon-android.png";
 import { useSeo } from "@/hooks/use-seo";
@@ -141,32 +141,69 @@ export default function InstallPage() {
  {(showManual || !installPrompt) && !isInstalled && (
  <>
  {/* iOS */}
- <section className="rounded-xl glass p-5 sm:p-6 space-y-4">
-          <h2 className="text-lg sm:text-xl font-semibold text-primary-foreground flex items-center gap-2">
-            <img src={iconIphone} alt="iPhone Safari install icon" loading="lazy" width={80} height={80} className="w-20 h-20 object-contain drop-shadow-lg -ml-2 mr-1" />
-            iPhone / iPad (Safari)
-          </h2>
-          <ol className="space-y-4 text-secondary-foreground/80 text-sm">
-            <li className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center shrink-0 mt-0.5">
-                <Share size={16} className="text-primary-foreground" />
-              </div>
-              <span className="pt-1">{t("install.ios1")}</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center shrink-0 mt-0.5">
-                <PlusSquare size={16} className="text-primary-foreground" />
-              </div>
-              <span className="pt-1">{t("install.ios2")}</span>
-            </li>
-            <li className="flex items-start gap-3">
-              <div className="w-8 h-8 rounded-lg gradient-primary flex items-center justify-center shrink-0 mt-0.5">
-                <Download size={16} className="text-primary-foreground" />
-              </div>
-              <span className="pt-1">{t("install.ios3")}</span>
-            </li>
-          </ol>
-        </section>
+ <section className="rounded-xl glass p-5 sm:p-6 space-y-5">
+ <h2 className="text-lg sm:text-xl font-semibold text-primary-foreground flex items-center gap-3">
+ <img src={iconIphone} alt="iPhone Safari install icon" loading="lazy" width={80} height={80} className="w-16 h-16 object-contain drop-shadow-lg" />
+ iPhone / iPad (Safari)
+ </h2>
+
+ {/* Visuel guidé Partager → Ajouter à l'écran d'accueil */}
+ <div className="rounded-xl bg-secondary/40 border border-border p-4 sm:p-5">
+ <div className="flex flex-col items-center gap-4">
+ {/* Barre Safari stylisée */}
+ <div className="w-full max-w-[260px] rounded-xl bg-card border border-border overflow-hidden shadow-sm">
+ <div className="h-8 bg-card border-b border-border flex items-center justify-between px-3">
+ <span className="text-[10px] text-muted-foreground">cloudmature.com</span>
+ <div className="flex items-center gap-2">
+ <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/40" />
+ <div className="w-1.5 h-1.5 rounded-full bg-muted-foreground/40" />
+ <div className="w-6 h-6 rounded-md bg-primary/10 flex items-center justify-center">
+ <Share size={12} className="text-primary" />
+ </div>
+ </div>
+ </div>
+ <div className="h-20 bg-secondary/30 flex items-center justify-center">
+ <span className="text-xs text-muted-foreground">Page CloudMature</span>
+ </div>
+ </div>
+
+ <ArrowDown size={20} className="text-primary animate-bounce" />
+
+ {/* Option Ajouter à l'écran d'accueil */}
+ <div className="w-full max-w-[260px] rounded-xl bg-card border border-border p-3 flex items-center gap-3 shadow-sm">
+ <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
+ <SquarePlus size={20} className="text-primary" />
+ </div>
+ <div className="min-w-0">
+ <p className="text-sm font-medium text-foreground truncate">Ajouter à l'écran d'accueil</p>
+ <p className="text-xs text-muted-foreground truncate">CloudMature</p>
+ </div>
+ </div>
+ </div>
+ </div>
+
+ {/* Étapes numérotées */}
+ <ol className="space-y-4 text-secondary-foreground/80 text-sm">
+ <li className="flex items-start gap-3">
+ <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+ <span className="text-sm font-semibold text-primary">1</span>
+ </div>
+ <span className="pt-1.5">{t("install.ios1")}</span>
+ </li>
+ <li className="flex items-start gap-3">
+ <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+ <span className="text-sm font-semibold text-primary">2</span>
+ </div>
+ <span className="pt-1.5">{t("install.ios2")}</span>
+ </li>
+ <li className="flex items-start gap-3">
+ <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center shrink-0 mt-0.5">
+ <span className="text-sm font-semibold text-primary">3</span>
+ </div>
+ <span className="pt-1.5">{t("install.ios3")}</span>
+ </li>
+ </ol>
+ </section>
 
         {/* Android */}
         <section className="rounded-xl glass p-5 sm:p-6 space-y-4">
