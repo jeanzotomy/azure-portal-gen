@@ -859,7 +859,6 @@ function AgentDashboard({ user }: { user: SupaUser }) {
  return (
  <div className="space-y-6 animate-fade-up">
  <div className="relative overflow-hidden bg-primary rounded-2xl p-6 border border-accent/10">
- <div className="absolute top-0 right-0 w-64 h-64 bg-accent/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"/>
  <div className="relative flex items-center justify-between">
  <div>
  <h1 className="text-2xl font-bold text-foreground">Bonjour, {user.user_metadata?.full_name || user.email?.split("@")[0]}</h1>
@@ -1106,7 +1105,6 @@ function AdminDashboard() {
  <div className="space-y-6 animate-fade-up">
  {/* Welcome banner */}
  <div className="relative overflow-hidden bg-primary rounded-2xl p-6 border border-primary/10">
- <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"/>
  <div className="relative flex items-center justify-between">
  <div>
  <h1 className="text-2xl font-bold text-foreground">Vue d'ensemble</h1>

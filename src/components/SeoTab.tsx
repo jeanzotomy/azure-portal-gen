@@ -107,9 +107,6 @@ export default function SeoTab() {
  return (
  <div className="space-y-6 relative">
  {/* Ambient background glow */}
- <div className="pointer-events-none absolute -top-20 -left-10 w-96 h-96 rounded-full bg-primary/10 blur-3xl opacity-60"/>
- <div className="pointer-events-none absolute top-40 right-0 w-80 h-80 rounded-full bg-primary/5 blur-3xl"/>
-
  {/* Hero header */}
  <div className="relative flex flex-col md:flex-row md:items-center justify-between gap-4">
  <div className="flex items-start gap-3">

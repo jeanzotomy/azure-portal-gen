@@ -298,8 +298,6 @@ export default function JobDetailPage() {
 
  <Card className="overflow-hidden">
  <div className="bg-primary text-primary-foreground p-6 md:p-8 relative overflow-hidden">
- <div className="absolute -top-12 -right-12 w-40 h-40 rounded-full bg-white/10 blur-2xl pointer-events-none"/>
- <div className="absolute -bottom-16 -left-8 w-44 h-44 rounded-full bg-white/10 blur-3xl pointer-events-none"/>
  <div className="relative">
  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 border border-white/20 mb-3 text-xs">
  <Briefcase size={12} /> Offre d'emploi

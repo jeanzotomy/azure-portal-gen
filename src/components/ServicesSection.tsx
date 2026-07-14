@@ -8,7 +8,6 @@ function ServiceCard({ s }: { s: { title: string; desc: string; icon: typeof Clo
  return (
  <div className="group relative bg-card rounded-2xl p-7 shadow-card hover:shadow-card-hover transition-all duration-500 hover:-translate-y-2 border border-border hover:border-primary/30 overflow-hidden">
  <div className="absolute inset-0 bg-primary via-transparent group-hover: group-hover: transition-all duration-500 rounded-2xl"/>
- <div className="absolute -top-8 -right-8 w-24 h-24 rounded-full bg-primary/0 group-hover:bg-primary/10 blur-2xl transition-all duration-500"/>
  <div className="relative z-10">
  <div className="flex items-center gap-3 mb-3">
  <div className="relative shrink-0">
@@ -41,9 +40,6 @@ export function ServicesSection() {
 
  return (
  <section id="services"className="py-28 bg-background relative overflow-hidden">
- <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[800px] rounded-full bg-primary/3 blur-3xl pointer-events-none"/>
- <div className="absolute bottom-0 right-0 w-[400px] h-[400px] rounded-full bg-accent/3 blur-3xl pointer-events-none"/>
- 
  <div className="container relative z-10">
  <div className="text-center mb-20">
  <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 text-primary text-sm font-semibold uppercase tracking-wider mb-4">

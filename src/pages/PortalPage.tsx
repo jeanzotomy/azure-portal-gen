@@ -225,7 +225,6 @@ function PortalContent() {
  <div className="space-y-4 animate-fade-up">
  {/* Welcome banner — au-dessus du tableau de bord intelligent */}
  <div className="relative overflow-hidden bg-primary rounded-2xl p-6 border border-primary/10">
- <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl"/>
  <div className="relative flex items-center justify-between gap-3 flex-wrap">
  <div>
  <h1 className="text-lg sm:text-2xl font-bold text-foreground">

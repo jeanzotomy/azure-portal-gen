@@ -31,9 +31,6 @@ export function TrainingPageHero({
  return (
  <div className="relative overflow-hidden rounded-2xl border border-white/10 bg-primary text-white shadow-xl">
  {/* Glass orbs decoration */}
- <div className="pointer-events-none absolute -top-24 -right-24 h-64 w-64 rounded-full bg-white/10 blur-3xl"/>
- <div className="pointer-events-none absolute -bottom-32 -left-16 h-72 w-72 rounded-full bg-cyan-300/10 blur-3xl"/>
-
  <div className="relative p-5 md:p-7">
  {(backTo || breadcrumbs?.length) && (
  <div className="flex items-center gap-2 mb-3 text-xs text-white/80">

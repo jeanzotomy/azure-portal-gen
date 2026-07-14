@@ -21,8 +21,6 @@ export function HeroScreenCarousel() {
  return (
  <div className="relative mx-auto max-w-5xl animate-fade-up delay-500">
  {/* Glow behind monitor */}
- <div className="absolute -inset-8 bg-primary to-transparent blur-3xl rounded-3xl opacity-60"/>
-
  {/* Monitor frame */}
  <div className="relative rounded-2xl border-2 border-white/20">
  {/* Top bezel */}
