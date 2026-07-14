@@ -355,13 +355,13 @@ export default function CareersPage() {
  <button
  key={t.id}
  type="button" onClick={() => setSpontaneous({ id: t.id, title: t.title })}
- className="group w-full text-left p-3 sm:p-4 rounded-lg border border-border bg-secondary/50 hover:border-primary/50 hover:bg-secondary hover:shadow-sm transition-all flex items-center gap-3"
+ className="group w-full text-left p-3 sm:p-4 rounded-lg border border-border bg-background hover:border-primary/50 hover:bg-primary/5 hover:shadow-sm transition-all flex items-center gap-3"
  >
  <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors shrink-0">
  <Icon size={18} />
  </div>
  <div className="min-w-0">
- <div className="font-semibold text-sm sm:text-base text-foreground">{t.label}</div>
+ <div className="font-semibold text-sm sm:text-base text-foreground group-hover:text-primary transition-colors">{t.label}</div>
  <p className="text-xs sm:text-sm text-muted-foreground">{t.desc}</p>
  </div>
  </button>
