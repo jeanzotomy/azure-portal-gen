@@ -212,12 +212,6 @@ export function ContactSection() {
  </div>
  </div>
 
- <div className="rounded-xl border border-border/30 bg-background/20 backdrop-blur-sm p-4">
- <p className="text-xs font-semibold uppercase tracking-wider text-primary mb-3">
- {locale ==="en"?"Chat with us":"Discutez avec nous"}
- </p>
- <SocialChannels variant="inline"/>
- </div>
 
  <div className="relative group overflow-hidden rounded-2xl">
 
