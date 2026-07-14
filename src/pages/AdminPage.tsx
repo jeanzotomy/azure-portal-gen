@@ -437,7 +437,7 @@ function AdminContent() {
  <div className="flex items-center gap-3">
  <SidebarTrigger />
  <h2 className="text-sm font-semibold text-card-foreground hidden sm:block">
- {[...gestionnaireNavItems, ...gestionnaireServicesGroup, ...gestionnaireHrGroup].find((n) => n.id === gestionnaireTab)?.label}
+ {[...gestionnaireNavItems, ...gestionnaireServicesGroup, ...gestionnaireRhGroup, ...gestionnaireRecruitmentGroup].find((n) => n.id === gestionnaireTab)?.label}
  </h2>
  </div>
  <div className="flex items-center gap-2">
