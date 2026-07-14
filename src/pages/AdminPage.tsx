@@ -651,10 +651,10 @@ function AdminContent() {
  <SidebarMenuButton
  onClick={() => setTab("commerce")}
  isActive={tab ==="commerce"|| isAdminServicesTab}
- tooltip="Commerce"
-  className="gap-3" >
- <Briefcase size={18} />
- <span>Commerce</span>
+  tooltip="Ventes & Marketing"
+   className="gap-3" >
+  <Briefcase size={18} />
+  <span>Ventes & Marketing</span>
  </SidebarMenuButton>
  </SidebarMenuItem>
  </SidebarMenu>
@@ -1105,7 +1105,7 @@ function AdminDashboard() {
 
  const cards = [
  { label:"Clients inscrits", value: stats.users, icon: Users, color:"gradient-primary", subtitle:"Total"},
- { label:"Projets total", value: stats.projects, icon: FolderOpen, color:"bg-accent", subtitle: `${stats.activeProjects} actifs` },
+ { label:"Portefeuille total", value: stats.projects, icon: FolderOpen, color:"bg-accent", subtitle: `${stats.activeProjects} actifs` },
  { label:"Tickets ouverts", value: stats.openTickets, icon: LifeBuoy, color:"bg-destructive", subtitle: `${tickets.length} total` },
  { label:"Budget total", value: totalBudget, icon: DollarSign, color:"bg-primary", subtitle: `Moy. ${avgProgress}% progression`, isCurrency: true },
  ];
@@ -1178,7 +1178,7 @@ function AdminDashboard() {
  contentStyle={{ background:"hsl(var(--card))", border:"1px solid hsl(var(--border))", borderRadius:"0.75rem", fontSize: 12 }}
  labelStyle={{ color:"hsl(var(--card-foreground))"}}
  />
- <Area type="monotone"dataKey="projets"stroke="hsl(var(--primary))"fill="url(#gradProjects)"strokeWidth={2} name="Projets"/>
+ <Area type="monotone"dataKey="projets"stroke="hsl(var(--primary))"fill="url(#gradProjects)"strokeWidth={2} name="Portefeuille"/>
  <Area type="monotone"dataKey="tickets"stroke="hsl(var(--accent))"fill="url(#gradTickets)"strokeWidth={2} name="Tickets"/>
  </AreaChart>
  </ResponsiveContainer>
@@ -1190,7 +1190,7 @@ function AdminDashboard() {
  <div>
  <div className="flex items-center gap-2 mb-2">
  <PieChart size={14} className="text-primary"/>
- <h4 className="text-sm font-semibold text-card-foreground">Projets par statut</h4>
+ <h4 className="text-sm font-semibold text-card-foreground">Portefeuille par statut</h4>
  </div>
  {projectStatusData.length > 0 ? (
  <div className="h-32">
@@ -1285,7 +1285,7 @@ function AdminDashboard() {
  <div className="bg-card rounded-xl shadow-card border border-border/50 overflow-hidden">
  <div className="p-5 border-b border-border/50 flex items-center justify-between">
  <h3 className="font-semibold text-card-foreground flex items-center gap-2">
- <TrendingUp size={16} className="text-accent"/> Projets récents
+ <TrendingUp size={16} className="text-accent"/> Portefeuille récent
  </h3>
  </div>
  <div className="divide-y divide-border/50">
