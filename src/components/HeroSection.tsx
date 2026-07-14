@@ -26,7 +26,7 @@ export function HeroSection() {
  }, [words[0]]);
 
  return (
- <section id="hero"className="relative min-h-screen flex items-center overflow-hidden">
+ <section id="hero" className="relative lg:min-h-screen flex items-center overflow-hidden">
  <div className="absolute inset-0 gradient-hero"/>
 
  <div className="container relative z-10 py-24">
@@ -90,7 +90,7 @@ export function HeroSection() {
  </div>
  </div>
 
- <div className="flex flex-wrap gap-3 mt-4 md:-mt-8 animate-fade-up delay-300">
+ <div className="flex flex-wrap gap-3 mt-8 lg:-mt-8 animate-fade-up delay-300">
  {[
  { icon: Cloud, title: t("hero.multiCloud"), desc: t("hero.multiCloudDesc") },
  { icon: Shield, title: t("hero.security"), desc: t("hero.securityDesc") },
