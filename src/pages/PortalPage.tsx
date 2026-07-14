@@ -822,20 +822,40 @@ function ProjectsTab({ user }: { user: SupaUser }) {
  ))}
  </div>
 
- <div className="bg-card rounded-xl p-4 shadow-card border border-border/50 space-y-3">
- <div className="relative">
- <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"/>
- <Input placeholder="Rechercher un portefeuille..."value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9"/>
- </div>
- <div className="flex flex-wrap gap-2 items-center">
- <span className="text-xs font-medium text-muted-foreground flex items-center gap-1"><Filter size={12} /> Statut :</span>
- {statusFilterOptions.map((opt) => (
- <button key={opt.value} onClick={() => setStatusFilter(opt.value)}
- className={`text-xs px-3 py-1.5 rounded-full transition-colors ${statusFilter === opt.value ?"bg-primary text-primary-foreground":"bg-muted text-muted-foreground hover:bg-muted/80"}`}
- >{opt.label}</button>
- ))}
- </div>
- </div>
+  <div className="bg-card rounded-xl p-4 shadow-card border border-border/50 space-y-3">
+  <div className="relative">
+  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"/>
+  <Input placeholder="Rechercher un portefeuille..."value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9"/>
+  </div>
+  <div className="flex flex-wrap gap-3 items-center justify-between">
+  <div className="flex flex-wrap gap-2 items-center">
+  <span className="text-xs font-medium text-muted-foreground flex items-center gap-1"><Filter size={12} /> Statut :</span>
+  {statusFilterOptions.map((opt) => (
+  <button key={opt.value} onClick={() => setStatusFilter(opt.value)}
+  className={`text-xs px-3 py-1.5 rounded-full transition-colors ${statusFilter === opt.value ?"bg-primary text-primary-foreground":"bg-muted text-muted-foreground hover:bg-muted/80"}`}
+  >{opt.label}</button>
+  ))}
+  </div>
+  <div className="flex items-center gap-1 border rounded-lg p-1 bg-muted">
+  <button
+  onClick={() => setViewMode("table")}
+  className={`p-1.5 rounded-md transition-colors ${viewMode ==="table" ?"bg-card text-primary shadow-sm":"text-muted-foreground hover:text-foreground"}`}
+  title="Tableau"
+  aria-label="Vue tableau"
+  >
+  <List size={16} />
+  </button>
+  <button
+  onClick={() => setViewMode("cards")}
+  className={`p-1.5 rounded-md transition-colors ${viewMode ==="cards" ?"bg-card text-primary shadow-sm":"text-muted-foreground hover:text-foreground"}`}
+  title="Cartes"
+  aria-label="Vue cartes"
+  >
+  <LayoutGrid size={16} />
+  </button>
+  </div>
+  </div>
+  </div>
  </>
  )}
 
