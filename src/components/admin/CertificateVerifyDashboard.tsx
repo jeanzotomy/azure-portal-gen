@@ -96,6 +96,31 @@ export function CertificateVerifyDashboard() {
 
   useEffect(() => { load(); }, [win]);
 
+  // Realtime sync: append new attempts as they arrive
+  useEffect(() => {
+    const channel = supabase
+      .channel("verify_attempts_stream")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "verify_attempts" }, (payload) => {
+        const r = payload.new as Row;
+        const cutoff = Date.now() - WINDOW_MS[win];
+        if (new Date(r.attempted_at).getTime() >= cutoff) {
+          setRows((prev) => [r, ...prev].slice(0, 5000));
+        }
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [win]);
+
+  const exportCsv = () => {
+    const header = "attempted_at,ip,code,ok\n";
+    const body = rows.map(r => `${r.attempted_at},${r.ip},${r.code ?? ""},${r.ok}`).join("\n");
+    const blob = new Blob([header + body], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `verify-attempts-${win}-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click(); URL.revokeObjectURL(url);
+  };
+
   const stats = useMemo(() => {
     const total = rows.length;
     const ok = rows.filter(r => r.ok).length;
