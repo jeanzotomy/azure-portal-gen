@@ -681,7 +681,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
 
         {/* Hidden PDF template for capture */}
         <div style={{ position: "fixed", left: "-10000px", top: 0 }}>
-          {selectedClient && <InvoicePDFTemplate ref={pdfRef} data={buildPdfData("APERÇU")} />}
+          {selectedClient && <InvoicePDFTemplate ref={pdfRef} data={buildPdfData(pdfInvoiceNumber)} />}
         </div>
 
         <DialogFooter className="flex-col sm:flex-row sm:items-center gap-2">
