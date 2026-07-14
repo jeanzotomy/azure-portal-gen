@@ -37,6 +37,7 @@ import {
 } from"lucide-react";
 import { Alert, AlertDescription } from"@/components/ui/alert";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from"@/components/ui/dialog";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from"@/components/ui/table";
 import { PieChart as RePieChart, Pie, Cell, ResponsiveContainer, AreaChart, Area, CartesianGrid, XAxis, YAxis, Tooltip } from"recharts";
 import type { User as SupaUser } from"@supabase/supabase-js";
 import { PortalInfoBar } from"@/components/PortalInfoBar";
