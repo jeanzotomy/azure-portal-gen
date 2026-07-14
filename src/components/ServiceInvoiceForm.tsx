@@ -338,7 +338,10 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
       await supabase.from("service_invoice_items").insert(itemsPayload);
 
       // Generate documents according to chosen format
-      await new Promise((r) => setTimeout(r, 100));
+      // Ensure the hidden PDF template renders with the real invoice number before capture
+      setPdfInvoiceNumber(inv!.invoice_number ?? "");
+      await new Promise((r) => requestAnimationFrame(() => r(null)));
+      await new Promise((r) => setTimeout(r, 150));
       const wantPdf = outputFormat === "pdf" || outputFormat === "both";
       const wantDocx = outputFormat === "docx" || outputFormat === "both";
       const pdfBlob = wantPdf && pdfRef.current ? await generateInvoicePDFBlob(pdfRef.current) : null;
