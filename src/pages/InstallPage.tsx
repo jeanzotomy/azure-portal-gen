@@ -7,6 +7,7 @@ import iconIphone from "@/assets/icon-iphone.png";
 import iconAndroid from "@/assets/icon-android.png";
 import { useSeo } from "@/hooks/use-seo";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 interface BeforeInstallPromptEvent extends Event {
  prompt: () => Promise<void>;
