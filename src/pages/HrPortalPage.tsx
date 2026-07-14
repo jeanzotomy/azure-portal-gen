@@ -80,8 +80,9 @@ export default function HrPortalPage() {
       </header>
       <PortalInfoBar />
       <nav className="border-b border-border bg-card overflow-x-auto">
-        <div className="flex gap-1 px-3 py-2">
-          {SUBS.map((s) => {
+        <div className="flex items-center gap-1 px-3 py-2">
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2">RH</span>
+          {RH_SUBS.map((s) => {
             const active = !isFormationsRoute && sub === s.id;
             return (
               <button
@@ -99,6 +100,27 @@ export default function HrPortalPage() {
               </button>
             );
           })}
+          <div className="w-px h-6 bg-border mx-1" />
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider px-2">Recrutements</span>
+          {RECRUITMENT_SUBS.map((s) => {
+            const active = !isFormationsRoute && sub === s.id;
+            return (
+              <button
+                key={s.id}
+                onClick={() => {
+                  if (isFormationsRoute) navigate("/rh");
+                  setSub(s.id);
+                }}
+                className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm whitespace-nowrap transition-colors ${
+                  active ? "bg-primary text-primary-foreground" : "hover:bg-muted text-foreground"
+  }`}
+              >
+                <s.icon size={14} />
+                {s.label}
+              </button>
+            );
+          })}
+          <div className="w-px h-6 bg-border mx-1" />
           <button
             onClick={() => navigate("/rh/formations")}
             className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm whitespace-nowrap transition-colors ${
