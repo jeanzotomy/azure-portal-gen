@@ -1,14 +1,59 @@
+import { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "@/i18n/LanguageContext";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { Share, MoreVertical, PlusSquare, Download, Smartphone } from "lucide-react";
+import { Share, MoreVertical, PlusSquare, Download, Smartphone, Check } from "lucide-react";
 import iconIphone from "@/assets/icon-iphone.png";
 import iconAndroid from "@/assets/icon-android.png";
 import { useSeo } from "@/hooks/use-seo";
+import { Button } from "@/components/ui/button";
+
+interface BeforeInstallPromptEvent extends Event {
+ prompt: () => Promise<void>;
+ userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
+}
 
 export default function InstallPage() {
-  const { t } = useTranslation();
-  useSeo({
+ const { t } = useTranslation();
+ const [installPrompt, setInstallPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+ const [isInstalled, setIsInstalled] = useState(false);
+ const [showManual, setShowManual] = useState(false);
+
+ useEffect(() => {
+ const handleBeforeInstallPrompt = (e: Event) => {
+ e.preventDefault();
+ setInstallPrompt(e as BeforeInstallPromptEvent);
+ };
+
+ const handleAppInstalled = () => {
+ setIsInstalled(true);
+ setInstallPrompt(null);
+ };
+
+ window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+ window.addEventListener("appinstalled", handleAppInstalled);
+
+ // iOS Safari et navigateurs sans API n'émètront jamais beforeinstallprompt
+ const timer = window.setTimeout(() => setShowManual(true), 800);
+
+ return () => {
+ window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
+ window.removeEventListener("appinstalled", handleAppInstalled);
+ clearTimeout(timer);
+ };
+ }, []);
+
+ const handleInstall = useCallback(async () => {
+ if (!installPrompt) return;
+ await installPrompt.prompt();
+ const { outcome } = await installPrompt.userChoice;
+ if (outcome === "accepted") {
+ setIsInstalled(true);
+ }
+ setInstallPrompt(null);
+ }, [installPrompt]);
+
+ useSeo({
     title: "Installer l'application CloudMature sur mobile",
     description: "Guide d'installation de l'application CloudMature en PWA sur iPhone et Android pour un accès rapide à votre portail.",
     path: "/install",
@@ -28,10 +73,45 @@ export default function InstallPage() {
           <p className="text-secondary-foreground/70 text-sm sm:text-base">
             {t("install.subtitle")}
           </p>
-        </div>
+ </div>
 
-        {/* iOS */}
-        <section className="rounded-xl glass p-5 sm:p-6 space-y-4">
+ {/* Installation native (Chrome/Edge Android/Windows) */}
+ {(installPrompt || isInstalled) && (
+ <section className="rounded-xl glass p-5 sm:p-6 text-center space-y-4">
+ {isInstalled ? (
+ <div className="flex flex-col items-center gap-3">
+ <div className="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center">
+ <Check size={24} className="text-green-500" />
+ </div>
+ <h2 className="text-lg sm:text-xl font-semibold text-primary-foreground">
+ Application installée
+ </h2>
+ <p className="text-secondary-foreground/70 text-sm">
+ Le raccourci CloudMature a été ajouté à votre écran d'accueil.
+ </p>
+ </div>
+ ) : (
+ <div className="space-y-4">
+ <h2 className="text-lg sm:text-xl font-semibold text-primary-foreground">
+ Ajouter CloudMature à votre écran d'accueil
+ </h2>
+ <p className="text-secondary-foreground/70 text-sm">
+ Votre navigateur permet d'installer l'application en un clic.
+ </p>
+ <Button onClick={handleInstall} size="lg" className="w-full sm:w-auto">
+ <Download size={18} className="mr-2" />
+ Ajouter à l'écran d'accueil
+ </Button>
+ </div>
+ )}
+ </section>
+ )}
+
+ {/* Instructions manuelles */}
+ {(showManual || !installPrompt) && !isInstalled && (
+ <>
+ {/* iOS */}
+ <section className="rounded-xl glass p-5 sm:p-6 space-y-4">
           <h2 className="text-lg sm:text-xl font-semibold text-primary-foreground flex items-center gap-2">
             <img src={iconIphone} alt="iPhone Safari install icon" loading="lazy" width={80} height={80} className="w-20 h-20 object-contain drop-shadow-lg -ml-2 mr-1" />
             iPhone / iPad (Safari)
@@ -77,9 +157,11 @@ export default function InstallPage() {
               </div>
               <span className="pt-1">{t("install.android2")}</span>
             </li>
-          </ol>
-        </section>
-      </main>
+ </ol>
+ </section>
+ </>
+ )}
+ </main>
       <Footer />
     </div>
   );
