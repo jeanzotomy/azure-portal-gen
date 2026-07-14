@@ -338,30 +338,31 @@ export default function CareersPage() {
  <aside className="lg:sticky lg:top-24 space-y-4">
 
  {/* Candidature spontanée */}
- <div className="rounded-xl border border-primary/20 bg-primary p-5">
- <div className="flex items-center gap-3 mb-4">
+ <div className="rounded-xl border border-border bg-card p-5 sm:p-6 shadow-sm">
+ <div className="flex items-center gap-3 mb-5">
  <div className="inline-flex items-center justify-center w-10 h-10 rounded-lg bg-primary/10 text-primary shrink-0">
  <Sparkles size={18} />
  </div>
  <div className="min-w-0">
- <h2 className="text-base font-bold leading-tight">Candidature spontanée</h2>
- <p className="text-xs text-muted-foreground mt-0.5">Aucune offre ne vous correspond&nbsp;?</p>
+ <h2 className="text-base sm:text-lg font-bold leading-tight text-foreground">Candidature spontanée</h2>
+ <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">Aucune offre ne vous correspond&nbsp;?</p>
  </div>
  </div>
- <div className="space-y-2">
+ <div className="space-y-3">
  {SPONTANEOUS_TYPES.map((t) => {
  const Icon = t.icon;
  return (
  <button
  key={t.id}
  type="button" onClick={() => setSpontaneous({ id: t.id, title: t.title })}
- className="group w-full text-left p-3 rounded-lg border bg-card hover:border-primary/50 hover:shadow-sm transition-all flex items-center gap-3" >
- <div className="w-9 h-9 rounded-lg bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors shrink-0">
- <Icon size={16} />
+ className="group w-full text-left p-3 sm:p-4 rounded-lg border border-border bg-secondary/50 hover:border-primary/50 hover:bg-secondary hover:shadow-sm transition-all flex items-center gap-3"
+ >
+ <div className="w-10 h-10 rounded-lg bg-primary/10 text-primary flex items-center justify-center group-hover:bg-primary group-hover:text-primary-foreground transition-colors shrink-0">
+ <Icon size={18} />
  </div>
  <div className="min-w-0">
- <div className="font-semibold text-sm">{t.label}</div>
- <p className="text-[11px] text-muted-foreground truncate">{t.desc}</p>
+ <div className="font-semibold text-sm sm:text-base text-foreground">{t.label}</div>
+ <p className="text-xs sm:text-sm text-muted-foreground">{t.desc}</p>
  </div>
  </button>
  );
