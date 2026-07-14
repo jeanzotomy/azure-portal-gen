@@ -1462,7 +1462,7 @@ function AdminProjectsInner({ readOnly = false, assignedCount }: { readOnly?: bo
  <div className="bg-card rounded-xl p-4 shadow-card border border-border/50 space-y-3">
  <div className="relative">
  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"/>
- <Input placeholder="Rechercher par projet, client ou entreprise..."value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9"/>
+ <Input placeholder="Rechercher par portefeuille, client ou entreprise..."value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9"/>
  </div>
  <div className="flex flex-wrap gap-2 items-center">
  <span className="text-xs font-medium text-muted-foreground flex items-center gap-1"><Filter size={12} /> Statut :</span>
