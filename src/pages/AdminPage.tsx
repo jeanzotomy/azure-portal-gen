@@ -290,14 +290,14 @@ function AdminContent() {
  { id:"payment-methods", icon: CreditCard, label:"Méthodes de paiement"},
  ];
 
- const gestionnaireHrGroup: { id: GestionnaireTab; icon: typeof LayoutDashboard; label: string }[] = [
- { id:"hr-recruitment", icon: Briefcase, label:"Recrutement"},
- { id:"hr-contracts", icon: FileSignature, label:"Générer le contrat"},
- { id:"hr-onboarding", icon: Users, label:"Onboarding"},
- { id:"hr-trainings", icon: GraduationCap, label:"Formation"},
- ];
- const GESTIONNAIRE_HR_TABS: GestionnaireTab[] = ["hr","hr-recruitment","hr-contracts","hr-onboarding","hr-trainings"];
- const isGestionnaireHrTab = GESTIONNAIRE_HR_TABS.includes(gestionnaireTab);
+  const gestionnaireRhGroup: { id: GestionnaireTab; icon: typeof LayoutDashboard; label: string }[] = [
+  { id:"hr-contracts", icon: FileSignature, label:"Générer le contrat"},
+  { id:"hr-onboarding", icon: Users, label:"Onboarding"},
+  { id:"hr-trainings", icon: GraduationCap, label:"Formation"},
+  ];
+  const gestionnaireRecruitmentGroup: { id: GestionnaireTab; icon: typeof LayoutDashboard; label: string }[] = [
+  { id:"hr-recruitment", icon: Briefcase, label:"Recrutement"},
+  ];
 
 
  return (
