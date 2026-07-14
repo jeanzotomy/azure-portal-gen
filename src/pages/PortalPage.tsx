@@ -847,7 +847,7 @@ function ProjectsTab({ user }: { user: SupaUser }) {
  </div>
  <div>
  <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5"><FileText size={14} /> Description *</label>
- <Textarea placeholder="Décrivez votre projet, vos besoins et objectifs..."rows={4} required value={description} onChange={(e) => setDescription(e.target.value)} />
+ <Textarea placeholder="Décrivez votre portefeuille, vos besoins et objectifs..."rows={4} required value={description} onChange={(e) => setDescription(e.target.value)} />
  </div>
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
  <div>
