@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useTranslation } from "@/i18n/LanguageContext";
 import { Navbar } from "@/components/Navbar";
 import { Footer } from "@/components/Footer";
-import { Share, MoreVertical, PlusSquare, Download, Smartphone, Check } from "lucide-react";
+import { Share, MoreVertical, PlusSquare, Download, Smartphone, Check, ArrowDown, Home, SquarePlus } from "lucide-react";
 import iconIphone from "@/assets/icon-iphone.png";
 import iconAndroid from "@/assets/icon-android.png";
 import { useSeo } from "@/hooks/use-seo";
