@@ -821,7 +821,7 @@ function ProjectsTab({ user }: { user: SupaUser }) {
  <div className="bg-card rounded-xl p-4 shadow-card border border-border/50 space-y-3">
  <div className="relative">
  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"/>
- <Input placeholder="Rechercher un projet..."value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9"/>
+ <Input placeholder="Rechercher un portefeuille..."value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9"/>
  </div>
  <div className="flex flex-wrap gap-2 items-center">
  <span className="text-xs font-medium text-muted-foreground flex items-center gap-1"><Filter size={12} /> Statut :</span>
@@ -838,11 +838,11 @@ function ProjectsTab({ user }: { user: SupaUser }) {
  <Dialog open={showForm} onOpenChange={(open) => { if (!open) closeForm(); }}>
  <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
  <DialogHeader>
- <DialogTitle>{editingProject ?"Modifier le projet":"Nouveau projet"}</DialogTitle>
+ <DialogTitle>{editingProject ?"Modifier le portefeuille":"Nouveau portefeuille"}</DialogTitle>
  </DialogHeader>
  <form onSubmit={handleSubmit} className="space-y-4">
  <div>
- <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5"><FileText size={14} /> Nom du projet *</label>
+ <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5"><FileText size={14} /> Nom du portefeuille *</label>
  <Input placeholder="Ex: Refonte du site web"required value={name} onChange={(e) => setName(e.target.value)} />
  </div>
  <div>
@@ -919,7 +919,7 @@ function ProjectsTab({ user }: { user: SupaUser }) {
  )}
  </div>
  <Button type="submit"className="w-full gradient-primary text-primary-foreground border-0"disabled={submitting}>
- <Send size={16} className="mr-2"/> {submitting ?"Envoi en cours...": editingProject ?"Enregistrer les modifications":"Soumettre le projet"}
+ <Send size={16} className="mr-2"/> {submitting ?"Envoi en cours...": editingProject ?"Enregistrer les modifications":"Soumettre le portefeuille"}
  </Button>
  </form>
  </DialogContent>
@@ -928,8 +928,8 @@ function ProjectsTab({ user }: { user: SupaUser }) {
  {projects.length === 0 && !showForm ? (
  <div className="bg-card rounded-xl p-12 shadow-card border border-border/50 text-center">
  <FolderOpen size={48} className="mx-auto text-muted-foreground/30 mb-4"/>
- <p className="text-muted-foreground">Aucun projet pour le moment.</p>
- <p className="text-sm text-muted-foreground/60 mt-1">Soumettez votre premier projet ci-dessus.</p>
+  <p className="text-muted-foreground">Aucun portefeuille pour le moment.</p>
+  <p className="text-sm text-muted-foreground/60 mt-1">Soumettez votre premier portefeuille ci-dessus.</p>
  </div>
  ) : (
  <div className="grid gap-4 sm:gap-5 grid-cols-1 md:grid-cols-2">
