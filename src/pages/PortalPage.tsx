@@ -347,7 +347,7 @@ function DashboardTab({ user }: { user: SupaUser }) {
  <div className="space-y-6 animate-fade-up">
  {/* Stats grid */}
  <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
- <StatCard icon={FolderOpen} label="Projets actifs"value={projects.filter(p => p.status ==="en_cours").length} color="gradient-primary"subtitle={`${projects.length} total`} />
+ <StatCard icon={FolderOpen} label="Portefeuille actif"value={projects.filter(p => p.status ==="en_cours").length} color="gradient-primary"subtitle={`${projects.length} total`} />
  <StatCard icon={LifeBuoy} label="Tickets ouverts"value={tickets.filter(t => t.status ==="ouvert").length} color="bg-accent"subtitle={`${tickets.length} total`} />
  <StatCard icon={CheckCircle2} label="Complétés"value={projects.filter(p => p.status ==="termine").length} color="bg-teal-600"/>
  <StatCard icon={TrendingUp} label="Progression moy."value={avgProgress} color="bg-primary"subtitle={`${avgProgress}% en moyenne`} />
@@ -378,7 +378,7 @@ function DashboardTab({ user }: { user: SupaUser }) {
  <XAxis dataKey="name"tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))"/>
  <YAxis tick={{ fontSize: 12 }} stroke="hsl(var(--muted-foreground))"allowDecimals={false} />
  <Tooltip contentStyle={{ background:"hsl(var(--card))", border:"1px solid hsl(var(--border))", borderRadius:"0.75rem", fontSize: 12 }} />
- <Area type="monotone"dataKey="projets"stroke="hsl(var(--primary))"fill="url(#clientGradProjects)"strokeWidth={2} name="Projets"/>
+ <Area type="monotone"dataKey="projets"stroke="hsl(var(--primary))"fill="url(#clientGradProjects)"strokeWidth={2} name="Portefeuille"/>
  <Area type="monotone"dataKey="tickets"stroke="hsl(var(--accent))"fill="url(#clientGradTickets)"strokeWidth={2} name="Tickets"/>
  </AreaChart>
  </ResponsiveContainer>
@@ -389,7 +389,7 @@ function DashboardTab({ user }: { user: SupaUser }) {
  <div className="bg-card rounded-xl shadow-card border border-border/50 p-5">
  <div className="flex items-center gap-2 mb-2">
  <FolderOpen size={14} className="text-primary"/>
- <h4 className="text-sm font-semibold text-card-foreground">Projets par statut</h4>
+ <h4 className="text-sm font-semibold text-card-foreground">Portefeuille par statut</h4>
  </div>
  {projectStatusData.length > 0 ? (
  <>
@@ -427,10 +427,10 @@ function DashboardTab({ user }: { user: SupaUser }) {
  {/* Recent projects */}
  <div className="bg-card rounded-xl shadow-card border border-border/50 overflow-hidden">
  <div className="p-5 border-b border-border/50 flex items-center justify-between">
- <h3 className="font-semibold text-card-foreground flex items-center gap-2">
- <FolderOpen size={16} className="text-primary"/> Projets récents
- </h3>
- <span className="text-xs text-muted-foreground">{projects.length} projet(s)</span>
+  <h3 className="font-semibold text-card-foreground flex items-center gap-2">
+  <FolderOpen size={16} className="text-primary"/> Portefeuille récent
+  </h3>
+  <span className="text-xs text-muted-foreground">{projects.length} portefeuille(s)</span>
  </div>
  {projects.length > 0 ? (
  <div className="divide-y divide-border/50">
@@ -466,7 +466,7 @@ function DashboardTab({ user }: { user: SupaUser }) {
  ) : (
  <div className="p-8 text-center">
  <FolderOpen size={32} className="mx-auto text-muted-foreground/20 mb-2"/>
- <p className="text-sm text-muted-foreground">Aucun projet pour le moment</p>
+ <p className="text-sm text-muted-foreground">Aucun portefeuille pour le moment</p>
  </div>
  )}
  </div>
@@ -515,8 +515,8 @@ function DashboardTab({ user }: { user: SupaUser }) {
  {projects.length === 0 && tickets.length === 0 && (
  <div className="bg-card rounded-xl p-12 shadow-card border border-border/50 text-center">
  <LayoutDashboard size={48} className="mx-auto text-muted-foreground/30 mb-4"/>
- <p className="text-muted-foreground">Aucun projet ou ticket pour le moment.</p>
- <p className="text-sm text-muted-foreground/60 mt-1">Votre équipe CloudMature ajoutera vos projets ici.</p>
+  <p className="text-muted-foreground">Aucun portefeuille ou ticket pour le moment.</p>
+  <p className="text-sm text-muted-foreground/60 mt-1">Votre équipe CloudMature ajoutera vos portefeuilles ici.</p>
  </div>
  )}
  </div>
@@ -704,14 +704,14 @@ function ProjectsTab({ user }: { user: SupaUser }) {
  if (!prof?.full_name || !prof?.company || !(prof as any).country) {
  toast({
  title:"Profil incomplet",
- description:"Veuillez compléter votre nom complet, entreprise et pays dans votre profil avant de soumettre un projet.",
+ description:"Veuillez compléter votre nom complet, entreprise et pays dans votre profil avant de soumettre un portefeuille.",
  variant:"destructive",
  });
  return;
  }
  }
  if (!name.trim()) {
- toast({ title:"Champ requis", description:"Le nom du projet est obligatoire.", variant:"destructive"}); return;
+ toast({ title:"Champ requis", description:"Le nom du portefeuille est obligatoire.", variant:"destructive"}); return;
  }
  if (!description.trim()) {
  toast({ title:"Champ requis", description:"La description est obligatoire.", variant:"destructive"}); return;
@@ -740,12 +740,12 @@ function ProjectsTab({ user }: { user: SupaUser }) {
  const { error } = await supabase.from("projects").update(payload).eq("id", editingProject.id);
  if (error) { toast({ title:"Erreur", description: error.message, variant:"destructive"}); setSubmitting(false); return; }
  if (files.length > 0) await uploadFiles(editingProject.id);
- toast({ title:"Projet modifié!", description:"Les modifications ont été enregistrées."});
- } else {
- const { data: project, error } = await supabase.from("projects").insert({ user_id: user.id, ...payload }).select().single();
- if (error) { toast({ title:"Erreur", description: error.message, variant:"destructive"}); setSubmitting(false); return; }
- if (files.length > 0 && project) await uploadFiles(project.id);
- toast({ title:"Projet soumis!", description:"Votre projet a été envoyé avec succès."});
+  toast({ title:"Portefeuille modifié!", description:"Les modifications ont été enregistrées."});
+  } else {
+  const { data: project, error } = await supabase.from("projects").insert({ user_id: user.id, ...payload }).select().single();
+  if (error) { toast({ title:"Erreur", description: error.message, variant:"destructive"}); setSubmitting(false); return; }
+  if (files.length > 0 && project) await uploadFiles(project.id);
+  toast({ title:"Portefeuille soumis!", description:"Votre portefeuille a été envoyé avec succès."});
  }
 
  closeForm();
@@ -788,7 +788,7 @@ function ProjectsTab({ user }: { user: SupaUser }) {
  return (
  <div className="space-y-6 animate-fade-up">
  <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
- <h1 className="text-xl sm:text-2xl font-bold text-foreground">Mes Projets</h1>
+ <h1 className="text-xl sm:text-2xl font-bold text-foreground">Mon Portefeuille</h1>
  <div className="flex items-center gap-2">
  <Button variant="outline"size="sm"onClick={loadProjects} className="gap-1.5">
  <RefreshCw size={14} /> <span className="hidden sm:inline">Actualiser</span>
@@ -803,7 +803,7 @@ function ProjectsTab({ user }: { user: SupaUser }) {
  <>
  <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
  {[
- { label:"Total projets", value: totalProjects, helper:"Tous vos projets"},
+ { label:"Total portefeuille", value: totalProjects, helper:"Tous vos portefeuilles"},
  { label:"En cours", value: activeProjects, helper:"Travail actif"},
  { label:"En attente", value: pendingProjects, helper:"À démarrer"},
  { label:"Terminés", value: completedProjects, helper:"Livrés"},
@@ -821,7 +821,7 @@ function ProjectsTab({ user }: { user: SupaUser }) {
  <div className="bg-card rounded-xl p-4 shadow-card border border-border/50 space-y-3">
  <div className="relative">
  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"/>
- <Input placeholder="Rechercher un projet..."value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9"/>
+ <Input placeholder="Rechercher un portefeuille..."value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} className="pl-9"/>
  </div>
  <div className="flex flex-wrap gap-2 items-center">
  <span className="text-xs font-medium text-muted-foreground flex items-center gap-1"><Filter size={12} /> Statut :</span>
@@ -838,16 +838,16 @@ function ProjectsTab({ user }: { user: SupaUser }) {
  <Dialog open={showForm} onOpenChange={(open) => { if (!open) closeForm(); }}>
  <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
  <DialogHeader>
- <DialogTitle>{editingProject ?"Modifier le projet":"Nouveau projet"}</DialogTitle>
+ <DialogTitle>{editingProject ?"Modifier le portefeuille":"Nouveau portefeuille"}</DialogTitle>
  </DialogHeader>
  <form onSubmit={handleSubmit} className="space-y-4">
  <div>
- <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5"><FileText size={14} /> Nom du projet *</label>
+ <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5"><FileText size={14} /> Nom du portefeuille *</label>
  <Input placeholder="Ex: Refonte du site web"required value={name} onChange={(e) => setName(e.target.value)} />
  </div>
  <div>
  <label className="text-sm font-medium text-card-foreground flex items-center gap-1.5 mb-1.5"><FileText size={14} /> Description *</label>
- <Textarea placeholder="Décrivez votre projet, vos besoins et objectifs..."rows={4} required value={description} onChange={(e) => setDescription(e.target.value)} />
+ <Textarea placeholder="Décrivez votre portefeuille, vos besoins et objectifs..."rows={4} required value={description} onChange={(e) => setDescription(e.target.value)} />
  </div>
  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
  <div>
@@ -919,7 +919,7 @@ function ProjectsTab({ user }: { user: SupaUser }) {
  )}
  </div>
  <Button type="submit"className="w-full gradient-primary text-primary-foreground border-0"disabled={submitting}>
- <Send size={16} className="mr-2"/> {submitting ?"Envoi en cours...": editingProject ?"Enregistrer les modifications":"Soumettre le projet"}
+ <Send size={16} className="mr-2"/> {submitting ?"Envoi en cours...": editingProject ?"Enregistrer les modifications":"Soumettre le portefeuille"}
  </Button>
  </form>
  </DialogContent>
@@ -928,8 +928,8 @@ function ProjectsTab({ user }: { user: SupaUser }) {
  {projects.length === 0 && !showForm ? (
  <div className="bg-card rounded-xl p-12 shadow-card border border-border/50 text-center">
  <FolderOpen size={48} className="mx-auto text-muted-foreground/30 mb-4"/>
- <p className="text-muted-foreground">Aucun projet pour le moment.</p>
- <p className="text-sm text-muted-foreground/60 mt-1">Soumettez votre premier projet ci-dessus.</p>
+  <p className="text-muted-foreground">Aucun portefeuille pour le moment.</p>
+  <p className="text-sm text-muted-foreground/60 mt-1">Soumettez votre premier portefeuille ci-dessus.</p>
  </div>
  ) : (
  <div className="grid gap-4 sm:gap-5 grid-cols-1 md:grid-cols-2">

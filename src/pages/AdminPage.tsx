@@ -651,10 +651,10 @@ function AdminContent() {
  <SidebarMenuButton
  onClick={() => setTab("commerce")}
  isActive={tab ==="commerce"|| isAdminServicesTab}
- tooltip="Commerce"
-  className="gap-3" >
- <Briefcase size={18} />
- <span>Commerce</span>
+  tooltip="Ventes & Marketing"
+   className="gap-3" >
+  <Briefcase size={18} />
+  <span>Ventes & Marketing</span>
  </SidebarMenuButton>
  </SidebarMenuItem>
  </SidebarMenu>
@@ -1105,7 +1105,7 @@ function AdminDashboard() {
 
  const cards = [
  { label:"Clients inscrits", value: stats.users, icon: Users, color:"gradient-primary", subtitle:"Total"},
- { label:"Projets total", value: stats.projects, icon: FolderOpen, color:"bg-accent", subtitle: `${stats.activeProjects} actifs` },
+ { label:"Portefeuille total", value: stats.projects, icon: FolderOpen, color:"bg-accent", subtitle: `${stats.activeProjects} actifs` },
  { label:"Tickets ouverts", value: stats.openTickets, icon: LifeBuoy, color:"bg-destructive", subtitle: `${tickets.length} total` },
  { label:"Budget total", value: totalBudget, icon: DollarSign, color:"bg-primary", subtitle: `Moy. ${avgProgress}% progression`, isCurrency: true },
  ];
@@ -1178,7 +1178,7 @@ function AdminDashboard() {
  contentStyle={{ background:"hsl(var(--card))", border:"1px solid hsl(var(--border))", borderRadius:"0.75rem", fontSize: 12 }}
  labelStyle={{ color:"hsl(var(--card-foreground))"}}
  />
- <Area type="monotone"dataKey="projets"stroke="hsl(var(--primary))"fill="url(#gradProjects)"strokeWidth={2} name="Projets"/>
+ <Area type="monotone"dataKey="projets"stroke="hsl(var(--primary))"fill="url(#gradProjects)"strokeWidth={2} name="Portefeuille"/>
  <Area type="monotone"dataKey="tickets"stroke="hsl(var(--accent))"fill="url(#gradTickets)"strokeWidth={2} name="Tickets"/>
  </AreaChart>
  </ResponsiveContainer>
@@ -1190,7 +1190,7 @@ function AdminDashboard() {
  <div>
  <div className="flex items-center gap-2 mb-2">
  <PieChart size={14} className="text-primary"/>
- <h4 className="text-sm font-semibold text-card-foreground">Projets par statut</h4>
+ <h4 className="text-sm font-semibold text-card-foreground">Portefeuille par statut</h4>
  </div>
  {projectStatusData.length > 0 ? (
  <div className="h-32">
@@ -1285,7 +1285,7 @@ function AdminDashboard() {
  <div className="bg-card rounded-xl shadow-card border border-border/50 overflow-hidden">
  <div className="p-5 border-b border-border/50 flex items-center justify-between">
  <h3 className="font-semibold text-card-foreground flex items-center gap-2">
- <TrendingUp size={16} className="text-accent"/> Projets récents
+ <TrendingUp size={16} className="text-accent"/> Portefeuille récent
  </h3>
  </div>
  <div className="divide-y divide-border/50">
@@ -1313,7 +1313,7 @@ function AdminDashboard() {
  ))}
  {projects.length === 0 && (
  <div className="p-8 text-center">
- <p className="text-sm text-muted-foreground">Aucun projet</p>
+ <p className="text-sm text-muted-foreground">Aucun portefeuille</p>
  </div>
  )}
  </div>
@@ -1380,7 +1380,7 @@ function AdminProjectsInner({ readOnly = false, assignedCount }: { readOnly?: bo
 
  const saveProject = async (id: string) => {
  if (!editName.trim()) {
- toast({ title:"Nom requis", description:"Le nom du projet ne peut pas être vide.", variant:"destructive"});
+ toast({ title:"Nom requis", description:"Le nom du portefeuille ne peut pas être vide.", variant:"destructive"});
  return;
  }
  const { error } = await supabase.from("projects").update({
@@ -1390,7 +1390,7 @@ function AdminProjectsInner({ readOnly = false, assignedCount }: { readOnly?: bo
  gestionnaire_id: editGestionnaire || null,
  }).eq("id", id);
  if (error) toast({ title:"Erreur", description: error.message, variant:"destructive"});
- else { toast({ title:"Projet mis à jour!"}); setEditingId(null); load(); }
+ else { toast({ title:"Portefeuille mis à jour!"}); setEditingId(null); load(); }
  };
 
  const filtered = projects.filter(p => {
@@ -1433,21 +1433,21 @@ function AdminProjectsInner({ readOnly = false, assignedCount }: { readOnly?: bo
  return (
  <div className="space-y-6 animate-fade-up">
  <div className="flex items-center justify-between">
- <h1 className="text-2xl font-bold text-foreground">Gestion des projets</h1>
- <div className="flex items-center gap-3">
- <Button variant="outline"size="sm"onClick={load} className="gap-1.5">
- <RefreshCw size={14} /> Actualiser
- </Button>
- <span className="text-sm text-muted-foreground">{filtered.length}/{projects.length} projet(s)</span>
- </div>
+  <h1 className="text-2xl font-bold text-foreground">Gestion du portefeuille</h1>
+  <div className="flex items-center gap-3">
+  <Button variant="outline"size="sm"onClick={load} className="gap-1.5">
+  <RefreshCw size={14} /> Actualiser
+  </Button>
+  <span className="text-sm text-muted-foreground">{filtered.length}/{projects.length} portefeuille(s)</span>
+  </div>
  </div>
 
  <div className="grid gap-3 grid-cols-2 md:grid-cols-4">
  {[
- { label:"Total projets", value: totalProjects, helper:"Vue globale"},
- { label:"En cours", value: activeProjects, helper:"Suivi actif"},
- { label:"Terminés", value: completedProjects, helper:"Livrés"},
- { label:"Budget cumulé", value: totalBudget.toLocaleString("fr-CA", { style:"currency", currency:"CAD"}), helper:"Tous projets"},
+  { label:"Total portefeuille", value: totalProjects, helper:"Vue globale"},
+  { label:"En cours", value: activeProjects, helper:"Suivi actif"},
+  { label:"Terminés", value: completedProjects, helper:"Livrés"},
+  { label:"Budget cumulé", value: totalBudget.toLocaleString("fr-CA", { style:"currency", currency:"CAD"}), helper:"Tous portefeuilles"},
  ].map((stat) => (
  <Card key={stat.label} className="border-border/50 shadow-card">
  <CardContent className="p-4">
@@ -1462,7 +1462,7 @@ function AdminProjectsInner({ readOnly = false, assignedCount }: { readOnly?: bo
  <div className="bg-card rounded-xl p-4 shadow-card border border-border/50 space-y-3">
  <div className="relative">
  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"/>
- <Input placeholder="Rechercher par projet, client ou entreprise..."value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9"/>
+ <Input placeholder="Rechercher par portefeuille, client ou entreprise..."value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9"/>
  </div>
  <div className="flex flex-wrap gap-2 items-center">
  <span className="text-xs font-medium text-muted-foreground flex items-center gap-1"><Filter size={12} /> Statut :</span>
@@ -1616,17 +1616,17 @@ function AdminProjectsInner({ readOnly = false, assignedCount }: { readOnly?: bo
  );
  })}
  </div>
- {filtered.length === 0 && <p className="text-center text-muted-foreground py-8">Aucun projet trouvé.</p>}
+  {filtered.length === 0 && <p className="text-center text-muted-foreground py-8">Aucun portefeuille trouvé.</p>}
 
- {/* Edit Project Dialog */}
- <Dialog open={!!editingId} onOpenChange={(open) => { if (!open) setEditingId(null); }}>
- <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
- <DialogHeader>
- <DialogTitle>Modifier le projet</DialogTitle>
- </DialogHeader>
- <div className="space-y-4">
- <div>
- <label className="text-sm font-medium text-card-foreground">Nom du projet</label>
+  {/* Edit Project Dialog */}
+  <Dialog open={!!editingId} onOpenChange={(open) => { if (!open) setEditingId(null); }}>
+  <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+  <DialogHeader>
+  <DialogTitle>Modifier le portefeuille</DialogTitle>
+  </DialogHeader>
+  <div className="space-y-4">
+  <div>
+  <label className="text-sm font-medium text-card-foreground">Nom du portefeuille</label>
  <Input value={editName} onChange={(e) => setEditName(e.target.value)} className="mt-1"/>
  </div>
  <div>
