@@ -63,7 +63,8 @@ export function MentionsBell({ userId }: { userId: string }) {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm" className="relative h-8 bg-white/10 text-white border-white/30 hover:bg-white/20 hover:text-white">
+        <Button variant="outline" size="sm"
+  className="relative h-8 bg-white/10 text-white border-white/30 hover:bg-white/20 hover:text-white">
           <AtSign className="h-4 w-4" />
           <span className="ml-1 text-xs hidden sm:inline">Mentions</span>
           {unread > 0 && (
@@ -80,7 +81,9 @@ export function MentionsBell({ userId }: { userId: string }) {
             Mes mentions
           </div>
           {unread > 0 && (
-            <Button size="sm" variant="ghost" className="h-6 text-[10px]" onClick={() => markRead()}>
+            <Button size="sm"
+  variant="ghost"
+  className="h-6 text-[10px]" onClick={() => markRead()}>
               <Check className="h-3 w-3 mr-1" />Tout marquer lu
             </Button>
           )}

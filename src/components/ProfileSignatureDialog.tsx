@@ -52,9 +52,11 @@ export function ProfileSignatureDialog({ open, onOpenChange }: Props) {
       const signed = await resolveSignatureUrl(path);
       setCurrentUrl(signed);
       setHasSignature(true);
-      toast({ title: "Signature enregistrée", description: "Elle sera apposée sur vos prochaines factures." });
+      toast({ title: "Signature enregistrée", description: "Elle sera apposée sur vos prochaines factures."
+  });
     } catch (e) {
-      toast({ title: "Erreur", description: e instanceof Error ? e.message : "Échec de l'enregistrement", variant: "destructive" });
+      toast({ title: "Erreur", description: e instanceof Error ? e.message : "Échec de l'enregistrement", variant: "destructive"
+  });
     } finally {
       setSaving(false);
     }
@@ -68,9 +70,11 @@ export function ProfileSignatureDialog({ open, onOpenChange }: Props) {
       await supabase.from("profiles").update({ signature_url: null }).eq("user_id", user.id);
       setCurrentUrl(null);
       setHasSignature(false);
-      toast({ title: "Signature supprimée" });
+      toast({ title: "Signature supprimée"
+  });
     } catch (e) {
-      toast({ title: "Erreur", description: e instanceof Error ? e.message : "Erreur", variant: "destructive" });
+      toast({ title: "Erreur", description: e instanceof Error ? e.message : "Erreur", variant: "destructive"
+  });
     } finally {
       setSaving(false);
     }
@@ -95,7 +99,8 @@ export function ProfileSignatureDialog({ open, onOpenChange }: Props) {
           {hasSignature && (
             <div className="flex items-center justify-between border-t pt-3">
               <span className="text-xs text-muted-foreground">Signature actuelle enregistrée</span>
-              <Button type="button" variant="ghost" size="sm" onClick={handleDelete} disabled={saving} className="text-destructive">
+              <Button type="button"
+  variant="ghost" size="sm" onClick={handleDelete} disabled={saving} className="text-destructive">
                 <Trash2 size={14} className="mr-1" /> Supprimer
               </Button>
             </div>

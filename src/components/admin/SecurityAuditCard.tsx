@@ -29,7 +29,8 @@ export default function SecurityAuditCard() {
       setResult(data as unknown as AuditResult);
       toast({ title: "Analyse terminée", description: `${(data as any).findings} anomalie(s) détectée(s).` });
     } catch (err: any) {
-      toast({ title: "Échec de l'analyse", description: err.message ?? "Erreur inconnue", variant: "destructive" });
+      toast({ title: "Échec de l'analyse", description: err.message ?? "Erreur inconnue", variant: "destructive"
+  });
     } finally {
       setLoading(false);
     }

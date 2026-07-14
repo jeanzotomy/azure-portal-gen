@@ -35,12 +35,18 @@ interface PMRow {
 }
 
 const TYPE_META: Record<PaymentType, { label: string; icon: typeof CreditCard; hint: string }> = {
-  virement: { label: "Virement bancaire", icon: Building2, hint: "Renseignez les coordonnées bancaires complètes (banque, IBAN, SWIFT)." },
-  mobile_money: { label: "Mobile Money", icon: Smartphone, hint: "Indiquez l'opérateur (Orange, MTN…) et le numéro à créditer." },
-  depot: { label: "Dépôt en espèces", icon: PiggyBank, hint: "Banque destinataire et numéro de compte à créditer en agence." },
-  especes: { label: "Espèces", icon: Banknote, hint: "Aucune coordonnée bancaire requise - précisez le bénéficiaire et le lieu de remise." },
-  cheque: { label: "Chèque", icon: FileText, hint: "Indiquez le bénéficiaire (à l'ordre de) et la banque émettrice si nécessaire." },
-  autre: { label: "Autre", icon: CreditCard, hint: "Mode personnalisé : remplissez uniquement les champs pertinents." },
+  virement: { label: "Virement bancaire", icon: Building2, hint: "Renseignez les coordonnées bancaires complètes (banque, IBAN, SWIFT)."
+  },
+  mobile_money: { label: "Mobile Money", icon: Smartphone, hint: "Indiquez l'opérateur (Orange, MTN…) et le numéro à créditer."
+  },
+  depot: { label: "Dépôt en espèces", icon: PiggyBank, hint: "Banque destinataire et numéro de compte à créditer en agence."
+  },
+  especes: { label: "Espèces", icon: Banknote, hint: "Aucune coordonnée bancaire requise - précisez le bénéficiaire et le lieu de remise."
+  },
+  cheque: { label: "Chèque", icon: FileText, hint: "Indiquez le bénéficiaire (à l'ordre de) et la banque émettrice si nécessaire."
+  },
+  autre: { label: "Autre", icon: CreditCard, hint: "Mode personnalisé : remplissez uniquement les champs pertinents."
+  },
 };
 
 // Définit quels champs afficher selon le type
@@ -54,11 +60,15 @@ const FIELDS_BY_TYPE: Record<PaymentType, {
   ibanLabel?: string;
   bankLabel?: string;
 }> = {
-  virement: { bank: true, account_holder: true, iban: true, swift: true, ibanLabel: "IBAN / N° de compte" },
-  mobile_money: { mobile_number: true, account_holder: true, bank: true, bankLabel: "Opérateur (Orange, MTN…)", mobileLabel: "Numéro Mobile Money" },
-  depot: { bank: true, account_holder: true, iban: true, bankLabel: "Banque destinataire", ibanLabel: "N° de compte à créditer" },
+  virement: { bank: true, account_holder: true, iban: true, swift: true, ibanLabel: "IBAN / N° de compte"
+  },
+  mobile_money: { mobile_number: true, account_holder: true, bank: true, bankLabel: "Opérateur (Orange, MTN…)", mobileLabel: "Numéro Mobile Money"
+  },
+  depot: { bank: true, account_holder: true, iban: true, bankLabel: "Banque destinataire", ibanLabel: "N° de compte à créditer"
+  },
   especes: { account_holder: true },
-  cheque: { account_holder: true, bank: true, bankLabel: "Banque émettrice (à l'ordre de)" },
+  cheque: { account_holder: true, bank: true, bankLabel: "Banque émettrice (à l'ordre de)"
+  },
   autre: { bank: true, account_holder: true, iban: true, mobile_number: true },
 };
 
@@ -96,7 +106,8 @@ export default function PaymentMethodsTab() {
 
   const save = async () => {
     if (!user || !editing?.label?.trim()) {
-      toast({ title: "Libellé requis", variant: "destructive" });
+      toast({ title: "Libellé requis", variant: "destructive"
+  });
       return;
     }
     const type = (editing.type ?? "virement") as PaymentType;
@@ -117,12 +128,15 @@ export default function PaymentMethodsTab() {
     };
     if (editing.id) {
       const { error } = await supabase.from("payment_methods").update(payload).eq("id", editing.id);
-      if (error) return toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      if (error) return toast({ title: "Erreur", description: error.message, variant: "destructive"
+  });
     } else {
       const { error } = await supabase.from("payment_methods").insert({ ...payload, created_by: user.id });
-      if (error) return toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      if (error) return toast({ title: "Erreur", description: error.message, variant: "destructive"
+  });
     }
-    toast({ title: editing.id ? "Mode modifié" : "Mode ajouté" });
+    toast({ title: editing.id ? "Mode modifié" : "Mode ajouté"
+  });
     setOpen(false);
     setEditing(null);
     void load();
@@ -131,8 +145,10 @@ export default function PaymentMethodsTab() {
   const remove = async (id: string) => {
     if (!confirm("Supprimer ce mode de paiement ?")) return;
     const { error } = await supabase.from("payment_methods").delete().eq("id", id);
-    if (error) return toast({ title: "Erreur", description: error.message, variant: "destructive" });
-    toast({ title: "Supprimé" });
+    if (error) return toast({ title: "Erreur", description: error.message, variant: "destructive"
+  });
+    toast({ title: "Supprimé"
+  });
     void load();
   };
 
@@ -201,11 +217,14 @@ export default function PaymentMethodsTab() {
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="inline-flex items-center">
-                          <Button size="icon" variant="ghost" onClick={() => { setEditing(r); setOpen(true); }}><Pencil size={14} /></Button>
-                          <Button size="icon" variant="ghost" onClick={() => toggleActive(r)} title={r.active ? "Désactiver" : "Activer"}>
+                          <Button size="icon"
+  variant="ghost" onClick={() => { setEditing(r); setOpen(true); }}><Pencil size={14} /></Button>
+                          <Button size="icon"
+  variant="ghost" onClick={() => toggleActive(r)} title={r.active ? "Désactiver" : "Activer"}>
                             <Switch checked={r.active} className="pointer-events-none" />
                           </Button>
-                          <Button size="icon" variant="ghost" onClick={() => void remove(r.id)} className="text-destructive"><Trash2 size={14} /></Button>
+                          <Button size="icon"
+  variant="ghost" onClick={() => void remove(r.id)} className="text-destructive"><Trash2 size={14} /></Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -246,13 +265,16 @@ export default function PaymentMethodsTab() {
                     {r.account_holder && <div>Titulaire : {r.account_holder}</div>}
                   </div>
                   <div className="flex items-center gap-2 pt-2 border-t">
-                    <Button size="sm" variant="ghost" onClick={() => { setEditing(r); setOpen(true); }}>
+                    <Button size="sm"
+  variant="ghost" onClick={() => { setEditing(r); setOpen(true); }}>
                       <Pencil size={14} />
                     </Button>
-                    <Button size="sm" variant="ghost" onClick={() => toggleActive(r)}>
+                    <Button size="sm"
+  variant="ghost" onClick={() => toggleActive(r)}>
                       <Switch checked={r.active} />
                     </Button>
-                    <Button size="sm" variant="ghost" onClick={() => void remove(r.id)} className="text-destructive ml-auto">
+                    <Button size="sm"
+  variant="ghost" onClick={() => void remove(r.id)} className="text-destructive ml-auto">
                       <Trash2 size={14} />
                     </Button>
                   </div>
@@ -401,7 +423,7 @@ export default function PaymentMethodsTab() {
                       currentType === "depot" ? "Ex: Mentionner le n° de facture sur le bordereau de dépôt" :
                       currentType === "cheque" ? "Ex: Chèque à libeller au nom de…" :
                       "Ex: Mentionner le numéro de facture en référence"
-                    }
+  }
                   />
                 </div>
               </div>

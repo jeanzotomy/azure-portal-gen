@@ -60,7 +60,8 @@ export default function ServiceClientsTab() {
       .select("*")
       .order("client_name", { ascending: true });
     if (error) {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      toast({ title: "Erreur", description: error.message, variant: "destructive"
+  });
     } else {
       setClients(data ?? []);
     }
@@ -86,7 +87,8 @@ export default function ServiceClientsTab() {
   const save = async () => {
     if (!user) return;
     if (!form.client_name?.trim()) {
-      toast({ title: "Nom requis", description: "Le nom du client est obligatoire.", variant: "destructive" });
+      toast({ title: "Nom requis", description: "Le nom du client est obligatoire.", variant: "destructive"
+  });
       return;
     }
     setSaving(true);
@@ -107,9 +109,11 @@ export default function ServiceClientsTab() {
         })
         .eq("id", editing.id);
       if (error) {
-        toast({ title: "Erreur", description: error.message, variant: "destructive" });
+        toast({ title: "Erreur", description: error.message, variant: "destructive"
+  });
       } else {
-        toast({ title: "Client modifié" });
+        toast({ title: "Client modifié"
+  });
         setDialogOpen(false);
         void load();
       }
@@ -128,9 +132,11 @@ export default function ServiceClientsTab() {
         created_by: user.id,
       });
       if (error) {
-        toast({ title: "Erreur", description: error.message, variant: "destructive" });
+        toast({ title: "Erreur", description: error.message, variant: "destructive"
+  });
       } else {
-        toast({ title: "Client ajouté" });
+        toast({ title: "Client ajouté"
+  });
         setDialogOpen(false);
         void load();
       }
@@ -142,9 +148,11 @@ export default function ServiceClientsTab() {
     if (!confirm("Supprimer ce client ? Les factures associées seront conservées si elles existent.")) return;
     const { error } = await supabase.from("service_clients").delete().eq("id", id);
     if (error) {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      toast({ title: "Erreur", description: error.message, variant: "destructive"
+  });
     } else {
-      toast({ title: "Client supprimé" });
+      toast({ title: "Client supprimé"
+  });
       void load();
     }
   };
@@ -217,8 +225,10 @@ export default function ServiceClientsTab() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="inline-flex">
-                        <Button size="icon" variant="ghost" onClick={() => openEdit(c)}><Pencil size={14} /></Button>
-                        <Button size="icon" variant="ghost" onClick={() => void remove(c.id)}><Trash2 size={14} className="text-destructive" /></Button>
+                        <Button size="icon"
+  variant="ghost" onClick={() => openEdit(c)}><Pencil size={14} /></Button>
+                        <Button size="icon"
+  variant="ghost" onClick={() => void remove(c.id)}><Trash2 size={14} className="text-destructive" /></Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -238,8 +248,10 @@ export default function ServiceClientsTab() {
                     {c.contact_person && <div className="text-xs text-muted-foreground">{c.contact_person}</div>}
                   </div>
                   <div className="flex gap-1">
-                    <Button size="icon" variant="ghost" onClick={() => openEdit(c)}><Pencil size={14} /></Button>
-                    <Button size="icon" variant="ghost" onClick={() => void remove(c.id)}><Trash2 size={14} className="text-destructive" /></Button>
+                    <Button size="icon"
+  variant="ghost" onClick={() => openEdit(c)}><Pencil size={14} /></Button>
+                    <Button size="icon"
+  variant="ghost" onClick={() => void remove(c.id)}><Trash2 size={14} className="text-destructive" /></Button>
                   </div>
                 </div>
                 <div className="text-xs text-muted-foreground space-y-0.5">

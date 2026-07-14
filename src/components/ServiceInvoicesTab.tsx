@@ -28,11 +28,16 @@ interface InvoiceRow {
 }
 
 const STATUS_LABELS: Record<InvoiceRow["status"], { label: string; cls: string }> = {
-  brouillon: { label: "Brouillon", cls: "bg-muted text-muted-foreground" },
-  emise: { label: "Émise", cls: "bg-blue-500/10 text-blue-600" },
-  payee: { label: "Payée", cls: "bg-green-500/10 text-green-600" },
-  en_retard: { label: "En retard", cls: "bg-destructive/10 text-destructive" },
-  annulee: { label: "Annulée", cls: "bg-orange-500/10 text-orange-600" },
+  brouillon: { label: "Brouillon", cls: "bg-muted text-muted-foreground"
+  },
+  emise: { label: "Émise", cls: "bg-blue-500/10 text-blue-600"
+  },
+  payee: { label: "Payée", cls: "bg-green-500/10 text-green-600"
+  },
+  en_retard: { label: "En retard", cls: "bg-destructive/10 text-destructive"
+  },
+  annulee: { label: "Annulée", cls: "bg-orange-500/10 text-orange-600"
+  },
 };
 
 export default function ServiceInvoicesTab() {
@@ -64,7 +69,8 @@ export default function ServiceInvoicesTab() {
       .from("service_invoices")
       .select("id, invoice_number, client_id, invoice_date, due_date, currency, total, status, sharepoint_url, service_clients(client_name)")
       .order("created_at", { ascending: false });
-    if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    if (error) toast({ title: "Erreur", description: error.message, variant: "destructive"
+  });
     else setRows((data ?? []) as unknown as InvoiceRow[]);
     setLoading(false);
   };
@@ -75,15 +81,18 @@ export default function ServiceInvoicesTab() {
     const patch: import("@/integrations/supabase/types").TablesUpdate<"service_invoices"> = { status };
     if (status === "payee") patch.paid_at = new Date().toISOString();
     const { error } = await supabase.from("service_invoices").update(patch).eq("id", id);
-    if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    if (error) toast({ title: "Erreur", description: error.message, variant: "destructive"
+  });
     else void load();
   };
 
   const remove = async (id: string) => {
     if (!confirm("Supprimer cette facture ?")) return;
     const { error } = await supabase.from("service_invoices").delete().eq("id", id);
-    if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
-    else { toast({ title: "Facture supprimée" }); void load(); }
+    if (error) toast({ title: "Erreur", description: error.message, variant: "destructive"
+  });
+    else { toast({ title: "Facture supprimée"
+  }); void load(); }
   };
 
   const filtered = rows.filter((r) => {
@@ -111,10 +120,14 @@ export default function ServiceInvoicesTab() {
   const fmt = (val: number) => new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(Math.round(val));
 
   const STAT_CARDS = [
-    { label: "Total factures", value: filtered.length.toString(), sub: `${countBy("brouillon")} brouillon · ${countBy("annulee")} annulée(s)`, icon: Receipt, tone: "text-foreground" },
-    { label: `Payées (${displayCurrency})`, value: fmt(paidTotal), sub: `${countBy("payee")} facture(s)`, icon: CheckCircle2, tone: "text-emerald-600" },
-    { label: `En attente (${displayCurrency})`, value: fmt(pendingTotal), sub: `${countBy("emise")} émise · ${countBy("en_retard")} en retard`, icon: Clock, tone: "text-blue-600" },
-    { label: `Total facturé (${displayCurrency})`, value: fmt(convertedTotal), sub: "Hors annulées", icon: FileEdit, tone: "text-primary" },
+    { label: "Total factures", value: filtered.length.toString(), sub: `${countBy("brouillon")} brouillon · ${countBy("annulee")} annulée(s)`, icon: Receipt, tone: "text-foreground"
+  },
+    { label: `Payées (${displayCurrency})`, value: fmt(paidTotal), sub: `${countBy("payee")} facture(s)`, icon: CheckCircle2, tone: "text-emerald-600"
+  },
+    { label: `En attente (${displayCurrency})`, value: fmt(pendingTotal), sub: `${countBy("emise")} émise · ${countBy("en_retard")} en retard`, icon: Clock, tone: "text-blue-600"
+  },
+    { label: `Total facturé (${displayCurrency})`, value: fmt(convertedTotal), sub: "Hors annulées", icon: FileEdit, tone: "text-primary"
+  },
   ];
 
   return (
@@ -143,7 +156,7 @@ export default function ServiceInvoicesTab() {
                 displayCurrency === c
                   ? "bg-primary text-primary-foreground"
                   : "bg-background text-muted-foreground hover:bg-muted"
-              }`}
+  }`}
             >
               {c}
             </button>
@@ -154,7 +167,8 @@ export default function ServiceInvoicesTab() {
             Taux : 1 USD ≈ {fmt(rates.rates.GNF ?? 0)} GNF · {(rates.rates.EUR ?? 0).toFixed(2)} EUR
           </span>
         )}
-        <Button variant="ghost" size="sm" className="h-6 px-2 text-[10px]" onClick={() => void refreshRates(true)} disabled={ratesLoading}>
+        <Button variant="ghost" size="sm"
+  className="h-6 px-2 text-[10px]" onClick={() => void refreshRates(true)} disabled={ratesLoading}>
           <RefreshCw size={10} className={`mr-1 ${ratesLoading ? "animate-spin" : ""}`} /> Taux
         </Button>
       </div>
@@ -243,19 +257,23 @@ export default function ServiceInvoicesTab() {
                       <TableCell className="text-right">
                         <div className="inline-flex">
                           {(r.status === "emise" || r.status === "en_retard") && (
-                            <Button size="icon" variant="ghost" onClick={() => payInvoice(r.id)} title="Payer en ligne">
+                            <Button size="icon"
+  variant="ghost" onClick={() => payInvoice(r.id)} title="Payer en ligne">
                               <CreditCard size={14} className="text-primary" />
                             </Button>
                           )}
                           {r.sharepoint_url && (
-                            <Button size="icon" variant="ghost" asChild>
+                            <Button size="icon"
+  variant="ghost" asChild>
                               <a href={r.sharepoint_url} target="_blank" rel="noreferrer" title="SharePoint"><ExternalLink size={14} /></a>
                             </Button>
                           )}
-                          <Button size="icon" variant="ghost" onClick={() => { setEditId(r.id); setFormOpen(true); }} title="Modifier">
+                          <Button size="icon"
+  variant="ghost" onClick={() => { setEditId(r.id); setFormOpen(true); }} title="Modifier">
                             <Pencil size={14} className="text-primary" />
                           </Button>
-                          <Button size="icon" variant="ghost" onClick={() => void remove(r.id)} title="Supprimer"><Trash2 size={14} className="text-destructive" /></Button>
+                          <Button size="icon"
+  variant="ghost" onClick={() => void remove(r.id)} title="Supprimer"><Trash2 size={14} className="text-destructive" /></Button>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -298,19 +316,23 @@ export default function ServiceInvoicesTab() {
                       </SelectContent>
                     </Select>
                     {(r.status === "emise" || r.status === "en_retard") && (
-                      <Button size="icon" variant="ghost" onClick={() => payInvoice(r.id)} title="Payer en ligne (Stripe)">
+                      <Button size="icon"
+  variant="ghost" onClick={() => payInvoice(r.id)} title="Payer en ligne (Stripe)">
                         <CreditCard size={14} className="text-primary" />
                       </Button>
                     )}
                     {r.sharepoint_url && (
-                      <Button size="icon" variant="ghost" asChild>
+                      <Button size="icon"
+  variant="ghost" asChild>
                         <a href={r.sharepoint_url} target="_blank" rel="noreferrer" title="Ouvrir dans SharePoint"><ExternalLink size={14} /></a>
                       </Button>
                     )}
-                    <Button size="icon" variant="ghost" onClick={() => { setEditId(r.id); setFormOpen(true); }} title="Modifier la facture">
+                    <Button size="icon"
+  variant="ghost" onClick={() => { setEditId(r.id); setFormOpen(true); }} title="Modifier la facture">
                       <Pencil size={14} className="text-primary" />
                     </Button>
-                    <Button size="icon" variant="ghost" onClick={() => void remove(r.id)} title="Supprimer"><Trash2 size={14} className="text-destructive" /></Button>
+                    <Button size="icon"
+  variant="ghost" onClick={() => void remove(r.id)} title="Supprimer"><Trash2 size={14} className="text-destructive" /></Button>
                   </div>
                 </div>
               </CardContent></Card>

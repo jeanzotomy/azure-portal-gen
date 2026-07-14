@@ -14,23 +14,28 @@ export default function SharePointTab({ readOnly = false }: { readOnly?: boolean
         <p className="text-muted-foreground text-sm mt-1">{t("sharepoint.description")}</p>
       </div>
 
-      <Tabs defaultValue="invoices" className="w-full">
+      <Tabs defaultValue="invoices"
+  className="w-full">
         <TabsList>
-          <TabsTrigger value="invoices" className="gap-2">
+          <TabsTrigger value="invoices"
+  className="gap-2">
             <Receipt size={14} />
             {t("sharepoint.invoicesTab")}
           </TabsTrigger>
-          <TabsTrigger value="files" className="gap-2">
+          <TabsTrigger value="files"
+  className="gap-2">
             <FolderOpen size={14} />
             {t("sharepoint.filesTab")}
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="invoices" className="mt-4">
+        <TabsContent value="invoices"
+  className="mt-4">
           <InvoicesTab readOnly={readOnly} />
         </TabsContent>
 
-        <TabsContent value="files" className="mt-4">
+        <TabsContent value="files"
+  className="mt-4">
           <SharePointBrowser />
         </TabsContent>
       </Tabs>

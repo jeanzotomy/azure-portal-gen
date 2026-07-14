@@ -18,10 +18,14 @@ export interface InvoiceItemData {
 }
 
 const FREQ_PERIOD_LABEL: Record<BillingFrequency, { adj: string; period: string; periodPlural: string }> = {
-  mensuel:     { adj: "Mensuel",     period: "mois",      periodPlural: "mois" },
-  trimestriel: { adj: "Trimestriel", period: "trimestre", periodPlural: "trimestres" },
-  semestriel:  { adj: "Semestriel",  period: "semestre",  periodPlural: "semestres" },
-  annuel:      { adj: "Annuel",      period: "an",        periodPlural: "ans" },
+  mensuel:     { adj: "Mensuel",     period: "mois",      periodPlural: "mois"
+  },
+  trimestriel: { adj: "Trimestriel", period: "trimestre", periodPlural: "trimestres"
+  },
+  semestriel:  { adj: "Semestriel",  period: "semestre",  periodPlural: "semestres"
+  },
+  annuel:      { adj: "Annuel",      period: "an",        periodPlural: "ans"
+  },
 };
 
 export interface InvoicePaymentDetails {
@@ -90,7 +94,8 @@ const formatCurrency = (n: number, currency: string) => {
 const formatDate = (iso?: string | null) => {
   if (!iso) return "-";
   const d = new Date(iso);
-  return d.toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" });
+  return d.toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric"
+  });
 };
 
 /** Caractères au-delà desquels une description est considérée "longue" et renvoyée en annexe. */
@@ -126,14 +131,19 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
     };
 
     return (
-      <div ref={ref} style={{ width: "794px", background: "#ffffff" }}>
+      <div ref={ref} style={{ width: "794px", background: "#ffffff"
+  }}>
         <div className="invoice-page" style={pageStyle}>
 
         {/* En-tête */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
-              <img src={logo} alt="CloudMature" style={{ height: "44px" }} />
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start"
+  }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "8px"
+  }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "8px"
+  }}>
+              <img src={logo} alt="CloudMature" style={{ height: "44px"
+  }} />
               <div>
                 <div style={{ fontSize: "20px", fontWeight: 700, color: navy }}>Cloud Mature</div>
                 <div style={{ fontSize: "10px", color: cyan, fontWeight: 500 }}>
@@ -150,18 +160,23 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
             </div>
           </div>
 
-          <div style={{ textAlign: "right" }}>
-            <div style={{ fontSize: "32px", fontWeight: 800, color: navy, letterSpacing: "1px" }}>
+          <div style={{ textAlign: "right"
+  }}>
+            <div style={{ fontSize: "32px", fontWeight: 800, color: navy, letterSpacing: "1px"
+  }}>
               FACTURE
             </div>
-            <div style={{ fontSize: "12px", color: cyan, fontWeight: 600, marginTop: "4px" }}>
+            <div style={{ fontSize: "12px", color: cyan, fontWeight: 600, marginTop: "4px"
+  }}>
               N° {data.invoice_number}
             </div>
-            <div style={{ fontSize: "11px", color: "#374151", marginTop: "8px" }}>
+            <div style={{ fontSize: "11px", color: "#374151", marginTop: "8px"
+  }}>
               Date : {formatDate(data.invoice_date)}
             </div>
             {data.due_date && (
-              <div style={{ fontSize: "11px", color: "#374151" }}>
+              <div style={{ fontSize: "11px", color: "#374151"
+  }}>
                 Échéance : {formatDate(data.due_date)}
               </div>
             )}
@@ -169,7 +184,8 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
         </div>
 
         {/* Bandeau Client / Détails de paiement */}
-        <div style={{ marginTop: "24px", display: "grid", gridTemplateColumns: "1fr 1.3fr", gap: "0" }}>
+        <div style={{ marginTop: "24px", display: "grid", gridTemplateColumns: "1fr 1.3fr", gap: "0"
+  }}>
           <div style={{ background: navy, color: "#fff", padding: "8px 12px", fontSize: "11px", fontWeight: 600 }}>
             CLIENT
           </div>
@@ -178,37 +194,45 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
           </div>
         </div>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1.3fr", gap: "0", background: "#EAF6FB" }}>
-          <div style={{ padding: "12px", borderRight: "2px solid #fff" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1.3fr", gap: "0", background: "#EAF6FB"
+  }}>
+          <div style={{ padding: "12px", borderRight: "2px solid #fff"
+  }}>
             <div style={{ fontWeight: 700, fontSize: "13px", color: navy }}>{data.client.client_name}</div>
             {data.client.contact_person && (
-              <div style={{ fontSize: "11px", color: "#374151", marginTop: "2px" }}>
+              <div style={{ fontSize: "11px", color: "#374151", marginTop: "2px"
+  }}>
                 À l'attention de : {data.client.contact_person}
               </div>
             )}
             {data.client.nif && (
-              <div style={{ fontSize: "11px", color: "#374151", marginTop: "4px" }}>
+              <div style={{ fontSize: "11px", color: "#374151", marginTop: "4px"
+  }}>
                 NIF : {data.client.nif}
               </div>
             )}
             {data.client.rccm && (
-              <div style={{ fontSize: "11px", color: "#374151" }}>
+              <div style={{ fontSize: "11px", color: "#374151"
+  }}>
                 N°RCCM : {data.client.rccm}
               </div>
             )}
             {(data.client.address_line || data.client.city) && (
-              <div style={{ fontSize: "11px", color: "#374151", marginTop: "4px" }}>
+              <div style={{ fontSize: "11px", color: "#374151", marginTop: "4px"
+  }}>
                 {[data.client.address_line, data.client.city, data.client.country].filter(Boolean).join(", ")}
               </div>
             )}
             {data.client.phone && (
-              <div style={{ fontSize: "11px", color: "#374151" }}>{data.client.phone}</div>
+              <div style={{ fontSize: "11px", color: "#374151"
+  }}>{data.client.phone}</div>
             )}
             {data.client.email && (
               <div style={{ fontSize: "11px", color: cyan }}>{data.client.email}</div>
             )}
           </div>
-          <div style={{ padding: "12px" }}>
+          <div style={{ padding: "12px"
+  }}>
             {data.payment_methods && data.payment_methods.length > 0 ? (
               data.payment_methods.map((pm, i) => {
                 const typeLabels: Record<string, string> = {
@@ -220,45 +244,60 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
                   autre: "Autre",
                 };
                 return (
-                  <div key={i} style={{ marginBottom: i < (data.payment_methods!.length - 1) ? "8px" : 0, paddingBottom: i < (data.payment_methods!.length - 1) ? "6px" : 0, borderBottom: i < (data.payment_methods!.length - 1) ? "1px dashed #B6D8E5" : "none" }}>
+                  <div key={i} style={{ marginBottom: i < (data.payment_methods!.length - 1) ? "8px" : 0, paddingBottom: i < (data.payment_methods!.length - 1) ? "6px" : 0, borderBottom: i < (data.payment_methods!.length - 1) ? "1px dashed #B6D8E5" : "none"
+  }}>
                     <div style={{ fontSize: "11px", fontWeight: 700, color: navy }}>
-                      {pm.label} <span style={{ fontWeight: 400, color: "#6B7280" }}>· {typeLabels[pm.type] ?? pm.type}</span>
+                      {pm.label} <span style={{ fontWeight: 400, color: "#6B7280"
+  }}>· {typeLabels[pm.type] ?? pm.type}</span>
                     </div>
-                    {pm.bank && <div style={{ fontSize: "10.5px", marginTop: "2px" }}><b>Banque :</b> {pm.bank}</div>}
-                    {pm.account_holder && <div style={{ fontSize: "10.5px" }}><b>Titulaire :</b> {pm.account_holder}</div>}
-                    {pm.iban && <div style={{ fontSize: "10.5px" }}><b>IBAN / Compte :</b> {pm.iban}</div>}
-                    {pm.swift && <div style={{ fontSize: "10.5px" }}><b>SWIFT :</b> {pm.swift}</div>}
-                    {pm.mobile_number && <div style={{ fontSize: "10.5px" }}><b>Mobile Money :</b> {pm.mobile_number}</div>}
-                    {pm.instructions && <div style={{ fontSize: "10px", fontStyle: "italic", color: "#6B7280", marginTop: "2px" }}>{pm.instructions}</div>}
+                    {pm.bank && <div style={{ fontSize: "10.5px", marginTop: "2px"
+  }}><b>Banque :</b> {pm.bank}</div>}
+                    {pm.account_holder && <div style={{ fontSize: "10.5px"
+  }}><b>Titulaire :</b> {pm.account_holder}</div>}
+                    {pm.iban && <div style={{ fontSize: "10.5px"
+  }}><b>IBAN / Compte :</b> {pm.iban}</div>}
+                    {pm.swift && <div style={{ fontSize: "10.5px"
+  }}><b>SWIFT :</b> {pm.swift}</div>}
+                    {pm.mobile_number && <div style={{ fontSize: "10.5px"
+  }}><b>Mobile Money :</b> {pm.mobile_number}</div>}
+                    {pm.instructions && <div style={{ fontSize: "10px", fontStyle: "italic", color: "#6B7280", marginTop: "2px"
+  }}>{pm.instructions}</div>}
                   </div>
                 );
               })
             ) : (
               <>
                 {data.payment_details.bank && (
-                  <div style={{ fontSize: "11px" }}>
-                    <span style={{ fontWeight: 700, textDecoration: "underline" }}>Banque :</span>{" "}
+                  <div style={{ fontSize: "11px"
+  }}>
+                    <span style={{ fontWeight: 700, textDecoration: "underline"
+  }}>Banque :</span>{" "}
                     {data.payment_details.bank}
                   </div>
                 )}
                 {data.payment_details.iban && (
-                  <div style={{ fontSize: "11px", marginTop: "2px" }}>
+                  <div style={{ fontSize: "11px", marginTop: "2px"
+  }}>
                     <span style={{ fontWeight: 700 }}>IBAN / Compte :</span> {data.payment_details.iban}
                   </div>
                 )}
                 {data.payment_details.swift && (
-                  <div style={{ fontSize: "11px", marginTop: "2px" }}>
-                    <span style={{ fontWeight: 700, textDecoration: "underline" }}>SWIFT :</span>{" "}
+                  <div style={{ fontSize: "11px", marginTop: "2px"
+  }}>
+                    <span style={{ fontWeight: 700, textDecoration: "underline"
+  }}>SWIFT :</span>{" "}
                     {data.payment_details.swift}
                   </div>
                 )}
                 {data.payment_details.mobile_money && (
-                  <div style={{ fontSize: "11px", marginTop: "2px" }}>
+                  <div style={{ fontSize: "11px", marginTop: "2px"
+  }}>
                     <span style={{ fontWeight: 700 }}>Mobile Money :</span> {data.payment_details.mobile_money}
                   </div>
                 )}
                 {data.payment_details.reference && (
-                  <div style={{ fontSize: "11px", marginTop: "2px" }}>
+                  <div style={{ fontSize: "11px", marginTop: "2px"
+  }}>
                     <span style={{ fontWeight: 700 }}>Référence :</span> {data.payment_details.reference}
                   </div>
                 )}
@@ -268,9 +307,11 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
         </div>
 
         {/* Tableau des lignes */}
-        <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "20px", fontSize: "11px" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", marginTop: "20px", fontSize: "11px"
+  }}>
           <thead>
-            <tr style={{ background: cyan, color: "#fff" }}>
+            <tr style={{ background: cyan, color: "#fff"
+  }}>
               <th style={{ padding: "8px", textAlign: "left", width: "30px", fontWeight: 700 }}>#</th>
               <th style={{ padding: "8px", textAlign: "left", fontWeight: 700 }}>DESCRIPTION</th>
               <th style={{ padding: "8px", textAlign: "center", width: "50px", fontWeight: 700 }}>QTÉ</th>
@@ -285,11 +326,14 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
               const periods = Math.max(1, item.periods ?? 1);
               const isRecurring = !!(item.is_recurring || freq);
               return (
-              <tr key={idx} style={{ borderBottom: "1px solid #E5E7EB" }}>
-                <td style={{ padding: "10px 8px", color: cyan, fontWeight: 700, verticalAlign: "top" }}>
+              <tr key={idx} style={{ borderBottom: "1px solid #E5E7EB"
+  }}>
+                <td style={{ padding: "10px 8px", color: cyan, fontWeight: 700, verticalAlign: "top"
+  }}>
                   {item.position}
                 </td>
-                <td style={{ padding: "10px 8px", verticalAlign: "top" }}>
+                <td style={{ padding: "10px 8px", verticalAlign: "top"
+  }}>
                   <div style={{ fontWeight: 600, color: navy }}>{item.description}</div>
                   {isRecurring && (
                     <div style={{ marginTop: "4px", lineHeight: 1.2 }}>
@@ -329,7 +373,8 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
                           {item.subtitle}
                         </div>
                         {goesToAnnex && (
-                          <div style={{ marginTop: "3px", fontSize: "9px", color: cyan, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "4px" }}>
+                          <div style={{ marginTop: "3px", fontSize: "9px", color: cyan, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "4px"
+  }}>
                             <span style={{ display: "inline-block", width: "6px", height: "6px", borderRadius: "50%", background: cyan }} />
                             Détail complet - voir Annexe (p. 2)
                           </div>
@@ -339,7 +384,8 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
                   })()}
 
                 </td>
-                <td style={{ padding: "10px 8px", textAlign: "center", verticalAlign: "top" }}>
+                <td style={{ padding: "10px 8px", textAlign: "center", verticalAlign: "top"
+  }}>
                   <div>{item.quantity}{item.unit && item.unit !== "unité" ? ` ${item.unit}` : ""}</div>
                   {isRecurring && (
                     <div style={{ fontSize: "9px", color: "#6B7280", marginTop: "2px", fontWeight: 600 }}>
@@ -347,18 +393,22 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
                     </div>
                   )}
                 </td>
-                <td style={{ padding: "10px 8px", textAlign: "right", verticalAlign: "top" }}>
+                <td style={{ padding: "10px 8px", textAlign: "right", verticalAlign: "top"
+  }}>
                   <div>{formatCurrency(item.unit_price, data.currency)}</div>
                   {freq && (
-                    <div style={{ fontSize: "9px", color: "#6B7280", marginTop: "2px" }}>
+                    <div style={{ fontSize: "9px", color: "#6B7280", marginTop: "2px"
+  }}>
                       /{item.unit && item.unit !== "unité" ? `${item.unit}/` : ""}{freq.period}
                     </div>
                   )}
                 </td>
-                <td style={{ padding: "10px 8px", textAlign: "center", verticalAlign: "top", color: item.discount_rate ? "#DC2626" : "#9CA3AF" }}>
+                <td style={{ padding: "10px 8px", textAlign: "center", verticalAlign: "top", color: item.discount_rate ? "#DC2626" : "#9CA3AF"
+  }}>
                   {item.discount_rate ? `−${item.discount_rate}%` : "-"}
                 </td>
-                <td style={{ padding: "10px 8px", textAlign: "right", fontWeight: 700, verticalAlign: "top" }}>
+                <td style={{ padding: "10px 8px", textAlign: "right", fontWeight: 700, verticalAlign: "top"
+  }}>
                   {formatCurrency(item.total, data.currency)}
                 </td>
               </tr>
@@ -368,9 +418,11 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
         </table>
 
         {/* Notes + Totaux */}
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginTop: "24px" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginTop: "24px"
+  }}>
           <div>
-            <div style={{ fontWeight: 700, fontSize: "11px", color: navy, marginBottom: "6px" }}>
+            <div style={{ fontWeight: 700, fontSize: "11px", color: navy, marginBottom: "6px"
+  }}>
               NOTES & CONDITIONS
             </div>
             <div style={{ fontSize: "10px", color: "#374151", whiteSpace: "pre-line", lineHeight: 1.5 }}>
@@ -381,8 +433,10 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
 • TVA applicable selon la réglementation guinéenne en vigueur.`}
             </div>
           </div>
-          <div style={{ background: "#EAF6FB", padding: "12px" }}>
-            <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", fontSize: "11px" }}>
+          <div style={{ background: "#EAF6FB", padding: "12px"
+  }}>
+            <div style={{ display: "flex", justifyContent: "space-between", padding: "6px 0", fontSize: "11px"
+  }}>
               <span style={{ fontWeight: 600 }}>Sous-total</span>
               <span style={{ fontWeight: 700 }}>{formatCurrency(data.subtotal, data.currency)}</span>
             </div>
@@ -445,9 +499,12 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
 
         {/* Bloc Émis par (signataire) */}
         {data.issuer && (data.issuer.full_name || data.issuer.signature_url) && (
-          <div style={{ marginTop: "32px", display: "flex", justifyContent: "flex-end" }}>
-            <div style={{ minWidth: "260px", textAlign: "center" }}>
-              <div style={{ fontSize: "10px", color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "4px" }}>
+          <div style={{ marginTop: "32px", display: "flex", justifyContent: "flex-end"
+  }}>
+            <div style={{ minWidth: "260px", textAlign: "center"
+  }}>
+              <div style={{ fontSize: "10px", color: "#6B7280", textTransform: "uppercase", letterSpacing: "0.5px", marginBottom: "4px"
+  }}>
                 Émis par
               </div>
               {data.issuer.signature_url && (
@@ -455,15 +512,18 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
                   src={data.issuer.signature_url}
                   alt="Signature"
                   crossOrigin="anonymous"
-                  style={{ maxHeight: "70px", maxWidth: "240px", objectFit: "contain", display: "block", margin: "0 auto" }}
+                  style={{ maxHeight: "70px", maxWidth: "240px", objectFit: "contain", display: "block", margin: "0 auto"
+  }}
                 />
               )}
-              <div style={{ borderTop: `1px solid ${navy}`, marginTop: "4px", paddingTop: "4px" }}>
+              <div style={{ borderTop: `1px solid ${navy}`, marginTop: "4px", paddingTop: "4px"
+  }}>
                 <div style={{ fontSize: "12px", fontWeight: 700, color: navy }}>
                   {data.issuer.full_name || "-"}
                 </div>
                 {data.issuer.role && (
-                  <div style={{ fontSize: "10px", color: cyan, fontWeight: 600, textTransform: "capitalize" }}>
+                  <div style={{ fontSize: "10px", color: cyan, fontWeight: 600, textTransform: "capitalize"
+  }}>
                     {data.issuer.role}
                   </div>
                 )}
@@ -489,20 +549,28 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
         </div>
         {/* ───────── ANNEXE - Descriptions détaillées ───────── */}
         {hasAnnex && (
-          <div className="invoice-page" style={{ ...pageStyle, pageBreakBefore: "always" }}>
+          <div className="invoice-page" style={{ ...pageStyle, pageBreakBefore: "always"
+  }}>
             {/* En-tête annexe */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: `2px solid ${cyan}`, paddingBottom: "12px" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-                <img src={logo} alt="CloudMature" style={{ height: "34px" }} />
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: `2px solid ${cyan}`, paddingBottom: "12px"
+  }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "10px"
+  }}>
+                <img src={logo} alt="CloudMature" style={{ height: "34px"
+  }} />
                 <div>
-                  <div style={{ fontSize: "11px", color: cyan, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase" }}>Annexe</div>
+                  <div style={{ fontSize: "11px", color: cyan, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase"
+  }}>Annexe</div>
                   <div style={{ fontSize: "16px", fontWeight: 800, color: navy }}>Descriptions détaillées</div>
                 </div>
               </div>
-              <div style={{ textAlign: "right" }}>
-                <div style={{ fontSize: "11px", color: "#6B7280" }}>Facture</div>
+              <div style={{ textAlign: "right"
+  }}>
+                <div style={{ fontSize: "11px", color: "#6B7280"
+  }}>Facture</div>
                 <div style={{ fontSize: "14px", color: cyan, fontWeight: 700 }}>N° {data.invoice_number}</div>
-                <div style={{ fontSize: "10px", color: "#6B7280", marginTop: "2px" }}>{formatDate(data.invoice_date)}</div>
+                <div style={{ fontSize: "10px", color: "#6B7280", marginTop: "2px"
+  }}>{formatDate(data.invoice_date)}</div>
               </div>
             </div>
 
@@ -511,14 +579,18 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
               Chaque entrée référence le numéro de ligne d'origine.
             </div>
 
-            <div style={{ marginTop: "20px", display: "flex", flexDirection: "column", gap: "16px" }}>
+            <div style={{ marginTop: "20px", display: "flex", flexDirection: "column", gap: "16px"
+  }}>
               {annexItems.map((it) => (
-                <div key={it.position} style={{ display: "grid", gridTemplateColumns: "44px 1fr", gap: "14px", padding: "14px 16px", border: `1px solid #E5E7EB`, borderLeft: `4px solid ${cyan}`, borderRadius: "4px", background: "#FBFEFF" }}>
-                  <div style={{ background: navy, color: "#fff", width: "32px", height: "32px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: "13px" }}>
+                <div key={it.position} style={{ display: "grid", gridTemplateColumns: "44px 1fr", gap: "14px", padding: "14px 16px", border: `1px solid #E5E7EB`, borderLeft: `4px solid ${cyan}`, borderRadius: "4px", background: "#FBFEFF"
+  }}>
+                  <div style={{ background: navy, color: "#fff", width: "32px", height: "32px", borderRadius: "50%", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 700, fontSize: "13px"
+  }}>
                     {it.position}
                   </div>
                   <div>
-                    <div style={{ fontWeight: 700, color: navy, fontSize: "12.5px" }}>{it.description}</div>
+                    <div style={{ fontWeight: 700, color: navy, fontSize: "12.5px"
+  }}>{it.description}</div>
                     <div style={{ marginTop: "6px", fontSize: "10.5px", color: "#374151", whiteSpace: "pre-line", lineHeight: 1.55 }}>
                       {it.subtitle}
                     </div>

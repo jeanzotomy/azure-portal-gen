@@ -86,7 +86,8 @@ export default function SharePointBrowser() {
     (async () => {
       setLoading(true);
       try {
-        const data = await callProxy("list-sites", { search: "projet" });
+        const data = await callProxy("list-sites", { search: "projet"
+  });
         const sites: Site[] = data.value || [];
         if (!active) return;
         if (sites.length === 0) {
@@ -127,7 +128,8 @@ export default function SharePointBrowser() {
       const data = await callProxy("list-files", { siteId: selectedSite!.id, driveId: drive.id });
       setItems(data.value || []);
     } catch (err: unknown) {
-      toast({ title: t("sharepoint.error"), description: err instanceof Error ? err.message : "Unknown error", variant: "destructive" });
+      toast({ title: t("sharepoint.error"), description: err instanceof Error ? err.message : "Unknown error", variant: "destructive"
+  });
     } finally {
       setLoading(false);
     }
@@ -145,7 +147,8 @@ export default function SharePointBrowser() {
       });
       setItems(data.value || []);
     } catch (err: unknown) {
-      toast({ title: t("sharepoint.error"), description: err instanceof Error ? err.message : "Unknown error", variant: "destructive" });
+      toast({ title: t("sharepoint.error"), description: err instanceof Error ? err.message : "Unknown error", variant: "destructive"
+  });
     } finally {
       setLoading(false);
     }
@@ -173,7 +176,8 @@ export default function SharePointBrowser() {
       const data = await callProxy("list-files", params);
       setItems(data.value || []);
     } catch (err: unknown) {
-      toast({ title: t("sharepoint.error"), description: err instanceof Error ? err.message : "Unknown error", variant: "destructive" });
+      toast({ title: t("sharepoint.error"), description: err instanceof Error ? err.message : "Unknown error", variant: "destructive"
+  });
     } finally {
       setLoading(false);
     }
@@ -217,7 +221,8 @@ export default function SharePointBrowser() {
       const data = await callProxy("list-files", refreshParams);
       setItems(data.value || []);
     } catch (err: unknown) {
-      toast({ title: t("sharepoint.error"), description: err instanceof Error ? err.message : "Unknown error", variant: "destructive" });
+      toast({ title: t("sharepoint.error"), description: err instanceof Error ? err.message : "Unknown error", variant: "destructive"
+  });
     } finally {
       setUploading(false);
       e.target.value = "";
@@ -245,7 +250,8 @@ export default function SharePointBrowser() {
       const data = await callProxy("list-files", refreshParams);
       setItems(data.value || []);
     } catch (err: unknown) {
-      toast({ title: t("sharepoint.error"), description: err instanceof Error ? err.message : "Unknown error", variant: "destructive" });
+      toast({ title: t("sharepoint.error"), description: err instanceof Error ? err.message : "Unknown error", variant: "destructive"
+  });
     } finally {
       setLoading(false);
     }
@@ -362,10 +368,12 @@ export default function SharePointBrowser() {
             <SelectItem value="size">Taille</SelectItem>
           </SelectContent>
         </Select>
-        <Button variant="ghost" size="icon" className="h-9 w-9" onClick={() => setSortDir(d => d === "asc" ? "desc" : "asc")} title={sortDir === "asc" ? "Croissant" : "Décroissant"}>
+        <Button variant="ghost" size="icon"
+  className="h-9 w-9" onClick={() => setSortDir(d => d === "asc" ? "desc" : "asc")} title={sortDir === "asc" ? "Croissant" : "Décroissant"}>
           <ArrowUpDown size={14} className={sortDir === "desc" ? "rotate-180" : ""} />
         </Button>
-        <Button variant="outline" size="sm" className="gap-2" onClick={() => setShowNewFolder(true)}>
+        <Button variant="outline" size="sm"
+  className="gap-2" onClick={() => setShowNewFolder(true)}>
           <FolderPlus size={14} />
           {t("sharepoint.newFolder")}
         </Button>
@@ -424,7 +432,8 @@ export default function SharePointBrowser() {
                   </p>
                 </div>
                 {item.webUrl && !item.folder && (
-                  <Button variant="ghost" size="icon" className="shrink-0" onClick={e => { e.stopPropagation(); window.open(item.webUrl, "_blank"); }}>
+                  <Button variant="ghost" size="icon"
+  className="shrink-0" onClick={e => { e.stopPropagation(); window.open(item.webUrl, "_blank"); }}>
                     <Download size={14} />
                   </Button>
                 )}

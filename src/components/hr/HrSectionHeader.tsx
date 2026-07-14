@@ -34,7 +34,8 @@ export default function HrSectionHeader({ icon, title, description, count, onRef
       <div className="flex items-center gap-2 flex-wrap sm:justify-end shrink-0">
         {right}
         {onRefresh && (
-          <Button size="sm" variant="outline" onClick={onRefresh}>
+          <Button size="sm"
+  variant="outline" onClick={onRefresh}>
             <RefreshCw className="h-4 w-4 mr-1.5" />Actualiser
           </Button>
         )}

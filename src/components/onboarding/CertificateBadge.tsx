@@ -138,7 +138,8 @@ export const CertificateBadge = forwardRef<HTMLDivElement, { data: BadgeData }>(
           }}
         >
           <div>
-            <div style={{ fontSize: 13, color: "#9fd8f0", letterSpacing: 2, textTransform: "uppercase" }}>
+            <div style={{ fontSize: 13, color: "#9fd8f0", letterSpacing: 2, textTransform: "uppercase"
+  }}>
               Délivré en
             </div>
             <div style={{ fontSize: 22, fontWeight: 600, marginTop: 4 }}>{issued}</div>
@@ -163,8 +164,10 @@ export const CertificateBadge = forwardRef<HTMLDivElement, { data: BadgeData }>(
             </div>
           )}
 
-          <div style={{ textAlign: "right" }}>
-            <div style={{ fontSize: 13, color: "#9fd8f0", letterSpacing: 2, textTransform: "uppercase" }}>
+          <div style={{ textAlign: "right"
+  }}>
+            <div style={{ fontSize: 13, color: "#9fd8f0", letterSpacing: 2, textTransform: "uppercase"
+  }}>
               Code de vérification
             </div>
             <div

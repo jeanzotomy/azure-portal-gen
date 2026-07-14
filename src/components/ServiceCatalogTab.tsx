@@ -84,7 +84,8 @@ export default function ServiceCatalogTab() {
   const load = async () => {
     setLoading(true);
     const { data, error } = await supabase.from("service_catalog").select("*").order("display_order", { ascending: true }).order("name");
-    if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    if (error) toast({ title: "Erreur", description: error.message, variant: "destructive"
+  });
     else setItems((data ?? []) as unknown as CatalogService[]);
     setLoading(false);
   };
@@ -108,7 +109,8 @@ export default function ServiceCatalogTab() {
   const save = async () => {
     if (!user) return;
     if (!form.name?.trim()) {
-      toast({ title: "Nom requis", variant: "destructive" });
+      toast({ title: "Nom requis", variant: "destructive"
+  });
       return;
     }
     setSaving(true);
@@ -128,9 +130,11 @@ export default function ServiceCatalogTab() {
           billing_frequency: form.is_subscription ? (form.billing_frequency ?? "mensuel") : null,
         })
         .eq("id", editing.id);
-      if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      if (error) toast({ title: "Erreur", description: error.message, variant: "destructive"
+  });
       else {
-        toast({ title: "Service modifié" });
+        toast({ title: "Service modifié"
+  });
         setDialogOpen(false);
         void load();
       }
@@ -148,9 +152,11 @@ export default function ServiceCatalogTab() {
         billing_frequency: form.is_subscription ? (form.billing_frequency ?? "mensuel") : null,
         created_by: user.id,
       } as never);
-      if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      if (error) toast({ title: "Erreur", description: error.message, variant: "destructive"
+  });
       else {
-        toast({ title: "Service ajouté" });
+        toast({ title: "Service ajouté"
+  });
         setDialogOpen(false);
         void load();
       }
@@ -173,9 +179,11 @@ export default function ServiceCatalogTab() {
       billing_frequency: s.billing_frequency,
       created_by: user.id,
     } as never);
-    if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    if (error) toast({ title: "Erreur", description: error.message, variant: "destructive"
+  });
     else {
-      toast({ title: "Service dupliqué" });
+      toast({ title: "Service dupliqué"
+  });
       void load();
     }
   };
@@ -186,9 +194,11 @@ export default function ServiceCatalogTab() {
       .from("service_catalog")
       .update({ published: next })
       .eq("id", s.id);
-    if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    if (error) toast({ title: "Erreur", description: error.message, variant: "destructive"
+  });
     else {
-      toast({ title: next ? "Publié sur le site" : "Retiré du site" });
+      toast({ title: next ? "Publié sur le site" : "Retiré du site"
+  });
       void load();
     }
   };
@@ -197,9 +207,11 @@ export default function ServiceCatalogTab() {
   const remove = async (id: string) => {
     if (!confirm("Supprimer ce service du catalogue ?")) return;
     const { error } = await supabase.from("service_catalog").delete().eq("id", id);
-    if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
+    if (error) toast({ title: "Erreur", description: error.message, variant: "destructive"
+  });
     else {
-      toast({ title: "Service supprimé" });
+      toast({ title: "Service supprimé"
+  });
       void load();
     }
   };
@@ -235,7 +247,8 @@ export default function ServiceCatalogTab() {
     );
     const firstErr = updates.find((u) => u.error);
     if (firstErr?.error) {
-      toast({ title: "Erreur d'ordre", description: firstErr.error.message, variant: "destructive" });
+      toast({ title: "Erreur d'ordre", description: firstErr.error.message, variant: "destructive"
+  });
       void load();
     }
   };
@@ -296,26 +309,32 @@ export default function ServiceCatalogTab() {
                     <TableCell className="hidden md:table-cell text-muted-foreground">{s.default_unit}</TableCell>
                     <TableCell className="hidden md:table-cell">
                       {s.is_subscription ? (
-                        <Badge variant="outline" className="gap-1 text-[10px]">
+                        <Badge variant="outline"
+  className="gap-1 text-[10px]">
                           <Repeat size={10} /> {s.billing_frequency ? FREQ_LABEL[s.billing_frequency] : "Abonnement"}
                         </Badge>
                       ) : <span className="text-muted-foreground text-xs">Ponctuel</span>}
                     </TableCell>
                     <TableCell>
                       {s.published ? (
-                        <Badge variant="secondary" className="gap-1 text-[10px]"><Globe size={10} /> Publié</Badge>
+                        <Badge variant="secondary"
+  className="gap-1 text-[10px]"><Globe size={10} /> Publié</Badge>
                       ) : (
                         <span className="text-xs text-muted-foreground">Privé</span>
                       )}
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="inline-flex">
-                        <Button size="icon" variant="ghost" onClick={() => void togglePublish(s)} title={s.published ? "Dépublier" : "Publier"}>
+                        <Button size="icon"
+  variant="ghost" onClick={() => void togglePublish(s)} title={s.published ? "Dépublier" : "Publier"}>
                           {s.published ? <GlobeLock size={14} className="text-primary" /> : <Globe size={14} />}
                         </Button>
-                        <Button size="icon" variant="ghost" onClick={() => void duplicate(s)} title="Dupliquer"><Copy size={14} /></Button>
-                        <Button size="icon" variant="ghost" onClick={() => openEdit(s)}><Pencil size={14} /></Button>
-                        <Button size="icon" variant="ghost" onClick={() => void remove(s.id)}><Trash2 size={14} className="text-destructive" /></Button>
+                        <Button size="icon"
+  variant="ghost" onClick={() => void duplicate(s)} title="Dupliquer"><Copy size={14} /></Button>
+                        <Button size="icon"
+  variant="ghost" onClick={() => openEdit(s)}><Pencil size={14} /></Button>
+                        <Button size="icon"
+  variant="ghost" onClick={() => void remove(s.id)}><Trash2 size={14} className="text-destructive" /></Button>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -396,7 +415,8 @@ export default function ServiceCatalogTab() {
               </div>
               <div>
                 <label className="text-xs font-medium">Devise</label>
-                <Select value={form.default_currency ?? "GNF"} onValueChange={(v) => setForm({ ...form, default_currency: v as "GNF" | "USD" | "EUR" })}>
+                <Select value={form.default_currency ?? "GNF"} onValueChange={(v) => setForm({ ...form, default_currency: v as "GNF" | "USD" | "EUR"
+  })}>
                   <SelectTrigger><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="GNF">GNF</SelectItem>
@@ -494,7 +514,8 @@ function ServiceCardContent({ service: s, onTogglePublish, onDuplicate, onEdit, 
                 </Badge>
               )}
               {s.published && (
-                <Badge variant="secondary" className="gap-1 text-[10px]">
+                <Badge variant="secondary"
+  className="gap-1 text-[10px]">
                   <Globe size={10} /> Publié
                 </Badge>
               )}
@@ -503,12 +524,16 @@ function ServiceCardContent({ service: s, onTogglePublish, onDuplicate, onEdit, 
           </div>
         </div>
         <div className="flex gap-1 shrink-0">
-          <Button size="icon" variant="ghost" onClick={onTogglePublish} title={s.published ? "Dépublier" : "Publier sur le site"}>
+          <Button size="icon"
+  variant="ghost" onClick={onTogglePublish} title={s.published ? "Dépublier" : "Publier sur le site"}>
             {s.published ? <GlobeLock size={14} className="text-primary" /> : <Globe size={14} />}
           </Button>
-          <Button size="icon" variant="ghost" onClick={onDuplicate} title="Dupliquer"><Copy size={14} /></Button>
-          <Button size="icon" variant="ghost" onClick={onEdit} title="Modifier"><Pencil size={14} /></Button>
-          <Button size="icon" variant="ghost" onClick={onRemove} title="Supprimer"><Trash2 size={14} className="text-destructive" /></Button>
+          <Button size="icon"
+  variant="ghost" onClick={onDuplicate} title="Dupliquer"><Copy size={14} /></Button>
+          <Button size="icon"
+  variant="ghost" onClick={onEdit} title="Modifier"><Pencil size={14} /></Button>
+          <Button size="icon"
+  variant="ghost" onClick={onRemove} title="Supprimer"><Trash2 size={14} className="text-destructive" /></Button>
         </div>
       </div>
       <div className="text-xs flex gap-2 items-center flex-wrap">
@@ -539,9 +564,9 @@ function SortableServiceCard(props: CardActionProps) {
   const handle = (
     <button
       type="button"
-      className="text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing touch-none mt-0.5"
+  className="text-muted-foreground hover:text-foreground cursor-grab active:cursor-grabbing touch-none mt-0.5"
       aria-label="Glisser pour réordonner"
-      {...attributes}
+  {...attributes}
       {...listeners}
     >
       <GripVertical size={16} />

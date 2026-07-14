@@ -23,7 +23,7 @@ export default function EmployeeTrainingPlayerPage() {
       .from("onboarding_assigned_trainings")
       .select(
         "id, training_id, completed_at, quiz_score, quiz_passed, quiz_submitted_at, course_page, quiz_page, quiz_draft_answers, quiz_answers, process:onboarding_processes!inner(user_id), training:trainings(title, description, url, duration_minutes, category, content, passing_score)"
-      )
+  )
       .eq("id", assignedId)
       .eq("process.user_id", user.id)
       .maybeSingle();
@@ -76,9 +76,12 @@ export default function EmployeeTrainingPlayerPage() {
         icon={<GraduationCap className="h-6 w-6 text-white" />}
         backTo="/portal/formations"
         breadcrumbs={[
-          { label: "Portail", to: "/portal" },
-          { label: "Mes formations", to: "/portal/formations" },
-          { label: assigned.training?.title || "Formation" },
+          { label: "Portail", to: "/portal"
+  },
+          { label: "Mes formations", to: "/portal/formations"
+  },
+          { label: assigned.training?.title || "Formation"
+  },
         ]}
       />
 

@@ -179,7 +179,8 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
 
   const handleAutoAnalyze = async () => {
     if (!selectedFile) {
-      toast({ title: "Fichier requis", description: "Veuillez d'abord choisir un fichier.", variant: "destructive" });
+      toast({ title: "Fichier requis", description: "Veuillez d'abord choisir un fichier.", variant: "destructive"
+  });
       return;
     }
 
@@ -219,10 +220,12 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
 
       const parsed: ParsedInvoice = await res.json();
       applyParsedData(parsed);
-      toast({ title: "Analyse terminée", description: "Les champs ont été préremplis automatiquement." });
+      toast({ title: "Analyse terminée", description: "Les champs ont été préremplis automatiquement."
+  });
     } catch (err: unknown) {
       const message = err instanceof Error ? err.message : "Une erreur est survenue pendant l'analyse.";
-      toast({ title: "Analyse indisponible", description: `${message} Vous pouvez continuer manuellement.`, variant: "destructive" });
+      toast({ title: "Analyse indisponible", description: `${message} Vous pouvez continuer manuellement.`, variant: "destructive"
+  });
       setCurrentStep("validation");
     } finally {
       setParsing(false);
@@ -231,39 +234,48 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
 
   const handleSubmit = async () => {
     if (!formProjectId) {
-      toast({ title: "Champ requis", description: "Veuillez sélectionner un projet.", variant: "destructive" });
+      toast({ title: "Champ requis", description: "Veuillez sélectionner un projet.", variant: "destructive"
+  });
       return;
     }
     if (!formInvoiceNumber.trim()) {
-      toast({ title: "Champ requis", description: "Le numéro de facture est obligatoire.", variant: "destructive" });
+      toast({ title: "Champ requis", description: "Le numéro de facture est obligatoire.", variant: "destructive"
+  });
       return;
     }
     if (!formVendor.trim()) {
-      toast({ title: "Champ requis", description: "Le fournisseur est obligatoire.", variant: "destructive" });
+      toast({ title: "Champ requis", description: "Le fournisseur est obligatoire.", variant: "destructive"
+  });
       return;
     }
     if (!formDescription.trim()) {
-      toast({ title: "Champ requis", description: "La description est obligatoire.", variant: "destructive" });
+      toast({ title: "Champ requis", description: "La description est obligatoire.", variant: "destructive"
+  });
       return;
     }
     if (!formAmount || parseFloat(formAmount) <= 0) {
-      toast({ title: "Champ requis", description: "Le montant HT est obligatoire.", variant: "destructive" });
+      toast({ title: "Champ requis", description: "Le montant HT est obligatoire.", variant: "destructive"
+  });
       return;
     }
     if (!formTaxAmount || parseFloat(formTaxAmount) < 0) {
-      toast({ title: "Champ requis", description: "Le montant des taxes est obligatoire.", variant: "destructive" });
+      toast({ title: "Champ requis", description: "Le montant des taxes est obligatoire.", variant: "destructive"
+  });
       return;
     }
     if (!formTotalAmount || parseFloat(formTotalAmount) <= 0) {
-      toast({ title: "Champ requis", description: "Le total TTC est obligatoire.", variant: "destructive" });
+      toast({ title: "Champ requis", description: "Le total TTC est obligatoire.", variant: "destructive"
+  });
       return;
     }
     if (!formInvoiceDate) {
-      toast({ title: "Champ requis", description: "La date de facture est obligatoire.", variant: "destructive" });
+      toast({ title: "Champ requis", description: "La date de facture est obligatoire.", variant: "destructive"
+  });
       return;
     }
     if (!formDueDate) {
-      toast({ title: "Champ requis", description: "La date d'échéance est obligatoire.", variant: "destructive" });
+      toast({ title: "Champ requis", description: "La date d'échéance est obligatoire.", variant: "destructive"
+  });
       return;
     }
 
@@ -394,7 +406,8 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
       loadInvoices();
       loadProjects();
     } catch (err: any) {
-      toast({ title: "Erreur", description: err.message, variant: "destructive" });
+      toast({ title: "Erreur", description: err.message, variant: "destructive"
+  });
       setCurrentStep("validation");
     } finally {
       setUploading(false);
@@ -404,9 +417,11 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
   const handleDelete = async (id: string) => {
     const { error } = await supabase.from("invoices").delete().eq("id", id);
     if (error) {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      toast({ title: "Erreur", description: error.message, variant: "destructive"
+  });
     } else {
-      toast({ title: "Supprimée" });
+      toast({ title: "Supprimée"
+  });
       loadInvoices();
       loadProjects();
     }
@@ -464,7 +479,8 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
       <div className="flex gap-3 items-center">
         <div className="relative flex-1 max-w-xs">
           <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-          <Input placeholder="Rechercher..." className="pl-9" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
+          <Input placeholder="Rechercher..."
+  className="pl-9" value={searchQuery} onChange={e => setSearchQuery(e.target.value)} />
         </div>
         <Select value={filterProject} onValueChange={setFilterProject}>
           <SelectTrigger className="w-48">
@@ -481,7 +497,8 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
 
       {/* Financial overview - reactive to filterProject */}
       {projects.length > 0 && (() => {
-        const fmt = (n: number) => n.toLocaleString("fr-CA", { style: "currency", currency: "CAD" });
+        const fmt = (n: number) => n.toLocaleString("fr-CA", { style: "currency", currency: "CAD"
+  });
         const visibleProjects = filterProject === "all"
           ? projects
           : projects.filter(p => p.id === filterProject);
@@ -510,10 +527,14 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
             {/* Summary stats */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {[
-                { label: filterProject === "all" ? "Budget total" : "Budget projet", value: fmt(totalBudget), sub: filterProject === "all" ? `${visibleProjects.length} projet(s)` : visibleProjects[0]?.project_number || "", color: "text-primary" },
-                { label: "Total payé", value: fmt(totalPaid), sub: `${validees} facture(s) validée(s)`, color: "text-emerald-600" },
-                { label: "Solde restant", value: fmt(totalSolde), sub: totalSolde < 0 ? "Dépassement!" : "Disponible", color: totalSolde < 0 ? "text-destructive" : "text-primary" },
-                { label: "Factures", value: totalInv.toString(), sub: `${enAttente} en attente · ${nonConformes} non conf.`, color: "text-foreground" },
+                { label: filterProject === "all" ? "Budget total" : "Budget projet", value: fmt(totalBudget), sub: filterProject === "all" ? `${visibleProjects.length} projet(s)` : visibleProjects[0]?.project_number || "", color: "text-primary"
+  },
+                { label: "Total payé", value: fmt(totalPaid), sub: `${validees} facture(s) validée(s)`, color: "text-emerald-600"
+  },
+                { label: "Solde restant", value: fmt(totalSolde), sub: totalSolde < 0 ? "Dépassement!" : "Disponible", color: totalSolde < 0 ? "text-destructive" : "text-primary"
+  },
+                { label: "Factures", value: totalInv.toString(), sub: `${enAttente} en attente · ${nonConformes} non conf.`, color: "text-foreground"
+  },
               ].map(s => (
                 <Card key={s.label} className="border">
                   <CardContent className="p-4">
@@ -582,7 +603,8 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
                       const bgt = parseFloat(((proj as any).budget || "0").replace(/[^\d.]/g, "")) || proj.total_budget || 0;
                       const paid = proj.total_paid || 0;
                       const solde = bgt - paid;
-                      const fmt = (n: number) => n.toLocaleString("fr-CA", { style: "currency", currency: "CAD" });
+                      const fmt = (n: number) => n.toLocaleString("fr-CA", { style: "currency", currency: "CAD"
+  });
                       return (
                         <div className="flex gap-3 text-[11px] mt-0.5">
                           <span className="text-muted-foreground">Budget: <span className="font-medium text-foreground">{fmt(bgt)}</span></span>
@@ -613,7 +635,8 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
                   )}
                   <div className="text-right">
                     <div className="font-bold text-sm">
-                      {(inv.amount || 0).toLocaleString("fr-CA", { style: "currency", currency: "CAD" })}
+                      {(inv.amount || 0).toLocaleString("fr-CA", { style: "currency", currency: "CAD"
+  })}
                     </div>
                     <div className="text-xs text-muted-foreground">
                       {inv.invoice_date ? new Date(inv.invoice_date).toLocaleDateString("fr-CA") : ""}
@@ -705,12 +728,15 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
                     <label className="text-sm font-medium">Budget du projet</label>
                     <div className="flex items-center gap-2 h-9 rounded-md border bg-muted/50 px-3 text-sm">
                       <DollarSign size={14} className="text-muted-foreground" />
-                      <span className="font-medium">{allocatedBudget.toLocaleString("fr-CA", { style: "currency", currency: "CAD" })}</span>
+                      <span className="font-medium">{allocatedBudget.toLocaleString("fr-CA", { style: "currency", currency: "CAD"
+  })}</span>
                       <span className="text-muted-foreground">·</span>
-                      <span className="text-xs text-muted-foreground">Payé : {(sp.total_paid || 0).toLocaleString("fr-CA", { style: "currency", currency: "CAD" })}</span>
+                      <span className="text-xs text-muted-foreground">Payé : {(sp.total_paid || 0).toLocaleString("fr-CA", { style: "currency", currency: "CAD"
+  })}</span>
                       <span className="text-muted-foreground">·</span>
                       <span className={`text-xs font-semibold ${balance < 0 ? "text-destructive" : "text-emerald-600"}`}>
-                        Solde : {balance.toLocaleString("fr-CA", { style: "currency", currency: "CAD" })}
+                        Solde : {balance.toLocaleString("fr-CA", { style: "currency", currency: "CAD"
+  })}
                       </span>
                     </div>
                   </div>
@@ -788,7 +814,8 @@ export default function InvoicesTab({ readOnly = false }: { readOnly?: boolean }
           </div>
 
           <div className="flex justify-end gap-2 pt-2">
-            <Button type="button" variant="outline" onClick={() => { setDialogOpen(false); resetForm(); }} disabled={uploading}>
+            <Button type="button"
+  variant="outline" onClick={() => { setDialogOpen(false); resetForm(); }} disabled={uploading}>
               Annuler
             </Button>
             <Button type="button" onClick={handleSubmit} disabled={uploading || parsing}>

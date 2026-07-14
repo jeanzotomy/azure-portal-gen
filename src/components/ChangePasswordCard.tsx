@@ -36,19 +36,23 @@ export default function ChangePasswordCard({ email }: Props) {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (pw.length < 8) {
-      toast({ title: "Mot de passe trop court", description: "Minimum 8 caractères.", variant: "destructive" });
+      toast({ title: "Mot de passe trop court", description: "Minimum 8 caractères.", variant: "destructive"
+  });
       return;
     }
     if (pw !== confirm) {
-      toast({ title: "Erreur", description: "Les mots de passe ne correspondent pas.", variant: "destructive" });
+      toast({ title: "Erreur", description: "Les mots de passe ne correspondent pas.", variant: "destructive"
+  });
       return;
     }
     if (pw === current) {
-      toast({ title: "Erreur", description: "Le nouveau mot de passe doit être différent de l'actuel.", variant: "destructive" });
+      toast({ title: "Erreur", description: "Le nouveau mot de passe doit être différent de l'actuel.", variant: "destructive"
+  });
       return;
     }
     if (score < 2) {
-      toast({ title: "Mot de passe trop faible", description: "Ajoutez majuscules, chiffres et symboles.", variant: "destructive" });
+      toast({ title: "Mot de passe trop faible", description: "Ajoutez majuscules, chiffres et symboles.", variant: "destructive"
+  });
       return;
     }
     setLoading(true);
@@ -56,16 +60,19 @@ export default function ChangePasswordCard({ email }: Props) {
       // Reauthentication: verify current password
       const { error: reauthError } = await supabase.auth.signInWithPassword({ email, password: current });
       if (reauthError) {
-        toast({ title: "Mot de passe actuel incorrect", description: "Veuillez réessayer.", variant: "destructive" });
+        toast({ title: "Mot de passe actuel incorrect", description: "Veuillez réessayer.", variant: "destructive"
+  });
         setLoading(false);
         return;
       }
       const { error } = await supabase.auth.updateUser({ password: pw });
       if (error) throw error;
-      toast({ title: "Mot de passe mis à jour", description: "Votre mot de passe a été modifié avec succès." });
+      toast({ title: "Mot de passe mis à jour", description: "Votre mot de passe a été modifié avec succès."
+  });
       setCurrent(""); setPw(""); setConfirm("");
     } catch (err: any) {
-      toast({ title: "Erreur", description: err.message || "Impossible de mettre à jour le mot de passe.", variant: "destructive" });
+      toast({ title: "Erreur", description: err.message || "Impossible de mettre à jour le mot de passe.", variant: "destructive"
+  });
     } finally {
       setLoading(false);
     }

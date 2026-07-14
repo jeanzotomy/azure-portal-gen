@@ -38,7 +38,8 @@ const ROLE_LABELS: Record<string, string> = {
 };
 
 export default function UserDetailPage() {
-  const { userId = "" } = useParams<{ userId: string }>();
+  const { userId = ""
+  } = useParams<{ userId: string }>();
   const navigate = useNavigate();
   const { isAdmin } = useUserRoles();
 
@@ -129,13 +130,15 @@ export default function UserDetailPage() {
   return (
     <div className="p-3 sm:p-6 space-y-6">
       <div className="flex items-center justify-between gap-2">
-        <Button asChild variant="ghost" size="sm" className="gap-2">
+        <Button asChild variant="ghost" size="sm"
+  className="gap-2">
           <Link to="/admin?role=client" aria-label="Retour à la liste des utilisateurs">
             <ArrowLeft size={14} /> Utilisateurs
           </Link>
         </Button>
         {isAdmin && (
-          <Button variant="outline" size="sm" className="gap-2" onClick={() => navigate(`/admin?q=${encodeURIComponent(profile.full_name || profile.user_id)}`)}>
+          <Button variant="outline" size="sm"
+  className="gap-2" onClick={() => navigate(`/admin?q=${encodeURIComponent(profile.full_name || profile.user_id)}`)}>
             <Pencil size={14} /> Gérer dans la liste
           </Button>
         )}
@@ -153,7 +156,8 @@ export default function UserDetailPage() {
               <div className="flex flex-wrap items-center gap-2 mt-2">
                 {roles.length === 0 && <Badge variant="secondary">client</Badge>}
                 {roles.map((r) => (
-                  <Badge key={r} variant="secondary" className="capitalize">{ROLE_LABELS[r] || r}</Badge>
+                  <Badge key={r} variant="secondary"
+  className="capitalize">{ROLE_LABELS[r] || r}</Badge>
                 ))}
                 {status === "active" && <Badge className="bg-emerald-500/10 text-emerald-600 border-emerald-500/20 border"><ShieldCheck size={11} className="mr-1" /> Actif</Badge>}
                 {status === "blocked" && <Badge className="bg-destructive/10 text-destructive border-destructive/20 border"><ShieldBan size={11} className="mr-1" /> Bloqué</Badge>}
@@ -179,7 +183,8 @@ export default function UserDetailPage() {
             <InfoRow icon={MapPin} label="Adresse" value={[profile.address_line, profile.city, profile.country].filter(Boolean).join(", ") || null} />
             <InfoRow icon={Globe} label="Pays" value={profile.country} />
             <InfoRow icon={Clock} label="Fuseau horaire" value={profile.timezone} />
-            <InfoRow icon={Calendar} label="Inscrit le" value={new Date(profile.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" })} />
+            <InfoRow icon={Calendar} label="Inscrit le" value={new Date(profile.created_at).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric"
+  })} />
           </CardContent>
         </Card>
 

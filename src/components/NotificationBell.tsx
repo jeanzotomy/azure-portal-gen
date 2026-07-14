@@ -265,7 +265,8 @@ export function NotificationBell({ role = "client", onNavigate }: NotificationBe
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative text-muted-foreground">
+        <Button variant="ghost" size="icon"
+  className="relative text-muted-foreground">
           <Bell size={18} />
           {unreadCount > 0 && (
             <span className="absolute -top-0.5 -right-0.5 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold px-1 animate-pulse">
@@ -274,7 +275,8 @@ export function NotificationBell({ role = "client", onNavigate }: NotificationBe
           )}
         </Button>
       </PopoverTrigger>
-      <PopoverContent align="end" className="w-80 p-0">
+      <PopoverContent align="end"
+  className="w-80 p-0">
         <div className="flex items-center justify-between px-4 py-3 border-b border-border">
           <span className="text-sm font-semibold text-foreground">Notifications</span>
           {unreadCount > 0 && (

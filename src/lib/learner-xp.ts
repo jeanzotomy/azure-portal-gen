@@ -75,8 +75,8 @@ export async function fetchLearnerRank(): Promise<LearnerRank | null> {
 }
 
 export const LEAGUE_META: Record<LearnerLeague, { label: string; color: string; emoji: string; threshold: number }> = {
-  bronze: { label: "Bronze", color: "from-amber-700 to-amber-500", emoji: "🥉", threshold: 0 },
-  argent: { label: "Argent", color: "from-slate-400 to-slate-200", emoji: "🥈", threshold: 500 },
-  or: { label: "Or", color: "from-amber-400 to-yellow-300", emoji: "🥇", threshold: 2000 },
-  platine: { label: "Platine", color: "from-cyan-400 to-violet-500", emoji: "💎", threshold: 5000 },
+  bronze: { label: "Bronze", color: "bg-amber-700", emoji: "🥉", threshold: 0 },
+  argent: { label: "Argent", color: "bg-slate-400", emoji: "🥈", threshold: 500 },
+  or: { label: "Or", color: "bg-amber-400", emoji: "🥇", threshold: 2000 },
+  platine: { label: "Platine", color: "bg-cyan-500", emoji: "💎", threshold: 5000 },
 };

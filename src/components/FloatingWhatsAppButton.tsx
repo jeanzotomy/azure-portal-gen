@@ -48,7 +48,7 @@ export function FloatingWhatsAppButton() {
       target="_blank"
       rel="noopener noreferrer"
       aria-label="Discuter sur WhatsApp"
-      className={cn(
+  className={cn(
         "fixed z-40 bottom-20 right-4 md:bottom-6 md:right-6",
         "inline-flex items-center gap-2 rounded-full pl-3 pr-4 py-3",
         "bg-[#25D366] text-white shadow-lg shadow-[#25D366]/30",
@@ -64,7 +64,7 @@ export function FloatingWhatsAppButton() {
         type="button"
         onClick={handleClose}
         aria-label="Fermer"
-        className="ml-1 -mr-1 h-5 w-5 inline-flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30"
+  className="ml-1 -mr-1 h-5 w-5 inline-flex items-center justify-center rounded-full bg-white/20 hover:bg-white/30"
       >
         <X size={12} />
       </button>

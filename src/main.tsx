@@ -34,7 +34,7 @@ const showUpdateOverlay = () => {
   overlay.style.cssText =
     "position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;background:rgba(8,18,32,0.78);backdrop-filter:blur(6px);font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#fff;padding:24px;";
   overlay.innerHTML = `
-    <div style="max-width:420px;width:100%;background:linear-gradient(135deg,#0b2a3d,#0e3a55);border:1px solid rgba(0,153,204,0.4);border-radius:16px;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,0.5);text-align:center;">
+    <div style="max-width:420px;width:100%;background:#0b2a3d;border:1px solid rgba(0,153,204,0.4);border-radius:16px;padding:28px;box-shadow:0 20px 60px rgba(0,0,0,0.5);text-align:center;">
       <div style="margin:0 auto 16px;width:48px;height:48px;border-radius:50%;border:3px solid rgba(255,255,255,0.2);border-top-color:#00c2ff;animation:cm-spin 0.9s linear infinite;"></div>
       <h2 style="margin:0 0 8px;font-size:18px;font-weight:600;">Mise à jour en cours</h2>
       <p style="margin:0 0 4px;font-size:14px;opacity:0.9;line-height:1.5;">Une nouvelle version de l'application est disponible.</p>

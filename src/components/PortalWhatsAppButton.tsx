@@ -16,7 +16,7 @@ export function PortalWhatsAppButton() {
       rel="noopener noreferrer"
       aria-label="Contacter le support sur WhatsApp"
       title="Support WhatsApp"
-      className={cn(
+  className={cn(
         // Stack above the AI assistant launcher (bottom-20 / md:bottom-6, ~56px tall + 12px gap)
         "fixed z-40 bottom-[9rem] right-4 md:bottom-[5.5rem] md:right-6",
         "inline-flex items-center gap-2 rounded-full pl-3 pr-4 py-3",

@@ -25,9 +25,12 @@ const FUNCTIONS_BASE = `https://${PROJECT_ID}.supabase.co/functions/v1`;
 
 const CONNECTOR_DEFS = [
   { id: "stripe", label: "Stripe Payments", desc: "Paiements & abonnements (non disponible en Guinée)", manageUrl: null as string | null, blocked: true },
-  { id: "microsoft", label: "Microsoft Graph", desc: "Outlook / OneDrive / SharePoint", manageUrl: "https://entra.microsoft.com" },
-  { id: "twilio", label: "Twilio", desc: "SMS OTP (MFA)", manageUrl: "https://console.twilio.com" },
-  { id: "google_search_console", label: "Google Search Console", desc: "Données SEO", manageUrl: "https://search.google.com/search-console" },
+  { id: "microsoft", label: "Microsoft Graph", desc: "Outlook / OneDrive / SharePoint", manageUrl: "https://entra.microsoft.com"
+  },
+  { id: "twilio", label: "Twilio", desc: "SMS OTP (MFA)", manageUrl: "https://console.twilio.com"
+  },
+  { id: "google_search_console", label: "Google Search Console", desc: "Données SEO", manageUrl: "https://search.google.com/search-console"
+  },
   { id: "lovable_ai", label: "AI Gateway", desc: "Tuteur IA, analyse de CV", manageUrl: null },
   { id: "email_domain", label: "Emails", desc: "Envoi via notify.cloudmature.com", manageUrl: null },
 ];
@@ -95,7 +98,8 @@ export default function IntegrationsTab() {
     setTokensLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke("manage-api-token", {
-        body: { action: "list" },
+        body: { action: "list"
+  },
       });
       if (error) throw error;
       setTokens(data?.tokens ?? []);
@@ -213,19 +217,22 @@ export default function IntegrationsTab() {
                   <div className="font-medium flex items-center gap-2">
                     {c.label}
                     {c.blocked ? (
-                      <Badge variant="secondary" className="gap-1"><AlertCircle className="h-3 w-3" /> Indisponible</Badge>
+                      <Badge variant="secondary"
+  className="gap-1"><AlertCircle className="h-3 w-3" /> Indisponible</Badge>
                     ) : statusLoading ? (
                       <Badge variant="outline">…</Badge>
                     ) : connected ? (
                       <Badge className="bg-emerald-600 hover:bg-emerald-600 gap-1"><CheckCircle2 className="h-3 w-3" /> Connecté</Badge>
                     ) : (
-                      <Badge variant="outline" className="gap-1 text-muted-foreground"><XCircle className="h-3 w-3" /> Non connecté</Badge>
+                      <Badge variant="outline"
+  className="gap-1 text-muted-foreground"><XCircle className="h-3 w-3" /> Non connecté</Badge>
                     )}
                   </div>
                   <p className="text-xs text-muted-foreground mt-0.5">{c.desc}</p>
                 </div>
                 {c.manageUrl && (
-                  <a href={c.manageUrl} target="_blank" rel="noreferrer" className="text-xs text-primary inline-flex items-center gap-1 hover:underline shrink-0">
+                  <a href={c.manageUrl} target="_blank" rel="noreferrer"
+  className="text-xs text-primary inline-flex items-center gap-1 hover:underline shrink-0">
                     Gérer <ExternalLink className="h-3 w-3" />
                   </a>
                 )}
@@ -303,7 +310,8 @@ export default function IntegrationsTab() {
                       <TableCell className="text-xs">{t.last_used_at ? new Date(t.last_used_at).toLocaleString("fr-FR") : "-"}</TableCell>
                       <TableCell>
                         {revoked ? <Badge variant="destructive">Révoqué</Badge>
-                          : expired ? <Badge variant="outline" className="text-amber-600 border-amber-600">Expiré</Badge>
+                          : expired ? <Badge variant="outline"
+  className="text-amber-600 border-amber-600">Expiré</Badge>
                           : <Badge className="bg-emerald-600 hover:bg-emerald-600">Actif</Badge>}
                       </TableCell>
                       <TableCell className="text-right">
@@ -391,7 +399,8 @@ export default function IntegrationsTab() {
             <div className="space-y-2">
               <div className="flex items-center gap-2 rounded-md border bg-muted p-3">
                 <code className="text-xs break-all flex-1">{revealedToken}</code>
-                <Button size="sm" variant="outline" onClick={() => copy(revealedToken, "Token copié")}>
+                <Button size="sm"
+  variant="outline" onClick={() => copy(revealedToken, "Token copié")}>
                   <Copy className="h-3.5 w-3.5" />
                 </Button>
               </div>

@@ -48,10 +48,14 @@ const lineTotal = (it: LineItem) => {
 };
 
 const FREQ_LABELS: Record<BillingFrequency, { adj: string; period: string; periodPlural: string }> = {
-  mensuel:     { adj: "mensuel",     period: "mois",      periodPlural: "mois" },
-  trimestriel: { adj: "trimestriel", period: "trimestre", periodPlural: "trimestres" },
-  semestriel:  { adj: "semestriel",  period: "semestre",  periodPlural: "semestres" },
-  annuel:      { adj: "annuel",      period: "an",        periodPlural: "ans" },
+  mensuel:     { adj: "mensuel",     period: "mois",      periodPlural: "mois"
+  },
+  trimestriel: { adj: "trimestriel", period: "trimestre", periodPlural: "trimestres"
+  },
+  semestriel:  { adj: "semestriel",  period: "semestre",  periodPlural: "semestres"
+  },
+  annuel:      { adj: "annuel",      period: "an",        periodPlural: "ans"
+  },
 };
 
 const buildRecurringSubtitle = (it: LineItem, currency: Currency): string => {
@@ -64,7 +68,8 @@ const buildRecurringSubtitle = (it: LineItem, currency: Currency): string => {
 };
 
 const UNIT_OPTIONS = ["unité", "utilisateur", "licence", "poste", "heure", "jour", "mois", "année", "forfait"] as const;
-const DEFAULT_PAYMENT = { bank: "", iban: "", swift: "", mobile_money: "+224 626 441 150", reference: "" };
+const DEFAULT_PAYMENT = { bank: "", iban: "", swift: "", mobile_money: "+224 626 441 150", reference: ""
+  };
 
 const PM_TYPE_ICONS: Record<PMRow["type"], typeof CreditCard> = {
   virement: Building2, mobile_money: Smartphone, especes: Banknote, cheque: FileText, depot: PiggyBank, autre: CreditCard,
@@ -287,11 +292,13 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
 
   const handleSave = async (status: "brouillon" | "emise") => {
     if (!user || !selectedClient) {
-      toast({ title: "Client requis", variant: "destructive" });
+      toast({ title: "Client requis", variant: "destructive"
+  });
       return;
     }
     if (!items.length || items.some((i) => !i.description.trim())) {
-      toast({ title: "Lignes invalides", description: "Toutes les lignes doivent avoir une description.", variant: "destructive" });
+      toast({ title: "Lignes invalides", description: "Toutes les lignes doivent avoir une description.", variant: "destructive"
+  });
       return;
     }
     setSaving(true);
@@ -360,7 +367,8 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
       onSaved();
       onOpenChange(false);
     } catch (e) {
-      toast({ title: "Erreur", description: e instanceof Error ? e.message : "Erreur inconnue", variant: "destructive" });
+      toast({ title: "Erreur", description: e instanceof Error ? e.message : "Erreur inconnue", variant: "destructive"
+  });
     } finally {
       setSaving(false);
     }
@@ -413,7 +421,9 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
             <label className="text-xs font-medium">Date</label>
             <Popover>
               <PopoverTrigger asChild>
-                <Button type="button" variant="outline" className={cn("w-full justify-start text-left font-normal", !invoiceDate && "text-muted-foreground")}>
+                <Button type="button"
+  variant="outline"
+  className={cn("w-full justify-start text-left font-normal", !invoiceDate && "text-muted-foreground")}>
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {invoiceDate ? format(parseISO(invoiceDate), "dd/MM/yyyy") : "Choisir"}
                 </Button>
@@ -427,7 +437,9 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
             <label className="text-xs font-medium">Échéance</label>
             <Popover>
               <PopoverTrigger asChild>
-                <Button type="button" variant="outline" className={cn("w-full justify-start text-left font-normal", !dueDate && "text-muted-foreground")}>
+                <Button type="button"
+  variant="outline"
+  className={cn("w-full justify-start text-left font-normal", !dueDate && "text-muted-foreground")}>
                   <CalendarIcon className="mr-2 h-4 w-4" />
                   {dueDate ? format(parseISO(dueDate), "dd/MM/yyyy") : "Choisir"}
                 </Button>
@@ -464,7 +476,8 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
               <span className="text-muted-foreground">{ratesLoading ? "Chargement..." : "Taux indisponibles (mode secours)"}</span>
             )}
           </div>
-          <Button size="sm" variant="ghost" onClick={() => void refreshRates(true)} disabled={ratesLoading} className="self-end sm:self-auto">
+          <Button size="sm"
+  variant="ghost" onClick={() => void refreshRates(true)} disabled={ratesLoading} className="self-end sm:self-auto">
             <RefreshCw size={12} className={ratesLoading ? "animate-spin" : ""} />
           </Button>
         </div>
@@ -494,7 +507,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
                     className={cn(
                       "flex items-start gap-3 p-3 rounded-md border cursor-pointer transition-colors",
                       checked ? "border-primary bg-primary/5" : "border-border hover:bg-muted/40"
-                    )}
+  )}
                   >
                     <Checkbox
                       checked={checked}
@@ -531,7 +544,8 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <div className="text-sm font-semibold">Lignes de facture</div>
-            <Button size="sm" variant="outline" onClick={addLine}><Plus size={14} className="mr-1" /> Ajouter</Button>
+            <Button size="sm"
+  variant="outline" onClick={addLine}><Plus size={14} className="mr-1" /> Ajouter</Button>
           </div>
           {items.map((it, idx) => (
             <Card key={idx}><CardContent className="p-3 space-y-2">
@@ -623,7 +637,8 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
                   Total : {new Intl.NumberFormat("fr-FR").format(lineTotal(it))} {currency}
                 </div>
                 <div className="col-span-3 md:col-span-1 flex items-center justify-end">
-                  <Button size="icon" variant="ghost" onClick={() => removeLine(idx)} disabled={items.length === 1}><Trash2 size={14} className="text-destructive" /></Button>
+                  <Button size="icon"
+  variant="ghost" onClick={() => removeLine(idx)} disabled={items.length === 1}><Trash2 size={14} className="text-destructive" /></Button>
                 </div>
               </div>
             </CardContent></Card>
