@@ -59,7 +59,7 @@ export function ServicesSection() {
  ))}
  <div className="relative group overflow-hidden rounded-2xl">
  <img src={servicesImage} alt="Équipe CloudMature accompagnant un client en transformation Cloud et DevOps"className="w-full h-64 object-cover rounded-2xl"/>
- <div className="absolute inset-0 bg-primary to-transparent rounded-2xl"/>
+ <div className="absolute inset-0 bg-secondary/60 rounded-2xl"/>
  <div className="absolute bottom-0 left-0 right-0 p-6">
  <p className="text-sm font-semibold uppercase tracking-wider text-primary">Cloud Mature</p>
  <p className="text-lg font-bold text-primary-foreground mt-1">{t("services.imageCaption")}</p>
