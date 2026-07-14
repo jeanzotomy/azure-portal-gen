@@ -16,7 +16,7 @@ export function IndustriesSection() {
  const items: { title: string; desc: string }[] = t("industries.items");
 
  return (
- <section id="industries"className="py-24 bg-primary from-white relative overflow-hidden">
+ <section id="industries" className="py-24 bg-background relative overflow-hidden">
  <div className="container relative z-10">
  <div className="text-center mb-16">
  <span className="inline-block text-sm font-semibold uppercase tracking-wider text-primary bg-primary/10 px-4 py-1.5 rounded-full mb-4">
@@ -35,14 +35,12 @@ export function IndustriesSection() {
  const Icon = industryIcons[i];
  const color = colors[i];
  return (
- <div
+   <div
  key={ind.title}
- className="relative bg-white rounded-xl p-5 text-center border border-border/60 hover:border-transparent shadow-[0_2px_16px_0_hsl(var(--primary)/0.07)] hover:shadow-[0_8px_32px_0_hsl(var(--primary)/0.13)] transition-all duration-500 group overflow-hidden" >
- <div className={`absolute inset-0 rounded-xl bg-primary ${color} opacity-0 group-hover:opacity-100 transition-opacity duration-500 -z-10 scale-[1.02]`} />
- <div className="absolute inset-[2px] rounded-xl bg-white -z-[5]"/>
- <div className={`absolute top-0 left-1/2 -translate-x-1/2 h-1 w-0 group-hover:w-full bg-primary ${color} transition-all duration-500 rounded-t-xl`} />
- <div className={`mx-auto w-12 h-12 rounded-xl bg-primary ${color} flex items-center justify-center mb-3 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-lg`}>
- <Icon size={22} className="text-white"/>
+ className="relative bg-card rounded-xl p-5 text-center border border-border/60 hover:border-primary/40 shadow-[0_2px_16px_0_hsl(var(--primary)/0.07)] hover:shadow-[0_8px_32px_0_hsl(var(--primary)/0.13)] transition-all duration-500 group overflow-hidden" >
+ <div className="absolute top-0 left-1/2 -translate-x-1/2 h-1 w-0 group-hover:w-full bg-primary transition-all duration-500 rounded-t-xl" />
+ <div className="mx-auto w-12 h-12 rounded-xl bg-primary flex items-center justify-center mb-3 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-md">
+ <Icon size={22} className="text-primary-foreground"/>
  </div>
  <h3 className="font-bold text-secondary text-base mb-1">{ind.title}</h3>
  <p className="text-xs text-muted-foreground leading-relaxed">{ind.desc}</p>

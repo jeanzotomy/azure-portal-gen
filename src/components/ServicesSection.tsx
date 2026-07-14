@@ -7,19 +7,17 @@ const icons = [Cloud, Code2, Server, Blocks, ArrowUpRight, ShieldCheck, Headphon
 function ServiceCard({ s }: { s: { title: string; desc: string; icon: typeof Cloud } }) {
  return (
  <div className="group relative bg-card rounded-2xl p-7 shadow-card hover:shadow-card-hover transition-all duration-500 hover:-translate-y-2 border border-border hover:border-primary/30 overflow-hidden">
- <div className="absolute inset-0 bg-primary via-transparent group-hover: group-hover: transition-all duration-500 rounded-2xl"/>
  <div className="relative z-10">
  <div className="flex items-center gap-3 mb-3">
  <div className="relative shrink-0">
- <div className="absolute inset-0 rounded-xl gradient-primary opacity-15 blur-md scale-110 group-hover:opacity-30 transition-opacity duration-500"/>
- <div className="relative w-11 h-11 rounded-xl gradient-primary flex items-center justify-center shadow-md shadow-primary/20 group-hover:scale-110 group-hover:shadow-lg group-hover:shadow-primary/30 transition-all duration-300">
- <s.icon size={22} className="text-primary-foreground"strokeWidth={1.8} />
+ <div className="w-11 h-11 rounded-xl bg-primary flex items-center justify-center shadow-md shadow-primary/20 group-hover:scale-110 transition-all duration-300">
+ <s.icon size={22} className="text-primary-foreground" strokeWidth={1.8} />
  </div>
  </div>
  <h3 className="text-[17px] font-bold text-card-foreground group-hover:text-primary transition-colors duration-300">{s.title}</h3>
  </div>
  <p className="text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
- <div className="mt-5 h-0.5 w-8 bg-border group-hover:w-14 group-hover:bg-primary group-hover: group-hover: transition-all duration-500 rounded-full"/>
+ <div className="mt-5 h-0.5 w-8 bg-border group-hover:w-14 group-hover:bg-primary transition-all duration-500 rounded-full"/>
  </div>
  </div>
  );
@@ -61,7 +59,7 @@ export function ServicesSection() {
  ))}
  <div className="relative group overflow-hidden rounded-2xl">
  <img src={servicesImage} alt="Équipe CloudMature accompagnant un client en transformation Cloud et DevOps"className="w-full h-64 object-cover rounded-2xl"/>
- <div className="absolute inset-0 bg-primary to-transparent rounded-2xl"/>
+ <div className="absolute inset-0 bg-secondary/60 rounded-2xl"/>
  <div className="absolute bottom-0 left-0 right-0 p-6">
  <p className="text-sm font-semibold uppercase tracking-wider text-primary">Cloud Mature</p>
  <p className="text-lg font-bold text-primary-foreground mt-1">{t("services.imageCaption")}</p>
@@ -88,11 +86,10 @@ export function ServicesSection() {
  {middleLeft.map((s) => (
  <ServiceCard key={s.title} s={s} />
  ))}
- <div className="relative group overflow-hidden rounded-2xl">
- <div className="absolute -inset-1 rounded-2xl bg-primary blur-lg opacity-60 group-hover:opacity-90 transition-opacity duration-500"/>
+  <div className="relative group overflow-hidden rounded-2xl">
  <div className="relative overflow-hidden rounded-2xl h-full border border-primary/20">
- <img src={servicesImage} alt="Consultants CloudMature en session de travail sur un projet Cloud et IA"className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"/>
- <div className="absolute inset-0 bg-primary to-transparent"/>
+ <img src={servicesImage} alt="Consultants CloudMature en session de travail sur un projet Cloud et IA" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"/>
+ <div className="absolute inset-0 bg-secondary/60"/>
  <div className="absolute bottom-0 left-0 right-0 p-6">
  <p className="text-sm font-semibold uppercase tracking-wider text-primary">Cloud Mature</p>
  <p className="text-lg font-bold text-primary-foreground mt-1">{t("services.imageCaption")}</p>
