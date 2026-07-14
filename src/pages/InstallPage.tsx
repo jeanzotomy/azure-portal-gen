@@ -21,9 +21,8 @@ export default function InstallPage() {
  const [showManual, setShowManual] = useState(false);
 
  const checkInstalled = useCallback(() => {
- const standalone =
- window.matchMedia("(display-mode: standalone)").matches ||
- ("standalone" in window.navigator && (window.navigator as Navigator).standalone === true);
+ const nav = window.navigator as Navigator & { standalone?: boolean };
+ const standalone = window.matchMedia("(display-mode: standalone)").matches || nav.standalone === true;
  setIsInstalled(standalone);
  return standalone;
  }, []);
