@@ -38,10 +38,14 @@ interface ApplicationOption {
 }
 
 const STATUS_FILTERS = [
-  { value: "all", label: "Tous statuts" },
-  { value: "sent", label: "Envoyé" },
-  { value: "failed", label: "Échec" },
-  { value: "pending", label: "En attente" },
+  { value: "all", label: "Tous statuts"
+  },
+  { value: "sent", label: "Envoyé"
+  },
+  { value: "failed", label: "Échec"
+  },
+  { value: "pending", label: "En attente"
+  },
 ] as const;
 
 function statusBadge(status: string) {
@@ -54,7 +58,8 @@ function statusBadge(status: string) {
     case "pending":
       return <Badge className="bg-amber-500/10 text-amber-700 border-amber-500/30 hover:bg-amber-500/10"><Clock size={12} className="mr-1" />En attente</Badge>;
     case "suppressed":
-      return <Badge variant="outline" className="text-muted-foreground">Supprimé</Badge>;
+      return <Badge variant="outline"
+  className="text-muted-foreground">Supprimé</Badge>;
     default:
       return <Badge variant="outline">{status}</Badge>;
   }
@@ -85,7 +90,8 @@ export default function EmailLogTab() {
       .order("created_at", { ascending: false })
       .limit(500);
     if (error) {
-      toast({ title: "Erreur", description: error.message, variant: "destructive" });
+      toast({ title: "Erreur", description: error.message, variant: "destructive"
+  });
       setRows([]);
     } else {
       setRows((data as any) || []);
@@ -106,7 +112,8 @@ export default function EmailLogTab() {
     setDeleting(true);
     const { error, count } = await supabase
       .from("email_send_log")
-      .delete({ count: "exact" })
+      .delete({ count: "exact"
+  })
       .eq("id", target.id);
     setDeleting(false);
 
@@ -194,7 +201,8 @@ export default function EmailLogTab() {
 
   const exportCsv = () => {
     if (!filtered.length) {
-      toast({ title: "Rien à exporter", description: "Aucun résultat dans les filtres actuels." });
+      toast({ title: "Rien à exporter", description: "Aucun résultat dans les filtres actuels."
+  });
       return;
     }
     const headers = [
@@ -222,7 +230,8 @@ export default function EmailLogTab() {
         r.error_message || "",
       ].map(csvEscape).join(","));
     }
-    const blob = new Blob(["\uFEFF" + lines.join("\n")], { type: "text/csv;charset=utf-8" });
+    const blob = new Blob(["\uFEFF" + lines.join("\n")], { type: "text/csv;charset=utf-8"
+  });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
@@ -336,7 +345,7 @@ export default function EmailLogTab() {
                       <Button
                         variant="ghost"
                         size="sm"
-                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
+  className="text-destructive hover:text-destructive hover:bg-destructive/10"
                         onClick={() => setToDelete(r)}
                         aria-label="Supprimer"
                       >
@@ -384,7 +393,7 @@ export default function EmailLogTab() {
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
+  className="h-8 text-destructive hover:text-destructive hover:bg-destructive/10"
                   onClick={() => setToDelete(r)}
                 >
                   <Trash2 size={14} className="mr-1" /> Supprimer

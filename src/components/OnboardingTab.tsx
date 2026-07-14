@@ -128,7 +128,8 @@ export default function OnboardingTab({ user }: { user: SupaUser }) {
 
  useEffect(() => { load(); }, [load]);
 
- // Notification quand le contrat passe de"En préparation/Indisponible"→"Téléchargement disponible" const prevContractReadyRef = useRef<boolean | null>(null);
+ // Notification quand le contrat passe de"En préparation/Indisponible"→"Téléchargement disponible"
+  const prevContractReadyRef = useRef<boolean | null>(null);
  const notifiedKeyRef = useRef<string | null>(null);
  useEffect(() => {
  const isReady = !!(contract && contractStatus?.ok === true && !contract.signed_at);
@@ -427,7 +428,8 @@ export default function OnboardingTab({ user }: { user: SupaUser }) {
  isLocked ?"bg-muted text-muted-foreground":
  isDone ?"bg-emerald-100 text-emerald-600":
  isReview ?"bg-amber-100 text-amber-600":
-"bg-primary/10 text-primary" }`}>
+"bg-primary/10 text-primary"
+  }`}>
  {isLocked ? <Lock className="h-6 w-6"/> : isDone ? <CheckCircle2 className="h-6 w-6"/> : <Icon className="h-6 w-6"/>}
  </div>
  <div className="flex-1 min-w-0">
@@ -736,7 +738,8 @@ export function TrainingPlayer({ assigned, userId, onComplete }: { assigned: any
  q?.type ==="open"? (openAnswers[i] ||"").trim().length > 5 : answers[i] != null,
  );
 
- // Session timer: increments every second; assigns time to current"context key" const expandedRef = useRef(expanded);
+ // Session timer: increments every second; assigns time to current"context key"
+  const expandedRef = useRef(expanded);
  const quizOpenRef = useRef(quizOpen);
  const coursePageRef = useRef(coursePage);
  expandedRef.current = expanded; quizOpenRef.current = quizOpen; coursePageRef.current = coursePage;
@@ -1249,7 +1252,8 @@ export function TrainingPlayer({ assigned, userId, onComplete }: { assigned: any
  {currentQ.youtube_url && currentQ.timestamp_seconds != null && (
  <a
  href={`${currentQ.youtube_url}${currentQ.youtube_url.includes("?") ?"&":"?"}t=${currentQ.timestamp_seconds}s`}
- target="_blank"rel="noreferrer" className="inline-flex items-center gap-1 text-xs text-red-600 hover:underline" >
+ target="_blank"rel="noreferrer"
+  className="inline-flex items-center gap-1 text-xs text-red-600 hover:underline" >
  <Youtube className="h-3.5 w-3.5"/> Revoir le passage à {fmtTime(currentQ.timestamp_seconds)}
  </a>
  )}
@@ -1373,7 +1377,8 @@ function CertificateButton({ assignedId }: { assignedId: string }) {
  Certificat PDF
  </Button>
  <Button
- size="sm" variant="outline" onClick={handleShare}
+ size="sm"
+  variant="outline" onClick={handleShare}
  disabled={loading}
  className="border-amber-500/40 text-amber-700 hover:bg-amber-50" >
  <Share2 className="h-3 w-3 mr-1"/> Partager

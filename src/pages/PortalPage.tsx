@@ -1147,12 +1147,14 @@ function TicketsTab({ user }: { user: SupaUser }) {
  <RefreshCw size={14} /> <span className="hidden sm:inline">Actualiser</span>
  </Button>
  <a
- href="https://wa.me/18734371229?text=Bonjour%20CloudMature%2C%20j%27ai%20besoin%20d%27aide%20depuis%20mon%20espace%20support." target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 h-9 px-3 rounded-md bg-[#25D366] hover:bg-[#1ebe57] text-white text-sm font-medium shadow-sm transition-colors" aria-label="Contacter le support sur WhatsApp" >
+ href="https://wa.me/18734371229?text=Bonjour%20CloudMature%2C%20j%27ai%20besoin%20d%27aide%20depuis%20mon%20espace%20support." target="_blank" rel="noopener noreferrer"
+  className="inline-flex items-center gap-1.5 h-9 px-3 rounded-md bg-[#25D366] hover:bg-[#1ebe57] text-white text-sm font-medium shadow-sm transition-colors" aria-label="Contacter le support sur WhatsApp" >
  <MessageCircle size={14} /> <span className="hidden sm:inline">WhatsApp</span>
  </a>
  <Button
  onClick={() => setShowForm(!showForm)}
- size="sm" className="gradient-primary text-primary-foreground border-0" >
+ size="sm"
+  className="gradient-primary text-primary-foreground border-0" >
  {showForm ? <X size={14} className="mr-1"/> : <Plus size={14} className="mr-1"/>}
  {showForm ?"Annuler":"Nouveau ticket"}
  </Button>
@@ -1215,7 +1217,8 @@ function TicketsTab({ user }: { user: SupaUser }) {
  key={f.v}
  onClick={() => setFilter(f.v)}
  className={`text-xs px-3 py-1.5 rounded-full transition-colors ${
- filter === f.v ?"bg-primary text-primary-foreground":"bg-muted text-muted-foreground hover:bg-muted/80" }`}
+ filter === f.v ?"bg-primary text-primary-foreground":"bg-muted text-muted-foreground hover:bg-muted/80"
+  }`}
  >
  {f.label}
  </button>
@@ -1258,7 +1261,8 @@ function TicketsTab({ user }: { user: SupaUser }) {
  <div key={r.id} className={`flex ${r.is_admin ?"justify-start":"justify-end"}`}>
  <div className={`max-w-[80%] rounded-xl px-4 py-2.5 ${
  r.is_admin
- ?"bg-primary/10 border border-primary/20 text-card-foreground rounded-bl-sm" :"bg-primary text-primary-foreground rounded-br-sm" }`}>
+ ?"bg-primary/10 border border-primary/20 text-card-foreground rounded-bl-sm" :"bg-primary text-primary-foreground rounded-br-sm"
+  }`}>
  <p className="text-sm">{r.message}</p>
  <p className={`text-[10px] mt-1 ${r.is_admin ?"text-primary":"text-primary-foreground/60"}`}>
  {r.is_admin ?"CloudMature":"Vous"} · {new Date(r.created_at).toLocaleString("fr-CA")}

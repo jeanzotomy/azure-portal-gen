@@ -122,7 +122,8 @@ function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser
  if (!isServicesTab) setTab("service-clients");
  }}
  isActive={isServicesTab}
- tooltip="Services aux clients"data-keep-mobile-open="true" className="gap-3" >
+ tooltip="Services aux clients"data-keep-mobile-open="true"
+  className="gap-3" >
  <Briefcase size={18} />
  <span className="flex-1 text-left">Services aux clients</span>
  {servicesOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
@@ -171,7 +172,8 @@ function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser
  <NotificationBell role="comptable"onNavigate={(target) => setTab(target as typeof tab)} />
  <button
  onClick={() => setSignatureOpen(true)}
- title="Ma signature" className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold cursor-pointer hover:opacity-80 transition-opacity" >
+ title="Ma signature"
+  className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold cursor-pointer hover:opacity-80 transition-opacity" >
  {(user.user_metadata?.full_name || user.email ||"C").charAt(0).toUpperCase()}
  </button>
  </div>
@@ -339,7 +341,8 @@ function AdminContent() {
  if (!isGestionnaireServicesTab) setGestionnaireTab("service-clients");
  }}
  isActive={isGestionnaireServicesTab}
- tooltip="Services aux clients"data-keep-mobile-open="true" className="gap-3" >
+ tooltip="Services aux clients"data-keep-mobile-open="true"
+  className="gap-3" >
  <Briefcase size={18} />
  <span className="flex-1 text-left">Services aux clients</span>
  {gestionnaireServicesOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
@@ -364,7 +367,8 @@ function AdminContent() {
  if (!isGestionnaireHrTab) setGestionnaireTab("hr-recruitment");
  }}
  isActive={isGestionnaireHrTab}
- tooltip="RH"data-keep-mobile-open="true" className="gap-3" >
+ tooltip="RH"data-keep-mobile-open="true"
+  className="gap-3" >
  <HrIcon size={18} />
  <span className="flex-1 text-left">RH</span>
  {gestionnaireHrOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
@@ -647,7 +651,8 @@ function AdminContent() {
  <SidebarMenuButton
  onClick={() => setTab("commerce")}
  isActive={tab ==="commerce"|| isAdminServicesTab}
- tooltip="Commerce" className="gap-3" >
+ tooltip="Commerce"
+  className="gap-3" >
  <Briefcase size={18} />
  <span>Commerce</span>
  </SidebarMenuButton>
@@ -665,7 +670,8 @@ function AdminContent() {
  <SidebarMenuButton
  onClick={() => { if (!isHrTab) setTab("hr-recruitment"); }}
  isActive={isHrTab}
- tooltip="RH" className="gap-3" >
+ tooltip="RH"
+  className="gap-3" >
  <HrIcon size={18} />
  <span>RH</span>
  </SidebarMenuButton>
@@ -683,7 +689,8 @@ function AdminContent() {
  <SidebarMenuButton
  onClick={() => { if (!isSettingsTab) setTab("users"); }}
  isActive={isSettingsTab}
- tooltip="Paramètres" className="gap-3" >
+ tooltip="Paramètres"
+  className="gap-3" >
  <Settings size={18} />
  <span>Paramètres</span>
  </SidebarMenuButton>
@@ -719,7 +726,8 @@ function AdminContent() {
  <NotificationBell role="admin"onNavigate={(target) => setTab(target as AdminTab)} />
  <button
  onClick={() => setSignatureOpen(true)}
- title="Ma signature" className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold cursor-pointer hover:opacity-80 transition-opacity" >
+ title="Ma signature"
+  className="w-8 h-8 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-xs font-bold cursor-pointer hover:opacity-80 transition-opacity" >
  {(user.user_metadata?.full_name || user.email ||"A").charAt(0).toUpperCase()}
  </button>
  </div>
@@ -1285,7 +1293,8 @@ function AdminDashboard() {
  <p className="text-sm font-medium text-card-foreground truncate flex-1">{p.project_number && <span className="text-muted-foreground mr-1.5 font-mono text-xs">{p.project_number}</span>}{p.name}</p>
  <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-full flex-shrink-0 ${
  p.status ==="en_cours"?"text-primary bg-primary/10":
- p.status ==="termine"?"text-teal-600 bg-teal-600/10":"text-muted-foreground bg-muted" }`}>
+ p.status ==="termine"?"text-teal-600 bg-teal-600/10":"text-muted-foreground bg-muted"
+  }`}>
  {p.status ==="en_cours"?"En cours": p.status ==="termine"?"Terminé":"En attente"}
  </span>
  </div>
@@ -1680,7 +1689,8 @@ function AdminProjectsInner({ readOnly = false, assignedCount }: { readOnly?: bo
  <button key={step.value} onClick={() => setEditProgress(step.value)}
  className={`flex-1 flex flex-col items-center gap-1 px-2 py-2.5 rounded-xl border-2 transition-all text-center ${
  editProgress === step.value
- ?"bg-primary/10 border-primary text-primary font-semibold" :"bg-card border-border text-muted-foreground hover:border-primary/40" }`}
+ ?"bg-primary/10 border-primary text-primary font-semibold" :"bg-card border-border text-muted-foreground hover:border-primary/40"
+  }`}
  >
  <span className="text-lg">{step.icon}</span>
  <span className="text-[11px] leading-tight">{step.label}</span>
@@ -1869,7 +1879,8 @@ function AdminTickets() {
  <div className="flex items-center gap-1.5">
  {t.priority !=="normal"&& (
  <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${
- t.priority ==="urgent"?"text-destructive bg-destructive/10 border-destructive/20":"text-orange-500 bg-orange-500/10 border-orange-500/20" }`}>
+ t.priority ==="urgent"?"text-destructive bg-destructive/10 border-destructive/20":"text-orange-500 bg-orange-500/10 border-orange-500/20"
+  }`}>
  <Flag size={10} className="inline mr-1"/>{t.priority ==="urgent"?"Urgent":"Haute"}
  </span>
  )}
@@ -1938,7 +1949,8 @@ function AdminTickets() {
  {ticketReplies.map((r) => (
  <div key={r.id} className={`flex ${r.is_admin ?"justify-end":"justify-start"}`}>
  <div className={`max-w-[80%] rounded-xl px-4 py-2.5 ${
- r.is_admin ?"bg-primary text-primary-foreground rounded-br-sm":"bg-card border border-border text-card-foreground rounded-bl-sm" }`}>
+ r.is_admin ?"bg-primary text-primary-foreground rounded-br-sm":"bg-card border border-border text-card-foreground rounded-bl-sm"
+  }`}>
  <p className="text-sm">{r.message}</p>
  <p className={`text-[10px] mt-1 ${r.is_admin ?"text-primary-foreground/60":"text-muted-foreground"}`}>
  {r.is_admin ?"Équipe": (profiles[r.user_id]?.full_name ||"Client")} · {new Date(r.created_at).toLocaleString("fr-CA")}
@@ -1957,7 +1969,9 @@ function AdminTickets() {
  <Send size={14} />
  </Button>
  <Button
- type="button" size="sm" variant="outline" className="border-[#25D366]/40 text-[#25D366] hover:bg-[#25D366]/10" title="Envoyer par WhatsApp" onClick={() => setWaTarget({
+ type="button" size="sm"
+  variant="outline"
+  className="border-[#25D366]/40 text-[#25D366] hover:bg-[#25D366]/10" title="Envoyer par WhatsApp" onClick={() => setWaTarget({
  ticketId: t.id,
  phone: profile?.phone || null,
  name: profile?.full_name || null,
@@ -2668,13 +2682,16 @@ function AdminUsers() {
  <h1 className="text-2xl font-bold text-foreground">Utilisateurs</h1>
  <div className="flex items-center gap-3 flex-wrap">
  <div className="flex items-center gap-1 bg-muted rounded-lg p-1">
- <button onClick={() => setViewMode("cards")} title="Cartes" className={`p-1.5 rounded-md transition-colors ${viewMode ==="cards"?"bg-card shadow-sm text-primary":"text-muted-foreground hover:text-foreground"}`}>
+ <button onClick={() => setViewMode("cards")} title="Cartes"
+  className={`p-1.5 rounded-md transition-colors ${viewMode ==="cards"?"bg-card shadow-sm text-primary":"text-muted-foreground hover:text-foreground"}`}>
  <LayoutGrid size={14} />
  </button>
- <button onClick={() => setViewMode("table")} title="Tableau" className={`p-1.5 rounded-md transition-colors ${viewMode ==="table"?"bg-card shadow-sm text-primary":"text-muted-foreground hover:text-foreground"}`}>
+ <button onClick={() => setViewMode("table")} title="Tableau"
+  className={`p-1.5 rounded-md transition-colors ${viewMode ==="table"?"bg-card shadow-sm text-primary":"text-muted-foreground hover:text-foreground"}`}>
  <TableIcon size={14} />
  </button>
- <button onClick={() => setViewMode("list")} title="Liste" className={`p-1.5 rounded-md transition-colors ${viewMode ==="list"?"bg-card shadow-sm text-primary":"text-muted-foreground hover:text-foreground"}`}>
+ <button onClick={() => setViewMode("list")} title="Liste"
+  className={`p-1.5 rounded-md transition-colors ${viewMode ==="list"?"bg-card shadow-sm text-primary":"text-muted-foreground hover:text-foreground"}`}>
  <ListIcon size={14} />
  </button>
  </div>
@@ -2702,7 +2719,8 @@ function AdminUsers() {
  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"/>
  <Input placeholder="Rechercher par nom, email, téléphone ou entreprise..."value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 pr-9"/>
  {search && (
- <button onClick={() => setSearch("")} title="Effacer la recherche" className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-md hover:bg-muted text-muted-foreground">
+ <button onClick={() => setSearch("")} title="Effacer la recherche"
+  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 rounded-md hover:bg-muted text-muted-foreground">
  <X size={14} />
  </button>
  )}
@@ -2769,7 +2787,8 @@ function AdminUsers() {
  )}
  </div>
  <Button
- size="sm" variant={hasActiveFilters ?"destructive":"outline"}
+ size="sm"
+  variant={hasActiveFilters ?"destructive":"outline"}
  onClick={resetFilters}
  disabled={!hasActiveFilters}
  className="gap-1.5 h-8" >
@@ -2969,7 +2988,9 @@ function AdminUsers() {
  </p>
  </div>
  <Button
- size="sm" variant="destructive" className="h-7 text-xs" disabled={mfaLoading === mfaDialogUser.user_id}
+ size="sm"
+  variant="destructive"
+  className="h-7 text-xs" disabled={mfaLoading === mfaDialogUser.user_id}
  onClick={() => disableFactor(mfaDialogUser.user_id, f.id,"totp")}
  >
  Désactiver
@@ -3004,7 +3025,8 @@ function AdminUsers() {
  {status.enrolled && (
  <div className="pt-2 border-t border-border/30">
  <Button
- variant="destructive" size="sm" className="w-full" disabled={mfaLoading === mfaDialogUser.user_id}
+ variant="destructive" size="sm"
+  className="w-full" disabled={mfaLoading === mfaDialogUser.user_id}
  onClick={() => disableMfa(mfaDialogUser.user_id, mfaDialogUser.full_name ||"cet utilisateur")}
  >
  <Shield size={14} className="mr-2"/>
@@ -3288,13 +3310,15 @@ function AdminUsers() {
  <div className="flex gap-2 mb-4">
  <Button
  variant={inviteMode ==="single"?"default":"outline"}
- size="sm" className="gap-1.5" onClick={() => { setInviteMode("single"); setCsvUsers([]); setImportResults(null); }}
+ size="sm"
+  className="gap-1.5" onClick={() => { setInviteMode("single"); setCsvUsers([]); setImportResults(null); }}
  >
  <Send size={14} /> Invitation
  </Button>
  <Button
  variant={inviteMode ==="csv"?"default":"outline"}
- size="sm" className="gap-1.5" onClick={() => { setInviteMode("csv"); setImportResults(null); }}
+ size="sm"
+  className="gap-1.5" onClick={() => { setInviteMode("csv"); setImportResults(null); }}
  >
  <FileSpreadsheet size={14} /> Import CSV
  </Button>

@@ -132,7 +132,8 @@ export default function LearnerLeaderboardPage() {
  <li
  key={r.user_id}
  className={`flex items-center gap-3 px-3 py-2.5 rounded-lg border transition-colors ${
- isMe ?"bg-primary/5 border-primary/30":"bg-card hover:bg-muted/40 border-transparent" }`}
+ isMe ?"bg-primary/5 border-primary/30":"bg-card hover:bg-muted/40 border-transparent"
+  }`}
  >
  <RankBadge rank={Number(r.rank)} />
  <div className="h-9 w-9 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-semibold shrink-0">

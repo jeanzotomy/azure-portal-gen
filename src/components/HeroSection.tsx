@@ -47,10 +47,13 @@ export function HeroSection() {
  {words.map((word: string, i: number) => (
  <span
  key={word}
- aria-hidden="true" className={`inline-block transition-all duration-700 ${
- i === 1 ?"gradient-text":"" } ${
+ aria-hidden="true"
+  className={`inline-block transition-all duration-700 ${
+ i === 1 ?"gradient-text":""
+  } ${
  i < visibleCount
- ?"opacity-100 translate-y-0" :"opacity-0 translate-y-4" }`}
+ ?"opacity-100 translate-y-0" :"opacity-0 translate-y-4"
+  }`}
  >
  {word}{""}
  </span>
@@ -81,7 +84,8 @@ export function HeroSection() {
  src={heroPerson}
  alt="Consultante Cloud Mature" width={900}
  height={1244}
- fetchPriority="high" loading="eager" decoding="async" className="relative max-h-[600px] w-auto rounded-2xl shadow-[0_20px_60px_-15px_hsl(195_100%_40%/0.3)] ring-1 ring-white/10" />
+ fetchPriority="high" loading="eager" decoding="async"
+  className="relative max-h-[600px] w-auto rounded-2xl shadow-[0_20px_60px_-15px_hsl(195_100%_40%/0.3)] ring-1 ring-white/10" />
  </div>
  </div>
  </div>

@@ -27,7 +27,7 @@ function XIcon({ size = 16, className }: { size?: number; className?: string }) 
       height={size}
       viewBox="0 0 24 24"
       fill="currentColor"
-      className={className}
+  className={className}
       aria-hidden="true"
     >
       <path d="M18.244 2H21.5l-7.5 8.57L23 22h-6.797l-5.32-6.97L4.8 22H1.54l8.03-9.18L1 2h6.91l4.808 6.36L18.244 2Zm-2.39 18h1.86L7.243 4h-1.93l10.54 16Z" />
@@ -142,7 +142,7 @@ export function SocialChannels({
             href={c.href}
             target="_blank"
             rel="noopener noreferrer"
-            className={cn(
+  className={cn(
               "inline-flex items-center gap-2 rounded-md border px-3 py-2 text-sm font-medium bg-background/40 backdrop-blur-sm transition-colors",
               c.colorClass,
             )}
@@ -165,7 +165,7 @@ export function SocialChannels({
           href={c.href}
           target="_blank"
           rel="noopener noreferrer"
-          className={cn(
+  className={cn(
             "inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium bg-background/40 backdrop-blur-sm transition-colors",
             c.colorClass,
           )}

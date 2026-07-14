@@ -57,7 +57,8 @@ const timeAgo = (iso: string) => {
   if (d < 60) return "à l'instant";
   if (d < 3600) return `il y a ${Math.floor(d / 60)} min`;
   if (d < 86400) return `il y a ${Math.floor(d / 3600)} h`;
-  return new Date(iso).toLocaleDateString("fr-FR", { day: "2-digit", month: "short" });
+  return new Date(iso).toLocaleDateString("fr-FR", { day: "2-digit", month: "short"
+  });
 };
 
 type FilterMode = "all" | "unread" | "read";
@@ -205,7 +206,8 @@ export default function PortalNotificationsPage() {
             </SelectContent>
           </Select>
           {unreadCount > 0 && (
-            <Button size="sm" variant="outline" onClick={markAll}>
+            <Button size="sm"
+  variant="outline" onClick={markAll}>
               <CheckCheck className="h-3.5 w-3.5 mr-1" /> Tout marquer lu
             </Button>
           )}
@@ -236,7 +238,8 @@ export default function PortalNotificationsPage() {
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2 flex-wrap">
                         <span className="font-semibold text-sm">{n.title}</span>
-                        <Badge variant="outline" className={`text-[10px] ${LEVEL_CLS[n.level] ?? ""}`}>
+                        <Badge variant="outline"
+  className={`text-[10px] ${LEVEL_CLS[n.level] ?? ""}`}>
                           {CATEGORY_LABEL[n.category] ?? n.category}
                         </Badge>
                         <span className="text-[10px] text-muted-foreground ml-auto">{timeAgo(n.created_at)}</span>
@@ -246,8 +249,8 @@ export default function PortalNotificationsPage() {
                         {n.link && (
                           <Button
                             size="sm"
-                            variant="outline"
-                            className="h-7 text-xs"
+  variant="outline"
+  className="h-7 text-xs"
                             onClick={() => {
                               if (!n.read_at) void markRead(n.id);
                               window.location.href = n.link!;
@@ -257,14 +260,16 @@ export default function PortalNotificationsPage() {
                           </Button>
                         )}
                         {!n.read_at && (
-                          <Button size="sm" variant="ghost" className="h-7 text-xs" onClick={() => void markRead(n.id)}>
+                          <Button size="sm"
+  variant="ghost"
+  className="h-7 text-xs" onClick={() => void markRead(n.id)}>
                             <CheckCheck className="h-3 w-3 mr-1" /> Marquer lu
                           </Button>
                         )}
                         <Button
                           size="sm"
-                          variant="ghost"
-                          className="h-7 text-xs text-muted-foreground hover:text-rose-600 ml-auto"
+  variant="ghost"
+  className="h-7 text-xs text-muted-foreground hover:text-rose-600 ml-auto"
                           onClick={() => void remove(n.id)}
                         >
                           <Trash2 className="h-3 w-3" />
@@ -287,8 +292,8 @@ export default function PortalNotificationsPage() {
           <div className="flex items-center gap-1">
             <Button
               size="sm"
-              variant="outline"
-              className="h-8"
+  variant="outline"
+  className="h-8"
               disabled={safePage <= 1}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
             >
@@ -299,8 +304,8 @@ export default function PortalNotificationsPage() {
             </span>
             <Button
               size="sm"
-              variant="outline"
-              className="h-8"
+  variant="outline"
+  className="h-8"
               disabled={safePage >= pageCount}
               onClick={() => setPage((p) => Math.min(pageCount, p + 1))}
             >

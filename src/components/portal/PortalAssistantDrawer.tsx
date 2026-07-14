@@ -77,7 +77,8 @@ export function PortalAssistantDrawer({ open, onOpenChange }: { open: boolean; o
 
  return (
  <div
- role="dialog" aria-label="Assistant CloudMature" className={cn(
+ role="dialog" aria-label="Assistant CloudMature"
+  className={cn(
 "fixed z-[70] bottom-4 right-4 md:bottom-6 md:right-6",
 "w-[calc(100vw-2rem)] max-w-[400px] h-[min(70vh,600px)]",
 "rounded-2xl shadow-2xl border border-border bg-background/95 backdrop-blur-xl",

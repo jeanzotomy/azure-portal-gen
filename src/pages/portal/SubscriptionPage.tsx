@@ -94,7 +94,8 @@ export default function SubscriptionPage() {
             {sub.status === "active" && !sub.cancel_at_period_end && <Badge className="bg-emerald-600">Actif</Badge>}
             {sub.status === "trialing" && <Badge className="bg-blue-600">Essai</Badge>}
             {sub.status === "past_due" && <Badge variant="destructive">Paiement en retard</Badge>}
-            {sub.cancel_at_period_end && <Badge variant="outline" className="text-amber-600 border-amber-600">Annulation prévue</Badge>}
+            {sub.cancel_at_period_end && <Badge variant="outline"
+  className="text-amber-600 border-amber-600">Annulation prévue</Badge>}
             {sub.status === "canceled" && <Badge variant="secondary">Annulé</Badge>}
           </CardTitle>
         </CardHeader>
@@ -102,7 +103,8 @@ export default function SubscriptionPage() {
           {sub.current_period_end && (
             <p className="text-sm">
               {sub.cancel_at_period_end ? "Accès jusqu'au " : "Prochain renouvellement : "}
-              <strong>{new Date(sub.current_period_end).toLocaleDateString("fr-FR", { dateStyle: "long" })}</strong>
+              <strong>{new Date(sub.current_period_end).toLocaleDateString("fr-FR", { dateStyle: "long"
+  })}</strong>
             </p>
           )}
           {sub.status === "past_due" && (

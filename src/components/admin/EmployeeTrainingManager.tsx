@@ -146,12 +146,14 @@ export default function EmployeeTrainingManager() {
  <UsersRound className="h-4 w-4 mr-1"/> Assigner en masse
  </Button>
  <Button
- size="sm" variant="secondary" onClick={() => navigate(`${basePath}/formations/groupes`)}
+ size="sm"
+  variant="secondary" onClick={() => navigate(`${basePath}/formations/groupes`)}
  className="bg-white/15 hover:bg-white/25 text-white border-white/20" >
  <Layers className="h-4 w-4 mr-1"/> Groupes
  </Button>
  <Button
- size="sm" variant="secondary" onClick={loadUsers}
+ size="sm"
+  variant="secondary" onClick={loadUsers}
  className="bg-white/15 hover:bg-white/25 text-white border-white/20" >
  <RefreshCw className="h-4 w-4 mr-1"/> Actualiser
  </Button>
@@ -304,13 +306,15 @@ export default function EmployeeTrainingManager() {
  </span>
  <div className="flex items-center gap-1">
  <Button
- size="sm" variant="outline" disabled={trainingPage <= 1}
+ size="sm"
+  variant="outline" disabled={trainingPage <= 1}
  onClick={() => setTrainingPage((p) => Math.max(1, p - 1))}
  >
  <ChevronLeft className="h-4 w-4"/>
  </Button>
  <Button
- size="sm" variant="outline" disabled={trainingPage >= trainingTotalPages}
+ size="sm"
+  variant="outline" disabled={trainingPage >= trainingTotalPages}
  onClick={() => setTrainingPage((p) => Math.min(trainingTotalPages, p + 1))}
  >
  <ChevronRight className="h-4 w-4"/>

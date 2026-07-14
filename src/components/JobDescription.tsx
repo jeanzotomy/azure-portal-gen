@@ -80,7 +80,8 @@ function parse(input: string): Block[] {
   return blocks;
 }
 
-export function JobDescription({ text, className = "" }: { text: string; className?: string }) {
+export function JobDescription({ text, className = ""
+  }: { text: string; className?: string }) {
   const blocks = useMemo(() => parse(text || ""), [text]);
   return (
     <div className={`space-y-4 text-sm leading-relaxed text-foreground/85 ${className}`}>

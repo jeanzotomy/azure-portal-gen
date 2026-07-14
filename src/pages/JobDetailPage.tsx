@@ -291,7 +291,8 @@ export default function JobDetailPage() {
  <div className="container max-w-4xl">
  <div className="mb-6">
  <Link
- to="/careers" className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors" >
+ to="/careers"
+  className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-primary transition-colors" >
  <ArrowLeft size={14} /> Toutes les offres
  </Link>
  </div>
@@ -321,13 +322,15 @@ export default function JobDetailPage() {
  <div className="flex flex-wrap gap-3 items-center">
  <Button
  onClick={() => setApplyOpen(true)}
- size="lg" className="bg-white text-primary hover:bg-white/90" >
+ size="lg"
+  className="bg-white text-primary hover:bg-white/90" >
  Postuler maintenant
  </Button>
  <DropdownMenu>
  <DropdownMenuTrigger asChild>
  <Button
- variant="outline" size="lg" className="bg-white/10 border-white/30 text-primary-foreground hover:bg-white/20 hover:text-primary-foreground gap-1.5" >
+ variant="outline" size="lg"
+  className="bg-white/10 border-white/30 text-primary-foreground hover:bg-white/20 hover:text-primary-foreground gap-1.5" >
  <Share2 size={14} /> Partager
  </Button>
  </DropdownMenuTrigger>

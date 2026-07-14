@@ -135,7 +135,7 @@ export default function TrainingsStorePage() {
                 onClick={() => setCurrency(c)}
                 className={`px-3 py-1.5 text-sm font-medium rounded transition-colors ${
                   currency === c ? "bg-background shadow-sm" : "text-muted-foreground hover:text-foreground"
-                }`}
+  }`}
               >
                 {c}
               </button>
@@ -163,7 +163,8 @@ export default function TrainingsStorePage() {
                   <CardContent className="p-5 flex-1 flex flex-col">
                     <div className="flex items-start justify-between gap-2 mb-2">
                       <h3 className="font-semibold text-base leading-tight">{t.title}</h3>
-                      {t.level && <Badge variant="secondary" className="shrink-0">{t.level}</Badge>}
+                      {t.level && <Badge variant="secondary"
+  className="shrink-0">{t.level}</Badge>}
                     </div>
                     {t.category && (
                       <div className="text-xs text-muted-foreground mb-2">{t.category}</div>
@@ -205,7 +206,8 @@ export default function TrainingsStorePage() {
 
         {!user && (
           <p className="text-center text-sm text-muted-foreground mt-8">
-            <Link to="/auth" className="text-primary underline">
+            <Link to="/auth"
+  className="text-primary underline">
               {locale === "fr" ? "Connectez-vous" : "Sign in"}
             </Link>{" "}
             {locale === "fr" ? "pour acheter une formation." : "to purchase a training."}

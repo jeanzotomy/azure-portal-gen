@@ -14,7 +14,8 @@ export function HeroScreenCarousel() {
  const command = muted ?"unMute":"mute";
  iframe.contentWindow.postMessage(
  JSON.stringify({ event:"command", func: command, args: [] }),
-"*" );
+"*"
+  );
  setMuted(!muted);
  };
 
@@ -40,7 +41,8 @@ export function HeroScreenCarousel() {
  ref={iframeRef}
  src={`https://www.youtube-nocookie.com/embed/${YOUTUBE_VIDEO_ID}?autoplay=1&mute=1&loop=1&playlist=${YOUTUBE_VIDEO_ID}&controls=0&modestbranding=1&rel=0&playsinline=1&enablejsapi=1`}
  title="CloudMature Présentation" allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen
- loading="lazy" className="absolute inset-0 w-full h-full border-0" />
+ loading="lazy"
+  className="absolute inset-0 w-full h-full border-0" />
 
  {/* Sound toggle button */}
  <button
@@ -53,11 +55,13 @@ export function HeroScreenCarousel() {
  ) : (
  <button
  type="button" onClick={() => setActivated(true)}
- aria-label="Lire la vidéo de présentation CloudMature" className="absolute inset-0 w-full h-full group cursor-pointer" >
+ aria-label="Lire la vidéo de présentation CloudMature"
+  className="absolute inset-0 w-full h-full group cursor-pointer" >
  {/* Lightweight thumbnail facade - no YouTube JS loaded until clicked */}
  <img
  src={`https://i.ytimg.com/vi/${YOUTUBE_VIDEO_ID}/hqdefault.jpg`}
- alt="CloudMature Présentation" loading="lazy" decoding="async" className="absolute inset-0 w-full h-full object-cover" />
+ alt="CloudMature Présentation" loading="lazy" decoding="async"
+  className="absolute inset-0 w-full h-full object-cover" />
  <div className="absolute inset-0 bg-black/30 group-hover:bg-black/20 transition-colors"/>
  <div className="absolute inset-0 flex items-center justify-center">
  <div className="bg-primary/90 text-primary-foreground rounded-full p-5 group-hover:scale-110 transition-transform shadow-lg">

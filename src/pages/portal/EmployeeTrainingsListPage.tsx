@@ -100,7 +100,8 @@ export default function EmployeeTrainingsListPage() {
  const { data } = await supabase
  .from("onboarding_assigned_trainings")
  .select(
-"id, training_id, completed_at, quiz_score, quiz_passed, course_page, training:trainings(title, description, duration_minutes, category, content)" )
+"id, training_id, completed_at, quiz_score, quiz_passed, course_page, training:trainings(title, description, duration_minutes, category, content)"
+  )
  .eq("process_id", proc.id)
  .order("assigned_at", { ascending: false });
 
@@ -187,12 +188,14 @@ export default function EmployeeTrainingsListPage() {
  <>
  <MentionsBell userId={user.id} />
  <Button
- size="sm" variant="outline" onClick={() => navigate("/portal/formations/classement")}
+ size="sm"
+  variant="outline" onClick={() => navigate("/portal/formations/classement")}
  className="bg-white/10 text-white border-white/30 hover:bg-white/20" >
  <Trophy className="h-4 w-4 mr-1"/> Classement
  </Button>
  <Button
- size="sm" variant="outline" onClick={load}
+ size="sm"
+  variant="outline" onClick={load}
  className="bg-white/10 text-white border-white/30 hover:bg-white/20" >
  <RefreshCw className="h-4 w-4 mr-1"/> Actualiser
  </Button>
@@ -246,7 +249,8 @@ export default function EmployeeTrainingsListPage() {
  <Input
  value={search}
  onChange={(e) => setSearch(e.target.value)}
- placeholder="Rechercher par titre, description, catégorie..." className="pl-9 pr-9 h-9" />
+ placeholder="Rechercher par titre, description, catégorie..."
+  className="pl-9 pr-9 h-9" />
  {search && (
  <button
  type="button" onClick={() => setSearch("")}

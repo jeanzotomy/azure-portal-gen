@@ -60,7 +60,8 @@ export default function SharePointLists({ siteId, siteName, onBack }: Props) {
       const data = await callProxy("list-lists", { siteId });
       setLists(data.value || []);
     } catch (err: unknown) {
-      toast({ title: t("sharepoint.error"), description: err instanceof Error ? err.message : "Unknown error", variant: "destructive" });
+      toast({ title: t("sharepoint.error"), description: err instanceof Error ? err.message : "Unknown error", variant: "destructive"
+  });
     } finally {
       setLoading(false);
     }
@@ -87,7 +88,8 @@ export default function SharePointLists({ siteId, siteName, onBack }: Props) {
       });
       setColumns(Array.from(colSet).slice(0, 10)); // Limit columns
     } catch (err: unknown) {
-      toast({ title: t("sharepoint.error"), description: err instanceof Error ? err.message : "Unknown error", variant: "destructive" });
+      toast({ title: t("sharepoint.error"), description: err instanceof Error ? err.message : "Unknown error", variant: "destructive"
+  });
     } finally {
       setLoading(false);
     }

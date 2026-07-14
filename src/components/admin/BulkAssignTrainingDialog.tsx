@@ -151,7 +151,8 @@ export default function BulkAssignTrainingDialog({
  <SelectTrigger>
  <SelectValue
  placeholder={
- loadingTrainings ?"Chargement…":"Choisir une formation" }
+ loadingTrainings ?"Chargement…":"Choisir une formation"
+  }
  />
  </SelectTrigger>
  <SelectContent>
@@ -173,7 +174,8 @@ export default function BulkAssignTrainingDialog({
  Employés ({selected.size} sélectionné{selected.size > 1 ?"s":""})
  </Label>
  <Button
- size="sm" variant="ghost" onClick={toggleAll}
+ size="sm"
+  variant="ghost" onClick={toggleAll}
  className="text-xs h-7" >
  {allFilteredSelected ?"Tout désélectionner":"Tout sélectionner"}
  </Button>

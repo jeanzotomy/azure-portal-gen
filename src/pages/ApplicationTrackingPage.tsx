@@ -123,7 +123,8 @@ export default function ApplicationTrackingPage() {
  <div>
  <Label htmlFor="email">Email utilisé pour la candidature</Label>
  <Input
- id="email" type="email" placeholder="vous@exemple.com" value={email}
+ id="email"
+  type="email" placeholder="vous@exemple.com" value={email}
  onChange={(e) => setEmail(e.target.value)}
  className="mt-1.5" required
  />

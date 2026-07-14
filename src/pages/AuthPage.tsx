@@ -33,7 +33,8 @@ export default function AuthPage() {
 
   useEffect(() => {
     if (isBlocked) {
-      toast({ title: t("auth.blocked"), description: t("auth.blockedDesc"), variant: "destructive" });
+      toast({ title: t("auth.blocked"), description: t("auth.blockedDesc"), variant: "destructive"
+  });
     }
   }, [isBlocked]);
 
@@ -54,7 +55,8 @@ export default function AuthPage() {
         const { data: profile } = await supabase.from("profiles").select("blocked").eq("user_id", data.user.id).maybeSingle();
         if (profile?.blocked) {
           await supabase.auth.signOut();
-          toast({ title: t("auth.blocked"), description: t("auth.blockedDesc"), variant: "destructive" });
+          toast({ title: t("auth.blocked"), description: t("auth.blockedDesc"), variant: "destructive"
+  });
           setLoading(false);
           return;
         }
@@ -69,7 +71,8 @@ export default function AuthPage() {
         toast({ title: t("auth.signupSuccess"), description: t("auth.signupSuccessDesc") });
       }
     } catch (err: any) {
-      toast({ title: t("auth.error"), description: err.message, variant: "destructive" });
+      toast({ title: t("auth.error"), description: err.message, variant: "destructive"
+  });
     } finally {
       setLoading(false);
     }
@@ -80,7 +83,8 @@ export default function AuthPage() {
       redirect_uri: window.location.origin + "/mfa",
     });
     if (result.error) {
-      toast({ title: t("auth.error"), description: String(result.error), variant: "destructive" });
+      toast({ title: t("auth.error"), description: String(result.error), variant: "destructive"
+  });
       return;
     }
     if (result.redirected) return;
@@ -90,13 +94,15 @@ export default function AuthPage() {
   return (
     <div className="min-h-screen gradient-hero flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-        <Link to="/" className="inline-flex items-center gap-2 text-sm text-secondary-foreground/60 hover:text-primary mb-8">
+        <Link to="/"
+  className="inline-flex items-center gap-2 text-sm text-secondary-foreground/60 hover:text-primary mb-8">
           <ArrowLeft size={16} /> {t("auth.backToSite")}
         </Link>
 
         <div className="glass rounded-2xl p-8">
           <div className="flex items-center gap-3 mb-6">
-            <img src={favicon} alt="CloudMature" className="h-10 w-10" />
+            <img src={favicon} alt="CloudMature"
+  className="h-10 w-10" />
             <div>
               <h1 className="text-xl font-bold text-primary-foreground">{t("auth.portalTitle")}</h1>
               <p className="text-sm text-secondary-foreground/60">Cloud Mature</p>
@@ -110,7 +116,7 @@ export default function AuthPage() {
                 className={cn(
                   "absolute top-1 bottom-1 rounded-lg bg-primary transition-all duration-300 ease-in-out",
                   activeTab === "login" ? "left-1 w-[calc(50%-4px)]" : "left-[calc(50%+2px)] w-[calc(50%-4px)]"
-                )}
+  )}
               />
               <button
                 type="button"
@@ -118,7 +124,7 @@ export default function AuthPage() {
                 className={cn(
                   "relative z-10 flex-1 py-2.5 text-sm font-semibold rounded-lg transition-colors duration-200",
                   activeTab === "login" ? "text-primary-foreground" : "text-secondary-foreground/60 hover:text-secondary-foreground"
-                )}
+  )}
               >
                 {t("auth.login")}
               </button>
@@ -128,7 +134,7 @@ export default function AuthPage() {
                 className={cn(
                   "relative z-10 flex-1 py-2.5 text-sm font-semibold rounded-lg transition-colors duration-200",
                   activeTab === "signup" ? "text-primary-foreground" : "text-secondary-foreground/60 hover:text-secondary-foreground"
-                )}
+  )}
               >
                 {t("auth.signup")}
               </button>
@@ -159,8 +165,8 @@ export default function AuthPage() {
             <>
               <Button
                 type="button"
-                variant="outline"
-                className="w-full mb-4 bg-white/10 border-border/30 text-primary-foreground hover:bg-white/20"
+  variant="outline"
+  className="w-full mb-4 bg-white/10 border-border/30 text-primary-foreground hover:bg-white/20"
                 onClick={handleGoogleLogin}
               >
                 <svg className="mr-2 h-4 w-4" viewBox="0 0 24 24">
@@ -195,7 +201,8 @@ export default function AuthPage() {
               <Input type="password" placeholder={t("auth.password")} required value={password} onChange={(e) => setPassword(e.target.value)}
                 className="bg-secondary/30 border-border/30 text-primary-foreground placeholder:text-secondary-foreground/70" />
             )}
-            <Button type="submit" className="w-full gradient-primary text-primary-foreground border-0" disabled={loading}>
+            <Button type="submit"
+  className="w-full gradient-primary text-primary-foreground border-0" disabled={loading}>
               {mode === "forgot" ? (
                 <><Mail size={16} className="mr-2" /> {loading ? t("auth.sendingLink") : t("auth.sendLink")}</>
               ) : (

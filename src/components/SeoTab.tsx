@@ -48,7 +48,8 @@ function DeltaPill({ current, previous, invert = false }: { current: number; pre
  <span
  className={`inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full ${
  isPositive
- ?"text-emerald-600 bg-emerald-500/10 dark:text-emerald-400" :"text-rose-600 bg-rose-500/10 dark:text-rose-400" }`}
+ ?"text-emerald-600 bg-emerald-500/10 dark:text-emerald-400" :"text-rose-600 bg-rose-500/10 dark:text-rose-400"
+  }`}
  >
  <Icon size={10} />
  {diff > 0 ?"+":""}{fmt(diff, 2)}
@@ -236,10 +237,12 @@ export default function SeoTab() {
  }}
  />
  <Area
- yAxisId="right" type="monotone" dataKey="impressions" stroke="hsl(var(--muted-foreground))" strokeWidth={1.5}
+ yAxisId="right"
+  type="monotone" dataKey="impressions" stroke="hsl(var(--muted-foreground))" strokeWidth={1.5}
  fill="url(#seoImpr)" name="Impressions" />
  <Area
- yAxisId="left" type="monotone" dataKey="clicks" stroke="hsl(var(--primary))" strokeWidth={2.5}
+ yAxisId="left"
+  type="monotone" dataKey="clicks" stroke="hsl(var(--primary))" strokeWidth={2.5}
  fill="url(#seoClicks)" name="Clics" />
  </AreaChart>
  </ResponsiveContainer>
@@ -330,7 +333,8 @@ export default function SeoTab() {
  <div className="border-l border-border/50 pl-3">
  <p
  className={`text-2xl font-bold tabular-nums ${
- (live?.sitemap?.errors ?? 0) > 0 ?"text-destructive":"text-foreground" }`}
+ (live?.sitemap?.errors ?? 0) > 0 ?"text-destructive":"text-foreground"
+  }`}
  >
  {fmt(live?.sitemap?.errors ?? 0)}
  </p>
@@ -339,7 +343,8 @@ export default function SeoTab() {
  <div className="border-l border-border/50 pl-3">
  <p
  className={`text-2xl font-bold tabular-nums ${
- (live?.sitemap?.warnings ?? 0) > 0 ?"text-amber-600 dark:text-amber-400":"text-foreground" }`}
+ (live?.sitemap?.warnings ?? 0) > 0 ?"text-amber-600 dark:text-amber-400":"text-foreground"
+  }`}
  >
  {fmt(live?.sitemap?.warnings ?? 0)}
  </p>
@@ -347,7 +352,8 @@ export default function SeoTab() {
  </div>
  </div>
  <a
- href="https://search.google.com/search-console" target="_blank" rel="noreferrer" className="mt-4 text-xs text-primary hover:underline inline-flex items-center gap-1" >
+ href="https://search.google.com/search-console" target="_blank" rel="noreferrer"
+  className="mt-4 text-xs text-primary hover:underline inline-flex items-center gap-1" >
  Ouvrir Search Console <ExternalLink size={11} />
  </a>
  </GlassCard>
@@ -416,7 +422,8 @@ export default function SeoTab() {
  <td className="px-5 py-3 truncate max-w-[200px]">
  <a
  href={r.page}
- target="_blank" rel="noreferrer" className="text-primary hover:underline font-medium" >
+ target="_blank" rel="noreferrer"
+  className="text-primary hover:underline font-medium" >
  {r.page?.replace("https://cloudmature.com","") ||"/"}
  </a>
  </td>

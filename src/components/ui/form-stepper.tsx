@@ -68,7 +68,8 @@ export const FormStepper: React.FC<FormStepperProps> = ({ steps, current, onStep
  </button>
  {index < steps.length - 1 && (
  <div
- aria-hidden="true" className={cn(
+ aria-hidden="true"
+  className={cn(
 "mt-1 h-0.5 rounded-full transition-colors",
  isComplete ?"bg-gradient-primary-deep":"bg-border/70",
  )}

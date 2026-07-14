@@ -48,7 +48,8 @@ export default function HrPortalPage() {
       <header className="h-16 flex items-center border-b border-border bg-card px-4 sm:px-6">
         <div className="max-w-[1400px] mx-auto w-full flex items-center justify-between gap-4">
           <div className="flex items-center gap-3 min-w-0">
-            <img src={cmLogo} alt="CloudMature" className="h-9 w-auto shrink-0" />
+            <img src={cmLogo} alt="CloudMature"
+  className="h-9 w-auto shrink-0" />
             <div className="hidden sm:block h-8 w-px bg-border" />
             <h1 className="text-sm font-semibold flex items-center gap-2 min-w-0">
               <Briefcase size={16} className="text-primary shrink-0" />
@@ -88,7 +89,7 @@ export default function HrPortalPage() {
                 }}
                 className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm whitespace-nowrap transition-colors ${
                   active ? "bg-primary text-primary-foreground" : "hover:bg-muted text-foreground"
-                }`}
+  }`}
               >
                 <s.icon size={14} />
                 {s.label}
@@ -99,7 +100,7 @@ export default function HrPortalPage() {
             onClick={() => navigate("/rh/formations")}
             className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm whitespace-nowrap transition-colors ${
               isFormationsRoute ? "bg-primary text-primary-foreground" : "hover:bg-muted text-foreground"
-            }`}
+  }`}
           >
             <BookOpenCheck size={14} />
             Formations employés

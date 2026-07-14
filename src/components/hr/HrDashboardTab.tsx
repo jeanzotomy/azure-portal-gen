@@ -155,12 +155,18 @@ export default function HrDashboardTab() {
   }
 
   const kpiCards = [
-    { icon: Briefcase, label: "Candidatures ce mois", value: kpis.appsMonth, tint: "text-blue-600 bg-blue-500/10" },
-    { icon: CheckCircle2, label: "Taux d'acceptation", value: `${kpis.acceptanceRate}%`, tint: "text-emerald-600 bg-emerald-500/10" },
-    { icon: TrendingUp, label: "Taux d'entretien", value: `${kpis.interviewRate}%`, tint: "text-purple-600 bg-purple-500/10" },
-    { icon: Timer, label: "Délai moyen (j)", value: kpis.avgProcessingDays, tint: "text-orange-600 bg-orange-500/10" },
-    { icon: Users, label: "Onboardings en cours", value: kpis.onboardingsActive, tint: "text-indigo-600 bg-indigo-500/10" },
-    { icon: GraduationCap, label: "Formations à finir < 7j", value: kpis.trainingsDueSoon, tint: "text-amber-600 bg-amber-500/10" },
+    { icon: Briefcase, label: "Candidatures ce mois", value: kpis.appsMonth, tint: "text-blue-600 bg-blue-500/10"
+  },
+    { icon: CheckCircle2, label: "Taux d'acceptation", value: `${kpis.acceptanceRate}%`, tint: "text-emerald-600 bg-emerald-500/10"
+  },
+    { icon: TrendingUp, label: "Taux d'entretien", value: `${kpis.interviewRate}%`, tint: "text-purple-600 bg-purple-500/10"
+  },
+    { icon: Timer, label: "Délai moyen (j)", value: kpis.avgProcessingDays, tint: "text-orange-600 bg-orange-500/10"
+  },
+    { icon: Users, label: "Onboardings en cours", value: kpis.onboardingsActive, tint: "text-indigo-600 bg-indigo-500/10"
+  },
+    { icon: GraduationCap, label: "Formations à finir < 7j", value: kpis.trainingsDueSoon, tint: "text-amber-600 bg-amber-500/10"
+  },
   ];
 
   const alertItems = [
@@ -177,7 +183,8 @@ export default function HrDashboardTab() {
         description="Indicateurs de recrutement, onboarding et formations en temps réel."
         onRefresh={load}
         right={
-          <Button size="sm" variant="outline" onClick={exportSnapshot}>
+          <Button size="sm"
+  variant="outline" onClick={exportSnapshot}>
             <FileDown size={14} className="mr-1.5" /> Exporter snapshot
           </Button>
         }

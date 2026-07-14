@@ -1002,7 +1002,8 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
  <div className="space-y-2">
  <Label htmlFor="job-closing">Date de clôture</Label>
  <Input
- id="job-closing" type="date" value={form.closing_date}
+ id="job-closing"
+  type="date" value={form.closing_date}
  onChange={(e) => setForm({ ...form, closing_date: e.target.value })}
  />
  </div>
@@ -1030,7 +1031,8 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
  <div className="space-y-2">
  <Label htmlFor="job-start">Date de prise de poste</Label>
  <Input
- id="job-start" type="date" value={form.start_date}
+ id="job-start"
+  type="date" value={form.start_date}
  onChange={(e) => setForm({ ...form, start_date: e.target.value })}
  />
  </div>
@@ -1086,7 +1088,8 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
  rows={2}
  value={aiPrompt}
  onChange={(e) => setAiPrompt(e.target.value)}
- placeholder="Instructions optionnelles : ton, public cible, compétences à mettre en avant…" className="text-sm bg-background/60" />
+ placeholder="Instructions optionnelles : ton, public cible, compétences à mettre en avant…"
+  className="text-sm bg-background/60" />
  <div className="flex flex-wrap gap-2">
  <Button type="button"size="sm"onClick={() => runJobAssistant("generate")} disabled={!!aiAction} className="bg-gradient-primary-deep text-primary-foreground hover:opacity-95">
  {aiAction ==="generate"? <Loader2 size={13} className="animate-spin"/> : <Sparkles size={13} />}

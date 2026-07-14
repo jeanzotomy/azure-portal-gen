@@ -121,7 +121,8 @@ export function SignaturePad({ initialImage, width = 480, height = 180, onSave, 
         />
       </div>
       <div className="flex items-center gap-2">
-        <Button type="button" variant="outline" size="sm" onClick={clear} disabled={saving}>
+        <Button type="button"
+  variant="outline" size="sm" onClick={clear} disabled={saving}>
           <Eraser size={14} className="mr-1" /> Effacer
         </Button>
         <Button type="button" size="sm" onClick={handleSave} disabled={!hasContent || saving}>

@@ -62,8 +62,10 @@ export default function MfaPage() {
     const { data: factors } = await supabase.auth.mfa.listFactors();
     const unverifiedFactors = (factors?.totp || []).filter(f => (f.status as string) === "unverified");
     for (const f of unverifiedFactors) { await supabase.auth.mfa.unenroll({ factorId: f.id }); }
-    const { data, error } = await supabase.auth.mfa.enroll({ factorType: "totp", issuer: "Portail Cloudmature", friendlyName: "Portail Cloudmature" });
-    if (error) { toast({ title: t("auth.error"), description: error.message, variant: "destructive" }); return; }
+    const { data, error } = await supabase.auth.mfa.enroll({ factorType: "totp", issuer: "Portail Cloudmature", friendlyName: "Portail Cloudmature"
+  });
+    if (error) { toast({ title: t("auth.error"), description: error.message, variant: "destructive"
+  }); return; }
     setQrCode(data.totp.qr_code); setSecret(data.totp.secret); setFactorId(data.id); setStep("enroll");
   };
 
@@ -81,14 +83,16 @@ export default function MfaPage() {
       toast({ title: t("mfa.success"), description: t("mfa.successDesc") });
       if (currentUser) { await redirectByRole(currentUser.id); } else { navigate("/portal"); }
     } catch (err: any) {
-      toast({ title: t("mfa.invalidCode"), description: err.message, variant: "destructive" }); setOtp("");
+      toast({ title: t("mfa.invalidCode"), description: err.message, variant: "destructive"
+  }); setOtp("");
     } finally { setLoading(false); }
   };
 
   // SMS MFA
   const handleSendSmsMfa = async () => {
     if (!userPhone) {
-      toast({ title: t("mfa.noPhone"), description: t("mfa.noPhoneDesc"), variant: "destructive" });
+      toast({ title: t("mfa.noPhone"), description: t("mfa.noPhoneDesc"), variant: "destructive"
+  });
       return;
     }
     setLoading(true);
@@ -104,7 +108,8 @@ export default function MfaPage() {
       setSmsSent(true);
       toast({ title: t("mfa.smsSent"), description: t("mfa.smsSentDesc") });
     } catch (err: any) {
-      toast({ title: t("auth.error"), description: err.message, variant: "destructive" });
+      toast({ title: t("auth.error"), description: err.message, variant: "destructive"
+  });
     } finally { setLoading(false); }
   };
 
@@ -113,7 +118,8 @@ export default function MfaPage() {
     try {
       const normalizedPhone = userPhone?.startsWith("+") ? userPhone : `+1${(userPhone || "").replace(/\D/g, "")}`;
       const res = await supabase.functions.invoke("verify-sms-otp", {
-        body: { phone: normalizedPhone, code: otp, purpose: "mfa" },
+        body: { phone: normalizedPhone, code: otp, purpose: "mfa"
+  },
       });
       if (res.error || res.data?.error) {
         throw new Error(res.data?.error || res.error?.message || "Verification failed");
@@ -130,7 +136,8 @@ export default function MfaPage() {
         }
       }
     } catch (err: any) {
-      toast({ title: t("mfa.invalidCode"), description: err.message, variant: "destructive" }); setOtp("");
+      toast({ title: t("mfa.invalidCode"), description: err.message, variant: "destructive"
+  }); setOtp("");
     } finally { setLoading(false); }
   };
 
@@ -154,12 +161,14 @@ export default function MfaPage() {
   return (
     <div className="min-h-screen gradient-hero flex items-center justify-center px-4">
       <div className="w-full max-w-md">
-        <Link to="/auth" className="inline-flex items-center gap-2 text-sm text-secondary-foreground/60 hover:text-primary mb-8">
+        <Link to="/auth"
+  className="inline-flex items-center gap-2 text-sm text-secondary-foreground/60 hover:text-primary mb-8">
           <ArrowLeft size={16} /> {t("mfa.backToLogin")}
         </Link>
         <div className="glass rounded-2xl p-8">
           <div className="flex items-center gap-3 mb-6">
-            <img src={favicon} alt="CloudMature" className="h-10 w-10" />
+            <img src={favicon} alt="CloudMature"
+  className="h-10 w-10" />
             <div>
               <h1 className="text-xl font-bold text-primary-foreground">{t("mfa.title")}</h1>
               <p className="text-sm text-secondary-foreground/60">{t("mfa.subtitle")}</p>
@@ -176,7 +185,7 @@ export default function MfaPage() {
                   onClick={() => switchMethod(m.key)}
                   className={`flex-1 py-2 text-xs font-medium flex items-center justify-center gap-1 transition-colors ${
                     mfaMethod === m.key ? "bg-primary text-primary-foreground" : "bg-secondary/20 text-secondary-foreground/60 hover:bg-secondary/40"
-                  }`}
+  }`}
                 >
                   {m.icon} {m.label}
                 </button>
@@ -193,7 +202,8 @@ export default function MfaPage() {
               </div>
               <p className="text-sm text-secondary-foreground/60">{t("mfa.scanQr")}</p>
               <div className="flex justify-center bg-white rounded-xl p-4">
-                <img src={qrCode} alt="QR Code MFA" className="w-48 h-48" />
+                <img src={qrCode} alt="QR Code MFA"
+  className="w-48 h-48" />
               </div>
               {secret && (
                 <div className="text-center">
@@ -208,7 +218,8 @@ export default function MfaPage() {
                     onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
                     className="bg-white border-border/30 text-slate-900 text-center text-2xl font-semibold tracking-[0.5em] placeholder:text-slate-400 placeholder:tracking-[0.5em]" required />
                 </div>
-                <Button type="submit" className="w-full gradient-primary text-primary-foreground border-0" disabled={loading || otp.length !== 6}>
+                <Button type="submit"
+  className="w-full gradient-primary text-primary-foreground border-0" disabled={loading || otp.length !== 6}>
                   <ShieldCheck size={16} className="mr-2" /> {loading ? t("mfa.verifying") : t("mfa.activateMfa")}
                 </Button>
               </form>
@@ -227,7 +238,8 @@ export default function MfaPage() {
                 <Input type="text" inputMode="numeric" pattern="[0-9]{6}" maxLength={6} placeholder="000000" value={otp}
                   onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
                   className="bg-white border-border/30 text-slate-900 text-center text-2xl font-semibold tracking-[0.5em] placeholder:text-slate-400 placeholder:tracking-[0.5em]" autoFocus required />
-                <Button type="submit" className="w-full gradient-primary text-primary-foreground border-0" disabled={loading || otp.length !== 6}>
+                <Button type="submit"
+  className="w-full gradient-primary text-primary-foreground border-0" disabled={loading || otp.length !== 6}>
                   <ShieldCheck size={16} className="mr-2" /> {loading ? t("mfa.verifying") : t("mfa.verify")}
                 </Button>
               </form>
@@ -246,7 +258,8 @@ export default function MfaPage() {
                   <p className="text-sm text-secondary-foreground/60">
                     {t("mfa.smsSendDesc")} ({userPhone})
                   </p>
-                  <Button type="button" className="w-full gradient-primary text-primary-foreground border-0" disabled={loading} onClick={handleSendSmsMfa}>
+                  <Button type="button"
+  className="w-full gradient-primary text-primary-foreground border-0" disabled={loading} onClick={handleSendSmsMfa}>
                     <Phone size={16} className="mr-2" />
                     {loading ? t("mfa.sendingSmsCode") : t("mfa.sendSmsCode")}
                   </Button>
@@ -257,7 +270,8 @@ export default function MfaPage() {
                   <Input type="text" inputMode="numeric" pattern="[0-9]{6}" maxLength={6} placeholder="000000" value={otp}
                     onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
                     className="bg-white border-border/30 text-slate-900 text-center text-2xl font-semibold tracking-[0.5em] placeholder:text-slate-400 placeholder:tracking-[0.5em]" autoFocus required />
-                  <Button type="submit" className="w-full gradient-primary text-primary-foreground border-0" disabled={loading || otp.length !== 6}>
+                  <Button type="submit"
+  className="w-full gradient-primary text-primary-foreground border-0" disabled={loading || otp.length !== 6}>
                     <Phone size={16} className="mr-2" /> {loading ? t("mfa.verifying") : t("mfa.smsVerify")}
                   </Button>
                 </form>

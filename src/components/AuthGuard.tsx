@@ -22,7 +22,8 @@ interface AuthGuardProps {
  *
  * No "early return between hooks" - every hook runs on every render.
  */
-export function AuthGuard({ children, requireRoles, fallbackRoute = "/portal" }: AuthGuardProps) {
+export function AuthGuard({ children, requireRoles, fallbackRoute = "/portal"
+  }: AuthGuardProps) {
   const { user, ready } = useAuthSession();
   const { mfaVerified, timedOut: mfaTimedOut } = useMfaCheck();
   const { roles, loading: rolesLoading } = useUserRoles();

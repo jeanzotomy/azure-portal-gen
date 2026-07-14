@@ -24,7 +24,8 @@ export function MediaCapsuleView({ item }: { item: MediaCapsule }) {
     if (!id) return null;
     return (
       <div className="my-3">
-        <div className="relative w-full overflow-hidden rounded-lg border" style={{ paddingBottom: "56.25%" }}>
+        <div className="relative w-full overflow-hidden rounded-lg border" style={{ paddingBottom: "56.25%"
+  }}>
           <iframe
             src={`https://www.youtube.com/embed/${id}`}
             className="absolute inset-0 w-full h-full"
@@ -114,7 +115,9 @@ export function TrainingMediaEditor({
             <div key={i} className="flex items-center gap-2 text-xs bg-muted/30 rounded px-2 py-1">
               {it.type === "youtube" ? <Youtube className="h-3 w-3 text-red-500 shrink-0" /> : <ImageIcon className="h-3 w-3 text-primary shrink-0" />}
               <span className="truncate flex-1">{it.caption || it.url}</span>
-              <Button size="icon" variant="ghost" className="h-5 w-5" onClick={() => remove(i)}>
+              <Button size="icon"
+  variant="ghost"
+  className="h-5 w-5" onClick={() => remove(i)}>
                 <Trash2 className="h-3 w-3 text-destructive" />
               </Button>
             </div>
@@ -136,20 +139,26 @@ export function TrainingMediaEditor({
           onChange={e => setCaption(e.target.value)}
         />
         <div className="flex gap-1 flex-wrap">
-          <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => add("image")} disabled={!urlInput.trim()}>
+          <Button size="sm"
+  variant="outline"
+  className="h-7 text-xs" onClick={() => add("image")} disabled={!urlInput.trim()}>
             <Link2 className="h-3 w-3 mr-1" />Image URL
           </Button>
-          <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => add("youtube")} disabled={!urlInput.trim()}>
+          <Button size="sm"
+  variant="outline"
+  className="h-7 text-xs" onClick={() => add("youtube")} disabled={!urlInput.trim()}>
             <Youtube className="h-3 w-3 mr-1" />YouTube
           </Button>
-          <Button size="sm" variant="outline" className="h-7 text-xs" onClick={() => fileRef.current?.click()} disabled={uploading}>
+          <Button size="sm"
+  variant="outline"
+  className="h-7 text-xs" onClick={() => fileRef.current?.click()} disabled={uploading}>
             {uploading ? <Loader2 className="h-3 w-3 mr-1 animate-spin" /> : <Upload className="h-3 w-3 mr-1" />}Téléverser image
           </Button>
           <input
             ref={fileRef}
             type="file"
             accept="image/*"
-            className="hidden"
+  className="hidden"
             onChange={e => e.target.files?.[0] && upload(e.target.files[0])}
           />
         </div>

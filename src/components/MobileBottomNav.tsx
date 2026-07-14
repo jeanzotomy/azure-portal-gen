@@ -68,7 +68,8 @@ export function MobileBottomNav() {
   return (
     <nav
       className="md:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-border/40 bg-background/90 backdrop-blur-xl shadow-[0_-8px_24px_-8px_rgba(0,0,0,0.18)]"
-      style={{ paddingBottom: "env(safe-area-inset-bottom)" }}
+      style={{ paddingBottom: "env(safe-area-inset-bottom)"
+  }}
       aria-label="Navigation mobile"
     >
       <ul className="grid grid-cols-4 px-2 pt-2 pb-3">
@@ -85,7 +86,7 @@ export function MobileBottomNav() {
                   active
                     ? "text-primary"
                     : "text-muted-foreground hover:text-foreground active:scale-95"
-                )}
+  )}
                 aria-current={active ? "page" : undefined}
               >
                 <span
@@ -94,7 +95,7 @@ export function MobileBottomNav() {
                     active
                       ? "bg-primary/15 shadow-sm"
                       : "group-hover:bg-muted/60"
-                  )}
+  )}
                 >
                   <Icon
                     size={20}

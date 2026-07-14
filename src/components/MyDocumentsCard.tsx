@@ -47,7 +47,8 @@ export default function MyDocumentsCard({ userId }: { userId: string }) {
     for (const t of DOC_TYPES) {
       const { data, error } = await supabase.storage
         .from(BUCKET)
-        .list(`${userId}/${t.key}`, { limit: 100, sortBy: { column: "updated_at", order: "desc" } });
+        .list(`${userId}/${t.key}`, { limit: 100, sortBy: { column: "updated_at", order: "desc"
+  } });
       if (error) continue;
       for (const f of data || []) {
         if (f.name.startsWith(".")) continue;
@@ -75,7 +76,8 @@ export default function MyDocumentsCard({ userId }: { userId: string }) {
 
   const handleUpload = async (docKey: string, file: File) => {
     const err = validate(file);
-    if (err) { toast({ title: "Fichier invalide", description: err, variant: "destructive" }); return; }
+    if (err) { toast({ title: "Fichier invalide", description: err, variant: "destructive"
+  }); return; }
     setUploading(docKey);
     const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
     const path = `${userId}/${docKey}/${Date.now()}-${safe}`;
@@ -83,28 +85,33 @@ export default function MyDocumentsCard({ userId }: { userId: string }) {
       cacheControl: "3600", upsert: false, contentType: file.type,
     });
     setUploading(null);
-    if (error) { toast({ title: "Échec de l'envoi", description: error.message, variant: "destructive" }); return; }
-    toast({ title: "Document ajouté" });
+    if (error) { toast({ title: "Échec de l'envoi", description: error.message, variant: "destructive"
+  }); return; }
+    toast({ title: "Document ajouté"
+  });
     await load();
   };
 
   const handleReplace = async (file: File) => {
     if (!replaceTarget) return;
     const err = validate(file);
-    if (err) { toast({ title: "Fichier invalide", description: err, variant: "destructive" }); return; }
+    if (err) { toast({ title: "Fichier invalide", description: err, variant: "destructive"
+  }); return; }
     setUploading(replaceTarget.docType);
     const safe = file.name.replace(/[^a-zA-Z0-9._-]/g, "_");
     const newPath = `${userId}/${replaceTarget.docType}/${Date.now()}-${safe}`;
     const up = await supabase.storage.from(BUCKET).upload(newPath, file, { upsert: false, contentType: file.type });
     if (up.error) {
       setUploading(null);
-      toast({ title: "Échec du remplacement", description: up.error.message, variant: "destructive" });
+      toast({ title: "Échec du remplacement", description: up.error.message, variant: "destructive"
+  });
       return;
     }
     await supabase.storage.from(BUCKET).remove([replaceTarget.fullPath]);
     setUploading(null);
     setReplaceTarget(null);
-    toast({ title: "Document remplacé" });
+    toast({ title: "Document remplacé"
+  });
     await load();
   };
 
@@ -116,8 +123,10 @@ export default function MyDocumentsCard({ userId }: { userId: string }) {
       variant: "destructive",
       onConfirm: async () => {
         const { error } = await supabase.storage.from(BUCKET).remove([f.fullPath]);
-        if (error) { toast({ title: "Erreur", description: error.message, variant: "destructive" }); return; }
-        toast({ title: "Document supprimé" });
+        if (error) { toast({ title: "Erreur", description: error.message, variant: "destructive"
+  }); return; }
+        toast({ title: "Document supprimé"
+  });
         await load();
       },
     });
@@ -125,7 +134,8 @@ export default function MyDocumentsCard({ userId }: { userId: string }) {
 
   const handleView = async (f: DocFile) => {
     const { data, error } = await supabase.storage.from(BUCKET).createSignedUrl(f.fullPath, 60 * 5);
-    if (error || !data?.signedUrl) { toast({ title: "Erreur", description: error?.message || "Lien indisponible", variant: "destructive" }); return; }
+    if (error || !data?.signedUrl) { toast({ title: "Erreur", description: error?.message || "Lien indisponible", variant: "destructive"
+  }); return; }
     window.open(data.signedUrl, "_blank", "noopener,noreferrer");
   };
 
@@ -173,8 +183,8 @@ export default function MyDocumentsCard({ userId }: { userId: string }) {
               />
               <Button
                 size="sm"
-                variant="secondary"
-                className="gap-1.5"
+  variant="secondary"
+  className="gap-1.5"
                 disabled={uploading === t.key}
                 onClick={() => inputRefs.current[t.key]?.click()}
               >
@@ -199,7 +209,8 @@ export default function MyDocumentsCard({ userId }: { userId: string }) {
                 <li key={f.fullPath} className="flex items-center justify-between gap-3 p-2.5 bg-background/40">
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2 min-w-0">
-                      <Badge variant="outline" className="text-[10px] shrink-0">{def?.label || f.docType}</Badge>
+                      <Badge variant="outline"
+  className="text-[10px] shrink-0">{def?.label || f.docType}</Badge>
                       <span className="text-sm truncate" title={f.name}>{f.name.replace(/^\d+-/, "")}</span>
                     </div>
                     <p className="text-[11px] text-muted-foreground mt-0.5">
@@ -207,18 +218,20 @@ export default function MyDocumentsCard({ userId }: { userId: string }) {
                     </p>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">
-                    <Button size="icon" variant="ghost" title="Voir" onClick={() => handleView(f)}>
+                    <Button size="icon"
+  variant="ghost" title="Voir" onClick={() => handleView(f)}>
                       <Eye size={15} />
                     </Button>
                     <Button
                       size="icon"
-                      variant="ghost"
+  variant="ghost"
                       title="Remplacer"
                       onClick={() => { setReplaceTarget(f); replaceInputRef.current?.click(); }}
                     >
                       <Replace size={15} />
                     </Button>
-                    <Button size="icon" variant="ghost" title="Supprimer" onClick={() => handleDelete(f)}>
+                    <Button size="icon"
+  variant="ghost" title="Supprimer" onClick={() => handleDelete(f)}>
                       <Trash2 size={15} className="text-destructive" />
                     </Button>
                   </div>

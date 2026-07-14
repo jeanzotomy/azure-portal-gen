@@ -21,7 +21,8 @@ interface CommerceTabProps {
 
 export type CommerceSection = "clients" | "catalog" | "invoices" | "methods" | "pricing" | "providers";
 
-export default function CommerceTab({ initialSection = "catalog" }: CommerceTabProps) {
+export default function CommerceTab({ initialSection = "catalog"
+  }: CommerceTabProps) {
   const [section, setSection] = useState<CommerceSection>(initialSection);
   const { value: pricingVisible, update: setPricingVisible, loading: pricingLoading } =
     useSiteSetting<boolean>("nav.pricing_visible", true);
@@ -39,20 +40,31 @@ export default function CommerceTab({ initialSection = "catalog" }: CommerceTabP
 
       <Tabs value={section} onValueChange={(v) => setSection(v as CommerceSection)} className="w-full">
         <TabsList className="inline-flex flex-wrap h-auto w-fit max-w-full">
-          <TabsTrigger value="catalog" className="gap-1.5"><BookOpen className="h-3.5 w-3.5" /> Catalogue</TabsTrigger>
-          <TabsTrigger value="clients" className="gap-1.5"><Briefcase className="h-3.5 w-3.5" /> Clients</TabsTrigger>
-          <TabsTrigger value="invoices" className="gap-1.5"><Receipt className="h-3.5 w-3.5" /> Facturation</TabsTrigger>
-          <TabsTrigger value="methods" className="gap-1.5"><CreditCard className="h-3.5 w-3.5" /> Modes paiement</TabsTrigger>
-          <TabsTrigger value="pricing" className="gap-1.5"><Tag className="h-3.5 w-3.5" /> Tarifs SaaS</TabsTrigger>
-          <TabsTrigger value="providers" className="gap-1.5"><Plug className="h-3.5 w-3.5" /> Providers</TabsTrigger>
+          <TabsTrigger value="catalog"
+  className="gap-1.5"><BookOpen className="h-3.5 w-3.5" /> Catalogue</TabsTrigger>
+          <TabsTrigger value="clients"
+  className="gap-1.5"><Briefcase className="h-3.5 w-3.5" /> Clients</TabsTrigger>
+          <TabsTrigger value="invoices"
+  className="gap-1.5"><Receipt className="h-3.5 w-3.5" /> Facturation</TabsTrigger>
+          <TabsTrigger value="methods"
+  className="gap-1.5"><CreditCard className="h-3.5 w-3.5" /> Modes paiement</TabsTrigger>
+          <TabsTrigger value="pricing"
+  className="gap-1.5"><Tag className="h-3.5 w-3.5" /> Tarifs SaaS</TabsTrigger>
+          <TabsTrigger value="providers"
+  className="gap-1.5"><Plug className="h-3.5 w-3.5" /> Providers</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="clients" className="mt-4"><ServiceClientsTab /></TabsContent>
-        <TabsContent value="catalog" className="mt-4"><ServiceCatalogTab /></TabsContent>
-        <TabsContent value="invoices" className="mt-4"><ServiceInvoicesTab /></TabsContent>
-        <TabsContent value="methods" className="mt-4"><PaymentMethodsTab /></TabsContent>
+        <TabsContent value="clients"
+  className="mt-4"><ServiceClientsTab /></TabsContent>
+        <TabsContent value="catalog"
+  className="mt-4"><ServiceCatalogTab /></TabsContent>
+        <TabsContent value="invoices"
+  className="mt-4"><ServiceInvoicesTab /></TabsContent>
+        <TabsContent value="methods"
+  className="mt-4"><PaymentMethodsTab /></TabsContent>
 
-        <TabsContent value="pricing" className="mt-4 space-y-4">
+        <TabsContent value="pricing"
+  className="mt-4 space-y-4">
           <Card>
             <CardHeader>
               <CardTitle className="text-base flex items-center gap-2">
@@ -62,7 +74,8 @@ export default function CommerceTab({ initialSection = "catalog" }: CommerceTabP
             </CardHeader>
             <CardContent className="flex items-center justify-between gap-4">
               <div className="space-y-1">
-                <Label htmlFor="pricing-visible" className="text-sm font-medium">
+                <Label htmlFor="pricing-visible"
+  className="text-sm font-medium">
                   Afficher le menu Tarifs dans la barre de navigation publique
                 </Label>
                 <p className="text-xs text-muted-foreground">
@@ -115,14 +128,16 @@ export default function CommerceTab({ initialSection = "catalog" }: CommerceTabP
           </Card>
         </TabsContent>
 
-        <TabsContent value="providers" className="mt-4 space-y-4">
+        <TabsContent value="providers"
+  className="mt-4 space-y-4">
           <CinetPayConfigCard />
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0">
               <CardTitle className="text-base flex items-center gap-2">
                 <CreditCard className="h-4 w-4 text-primary" /> Stripe (paiements internationaux)
               </CardTitle>
-              <Badge variant="outline" className="gap-1"><AlertCircle className="h-3 w-3" /> Non disponible en Guinée</Badge>
+              <Badge variant="outline"
+  className="gap-1"><AlertCircle className="h-3 w-3" /> Non disponible en Guinée</Badge>
             </CardHeader>
             <CardContent className="space-y-2 text-sm text-muted-foreground">
               <p>

@@ -61,7 +61,7 @@ export default function PortalHelpPage() {
           value={q}
           onChange={(e) => setQ(e.target.value)}
           placeholder="Rechercher dans l'aide… (ex : facture, formation, certificat)"
-          className="pl-9 h-11"
+  className="pl-9 h-11"
         />
       </div>
 
@@ -90,7 +90,8 @@ export default function PortalHelpPage() {
                         {a.tags.length > 0 && (
                           <div className="flex gap-1 mt-1 flex-wrap">
                             {a.tags.slice(0, 3).map((t) => (
-                              <Badge key={t} variant="outline" className="text-[9px]">{t}</Badge>
+                              <Badge key={t} variant="outline"
+  className="text-[9px]">{t}</Badge>
                             ))}
                           </div>
                         )}
@@ -112,7 +113,8 @@ export default function PortalHelpPage() {
                 {active.tags.length > 0 && (
                   <div className="flex gap-1 mb-3 flex-wrap">
                     {active.tags.map((t) => (
-                      <Badge key={t} variant="outline" className="text-[10px]">{t}</Badge>
+                      <Badge key={t} variant="outline"
+  className="text-[10px]">{t}</Badge>
                     ))}
                   </div>
                 )}
@@ -122,7 +124,8 @@ export default function PortalHelpPage() {
               <div className="h-full flex flex-col items-center justify-center text-center text-muted-foreground gap-3 py-10">
                 <BookOpen className="h-12 w-12 opacity-30" />
                 <p className="text-sm">Sélectionnez un article dans la liste de gauche.</p>
-                <p className="text-xs">Vous ne trouvez pas votre réponse ? <a href="/portal?tab=support" className="text-primary hover:underline">Ouvrez un ticket</a>.</p>
+                <p className="text-xs">Vous ne trouvez pas votre réponse ? <a href="/portal?tab=support"
+  className="text-primary hover:underline">Ouvrez un ticket</a>.</p>
               </div>
             )}
           </CardContent>

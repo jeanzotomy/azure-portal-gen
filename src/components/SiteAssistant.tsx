@@ -293,7 +293,8 @@ export default function SiteAssistant() {
  <input
  ref={hpRef}
  type="text" name="website" tabIndex={-1}
- autoComplete="off" aria-hidden="true" className="absolute -left-[9999px] h-0 w-0 opacity-0" />
+ autoComplete="off" aria-hidden="true"
+  className="absolute -left-[9999px] h-0 w-0 opacity-0" />
  {showSoftCta && (
  <div className="mb-2 rounded-lg border border-primary/20 bg-primary/5 px-3 py-2 flex items-center gap-2">
  <p className="text-[11px] text-foreground/80 leading-snug flex-1">{i18n.softCta}</p>

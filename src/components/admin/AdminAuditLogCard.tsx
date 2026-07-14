@@ -53,13 +53,15 @@ export function AdminAuditLogCard() {
           <CardTitle className="text-base flex items-center gap-2">
             <ScrollText className="h-4 w-4 text-primary" /> Journal d'audit administrateur
           </CardTitle>
-          <Button size="sm" variant="outline" onClick={() => void load()} disabled={loading}>
+          <Button size="sm"
+  variant="outline" onClick={() => void load()} disabled={loading}>
             <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
           </Button>
         </div>
         <div className="relative mt-2">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filtrer par action, email, cible…" className="pl-9 h-9" />
+          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filtrer par action, email, cible…"
+  className="pl-9 h-9" />
         </div>
       </CardHeader>
       <CardContent className="p-0">
@@ -75,7 +77,8 @@ export function AdminAuditLogCard() {
               {filtered.map((r) => (
                 <li key={r.id} className="px-3 py-2.5 text-xs hover:bg-muted/40">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <Badge variant="outline" className="text-[10px] font-mono">{r.action}</Badge>
+                    <Badge variant="outline"
+  className="text-[10px] font-mono">{r.action}</Badge>
                     {r.target_type && (
                       <span className="text-muted-foreground">
                         → <span className="font-medium">{r.target_type}</span>
@@ -83,7 +86,8 @@ export function AdminAuditLogCard() {
                       </span>
                     )}
                     <span className="ml-auto text-[10px] text-muted-foreground whitespace-nowrap">
-                      {new Date(r.created_at).toLocaleString("fr-FR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })}
+                      {new Date(r.created_at).toLocaleString("fr-FR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit"
+  })}
                     </span>
                   </div>
                   <div className="text-[11px] text-muted-foreground mt-0.5">

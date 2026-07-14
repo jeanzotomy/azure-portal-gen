@@ -12,11 +12,12 @@ export function ScrollToTop() {
 
   return (
     <button
-      onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+      onClick={() => window.scrollTo({ top: 0, behavior: "smooth"
+  })}
       aria-label="Revenir en haut"
-      className={`fixed bottom-[9rem] md:bottom-[5.5rem] right-4 md:right-6 z-40 md:z-50 p-3 rounded-full gradient-primary text-primary-foreground shadow-lg border border-cyan-glow/30 transition-all duration-300 hover:scale-110 ${
+  className={`fixed bottom-[9rem] md:bottom-[5.5rem] right-4 md:right-6 z-40 md:z-50 p-3 rounded-full gradient-primary text-primary-foreground shadow-lg border border-cyan-glow/30 transition-all duration-300 hover:scale-110 ${
         visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"
-      }`}
+  }`}
     >
       <ArrowUp size={20} />
     </button>

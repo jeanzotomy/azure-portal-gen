@@ -156,7 +156,8 @@ export default function TrainingGroupsManagerPage({ basePath, parentLabel }: Pro
  actions={
  <div className="flex items-center gap-2 flex-wrap">
  <Button
- size="sm" variant="secondary" onClick={() => navigate(`${effectiveBase}/formations`)}
+ size="sm"
+  variant="secondary" onClick={() => navigate(`${effectiveBase}/formations`)}
  className="bg-white/15 hover:bg-white/25 text-white border-white/20" >
  <ArrowLeft className="h-4 w-4 mr-1"/> Retour
  </Button>
@@ -164,7 +165,8 @@ export default function TrainingGroupsManagerPage({ basePath, parentLabel }: Pro
  <Plus className="h-4 w-4 mr-1"/> Nouveau groupe
  </Button>
  <Button
- size="sm" variant="secondary" onClick={load}
+ size="sm"
+  variant="secondary" onClick={load}
  className="bg-white/15 hover:bg-white/25 text-white border-white/20" >
  <RefreshCw className="h-4 w-4 mr-1"/> Actualiser
  </Button>

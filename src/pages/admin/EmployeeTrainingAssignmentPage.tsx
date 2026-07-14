@@ -54,7 +54,8 @@ type UserMeta = {
 
 interface Props {
  /** Route base used to compute backTo and breadcrumb links. */
- basePath?: string; // e.g."/admin/formations"or"/rh/formations" /** Human breadcrumb label for the parent screen. */
+ basePath?: string; // e.g."/admin/formations"or"/rh/formations"
+  /** Human breadcrumb label for the parent screen. */
  parentLabel?: string;
 }
 
@@ -184,7 +185,8 @@ export default function EmployeeTrainingAssignmentPage({
  ]}
  actions={
  <Button
- size="sm" variant="secondary" onClick={loadAll}
+ size="sm"
+  variant="secondary" onClick={loadAll}
  className="bg-white/15 hover:bg-white/25 text-white border-white/20" >
  <RefreshCw className="h-4 w-4 mr-1"/> Actualiser
  </Button>
@@ -221,7 +223,8 @@ export default function EmployeeTrainingAssignmentPage({
  </Tabs>
 
  <Button
- size="sm" variant="outline" disabled={!user}
+ size="sm"
+  variant="outline" disabled={!user}
  onClick={() => setEmailOpen(true)}
  className="gap-2 border-primary/30 text-primary hover:bg-primary/10 hover:text-primary" >
  <Mail className="h-4 w-4"/> Écrire un email
@@ -286,7 +289,8 @@ export default function EmployeeTrainingAssignmentPage({
  </div>
  </div>
  <Button
- size="sm" variant="ghost" disabled={done || busy === a.training_id}
+ size="sm"
+  variant="ghost" disabled={done || busy === a.training_id}
  onClick={() => unassignTraining(a.training_id)}
  className="text-destructive hover:text-destructive disabled:opacity-30" title={done ?"Impossible : déjà complétée":"Retirer"}
  >
@@ -327,7 +331,8 @@ export default function EmployeeTrainingAssignmentPage({
  {busy === t.id ? (
  <Loader2 className="h-4 w-4 animate-spin"/>
  ) : already ? (
-"Déjà assignée" ) : (
+"Déjà assignée"
+  ) : (
  <>
  <Plus className="h-4 w-4 mr-1"/> Assigner
  </>

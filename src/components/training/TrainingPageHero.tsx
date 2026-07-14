@@ -36,7 +36,8 @@ export function TrainingPageHero({
  <div className="flex items-center gap-2 mb-3 text-xs text-white/80">
  {backTo && (
  <Button
- size="sm" variant="ghost" onClick={() => navigate(backTo)}
+ size="sm"
+  variant="ghost" onClick={() => navigate(backTo)}
  className="text-white hover:bg-white/10 -ml-2 h-7 px-2" >
  <ArrowLeft className="h-3.5 w-3.5 mr-1"/> Retour
  </Button>

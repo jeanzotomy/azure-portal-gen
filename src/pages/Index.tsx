@@ -24,7 +24,8 @@ const Index = () => {
     if (location.hash) {
       setTimeout(() => {
         const el = document.querySelector(location.hash);
-        el?.scrollIntoView({ behavior: "smooth" });
+        el?.scrollIntoView({ behavior: "smooth"
+  });
       }, 100);
     }
   }, [location.hash]);

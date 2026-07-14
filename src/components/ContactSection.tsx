@@ -224,7 +224,8 @@ export function ContactSection() {
  <div className="absolute -inset-1 rounded-2xl bg-primary blur-lg opacity-60"/>
  <img
  src={contactImage}
- alt="Cloud Mature" className="relative w-full h-56 object-cover object-top rounded-2xl ring-1 ring-white/10" />
+ alt="Cloud Mature"
+  className="relative w-full h-56 object-cover object-top rounded-2xl ring-1 ring-white/10" />
  <div className="absolute bottom-3 left-3 inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-background/80 backdrop-blur-md text-xs font-medium tracking-wide border border-border/40 shadow-sm">
  <span className="text-foreground">{t("hero.badge.consulting")}</span>
  <span aria-hidden="true"className="text-foreground/70">·</span>

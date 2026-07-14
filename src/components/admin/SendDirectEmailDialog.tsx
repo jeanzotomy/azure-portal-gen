@@ -348,7 +348,8 @@ export default function SendDirectEmailDialog({
  type="button" onClick={() => setTab("edit")}
  className={cn(
 "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border-b-2 -mb-px transition-colors",
- tab ==="edit" ?"border-primary text-primary" :"border-transparent text-muted-foreground hover:text-foreground" )}
+ tab ==="edit" ?"border-primary text-primary" :"border-transparent text-muted-foreground hover:text-foreground"
+  )}
  >
  <Pencil className="h-3.5 w-3.5"/> Édition
  </button>
@@ -357,7 +358,8 @@ export default function SendDirectEmailDialog({
  disabled={!subject && !message}
  className={cn(
 "flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border-b-2 -mb-px transition-colors disabled:opacity-40",
- tab ==="preview" ?"border-primary text-primary" :"border-transparent text-muted-foreground hover:text-foreground" )}
+ tab ==="preview" ?"border-primary text-primary" :"border-transparent text-muted-foreground hover:text-foreground"
+  )}
  >
  <Eye className="h-3.5 w-3.5"/> Aperçu
  </button>
@@ -400,7 +402,8 @@ export default function SendDirectEmailDialog({
  maxLength={MESSAGE_MAX}
  className={cn(
 "resize-none font-[inherit]",
- messageError &&"border-destructive focus-visible:ring-destructive" )}
+ messageError &&"border-destructive focus-visible:ring-destructive"
+  )}
  />
  <div className="flex items-center justify-between gap-2">
  <p className="text-[11px] text-muted-foreground">
@@ -430,9 +433,11 @@ export default function SendDirectEmailDialog({
  </div>
 
  <label
- htmlFor="direct-email-files" className={cn(
+ htmlFor="direct-email-files"
+  className={cn(
 "flex flex-col items-center justify-center gap-1 rounded-md border-2 border-dashed border-border bg-muted/20 hover:bg-muted/40 hover:border-primary/50 cursor-pointer transition-colors py-4 px-3 text-center",
- files.length >= MAX_FILES &&"opacity-50 pointer-events-none" )}
+ files.length >= MAX_FILES &&"opacity-50 pointer-events-none"
+  )}
  >
  <Paperclip className="h-4 w-4 text-muted-foreground"/>
  <span className="text-xs font-medium">
@@ -442,7 +447,8 @@ export default function SendDirectEmailDialog({
  PDF, JPG, PNG, WEBP, GIF · {formatBytes(MAX_FILE_SIZE)} max par fichier
  </span>
  <input
- id="direct-email-files" type="file" multiple
+ id="direct-email-files"
+  type="file" multiple
  accept={ACCEPT_ATTR}
  className="sr-only" onChange={(e) => {
  handleFiles(e.target.files);

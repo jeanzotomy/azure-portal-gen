@@ -28,11 +28,16 @@ interface Props {
 }
 
 const COLUMNS: { key: AppStatus; label: string; ring: string; head: string }[] = [
-  { key: "nouvelle",  label: "Nouvelles",  ring: "ring-blue-500/30",    head: "text-blue-600 bg-blue-500/10" },
-  { key: "en_revue",  label: "En revue",   ring: "ring-amber-500/30",   head: "text-amber-600 bg-amber-500/10" },
-  { key: "entretien", label: "Entretien",  ring: "ring-purple-500/30",  head: "text-purple-600 bg-purple-500/10" },
-  { key: "acceptee",  label: "Acceptées",  ring: "ring-emerald-500/30", head: "text-emerald-600 bg-emerald-500/10" },
-  { key: "refusee",   label: "Refusées",   ring: "ring-rose-500/30",    head: "text-rose-600 bg-rose-500/10" },
+  { key: "nouvelle",  label: "Nouvelles",  ring: "ring-blue-500/30",    head: "text-blue-600 bg-blue-500/10"
+  },
+  { key: "en_revue",  label: "En revue",   ring: "ring-amber-500/30",   head: "text-amber-600 bg-amber-500/10"
+  },
+  { key: "entretien", label: "Entretien",  ring: "ring-purple-500/30",  head: "text-purple-600 bg-purple-500/10"
+  },
+  { key: "acceptee",  label: "Acceptées",  ring: "ring-emerald-500/30", head: "text-emerald-600 bg-emerald-500/10"
+  },
+  { key: "refusee",   label: "Refusées",   ring: "ring-rose-500/30",    head: "text-rose-600 bg-rose-500/10"
+  },
 ];
 
 export default function CandidatesKanban({ applications, jobs, onMove, onOpenDetail }: Props) {
@@ -74,7 +79,8 @@ export default function CandidatesKanban({ applications, jobs, onMove, onOpenDet
           >
             <div className={cn("flex items-center justify-between gap-2 px-2 py-2 rounded-lg mb-2", col.head)}>
               <span className="text-xs font-semibold uppercase tracking-wide">{col.label}</span>
-              <Badge variant="secondary" className="bg-white/60 text-foreground">{items.length}</Badge>
+              <Badge variant="secondary"
+  className="bg-white/60 text-foreground">{items.length}</Badge>
             </div>
             <div className="space-y-2">
               {items.length === 0 && (
@@ -105,7 +111,8 @@ export default function CandidatesKanban({ applications, jobs, onMove, onOpenDet
                           {format(new Date(app.created_at), "dd/MM")}
                         </span>
                         {app.ai_score != null && (
-                          <Badge variant="outline" className="h-5 px-1.5 gap-1 text-[10px]">
+                          <Badge variant="outline"
+  className="h-5 px-1.5 gap-1 text-[10px]">
                             <Sparkles size={9} className="text-primary" /> {app.ai_score}/100
                           </Badge>
                         )}

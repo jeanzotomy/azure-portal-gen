@@ -12,7 +12,8 @@ import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGri
 type Row = { ip: string; code: string | null; ok: boolean; attempted_at: string };
 type Window = "1h" | "24h" | "7d";
 
-const WINDOW_LABEL: Record<Window, string> = { "1h": "1 heure", "24h": "24 heures", "7d": "7 jours" };
+const WINDOW_LABEL: Record<Window, string> = { "1h": "1 heure", "24h": "24 heures", "7d": "7 jours"
+  };
 const WINDOW_MS: Record<Window, number> = { "1h": 60 * 60 * 1000, "24h": 24 * 3600 * 1000, "7d": 7 * 24 * 3600 * 1000 };
 
 const SHORT_WIN_S = 60;
@@ -22,15 +23,20 @@ const LONG_MAX = 60;
 const CODE_RE = /^[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$/;
 
 function fmtDate(d: Date) {
-  return d.toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit" });
+  return d.toLocaleString("fr-FR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit", second: "2-digit"
+  });
 }
 
 type Reason = "success" | "malformed" | "throttled" | "invalid";
 const REASON_META: Record<Reason, { label: string; cls: string }> = {
-  success:   { label: "Vérification réussie",       cls: "bg-emerald-100 text-emerald-700 border-emerald-300" },
-  malformed: { label: "Code mal formé",             cls: "bg-amber-100 text-amber-700 border-amber-300" },
-  throttled: { label: "Bloqué (anti-bruteforce)",   cls: "bg-rose-100 text-rose-700 border-rose-300" },
-  invalid:   { label: "Code inconnu / expiré",      cls: "bg-slate-100 text-slate-700 border-slate-300" },
+  success:   { label: "Vérification réussie",       cls: "bg-emerald-100 text-emerald-700 border-emerald-300"
+  },
+  malformed: { label: "Code mal formé",             cls: "bg-amber-100 text-amber-700 border-amber-300"
+  },
+  throttled: { label: "Bloqué (anti-bruteforce)",   cls: "bg-rose-100 text-rose-700 border-rose-300"
+  },
+  invalid:   { label: "Code inconnu / expiré",      cls: "bg-slate-100 text-slate-700 border-slate-300"
+  },
 };
 
 function classifyAttempts(attempts: { ip: string; code: string | null; ok: boolean; attempted_at: string }[]) {
@@ -115,10 +121,13 @@ export function CertificateVerifyDashboard() {
     }
     return [...map.values()].sort((a, b) => a.ts - b.ts).map(b => ({
       label: win === "1h"
-        ? new Date(b.ts).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit" })
+        ? new Date(b.ts).toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit"
+  })
         : win === "24h"
-        ? new Date(b.ts).toLocaleTimeString("fr-FR", { hour: "2-digit" }) + "h"
-        : new Date(b.ts).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" }),
+        ? new Date(b.ts).toLocaleTimeString("fr-FR", { hour: "2-digit"
+  }) + "h"
+        : new Date(b.ts).toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit"
+  }),
       Succès: b.ok,
       Échecs: b.fail,
     }));
@@ -270,7 +279,9 @@ export function CertificateVerifyDashboard() {
               onChange={(e) => setSearchValue(e.target.value.toUpperCase())}
               className="font-mono text-xs h-8 w-44"
             />
-            <Button size="sm" type="submit" variant="outline" disabled={!searchValue.trim()}>
+            <Button size="sm"
+  type="submit"
+  variant="outline" disabled={!searchValue.trim()}>
               <Search className="h-3.5 w-3.5 mr-1" />Ouvrir
             </Button>
           </form>
@@ -528,7 +539,8 @@ function AttemptDetailDialog({ filter, onClose }: { filter: Filter; onClose: () 
                           {a.ok ? (
                             <Badge className="bg-emerald-100 text-emerald-700 border-emerald-300">OK</Badge>
                           ) : (
-                            <Badge variant="outline" className="text-red-600 border-red-300">KO</Badge>
+                            <Badge variant="outline"
+  className="text-red-600 border-red-300">KO</Badge>
                           )}
                         </td>
                         <td className="px-3 py-1.5">

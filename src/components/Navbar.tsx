@@ -17,19 +17,27 @@ export function Navbar() {
   const { user } = useAuthSession();
 
   const navLinks = [
-    { label: t("nav.home"), href: "#hero" },
-    { label: t("nav.about"), href: "#about" },
-    { label: t("nav.services"), href: "#services" },
-    { label: t("nav.industries"), href: "#industries" },
-    { label: t("nav.whyUs"), href: "#why-us" },
-    { label: t("nav.contact"), href: "#contact" },
+    { label: t("nav.home"), href: "#hero"
+  },
+    { label: t("nav.about"), href: "#about"
+  },
+    { label: t("nav.services"), href: "#services"
+  },
+    { label: t("nav.industries"), href: "#industries"
+  },
+    { label: t("nav.whyUs"), href: "#why-us"
+  },
+    { label: t("nav.contact"), href: "#contact"
+  },
   ];
 
   const { value: pricingVisible } = useSiteSetting<boolean>("nav.pricing_visible", true);
 
   const routeLinks = [
-    ...(pricingVisible ? [{ label: locale === "fr" ? "Tarifs" : "Pricing", to: "/pricing" }] : []),
-    { label: locale === "fr" ? "Formations" : "Trainings", to: "/formations" },
+    ...(pricingVisible ? [{ label: locale === "fr" ? "Tarifs" : "Pricing", to: "/pricing"
+  }] : []),
+    { label: locale === "fr" ? "Formations" : "Trainings", to: "/formations"
+  },
   ];
 
 
@@ -39,7 +47,8 @@ export function Navbar() {
       navigate("/" + id);
     } else {
       const el = document.querySelector(id);
-      el?.scrollIntoView({ behavior: "smooth" });
+      el?.scrollIntoView({ behavior: "smooth"
+  });
     }
   };
 
@@ -57,7 +66,8 @@ export function Navbar() {
   return (
     <nav className="fixed top-0 left-0 right-0 z-50 navbar-dark">
       <div className="container flex items-center justify-between h-16">
-        <Link to="/" className="flex items-center gap-2 shrink-0" style={{ width: 220, height: 48 }}>
+        <Link to="/"
+  className="flex items-center gap-2 shrink-0" style={{ width: 220, height: 48 }}>
           <img
             src={logo}
             alt="CloudMature - Conseil Cloud, DevOps et Intelligence Artificielle"
@@ -66,7 +76,7 @@ export function Navbar() {
             fetchPriority="high"
             decoding="async"
             loading="eager"
-            className="block brightness-[1.15] contrast-[1.1]"
+  className="block brightness-[1.15] contrast-[1.1]"
             style={{ width: 220, height: 48 }}
           />
         </Link>
@@ -93,7 +103,8 @@ export function Navbar() {
 
           {user ? (
             <div className="flex items-center gap-2">
-              <Link to="/portal" className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-primary/15 border border-primary/30 hover:bg-primary/25 transition-colors">
+              <Link to="/portal"
+  className="flex items-center gap-2.5 px-4 py-2 rounded-full bg-primary/15 border border-primary/30 hover:bg-primary/25 transition-colors">
                 <div className="w-7 h-7 rounded-full gradient-primary flex items-center justify-center shadow-sm">
                   <User size={14} className="text-primary-foreground" />
                 </div>
@@ -110,7 +121,8 @@ export function Navbar() {
             </div>
           ) : (
             <Link to="/portal">
-              <Button size="sm" className="gradient-primary text-primary-foreground border-0 hover:opacity-90">
+              <Button size="sm"
+  className="gradient-primary text-primary-foreground border-0 hover:opacity-90">
                 {t("nav.portal")}
               </Button>
             </Link>
@@ -177,7 +189,8 @@ export function Navbar() {
               </div>
             ) : (
               <Link to="/portal" onClick={() => setOpen(false)}>
-                <Button size="sm" className="w-full gradient-primary text-primary-foreground border-0">{t("nav.portal")}</Button>
+                <Button size="sm"
+  className="w-full gradient-primary text-primary-foreground border-0">{t("nav.portal")}</Button>
               </Link>
             )}
           </div>

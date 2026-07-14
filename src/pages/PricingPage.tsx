@@ -206,7 +206,8 @@ export default function PricingPage() {
  {STRIPE_CURRENCIES.map((c) => (
  <Button
  key={c}
- size="sm" variant={currency === c ?"default":"outline"}
+ size="sm"
+  variant={currency === c ?"default":"outline"}
  onClick={() => setCurrency(c)}
  >
  {c}
@@ -217,7 +218,8 @@ export default function PricingPage() {
  {CINETPAY_CURRENCIES.map((c) => (
  <Button
  key={c}
- size="sm" variant={currency === c ?"default":"outline"}
+ size="sm"
+  variant={currency === c ?"default":"outline"}
  onClick={() => setCurrency(c)}
  >
  {c}
@@ -284,7 +286,8 @@ export default function PricingPage() {
  ))}
  </ul>
  <Button
- className="w-full" variant={plan.highlight ?"default":"outline"}
+ className="w-full"
+  variant={plan.highlight ?"default":"outline"}
  onClick={() => handleSubscribe(plan.id)}
  disabled={cinetpay.loading}
  >
@@ -312,7 +315,8 @@ export default function PricingPage() {
  </CardHeader>
  <CardContent>
  <Button
- className="w-full" variant="outline" onClick={() => handleBuyPack(pack.id)}
+ className="w-full"
+  variant="outline" onClick={() => handleBuyPack(pack.id)}
  disabled={cinetpay.loading}
  >
  Acheter
