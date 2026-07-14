@@ -99,6 +99,7 @@ const App = () => (
               <Route path="formations/assignations/:userId" element={<EmployeeTrainingAssignmentPage basePath="/rh" parentLabel="RH" />} />
               <Route path="formations/groupes" element={<TrainingGroupsManagerPage basePath="/rh" parentLabel="RH" />} />
             </Route>
+            <Route path="/verify" element={<VerifyCertificatePage />} />
             <Route path="/verify/:code" element={<VerifyCertificatePage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
