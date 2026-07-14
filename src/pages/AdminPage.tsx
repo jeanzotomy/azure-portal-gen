@@ -1616,17 +1616,17 @@ function AdminProjectsInner({ readOnly = false, assignedCount }: { readOnly?: bo
  );
  })}
  </div>
- {filtered.length === 0 && <p className="text-center text-muted-foreground py-8">Aucun projet trouvé.</p>}
+  {filtered.length === 0 && <p className="text-center text-muted-foreground py-8">Aucun portefeuille trouvé.</p>}
 
- {/* Edit Project Dialog */}
- <Dialog open={!!editingId} onOpenChange={(open) => { if (!open) setEditingId(null); }}>
- <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
- <DialogHeader>
- <DialogTitle>Modifier le projet</DialogTitle>
- </DialogHeader>
- <div className="space-y-4">
- <div>
- <label className="text-sm font-medium text-card-foreground">Nom du projet</label>
+  {/* Edit Project Dialog */}
+  <Dialog open={!!editingId} onOpenChange={(open) => { if (!open) setEditingId(null); }}>
+  <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+  <DialogHeader>
+  <DialogTitle>Modifier le portefeuille</DialogTitle>
+  </DialogHeader>
+  <div className="space-y-4">
+  <div>
+  <label className="text-sm font-medium text-card-foreground">Nom du portefeuille</label>
  <Input value={editName} onChange={(e) => setEditName(e.target.value)} className="mt-1"/>
  </div>
  <div>
