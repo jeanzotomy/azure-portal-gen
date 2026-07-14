@@ -210,6 +210,21 @@ export function CertificateVerifyDashboard() {
               <TabsTrigger value="7d">7 j</TabsTrigger>
             </TabsList>
           </Tabs>
+          <span className="inline-flex items-center gap-1 text-[11px] text-emerald-600 font-medium">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            Live
+          </span>
+          <Button variant="outline" size="sm" onClick={exportCsv} disabled={rows.length === 0}>
+            <Download className="h-3.5 w-3.5 mr-1" /> CSV
+          </Button>
+          <Button variant="outline" size="sm" asChild>
+            <RouterLink to="/verify" target="_blank" rel="noreferrer">
+              <ExternalLink className="h-3.5 w-3.5 mr-1" /> Page publique
+            </RouterLink>
+          </Button>
           <Button variant="outline" size="sm" onClick={load} disabled={loading}>
             <RefreshCw className={`h-3.5 w-3.5 mr-1 ${loading ? "animate-spin" : ""}`} /> Actualiser
           </Button>
