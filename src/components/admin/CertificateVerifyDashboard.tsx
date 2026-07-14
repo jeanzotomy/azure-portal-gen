@@ -538,6 +538,32 @@ function AttemptDetailDialog({ filter, onClose }: { filter: Filter; onClose: () 
                         <div><span className="text-muted-foreground">Score :</span> {cert.score ?? "-"}{cert.score != null ? "%" : ""}</div>
                         <div><span className="text-muted-foreground">Émis le :</span> {new Date(cert.issued_at).toLocaleDateString("fr-FR")}</div>
                       </div>
+                      <div className="flex flex-wrap items-center gap-2 pt-2 mt-2 border-t">
+                        <Button size="sm" variant="outline" asChild>
+                          <RouterLink to={`/verify/${cert.verification_code}`} target="_blank" rel="noreferrer">
+                            <ExternalLink className="h-3.5 w-3.5 mr-1" /> Voir la page publique
+                          </RouterLink>
+                        </Button>
+                        {cert.revoked_at ? (
+                          <Button size="sm" variant="outline" onClick={async () => {
+                            const { error } = await supabase.from("training_certificates").update({ revoked_at: null }).eq("verification_code", cert.verification_code);
+                            if (error) toast.error("Restauration impossible: " + error.message);
+                            else { toast.success("Certificat restauré"); setCert({ ...cert, revoked_at: null }); }
+                          }}>
+                            <RotateCcw className="h-3.5 w-3.5 mr-1" /> Restaurer
+                          </Button>
+                        ) : (
+                          <Button size="sm" variant="destructive" onClick={async () => {
+                            if (!confirm(`Révoquer le certificat ${cert.verification_code} ? Il sera immédiatement invalide.`)) return;
+                            const now = new Date().toISOString();
+                            const { error } = await supabase.from("training_certificates").update({ revoked_at: now }).eq("verification_code", cert.verification_code);
+                            if (error) toast.error("Révocation impossible: " + error.message);
+                            else { toast.success("Certificat révoqué"); setCert({ ...cert, revoked_at: now }); }
+                          }}>
+                            <ShieldOff className="h-3.5 w-3.5 mr-1" /> Révoquer
+                          </Button>
+                        )}
+                      </div>
                     </div>
                   ) : (
                     <div className="flex items-center gap-2 text-amber-700">
