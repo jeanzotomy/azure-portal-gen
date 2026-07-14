@@ -206,25 +206,29 @@ function AdminContent() {
  const [unrepliedCount, setUnrepliedCount] = useState(0);
  const [assignedProjectsCount, setAssignedProjectsCount] = useState(0);
  const [signatureOpen, setSignatureOpen] = useState(false);
- const [adminServicesOpen, setAdminServicesOpen] = useState(true);
- const [gestionnaireServicesOpen, setGestionnaireServicesOpen] = useState(true);
- const [gestionnaireHrOpen, setGestionnaireHrOpen] = useState(true);
- const { t } = useTranslation();
- const formationsMatch = useMatch("/admin/formations/*");
- const userDetailMatch = useMatch("/admin/users/:userId");
- const isFormationsRoute = !!formationsMatch;
- const isUserDetailRoute = !!userDetailMatch;
+  const [adminServicesOpen, setAdminServicesOpen] = useState(true);
+  const [gestionnaireServicesOpen, setGestionnaireServicesOpen] = useState(true);
+  const [gestionnaireRhOpen, setGestionnaireRhOpen] = useState(true);
+  const [gestionnaireRecruitmentOpen, setGestionnaireRecruitmentOpen] = useState(true);
+  const { t } = useTranslation();
+  const formationsMatch = useMatch("/admin/formations/*");
+  const userDetailMatch = useMatch("/admin/users/:userId");
+  const isFormationsRoute = !!formationsMatch;
+  const isUserDetailRoute = !!userDetailMatch;
 
- // Auto-open services submenu when a services tab is active. Must run before any early return to keep hook order stable.
- const ADMIN_SERVICES_TABS: AdminTab[] = ["service-clients","service-catalog","service-invoices","payment-methods"];
- const GESTIONNAIRE_SERVICES_TABS: GestionnaireTab[] = ["service-clients","service-catalog","service-invoices","payment-methods"];
- const isAdminServicesTab = ADMIN_SERVICES_TABS.includes(tab);
- const isGestionnaireServicesTab = GESTIONNAIRE_SERVICES_TABS.includes(gestionnaireTab);
- useEffect(() => { if (isAdminServicesTab) setAdminServicesOpen(true); }, [isAdminServicesTab]);
- useEffect(() => { if (isGestionnaireServicesTab) setGestionnaireServicesOpen(true); }, [isGestionnaireServicesTab]);
- const GESTIONNAIRE_HR_TABS_GLOBAL: GestionnaireTab[] = ["hr","hr-recruitment","hr-contracts","hr-onboarding","hr-trainings"];
- const isGestionnaireHrTabGlobal = GESTIONNAIRE_HR_TABS_GLOBAL.includes(gestionnaireTab);
- useEffect(() => { if (isGestionnaireHrTabGlobal) setGestionnaireHrOpen(true); }, [isGestionnaireHrTabGlobal]);
+  // Auto-open services submenu when a services tab is active. Must run before any early return to keep hook order stable.
+  const ADMIN_SERVICES_TABS: AdminTab[] = ["service-clients","service-catalog","service-invoices","payment-methods"];
+  const GESTIONNAIRE_SERVICES_TABS: GestionnaireTab[] = ["service-clients","service-catalog","service-invoices","payment-methods"];
+  const isAdminServicesTab = ADMIN_SERVICES_TABS.includes(tab);
+  const isGestionnaireServicesTab = GESTIONNAIRE_SERVICES_TABS.includes(gestionnaireTab);
+  useEffect(() => { if (isAdminServicesTab) setAdminServicesOpen(true); }, [isAdminServicesTab]);
+  useEffect(() => { if (isGestionnaireServicesTab) setGestionnaireServicesOpen(true); }, [isGestionnaireServicesTab]);
+  const GESTIONNAIRE_RH_TABS: GestionnaireTab[] = ["hr","hr-contracts","hr-onboarding","hr-trainings"];
+  const GESTIONNAIRE_RECRUITMENT_TABS: GestionnaireTab[] = ["hr-recruitment"];
+  const isGestionnaireRhTab = GESTIONNAIRE_RH_TABS.includes(gestionnaireTab);
+  const isGestionnaireRecruitmentTab = GESTIONNAIRE_RECRUITMENT_TABS.includes(gestionnaireTab);
+  useEffect(() => { if (isGestionnaireRhTab) setGestionnaireRhOpen(true); }, [isGestionnaireRhTab]);
+  useEffect(() => { if (isGestionnaireRecruitmentTab) setGestionnaireRecruitmentOpen(true); }, [isGestionnaireRecruitmentTab]);
 
  useEffect(() => {
  const fetchUnreplied = async () => {
