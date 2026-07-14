@@ -564,17 +564,25 @@ function AdminContent() {
  { id:"payment-methods", icon: CreditCard, label:"Modes de paiement"},
  ];
 
- const hrGroup: { id: AdminTab; icon: typeof LayoutDashboard; label: string }[] = [
- { id:"hr-recruitment", icon: Briefcase, label:"Recrutement"},
- { id:"hr-contracts", icon: FileSignature, label:"Générer le contrat"},
- { id:"hr-onboarding", icon: Users, label:"Onboarding"},
- { id:"hr-trainings", icon: GraduationCap, label:"Catalogue formations"},
- { id:"hr-employee-trainings", icon: GraduationCap, label:"Formations employés"},
- ];
- const HR_TABS: AdminTab[] = ["hr","hr-recruitment","hr-contracts","hr-onboarding","hr-trainings","hr-employee-trainings"];
- const isHrTab = HR_TABS.includes(tab);
- const [hrOpen, setHrOpen] = useState(true);
- useEffect(() => { if (isHrTab) setHrOpen(true); }, [isHrTab]);
+  const rhGroup: { id: AdminTab; icon: typeof LayoutDashboard; label: string }[] = [
+  { id:"hr-contracts", icon: FileSignature, label:"Générer le contrat"},
+  { id:"hr-onboarding", icon: Users, label:"Onboarding"},
+  { id:"hr-trainings", icon: GraduationCap, label:"Catalogue formations"},
+  { id:"hr-employee-trainings", icon: GraduationCap, label:"Formations employés"},
+  ];
+  const recruitmentGroup: { id: AdminTab; icon: typeof LayoutDashboard; label: string }[] = [
+  { id:"hr-recruitment", icon: Briefcase, label:"Recrutement"},
+  ];
+  const HR_TABS: AdminTab[] = ["hr","hr-recruitment","hr-contracts","hr-onboarding","hr-trainings","hr-employee-trainings"];
+  const RH_TABS: AdminTab[] = ["hr","hr-contracts","hr-onboarding","hr-trainings","hr-employee-trainings"];
+  const RECRUITMENT_TABS: AdminTab[] = ["hr-recruitment"];
+  const isHrTab = HR_TABS.includes(tab);
+  const isRhTab = RH_TABS.includes(tab);
+  const isRecruitmentTab = RECRUITMENT_TABS.includes(tab);
+  const [rhOpen, setRhOpen] = useState(true);
+  const [recruitmentOpen, setRecruitmentOpen] = useState(true);
+  useEffect(() => { if (isRhTab) setRhOpen(true); }, [isRhTab]);
+  useEffect(() => { if (isRecruitmentTab) setRecruitmentOpen(true); }, [isRecruitmentTab]);
 
  const settingsGroup: { id: AdminTab; icon: typeof LayoutDashboard; label: string }[] = [
  { id:"users", icon: Users, label: t("admin.users") },
