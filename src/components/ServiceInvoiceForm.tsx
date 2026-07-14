@@ -101,6 +101,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
   const [saving, setSaving] = useState(false);
   const [outputFormat, setOutputFormat] = useState<"pdf" | "docx" | "both">("both");
   const [issuer, setIssuer] = useState<{ full_name: string | null; role: string | null; signature_url: string | null }>({ full_name: null, role: null, signature_url: null });
+  const [pdfInvoiceNumber, setPdfInvoiceNumber] = useState<string>("APERÇU");
 
   const pdfRef = useRef<HTMLDivElement>(null);
 
@@ -337,7 +338,10 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
       await supabase.from("service_invoice_items").insert(itemsPayload);
 
       // Generate documents according to chosen format
-      await new Promise((r) => setTimeout(r, 100));
+      // Ensure the hidden PDF template renders with the real invoice number before capture
+      setPdfInvoiceNumber(inv!.invoice_number ?? "");
+      await new Promise((r) => requestAnimationFrame(() => r(null)));
+      await new Promise((r) => setTimeout(r, 150));
       const wantPdf = outputFormat === "pdf" || outputFormat === "both";
       const wantDocx = outputFormat === "docx" || outputFormat === "both";
       const pdfBlob = wantPdf && pdfRef.current ? await generateInvoicePDFBlob(pdfRef.current) : null;
@@ -677,7 +681,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
 
         {/* Hidden PDF template for capture */}
         <div style={{ position: "fixed", left: "-10000px", top: 0 }}>
-          {selectedClient && <InvoicePDFTemplate ref={pdfRef} data={buildPdfData("APERÇU")} />}
+          {selectedClient && <InvoicePDFTemplate ref={pdfRef} data={buildPdfData(pdfInvoiceNumber)} />}
         </div>
 
         <DialogFooter className="flex-col sm:flex-row sm:items-center gap-2">
