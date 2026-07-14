@@ -1460,45 +1460,65 @@ function AdminProjectsInner({ readOnly = false, assignedCount }: { readOnly?: bo
  ))}
  </div>
 
- <div className="bg-card rounded-xl p-4 shadow-card border border-border/50 space-y-3">
- <div className="relative">
- <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"/>
- <Input placeholder="Rechercher par portefeuille, client ou entreprise..."value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9"/>
- </div>
- <div className="flex flex-wrap gap-2 items-center">
- <span className="text-xs font-medium text-muted-foreground flex items-center gap-1"><Filter size={12} /> Statut :</span>
- {[{ value:"all", label:"Tous"}, ...statusOptions].map((opt) => (
- <button key={opt.value} onClick={() => setStatusFilter(opt.value)}
- className={`text-xs px-3 py-1.5 rounded-full transition-colors ${statusFilter === opt.value ?"bg-primary text-primary-foreground":"bg-muted text-muted-foreground hover:bg-muted/80"}`}
- >{opt.label}</button>
- ))}
- <span className="text-xs font-medium text-muted-foreground flex items-center gap-1 ml-2"><Flag size={12} /> Priorité :</span>
- {[{ value:"all", label:"Toutes"}, { value:"normal", label:"Normal"}, { value:"haute", label:"Haute"}, { value:"urgent", label:"Urgent"}].map((opt) => (
- <button key={opt.value} onClick={() => setPriorityFilter(opt.value)}
- className={`text-xs px-3 py-1.5 rounded-full transition-colors ${priorityFilter === opt.value ?"bg-primary text-primary-foreground":"bg-muted text-muted-foreground hover:bg-muted/80"}`}
- >{opt.label}</button>
- ))}
- {isCurrentUserGestionnaire && (
- <div className="flex items-center gap-2 ml-3 pl-3 border-l-2 border-primary/30">
- <span className="text-sm font-semibold text-primary flex items-center gap-1.5">
- <UserCheck size={14} /> Assignation :
- </span>
- {[{ value:"all", label:"Tous"}, { value:"mine", label:"Mes assignations"}].map((opt) => (
- <button key={opt.value} onClick={() => setAssignedFilter(opt.value as"all"|"mine")}
- className={`relative text-sm px-4 py-1.5 rounded-full font-medium transition-colors ${assignedFilter === opt.value ?"bg-primary text-primary-foreground shadow-sm":"bg-muted text-muted-foreground hover:bg-muted/80"}`}
- >
- {opt.label}
- {opt.value ==="mine"&& (assignedCount ?? 0) > 0 && (
- <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold px-1">
- {assignedCount}
- </span>
- )}
- </button>
- ))}
- </div>
- )}
- </div>
- </div>
+  <div className="bg-card rounded-xl p-4 shadow-card border border-border/50 space-y-3">
+  <div className="relative">
+  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"/>
+  <Input placeholder="Rechercher par portefeuille, client ou entreprise..."value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9"/>
+  </div>
+  <div className="flex flex-wrap gap-3 items-center justify-between">
+  <div className="flex flex-wrap gap-2 items-center">
+  <span className="text-xs font-medium text-muted-foreground flex items-center gap-1"><Filter size={12} /> Statut :</span>
+  {[{ value:"all", label:"Tous"}, ...statusOptions].map((opt) => (
+  <button key={opt.value} onClick={() => setStatusFilter(opt.value)}
+  className={`text-xs px-3 py-1.5 rounded-full transition-colors ${statusFilter === opt.value ?"bg-primary text-primary-foreground":"bg-muted text-muted-foreground hover:bg-muted/80"}`}
+  >{opt.label}</button>
+  ))}
+  <span className="text-xs font-medium text-muted-foreground flex items-center gap-1 ml-2"><Flag size={12} /> Priorité :</span>
+  {[{ value:"all", label:"Toutes"}, { value:"normal", label:"Normal"}, { value:"haute", label:"Haute"}, { value:"urgent", label:"Urgent"}].map((opt) => (
+  <button key={opt.value} onClick={() => setPriorityFilter(opt.value)}
+  className={`text-xs px-3 py-1.5 rounded-full transition-colors ${priorityFilter === opt.value ?"bg-primary text-primary-foreground":"bg-muted text-muted-foreground hover:bg-muted/80"}`}
+  >{opt.label}</button>
+  ))}
+  {isCurrentUserGestionnaire && (
+  <div className="flex items-center gap-2 ml-3 pl-3 border-l-2 border-primary/30">
+  <span className="text-sm font-semibold text-primary flex items-center gap-1.5">
+  <UserCheck size={14} /> Assignation :
+  </span>
+  {[{ value:"all", label:"Tous"}, { value:"mine", label:"Mes assignations"}].map((opt) => (
+  <button key={opt.value} onClick={() => setAssignedFilter(opt.value as"all"|"mine")}
+  className={`relative text-sm px-4 py-1.5 rounded-full font-medium transition-colors ${assignedFilter === opt.value ?"bg-primary text-primary-foreground shadow-sm":"bg-muted text-muted-foreground hover:bg-muted/80"}`}
+  >
+  {opt.label}
+  {opt.value ==="mine"&& (assignedCount ?? 0) > 0 && (
+  <span className="absolute -top-1.5 -right-1.5 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-destructive text-destructive-foreground text-[10px] font-bold px-1">
+  {assignedCount}
+  </span>
+  )}
+  </button>
+  ))}
+  </div>
+  )}
+  </div>
+  <div className="flex items-center gap-1 border rounded-lg p-1 bg-muted">
+  <button
+  onClick={() => setViewMode("table")}
+  className={`p-1.5 rounded-md transition-colors ${viewMode ==="table" ?"bg-card text-primary shadow-sm":"text-muted-foreground hover:text-foreground"}`}
+  title="Tableau"
+  aria-label="Vue tableau"
+  >
+  <ListIcon size={16} />
+  </button>
+  <button
+  onClick={() => setViewMode("cards")}
+  className={`p-1.5 rounded-md transition-colors ${viewMode ==="cards" ?"bg-card text-primary shadow-sm":"text-muted-foreground hover:text-foreground"}`}
+  title="Cartes"
+  aria-label="Vue cartes"
+  >
+  <LayoutGrid size={16} />
+  </button>
+  </div>
+  </div>
+  </div>
 
  <div className="grid gap-4 sm:gap-5 grid-cols-1 md:grid-cols-2">
  {filtered.map((p) => {
