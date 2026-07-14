@@ -1113,7 +1113,8 @@ function AdminDashboard() {
  return (
  <div className="space-y-6 animate-fade-up">
  {/* Welcome banner */}
- <div className="relative overflow-hidden bg-primary rounded-2xl p-6 border border-primary/10">
+ <div className="relative overflow-hidden bg-gradient-to-br from-card via-card to-primary/5 rounded-2xl p-6 border border-border shadow-sm">
+ <div className="absolute -top-16 -right-16 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
  <div className="relative flex items-center justify-between">
  <div>
  <h1 className="text-2xl font-bold text-foreground">Vue d'ensemble</h1>
