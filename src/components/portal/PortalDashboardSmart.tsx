@@ -74,7 +74,7 @@ export function PortalDashboardSmart({ onOpenAssistant }: { onOpenAssistant?: ()
  }
 
  return (
- <Card className="border-primary/20 bg-primary">
+ <Card className="border-border bg-card shadow-sm">
  <CardHeader className="pb-3">
  <div className="flex items-center justify-between gap-2 flex-wrap">
  <CardTitle className="text-base flex items-center gap-2">
