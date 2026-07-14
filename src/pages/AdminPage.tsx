@@ -206,25 +206,29 @@ function AdminContent() {
  const [unrepliedCount, setUnrepliedCount] = useState(0);
  const [assignedProjectsCount, setAssignedProjectsCount] = useState(0);
  const [signatureOpen, setSignatureOpen] = useState(false);
- const [adminServicesOpen, setAdminServicesOpen] = useState(true);
- const [gestionnaireServicesOpen, setGestionnaireServicesOpen] = useState(true);
- const [gestionnaireHrOpen, setGestionnaireHrOpen] = useState(true);
- const { t } = useTranslation();
- const formationsMatch = useMatch("/admin/formations/*");
- const userDetailMatch = useMatch("/admin/users/:userId");
- const isFormationsRoute = !!formationsMatch;
- const isUserDetailRoute = !!userDetailMatch;
+  const [adminServicesOpen, setAdminServicesOpen] = useState(true);
+  const [gestionnaireServicesOpen, setGestionnaireServicesOpen] = useState(true);
+  const [gestionnaireRhOpen, setGestionnaireRhOpen] = useState(true);
+  const [gestionnaireRecruitmentOpen, setGestionnaireRecruitmentOpen] = useState(true);
+  const { t } = useTranslation();
+  const formationsMatch = useMatch("/admin/formations/*");
+  const userDetailMatch = useMatch("/admin/users/:userId");
+  const isFormationsRoute = !!formationsMatch;
+  const isUserDetailRoute = !!userDetailMatch;
 
- // Auto-open services submenu when a services tab is active. Must run before any early return to keep hook order stable.
- const ADMIN_SERVICES_TABS: AdminTab[] = ["service-clients","service-catalog","service-invoices","payment-methods"];
- const GESTIONNAIRE_SERVICES_TABS: GestionnaireTab[] = ["service-clients","service-catalog","service-invoices","payment-methods"];
- const isAdminServicesTab = ADMIN_SERVICES_TABS.includes(tab);
- const isGestionnaireServicesTab = GESTIONNAIRE_SERVICES_TABS.includes(gestionnaireTab);
- useEffect(() => { if (isAdminServicesTab) setAdminServicesOpen(true); }, [isAdminServicesTab]);
- useEffect(() => { if (isGestionnaireServicesTab) setGestionnaireServicesOpen(true); }, [isGestionnaireServicesTab]);
- const GESTIONNAIRE_HR_TABS_GLOBAL: GestionnaireTab[] = ["hr","hr-recruitment","hr-contracts","hr-onboarding","hr-trainings"];
- const isGestionnaireHrTabGlobal = GESTIONNAIRE_HR_TABS_GLOBAL.includes(gestionnaireTab);
- useEffect(() => { if (isGestionnaireHrTabGlobal) setGestionnaireHrOpen(true); }, [isGestionnaireHrTabGlobal]);
+  // Auto-open services submenu when a services tab is active. Must run before any early return to keep hook order stable.
+  const ADMIN_SERVICES_TABS: AdminTab[] = ["service-clients","service-catalog","service-invoices","payment-methods"];
+  const GESTIONNAIRE_SERVICES_TABS: GestionnaireTab[] = ["service-clients","service-catalog","service-invoices","payment-methods"];
+  const isAdminServicesTab = ADMIN_SERVICES_TABS.includes(tab);
+  const isGestionnaireServicesTab = GESTIONNAIRE_SERVICES_TABS.includes(gestionnaireTab);
+  useEffect(() => { if (isAdminServicesTab) setAdminServicesOpen(true); }, [isAdminServicesTab]);
+  useEffect(() => { if (isGestionnaireServicesTab) setGestionnaireServicesOpen(true); }, [isGestionnaireServicesTab]);
+  const GESTIONNAIRE_RH_TABS: GestionnaireTab[] = ["hr","hr-contracts","hr-onboarding","hr-trainings"];
+  const GESTIONNAIRE_RECRUITMENT_TABS: GestionnaireTab[] = ["hr-recruitment"];
+  const isGestionnaireRhTab = GESTIONNAIRE_RH_TABS.includes(gestionnaireTab);
+  const isGestionnaireRecruitmentTab = GESTIONNAIRE_RECRUITMENT_TABS.includes(gestionnaireTab);
+  useEffect(() => { if (isGestionnaireRhTab) setGestionnaireRhOpen(true); }, [isGestionnaireRhTab]);
+  useEffect(() => { if (isGestionnaireRecruitmentTab) setGestionnaireRecruitmentOpen(true); }, [isGestionnaireRecruitmentTab]);
 
  useEffect(() => {
  const fetchUnreplied = async () => {
@@ -286,14 +290,14 @@ function AdminContent() {
  { id:"payment-methods", icon: CreditCard, label:"Méthodes de paiement"},
  ];
 
- const gestionnaireHrGroup: { id: GestionnaireTab; icon: typeof LayoutDashboard; label: string }[] = [
- { id:"hr-recruitment", icon: Briefcase, label:"Recrutement"},
- { id:"hr-contracts", icon: FileSignature, label:"Générer le contrat"},
- { id:"hr-onboarding", icon: Users, label:"Onboarding"},
- { id:"hr-trainings", icon: GraduationCap, label:"Formation"},
- ];
- const GESTIONNAIRE_HR_TABS: GestionnaireTab[] = ["hr","hr-recruitment","hr-contracts","hr-onboarding","hr-trainings"];
- const isGestionnaireHrTab = GESTIONNAIRE_HR_TABS.includes(gestionnaireTab);
+  const gestionnaireRhGroup: { id: GestionnaireTab; icon: typeof LayoutDashboard; label: string }[] = [
+  { id:"hr-contracts", icon: FileSignature, label:"Générer le contrat"},
+  { id:"hr-onboarding", icon: Users, label:"Onboarding"},
+  { id:"hr-trainings", icon: GraduationCap, label:"Formation"},
+  ];
+  const gestionnaireRecruitmentGroup: { id: GestionnaireTab; icon: typeof LayoutDashboard; label: string }[] = [
+  { id:"hr-recruitment", icon: Briefcase, label:"Recrutement"},
+  ];
 
 
  return (
@@ -360,32 +364,58 @@ function AdminContent() {
  </SidebarMenuSub>
  )}
  </SidebarMenuItem>
- <SidebarMenuItem>
- <SidebarMenuButton
- onClick={() => {
- setGestionnaireHrOpen((v) => !v);
- if (!isGestionnaireHrTab) setGestionnaireTab("hr-recruitment");
- }}
- isActive={isGestionnaireHrTab}
- tooltip="RH"data-keep-mobile-open="true"
-  className="gap-3" >
- <HrIcon size={18} />
- <span className="flex-1 text-left">RH</span>
- {gestionnaireHrOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
- </SidebarMenuButton>
- {gestionnaireHrOpen && (
- <SidebarMenuSub>
- {gestionnaireHrGroup.map((s) => (
- <SidebarMenuSubItem key={s.id}>
- <SidebarMenuSubButton onClick={() => setGestionnaireTab(s.id)} isActive={gestionnaireTab === s.id} className="gap-2 cursor-pointer">
- <s.icon size={14} />
- <span>{s.label}</span>
- </SidebarMenuSubButton>
- </SidebarMenuSubItem>
- ))}
- </SidebarMenuSub>
- )}
- </SidebarMenuItem>
+  <SidebarMenuItem>
+  <SidebarMenuButton
+  onClick={() => {
+  setGestionnaireRhOpen((v) => !v);
+  if (!isGestionnaireRhTab) setGestionnaireTab("hr");
+  }}
+  isActive={isGestionnaireRhTab}
+  tooltip="RH"data-keep-mobile-open="true"
+   className="gap-3" >
+  <HrIcon size={18} />
+  <span className="flex-1 text-left">RH</span>
+  {gestionnaireRhOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+  </SidebarMenuButton>
+  {gestionnaireRhOpen && (
+  <SidebarMenuSub>
+  {gestionnaireRhGroup.map((s) => (
+  <SidebarMenuSubItem key={s.id}>
+  <SidebarMenuSubButton onClick={() => setGestionnaireTab(s.id)} isActive={gestionnaireTab === s.id} className="gap-2 cursor-pointer">
+  <s.icon size={14} />
+  <span>{s.label}</span>
+  </SidebarMenuSubButton>
+  </SidebarMenuSubItem>
+  ))}
+  </SidebarMenuSub>
+  )}
+  </SidebarMenuItem>
+  <SidebarMenuItem>
+  <SidebarMenuButton
+  onClick={() => {
+  setGestionnaireRecruitmentOpen((v) => !v);
+  if (!isGestionnaireRecruitmentTab) setGestionnaireTab("hr-recruitment");
+  }}
+  isActive={isGestionnaireRecruitmentTab}
+  tooltip="Recrutements"data-keep-mobile-open="true"
+   className="gap-3" >
+  <Briefcase size={18} />
+  <span className="flex-1 text-left">Recrutements</span>
+  {gestionnaireRecruitmentOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+  </SidebarMenuButton>
+  {gestionnaireRecruitmentOpen && (
+  <SidebarMenuSub>
+  {gestionnaireRecruitmentGroup.map((s) => (
+  <SidebarMenuSubItem key={s.id}>
+  <SidebarMenuSubButton onClick={() => setGestionnaireTab(s.id)} isActive={gestionnaireTab === s.id} className="gap-2 cursor-pointer">
+  <s.icon size={14} />
+  <span>{s.label}</span>
+  </SidebarMenuSubButton>
+  </SidebarMenuSubItem>
+  ))}
+  </SidebarMenuSub>
+  )}
+  </SidebarMenuItem>
  </SidebarMenu>
  </SidebarGroupContent>
  </SidebarGroup>
@@ -407,7 +437,7 @@ function AdminContent() {
  <div className="flex items-center gap-3">
  <SidebarTrigger />
  <h2 className="text-sm font-semibold text-card-foreground hidden sm:block">
- {[...gestionnaireNavItems, ...gestionnaireServicesGroup, ...gestionnaireHrGroup].find((n) => n.id === gestionnaireTab)?.label}
+ {[...gestionnaireNavItems, ...gestionnaireServicesGroup, ...gestionnaireRhGroup, ...gestionnaireRecruitmentGroup].find((n) => n.id === gestionnaireTab)?.label}
  </h2>
  </div>
  <div className="flex items-center gap-2">
@@ -534,17 +564,25 @@ function AdminContent() {
  { id:"payment-methods", icon: CreditCard, label:"Modes de paiement"},
  ];
 
- const hrGroup: { id: AdminTab; icon: typeof LayoutDashboard; label: string }[] = [
- { id:"hr-recruitment", icon: Briefcase, label:"Recrutement"},
- { id:"hr-contracts", icon: FileSignature, label:"Générer le contrat"},
- { id:"hr-onboarding", icon: Users, label:"Onboarding"},
- { id:"hr-trainings", icon: GraduationCap, label:"Catalogue formations"},
- { id:"hr-employee-trainings", icon: GraduationCap, label:"Formations employés"},
- ];
- const HR_TABS: AdminTab[] = ["hr","hr-recruitment","hr-contracts","hr-onboarding","hr-trainings","hr-employee-trainings"];
- const isHrTab = HR_TABS.includes(tab);
- const [hrOpen, setHrOpen] = useState(true);
- useEffect(() => { if (isHrTab) setHrOpen(true); }, [isHrTab]);
+  const rhGroup: { id: AdminTab; icon: typeof LayoutDashboard; label: string }[] = [
+  { id:"hr-contracts", icon: FileSignature, label:"Générer le contrat"},
+  { id:"hr-onboarding", icon: Users, label:"Onboarding"},
+  { id:"hr-trainings", icon: GraduationCap, label:"Catalogue formations"},
+  { id:"hr-employee-trainings", icon: GraduationCap, label:"Formations employés"},
+  ];
+  const recruitmentGroup: { id: AdminTab; icon: typeof LayoutDashboard; label: string }[] = [
+  { id:"hr-recruitment", icon: Briefcase, label:"Recrutement"},
+  ];
+  const HR_TABS: AdminTab[] = ["hr","hr-recruitment","hr-contracts","hr-onboarding","hr-trainings","hr-employee-trainings"];
+  const RH_TABS: AdminTab[] = ["hr","hr-contracts","hr-onboarding","hr-trainings","hr-employee-trainings"];
+  const RECRUITMENT_TABS: AdminTab[] = ["hr-recruitment"];
+  const isHrTab = HR_TABS.includes(tab);
+  const isRhTab = RH_TABS.includes(tab);
+  const isRecruitmentTab = RECRUITMENT_TABS.includes(tab);
+  const [rhOpen, setRhOpen] = useState(true);
+  const [recruitmentOpen, setRecruitmentOpen] = useState(true);
+  useEffect(() => { if (isRhTab) setRhOpen(true); }, [isRhTab]);
+  useEffect(() => { if (isRecruitmentTab) setRecruitmentOpen(true); }, [isRecruitmentTab]);
 
  const settingsGroup: { id: AdminTab; icon: typeof LayoutDashboard; label: string }[] = [
  { id:"users", icon: Users, label: t("admin.users") },
@@ -661,24 +699,59 @@ function AdminContent() {
  </SidebarGroupContent>
  </SidebarGroup>
 
- {/* Ressources humaines */}
- <SidebarGroup>
- {!collapsed && <SidebarGroupLabel>Ressources humaines</SidebarGroupLabel>}
- <SidebarGroupContent>
- <SidebarMenu>
- <SidebarMenuItem>
- <SidebarMenuButton
- onClick={() => { if (!isHrTab) setTab("hr-recruitment"); }}
- isActive={isHrTab}
- tooltip="RH"
-  className="gap-3" >
- <HrIcon size={18} />
- <span>RH</span>
- </SidebarMenuButton>
- </SidebarMenuItem>
- </SidebarMenu>
- </SidebarGroupContent>
- </SidebarGroup>
+  {/* RH */}
+  <SidebarGroup>
+  {!collapsed && <SidebarGroupLabel>RH</SidebarGroupLabel>}
+  <SidebarGroupContent>
+  <SidebarMenu>
+  <SidebarMenuItem>
+  <SidebarMenuButton
+  onClick={() => {
+  setRhOpen((v) => !v);
+  if (!isRhTab) setTab("hr");
+  }}
+  isActive={isRhTab}
+  tooltip="RH"data-keep-mobile-open="true"
+   className="gap-3" >
+  <HrIcon size={18} />
+  <span className="flex-1 text-left">RH</span>
+  {rhOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+  </SidebarMenuButton>
+  {rhOpen && (
+  <SidebarMenuSub>
+  {rhGroup.map((s) => (
+  <SidebarMenuSubItem key={s.id}>
+  <SidebarMenuSubButton onClick={() => setTab(s.id)} isActive={tab === s.id} className="gap-2 cursor-pointer">
+  <s.icon size={14} />
+  <span>{s.label}</span>
+  </SidebarMenuSubButton>
+  </SidebarMenuSubItem>
+  ))}
+  </SidebarMenuSub>
+  )}
+  </SidebarMenuItem>
+  </SidebarMenu>
+  </SidebarGroupContent>
+  </SidebarGroup>
+
+  {/* Recrutements */}
+  <SidebarGroup>
+  {!collapsed && <SidebarGroupLabel>Recrutements</SidebarGroupLabel>}
+  <SidebarGroupContent>
+  <SidebarMenu>
+  <SidebarMenuItem>
+  <SidebarMenuButton
+  onClick={() => { if (!isRecruitmentTab) setTab("hr-recruitment"); }}
+  isActive={isRecruitmentTab}
+  tooltip="Recrutements"
+   className="gap-3" >
+  <Briefcase size={18} />
+  <span>Recrutements</span>
+  </SidebarMenuButton>
+  </SidebarMenuItem>
+  </SidebarMenu>
+  </SidebarGroupContent>
+  </SidebarGroup>
 
  {/* Système */}
  <SidebarGroup>
@@ -716,7 +789,7 @@ function AdminContent() {
  <div className="flex items-center gap-3">
  <SidebarTrigger />
  <h2 className="text-sm font-semibold text-card-foreground hidden sm:block">
- {[...allNavItems, ...adminServicesGroup, ...hrGroup, ...settingsGroup].find((n) => n.id === tab)?.label}
+ {[...allNavItems, ...adminServicesGroup, ...rhGroup, ...recruitmentGroup, ...settingsGroup].find((n) => n.id === tab)?.label}
  </h2>
  </div>
  <div className="flex items-center gap-2">
