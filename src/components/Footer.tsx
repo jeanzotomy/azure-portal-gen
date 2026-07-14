@@ -1,7 +1,6 @@
 import logo from "@/assets/logo.webp";
 import { useTranslation } from "@/i18n/LanguageContext";
 import { Link } from "react-router-dom";
-import { SocialChannels } from "@/components/SocialChannels";
 
 
 export function Footer() {
@@ -26,9 +25,6 @@ export function Footer() {
   className="text-secondary-foreground/70">·</span>
             <span className="gradient-text font-semibold">{t("hero.badge.ai")}</span>
           </div>
-        </div>
-        <div className="flex justify-center mt-6">
-          <SocialChannels variant="icons" />
         </div>
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 mt-8 pt-6 border-t border-secondary-foreground/20">
 
