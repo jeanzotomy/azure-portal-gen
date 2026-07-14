@@ -16,7 +16,7 @@ export function IndustriesSection() {
  const items: { title: string; desc: string }[] = t("industries.items");
 
  return (
- <section id="industries"className="py-24 bg-primary from-white relative overflow-hidden">
+ <section id="industries" className="py-24 bg-background relative overflow-hidden">
  <div className="container relative z-10">
  <div className="text-center mb-16">
  <span className="inline-block text-sm font-semibold uppercase tracking-wider text-primary bg-primary/10 px-4 py-1.5 rounded-full mb-4">
