@@ -213,9 +213,8 @@ export function ContactSection() {
  </div>
 
 
- <div className="relative group overflow-hidden rounded-2xl">
+   <div className="relative overflow-hidden rounded-2xl">
 
- <div className="absolute -inset-1 rounded-2xl bg-primary blur-lg opacity-60"/>
  <img
  src={contactImage}
  alt="Cloud Mature"
