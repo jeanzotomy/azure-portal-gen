@@ -22,12 +22,18 @@ const APP_URL ="https://cloudmature.com";
 
 export default function VerifyCertificatePage() {
  const { code } = useParams();
+ const navigate = useNavigate();
  const [cert, setCert] = useState<Cert | null>(null);
  const [valid, setValid] = useState<boolean | null>(null);
- const [loading, setLoading] = useState(true);
+ const [loading, setLoading] = useState(false);
  const [shareOpen, setShareOpen] = useState(false);
+ const [inputCode, setInputCode] = useState("");
+
+ const CODE_RE = /^[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$/;
 
  useEffect(() => {
+ if (!code) { setLoading(false); setValid(null); setCert(null); return; }
+ setLoading(true);
  (async () => {
  const safeCode = (code ||"").trim().toUpperCase();
  const { data, error } = await supabase.functions.invoke("verify-certificate", {
@@ -42,6 +48,12 @@ export default function VerifyCertificatePage() {
  setLoading(false);
  })();
  }, [code]);
+
+ const onSubmit = (e: React.FormEvent) => {
+ e.preventDefault();
+ const v = inputCode.trim().toUpperCase();
+ if (v) navigate(`/verify/${v}`);
+ };
 
  const pageTitle = cert
  ? `Certificat de ${cert.candidate_name} - ${cert.training_title} | CloudMature`
