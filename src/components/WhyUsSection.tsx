@@ -13,7 +13,7 @@ export function WhyUsSection() {
  <div className="text-center mb-16">
  <span className="text-sm font-semibold uppercase tracking-wider text-primary">{t("whyUs.badge")}</span>
  <h2 className="text-3xl md:text-4xl font-bold mt-3 text-foreground">
- {t("whyUs.title")} <span className="gradient-text">{t("whyUs.titleHighlight")}</span>
+ {t("whyUs.title")} <span className="text-primary">{t("whyUs.titleHighlight")}</span>
  </h2>
  </div>
 
@@ -23,16 +23,16 @@ export function WhyUsSection() {
  return (
  <div
  key={r.title}
- className="group relative rounded-2xl border border-border bg-card p-6 transition-all duration-300 hover:shadow-card-hover hover:border-primary/30 overflow-hidden" >
- <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 bg-primary to-transparent pointer-events-none"/>
+ className="group relative rounded-2xl border border-border bg-card p-6 transition-all duration-300 hover:shadow-card-hover hover:border-primary/30 overflow-hidden"
+ >
  <div className="relative flex items-center gap-4 mb-3">
  <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center shrink-0 group-hover:bg-primary/20 transition-colors duration-300">
- <Icon size={22} className="text-primary transition-transform duration-300 group-hover:scale-110"/>
+ <Icon size={22} className="text-primary transition-transform duration-300 group-hover:scale-110" />
  </div>
  <h3 className="font-semibold text-foreground group-hover:text-primary transition-colors duration-300">{r.title}</h3>
  </div>
  <p className="relative text-sm text-muted-foreground leading-relaxed pl-16">{r.desc}</p>
- <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-border group-hover:bg-primary group-hover: group-hover: transition-all duration-300"/>
+ <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-border group-hover:bg-primary transition-all duration-300" />
  </div>
  );
  })}
