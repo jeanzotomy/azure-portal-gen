@@ -12,12 +12,15 @@ import cmLogo from "@/assets/cloudmature-logo.png";
 
 type HrSubTab = "dashboard" | "recruitment" | "contracts" | "onboarding" | "trainings" | "employee-trainings";
 
-const SUBS: { id: HrSubTab; label: string; icon: typeof Briefcase }[] = [
+const RH_SUBS: { id: HrSubTab; label: string; icon: typeof Briefcase }[] = [
   { id: "dashboard", label: "Vue d'ensemble", icon: LayoutDashboard },
-  { id: "recruitment", label: "Recrutement", icon: Briefcase },
   { id: "contracts", label: "Générer le contrat", icon: FileSignature },
   { id: "onboarding", label: "Onboarding", icon: Users },
   { id: "trainings", label: "Formation (onboarding)", icon: GraduationCap },
+];
+
+const RECRUITMENT_SUBS: { id: HrSubTab; label: string; icon: typeof Briefcase }[] = [
+  { id: "recruitment", label: "Recrutement", icon: Briefcase },
 ];
 
 export default function HrPortalPage() {
