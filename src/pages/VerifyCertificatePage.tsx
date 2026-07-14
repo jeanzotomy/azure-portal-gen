@@ -1,10 +1,11 @@
 import { useEffect, useState } from"react";
-import { useParams, Link } from"react-router-dom";
+import { useParams, Link, useNavigate } from"react-router-dom";
 import { Helmet } from"react-helmet-async";
 import { supabase } from"@/integrations/supabase/client";
 import { Card, CardContent } from"@/components/ui/card";
 import { Button } from"@/components/ui/button";
-import { CheckCircle2, XCircle, ShieldCheck, Loader2, Calendar, User, GraduationCap, Award, Share2 } from"lucide-react";
+import { Input } from"@/components/ui/input";
+import { CheckCircle2, XCircle, ShieldCheck, Loader2, Calendar, User, GraduationCap, Award, Share2, Search } from"lucide-react";
 import { Badge } from"@/components/ui/badge";
 import { CertificateShareDialog } from"@/components/onboarding/CertificateShareDialog";
 
