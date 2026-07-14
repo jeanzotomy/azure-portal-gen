@@ -955,121 +955,201 @@ function ProjectsTab({ user }: { user: SupaUser }) {
   <p className="text-muted-foreground">Aucun portefeuille pour le moment.</p>
   <p className="text-sm text-muted-foreground/60 mt-1">Soumettez votre premier portefeuille ci-dessus.</p>
  </div>
- ) : (
- <div className="grid gap-4 sm:gap-5 grid-cols-1 md:grid-cols-2">
- {filteredProjects.map((p) => {
- const sc = statusConfig[p.status] || statusConfig.en_cours;
- const priorityConfig: Record<string, { label: string; color: string; bg: string }> = {
- urgent: { label:"Urgent", color:"text-destructive", bg:"bg-destructive/10 border-destructive/20"},
- haute: { label:"Haute", color:"text-orange-500", bg:"bg-orange-500/10 border-orange-500/20"},
- normal: { label:"Normal", color:"text-muted-foreground", bg:"bg-muted border-border"},
- };
- const pc = priorityConfig[p.priority] || priorityConfig.normal;
- return (
- <div key={p.id} className="group relative bg-card rounded-2xl shadow-card border border-border/50 hover:shadow-card-hover hover:border-primary/30 transition-all duration-300 overflow-hidden">
- {/* Top accent bar */}
- <div className={`h-1 w-full ${p.status ==="termine"?"bg-teal-500": p.status ==="en_attente"?"bg-muted-foreground/30":"bg-primary"}`} />
+  ) : (
+  <>
+  {viewMode === "table" && (
+  <div className="bg-card rounded-xl shadow-card border border-border/50 overflow-hidden">
+  <Table>
+  <TableHeader>
+  <TableRow>
+  <TableHead>Portefeuille</TableHead>
+  <TableHead>Statut</TableHead>
+  <TableHead>Priorité</TableHead>
+  <TableHead>Budget</TableHead>
+  <TableHead>Échéance</TableHead>
+  <TableHead>Progression</TableHead>
+  <TableHead className="text-right">Actions</TableHead>
+  </TableRow>
+  </TableHeader>
+  <TableBody>
+  {filteredProjects.map((p) => {
+  const sc = statusConfig[p.status] || statusConfig.en_cours;
+  const priorityConfig: Record<string, { label: string; color: string; bg: string }> = {
+  urgent: { label:"Urgent", color:"text-destructive", bg:"bg-destructive/10 border-destructive/20"},
+  haute: { label:"Haute", color:"text-orange-500", bg:"bg-orange-500/10 border-orange-500/20"},
+  normal: { label:"Normal", color:"text-muted-foreground", bg:"bg-muted border-border"},
+  };
+  const pc = priorityConfig[p.priority] || priorityConfig.normal;
+  const deadlineDate = p.deadline ? new Date(p.deadline) : null;
+  const days = deadlineDate ? differenceInDays(deadlineDate, new Date()) : null;
+  const overdue = deadlineDate ? isPast(deadlineDate) : false;
+  return (
+  <TableRow key={p.id}>
+  <TableCell>
+  <div className="min-w-0">
+  {p.project_number && <span className="text-xs font-mono text-muted-foreground block">{p.project_number}</span>}
+  <p className="font-medium text-sm text-card-foreground truncate">{p.name}</p>
+  {p.description && <p className="text-xs text-muted-foreground line-clamp-1">{p.description}</p>}
+  </div>
+  </TableCell>
+  <TableCell>
+  <span className={`inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full ${sc.color} ${sc.bg}`}>
+  <sc.icon size={10} /> {sc.label}
+  </span>
+  </TableCell>
+  <TableCell>
+  {p.priority && p.priority !=="normal" ? (
+  <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full border ${pc.color} ${pc.bg}`}>
+  <Flag size={10} className="inline mr-1"/>{pc.label}
+  </span>
+  ) : <span className="text-xs text-muted-foreground">-</span>}
+  </TableCell>
+  <TableCell className="text-sm text-card-foreground">{p.budget || "-"}</TableCell>
+  <TableCell className="text-sm text-card-foreground">
+  {deadlineDate ? (
+  <span className={`inline-flex items-center gap-1 ${overdue ?"text-destructive": days != null && days <= 7 ?"text-orange-500":"text-muted-foreground"}`}>
+  <Calendar size={12} /> {(() => { try { return format(deadlineDate,"d MMM yyyy", { locale: fr }); } catch { return p.deadline; } })()}
+  </span>
+  ) : "-"}
+  </TableCell>
+  <TableCell>
+  <div className="flex items-center gap-2 min-w-[100px]">
+  <div className="flex-1 relative h-1.5 bg-muted rounded-full overflow-hidden">
+  <div className={`absolute inset-y-0 left-0 rounded-full transition-all duration-500 ${p.progress === 100 ?"bg-teal-500":"bg-primary"}`} style={{ width: `${p.progress}%` }} />
+  </div>
+  <span className="text-[11px] font-bold text-card-foreground w-8 text-right">{p.progress}%</span>
+  </div>
+  </TableCell>
+  <TableCell className="text-right">
+  <button onClick={() => openEditForm(p)} className="p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all" title="Modifier">
+  <Pencil size={14} />
+  </button>
+  </TableCell>
+  </TableRow>
+  );
+  })}
+  </TableBody>
+  </Table>
+  </div>
+  )}
 
- <div className="p-5">
- {/* Header: status + priority + edit */}
- <div className="flex items-center justify-between mb-3">
- <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ${sc.color} ${sc.bg}`}>
- <sc.icon size={12} /> {sc.label}
- </span>
- <div className="flex items-center gap-1.5">
- {p.priority && p.priority !=="normal"&& (
- <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${pc.color} ${pc.bg}`}>
- <Flag size={10} className="inline mr-1"/>{pc.label}
- </span>
- )}
- <button onClick={() => openEditForm(p)} className="sm:opacity-0 sm:group-hover:opacity-100 p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"title="Modifier">
- <Pencil size={14} />
- </button>
- </div>
- </div>
+  {viewMode === "cards" && (
+  <div className="grid gap-4 sm:gap-5 grid-cols-1 md:grid-cols-2">
+  {filteredProjects.map((p) => {
+  const sc = statusConfig[p.status] || statusConfig.en_cours;
+  const priorityConfig: Record<string, { label: string; color: string; bg: string }> = {
+  urgent: { label:"Urgent", color:"text-destructive", bg:"bg-destructive/10 border-destructive/20"},
+  haute: { label:"Haute", color:"text-orange-500", bg:"bg-orange-500/10 border-orange-500/20"},
+  normal: { label:"Normal", color:"text-muted-foreground", bg:"bg-muted border-border"},
+  };
+  const pc = priorityConfig[p.priority] || priorityConfig.normal;
+  return (
+  <div key={p.id} className="group relative bg-card rounded-2xl shadow-card border border-border/50 hover:shadow-card-hover hover:border-primary/30 transition-all duration-300 overflow-hidden">
+  {/* Top accent bar */}
+  <div className={`h-1 w-full ${p.status ==="termine"?"bg-teal-500": p.status ==="en_attente"?"bg-muted-foreground/30":"bg-primary"}`} />
 
- {/* Title & description */}
- {p.project_number && <span className="text-xs font-mono text-muted-foreground">{p.project_number}</span>}
- <h3 className="font-bold text-card-foreground text-lg leading-tight mb-1">{p.name}</h3>
- {p.description && (
- <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{p.description}</p>
- )}
- {p.gestionnaire_id && gestionnaireProfiles[p.gestionnaire_id] && (
- <div className="flex items-center gap-2 mb-3">
- <UserCheck size={14} className="text-accent shrink-0"/>
- <span className="text-xs text-accent font-medium">Gestionnaire : {gestionnaireProfiles[p.gestionnaire_id]}</span>
- </div>
- )}
+  <div className="p-5">
+  {/* Header: status + priority + edit */}
+  <div className="flex items-center justify-between mb-3">
+  <span className={`inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ${sc.color} ${sc.bg}`}>
+  <sc.icon size={12} /> {sc.label}
+  </span>
+  <div className="flex items-center gap-1.5">
+  {p.priority && p.priority !=="normal"&& (
+  <span className={`text-xs font-medium px-2.5 py-1 rounded-full border ${pc.color} ${pc.bg}`}>
+  <Flag size={10} className="inline mr-1"/>{pc.label}
+  </span>
+  )}
+  <button onClick={() => openEditForm(p)} className="sm:opacity-0 sm:group-hover:opacity-100 p-1.5 rounded-lg text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all"title="Modifier">
+  <Pencil size={14} />
+  </button>
+  </div>
+  </div>
 
- {(p.budget || p.deadline || p.technologies || p.total_paid) && (
- <div className="flex flex-wrap gap-1.5 mb-4">
- {p.budget && (
- <span className="inline-flex items-center gap-1 text-xs bg-primary/5 text-primary border border-primary/15 px-2.5 py-1 rounded-lg">
- <DollarSign size={11} /> Budget: {p.budget}
- </span>
- )}
- {(p.total_paid != null && p.total_paid > 0) && (
- <span className="inline-flex items-center gap-1 text-xs bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 px-2.5 py-1 rounded-lg dark:text-emerald-400">
- <DollarSign size={11} /> Payé: {(p.total_paid || 0).toLocaleString("fr-CA", { style:"currency", currency:"CAD"})}
- </span>
- )}
- {p.budget && (() => {
- const bNum = parseFloat((p.budget ||"0").replace(/[^\d.]/g,""));
- const solde = bNum - (p.total_paid || 0);
- return (
- <span className={`inline-flex items-center gap-1 text-xs border px-2.5 py-1 rounded-lg ${solde < 0 ?"bg-destructive/10 text-destructive border-destructive/20":"bg-primary/5 text-primary border-primary/15"}`}>
- <DollarSign size={11} /> Solde: {solde.toLocaleString("fr-CA", { style:"currency", currency:"CAD"})}
- </span>
- );
- })()}
- {p.deadline && (() => {
- const deadlineDate = new Date(p.deadline);
- const days = differenceInDays(deadlineDate, new Date());
- const overdue = isPast(deadlineDate);
- const daysLabel = overdue ? `${Math.abs(days)}j en retard` : days === 0 ?"Aujourd'hui": `${days}j restants`;
- return (
- <span className={`inline-flex items-center gap-1 text-xs border px-2.5 py-1 rounded-lg ${overdue ?"bg-destructive/10 text-destructive border-destructive/20": days <= 7 ?"bg-orange-50 text-orange-600 border-orange-200 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/20":"bg-primary/5 text-primary border-primary/15"}`}>
- <Calendar size={11} /> {(() => { try { return format(deadlineDate,"d MMM yyyy", { locale: fr }); } catch { return p.deadline; } })()}
- <span className="font-semibold ml-0.5">· {daysLabel}</span>
- </span>
- );
- })()}
- </div>
- )}
- {p.technologies && (
- <div className="flex flex-wrap gap-1 mb-4">
- {p.technologies.split(",").map((tech: string) => (
- <span key={tech} className="text-[11px] bg-secondary/50 text-secondary-foreground/70 px-2 py-0.5 rounded-md">
- {tech}
- </span>
- ))}
- </div>
- )}
+  {/* Title & description */}
+  {p.project_number && <span className="text-xs font-mono text-muted-foreground">{p.project_number}</span>}
+  <h3 className="font-bold text-card-foreground text-lg leading-tight mb-1">{p.name}</h3>
+  {p.description && (
+  <p className="text-sm text-muted-foreground line-clamp-2 mb-3">{p.description}</p>
+  )}
+  {p.gestionnaire_id && gestionnaireProfiles[p.gestionnaire_id] && (
+  <div className="flex items-center gap-2 mb-3">
+  <UserCheck size={14} className="text-accent shrink-0"/>
+  <span className="text-xs text-accent font-medium">Gestionnaire : {gestionnaireProfiles[p.gestionnaire_id]}</span>
+  </div>
+  )}
 
- {/* Progress */}
- <div className="mt-auto">
- <div className="flex items-center justify-between mb-1.5">
- <span className="text-xs font-medium text-muted-foreground">Progression</span>
- <span className="text-xs font-bold text-card-foreground">{p.progress}%</span>
- </div>
- <div className="relative h-2 bg-muted rounded-full overflow-hidden">
- <div
- className={`absolute inset-y-0 left-0 rounded-full transition-all duration-500 ${p.progress === 100 ?"bg-teal-500":"bg-primary"}`}
- style={{ width: `${p.progress}%` }}
- />
- </div>
- </div>
+  {(p.budget || p.deadline || p.technologies || p.total_paid) && (
+  <div className="flex flex-wrap gap-1.5 mb-4">
+  {p.budget && (
+  <span className="inline-flex items-center gap-1 text-xs bg-primary/5 text-primary border border-primary/15 px-2.5 py-1 rounded-lg">
+  <DollarSign size={11} /> Budget: {p.budget}
+  </span>
+  )}
+  {(p.total_paid != null && p.total_paid > 0) && (
+  <span className="inline-flex items-center gap-1 text-xs bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 px-2.5 py-1 rounded-lg dark:text-emerald-400">
+  <DollarSign size={11} /> Payé: {(p.total_paid || 0).toLocaleString("fr-CA", { style:"currency", currency:"CAD"})}
+  </span>
+  )}
+  {p.budget && (() => {
+  const bNum = parseFloat((p.budget ||"0").replace(/[^\d.]/g,""));
+  const solde = bNum - (p.total_paid || 0);
+  return (
+  <span className={`inline-flex items-center gap-1 text-xs border px-2.5 py-1 rounded-lg ${solde < 0 ?"bg-destructive/10 text-destructive border-destructive/20":"bg-primary/5 text-primary border-primary/15"}`}>
+  <DollarSign size={11} /> Solde: {solde.toLocaleString("fr-CA", { style:"currency", currency:"CAD"})}
+  </span>
+  );
+  })()}
+  {p.deadline && (() => {
+  const deadlineDate = new Date(p.deadline);
+  const days = differenceInDays(deadlineDate, new Date());
+  const overdue = isPast(deadlineDate);
+  const daysLabel = overdue ? `${Math.abs(days)}j en retard` : days === 0 ?"Aujourd'hui": `${days}j restants`;
+  return (
+  <span className={`inline-flex items-center gap-1 text-xs border px-2.5 py-1 rounded-lg ${overdue ?"bg-destructive/10 text-destructive border-destructive/20": days <= 7 ?"bg-orange-50 text-orange-600 border-orange-200 dark:bg-orange-500/10 dark:text-orange-400 dark:border-orange-500/20":"bg-primary/5 text-primary border-primary/15"}`}>
+  <Calendar size={11} /> {(() => { try { return format(deadlineDate,"d MMM yyyy", { locale: fr }); } catch { return p.deadline; } })()}
+  <span className="font-semibold ml-0.5">· {daysLabel}</span>
+  </span>
+  );
+  })()}
+  </div>
+  )}
+  {p.technologies && (
+  <div className="flex flex-wrap gap-1 mb-4">
+  {p.technologies.split(",").map((tech: string) => (
+  <span key={tech} className="text-[11px] bg-secondary/50 text-secondary-foreground/70 px-2 py-0.5 rounded-md">
+  {tech}
+  </span>
+  ))}
+  </div>
+  )}
 
- {/* Date */}
- <p className="text-[11px] text-muted-foreground/50 mt-3">
- Soumis le {new Date(p.created_at).toLocaleDateString("fr-FR", { day:"numeric", month:"long", year:"numeric"})}
- </p>
- </div>
- </div>
- );
- })}
- </div>
- )}
+  {/* Progress */}
+  <div className="mt-auto">
+  <div className="flex items-center justify-between mb-1.5">
+  <span className="text-xs font-medium text-muted-foreground">Progression</span>
+  <span className="text-xs font-bold text-card-foreground">{p.progress}%</span>
+  </div>
+  <div className="relative h-2 bg-muted rounded-full overflow-hidden">
+  <div
+  className={`absolute inset-y-0 left-0 rounded-full transition-all duration-500 ${p.progress === 100 ?"bg-teal-500":"bg-primary"}`}
+  style={{ width: `${p.progress}%` }}
+  />
+  </div>
+  </div>
+
+  {/* Date */}
+  <p className="text-[11px] text-muted-foreground/50 mt-3">
+  Soumis le {new Date(p.created_at).toLocaleDateString("fr-FR", { day:"numeric", month:"long", year:"numeric"})}
+  </p>
+  </div>
+  </div>
+  );
+  })}
+  </div>
+  )}
+  </>
+  )}
  </div>
  );
 }
