@@ -1,10 +1,11 @@
 import { useEffect, useState } from"react";
-import { useParams, Link } from"react-router-dom";
+import { useParams, Link, useNavigate } from"react-router-dom";
 import { Helmet } from"react-helmet-async";
 import { supabase } from"@/integrations/supabase/client";
 import { Card, CardContent } from"@/components/ui/card";
 import { Button } from"@/components/ui/button";
-import { CheckCircle2, XCircle, ShieldCheck, Loader2, Calendar, User, GraduationCap, Award, Share2 } from"lucide-react";
+import { Input } from"@/components/ui/input";
+import { CheckCircle2, XCircle, ShieldCheck, Loader2, Calendar, User, GraduationCap, Award, Share2, Search } from"lucide-react";
 import { Badge } from"@/components/ui/badge";
 import { CertificateShareDialog } from"@/components/onboarding/CertificateShareDialog";
 
@@ -21,12 +22,18 @@ const APP_URL ="https://cloudmature.com";
 
 export default function VerifyCertificatePage() {
  const { code } = useParams();
+ const navigate = useNavigate();
  const [cert, setCert] = useState<Cert | null>(null);
  const [valid, setValid] = useState<boolean | null>(null);
- const [loading, setLoading] = useState(true);
+ const [loading, setLoading] = useState(false);
  const [shareOpen, setShareOpen] = useState(false);
+ const [inputCode, setInputCode] = useState("");
+
+ const CODE_RE = /^[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}-[A-HJ-NP-Z2-9]{4}$/;
 
  useEffect(() => {
+ if (!code) { setLoading(false); setValid(null); setCert(null); return; }
+ setLoading(true);
  (async () => {
  const safeCode = (code ||"").trim().toUpperCase();
  const { data, error } = await supabase.functions.invoke("verify-certificate", {
@@ -41,6 +48,12 @@ export default function VerifyCertificatePage() {
  setLoading(false);
  })();
  }, [code]);
+
+ const onSubmit = (e: React.FormEvent) => {
+ e.preventDefault();
+ const v = inputCode.trim().toUpperCase();
+ if (v) navigate(`/verify/${v}`);
+ };
 
  const pageTitle = cert
  ? `Certificat de ${cert.candidate_name} - ${cert.training_title} | CloudMature`
@@ -77,11 +90,35 @@ export default function VerifyCertificatePage() {
 
  <Card className="shadow-lg border-0">
  <CardContent className="p-8">
- {loading ? (
+ {!code ? (
+ <div className="py-6">
+ <h2 className="text-lg font-semibold text-[#003d66] mb-2 text-center">Vérifier un certificat</h2>
+ <p className="text-sm text-muted-foreground text-center mb-6">
+ Saisissez le code d'authenticité imprimé sur le certificat (format <span className="font-mono">XXXX-XXXX-XXXX</span>).
+ </p>
+ <form onSubmit={onSubmit} className="flex flex-col sm:flex-row gap-2 max-w-md mx-auto">
+ <Input
+ value={inputCode}
+ onChange={(e) => setInputCode(e.target.value.toUpperCase())}
+ placeholder="XXXX-XXXX-XXXX"
+ className="font-mono uppercase tracking-wider text-center"
+ maxLength={14}
+ autoFocus
+ />
+ <Button type="submit" disabled={!CODE_RE.test(inputCode.trim().toUpperCase())} className="bg-gradient-primary-deep text-primary-foreground">
+ <Search className="h-4 w-4 mr-2"/> Vérifier
+ </Button>
+ </form>
+ <p className="text-[11px] text-muted-foreground text-center mt-4">
+ Toute tentative est enregistrée. Les codes invalides ne renvoient aucune information.
+ </p>
+ </div>
+ ) : loading ? (
  <div className="flex flex-col items-center py-10 text-muted-foreground">
  <Loader2 className="h-8 w-8 animate-spin mb-3"/>
  <p>Vérification en cours…</p>
  </div>
+
  ) : !valid || !cert ? (
  <div className="flex flex-col items-center py-10">
  <XCircle className="h-14 w-14 text-red-500 mb-3"/>

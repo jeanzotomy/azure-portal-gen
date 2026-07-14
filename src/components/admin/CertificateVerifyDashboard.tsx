@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { ShieldCheck, ShieldAlert, CheckCircle2, XCircle, RefreshCw, Activity, Ban, Search, AlertTriangle, Hash } from "lucide-react";
+import { ShieldCheck, ShieldAlert, CheckCircle2, XCircle, RefreshCw, Activity, Ban, Search, AlertTriangle, Hash, Download, RotateCcw, ShieldOff, ExternalLink } from "lucide-react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from "recharts";
+import { toast } from "sonner";
+import { Link as RouterLink } from "react-router-dom";
 
 type Row = { ip: string; code: string | null; ok: boolean; attempted_at: string };
 type Window = "1h" | "24h" | "7d";
@@ -93,6 +95,31 @@ export function CertificateVerifyDashboard() {
   };
 
   useEffect(() => { load(); }, [win]);
+
+  // Realtime sync: append new attempts as they arrive
+  useEffect(() => {
+    const channel = supabase
+      .channel("verify_attempts_stream")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "verify_attempts" }, (payload) => {
+        const r = payload.new as Row;
+        const cutoff = Date.now() - WINDOW_MS[win];
+        if (new Date(r.attempted_at).getTime() >= cutoff) {
+          setRows((prev) => [r, ...prev].slice(0, 5000));
+        }
+      })
+      .subscribe();
+    return () => { supabase.removeChannel(channel); };
+  }, [win]);
+
+  const exportCsv = () => {
+    const header = "attempted_at,ip,code,ok\n";
+    const body = rows.map(r => `${r.attempted_at},${r.ip},${r.code ?? ""},${r.ok}`).join("\n");
+    const blob = new Blob([header + body], { type: "text/csv;charset=utf-8" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = `verify-attempts-${win}-${new Date().toISOString().slice(0, 10)}.csv`;
+    a.click(); URL.revokeObjectURL(url);
+  };
 
   const stats = useMemo(() => {
     const total = rows.length;
@@ -183,6 +210,21 @@ export function CertificateVerifyDashboard() {
               <TabsTrigger value="7d">7 j</TabsTrigger>
             </TabsList>
           </Tabs>
+          <span className="inline-flex items-center gap-1 text-[11px] text-emerald-600 font-medium">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            Live
+          </span>
+          <Button variant="outline" size="sm" onClick={exportCsv} disabled={rows.length === 0}>
+            <Download className="h-3.5 w-3.5 mr-1" /> CSV
+          </Button>
+          <Button variant="outline" size="sm" asChild>
+            <RouterLink to="/verify" target="_blank" rel="noreferrer">
+              <ExternalLink className="h-3.5 w-3.5 mr-1" /> Page publique
+            </RouterLink>
+          </Button>
           <Button variant="outline" size="sm" onClick={load} disabled={loading}>
             <RefreshCw className={`h-3.5 w-3.5 mr-1 ${loading ? "animate-spin" : ""}`} /> Actualiser
           </Button>
@@ -495,6 +537,32 @@ function AttemptDetailDialog({ filter, onClose }: { filter: Filter; onClose: () 
                         <div><span className="text-muted-foreground">Formation :</span> {cert.training_title}</div>
                         <div><span className="text-muted-foreground">Score :</span> {cert.score ?? "-"}{cert.score != null ? "%" : ""}</div>
                         <div><span className="text-muted-foreground">Émis le :</span> {new Date(cert.issued_at).toLocaleDateString("fr-FR")}</div>
+                      </div>
+                      <div className="flex flex-wrap items-center gap-2 pt-2 mt-2 border-t">
+                        <Button size="sm" variant="outline" asChild>
+                          <RouterLink to={`/verify/${cert.verification_code}`} target="_blank" rel="noreferrer">
+                            <ExternalLink className="h-3.5 w-3.5 mr-1" /> Voir la page publique
+                          </RouterLink>
+                        </Button>
+                        {cert.revoked_at ? (
+                          <Button size="sm" variant="outline" onClick={async () => {
+                            const { error } = await supabase.from("training_certificates").update({ revoked_at: null }).eq("verification_code", cert.verification_code);
+                            if (error) toast.error("Restauration impossible: " + error.message);
+                            else { toast.success("Certificat restauré"); setCert({ ...cert, revoked_at: null }); }
+                          }}>
+                            <RotateCcw className="h-3.5 w-3.5 mr-1" /> Restaurer
+                          </Button>
+                        ) : (
+                          <Button size="sm" variant="destructive" onClick={async () => {
+                            if (!confirm(`Révoquer le certificat ${cert.verification_code} ? Il sera immédiatement invalide.`)) return;
+                            const now = new Date().toISOString();
+                            const { error } = await supabase.from("training_certificates").update({ revoked_at: now }).eq("verification_code", cert.verification_code);
+                            if (error) toast.error("Révocation impossible: " + error.message);
+                            else { toast.success("Certificat révoqué"); setCert({ ...cert, revoked_at: now }); }
+                          }}>
+                            <ShieldOff className="h-3.5 w-3.5 mr-1" /> Révoquer
+                          </Button>
+                        )}
                       </div>
                     </div>
                   ) : (
