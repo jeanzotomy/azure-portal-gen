@@ -6,8 +6,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import { ShieldCheck, ShieldAlert, CheckCircle2, XCircle, RefreshCw, Activity, Ban, Search, AlertTriangle, Hash } from "lucide-react";
+import { ShieldCheck, ShieldAlert, CheckCircle2, XCircle, RefreshCw, Activity, Ban, Search, AlertTriangle, Hash, Download, RotateCcw, ShieldOff, ExternalLink } from "lucide-react";
 import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from "recharts";
+import { toast } from "sonner";
+import { Link as RouterLink } from "react-router-dom";
 
 type Row = { ip: string; code: string | null; ok: boolean; attempted_at: string };
 type Window = "1h" | "24h" | "7d";
