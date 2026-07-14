@@ -20,7 +20,22 @@ export default function InstallPage() {
  const [isInstalled, setIsInstalled] = useState(false);
  const [showManual, setShowManual] = useState(false);
 
+ const checkInstalled = useCallback(() => {
+ const standalone =
+ window.matchMedia("(display-mode: standalone)").matches ||
+ ("standalone" in window.navigator && (window.navigator as Navigator).standalone === true);
+ setIsInstalled(standalone);
+ return standalone;
+ }, []);
+
  useEffect(() => {
+ const alreadyInstalled = checkInstalled();
+ if (alreadyInstalled) {
+ toast.info("CloudMature est déjà installée sur votre appareil.", {
+ description: "Ouvrez l'application depuis votre écran d'accueil.",
+ });
+ }
+
  const handleBeforeInstallPrompt = (e: Event) => {
  e.preventDefault();
  setInstallPrompt(e as BeforeInstallPromptEvent);
@@ -29,10 +44,17 @@ export default function InstallPage() {
  const handleAppInstalled = () => {
  setIsInstalled(true);
  setInstallPrompt(null);
+ toast.success("Installation réussie", {
+ description: "CloudMature a été ajoutée à votre écran d'accueil.",
+ });
  };
 
  window.addEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
  window.addEventListener("appinstalled", handleAppInstalled);
+
+ const mediaQuery = window.matchMedia("(display-mode: standalone)");
+ const handleDisplayModeChange = () => checkInstalled();
+ mediaQuery.addEventListener("change", handleDisplayModeChange);
 
  // iOS Safari et navigateurs sans API n'émètront jamais beforeinstallprompt
  const timer = window.setTimeout(() => setShowManual(true), 800);
@@ -40,9 +62,10 @@ export default function InstallPage() {
  return () => {
  window.removeEventListener("beforeinstallprompt", handleBeforeInstallPrompt);
  window.removeEventListener("appinstalled", handleAppInstalled);
+ mediaQuery.removeEventListener("change", handleDisplayModeChange);
  clearTimeout(timer);
  };
- }, []);
+ }, [checkInstalled]);
 
  const handleInstall = useCallback(async () => {
  if (!installPrompt) return;
@@ -50,6 +73,13 @@ export default function InstallPage() {
  const { outcome } = await installPrompt.userChoice;
  if (outcome === "accepted") {
  setIsInstalled(true);
+ toast.success("Installation réussie", {
+ description: "CloudMature a été ajoutée à votre écran d'accueil.",
+ });
+ } else {
+ toast.info("Installation annulée", {
+ description: "Vous pouvez réessayer à tout moment depuis cette page.",
+ });
  }
  setInstallPrompt(null);
  }, [installPrompt]);
