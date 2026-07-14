@@ -699,24 +699,59 @@ function AdminContent() {
  </SidebarGroupContent>
  </SidebarGroup>
 
- {/* Ressources humaines */}
- <SidebarGroup>
- {!collapsed && <SidebarGroupLabel>Ressources humaines</SidebarGroupLabel>}
- <SidebarGroupContent>
- <SidebarMenu>
- <SidebarMenuItem>
- <SidebarMenuButton
- onClick={() => { if (!isHrTab) setTab("hr-recruitment"); }}
- isActive={isHrTab}
- tooltip="RH"
-  className="gap-3" >
- <HrIcon size={18} />
- <span>RH</span>
- </SidebarMenuButton>
- </SidebarMenuItem>
- </SidebarMenu>
- </SidebarGroupContent>
- </SidebarGroup>
+  {/* RH */}
+  <SidebarGroup>
+  {!collapsed && <SidebarGroupLabel>RH</SidebarGroupLabel>}
+  <SidebarGroupContent>
+  <SidebarMenu>
+  <SidebarMenuItem>
+  <SidebarMenuButton
+  onClick={() => {
+  setRhOpen((v) => !v);
+  if (!isRhTab) setTab("hr");
+  }}
+  isActive={isRhTab}
+  tooltip="RH"data-keep-mobile-open="true"
+   className="gap-3" >
+  <HrIcon size={18} />
+  <span className="flex-1 text-left">RH</span>
+  {rhOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+  </SidebarMenuButton>
+  {rhOpen && (
+  <SidebarMenuSub>
+  {rhGroup.map((s) => (
+  <SidebarMenuSubItem key={s.id}>
+  <SidebarMenuSubButton onClick={() => setTab(s.id)} isActive={tab === s.id} className="gap-2 cursor-pointer">
+  <s.icon size={14} />
+  <span>{s.label}</span>
+  </SidebarMenuSubButton>
+  </SidebarMenuSubItem>
+  ))}
+  </SidebarMenuSub>
+  )}
+  </SidebarMenuItem>
+  </SidebarMenu>
+  </SidebarGroupContent>
+  </SidebarGroup>
+
+  {/* Recrutements */}
+  <SidebarGroup>
+  {!collapsed && <SidebarGroupLabel>Recrutements</SidebarGroupLabel>}
+  <SidebarGroupContent>
+  <SidebarMenu>
+  <SidebarMenuItem>
+  <SidebarMenuButton
+  onClick={() => { if (!isRecruitmentTab) setTab("hr-recruitment"); }}
+  isActive={isRecruitmentTab}
+  tooltip="Recrutements"
+   className="gap-3" >
+  <Briefcase size={18} />
+  <span>Recrutements</span>
+  </SidebarMenuButton>
+  </SidebarMenuItem>
+  </SidebarMenu>
+  </SidebarGroupContent>
+  </SidebarGroup>
 
  {/* Système */}
  <SidebarGroup>
