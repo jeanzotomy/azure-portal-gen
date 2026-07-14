@@ -86,11 +86,10 @@ export function ServicesSection() {
  {middleLeft.map((s) => (
  <ServiceCard key={s.title} s={s} />
  ))}
- <div className="relative group overflow-hidden rounded-2xl">
- <div className="absolute -inset-1 rounded-2xl bg-primary blur-lg opacity-60 group-hover:opacity-90 transition-opacity duration-500"/>
+  <div className="relative group overflow-hidden rounded-2xl">
  <div className="relative overflow-hidden rounded-2xl h-full border border-primary/20">
- <img src={servicesImage} alt="Consultants CloudMature en session de travail sur un projet Cloud et IA"className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"/>
- <div className="absolute inset-0 bg-primary to-transparent"/>
+ <img src={servicesImage} alt="Consultants CloudMature en session de travail sur un projet Cloud et IA" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"/>
+ <div className="absolute inset-0 bg-secondary/60"/>
  <div className="absolute bottom-0 left-0 right-0 p-6">
  <p className="text-sm font-semibold uppercase tracking-wider text-primary">Cloud Mature</p>
  <p className="text-lg font-bold text-primary-foreground mt-1">{t("services.imageCaption")}</p>
