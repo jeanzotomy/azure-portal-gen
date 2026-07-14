@@ -27,9 +27,6 @@ export function Footer() {
             <span className="gradient-text font-semibold">{t("hero.badge.ai")}</span>
           </div>
         </div>
-        <div className="flex justify-center mt-6">
-          <SocialChannels variant="icons" />
-        </div>
         <div className="flex flex-col md:flex-row items-center justify-between gap-4 mt-8 pt-6 border-t border-secondary-foreground/20">
 
           <p className="text-sm text-secondary-foreground/85">
