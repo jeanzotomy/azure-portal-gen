@@ -105,16 +105,16 @@
     background: var(--gradient-hero);
   }
   .gradient-primary {
-    background: var(--gradient-primary);
+    background-color: hsl(var(--primary));
   }
   .bg-gradient-primary-deep {
-    background-image: var(--gradient-primary-deep);
+    background-color: hsl(var(--primary));
+    background-image: none;
   }
   .gradient-text {
-    background: var(--gradient-primary);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+    color: hsl(var(--primary));
+    -webkit-text-fill-color: currentColor;
+    background: none;
   }
   .shadow-card {
     box-shadow: var(--shadow-card);
