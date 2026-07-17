@@ -324,18 +324,30 @@ export default function SiteAssistant() {
  </div>
  </>
  )}
- {messages.map((m, i) => (
- <div key={i} className={cn("flex", m.role ==="user"?"justify-end":"justify-start")}>
- <div
- className={cn(
-"max-w-[85%] rounded-2xl px-3 py-2 leading-relaxed",
- m.role ==="user" ?"bg-primary text-primary-foreground rounded-br-md" :"bg-muted/70 text-foreground rounded-bl-md",
- )}
- >
- {m.role ==="assistant"? renderRich(m.content) : <p className="whitespace-pre-line">{m.content}</p>}
- </div>
- </div>
- ))}
+  {messages.map((m, i) => {
+    const isUser = m.role === "user";
+    const prevRole = i > 0 ? messages[i - 1].role : null;
+    const needsSeparator = !isUser && prevRole === "assistant";
+    return (
+      <div key={i} className="space-y-2">
+        {needsSeparator && <div className="h-px bg-border/40 mx-8" />}
+        <div className={cn("flex", isUser ? "justify-end" : "justify-start")}>
+          <div
+            className={cn(
+              "rounded-2xl px-3.5 py-2.5 leading-relaxed",
+              isUser
+                ? "max-w-[85%] bg-primary text-primary-foreground rounded-br-md"
+                : "max-w-[92%] bg-muted/60 text-foreground rounded-bl-md border border-border/40 shadow-sm",
+            )}
+          >
+            {isUser
+              ? <p className="whitespace-pre-line">{m.content}</p>
+              : renderRich(m.content)}
+          </div>
+        </div>
+      </div>
+    );
+  })}
  {loading && (
  <div className="flex justify-start">
  <div className="bg-muted/70 rounded-2xl rounded-bl-md px-3 py-2 flex items-center gap-2 text-muted-foreground text-xs">
