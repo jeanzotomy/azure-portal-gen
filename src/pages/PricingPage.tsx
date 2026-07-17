@@ -98,6 +98,7 @@ export default function PricingPage() {
  const cinetpay = useCinetPayCheckout();
  const { isAdmin } = useUserRoles();
  const [publishedServices, setPublishedServices] = useState<PublishedService[]>([]);
+ const [quoteService, setQuoteService] = useState<PublishedService | null>(null);
 
  useEffect(() => {
  supabase.auth.getUser().then(({ data }) => {
