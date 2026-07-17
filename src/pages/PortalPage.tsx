@@ -58,7 +58,7 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from"@/components/ui/tabs";
 import { IdCard, Lock as LockIcon } from"lucide-react";
 import { getDialCode, applyDialCode } from"@/lib/country-dial-codes";
 
-type Tab ="dashboard"|"projects"|"tickets"|"applications"|"onboarding"|"my-trainings"|"invoices"|"profile";
+type Tab ="dashboard"|"projects"|"tickets"|"applications"|"onboarding"|"my-trainings"|"invoices"|"payments"|"profile";
 
 
 function PortalContent() {
