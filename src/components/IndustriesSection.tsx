@@ -42,10 +42,10 @@ export function IndustriesSection() {
  <div className="mx-auto w-12 h-12 rounded-xl bg-primary flex items-center justify-center mb-3 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-md">
  <Icon size={22} className="text-primary-foreground"/>
  </div>
- <h3 className="font-bold text-secondary text-base mb-1">{ind.title}</h3>
- <p className="text-xs text-muted-foreground leading-relaxed">{ind.desc}</p>
- <div className="mt-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
- <span className="text-primary text-xs font-medium">{t("industries.learnMore")}</span>
+  <h3 className="font-bold text-secondary text-[17px] mb-1">{ind.title}</h3>
+  <p className="text-sm text-muted-foreground leading-relaxed">{ind.desc}</p>
+  <div className="mt-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+  <span className="text-primary text-sm font-medium">{t("industries.learnMore")}</span>
  </div>
  </div>
  );
