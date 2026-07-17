@@ -35,10 +35,15 @@ export default function OnboardingAdminTab({ readOnly = false }: { readOnly?: bo
  const [contract, setContract] = useState<Contract | null>(null);
  const [uploadingContract, setUploadingContract] = useState(false);
  const [search, setSearch] = useState("");
+ const [statusFilter, setStatusFilter] = useState<string>("all");
+ const [registrationFilter, setRegistrationFilter] = useState<string>("all");
+ const [messagesOnly, setMessagesOnly] = useState(false);
+ const [messageCounts, setMessageCounts] = useState<Record<string, number>>({});
  const [rejectDoc, setRejectDoc] = useState<Doc | null>(null);
  const [rejectReason, setRejectReason] = useState("");
  const [adminUserId, setAdminUserId] = useState<string | null>(null);
  const [resendingInvite, setResendingInvite] = useState(false);
+ const messagesSectionRef = useRef<HTMLDivElement>(null);
 
  useEffect(() => {
   supabase.auth.getUser().then(({ data }) => setAdminUserId(data.user?.id ?? null));
