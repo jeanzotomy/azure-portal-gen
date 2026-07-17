@@ -18,7 +18,7 @@ const fr = {
     badge: "À propos",
     title: "Qui sommes-nous,",
     titleHighlight: "Cloud Mature?",
-    description: "Cloud Mature est une entreprise de technologies de l'information basée à Conakry, dont la vocation est d'accompagner ses partenaires vers la maturité dans le Cloud qu'il soit public, hybride ou privé. Experts certifiés Microsoft, AWS et Google Cloud, nous concevons des architectures multi-cloud robustes et guidons les organisations dans leur transformation numérique avec rigueur, proximité et engagement.",
+    description: "Cloud Mature est une entreprise de technologies de l'information basée à Conakry, dont la vocation est d'accompagner les organisations dans leur transformation vers le Cloud, qu'il soit public, privé ou hybride, avec une approche sécurisée, performante et conforme aux standards les plus élevés. Experts certifiés Microsoft, AWS et Google Cloud, nous concevons des architectures multi-cloud robustes et guidons les organisations dans leur transformation numérique avec rigueur, proximité et engagement.",
     missions: [
       { title: "Architectures Multi-Cloud", desc: "Conception d'infrastructures sur Azure, AWS et GCP - du cloud public au cloud privé - avec des architectures résilientes, scalables et optimisées pour votre contexte métier." },
       { title: "Excellence opérationnelle", desc: "Automatisation CI/CD, Infrastructure-as-Code (Terraform, Bicep, CloudFormation), monitoring avancé et gouvernance FinOps pour maximiser votre retour sur investissement." },
@@ -31,7 +31,7 @@ const fr = {
   hero: {
     words: ["Innover.", "Optimiser.", "Automatiser."],
     badge: { consulting: "Consultation", cloud: "Cloud", devops: "DevOps", ai: "IA" },
-    description: "Cloud Mature accompagne les organisations dans leur transformation vers le Cloud avec une approche sécurisée, performante et conforme aux standards les plus élevés.",
+    description: "Cloud Mature accompagne les organisations dans leur transformation vers le Cloud, qu'il soit public, privé ou hybride, avec une approche sécurisée, performante et conforme aux standards les plus élevés.",
     cta: "Demander une consultation",
     become: "Devenir client",
     multiCloud: "Multi-Cloud",
