@@ -153,44 +153,113 @@ export default function OnboardingAdminTab({ readOnly = false }: { readOnly?: bo
  window.open(data.signedUrl,"_blank");
  };
 
- const filtered = processes.filter(p =>
- !search || p.candidate_name.toLowerCase().includes(search.toLowerCase()) ||
- p.candidate_email.toLowerCase().includes(search.toLowerCase())
- );
+ const filtered = processes.filter(p => {
+  const q = search.trim().toLowerCase();
+  const matchesSearch = !q
+   || p.candidate_name.toLowerCase().includes(q)
+   || p.candidate_email.toLowerCase().includes(q);
+  const matchesStatus = statusFilter === "all" || p.status === statusFilter;
+  const matchesRegistration =
+   registrationFilter === "all"
+   || (registrationFilter === "registered" && !!p.user_id)
+   || (registrationFilter === "not_registered" && !p.user_id);
+  const matchesMessages = !messagesOnly || (messageCounts[p.id] || 0) > 0;
+  return matchesSearch && matchesStatus && matchesRegistration && matchesMessages;
+ });
+
+ const hasActiveFilters = search || statusFilter !== "all" || registrationFilter !== "all" || messagesOnly;
+ const resetFilters = () => {
+  setSearch(""); setStatusFilter("all"); setRegistrationFilter("all"); setMessagesOnly(false);
+ };
 
  return (
  <div className="space-y-4">
  <div className="flex items-center justify-between gap-3 flex-wrap">
- <div className="flex items-center gap-2">
- <Users className="h-5 w-5 text-primary"/>
- <h3 className="font-semibold">Onboarding ({processes.length})</h3>
+  <div className="flex items-center gap-2">
+   <Users className="h-5 w-5 text-primary"/>
+   <h3 className="font-semibold">Onboarding ({filtered.length}{filtered.length !== processes.length && `/${processes.length}`})</h3>
+  </div>
+  <Button size="sm" variant="outline" onClick={load}>Actualiser</Button>
  </div>
- <Input placeholder="Rechercher candidat..."value={search} onChange={(e) => setSearch(e.target.value)} className="max-w-xs"/>
- <Button size="sm"variant="outline"onClick={load}>Actualiser</Button>
- </div>
+
+ {/* Barre de recherche + filtres */}
+ <Card className="p-3 flex flex-wrap items-center gap-2">
+  <div className="relative flex-1 min-w-[220px]">
+   <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+   <Input
+    placeholder="Rechercher par nom ou email..."
+    value={search}
+    onChange={(e) => setSearch(e.target.value)}
+    className="pl-8"
+   />
+  </div>
+  <Select value={statusFilter} onValueChange={setStatusFilter}>
+   <SelectTrigger className="w-[160px]"><SelectValue placeholder="Statut" /></SelectTrigger>
+   <SelectContent>
+    <SelectItem value="all">Tous les statuts</SelectItem>
+    <SelectItem value="en_cours">En cours</SelectItem>
+    <SelectItem value="complete">Complète</SelectItem>
+   </SelectContent>
+  </Select>
+  <Select value={registrationFilter} onValueChange={setRegistrationFilter}>
+   <SelectTrigger className="w-[160px]"><SelectValue placeholder="Inscription" /></SelectTrigger>
+   <SelectContent>
+    <SelectItem value="all">Tous</SelectItem>
+    <SelectItem value="registered">Inscrit</SelectItem>
+    <SelectItem value="not_registered">Pas inscrit</SelectItem>
+   </SelectContent>
+  </Select>
+  <Button
+   size="sm"
+   variant={messagesOnly ? "default" : "outline"}
+   onClick={() => setMessagesOnly(v => !v)}
+   className={messagesOnly ? "bg-primary text-primary-foreground" : ""}
+  >
+   <MessageSquare className="h-3.5 w-3.5 mr-1.5" />
+   Avec messages
+  </Button>
+  {hasActiveFilters && (
+   <Button size="sm" variant="ghost" onClick={resetFilters}>
+    <X className="h-3.5 w-3.5 mr-1" /> Réinitialiser
+   </Button>
+  )}
+ </Card>
 
  {loading ? (
  <div className="flex justify-center py-10"><Loader2 className="h-6 w-6 animate-spin"/></div>
  ) : filtered.length === 0 ? (
  <Card className="p-10 text-center text-muted-foreground text-sm">
- Aucun dossier d'onboarding.
+  {hasActiveFilters ? "Aucun candidat ne correspond aux filtres." : "Aucun dossier d'onboarding."}
  </Card>
  ) : (
  <div className="grid gap-3">
- {filtered.map(p => (
- <Card key={p.id} className="p-4 flex items-center justify-between gap-4 hover:shadow-md transition cursor-pointer"onClick={() => openProcess(p)}>
- <div className="flex-1 min-w-0">
- <div className="font-medium">{p.candidate_name}</div>
- <div className="text-xs text-muted-foreground">{p.candidate_email}</div>
- </div>
- <div className="flex items-center gap-2 text-xs">
- <Badge variant={p.status ==="complete"?"default":"outline"}>{p.status}</Badge>
- {!p.user_id && <Badge variant="outline"className="text-amber-600 border-amber-300"><Clock className="h-3 w-3 mr-1"/>Pas inscrit</Badge>}
- <span className="text-muted-foreground">Étape {p.current_step}/7</span>
- </div>
- <Button size="sm"variant="ghost"><Eye className="h-4 w-4"/></Button>
- </Card>
- ))}
+ {filtered.map(p => {
+  const msgCount = messageCounts[p.id] || 0;
+  return (
+  <Card key={p.id} className="p-4 flex items-center justify-between gap-4 hover:shadow-md transition cursor-pointer" onClick={() => openProcess(p)}>
+   <div className="flex-1 min-w-0">
+    <div className="font-medium">{p.candidate_name}</div>
+    <div className="text-xs text-muted-foreground">{p.candidate_email}</div>
+   </div>
+   <div className="flex items-center gap-2 text-xs">
+    <Badge variant={p.status === "complete" ? "default" : "outline"}>{p.status}</Badge>
+    {!p.user_id && <Badge variant="outline" className="text-amber-600 border-amber-300"><Clock className="h-3 w-3 mr-1"/>Pas inscrit</Badge>}
+    <span className="text-muted-foreground">Étape {p.current_step}/7</span>
+   </div>
+   <Button
+    size="sm"
+    variant={msgCount > 0 ? "default" : "outline"}
+    onClick={(e) => { e.stopPropagation(); openProcess(p, true); }}
+    className={msgCount > 0 ? "bg-primary text-primary-foreground" : ""}
+    title="Ouvrir la conversation"
+   >
+    <MessageSquare className="h-3.5 w-3.5" />
+    {msgCount > 0 && <span className="ml-1 text-[10px] font-semibold">{msgCount}</span>}
+   </Button>
+   <Button size="sm" variant="ghost"><Eye className="h-4 w-4"/></Button>
+  </Card>
+  );
+ })}
  </div>
  )}
 
