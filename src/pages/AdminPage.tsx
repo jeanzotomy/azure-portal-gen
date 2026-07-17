@@ -791,13 +791,28 @@ function AdminContent() {
  </Sidebar>
 
  <div className="flex-1 flex flex-col min-h-screen">
- <header className="h-14 flex items-center justify-between border-b border-border bg-card px-4">
- <div className="flex items-center gap-3">
- <SidebarTrigger />
- <h2 className="text-sm font-semibold text-card-foreground hidden sm:block">
- {[...allNavItems, ...adminServicesGroup, ...rhGroup, ...recruitmentGroup, ...settingsGroup].find((n) => n.id === tab)?.label}
- </h2>
- </div>
+  <header className="h-14 flex items-center justify-between border-b border-border bg-card px-4">
+  <div className="flex items-center gap-3">
+  <SidebarTrigger />
+  {(() => {
+    const currentLabel = [...allNavItems, ...adminServicesGroup, ...rhGroup, ...recruitmentGroup, ...settingsGroup].find((n) => n.id === tab)?.label;
+    const section =
+      isAdminServicesTab || tab === "commerce" ? "Ventes & Marketing"
+      : isRhTab ? "RH"
+      : isRecruitmentTab ? "Recrutements"
+      : isSettingsTab ? "Système"
+      : tab === "dashboard" ? null
+      : ["projects","tickets","contacts","sharepoint","verify-certificates"].includes(tab) ? "Opérations"
+      : null;
+    return (
+      <nav className="admin-breadcrumb hidden sm:flex" aria-label="Fil d'Ariane">
+        {section && <><span>{section}</span><span className="crumb-sep">›</span></>}
+        <span className="crumb-current">{currentLabel}</span>
+      </nav>
+    );
+  })()}
+  </div>
+
  <div className="flex items-center gap-2">
  <span className="text-xs bg-primary/10 text-primary px-2.5 py-1 rounded-full font-medium flex items-center gap-1">
  <Shield size={12} /> Admin
