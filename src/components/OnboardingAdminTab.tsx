@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from"react";
+import { useEffect, useState, useCallback, useRef } from"react";
 import { supabase } from"@/integrations/supabase/client";
 import { Card } from"@/components/ui/card";
 import { Button } from"@/components/ui/button";
@@ -8,8 +8,9 @@ import { Label } from"@/components/ui/label";
 import { Progress } from"@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from"@/components/ui/dialog";
 import { Textarea } from"@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from"@/components/ui/select";
 import { toast } from"sonner";
-import { Loader2, FileUp, CheckCircle2, XCircle, Eye, Users, Clock, Sparkles, ExternalLink, Send } from"lucide-react";
+import { Loader2, FileUp, CheckCircle2, XCircle, Eye, Users, Clock, Sparkles, ExternalLink, Send, MessageSquare, Search, X } from"lucide-react";
 import { OnboardingMessagesPanel } from "@/components/onboarding/OnboardingMessagesPanel";
 
 interface Process {
