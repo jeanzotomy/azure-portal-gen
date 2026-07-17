@@ -158,7 +158,11 @@ export function GamificationWidget({ userId, refreshKey = 0 }: { userId: string;
  );
  })}
  </ol>
- )}
+  )}
+ </div>
+
+ <div className="mt-3">
+  <XpHistoryFeed userId={userId} />
  </div>
  </div>
  </div>
