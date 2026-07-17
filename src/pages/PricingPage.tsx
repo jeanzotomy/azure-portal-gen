@@ -331,34 +331,70 @@ export default function PricingPage() {
  </div>
 
  {publishedServices.length > 0 && (
- <div className="mt-16 text-center">
- <h2 className="text-2xl font-bold mb-2">Services à la carte</h2>
- <p className="text-muted-foreground mb-6">Prestations issues de notre catalogue - contactez-nous pour un devis personnalisé.</p>
- <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 text-left">
- {publishedServices.map((s) => (
- <Card key={s.id}>
- <CardHeader>
- <CardTitle className="text-base">{s.name}</CardTitle>
- {s.description && (
- <CardDescription className="italic text-xs">{s.description}</CardDescription>
- )}
- </CardHeader>
- <CardContent className="space-y-3">
- <div>
- <span className="text-2xl font-bold text-foreground">
- {new Intl.NumberFormat("fr-FR").format(s.default_unit_price)} {s.default_currency}
- </span>
- <span className="text-xs text-muted-foreground"> / {s.default_unit}</span>
- </div>
- <Button asChild variant="outline"size="sm"className="w-full">
- <Link to="/#contact">Demander un devis</Link>
- </Button>
- </CardContent>
- </Card>
- ))}
- </div>
- </div>
- )}
+  <div className="mt-16 text-center">
+  <h2 className="text-2xl font-bold mb-2">Services à la carte</h2>
+  <p className="text-muted-foreground mb-6">Prestations issues de notre catalogue - achat direct ou demande de devis personnalisé.</p>
+  <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 text-left">
+  {publishedServices.map((s) => {
+    const stripePriceId = getStripePriceIdForService(s.name);
+    const hasFixedPrice = s.default_unit_price > 0 && !!stripePriceId;
+    return (
+      <Card key={s.id}>
+        <CardHeader>
+          <CardTitle className="text-base">{s.name}</CardTitle>
+          {s.description && (
+            <CardDescription className="italic text-xs">{s.description}</CardDescription>
+          )}
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <div>
+            {hasFixedPrice ? (
+              <>
+                <span className="text-2xl font-bold text-foreground">
+                  {new Intl.NumberFormat("fr-FR").format(s.default_unit_price)} {s.default_currency}
+                </span>
+                <span className="text-xs text-muted-foreground"> / {s.default_unit}</span>
+              </>
+            ) : (
+              <span className="text-lg font-semibold text-primary">Sur devis</span>
+            )}
+          </div>
+          {hasFixedPrice ? (
+            <Button
+              size="sm"
+              className="w-full"
+              onClick={() => {
+                if (!user) {
+                  navigate("/auth?redirect=/pricing");
+                  return;
+                }
+                openCheckout({
+                  priceId: stripePriceId!,
+                  userId: user.id,
+                  customerEmail: user.email,
+                  returnUrl: `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
+                });
+              }}
+            >
+              Acheter
+            </Button>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              className="w-full"
+              onClick={() => setQuoteService(s)}
+            >
+              Demander un devis
+            </Button>
+          )}
+        </CardContent>
+      </Card>
+    );
+  })}
+  </div>
+  </div>
+  )}
 
 
  {usingCinetPay && (
