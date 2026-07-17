@@ -22,10 +22,10 @@ export function IndustriesSection() {
  <span className="inline-block text-sm font-semibold uppercase tracking-wider text-primary bg-primary/10 px-4 py-1.5 rounded-full mb-4">
  {t("industries.badge")}
  </span>
- <h2 className="text-3xl md:text-4xl font-bold text-secondary">
- {t("industries.title")} <span className="text-primary">{t("industries.titleHighlight")}</span>
- </h2>
- <p className="mt-4 text-muted-foreground max-w-2xl mx-auto text-lg">
+  <h2 className="text-3xl md:text-5xl font-bold text-secondary">
+  {t("industries.title")} <span className="text-primary">{t("industries.titleHighlight")}</span>
+  </h2>
+  <p className="mt-4 text-muted-foreground max-w-2xl mx-auto text-lg">
  {t("industries.subtitle")}
  </p>
  </div>
