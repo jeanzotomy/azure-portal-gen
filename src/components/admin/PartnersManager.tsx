@@ -23,7 +23,7 @@ const SIGN_TTL = 60 * 60 * 24 * 365 * 10; // 10 years
 
 export default function PartnersManager() {
   const { toast } = useToast();
-  const confirm = useConfirm();
+  const { confirm, dialog: confirmDialog } = useConfirm();
   const [rows, setRows] = useState<Partner[]>([]);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState<Partner | null>(null);
@@ -114,12 +114,18 @@ export default function PartnersManager() {
     load();
   };
 
-  const remove = async (p: Partner) => {
-    const ok = await confirm({ title: "Supprimer ce partenaire ?", description: p.name, confirmLabel: "Supprimer", variant: "destructive" });
-    if (!ok) return;
-    const { error } = await supabase.from("partners").delete().eq("id", p.id);
-    if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
-    else { toast({ title: "Supprimé" }); load(); }
+  const remove = (p: Partner) => {
+    confirm({
+      title: "Supprimer ce partenaire ?",
+      description: p.name,
+      confirmLabel: "Supprimer",
+      variant: "destructive",
+      onConfirm: async () => {
+        const { error } = await supabase.from("partners").delete().eq("id", p.id);
+        if (error) toast({ title: "Erreur", description: error.message, variant: "destructive" });
+        else { toast({ title: "Supprimé" }); load(); }
+      },
+    });
   };
 
   const move = async (p: Partner, dir: -1 | 1) => {
@@ -240,6 +246,7 @@ export default function PartnersManager() {
           </div>
         )}
       </Card>
+      {confirmDialog}
     </div>
   );
 }
