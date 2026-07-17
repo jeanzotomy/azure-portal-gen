@@ -164,9 +164,11 @@ function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser
  <header className="h-14 flex items-center justify-between border-b border-border bg-card px-4">
  <div className="flex items-center gap-3">
  <SidebarTrigger />
- <h2 className="text-sm font-semibold text-card-foreground hidden sm:block">
- {navItems.find((n) => n.id === tab)?.label}
- </h2>
+  <nav className="admin-breadcrumb hidden sm:flex" aria-label="Fil d'Ariane">
+    <span>Comptable</span><span className="crumb-sep">›</span>
+    <span className="crumb-current">{navItems.find((n) => n.id === tab)?.label}</span>
+  </nav>
+
  </div>
  <div className="flex items-center gap-2">
  <span className="text-xs bg-teal-500/10 text-teal-500 px-2.5 py-1 rounded-full font-medium flex items-center gap-1">
