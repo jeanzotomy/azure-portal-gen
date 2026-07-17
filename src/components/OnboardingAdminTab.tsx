@@ -270,10 +270,16 @@ export default function OnboardingAdminTab({ readOnly = false }: { readOnly?: bo
   <p className="text-cyan-100 text-sm">{selected?.candidate_email}</p>
   {!readOnly && selected && (
    <div className="pt-2">
-    <Button size="sm" variant="outline" onClick={resendInvite} disabled={resendingInvite}>
-     {resendingInvite ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <Send className="h-3.5 w-3.5 mr-1.5" />}
-     Renvoyer l'invitation onboarding
-    </Button>
+     <Button
+      size="sm"
+      variant="outline"
+      onClick={resendInvite}
+      disabled={resendingInvite}
+      className="bg-background text-foreground hover:bg-accent hover:text-accent-foreground"
+     >
+      {resendingInvite ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <Send className="h-3.5 w-3.5 mr-1.5" />}
+      Renvoyer l'invitation onboarding
+     </Button>
    </div>
   )}
   </DialogHeader>
