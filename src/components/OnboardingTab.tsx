@@ -1369,13 +1369,13 @@ function CertificateButton({ assignedId }: { assignedId: string }) {
 
  return (
  <>
- <Button
- size="sm" onClick={handlePdf}
- disabled={loading}
- className="bg-amber-500/10 hover: hover: text-white" >
- {loading ? <Loader2 className="h-3 w-3 mr-1 animate-spin"/> : <Award className="h-3 w-3 mr-1"/>}
- Certificat PDF
- </Button>
+  <Button
+  size="sm" onClick={handlePdf}
+  disabled={loading}
+  className="bg-amber-500 text-white hover:bg-amber-600">
+  {loading ? <Loader2 className="h-3 w-3 mr-1 animate-spin"/> : <Award className="h-3 w-3 mr-1"/>}
+  Certificat PDF
+  </Button>
  <Button
  size="sm"
   variant="outline" onClick={handleShare}
