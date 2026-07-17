@@ -418,7 +418,16 @@ export default function PricingPage() {
  </DialogHeader>
  <div className="flex-1 overflow-y-auto p-2">{checkoutElement}</div>
  </DialogContent>
- </Dialog>
- </div>
+  </Dialog>
+
+  <QuoteRequestDialog
+    open={!!quoteService}
+    onOpenChange={(o) => { if (!o) setQuoteService(null); }}
+    serviceName={quoteService?.name ?? ""}
+    serviceId={quoteService?.id ?? null}
+    userId={user?.id ?? null}
+    defaultEmail={user?.email ?? null}
+  />
+  </div>
  );
 }
