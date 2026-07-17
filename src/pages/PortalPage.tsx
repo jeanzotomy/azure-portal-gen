@@ -49,6 +49,8 @@ import ApplicationsTab from"@/components/ApplicationsTab";
 import OnboardingTab from"@/components/OnboardingTab";
 import EmployeeTrainingsTab from"@/components/EmployeeTrainingsTab";
 import PortalInvoicesTab from"@/components/PortalInvoicesTab";
+import PortalPaymentHistoryPage from"@/pages/portal/PortalPaymentHistoryPage";
+import { Receipt } from"lucide-react";
 import MyDocumentsCard from"@/components/MyDocumentsCard";
 import PortalWhatsAppButton from"@/components/PortalWhatsAppButton";
 import { PortalAssistantLauncher } from"@/components/portal/PortalAssistantDrawer";
