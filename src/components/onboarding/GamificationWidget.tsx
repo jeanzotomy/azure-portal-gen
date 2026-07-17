@@ -2,6 +2,7 @@ import { useEffect, useState } from"react";
 import { supabase } from"@/integrations/supabase/client";
 import { Trophy, Flame, Sparkles, Star, RefreshCw } from"lucide-react";
 import { Button } from"@/components/ui/button";
+import { XpHistoryFeed } from"@/components/onboarding/XpHistoryFeed";
 
 interface Gamif {
  xp: number;
@@ -157,7 +158,11 @@ export function GamificationWidget({ userId, refreshKey = 0 }: { userId: string;
  );
  })}
  </ol>
- )}
+  )}
+ </div>
+
+ <div className="mt-3">
+  <XpHistoryFeed userId={userId} />
  </div>
  </div>
  </div>

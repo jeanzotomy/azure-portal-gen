@@ -9,7 +9,8 @@ import { Progress } from"@/components/ui/progress";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from"@/components/ui/dialog";
 import { Textarea } from"@/components/ui/textarea";
 import { toast } from"sonner";
-import { Loader2, FileUp, CheckCircle2, XCircle, Eye, Users, Clock, Sparkles, ExternalLink } from"lucide-react";
+import { Loader2, FileUp, CheckCircle2, XCircle, Eye, Users, Clock, Sparkles, ExternalLink, Send } from"lucide-react";
+import { OnboardingMessagesPanel } from "@/components/onboarding/OnboardingMessagesPanel";
 
 interface Process {
  id: string; candidate_name: string; candidate_email: string; status: string;
@@ -35,6 +36,28 @@ export default function OnboardingAdminTab({ readOnly = false }: { readOnly?: bo
  const [search, setSearch] = useState("");
  const [rejectDoc, setRejectDoc] = useState<Doc | null>(null);
  const [rejectReason, setRejectReason] = useState("");
+ const [adminUserId, setAdminUserId] = useState<string | null>(null);
+ const [resendingInvite, setResendingInvite] = useState(false);
+
+ useEffect(() => {
+  supabase.auth.getUser().then(({ data }) => setAdminUserId(data.user?.id ?? null));
+ }, []);
+
+ const resendInvite = async () => {
+  if (!selected) return;
+  setResendingInvite(true);
+  try {
+   const { data, error } = await supabase.functions.invoke("onboarding-invite", {
+    body: { process_id: selected.id },
+   });
+   if (error || (data as any)?.error) throw new Error(error?.message || (data as any)?.error);
+   toast.success("Invitation renvoyée au candidat");
+  } catch (e: any) {
+   toast.error(e.message || "Échec de l'envoi");
+  } finally {
+   setResendingInvite(false);
+  }
+ };
 
  const load = useCallback(async () => {
  setLoading(true);
@@ -158,12 +181,20 @@ export default function OnboardingAdminTab({ readOnly = false }: { readOnly?: bo
 
  <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
  <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
- <DialogHeader>
- <DialogTitle>{selected?.candidate_name}</DialogTitle>
- <p className="text-cyan-100 text-sm">{selected?.candidate_email}</p>
- </DialogHeader>
+  <DialogHeader>
+  <DialogTitle>{selected?.candidate_name}</DialogTitle>
+  <p className="text-cyan-100 text-sm">{selected?.candidate_email}</p>
+  {!readOnly && selected && (
+   <div className="pt-2">
+    <Button size="sm" variant="outline" onClick={resendInvite} disabled={resendingInvite}>
+     {resendingInvite ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <Send className="h-3.5 w-3.5 mr-1.5" />}
+     Renvoyer l'invitation onboarding
+    </Button>
+   </div>
+  )}
+  </DialogHeader>
 
- <div className="space-y-6 pt-6">
+  <div className="space-y-6 pt-6">
  {/* Steps */}
  <section>
  <h4 className="font-semibold mb-3 text-sm">Étapes</h4>
@@ -256,11 +287,18 @@ export default function OnboardingAdminTab({ readOnly = false }: { readOnly?: bo
  </Card>
  ))}
  </div>
- )}
- </section>
- </div>
- </DialogContent>
- </Dialog>
+  )}
+  </section>
+
+  {/* Messagerie candidat ↔ RH */}
+  {selected && adminUserId && (
+   <section>
+    <OnboardingMessagesPanel processId={selected.id} asAdmin currentUserId={adminUserId} />
+   </section>
+  )}
+  </div>
+  </DialogContent>
+  </Dialog>
 
  <Dialog open={!!rejectDoc} onOpenChange={(o) => !o && setRejectDoc(null)}>
  <DialogContent className="max-w-md">

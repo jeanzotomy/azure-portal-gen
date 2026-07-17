@@ -21,6 +21,7 @@ const fmtTime = (s: number) => {
 import { SignaturePad } from"@/components/SignaturePad";
 import { MediaCapsuleList } from"@/components/hr/TrainingMediaEditor";
 import { GamificationWidget } from"@/components/onboarding/GamificationWidget";
+import { OnboardingMessagesPanel } from "@/components/onboarding/OnboardingMessagesPanel";
 import { TrainingTutor } from"@/components/onboarding/TrainingTutor";
 import { TrainingComments } from"@/components/onboarding/TrainingComments";
 import { MentionsBell } from"@/components/onboarding/MentionsBell";
@@ -470,10 +471,16 @@ export default function OnboardingTab({ user }: { user: SupaUser }) {
  )}
  </Card>
  );
- })}
- </div>
- </div>
- );
+  })}
+  </div>
+
+  {process && (
+   <div className="mt-6">
+    <OnboardingMessagesPanel processId={process.id} currentUserId={user.id} />
+   </div>
+  )}
+  </div>
+  );
 }
 
 function StepContent({ step, contract, docs, trainings = [], uploading, userId, onUploadDoc, onSignContract, onDownloadContract, onMarkDone, onMarkTrainingDone }: any) {
