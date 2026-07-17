@@ -88,7 +88,8 @@ function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser
  useEffect(() => { if (isServicesTab) setServicesOpen(true); }, [isServicesTab]);
 
  return (
- <div className="min-h-screen flex w-full bg-background">
+  <div className="admin-shell min-h-screen flex w-full bg-background">
+
  <Sidebar collapsible="icon"className="border-r border-sidebar-border">
  <SidebarContent className="bg-sidebar">
  <div className="px-4 py-5 border-b border-sidebar-border">
@@ -163,9 +164,11 @@ function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser
  <header className="h-14 flex items-center justify-between border-b border-border bg-card px-4">
  <div className="flex items-center gap-3">
  <SidebarTrigger />
- <h2 className="text-sm font-semibold text-card-foreground hidden sm:block">
- {navItems.find((n) => n.id === tab)?.label}
- </h2>
+  <nav className="admin-breadcrumb hidden sm:flex" aria-label="Fil d'Ariane">
+    <span>Comptable</span><span className="crumb-sep">›</span>
+    <span className="crumb-current">{navItems.find((n) => n.id === tab)?.label}</span>
+  </nav>
+
  </div>
  <div className="flex items-center gap-2">
  <span className="text-xs bg-teal-500/10 text-teal-500 px-2.5 py-1 rounded-full font-medium flex items-center gap-1">
@@ -303,7 +306,8 @@ function AdminContent() {
 
 
  return (
- <div className="min-h-screen flex w-full bg-background">
+  <div className="admin-shell min-h-screen flex w-full bg-background">
+
  <Sidebar collapsible="icon"className="border-r border-sidebar-border">
  <SidebarContent className="bg-sidebar">
  <div className="px-4 py-5 border-b border-sidebar-border">
@@ -438,9 +442,11 @@ function AdminContent() {
  <header className="h-14 flex items-center justify-between border-b border-border bg-card px-4">
  <div className="flex items-center gap-3">
  <SidebarTrigger />
- <h2 className="text-sm font-semibold text-card-foreground hidden sm:block">
- {[...gestionnaireNavItems, ...gestionnaireServicesGroup, ...gestionnaireRhGroup, ...gestionnaireRecruitmentGroup].find((n) => n.id === gestionnaireTab)?.label}
- </h2>
+  <nav className="admin-breadcrumb hidden sm:flex" aria-label="Fil d'Ariane">
+    <span>Gestionnaire</span><span className="crumb-sep">›</span>
+    <span className="crumb-current">{[...gestionnaireNavItems, ...gestionnaireServicesGroup, ...gestionnaireRhGroup, ...gestionnaireRecruitmentGroup].find((n) => n.id === gestionnaireTab)?.label}</span>
+  </nav>
+
  </div>
  <div className="flex items-center gap-2">
  <span className="text-xs bg-blue-500/10 text-blue-500 px-2.5 py-1 rounded-full font-medium flex items-center gap-1">
@@ -482,7 +488,7 @@ function AdminContent() {
  ];
 
  return (
- <div className="min-h-screen flex w-full bg-background">
+ <div className="admin-shell min-h-screen flex w-full bg-background">
  <Sidebar collapsible="icon"className="border-r border-sidebar-border">
  <SidebarContent className="bg-sidebar">
  <div className="px-4 py-5 border-b border-sidebar-border">
@@ -534,9 +540,11 @@ function AdminContent() {
  <header className="h-14 flex items-center justify-between border-b border-border bg-card px-4">
  <div className="flex items-center gap-3">
  <SidebarTrigger />
- <h2 className="text-sm font-semibold text-card-foreground hidden sm:block">
- {agentNavItems.find((n) => n.id === agentTab)?.label}
- </h2>
+  <nav className="admin-breadcrumb hidden sm:flex" aria-label="Fil d'Ariane">
+    <span>Agent</span><span className="crumb-sep">›</span>
+    <span className="crumb-current">{agentNavItems.find((n) => n.id === agentTab)?.label}</span>
+  </nav>
+
  </div>
  <div className="flex items-center gap-2">
  <span className="text-xs bg-accent/10 text-accent px-2.5 py-1 rounded-full font-medium flex items-center gap-1">
@@ -609,7 +617,8 @@ function AdminContent() {
 
 
  return (
- <div className="min-h-screen flex w-full bg-background">
+  <div className="admin-shell min-h-screen flex w-full bg-background">
+
  <Sidebar collapsible="icon"className="border-r border-sidebar-border">
  <SidebarContent className="bg-sidebar">
  <div className="px-4 py-5 border-b border-sidebar-border">
@@ -788,13 +797,28 @@ function AdminContent() {
  </Sidebar>
 
  <div className="flex-1 flex flex-col min-h-screen">
- <header className="h-14 flex items-center justify-between border-b border-border bg-card px-4">
- <div className="flex items-center gap-3">
- <SidebarTrigger />
- <h2 className="text-sm font-semibold text-card-foreground hidden sm:block">
- {[...allNavItems, ...adminServicesGroup, ...rhGroup, ...recruitmentGroup, ...settingsGroup].find((n) => n.id === tab)?.label}
- </h2>
- </div>
+  <header className="h-14 flex items-center justify-between border-b border-border bg-card px-4">
+  <div className="flex items-center gap-3">
+  <SidebarTrigger />
+  {(() => {
+    const currentLabel = [...allNavItems, ...adminServicesGroup, ...rhGroup, ...recruitmentGroup, ...settingsGroup].find((n) => n.id === tab)?.label;
+    const section =
+      isAdminServicesTab || tab === "commerce" ? "Ventes & Marketing"
+      : isRhTab ? "RH"
+      : isRecruitmentTab ? "Recrutements"
+      : isSettingsTab ? "Système"
+      : tab === "dashboard" ? null
+      : ["projects","tickets","contacts","sharepoint","verify-certificates"].includes(tab) ? "Opérations"
+      : null;
+    return (
+      <nav className="admin-breadcrumb hidden sm:flex" aria-label="Fil d'Ariane">
+        {section && <><span>{section}</span><span className="crumb-sep">›</span></>}
+        <span className="crumb-current">{currentLabel}</span>
+      </nav>
+    );
+  })()}
+  </div>
+
  <div className="flex items-center gap-2">
  <span className="text-xs bg-primary/10 text-primary px-2.5 py-1 rounded-full font-medium flex items-center gap-1">
  <Shield size={12} /> Admin
