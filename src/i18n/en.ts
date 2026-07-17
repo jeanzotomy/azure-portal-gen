@@ -18,7 +18,7 @@ const en = {
     badge: "About Us",
     title: "Who is",
     titleHighlight: "Cloud Mature?",
-    description: "Cloud Mature is an information technology company based in Conakry, dedicated to guiding its partners toward Cloud maturity - whether public, hybrid or private. Certified Microsoft, AWS and Google Cloud experts, we design robust multi-cloud architectures and support organizations through their digital transformation with rigor, proximity and commitment.",
+    description: "Cloud Mature is an information technology company based in Conakry, dedicated to helping organizations transform to the Cloud, whether public, private, or hybrid, with a secure, high-performance approach that meets the highest standards. Certified Microsoft, AWS and Google Cloud experts, we design robust multi-cloud architectures and support organizations through their digital transformation with rigor, proximity and commitment.",
     missions: [
       { title: "Multi-Cloud Architectures", desc: "Design infrastructures on Azure, AWS and GCP - from public to private cloud - with resilient, scalable architectures optimized for your business context." },
       { title: "Operational Excellence", desc: "CI/CD automation, Infrastructure-as-Code (Terraform, Bicep, CloudFormation), advanced monitoring and FinOps governance to maximize your ROI." },
@@ -31,7 +31,7 @@ const en = {
   hero: {
     words: ["Innovate.", "Optimize.", "Automate."],
     badge: { consulting: "Consulting", cloud: "Cloud", devops: "DevOps", ai: "AI" },
-    description: "Cloud Mature helps organizations transform to the Cloud with a secure, high-performance approach that meets the highest standards.",
+    description: "Cloud Mature helps organizations transform to the Cloud, whether public, private, or hybrid, with a secure, high-performance approach that meets the highest standards.",
     cta: "Request a consultation",
     become: "Become a client",
     multiCloud: "Multi-Cloud",

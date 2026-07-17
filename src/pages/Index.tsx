@@ -15,7 +15,7 @@ import { useSeo } from "@/hooks/use-seo";
 const Index = () => {
   useSeo({
     title: "CloudMature | Cloud · DevOps · IA - Conakry, Guinée",
-    description: "Cloud Mature - Conseil Cloud (Azure, AWS, GCP), DevOps et Intelligence Artificielle pour entreprises. Conakry, Guinée.",
+    description: "Cloud Mature accompagne les organisations dans leur transformation vers le Cloud, qu'il soit public, privé ou hybride, avec une approche sécurisée, performante et conforme aux standards les plus élevés.",
     path: "/",
   });
   const location = useLocation();
