@@ -540,9 +540,11 @@ function AdminContent() {
  <header className="h-14 flex items-center justify-between border-b border-border bg-card px-4">
  <div className="flex items-center gap-3">
  <SidebarTrigger />
- <h2 className="text-sm font-semibold text-card-foreground hidden sm:block">
- {agentNavItems.find((n) => n.id === agentTab)?.label}
- </h2>
+  <nav className="admin-breadcrumb hidden sm:flex" aria-label="Fil d'Ariane">
+    <span>Agent</span><span className="crumb-sep">›</span>
+    <span className="crumb-current">{agentNavItems.find((n) => n.id === agentTab)?.label}</span>
+  </nav>
+
  </div>
  <div className="flex items-center gap-2">
  <span className="text-xs bg-accent/10 text-accent px-2.5 py-1 rounded-full font-medium flex items-center gap-1">
