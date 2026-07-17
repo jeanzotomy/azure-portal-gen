@@ -93,7 +93,8 @@ export default function AuthPage() {
   };
 
   return (
-    <div className="min-h-screen gradient-hero flex items-center justify-center px-4">
+    <div className="min-h-screen flex items-center justify-center px-4 relative">
+      <AuthBackground />
       <div className="w-full max-w-md">
         <Link to="/"
   className="inline-flex items-center gap-2 text-sm text-secondary-foreground/60 hover:text-primary mb-8">
