@@ -55,12 +55,7 @@ export default function ServiceInvoicesTab() {
   const [view, setView] = useViewMode("service-invoices", "table");
 
   const payInvoice = (id: string) => {
-    openCheckout({
-      invoiceId: id,
-      customerEmail: user?.email,
-      userId: user?.id,
-      returnUrl: `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
-    });
+    window.open(`/portal/pay/${id}`, "_blank", "noopener,noreferrer");
   };
 
   const load = async () => {
