@@ -13,6 +13,8 @@ import { useStripeCheckout } from"@/hooks/useStripeCheckout";
 import { useCinetPayCheckout } from"@/hooks/useCinetPayCheckout";
 import { useUserRoles } from"@/hooks/use-admin";
 import { useSeo } from"@/hooks/use-seo";
+import { QuoteRequestDialog } from "@/components/QuoteRequestDialog";
+import { getStripePriceIdForService } from "@/lib/servicePriceMap";
 
 import { supabase } from"@/integrations/supabase/client";
 import {
