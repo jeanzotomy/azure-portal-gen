@@ -112,6 +112,7 @@ const fr = {
     copyright: "© {year} Cloud Mature. Tous droits réservés. Innover · Optimiser · Automatiser",
     privacy: "Politique de confidentialité",
     terms: "Conditions d'utilisation",
+    partners: "Nos partenaires",
   },
   privacy: {
     title: "Politique de confidentialité",
