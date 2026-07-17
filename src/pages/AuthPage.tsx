@@ -10,6 +10,7 @@ import favicon from "@/assets/cloudmature-logo.png";
 import { useTranslation } from "@/i18n/LanguageContext";
 import { cn } from "@/lib/utils";
 import { useSeo } from "@/hooks/use-seo";
+import { AuthBackground } from "@/components/AuthBackground";
 
 export default function AuthPage() {
   useSeo({
