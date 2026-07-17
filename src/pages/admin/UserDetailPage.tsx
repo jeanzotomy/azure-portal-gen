@@ -91,7 +91,7 @@ export default function UserDetailPage() {
       // MFA + email via edge function
       try {
         const { data: mfaData } = await supabase.functions.invoke("manage-user-mfa", {
-          body: { action: "list", target_user_id: userId },
+          body: { action: "list", user_id: userId },
         });
         if (active && mfaData) {
           setMfa({ enrolled: !!mfaData.enrolled, factors: mfaData.factors || [] });
