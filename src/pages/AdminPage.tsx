@@ -88,7 +88,8 @@ function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser
  useEffect(() => { if (isServicesTab) setServicesOpen(true); }, [isServicesTab]);
 
  return (
- <div className="min-h-screen flex w-full bg-background">
+  <div className="admin-shell min-h-screen flex w-full bg-background">
+
  <Sidebar collapsible="icon"className="border-r border-sidebar-border">
  <SidebarContent className="bg-sidebar">
  <div className="px-4 py-5 border-b border-sidebar-border">
