@@ -196,3 +196,89 @@
 .delay-300 { animation-delay: 300ms; }
 .delay-400 { animation-delay: 400ms; }
 .delay-500 { animation-delay: 500ms; }
+
+/* ===============================================
+   Admin Shell – Rail + Flyout aesthetic
+   Applies subtle pro polish to the shadcn sidebar
+   used across Admin / Comptable / Gestionnaire.
+   =============================================== */
+.admin-shell [data-sidebar="sidebar"] {
+  background: hsl(215 35% 8%);
+  box-shadow: inset -1px 0 0 hsl(215 30% 18%);
+}
+
+.admin-shell [data-sidebar="group-label"] {
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: hsl(220 15% 55%);
+  padding-top: 14px;
+  padding-bottom: 6px;
+  font-weight: 700;
+}
+
+.admin-shell [data-sidebar="menu-button"] {
+  border-radius: 10px;
+  transition: background-color .18s ease, color .18s ease, transform .18s ease;
+}
+
+.admin-shell [data-sidebar="menu-button"]:hover:not([data-active="true"]) {
+  background: hsl(215 25% 16%);
+  color: hsl(220 25% 95%);
+}
+
+.admin-shell [data-sidebar="menu-button"][data-active="true"] {
+  background: linear-gradient(90deg, hsl(195 100% 40% / 0.18), hsl(195 100% 40% / 0.02));
+  color: hsl(195 100% 65%);
+  font-weight: 600;
+  position: relative;
+}
+
+.admin-shell [data-sidebar="menu-button"][data-active="true"]::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 20%;
+  bottom: 20%;
+  width: 3px;
+  border-radius: 0 3px 3px 0;
+  background: hsl(195 100% 55%);
+  box-shadow: 0 0 12px hsl(195 100% 55% / 0.55);
+}
+
+.admin-shell [data-sidebar="menu-sub-button"] {
+  border-radius: 8px;
+  transition: background-color .16s ease, color .16s ease;
+}
+
+.admin-shell [data-sidebar="menu-sub-button"][data-active="true"] {
+  background: hsl(195 100% 40% / 0.12);
+  color: hsl(195 100% 70%);
+  font-weight: 600;
+}
+
+/* Header breadcrumb polish */
+.admin-shell .admin-breadcrumb {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: hsl(215 20% 45%);
+}
+.admin-shell .admin-breadcrumb .crumb-sep {
+  color: hsl(215 15% 70%);
+  font-size: 10px;
+}
+.admin-shell .admin-breadcrumb .crumb-current {
+  color: hsl(215 30% 15%);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+/* Collapsed icon rail: center icons in a squircle */
+.admin-shell [data-collapsible="icon"] [data-sidebar="menu-button"] > svg {
+  transition: transform .18s ease;
+}
+.admin-shell [data-collapsible="icon"] [data-sidebar="menu-button"][data-active="true"] > svg {
+  transform: scale(1.08);
+}
