@@ -57,30 +57,30 @@ function linkify(text: string): React.ReactNode[] {
 }
 
 function renderRich(text: string) {
- // Rendu léger: lignes, puces"-", listes numérotées"1.".
- const lines = text.split("\n");
- const blocks: React.ReactNode[] = [];
- let buf: string[] = [];
- let mode:"ul"|"ol"|"p"| null = null;
- const flush = (key: number) => {
- if (!mode || buf.length === 0) { buf = []; mode = null; return; }
- if (mode ==="ul") blocks.push(<ul key={key} className="list-disc pl-4 space-y-0.5">{buf.map((b,i)=><li key={i}>{linkify(b)}</li>)}</ul>);
- else if (mode ==="ol") blocks.push(<ol key={key} className="list-decimal pl-4 space-y-0.5">{buf.map((b,i)=><li key={i}>{linkify(b)}</li>)}</ol>);
- else blocks.push(<p key={key}>{linkify(buf.join(""))}</p>);
- buf = []; mode = null;
- };
- lines.forEach((raw, idx) => {
- const t = raw.trim();
- if (!t) { flush(idx); return; }
- const ul = t.match(/^[-•]\s+(.+)$/);
- const ol = t.match(/^\d{1,2}[.)]\s+(.+)$/);
- if (ul) { if (mode !=="ul") flush(idx); mode ="ul"; buf.push(ul[1]); return; }
- if (ol) { if (mode !=="ol") flush(idx); mode ="ol"; buf.push(ol[1]); return; }
- if (mode !=="p") flush(idx);
- mode ="p"; buf.push(t);
- });
- flush(lines.length);
- return <div className="space-y-2">{blocks}</div>;
+  // Rendu léger: lignes, puces "-" / "•", listes numérotées "1.".
+  const lines = text.split("\n");
+  const blocks: React.ReactNode[] = [];
+  let buf: string[] = [];
+  let mode:"ul"|"ol"|"p"| null = null;
+  const flush = (key: number) => {
+    if (!mode || buf.length === 0) { buf = []; mode = null; return; }
+    if (mode ==="ul") blocks.push(<ul key={key} className="list-disc pl-4 space-y-0.5">{buf.map((b,i)=><li key={i}>{linkify(b)}</li>)}</ul>);
+    else if (mode ==="ol") blocks.push(<ol key={key} className="list-decimal pl-4 space-y-0.5">{buf.map((b,i)=><li key={i}>{linkify(b)}</li>)}</ol>);
+    else blocks.push(<p key={key}>{linkify(buf.join(" "))}</p>);
+    buf = []; mode = null;
+  };
+  lines.forEach((raw, idx) => {
+    const t = raw.trim();
+    if (!t) { flush(idx); return; }
+    const ul = t.match(/^[-•]\s+(.+)$/);
+    const ol = t.match(/^\d{1,2}[.)]\s+(.+)$/);
+    if (ul) { if (mode !=="ul") flush(idx); mode ="ul"; buf.push(ul[1]); return; }
+    if (ol) { if (mode !=="ol") flush(idx); mode ="ol"; buf.push(ol[1]); return; }
+    if (mode !=="p") flush(idx);
+    mode ="p"; buf.push(t);
+  });
+  flush(lines.length);
+  return <div className="space-y-2">{blocks}</div>;
 }
 
 export default function SiteAssistant() {
