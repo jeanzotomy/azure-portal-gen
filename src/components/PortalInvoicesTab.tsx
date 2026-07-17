@@ -78,12 +78,9 @@ export default function PortalInvoicesTab({ user: _user }: { user: SupaUser }) {
  void load();
  }, [load]);
 
- const pay = (inv: InvoiceRow) => {
- openCheckout({
- invoiceId: inv.id,
- returnUrl: `${window.location.origin}/checkout/return?session_id={CHECKOUT_SESSION_ID}`,
- });
- };
+  const pay = (inv: InvoiceRow) => {
+  window.open(`/portal/pay/${inv.id}`, "_blank", "noopener,noreferrer");
+  };
 
  const openDetail = async (inv: InvoiceRow) => {
  setDetailRow(inv);
