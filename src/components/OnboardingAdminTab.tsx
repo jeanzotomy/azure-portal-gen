@@ -287,11 +287,18 @@ export default function OnboardingAdminTab({ readOnly = false }: { readOnly?: bo
  </Card>
  ))}
  </div>
- )}
- </section>
- </div>
- </DialogContent>
- </Dialog>
+  )}
+  </section>
+
+  {/* Messagerie candidat ↔ RH */}
+  {selected && adminUserId && (
+   <section>
+    <OnboardingMessagesPanel processId={selected.id} asAdmin currentUserId={adminUserId} />
+   </section>
+  )}
+  </div>
+  </DialogContent>
+  </Dialog>
 
  <Dialog open={!!rejectDoc} onOpenChange={(o) => !o && setRejectDoc(null)}>
  <DialogContent className="max-w-md">
