@@ -142,11 +142,17 @@ ${KNOWLEDGE}
 function sanitize(s: string): string {
   if (!s) return "";
   return s
-    .replace(/\*{1,3}([^*\n]+?)\*{1,3}/g, "$1")
-    .replace(/\*+/g, "")
+    // Nettoie le markdown gras/italique sans supprimer les puces
+    .replace(/\*{2,3}([^*\n]+?)\*{2,3}/g, "$1")
+    .replace(/(?<!^\s*[-•*\d])\*(?=\S)([^*\n]+?)(?<!\s)\*(?!\s*)/g, "$1")
+    // Convertit les puces markdown "* " ou "- " en tirets "- " pour le rendu frontend
+    .replace(/^[\s]*\*\s+/gm, "- ")
+    // Supprime les # de titres markdown
     .replace(/^\s{0,3}#{1,6}\s+/gm, "")
+    // Supprime les blocs de code
     .replace(/`{3}[\s\S]*?`{3}/g, "")
     .replace(/`+/g, "")
+    // Normalise les sauts de ligne multiples mais conserve les sauts de ligne entre paragraphes/puces
     .replace(/\n{3,}/g, "\n\n")
     .trim();
 }
