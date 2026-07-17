@@ -259,6 +259,7 @@ function PortalContent() {
  {tab ==="onboarding"&& <OnboardingTab user={user} />}
  {tab ==="my-trainings"&& <EmployeeTrainingsTab user={user} />}
  {tab ==="invoices"&& <PortalInvoicesTab user={user} />}
+ {tab ==="payments"&& <PortalPaymentHistoryPage />}
  {tab ==="profile"&& <ProfileTab user={user} />}
 
  </>
