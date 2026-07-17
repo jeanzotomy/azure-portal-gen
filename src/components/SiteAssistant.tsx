@@ -28,59 +28,131 @@ function isPublicRoute(pathname: string): boolean {
 }
 
 function linkify(text: string): React.ReactNode[] {
- // Détecte URLs absolues (http/https) et chemins internes (/xxx)
- const regex = /(https?:\/\/[^\s)]+|(?<![\w/])\/(?:#?[a-z][a-z0-9\-/_#]*))/gi;
- const out: React.ReactNode[] = [];
- let last = 0;
- let m: RegExpExecArray | null;
- let key = 0;
- while ((m = regex.exec(text)) !== null) {
- if (m.index > last) out.push(text.slice(last, m.index));
- const url = m[0].replace(/[.,;:!?)]+$/,"");
- const trailing = m[0].slice(url.length);
- const isInternal = url.startsWith("/");
- out.push(
- <a
- key={`l${key++}`}
- href={url}
- target={isInternal ? undefined :"_blank"}
- rel={isInternal ? undefined :"noopener noreferrer"}
- className="text-primary underline underline-offset-2 hover:opacity-80" >
- {url}
- </a>
- );
- if (trailing) out.push(trailing);
- last = m.index + m[0].length;
- }
- if (last < text.length) out.push(text.slice(last));
- return out;
+  // Détecte URLs absolues (http/https) et chemins internes (/xxx)
+  const regex = /(https?:\/\/[^\s)]+|(?<![\w/])\/(?:#?[a-z][a-z0-9\-/_#]*))/gi;
+  const out: React.ReactNode[] = [];
+  let last = 0;
+  let m: RegExpExecArray | null;
+  let key = 0;
+  while ((m = regex.exec(text)) !== null) {
+    if (m.index > last) out.push(text.slice(last, m.index));
+    const url = m[0].replace(/[.,;:!?)]+$/, "");
+    const trailing = m[0].slice(url.length);
+    const isInternal = url.startsWith("/");
+    out.push(
+      <a
+        key={`l${key++}`}
+        href={url}
+        target={isInternal ? undefined : "_blank"}
+        rel={isInternal ? undefined : "noopener noreferrer"}
+        className="text-primary underline underline-offset-2 hover:opacity-80"
+      >
+        {url}
+      </a>
+    );
+    if (trailing) out.push(trailing);
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) out.push(text.slice(last));
+  return out;
+}
+
+// Inline: **bold**, *italic*, `code`, then linkify remaining text.
+function renderInline(text: string): React.ReactNode[] {
+  const nodes: React.ReactNode[] = [];
+  const regex = /(\*\*[^*]+\*\*|\*[^*\n]+\*|`[^`\n]+`)/g;
+  let last = 0;
+  let m: RegExpExecArray | null;
+  let key = 0;
+  while ((m = regex.exec(text)) !== null) {
+    if (m.index > last) nodes.push(...linkify(text.slice(last, m.index)));
+    const tok = m[0];
+    if (tok.startsWith("**")) {
+      nodes.push(<strong key={`b${key++}`} className="font-semibold text-foreground">{tok.slice(2, -2)}</strong>);
+    } else if (tok.startsWith("`")) {
+      nodes.push(<code key={`c${key++}`} className="rounded bg-muted px-1 py-0.5 text-[0.85em] font-mono">{tok.slice(1, -1)}</code>);
+    } else {
+      nodes.push(<em key={`i${key++}`}>{tok.slice(1, -1)}</em>);
+    }
+    last = m.index + tok.length;
+  }
+  if (last < text.length) nodes.push(...linkify(text.slice(last)));
+  return nodes;
 }
 
 function renderRich(text: string) {
-  // Rendu léger: lignes, puces "-" / "•", listes numérotées "1.".
-  const lines = text.split("\n");
+  // Rendu structuré: titres (##/###), séparateurs (---), puces (- / •),
+  // listes numérotées (1.), paragraphes. Inline: **gras**, *italique*, `code`, liens.
+  const lines = text.replace(/\r\n/g, "\n").split("\n");
   const blocks: React.ReactNode[] = [];
   let buf: string[] = [];
-  let mode:"ul"|"ol"|"p"| null = null;
+  let mode: "ul" | "ol" | "p" | null = null;
+
   const flush = (key: number) => {
     if (!mode || buf.length === 0) { buf = []; mode = null; return; }
-    if (mode ==="ul") blocks.push(<ul key={key} className="list-disc pl-4 space-y-0.5">{buf.map((b,i)=><li key={i}>{linkify(b)}</li>)}</ul>);
-    else if (mode ==="ol") blocks.push(<ol key={key} className="list-decimal pl-4 space-y-0.5">{buf.map((b,i)=><li key={i}>{linkify(b)}</li>)}</ol>);
-    else blocks.push(<p key={key}>{linkify(buf.join(" "))}</p>);
+    if (mode === "ul") {
+      blocks.push(
+        <ul key={key} className="list-disc pl-5 space-y-1 marker:text-primary/70">
+          {buf.map((b, i) => <li key={i} className="leading-relaxed">{renderInline(b)}</li>)}
+        </ul>
+      );
+    } else if (mode === "ol") {
+      blocks.push(
+        <ol key={key} className="list-decimal pl-5 space-y-1 marker:font-semibold marker:text-primary/80">
+          {buf.map((b, i) => <li key={i} className="leading-relaxed">{renderInline(b)}</li>)}
+        </ol>
+      );
+    } else {
+      blocks.push(<p key={key} className="leading-relaxed">{renderInline(buf.join(" "))}</p>);
+    }
     buf = []; mode = null;
   };
+
   lines.forEach((raw, idx) => {
     const t = raw.trim();
     if (!t) { flush(idx); return; }
-    const ul = t.match(/^[-•]\s+(.+)$/);
+
+    if (/^(---+|\*\*\*+|___+)$/.test(t)) {
+      flush(idx);
+      blocks.push(<hr key={`hr${idx}`} className="my-1 border-border/60" />);
+      return;
+    }
+
+    const h = t.match(/^(#{1,3})\s+(.+)$/);
+    if (h) {
+      flush(idx);
+      const level = h[1].length;
+      const content = h[2].replace(/[:：]\s*$/, "");
+      const cls = level === 1
+        ? "text-sm font-semibold text-foreground mt-1"
+        : level === 2
+        ? "text-[13px] font-semibold text-foreground mt-1"
+        : "text-xs font-semibold uppercase tracking-wide text-primary mt-1";
+      blocks.push(<div key={`h${idx}`} className={cls}>{renderInline(content)}</div>);
+      return;
+    }
+
+    const label = t.match(/^([A-ZÀ-Ý][^:\n]{2,40}):\s*$/);
+    if (label) {
+      flush(idx);
+      blocks.push(
+        <div key={`lb${idx}`} className="text-xs font-semibold uppercase tracking-wide text-primary/90 mt-1">
+          {label[1]}
+        </div>
+      );
+      return;
+    }
+
+    const ul = t.match(/^[-•·–]\s+(.+)$/);
     const ol = t.match(/^\d{1,2}[.)]\s+(.+)$/);
-    if (ul) { if (mode !=="ul") flush(idx); mode ="ul"; buf.push(ul[1]); return; }
-    if (ol) { if (mode !=="ol") flush(idx); mode ="ol"; buf.push(ol[1]); return; }
-    if (mode !=="p") flush(idx);
-    mode ="p"; buf.push(t);
+    if (ul) { if (mode !== "ul") flush(idx); mode = "ul"; buf.push(ul[1]); return; }
+    if (ol) { if (mode !== "ol") flush(idx); mode = "ol"; buf.push(ol[1]); return; }
+    if (mode !== "p") flush(idx);
+    mode = "p"; buf.push(t);
   });
   flush(lines.length);
-  return <div className="space-y-2">{blocks}</div>;
+
+  return <div className="space-y-2.5 [&>hr+*]:mt-2">{blocks}</div>;
 }
 
 export default function SiteAssistant() {
@@ -252,18 +324,30 @@ export default function SiteAssistant() {
  </div>
  </>
  )}
- {messages.map((m, i) => (
- <div key={i} className={cn("flex", m.role ==="user"?"justify-end":"justify-start")}>
- <div
- className={cn(
-"max-w-[85%] rounded-2xl px-3 py-2 leading-relaxed",
- m.role ==="user" ?"bg-primary text-primary-foreground rounded-br-md" :"bg-muted/70 text-foreground rounded-bl-md",
- )}
- >
- {m.role ==="assistant"? renderRich(m.content) : <p className="whitespace-pre-line">{m.content}</p>}
- </div>
- </div>
- ))}
+  {messages.map((m, i) => {
+    const isUser = m.role === "user";
+    const prevRole = i > 0 ? messages[i - 1].role : null;
+    const needsSeparator = !isUser && prevRole === "assistant";
+    return (
+      <div key={i} className="space-y-2">
+        {needsSeparator && <div className="h-px bg-border/40 mx-8" />}
+        <div className={cn("flex", isUser ? "justify-end" : "justify-start")}>
+          <div
+            className={cn(
+              "rounded-2xl px-3.5 py-2.5 leading-relaxed",
+              isUser
+                ? "max-w-[85%] bg-primary text-primary-foreground rounded-br-md"
+                : "max-w-[92%] bg-muted/60 text-foreground rounded-bl-md border border-border/40 shadow-sm",
+            )}
+          >
+            {isUser
+              ? <p className="whitespace-pre-line">{m.content}</p>
+              : renderRich(m.content)}
+          </div>
+        </div>
+      </div>
+    );
+  })}
  {loading && (
  <div className="flex justify-start">
  <div className="bg-muted/70 rounded-2xl rounded-bl-md px-3 py-2 flex items-center gap-2 text-muted-foreground text-xs">
