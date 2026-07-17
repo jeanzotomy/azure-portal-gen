@@ -150,6 +150,23 @@
   50% { box-shadow: none; }
 }
 
+@keyframes orb-drift-1 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(8%, 6%) scale(1.05); }
+  66% { transform: translate(-4%, 10%) scale(0.95); }
+}
+
+@keyframes orb-drift-2 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  33% { transform: translate(-6%, -8%) scale(0.95); }
+  66% { transform: translate(4%, -4%) scale(1.05); }
+}
+
+@keyframes orb-drift-3 {
+  0%, 100% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(-10%, 4%) scale(1.08); }
+}
+
 .animate-fade-up {
   animation: fade-up 0.7s ease-out both;
 }
@@ -160,6 +177,18 @@
 
 .animate-pulse-glow {
   animation: pulse-glow 3s ease-in-out infinite;
+}
+
+.animate-orb-1 {
+  animation: orb-drift-1 18s ease-in-out infinite;
+}
+
+.animate-orb-2 {
+  animation: orb-drift-2 22s ease-in-out infinite;
+}
+
+.animate-orb-3 {
+  animation: orb-drift-3 16s ease-in-out infinite;
 }
 
 .delay-100 { animation-delay: 100ms; }
