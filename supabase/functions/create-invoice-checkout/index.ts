@@ -61,10 +61,13 @@ Deno.serve(async (req) => {
     const env: StripeEnv = environment;
     const stripe = createStripeClient(env);
     const billingEmail = "facture@cloudmature.com";
-    const customerId = await resolveOrCreateCustomer(stripe, { email: billingEmail, userId: user.id });
+    // Résoudre/créer un customer SANS email pour ne pas afficher le champ "Courriel"
+    // sur la page de paiement embarquée. Le reçu est envoyé via receipt_email.
+    const customerId = await resolveOrCreateCustomer(stripe, { userId: user.id });
     const customer = await stripe.customers.retrieve(customerId);
-    if (!customer.deleted && customer.email !== billingEmail) {
-      await stripe.customers.update(customerId, { email: billingEmail });
+    if (!customer.deleted && customer.email) {
+      // Supprimer l'email existant pour masquer l'affichage sur le checkout
+      await stripe.customers.update(customerId, { email: "" });
     }
 
     const description = `Facture ${invoice.invoice_number}`;
@@ -81,7 +84,7 @@ Deno.serve(async (req) => {
       ui_mode: "embedded_page",
       return_url: returnUrl,
       customer: customerId,
-      payment_intent_data: { description },
+      payment_intent_data: { description, receipt_email: billingEmail },
       metadata: { userId: user.id, invoice_id: invoice.id, kind: "service_invoice" },
     });
 
