@@ -60,7 +60,12 @@ Deno.serve(async (req) => {
 
     const env: StripeEnv = environment;
     const stripe = createStripeClient(env);
-    const customerId = await resolveOrCreateCustomer(stripe, { email: user.email, userId: user.id });
+    const billingEmail = "facture@cloudmature.com";
+    const customerId = await resolveOrCreateCustomer(stripe, { email: billingEmail, userId: user.id });
+    const customer = await stripe.customers.retrieve(customerId);
+    if (!customer.deleted && customer.email !== billingEmail) {
+      await stripe.customers.update(customerId, { email: billingEmail });
+    }
 
     const description = `Facture ${invoice.invoice_number}`;
     const session = await stripe.checkout.sessions.create({
