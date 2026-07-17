@@ -181,12 +181,20 @@ export default function OnboardingAdminTab({ readOnly = false }: { readOnly?: bo
 
  <Dialog open={!!selected} onOpenChange={(o) => !o && setSelected(null)}>
  <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
- <DialogHeader>
- <DialogTitle>{selected?.candidate_name}</DialogTitle>
- <p className="text-cyan-100 text-sm">{selected?.candidate_email}</p>
- </DialogHeader>
+  <DialogHeader>
+  <DialogTitle>{selected?.candidate_name}</DialogTitle>
+  <p className="text-cyan-100 text-sm">{selected?.candidate_email}</p>
+  {!readOnly && selected && (
+   <div className="pt-2">
+    <Button size="sm" variant="outline" onClick={resendInvite} disabled={resendingInvite}>
+     {resendingInvite ? <Loader2 className="h-3.5 w-3.5 animate-spin mr-1.5" /> : <Send className="h-3.5 w-3.5 mr-1.5" />}
+     Renvoyer l'invitation onboarding
+    </Button>
+   </div>
+  )}
+  </DialogHeader>
 
- <div className="space-y-6 pt-6">
+  <div className="space-y-6 pt-6">
  {/* Steps */}
  <section>
  <h4 className="font-semibold mb-3 text-sm">Étapes</h4>
