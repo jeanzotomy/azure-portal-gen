@@ -52,13 +52,15 @@ import IntegrationsTab from"@/components/admin/IntegrationsTab";
 import SecurityAuditCard from"@/components/admin/SecurityAuditCard";
 import AdminAuditLogCard from"@/components/admin/AdminAuditLogCard";
 import { CertificateVerifyDashboard } from"@/components/admin/CertificateVerifyDashboard";
+import PartnersManager from"@/components/admin/PartnersManager";
+import { Handshake } from"lucide-react";
 
 import CommerceTab from"@/components/admin/CommerceTab";
 import SendWhatsAppDialog from"@/components/admin/SendWhatsAppDialog";
 
 import { getDialCode, applyDialCode } from"@/lib/country-dial-codes";
 
-type AdminTab ="dashboard"|"projects"|"tickets"|"users"|"contacts"|"sharepoint"|"seo"|"integrations"|"security"|"verify-certificates"|"service-clients"|"service-catalog"|"service-invoices"|"payment-methods"|"commerce"|"hr"|"hr-recruitment"|"hr-contracts"|"hr-onboarding"|"hr-trainings"|"hr-employee-trainings";
+type AdminTab ="dashboard"|"projects"|"tickets"|"users"|"contacts"|"sharepoint"|"seo"|"integrations"|"security"|"partners"|"verify-certificates"|"service-clients"|"service-catalog"|"service-invoices"|"payment-methods"|"commerce"|"hr"|"hr-recruitment"|"hr-contracts"|"hr-onboarding"|"hr-trainings"|"hr-employee-trainings";
 type AgentTab ="dashboard"|"tickets"|"contacts";
 type GestionnaireTab ="dashboard"|"projects"|"sharepoint"|"tickets"|"contacts"|"hr"|"hr-recruitment"|"hr-contracts"|"hr-onboarding"|"hr-trainings"|"service-clients"|"service-catalog"|"service-invoices"|"payment-methods";
 
@@ -586,11 +588,12 @@ function AdminContent() {
 
  const settingsGroup: { id: AdminTab; icon: typeof LayoutDashboard; label: string }[] = [
  { id:"users", icon: Users, label: t("admin.users") },
+ { id:"partners", icon: Handshake, label:"Partenaires"},
  { id:"integrations", icon: Plug, label:"Intégrations"},
  { id:"seo", icon: Search, label:"SEO & AI Search"},
  { id:"security", icon: Shield, label:"Sécurité"},
  ];
- const SETTINGS_TABS: AdminTab[] = ["users","seo","integrations","security"];
+ const SETTINGS_TABS: AdminTab[] = ["users","partners","seo","integrations","security"];
  const isSettingsTab = SETTINGS_TABS.includes(tab);
  const [settingsOpen, setSettingsOpen] = useState(false);
  useEffect(() => { if (isSettingsTab) setSettingsOpen(true); }, [isSettingsTab]);
@@ -827,6 +830,7 @@ function AdminContent() {
  ))}
  </TabsList>
  <TabsContent value="users"><AdminUsers /></TabsContent>
+ <TabsContent value="partners"><PartnersManager /></TabsContent>
  <TabsContent value="seo"><SeoTab /></TabsContent>
  <TabsContent value="integrations"><IntegrationsTab /></TabsContent>
  <TabsContent value="security"className="space-y-4">

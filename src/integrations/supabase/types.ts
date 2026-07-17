@@ -1203,6 +1203,42 @@ export type Database = {
           },
         ]
       }
+      partners: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          display_order: number
+          id: string
+          logo_url: string
+          name: string
+          published: boolean
+          updated_at: string
+          website_url: string | null
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          display_order?: number
+          id?: string
+          logo_url: string
+          name: string
+          published?: boolean
+          updated_at?: string
+          website_url?: string | null
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          display_order?: number
+          id?: string
+          logo_url?: string
+          name?: string
+          published?: boolean
+          updated_at?: string
+          website_url?: string | null
+        }
+        Relationships: []
+      }
       payment_methods: {
         Row: {
           account_holder: string | null
