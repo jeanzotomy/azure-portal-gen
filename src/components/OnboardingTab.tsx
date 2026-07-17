@@ -471,10 +471,16 @@ export default function OnboardingTab({ user }: { user: SupaUser }) {
  )}
  </Card>
  );
- })}
- </div>
- </div>
- );
+  })}
+  </div>
+
+  {process && (
+   <div className="mt-6">
+    <OnboardingMessagesPanel processId={process.id} currentUserId={user.id} />
+   </div>
+  )}
+  </div>
+  );
 }
 
 function StepContent({ step, contract, docs, trainings = [], uploading, userId, onUploadDoc, onSignContract, onDownloadContract, onMarkDone, onMarkTrainingDone }: any) {
