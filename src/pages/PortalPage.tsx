@@ -129,6 +129,7 @@ function PortalContent() {
  ...(isOnboarding ? [{ id:"onboarding"as Tab, icon: Sparkles, label:"Mon onboarding"}] : []),
  { id:"my-trainings", icon: GraduationCap, label:"Mes formations"},
  { id:"invoices", icon: FileText, label:"Mes factures"},
+ { id:"payments", icon: Receipt, label:"Historique des paiements"},
  { id:"profile", icon: User, label: t("portal.profile") },
 
  ];
