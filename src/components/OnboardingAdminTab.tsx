@@ -67,14 +67,20 @@ export default function OnboardingAdminTab({ readOnly = false }: { readOnly?: bo
 
  const load = useCallback(async () => {
  setLoading(true);
- const { data } = await supabase.from("onboarding_processes").select("*").eq("kind","onboarding").order("invited_at", { ascending: false });
- setProcesses((data || []) as any);
+ const [{ data: procs }, { data: msgs }] = await Promise.all([
+  supabase.from("onboarding_processes").select("*").eq("kind","onboarding").order("invited_at", { ascending: false }),
+  (supabase as any).from("onboarding_messages").select("process_id"),
+ ]);
+ setProcesses((procs || []) as any);
+ const counts: Record<string, number> = {};
+ (msgs || []).forEach((m: any) => { counts[m.process_id] = (counts[m.process_id] || 0) + 1; });
+ setMessageCounts(counts);
  setLoading(false);
  }, []);
 
  useEffect(() => { load(); }, [load]);
 
- const openProcess = async (p: Process) => {
+ const openProcess = async (p: Process, scrollToMessages = false) => {
  setSelected(p);
  const [{ data: s }, { data: d }, { data: c }] = await Promise.all([
  supabase.from("onboarding_steps").select("*").eq("process_id", p.id).order("step_order"),
@@ -82,6 +88,9 @@ export default function OnboardingAdminTab({ readOnly = false }: { readOnly?: bo
  supabase.from("onboarding_contracts").select("*").eq("process_id", p.id).order("uploaded_at", { ascending: false }).limit(1).maybeSingle(),
  ]);
  setSteps((s || []) as any); setDocs((d || []) as any); setContract((c || null) as any);
+ if (scrollToMessages) {
+  setTimeout(() => messagesSectionRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 300);
+ }
  };
 
  const refreshDetail = async () => { if (selected) await openProcess(selected); };
