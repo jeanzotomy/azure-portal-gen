@@ -15,6 +15,9 @@ const today = new Date().toISOString().slice(0, 10);
 
 const entries: SitemapEntry[] = [
   { path: "/", changefreq: "weekly", priority: "1.0", lastmod: today },
+  { path: "/pricing", changefreq: "weekly", priority: "0.9", lastmod: today },
+  { path: "/formations", changefreq: "weekly", priority: "0.9", lastmod: today },
+  { path: "/verify", changefreq: "monthly", priority: "0.7", lastmod: today },
   { path: "/careers", changefreq: "daily", priority: "0.9", lastmod: today },
   { path: "/privacy", changefreq: "yearly", priority: "0.3", lastmod: today },
   { path: "/terms", changefreq: "yearly", priority: "0.3", lastmod: today },
