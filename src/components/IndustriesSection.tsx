@@ -22,10 +22,10 @@ export function IndustriesSection() {
  <span className="inline-block text-sm font-semibold uppercase tracking-wider text-primary bg-primary/10 px-4 py-1.5 rounded-full mb-4">
  {t("industries.badge")}
  </span>
- <h2 className="text-3xl md:text-4xl font-bold text-secondary">
- {t("industries.title")} <span className="text-primary">{t("industries.titleHighlight")}</span>
- </h2>
- <p className="mt-4 text-muted-foreground max-w-2xl mx-auto text-lg">
+  <h2 className="text-3xl md:text-5xl font-bold text-secondary">
+  {t("industries.title")} <span className="text-primary">{t("industries.titleHighlight")}</span>
+  </h2>
+  <p className="mt-4 text-muted-foreground max-w-2xl mx-auto text-lg">
  {t("industries.subtitle")}
  </p>
  </div>
@@ -42,10 +42,10 @@ export function IndustriesSection() {
  <div className="mx-auto w-12 h-12 rounded-xl bg-primary flex items-center justify-center mb-3 group-hover:scale-110 group-hover:rotate-3 transition-all duration-500 shadow-md">
  <Icon size={22} className="text-primary-foreground"/>
  </div>
- <h3 className="font-bold text-secondary text-base mb-1">{ind.title}</h3>
- <p className="text-xs text-muted-foreground leading-relaxed">{ind.desc}</p>
- <div className="mt-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
- <span className="text-primary text-xs font-medium">{t("industries.learnMore")}</span>
+  <h3 className="font-bold text-secondary text-[17px] mb-1">{ind.title}</h3>
+  <p className="text-sm text-muted-foreground leading-relaxed">{ind.desc}</p>
+  <div className="mt-3 opacity-0 group-hover:opacity-100 transition-all duration-300 translate-y-2 group-hover:translate-y-0">
+  <span className="text-primary text-sm font-medium">{t("industries.learnMore")}</span>
  </div>
  </div>
  );
