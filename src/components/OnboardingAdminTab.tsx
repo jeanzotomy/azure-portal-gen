@@ -376,7 +376,7 @@ export default function OnboardingAdminTab({ readOnly = false }: { readOnly?: bo
 
   {/* Messagerie candidat ↔ RH */}
   {selected && adminUserId && (
-   <section>
+   <section ref={messagesSectionRef}>
     <OnboardingMessagesPanel processId={selected.id} asAdmin currentUserId={adminUserId} />
    </section>
   )}
