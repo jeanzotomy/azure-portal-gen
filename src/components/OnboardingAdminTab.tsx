@@ -36,6 +36,28 @@ export default function OnboardingAdminTab({ readOnly = false }: { readOnly?: bo
  const [search, setSearch] = useState("");
  const [rejectDoc, setRejectDoc] = useState<Doc | null>(null);
  const [rejectReason, setRejectReason] = useState("");
+ const [adminUserId, setAdminUserId] = useState<string | null>(null);
+ const [resendingInvite, setResendingInvite] = useState(false);
+
+ useEffect(() => {
+  supabase.auth.getUser().then(({ data }) => setAdminUserId(data.user?.id ?? null));
+ }, []);
+
+ const resendInvite = async () => {
+  if (!selected) return;
+  setResendingInvite(true);
+  try {
+   const { data, error } = await supabase.functions.invoke("onboarding-invite", {
+    body: { process_id: selected.id },
+   });
+   if (error || (data as any)?.error) throw new Error(error?.message || (data as any)?.error);
+   toast.success("Invitation renvoyée au candidat");
+  } catch (e: any) {
+   toast.error(e.message || "Échec de l'envoi");
+  } finally {
+   setResendingInvite(false);
+  }
+ };
 
  const load = useCallback(async () => {
  setLoading(true);
