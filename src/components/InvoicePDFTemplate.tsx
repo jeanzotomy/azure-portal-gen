@@ -432,7 +432,7 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
                           style={{
                             fontStyle: "italic",
                             color: "#6B7280",
-                            marginTop: "4px",
+                            marginTop: "16px",
                             fontSize: "10px",
                             display: "-webkit-box",
                             WebkitLineClamp: goesToAnnex ? 2 : undefined,
