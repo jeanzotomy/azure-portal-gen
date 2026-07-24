@@ -125,6 +125,7 @@ export default function PortalInvoicesTab({ user: _user }: { user: SupaUser }) {
  invoice_date: full.invoice_date,
  due_date: full.due_date,
  currency: full.currency as"GNF"|"USD"|"EUR",
+ is_proforma: full.status === "proforma",
  client: {
  client_name: client?.client_name ??"",
  contact_person: client?.contact_person ?? null,
