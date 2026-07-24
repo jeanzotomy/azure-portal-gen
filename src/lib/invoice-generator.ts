@@ -178,10 +178,17 @@ function buildDynamicNotes(data: InvoicePDFData): string[] {
     case "emise":
     default:
       return [
-        dueLine,
-        "• Tout retard de paiement entraînera des pénalités de 1,5% par mois.",
-        "• Services soumis aux CGV disponibles sur www.cloudmature.com.",
-        "• TVA applicable selon la réglementation guinéenne en vigueur.",
+        "Conditions générales – Facture",
+        "",
+        "Le paiement de la présente facture est exigible conformément aux modalités et délais convenus entre les parties.",
+        "",
+        "Tout retard de paiement peut entraîner l’application de frais administratifs et/ou d’intérêts de retard conformément aux conditions contractuelles en vigueur.",
+        "",
+        "Les produits et/ou services facturés ont été fournis ou sont réputés acceptés par le client, sauf avis écrit contraire transmis dans un délai raisonnable suivant la réception de la facture.",
+        "",
+        "Les taxes applicables sont incluses ou ajoutées conformément à la réglementation en vigueur.",
+        "",
+        "La présente facture est soumise aux conditions générales de vente ainsi qu’aux ententes commerciales applicables entre les parties.",
       ];
   }
 }
