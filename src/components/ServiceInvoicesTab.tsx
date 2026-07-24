@@ -198,6 +198,7 @@ export default function ServiceInvoicesTab() {
           <SelectContent>
             <SelectItem value="all">Tous les statuts</SelectItem>
             <SelectItem value="brouillon">Brouillon</SelectItem>
+            <SelectItem value="proforma">Proforma</SelectItem>
             <SelectItem value="emise">Émise</SelectItem>
             <SelectItem value="payee">Payée</SelectItem>
             <SelectItem value="en_retard">En retard</SelectItem>
