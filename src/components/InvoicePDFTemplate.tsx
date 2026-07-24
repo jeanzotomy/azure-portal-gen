@@ -189,17 +189,18 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
             <div
               style={{
                 transform: "rotate(-30deg)",
-                fontSize: "200px",
+                fontSize: "150px",
                 fontWeight: 900,
                 color: "#16A34A",
                 opacity: 0.12,
                 whiteSpace: "nowrap",
-                letterSpacing: "12px",
+                letterSpacing: "6px",
                 userSelect: "none",
               }}
             >
               PAYÉ
             </div>
+
           </div>
         )}
 
