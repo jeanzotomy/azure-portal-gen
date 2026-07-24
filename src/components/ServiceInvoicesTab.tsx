@@ -9,6 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Plus, Search, ExternalLink, RefreshCw, Receipt, Trash2, Pencil, CreditCard, CheckCircle2, Clock, FileEdit } from "lucide-react";
 import ServiceInvoiceForm from "@/components/ServiceInvoiceForm";
 import InvoiceQuickDownloadButton from "@/components/InvoiceQuickDownloadButton";
+import InvoiceQuickPreviewButton from "@/components/InvoiceQuickPreviewButton";
 import { useStripeCheckout } from "@/hooks/useStripeCheckout";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { useExchangeRates, type Currency } from "@/hooks/use-exchange-rates";
