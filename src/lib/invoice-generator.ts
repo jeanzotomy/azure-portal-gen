@@ -357,9 +357,9 @@ export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blo
     children: [
       cell("#", { fill: CYAN, color: "FFFFFF", bold: true, width: colWidths[0] }),
       cell("DESCRIPTION", { fill: CYAN, color: "FFFFFF", bold: true, width: colWidths[1] }),
-      cell("QTÉ", { fill: CYAN, color: "FFFFFF", bold: true, align: AlignmentType.CENTER, width: colWidths[2] }),
+      cell("QTÉ", { fill: CYAN, color: "FFFFFF", bold: true, width: colWidths[2] }),
       cell("PRIX UNIT.", { fill: CYAN, color: "FFFFFF", bold: true, align: AlignmentType.RIGHT, width: colWidths[3] }),
-      cell("REMISE", { fill: CYAN, color: "FFFFFF", bold: true, align: AlignmentType.CENTER, width: colWidths[4] }),
+      cell("REMISE", { fill: CYAN, color: "FFFFFF", bold: true, width: colWidths[4] }),
       cell("TOTAL", { fill: CYAN, color: "FFFFFF", bold: true, align: AlignmentType.RIGHT, width: colWidths[5] }),
     ],
   });
@@ -426,17 +426,17 @@ export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blo
           margins: { top: 80, bottom: 80, left: 120, right: 120 },
           children: [
             new Paragraph({
-              alignment: AlignmentType.CENTER,
+              alignment: AlignmentType.LEFT,
               children: [new TextRun({ text: `${item.quantity}${item.unit && item.unit !== "unité" ? ` ${item.unit}` : ""}`, size: 20, font: "Arial" })],
             }),
             ...(freqPer ? [new Paragraph({
-              alignment: AlignmentType.CENTER,
+              alignment: AlignmentType.LEFT,
               children: [new TextRun({ text: `× ${periods} ${periods > 1 ? freqPer.pl : freqPer.p}`, size: 14, color: GRAY, font: "Arial" })],
             })] : []),
           ],
         }),
         cell(formatCurrency(item.unit_price, data.currency) + (freqPer ? `/${freqPer.p}` : ""), { align: AlignmentType.RIGHT, width: colWidths[3] }),
-        cell(item.discount_rate ? `−${item.discount_rate}%` : "-", { align: AlignmentType.CENTER, width: colWidths[4] }),
+        cell(item.discount_rate ? `−${item.discount_rate}%` : "-", { width: colWidths[4] }),
         cell(formatCurrency(item.total, data.currency), { align: AlignmentType.RIGHT, bold: true, width: colWidths[5] }),
       ],
     });
