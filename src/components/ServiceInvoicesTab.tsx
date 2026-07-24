@@ -268,6 +268,7 @@ export default function ServiceInvoicesTab() {
                               <a href={r.sharepoint_url} target="_blank" rel="noreferrer" title="SharePoint"><ExternalLink size={14} /></a>
                             </Button>
                           )}
+                          <InvoiceQuickDownloadButton invoiceId={r.id} status={r.status} />
                           <Button size="icon"
   variant="ghost" onClick={() => { setEditId(r.id); setFormOpen(true); }} title="Modifier">
                             <Pencil size={14} className="text-primary" />
