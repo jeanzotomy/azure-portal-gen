@@ -156,17 +156,18 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
             <div
               style={{
                 transform: "rotate(-30deg)",
-                fontSize: "180px",
+                fontSize: "130px",
                 fontWeight: 900,
                 color: cyan,
                 opacity: 0.10,
                 whiteSpace: "nowrap",
-                letterSpacing: "10px",
+                letterSpacing: "4px",
                 userSelect: "none",
               }}
             >
               PROFORMA
             </div>
+
           </div>
         )}
 
