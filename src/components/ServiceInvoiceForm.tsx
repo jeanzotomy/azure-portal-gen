@@ -181,8 +181,17 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
         setNotes(""); setSelectedPaymentIds([]); setPayment({ ...DEFAULT_PAYMENT });
         setItems([{ description: "", quantity: 1, unit: "unité", unit_price: 0, discount_rate: 0, is_recurring: false, periods: 1 }]);
       }
+      // Marquer comme initialisé après un tick pour ignorer les set d'initialisation
+      setDirty(false);
+      requestAnimationFrame(() => { initializedRef.current = true; });
     })();
+    return () => { initializedRef.current = false; };
   }, [open, user, editId]);
+
+  // Détecte toute modification utilisateur → active la garde de fermeture
+  useEffect(() => {
+    if (initializedRef.current) setDirty(true);
+  }, [clientId, assignedUserId, invoiceDate, dueDate, currency, items, discountRate, taxRate, earlyPaymentDiscountRate, notes, payment, selectedPaymentIds]);
 
   const subtotal = items.reduce((s, i) => s + lineTotal(i), 0);
   const discountAmount = subtotal * (discountRate / 100);
