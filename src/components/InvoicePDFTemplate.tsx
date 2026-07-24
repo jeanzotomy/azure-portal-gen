@@ -496,7 +496,7 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
   }}>
               NOTES & CONDITIONS
             </div>
-            <div style={{ fontSize: "10px", color: "#374151", whiteSpace: "pre-line", lineHeight: 1.5 }}>
+            <div style={{ fontSize: "10px", color: "#374151", whiteSpace: "pre-line", lineHeight: 1.5, textAlign: "left" }}>
               {data.notes && data.notes.trim().length > 0
                 ? data.notes
                 : (() => {
