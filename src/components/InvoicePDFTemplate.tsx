@@ -444,7 +444,7 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
                           {item.subtitle}
                         </div>
                         {goesToAnnex && (
-                          <div style={{ marginTop: "3px", fontSize: "9px", color: cyan, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "4px"
+                          <div style={{ marginTop: "12px", fontSize: "9px", color: cyan, fontWeight: 600, display: "inline-flex", alignItems: "center", gap: "4px"
   }}>
                             <span style={{ display: "inline-block", width: "6px", height: "6px", borderRadius: "50%", background: cyan }} />
                             Détail complet - voir Annexe (p. 2)
