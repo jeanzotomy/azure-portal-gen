@@ -286,6 +286,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
     early_payment_discount_rate: earlyPaymentDiscountRate, early_payment_discount_amount: earlyPaymentDiscountAmount,
     total, notes: notes || null,
     is_proforma: isProforma,
+    status: isProforma ? "proforma" : "emise",
     issuer,
   });
 

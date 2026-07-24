@@ -124,8 +124,10 @@ export default function PortalInvoicesTab({ user: _user }: { user: SupaUser }) {
  invoice_number: full.invoice_number ??"(sans numéro)",
  invoice_date: full.invoice_date,
  due_date: full.due_date,
- currency: full.currency as"GNF"|"USD"|"EUR",
+			currency: full.currency as"GNF"|"USD"|"EUR",
  is_proforma: full.status === "proforma",
+ status: full.status as InvoicePDFData["status"],
+ paid_at: full.paid_at,
  client: {
  client_name: client?.client_name ??"",
  contact_person: client?.contact_person ?? null,
@@ -176,7 +178,8 @@ export default function PortalInvoicesTab({ user: _user }: { user: SupaUser }) {
  setDownloading(true);
  try {
  const blob = await generateInvoicePDFBlob(pdfRef.current);
- const fileName = `Facture_${sanitizeName(detail.invoice_number)}_${sanitizeName(detail.client.client_name)}.pdf`;
+  const prefix = detailRow?.status === "proforma" ? "Proforma" : detailRow?.status === "payee" ? "Recu" : "Facture";
+  const fileName = `${prefix}_${sanitizeName(detail.invoice_number)}_${sanitizeName(detail.client.client_name)}.pdf`;
  const url = URL.createObjectURL(blob);
  const a = document.createElement("a");
  a.href = url;
