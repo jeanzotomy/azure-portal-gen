@@ -1,87 +1,52 @@
-## Objectif
+## Objectifs
 
-1. Introduire une étape **Proforma** dans le cycle de vie des factures clients, avec **filigrane « FACTURE PROFORMA »** en arrière-plan du PDF. Le filigrane disparaît dès que la facture est **validée** (statut Émise / Payée).
-2. Corriger la **perte du formulaire de facture** quand on redimensionne la fenêtre / clique hors du dialog : le dialog se ferme et tout le travail est perdu.
-
----
-
-## 1. Proforma : statut + filigrane
-
-### Base de données
-Migration SQL : ajouter la valeur `'proforma'` à l'enum `public.service_invoice_status` (avant `'emise'` dans l'ordre logique). Rendre `'proforma'` le nouveau statut par défaut à la création via le formulaire (le default SQL reste `'brouillon'` pour compatibilité).
-
-Ajuster le trigger `en_retard` (ligne 213 de la 1ʳᵉ migration) : ne déclencher que si `status = 'emise'` (déjà le cas), donc pas d'impact.
-
-### UI / Types
-- `src/components/ServiceInvoicesTab.tsx` : étendre `InvoiceRow["status"]` avec `"proforma"` et ajouter l'entrée dans `STATUS_LABELS` (libellé « Proforma », classe ambre `bg-amber-500/10 text-amber-600`). Ajouter l'option dans le `<Select>` de changement de statut et le filtre.
-- `src/components/PortalInvoicesTab.tsx` : ajouter `proforma` au `STATUS_MAP` (state = `"open"`, non payable en ligne — bouton « Payer » masqué tant que proforma).
-- `src/components/ServiceInvoiceForm.tsx` :
-  - `handleSave` accepte désormais `"brouillon" | "proforma" | "emise"`.
-  - Renommer le bouton principal actuel « Émettre & Générer » → deux boutons :
-    - **« Enregistrer proforma »** (sauve `status='proforma'`, génère le PDF avec filigrane).
-    - **« Valider & Émettre »** (sauve `status='emise'`, PDF sans filigrane) — visible uniquement en édition d'une proforma existante ou pour les admins.
-  - Le bouton « Brouillon » reste inchangé.
-
-### PDF (`src/components/InvoicePDFTemplate.tsx`)
-- Étendre `InvoicePDFData` avec `is_proforma?: boolean`.
-- Injecter dans le conteneur racine un overlay filigrane (position absolue, rotation -30°, opacité ~0.08, texte « FACTURE PROFORMA », `pointer-events:none`) rendu uniquement si `is_proforma === true`.
-- Depuis `ServiceInvoiceForm` et `PortalInvoicesTab` : passer `is_proforma: status === 'proforma'` dans `buildPdfData` / mapping du détail. Idem `PortalInvoicesTab` détail : filigrane visible tant que `detailRow.status === 'proforma'`.
-- Adapter le titre visible du PDF : « FACTURE PROFORMA N°… » vs « FACTURE N°… ».
-
-### Nommage fichier & SharePoint
-`sanitizeName` : préfixer `Proforma_` au lieu de `Facture_` quand `status === 'proforma'` (dossier SharePoint identique, seul le nom de fichier change).
+1. **Notes & conditions dynamiques** dans le PDF (`InvoicePDFTemplate.tsx`) : remplacer le texte codé en dur (« 30 jours ») par un délai calculé à partir de la date d'échéance saisie dans le formulaire, et adapter le contenu selon le type (brouillon / proforma / émise / payée).
+2. **Filigranes** : raccourcir « FACTURE PROFORMA » → « PROFORMA », et ajouter un filigrane « PAYÉ » (vert) pour les factures au statut `payee` afin que le PDF serve de reçu.
+3. **Bouton « Télécharger PDF »** directement sur la ligne du tableau et la carte de la liste (`ServiceInvoicesTab.tsx`), aux côtés des icônes Éditer / Ouvrir / Supprimer.
 
 ---
 
-## 2. Fix perte de saisie du formulaire facture
+## 1. Notes & conditions dynamiques
 
-**Cause confirmée par lecture** (`ServiceInvoiceForm.tsx` ligne 382) : `<Dialog open={open} onOpenChange={onOpenChange}>` sans garde. Radix ferme automatiquement le dialog sur :
-- clic hors du `DialogContent` (overlay),
-- appui sur `Échap`,
-- interactions de redimensionnement qui déplacent le focus.
+Fichier : `src/components/InvoicePDFTemplate.tsx`
 
-Comme le state (`clients`, `items`, `payment`, `notes`, `discountRate`, etc.) vit dans le composant enfant, la fermeture démonte tout et détruit la saisie.
+- Étendre `InvoicePDFData` avec `status?: 'brouillon' | 'proforma' | 'emise' | 'payee' | 'en_retard' | 'annulee'` (le composant lit déjà `is_proforma`, on ajoute le statut complet pour le rendu des notes et du filigrane payé).
+- Remplacer le bloc de notes par défaut (lignes 463-469) par une fonction `defaultNotes(status, invoice_date, due_date)` :
+  - Calcul du délai : `days = due_date ? round((due_date − invoice_date)/86400000) : null`. Si `days` est nul ou négatif, mentionner « à réception ».
+  - **Brouillon** : mention « Document de travail — non contractuel. Les montants et conditions restent à valider avant émission. »
+  - **Proforma** : « Devis proforma valable 30 jours. Ce document ne constitue pas une facture définitive et ne vaut pas justificatif comptable. Paiement dû au plus tard le {due_date} ({days} jour(s) après émission). »
+  - **Émise / En retard** : « Paiement dû au plus tard le {due_date} ({days} jour(s) après émission). Tout retard entraîne des pénalités de 1,5 %/mois. Services soumis aux CGV (www.cloudmature.com). TVA selon la réglementation guinéenne. »
+  - **Payée** : « Facture réglée le {paid_at}. Ce document tient lieu de reçu. Merci pour votre confiance. »
+  - **Annulée** : « Facture annulée — sans valeur comptable. »
+- `data.notes` saisies manuellement restent prioritaires si non vides.
 
-### Correctifs (dans `ServiceInvoiceForm.tsx`)
+## 2. Filigranes
 
-1. **Bloquer la fermeture non intentionnelle** sur le `DialogContent` :
-   ```tsx
-   <DialogContent
-     onPointerDownOutside={(e) => e.preventDefault()}
-     onInteractOutside={(e) => e.preventDefault()}
-     onEscapeKeyDown={(e) => {
-       if (isDirty) e.preventDefault();
-     }}
-     ...
-   >
-   ```
-2. **Détecter la saisie non enregistrée** (`isDirty`) via un `useRef`/state mis à `true` dès qu'un champ change, remis à `false` après sauvegarde réussie.
-3. **Intercepter `onOpenChange`** au niveau du `<Dialog>` :
-   ```tsx
-   onOpenChange={(v) => {
-     if (!v && isDirty && !confirm("Fermer sans enregistrer ? Les modifications seront perdues.")) return;
-     onOpenChange(v);
-   }}
-   ```
-   Cela protège aussi contre les fermetures programmatiques.
-4. **Persistance de secours** (protection ceinture-bretelles contre le démontage / rafraîchissement) : sauver le state complet du formulaire dans `sessionStorage` sous une clé `serviceInvoiceForm:<editId ?? "new">` à chaque changement (debounce 400 ms), et le restaurer à l'ouverture. Purger la clé après `handleSave` réussi ou clic explicite « Annuler ».
-5. Bouton **« Annuler »** (ligne 699) : appeler `onOpenChange(false)` en sautant la garde `isDirty` via un flag interne, puis purger le sessionStorage.
+Fichier : `src/components/InvoicePDFTemplate.tsx`
 
----
+- Filigrane proforma (lignes 139-169) : remplacer le texte `FACTURE PROFORMA` par `PROFORMA`, agrandir la police (~180px) et garder la rotation −30° et l'opacité 0.10.
+- Ajouter un second overlay conditionnel `status === 'payee'` : texte `PAYÉ`, couleur `#16A34A` (vert), même rotation, opacité 0.12, police ~200px. `zIndex: 0`, `pointer-events: none`.
+- Le titre reste « FACTURE » (non « FACTURE PROFORMA ») pour éviter le doublon avec le filigrane, mais on garde une petite mention discrète sous le numéro (« Document proforma » / « Reçu de paiement ») pour l'accessibilité impression noir & blanc.
+
+## 3. Bouton « Télécharger PDF » sur la carte / ligne
+
+Fichiers : `src/components/ServiceInvoicesTab.tsx` (+ un nouvel helper minimal).
+
+Approche : réutiliser l'infrastructure existante (`InvoicePDFTemplate` + `generateInvoicePDFBlob` + `sanitizeName`).
+
+- Créer un composant interne `<InvoiceQuickDownloadButton row={r} />` qui :
+  1. Charge à la volée le détail complet (`service_invoices`, `service_invoice_items`, `service_clients`, `payment_methods`) — même requêtes que dans `PortalInvoicesTab.openDetail`.
+  2. Monte un `<InvoicePDFTemplate>` invisible (`position:fixed; left:-10000px`) dans un ref, appelle `generateInvoicePDFBlob(ref.current)`.
+  3. Déclenche le téléchargement : nom de fichier `Proforma_…` si `status==='proforma'`, `Recu_…` si `payee`, sinon `Facture_…`.
+  4. Affiche un `<Loader2>` pendant la génération, un toast d'erreur en cas d'échec.
+- Ajouter l'icône `Download` de `lucide-react` avant l'icône « Modifier » dans les deux vues (`table` L256-276 et `card` L306-336), avec le même style (`size="icon" variant="ghost"`, tooltip « Télécharger le PDF »).
 
 ## Détails techniques
 
-**Fichiers touchés**
-- Nouveau : `supabase/migrations/<timestamp>_add_proforma_status.sql`
-- `src/components/ServiceInvoiceForm.tsx` (dirty tracking, garde onOpenChange, sessionStorage, nouveau bouton)
-- `src/components/ServiceInvoicesTab.tsx` (statut proforma dans map/filtre/select)
-- `src/components/InvoicePDFTemplate.tsx` (overlay filigrane, titre dynamique)
-- `src/components/PortalInvoicesTab.tsx` (statut proforma, filigrane dans preview PDF, désactivation bouton Payer)
-
-**Migration**
-```sql
-ALTER TYPE public.service_invoice_status ADD VALUE IF NOT EXISTS 'proforma' BEFORE 'emise';
-```
-(Postgres exige `ADD VALUE` hors transaction — la migration ne contiendra que cette instruction pour éviter l'erreur `ALTER TYPE ... ADD cannot run inside a transaction block` si besoin, on encapsule via `COMMIT; ALTER TYPE ...; BEGIN;` — le runner Supabase gère `ADD VALUE` seul.)
-
-**Aucune modification** des flux de paiement en ligne, RLS, ou logique de recouvrement.
+- Fichiers modifiés :
+  - `src/components/InvoicePDFTemplate.tsx` (types + notes dynamiques + filigranes).
+  - `src/components/ServiceInvoicesTab.tsx` (bouton téléchargement dans les deux vues).
+  - `src/components/ServiceInvoiceForm.tsx` : passer `status` (au lieu de seulement `is_proforma`) à `buildPdfData` pour bénéficier des notes adaptées.
+  - `src/components/PortalInvoicesTab.tsx` : idem — passer `status: full.status` dans la construction de `data`, pour que le portail client affiche les bonnes notes et le filigrane « PAYÉ ».
+- Aucune modification de base de données, RLS ni logique de paiement.
+- Pas de nouvelle dépendance.
