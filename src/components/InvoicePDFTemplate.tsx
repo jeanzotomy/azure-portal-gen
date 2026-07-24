@@ -76,6 +76,7 @@ export interface InvoicePDFData {
   early_payment_discount_amount?: number;
   total: number;
   notes?: string | null;
+  is_proforma?: boolean;
   issuer?: {
     full_name?: string | null;
     role?: string | null;
