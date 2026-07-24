@@ -178,7 +178,8 @@ export default function PortalInvoicesTab({ user: _user }: { user: SupaUser }) {
  setDownloading(true);
  try {
  const blob = await generateInvoicePDFBlob(pdfRef.current);
- const fileName = `Facture_${sanitizeName(detail.invoice_number)}_${sanitizeName(detail.client.client_name)}.pdf`;
+  const prefix = detailRow?.status === "proforma" ? "Proforma" : detailRow?.status === "payee" ? "Recu" : "Facture";
+  const fileName = `${prefix}_${sanitizeName(detail.invoice_number)}_${sanitizeName(detail.client.client_name)}.pdf`;
  const url = URL.createObjectURL(blob);
  const a = document.createElement("a");
  a.href = url;
