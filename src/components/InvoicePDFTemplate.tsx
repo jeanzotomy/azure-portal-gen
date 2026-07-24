@@ -77,6 +77,8 @@ export interface InvoicePDFData {
   total: number;
   notes?: string | null;
   is_proforma?: boolean;
+  status?: "brouillon" | "proforma" | "emise" | "payee" | "en_retard" | "annulee";
+  paid_at?: string | null;
   issuer?: {
     full_name?: string | null;
     role?: string | null;
