@@ -369,22 +369,25 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
       // Upload to SharePoint
       const updates: import("@/integrations/supabase/types").TablesUpdate<"service_invoices"> = {};
       if (pdfBlob) {
-        const up = await uploadToSharePoint(selectedClient.client_name, `${safeNum}_${safeClient}.pdf`, pdfBlob, "application/pdf");
+        const up = await uploadToSharePoint(selectedClient.client_name, `${filePrefix}_${safeNum}_${safeClient}.pdf`, pdfBlob, "application/pdf");
         if (up) { updates.sharepoint_pdf_id = up.id; updates.sharepoint_url = up.webUrl; updates.pdf_generated_at = new Date().toISOString(); }
       }
       if (docxBlob) {
-        const up2 = await uploadToSharePoint(selectedClient.client_name, `${safeNum}_${safeClient}.docx`, docxBlob, "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+        const up2 = await uploadToSharePoint(selectedClient.client_name, `${filePrefix}_${safeNum}_${safeClient}.docx`, docxBlob, "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
         if (up2) { updates.sharepoint_docx_id = up2.id; updates.docx_generated_at = new Date().toISOString(); if (!updates.sharepoint_url) updates.sharepoint_url = up2.webUrl; }
       }
 
       if (Object.keys(updates).length) await supabase.from("service_invoices").update(updates).eq("id", inv!.id);
 
       // Local download
-      if (pdfBlob) saveAs(pdfBlob, `${safeNum}_${safeClient}.pdf`);
-      if (docxBlob) saveAs(docxBlob, `${safeNum}_${safeClient}.docx`);
+      if (pdfBlob) saveAs(pdfBlob, `${filePrefix}_${safeNum}_${safeClient}.pdf`);
+      if (docxBlob) saveAs(docxBlob, `${filePrefix}_${safeNum}_${safeClient}.docx`);
 
       const formatLabel = outputFormat === "both" ? "PDF + Word" : outputFormat === "pdf" ? "PDF" : "Word";
-      toast({ title: editId ? "Facture mise à jour" : "Facture créée", description: `${inv!.invoice_number} • ${formatLabel} • ${updates.sharepoint_url ? "Stockée dans SharePoint" : "Téléchargée localement"}` });
+      const statusLabel = status === "proforma" ? "Proforma" : status === "emise" ? "Facture émise" : "Brouillon";
+      toast({ title: editId ? `${statusLabel} mise à jour` : `${statusLabel} créée`, description: `${inv!.invoice_number} • ${formatLabel} • ${updates.sharepoint_url ? "Stockée dans SharePoint" : "Téléchargée localement"}` });
+      setDirty(false);
+      forceCloseRef.current = true;
       onSaved();
       onOpenChange(false);
     } catch (e) {
