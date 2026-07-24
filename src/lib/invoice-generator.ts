@@ -581,21 +581,22 @@ export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blo
       new Paragraph({ children: [new PageBreak()] }),
       new Paragraph({
         children: [
-          new TextRun({ text: "ANNEXE", bold: true, size: 22, color: CYAN, font: "Arial" }),
+          new TextRun({ text: "ANNEXE", bold: true, size: 24, color: CYAN, font: "Arial" }),
         ],
       }),
       new Paragraph({
         spacing: { after: 200 },
         children: [
-          new TextRun({ text: "Descriptions détaillées", bold: true, size: 32, color: NAVY, font: "Arial" }),
+          new TextRun({ text: "Descriptions détaillées", bold: true, size: 24, color: NAVY, font: "Arial" }),
         ],
       }),
       new Paragraph({
         spacing: { after: 200 },
+        alignment: AlignmentType.LEFT,
         children: [
           new TextRun({
             text: "Cette annexe reprend in extenso la description des prestations dont le résumé figure dans le tableau principal. Chaque entrée référence le numéro de ligne d'origine.",
-            size: 18,
+            size: 24,
             color: "374151",
             italics: true,
             font: "Arial",
@@ -607,7 +608,7 @@ export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blo
       annexChildren.push(
         new Paragraph({
           spacing: { before: 240, after: 60 },
-          alignment: AlignmentType.RIGHT,
+          alignment: AlignmentType.LEFT,
           children: [
             new TextRun({ text: `#${it.position} — `, bold: true, size: 24, color: CYAN, font: "Arial" }),
             new TextRun({ text: it.description, bold: true, size: 24, color: NAVY, font: "Arial" }),
@@ -617,7 +618,7 @@ export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blo
       (it.subtitle || "").split("\n").forEach((line) => {
         annexChildren.push(
           new Paragraph({
-            alignment: AlignmentType.RIGHT,
+            alignment: AlignmentType.LEFT,
             children: [new TextRun({ text: line, size: 24, color: "374151", font: "Arial" })],
           }),
         );

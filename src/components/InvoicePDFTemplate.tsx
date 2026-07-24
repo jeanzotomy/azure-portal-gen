@@ -694,7 +694,7 @@ ${dueLine}
               </div>
             </div>
 
-            <div style={{ marginTop: "14px", fontSize: "10.5px", color: "#374151", background: "#EAF6FB", padding: "10px 14px", borderLeft: `3px solid ${cyan}` }}>
+            <div style={{ marginTop: "14px", fontSize: "12pt", color: "#374151", background: "#EAF6FB", padding: "10px 14px", borderLeft: `3px solid ${cyan}` }}>
               Cette annexe reprend in extenso la description des prestations dont le résumé figure dans le tableau principal.
               Chaque entrée référence le numéro de ligne d'origine.
             </div>
@@ -708,9 +708,9 @@ ${dueLine}
   }}>
                     {it.position}
                   </div>
-                  <div style={{ textAlign: "right" }}>
-                    <div style={{ fontWeight: 700, color: navy, fontSize: "12px" }}>{it.description}</div>
-                    <div style={{ marginTop: "6px", fontSize: "12px", color: "#374151", whiteSpace: "pre-line", lineHeight: 1.55 }}>
+                  <div style={{ textAlign: "left" }}>
+                    <div style={{ fontWeight: 700, color: navy, fontSize: "12pt" }}>{it.description}</div>
+                    <div style={{ marginTop: "6px", fontSize: "12pt", color: "#374151", whiteSpace: "pre-line", lineHeight: 1.55 }}>
                       {it.subtitle}
                     </div>
                   </div>
