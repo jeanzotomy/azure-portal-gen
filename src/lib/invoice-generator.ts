@@ -16,6 +16,8 @@ import {
   HeightRule,
   Header,
   PageBreak,
+  TabStopType,
+  TabStopPosition,
 } from "docx";
 import type { InvoicePDFData } from "@/components/InvoicePDFTemplate";
 
