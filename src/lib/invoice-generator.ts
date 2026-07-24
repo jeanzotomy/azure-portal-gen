@@ -14,6 +14,8 @@ import {
   BorderStyle,
   ShadingType,
   HeightRule,
+  Header,
+  PageBreak,
 } from "docx";
 import type { InvoicePDFData } from "@/components/InvoicePDFTemplate";
 
@@ -66,6 +68,11 @@ export async function generateInvoicePDFBlob(element: HTMLElement): Promise<Blob
 const NAVY = "0B1F33";
 const CYAN = "1FB6E5";
 const LIGHT = "EAF6FB";
+const GREEN = "16A34A";
+const GRAY = "6B7280";
+
+const SUBTITLE_MAX_CHARS = 180;
+const isLongSubtitle = (s?: string | null) => !!s && s.trim().length > SUBTITLE_MAX_CHARS;
 
 const cell = (text: string, opts?: {
   bold?: boolean;
@@ -109,12 +116,99 @@ const noBorder = {
   insideVertical: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
 };
 
+/** Notes dynamiques par statut, alignées sur le template PDF. */
+function buildDynamicNotes(data: InvoicePDFData): string[] {
+  if (data.notes && data.notes.trim().length > 0) return data.notes.split("\n");
+  const status = data.status ?? (data.is_proforma ? "proforma" : "emise");
+  const dueStr = data.due_date ? formatDate(data.due_date) : null;
+  const days = data.due_date
+    ? Math.max(
+        0,
+        Math.round(
+          (new Date(data.due_date).getTime() - new Date(data.invoice_date).getTime()) / 86400000,
+        ),
+      )
+    : null;
+  const delay =
+    days === null ? "à réception" : days <= 0 ? "à réception" : `${days} jour${days > 1 ? "s" : ""} après émission`;
+  const dueLine = dueStr
+    ? `• Paiement dû au plus tard le ${dueStr} (${delay}).`
+    : `• Paiement ${delay}.`;
+  switch (status) {
+    case "brouillon":
+      return [
+        "• Document de travail — non contractuel.",
+        "• Les montants, délais et conditions restent à valider avant émission.",
+        "• Ne constitue ni un devis engageant ni un justificatif comptable.",
+      ];
+    case "proforma":
+      return [
+        "• Devis proforma valable 30 jours à compter de la date d'émission.",
+        "• Ce document ne constitue pas une facture définitive et ne vaut pas justificatif comptable.",
+        dueLine,
+        "• TVA applicable selon la réglementation guinéenne en vigueur.",
+      ];
+    case "payee":
+      return [
+        `• Facture réglée${data.paid_at ? ` le ${formatDate(data.paid_at)}` : ""}.`,
+        "• Ce document tient lieu de reçu de paiement.",
+        "• Merci de votre confiance.",
+      ];
+    case "annulee":
+      return [
+        "• Facture annulée — sans valeur comptable.",
+        "• Ce document est conservé à titre d'archive uniquement.",
+      ];
+    case "en_retard":
+      return [
+        dueLine,
+        "• Paiement en retard : des pénalités de 1,5% par mois peuvent s'appliquer.",
+        "• Merci de régulariser dans les meilleurs délais.",
+        "• TVA applicable selon la réglementation guinéenne en vigueur.",
+      ];
+    case "emise":
+    default:
+      return [
+        dueLine,
+        "• Tout retard de paiement entraînera des pénalités de 1,5% par mois.",
+        "• Services soumis aux CGV disponibles sur www.cloudmature.com.",
+        "• TVA applicable selon la réglementation guinéenne en vigueur.",
+      ];
+  }
+}
+
+/** Filigrane simulé via un en-tête (Word ne permet pas facilement une rotation sans XML brut).
+ * On centre un très grand texte translucide-ish coloré. */
+function buildWatermarkHeader(text: string, color: string): Header {
+  return new Header({
+    children: [
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        spacing: { before: 2400, after: 0 },
+        children: [
+          new TextRun({
+            text,
+            bold: true,
+            size: 200, // 100pt
+            color,
+            font: "Arial",
+          }),
+        ],
+      }),
+    ],
+  });
+}
+
 /** Génère un Blob .docx. */
 export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blob> {
   const tableWidth = 9360;
   const colWidths = [500, 4060, 700, 1500, 900, 1700];
 
-  // En-tête (logo placé via texte/branding simple - Word ne charge pas l'image facilement sans assets binaires)
+  const isProforma = !!data.is_proforma || data.status === "proforma";
+  const isPaid = data.status === "payee";
+  const titleText = isProforma ? "FACTURE PROFORMA" : "FACTURE";
+
+  // En-tête
   const headerTable = new Table({
     width: { size: tableWidth, type: WidthType.DXA },
     columnWidths: [4680, 4680],
@@ -143,7 +237,7 @@ export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blo
             children: [
               new Paragraph({
                 alignment: AlignmentType.RIGHT,
-                children: [new TextRun({ text: "FACTURE", bold: true, size: 56, color: NAVY, font: "Arial" })],
+                children: [new TextRun({ text: titleText, bold: true, size: isProforma ? 44 : 56, color: NAVY, font: "Arial" })],
               }),
               new Paragraph({
                 alignment: AlignmentType.RIGHT,
@@ -161,6 +255,14 @@ export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blo
                     }),
                   ]
                 : []),
+              ...(isPaid && data.paid_at
+                ? [
+                    new Paragraph({
+                      alignment: AlignmentType.RIGHT,
+                      children: [new TextRun({ text: `Payée le : ${formatDate(data.paid_at)}`, size: 18, color: GREEN, bold: true, font: "Arial" })],
+                    }),
+                  ]
+                : []),
             ],
           }),
         ],
@@ -169,6 +271,44 @@ export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blo
   });
 
   // Bandeaux client/paiement
+  const paymentParagraphs: Paragraph[] = [];
+  if (data.payment_methods && data.payment_methods.length > 0) {
+    const typeLabels: Record<string, string> = {
+      virement: "Virement bancaire",
+      mobile_money: "Mobile Money",
+      especes: "Espèces",
+      cheque: "Chèque",
+      depot: "Dépôt en espèces",
+      autre: "Autre",
+    };
+    data.payment_methods.forEach((pm, i) => {
+      paymentParagraphs.push(
+        new Paragraph({
+          spacing: { after: 40 },
+          children: [
+            new TextRun({ text: pm.label, bold: true, size: 18, color: NAVY, font: "Arial" }),
+            new TextRun({ text: ` · ${typeLabels[pm.type] ?? pm.type}`, size: 16, color: GRAY, font: "Arial" }),
+          ],
+        }),
+      );
+      if (pm.bank) paymentParagraphs.push(new Paragraph({ children: [new TextRun({ text: "Banque : ", bold: true, size: 16, font: "Arial" }), new TextRun({ text: pm.bank, size: 16, font: "Arial" })] }));
+      if (pm.account_holder) paymentParagraphs.push(new Paragraph({ children: [new TextRun({ text: "Titulaire : ", bold: true, size: 16, font: "Arial" }), new TextRun({ text: pm.account_holder, size: 16, font: "Arial" })] }));
+      if (pm.iban) paymentParagraphs.push(new Paragraph({ children: [new TextRun({ text: "IBAN / Compte : ", bold: true, size: 16, font: "Arial" }), new TextRun({ text: pm.iban, size: 16, font: "Arial" })] }));
+      if (pm.swift) paymentParagraphs.push(new Paragraph({ children: [new TextRun({ text: "SWIFT : ", bold: true, size: 16, font: "Arial" }), new TextRun({ text: pm.swift, size: 16, font: "Arial" })] }));
+      if (pm.mobile_number) paymentParagraphs.push(new Paragraph({ children: [new TextRun({ text: "Mobile Money : ", bold: true, size: 16, font: "Arial" }), new TextRun({ text: pm.mobile_number, size: 16, font: "Arial" })] }));
+      if (pm.instructions) paymentParagraphs.push(new Paragraph({ children: [new TextRun({ text: pm.instructions, italics: true, size: 14, color: GRAY, font: "Arial" })] }));
+      if (i < data.payment_methods!.length - 1) {
+        paymentParagraphs.push(new Paragraph({ children: [new TextRun({ text: "", size: 8 })], spacing: { after: 60 } }));
+      }
+    });
+  } else {
+    if (data.payment_details.bank) paymentParagraphs.push(new Paragraph({ children: [new TextRun({ text: "Banque : ", bold: true, size: 18, font: "Arial" }), new TextRun({ text: data.payment_details.bank, size: 18, font: "Arial" })] }));
+    if (data.payment_details.iban) paymentParagraphs.push(new Paragraph({ children: [new TextRun({ text: "IBAN / Compte : ", bold: true, size: 18, font: "Arial" }), new TextRun({ text: data.payment_details.iban, size: 18, font: "Arial" })] }));
+    if (data.payment_details.swift) paymentParagraphs.push(new Paragraph({ children: [new TextRun({ text: "SWIFT : ", bold: true, size: 18, font: "Arial" }), new TextRun({ text: data.payment_details.swift, size: 18, font: "Arial" })] }));
+    if (data.payment_details.mobile_money) paymentParagraphs.push(new Paragraph({ children: [new TextRun({ text: "Mobile Money : ", bold: true, size: 18, font: "Arial" }), new TextRun({ text: data.payment_details.mobile_money, size: 18, font: "Arial" })] }));
+    if (data.payment_details.reference) paymentParagraphs.push(new Paragraph({ children: [new TextRun({ text: "Référence : ", bold: true, size: 18, font: "Arial" }), new TextRun({ text: data.payment_details.reference, size: 18, font: "Arial" })] }));
+  }
+
   const clientPaymentTable = new Table({
     width: { size: tableWidth, type: WidthType.DXA },
     columnWidths: [4080, 5280],
@@ -202,13 +342,7 @@ export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blo
             width: { size: 5280, type: WidthType.DXA },
             shading: { fill: LIGHT, type: ShadingType.CLEAR, color: "auto" },
             margins: { top: 120, bottom: 120, left: 120, right: 120 },
-            children: [
-              ...(data.payment_details.bank ? [new Paragraph({ children: [new TextRun({ text: "Banque : ", bold: true, size: 18, font: "Arial" }), new TextRun({ text: data.payment_details.bank, size: 18, font: "Arial" })] })] : []),
-              ...(data.payment_details.iban ? [new Paragraph({ children: [new TextRun({ text: "IBAN / Compte : ", bold: true, size: 18, font: "Arial" }), new TextRun({ text: data.payment_details.iban, size: 18, font: "Arial" })] })] : []),
-              ...(data.payment_details.swift ? [new Paragraph({ children: [new TextRun({ text: "SWIFT : ", bold: true, size: 18, font: "Arial" }), new TextRun({ text: data.payment_details.swift, size: 18, font: "Arial" })] })] : []),
-              ...(data.payment_details.mobile_money ? [new Paragraph({ children: [new TextRun({ text: "Mobile Money : ", bold: true, size: 18, font: "Arial" }), new TextRun({ text: data.payment_details.mobile_money, size: 18, font: "Arial" })] })] : []),
-              ...(data.payment_details.reference ? [new Paragraph({ children: [new TextRun({ text: "Référence : ", bold: true, size: 18, font: "Arial" }), new TextRun({ text: data.payment_details.reference, size: 18, font: "Arial" })] })] : []),
-            ],
+            children: paymentParagraphs.length > 0 ? paymentParagraphs : [new Paragraph({ children: [new TextRun({ text: "-", size: 18, font: "Arial" })] })],
           }),
         ],
       }),
@@ -238,47 +372,72 @@ export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blo
     annuel: { p: "an", pl: "ans" },
   };
 
+  const isSubscriptionLike = (it: typeof data.items[number]) => !!(it.is_recurring || it.billing_frequency);
+  const annexItems = data.items.filter((it) => isSubscriptionLike(it) && isLongSubtitle(it.subtitle));
+  const hasAnnex = annexItems.length > 0;
+
+  const truncate = (s: string, n: number) => (s.length > n ? s.slice(0, n).trimEnd() + "…" : s);
+
   const itemRows = data.items.map((item) => {
     const freqAdj = item.is_recurring && item.billing_frequency ? FREQ_ADJ[item.billing_frequency] : null;
     const freqPer = item.is_recurring && item.billing_frequency ? FREQ_PERIOD[item.billing_frequency] : null;
     const periods = Math.max(1, item.periods ?? 1);
-    return new TableRow({
+    const long = isLongSubtitle(item.subtitle);
+    const goesToAnnex = isSubscriptionLike(item) && long;
+    const subtitleShown = item.subtitle ? (goesToAnnex ? truncate(item.subtitle, 140) : item.subtitle) : null;
+
+    const descChildren: Paragraph[] = [
+      new Paragraph({
         children: [
-          cell(String(item.position), { color: CYAN, bold: true, width: colWidths[0] }),
-          new TableCell({
-            width: { size: colWidths[1], type: WidthType.DXA },
-            margins: { top: 80, bottom: 80, left: 120, right: 120 },
-            children: [
-              new Paragraph({
-                children: [
-                  new TextRun({ text: item.description, bold: true, size: 20, color: NAVY, font: "Arial" }),
-                  ...(freqAdj ? [new TextRun({ text: `  [Abonnement · ${freqAdj}]`, bold: true, size: 14, color: CYAN, font: "Arial" })] : []),
-                ],
-              }),
-              ...(item.subtitle
-                ? [new Paragraph({ children: [new TextRun({ text: item.subtitle, italics: true, size: 16, color: "6B7280", font: "Arial" })] })]
-                : []),
-            ],
-          }),
-          new TableCell({
-            width: { size: colWidths[2], type: WidthType.DXA },
-            margins: { top: 80, bottom: 80, left: 120, right: 120 },
-            children: [
-              new Paragraph({
-                alignment: AlignmentType.CENTER,
-                children: [new TextRun({ text: `${item.quantity}${item.unit && item.unit !== "unité" ? ` ${item.unit}` : ""}`, size: 20, font: "Arial" })],
-              }),
-              ...(freqPer ? [new Paragraph({
-                alignment: AlignmentType.CENTER,
-                children: [new TextRun({ text: `× ${periods} ${periods > 1 ? freqPer.pl : freqPer.p}`, size: 14, color: "6B7280", font: "Arial" })],
-              })] : []),
-            ],
-          }),
-          cell(formatCurrency(item.unit_price, data.currency) + (freqPer ? `/${freqPer.p}` : ""), { align: AlignmentType.RIGHT, width: colWidths[3] }),
-          cell(item.discount_rate ? `−${item.discount_rate}%` : "-", { align: AlignmentType.CENTER, width: colWidths[4] }),
-          cell(formatCurrency(item.total, data.currency), { align: AlignmentType.RIGHT, bold: true, width: colWidths[5] }),
+          new TextRun({ text: item.description, bold: true, size: 20, color: NAVY, font: "Arial" }),
+          ...(freqAdj ? [new TextRun({ text: `  [Abonnement · ${freqAdj}]`, bold: true, size: 14, color: CYAN, font: "Arial" })] : []),
         ],
-      });
+      }),
+    ];
+    if (subtitleShown) {
+      descChildren.push(
+        new Paragraph({
+          spacing: { before: 60 },
+          children: [new TextRun({ text: subtitleShown, italics: true, size: 16, color: GRAY, font: "Arial" })],
+        }),
+      );
+    }
+    if (goesToAnnex) {
+      descChildren.push(
+        new Paragraph({
+          spacing: { before: 240 },
+          children: [new TextRun({ text: "● Détail complet — voir Annexe (p. 2)", bold: true, size: 14, color: CYAN, font: "Arial" })],
+        }),
+      );
+    }
+
+    return new TableRow({
+      children: [
+        cell(String(item.position), { color: CYAN, bold: true, width: colWidths[0] }),
+        new TableCell({
+          width: { size: colWidths[1], type: WidthType.DXA },
+          margins: { top: 80, bottom: 80, left: 120, right: 120 },
+          children: descChildren,
+        }),
+        new TableCell({
+          width: { size: colWidths[2], type: WidthType.DXA },
+          margins: { top: 80, bottom: 80, left: 120, right: 120 },
+          children: [
+            new Paragraph({
+              alignment: AlignmentType.CENTER,
+              children: [new TextRun({ text: `${item.quantity}${item.unit && item.unit !== "unité" ? ` ${item.unit}` : ""}`, size: 20, font: "Arial" })],
+            }),
+            ...(freqPer ? [new Paragraph({
+              alignment: AlignmentType.CENTER,
+              children: [new TextRun({ text: `× ${periods} ${periods > 1 ? freqPer.pl : freqPer.p}`, size: 14, color: GRAY, font: "Arial" })],
+            })] : []),
+          ],
+        }),
+        cell(formatCurrency(item.unit_price, data.currency) + (freqPer ? `/${freqPer.p}` : ""), { align: AlignmentType.RIGHT, width: colWidths[3] }),
+        cell(item.discount_rate ? `−${item.discount_rate}%` : "-", { align: AlignmentType.CENTER, width: colWidths[4] }),
+        cell(formatCurrency(item.total, data.currency), { align: AlignmentType.RIGHT, bold: true, width: colWidths[5] }),
+      ],
+    });
   });
 
   const itemsTable = new Table({
@@ -286,6 +445,9 @@ export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blo
     columnWidths: colWidths,
     rows: [itemsHeader, ...itemRows],
   });
+
+  // Notes dynamiques
+  const notesLines = buildDynamicNotes(data);
 
   // Totaux
   const totalsTable = new Table({
@@ -299,10 +461,16 @@ export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blo
             width: { size: 4680, type: WidthType.DXA },
             margins: { top: 80, bottom: 80, left: 0, right: 120 },
             children: [
-              new Paragraph({ children: [new TextRun({ text: "NOTES & CONDITIONS", bold: true, size: 20, color: NAVY, font: "Arial" })] }),
-              ...(data.notes || `• Paiement dû dans les 30 jours suivant la date de facturation.\n• Tout retard de paiement entraînera des pénalités de 1,5% par mois.\n• Les services sont soumis aux CGV disponibles sur www.cloudmature.com.\n• TVA applicable selon la réglementation guinéenne en vigueur.`)
-                .split("\n")
-                .map((line) => new Paragraph({ children: [new TextRun({ text: line, size: 16, font: "Arial" })] })),
+              new Paragraph({
+                alignment: AlignmentType.LEFT,
+                children: [new TextRun({ text: "NOTES & CONDITIONS", bold: true, size: 20, color: NAVY, font: "Arial" })],
+              }),
+              ...notesLines.map((line) =>
+                new Paragraph({
+                  alignment: AlignmentType.LEFT,
+                  children: [new TextRun({ text: line, size: 16, font: "Arial" })],
+                }),
+              ),
             ],
           }),
           new TableCell({
@@ -369,7 +537,7 @@ export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blo
       new Paragraph({
         alignment: AlignmentType.RIGHT,
         spacing: { before: 400 },
-        children: [new TextRun({ text: "Émis par", size: 16, color: "6B7280", font: "Arial" })],
+        children: [new TextRun({ text: "Émis par", size: 16, color: GRAY, font: "Arial" })],
       })
     );
     if (signatureImage) {
@@ -389,7 +557,7 @@ export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blo
     issuerParagraphs.push(
       new Paragraph({
         alignment: AlignmentType.RIGHT,
-        children: [new TextRun({ text: "_______________________________", size: 16, color: "0B1F33", font: "Arial" })],
+        children: [new TextRun({ text: "_______________________________", size: 16, color: NAVY, font: "Arial" })],
       }),
       new Paragraph({
         alignment: AlignmentType.RIGHT,
@@ -406,6 +574,63 @@ export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blo
     }
   }
 
+  // Annexe
+  const annexChildren: Paragraph[] = [];
+  if (hasAnnex) {
+    annexChildren.push(
+      new Paragraph({ children: [new PageBreak()] }),
+      new Paragraph({
+        children: [
+          new TextRun({ text: "ANNEXE", bold: true, size: 22, color: CYAN, font: "Arial" }),
+        ],
+      }),
+      new Paragraph({
+        spacing: { after: 200 },
+        children: [
+          new TextRun({ text: "Descriptions détaillées", bold: true, size: 32, color: NAVY, font: "Arial" }),
+        ],
+      }),
+      new Paragraph({
+        spacing: { after: 200 },
+        children: [
+          new TextRun({
+            text: "Cette annexe reprend in extenso la description des prestations dont le résumé figure dans le tableau principal. Chaque entrée référence le numéro de ligne d'origine.",
+            size: 18,
+            color: "374151",
+            italics: true,
+            font: "Arial",
+          }),
+        ],
+      }),
+    );
+    annexItems.forEach((it) => {
+      annexChildren.push(
+        new Paragraph({
+          spacing: { before: 240, after: 60 },
+          children: [
+            new TextRun({ text: `#${it.position} — `, bold: true, size: 22, color: CYAN, font: "Arial" }),
+            new TextRun({ text: it.description, bold: true, size: 22, color: NAVY, font: "Arial" }),
+          ],
+        }),
+      );
+      (it.subtitle || "").split("\n").forEach((line) => {
+        annexChildren.push(
+          new Paragraph({
+            children: [new TextRun({ text: line, size: 18, color: "374151", font: "Arial" })],
+          }),
+        );
+      });
+    });
+  }
+
+  // Watermark (via header, sans rotation — limite de docx-js)
+  let watermarkHeader: Header | undefined;
+  if (isPaid) {
+    watermarkHeader = buildWatermarkHeader("PAYÉ", GREEN);
+  } else if (isProforma) {
+    watermarkHeader = buildWatermarkHeader("PROFORMA", CYAN);
+  }
+
   const doc = new Document({
     styles: {
       default: { document: { run: { font: "Arial", size: 20 } } },
@@ -418,6 +643,7 @@ export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blo
             margin: { top: 720, right: 720, bottom: 720, left: 720 },
           },
         },
+        headers: watermarkHeader ? { default: watermarkHeader } : undefined,
         children: [
           headerTable,
           new Paragraph({ children: [new TextRun("")], spacing: { after: 200 } }),
@@ -434,11 +660,12 @@ export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blo
               new TextRun({
                 text: "Enregistré sous N° GN.TCC.2025.B18495 · Partenaire : Microsoft · Datadog · Google Cloud",
                 size: 14,
-                color: "6B7280",
+                color: GRAY,
                 font: "Arial",
               }),
             ],
           }),
+          ...annexChildren,
         ],
       },
     ],
