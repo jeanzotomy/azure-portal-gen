@@ -118,6 +118,14 @@ const noBorder = {
   insideVertical: { style: BorderStyle.NONE, size: 0, color: "FFFFFF" },
 };
 
+const LICENSE_KEYWORDS = ["licence", "licences", "microsoft 365", "m365", "office 365"];
+
+const hasLicenseItems = (data: InvoicePDFData) =>
+  data.items.some((it) => {
+    const hay = `${it.description || ""} ${it.subtitle || ""}`.toLowerCase();
+    return LICENSE_KEYWORDS.some((k) => hay.includes(k));
+  });
+
 /** Notes dynamiques par statut, alignées sur le template PDF. */
 function buildDynamicNotes(data: InvoicePDFData): string[] {
   if (data.notes && data.notes.trim().length > 0) return data.notes.split("\n");
@@ -136,6 +144,18 @@ function buildDynamicNotes(data: InvoicePDFData): string[] {
   const dueLine = dueStr
     ? `• Paiement dû au plus tard le ${dueStr} (${delay}).`
     : `• Paiement ${delay}.`;
+  const licenseNotes = hasLicenseItems(data)
+    ? [
+        "",
+        "Les licences Microsoft 365 sont fournies pour une période d’engagement annuelle de 12 mois et sont soumises aux conditions générales applicables du fournisseur.",
+        "",
+        "Le paiement est exigible selon les modalités convenues entre les parties. Tout retard de paiement peut entraîner l’application de frais administratifs conformément aux conditions commerciales applicables.",
+        "",
+        "Les licences activées ne peuvent pas être annulées, remboursées ou transférées après leur provisionnement, sauf disposition contraire prévue par les conditions du fournisseur.",
+        "",
+        "Toute modification, ajout ou réduction du nombre de licences après l’activation fera l’objet d’une évaluation et pourra entraîner un ajustement de la facturation selon les conditions en vigueur.",
+      ]
+    : [];
   switch (status) {
     case "brouillon":
       return [
@@ -174,6 +194,7 @@ function buildDynamicNotes(data: InvoicePDFData): string[] {
         "• Paiement en retard : des pénalités de 1,5% par mois peuvent s'appliquer.",
         "• Merci de régulariser dans les meilleurs délais.",
         "• TVA applicable selon la réglementation guinéenne en vigueur.",
+        ...licenseNotes,
       ];
     case "emise":
     default:
@@ -189,6 +210,7 @@ function buildDynamicNotes(data: InvoicePDFData): string[] {
         "Les taxes applicables sont incluses ou ajoutées conformément à la réglementation en vigueur.",
         "",
         "La présente facture est soumise aux conditions générales de vente ainsi qu’aux ententes commerciales applicables entre les parties.",
+        ...licenseNotes,
       ];
   }
 }
