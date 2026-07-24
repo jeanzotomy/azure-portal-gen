@@ -331,6 +331,7 @@ export default function ServiceInvoicesTab() {
                         <a href={r.sharepoint_url} target="_blank" rel="noreferrer" title="Ouvrir dans SharePoint"><ExternalLink size={14} /></a>
                       </Button>
                     )}
+                    <InvoiceQuickPreviewButton invoiceId={r.id} status={r.status} />
                     <InvoiceQuickDownloadButton invoiceId={r.id} status={r.status} />
                     <Button size="icon"
   variant="ghost" onClick={() => { setEditId(r.id); setFormOpen(true); }} title="Modifier la facture">
