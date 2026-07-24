@@ -400,7 +400,7 @@ export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blo
     if (subtitleShown) {
       descChildren.push(
         new Paragraph({
-          spacing: { before: 60 },
+          spacing: { before: 240 },
           children: [new TextRun({ text: subtitleShown, italics: true, size: 16, color: GRAY, font: "Arial" })],
         }),
       );
