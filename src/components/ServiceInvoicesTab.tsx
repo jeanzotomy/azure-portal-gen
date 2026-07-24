@@ -245,6 +245,7 @@ export default function ServiceInvoicesTab() {
                           <SelectTrigger className={`w-[120px] h-7 text-xs ${s.cls} border-0`}><SelectValue /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="brouillon">Brouillon</SelectItem>
+                            <SelectItem value="proforma">Proforma</SelectItem>
                             <SelectItem value="emise">Émise</SelectItem>
                             <SelectItem value="payee">Payée</SelectItem>
                             <SelectItem value="en_retard">En retard</SelectItem>
