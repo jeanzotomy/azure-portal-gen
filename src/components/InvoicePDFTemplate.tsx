@@ -432,7 +432,7 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
                           style={{
                             fontStyle: "italic",
                             color: "#6B7280",
-                            marginTop: "4px",
+                            marginTop: "16px",
                             fontSize: "10px",
                             display: "-webkit-box",
                             WebkitLineClamp: goesToAnnex ? 2 : undefined,
@@ -526,10 +526,11 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
 • Les montants, délais et conditions restent à valider avant émission.
 • Ne constitue ni un devis engageant ni un justificatif comptable.`;
                       case "proforma":
-                        return `• Devis proforma valable 30 jours à compter de la date d'émission.
-• Ce document ne constitue pas une facture définitive et ne vaut pas justificatif comptable.
-${dueLine}
-• TVA applicable selon la réglementation guinéenne en vigueur.`;
+                        return `• Engagement : 12 mois
+• Paiement : annuel
+• Début du service : [date prévue]
+• Cette facture pro forma est émise à titre informatif et ne constitue pas une facture fiscale finale.
+• La facturation finale sera émise après confirmation de la commande et activation des licences.`;
                       case "payee":
                         return `• Facture réglée${data.paid_at ? ` le ${formatDate(data.paid_at)}` : ""}.
 • Ce document tient lieu de reçu de paiement.
