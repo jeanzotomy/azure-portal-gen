@@ -22,13 +22,15 @@ interface InvoiceRow {
   due_date: string | null;
   currency: "GNF" | "USD" | "EUR";
   total: number;
-  status: "brouillon" | "emise" | "payee" | "en_retard" | "annulee";
+  status: "brouillon" | "proforma" | "emise" | "payee" | "en_retard" | "annulee";
   sharepoint_url: string | null;
   service_clients?: { client_name: string } | null;
 }
 
 const STATUS_LABELS: Record<InvoiceRow["status"], { label: string; cls: string }> = {
   brouillon: { label: "Brouillon", cls: "bg-muted text-muted-foreground"
+  },
+  proforma: { label: "Proforma", cls: "bg-amber-500/10 text-amber-600"
   },
   emise: { label: "Émise", cls: "bg-blue-500/10 text-blue-600"
   },
