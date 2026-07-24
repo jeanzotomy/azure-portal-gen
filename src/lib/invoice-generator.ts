@@ -145,11 +145,17 @@ function buildDynamicNotes(data: InvoicePDFData): string[] {
       ];
     case "proforma":
       return [
-        "• Engagement : 12 mois",
-        "• Paiement : annuel",
-        `• Début du service : ${dueStr ?? "[date prévue]"}`,
-        "• Cette facture pro forma est émise à titre informatif et ne constitue pas une facture fiscale finale.",
-        "• La facturation finale sera émise après confirmation de la commande.",
+        "Notes et conditions générales – Facture Pro Forma",
+        "",
+        "Cette facture pro forma est fournie à titre indicatif et ne constitue pas une facture fiscale définitive.",
+        "",
+        "Les prix indiqués sont valides pour la période mentionnée sur le document et peuvent être révisés après expiration de cette période.",
+        "",
+        "Toute commande est soumise à la réception d’une confirmation écrite ou d’un bon de commande du client.",
+        "",
+        "Les produits et/ou services seront fournis conformément aux modalités de paiement et aux conditions convenues entre les parties.",
+        "",
+        "Les taxes applicables ainsi que les conditions générales des fournisseurs concernés s’appliquent, le cas échéant.",
       ];
     case "payee":
       return [

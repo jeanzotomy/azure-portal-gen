@@ -526,11 +526,17 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
 • Les montants, délais et conditions restent à valider avant émission.
 • Ne constitue ni un devis engageant ni un justificatif comptable.`;
                       case "proforma":
-                        return `• Engagement : 12 mois
-• Paiement : annuel
-• Début du service : ${dueStr ?? "[date prévue]"}
-• Cette facture pro forma est émise à titre informatif et ne constitue pas une facture fiscale finale.
-• La facturation finale sera émise après confirmation de la commande.`;
+                        return `Notes et conditions générales – Facture Pro Forma
+
+Cette facture pro forma est fournie à titre indicatif et ne constitue pas une facture fiscale définitive.
+
+Les prix indiqués sont valides pour la période mentionnée sur le document et peuvent être révisés après expiration de cette période.
+
+Toute commande est soumise à la réception d’une confirmation écrite ou d’un bon de commande du client.
+
+Les produits et/ou services seront fournis conformément aux modalités de paiement et aux conditions convenues entre les parties.
+
+Les taxes applicables ainsi que les conditions générales des fournisseurs concernés s’appliquent, le cas échéant.`;
                       case "payee":
                         return `• Facture réglée${data.paid_at ? ` le ${formatDate(data.paid_at)}` : ""}.
 • Ce document tient lieu de reçu de paiement.
