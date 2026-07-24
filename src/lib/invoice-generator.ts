@@ -607,16 +607,18 @@ export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blo
       annexChildren.push(
         new Paragraph({
           spacing: { before: 240, after: 60 },
+          alignment: AlignmentType.RIGHT,
           children: [
-            new TextRun({ text: `#${it.position} — `, bold: true, size: 22, color: CYAN, font: "Arial" }),
-            new TextRun({ text: it.description, bold: true, size: 22, color: NAVY, font: "Arial" }),
+            new TextRun({ text: `#${it.position} — `, bold: true, size: 24, color: CYAN, font: "Arial" }),
+            new TextRun({ text: it.description, bold: true, size: 24, color: NAVY, font: "Arial" }),
           ],
         }),
       );
       (it.subtitle || "").split("\n").forEach((line) => {
         annexChildren.push(
           new Paragraph({
-            children: [new TextRun({ text: line, size: 18, color: "374151", font: "Arial" })],
+            alignment: AlignmentType.RIGHT,
+            children: [new TextRun({ text: line, size: 24, color: "374151", font: "Arial" })],
           }),
         );
       });
