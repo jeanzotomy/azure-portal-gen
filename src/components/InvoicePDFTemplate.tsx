@@ -708,10 +708,9 @@ ${dueLine}
   }}>
                     {it.position}
                   </div>
-                  <div>
-                    <div style={{ fontWeight: 700, color: navy, fontSize: "12.5px"
-  }}>{it.description}</div>
-                    <div style={{ marginTop: "6px", fontSize: "10.5px", color: "#374151", whiteSpace: "pre-line", lineHeight: 1.55 }}>
+                  <div style={{ textAlign: "right" }}>
+                    <div style={{ fontWeight: 700, color: navy, fontSize: "12px" }}>{it.description}</div>
+                    <div style={{ marginTop: "6px", fontSize: "12px", color: "#374151", whiteSpace: "pre-line", lineHeight: 1.55 }}>
                       {it.subtitle}
                     </div>
                   </div>
