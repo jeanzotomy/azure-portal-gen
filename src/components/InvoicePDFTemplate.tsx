@@ -106,6 +106,14 @@ const SUBTITLE_MAX_CHARS = 180;
 
 const isLongSubtitle = (s?: string | null) => !!s && s.trim().length > SUBTITLE_MAX_CHARS;
 
+const LICENSE_KEYWORDS = ["licence", "licences", "microsoft 365", "m365", "office 365"];
+
+const hasLicenseItems = (items: InvoiceItemData[]) =>
+  items.some((it) => {
+    const hay = `${it.description || ""} ${it.subtitle || ""}`.toLowerCase();
+    return LICENSE_KEYWORDS.some((k) => hay.includes(k));
+  });
+
 export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFData }>(
   ({ data }, ref) => {
     const cyan = "#1FB6E5";
