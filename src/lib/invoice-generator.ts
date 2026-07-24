@@ -481,39 +481,44 @@ export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blo
             margins: { top: 120, bottom: 120, left: 120, right: 120 },
             children: [
               new Paragraph({
-                alignment: AlignmentType.RIGHT,
+                tabStops: [{ type: TabStopType.RIGHT, position: TabStopPosition.MAX }],
                 children: [
                   new TextRun({ text: "Sous-total : ", size: 18, font: "Arial" }),
+                  new TextRun({ text: "\t" }),
                   new TextRun({ text: formatCurrency(data.subtotal, data.currency), bold: true, size: 18, font: "Arial" }),
                 ],
               }),
               ...(data.discount_rate > 0 ? [new Paragraph({
-                alignment: AlignmentType.RIGHT,
+                tabStops: [{ type: TabStopType.RIGHT, position: TabStopPosition.MAX }],
                 children: [
                   new TextRun({ text: `Remise globale (${data.discount_rate}%) : `, size: 18, font: "Arial", color: "DC2626" }),
+                  new TextRun({ text: "\t" }),
                   new TextRun({ text: `- ${formatCurrency(data.discount_amount, data.currency)}`, size: 18, font: "Arial", color: "DC2626" }),
                 ],
               })] : []),
               new Paragraph({
-                alignment: AlignmentType.RIGHT,
+                tabStops: [{ type: TabStopType.RIGHT, position: TabStopPosition.MAX }],
                 children: [
                   new TextRun({ text: `TVA (${data.tax_rate}%) : `, size: 18, font: "Arial" }),
+                  new TextRun({ text: "\t" }),
                   new TextRun({ text: formatCurrency(data.tax_amount, data.currency), size: 18, font: "Arial" }),
                 ],
               }),
               ...(data.early_payment_discount_rate && data.early_payment_discount_rate > 0 ? [new Paragraph({
-                alignment: AlignmentType.RIGHT,
+                tabStops: [{ type: TabStopType.RIGHT, position: TabStopPosition.MAX }],
                 children: [
                   new TextRun({ text: `Escompte paiement anticipé (${data.early_payment_discount_rate}%) : `, size: 18, font: "Arial", color: "DC2626" }),
+                  new TextRun({ text: "\t" }),
                   new TextRun({ text: `- ${formatCurrency(data.early_payment_discount_amount ?? 0, data.currency)}`, size: 18, font: "Arial", color: "DC2626" }),
                 ],
               })] : []),
               new Paragraph({
-                alignment: AlignmentType.RIGHT,
+                tabStops: [{ type: TabStopType.RIGHT, position: TabStopPosition.MAX }],
                 spacing: { before: 200 },
                 shading: { fill: CYAN, type: ShadingType.CLEAR, color: "auto" },
                 children: [
                   new TextRun({ text: "NET À PAYER : ", bold: true, size: 24, color: "FFFFFF", font: "Arial" }),
+                  new TextRun({ text: "\t" }),
                   new TextRun({ text: formatCurrency(data.total, data.currency), bold: true, size: 24, color: "FFFFFF", font: "Arial" }),
                 ],
               }),
