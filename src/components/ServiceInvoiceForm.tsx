@@ -247,7 +247,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
       account_holder: p.account_holder, mobile_number: p.mobile_number, instructions: p.instructions,
     }));
 
-  const buildPdfData = (invoiceNumber: string): InvoicePDFData => ({
+  const buildPdfData = (invoiceNumber: string, isProforma: boolean = pdfIsProforma): InvoicePDFData => ({
     invoice_number: invoiceNumber,
     invoice_date: invoiceDate,
     due_date: dueDate || null,
