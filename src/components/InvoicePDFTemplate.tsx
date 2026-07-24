@@ -530,7 +530,7 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
 • Paiement : annuel
 • Début du service : ${dueStr ?? "[date prévue]"}
 • Cette facture pro forma est émise à titre informatif et ne constitue pas une facture fiscale finale.
-• La facturation finale sera émise après confirmation de la commande et activation des licences.`;
+• La facturation finale sera émise après confirmation de la commande.`;
                       case "payee":
                         return `• Facture réglée${data.paid_at ? ` le ${formatDate(data.paid_at)}` : ""}.
 • Ce document tient lieu de reçu de paiement.
