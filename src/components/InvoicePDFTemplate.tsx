@@ -385,9 +385,9 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
   }}>
               <th style={{ padding: "8px", textAlign: "left", width: "30px", fontWeight: 700 }}>#</th>
               <th style={{ padding: "8px", textAlign: "left", fontWeight: 700 }}>DESCRIPTION</th>
-              <th style={{ padding: "8px", textAlign: "center", width: "50px", fontWeight: 700 }}>QTÉ</th>
+              <th style={{ padding: "8px", textAlign: "left", width: "50px", fontWeight: 700 }}>QTÉ</th>
               <th style={{ padding: "8px", textAlign: "right", width: "100px", fontWeight: 700 }}>PRIX UNIT.</th>
-              <th style={{ padding: "8px", textAlign: "center", width: "55px", fontWeight: 700 }}>REMISE</th>
+              <th style={{ padding: "8px", textAlign: "left", width: "55px", fontWeight: 700 }}>REMISE</th>
               <th style={{ padding: "8px", textAlign: "right", width: "120px", fontWeight: 700 }}>TOTAL</th>
             </tr>
           </thead>
@@ -455,7 +455,7 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
                   })()}
 
                 </td>
-                <td style={{ padding: "10px 8px", textAlign: "center", verticalAlign: "top"
+                <td style={{ padding: "10px 8px", textAlign: "left", verticalAlign: "top"
   }}>
                   <div>{item.quantity}{item.unit && item.unit !== "unité" ? ` ${item.unit}` : ""}</div>
                   {isRecurring && (
@@ -474,7 +474,7 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
                     </div>
                   )}
                 </td>
-                <td style={{ padding: "10px 8px", textAlign: "center", verticalAlign: "top", color: item.discount_rate ? "#DC2626" : "#9CA3AF"
+                <td style={{ padding: "10px 8px", textAlign: "left", verticalAlign: "top", color: item.discount_rate ? "#DC2626" : "#9CA3AF"
   }}>
                   {item.discount_rate ? `−${item.discount_rate}%` : "-"}
                 </td>

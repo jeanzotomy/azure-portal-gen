@@ -16,6 +16,8 @@ import {
   HeightRule,
   Header,
   PageBreak,
+  TabStopType,
+  TabStopPosition,
 } from "docx";
 import type { InvoicePDFData } from "@/components/InvoicePDFTemplate";
 
@@ -355,9 +357,9 @@ export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blo
     children: [
       cell("#", { fill: CYAN, color: "FFFFFF", bold: true, width: colWidths[0] }),
       cell("DESCRIPTION", { fill: CYAN, color: "FFFFFF", bold: true, width: colWidths[1] }),
-      cell("QTÉ", { fill: CYAN, color: "FFFFFF", bold: true, align: AlignmentType.CENTER, width: colWidths[2] }),
+      cell("QTÉ", { fill: CYAN, color: "FFFFFF", bold: true, width: colWidths[2] }),
       cell("PRIX UNIT.", { fill: CYAN, color: "FFFFFF", bold: true, align: AlignmentType.RIGHT, width: colWidths[3] }),
-      cell("REMISE", { fill: CYAN, color: "FFFFFF", bold: true, align: AlignmentType.CENTER, width: colWidths[4] }),
+      cell("REMISE", { fill: CYAN, color: "FFFFFF", bold: true, width: colWidths[4] }),
       cell("TOTAL", { fill: CYAN, color: "FFFFFF", bold: true, align: AlignmentType.RIGHT, width: colWidths[5] }),
     ],
   });
@@ -424,17 +426,17 @@ export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blo
           margins: { top: 80, bottom: 80, left: 120, right: 120 },
           children: [
             new Paragraph({
-              alignment: AlignmentType.CENTER,
+              alignment: AlignmentType.LEFT,
               children: [new TextRun({ text: `${item.quantity}${item.unit && item.unit !== "unité" ? ` ${item.unit}` : ""}`, size: 20, font: "Arial" })],
             }),
             ...(freqPer ? [new Paragraph({
-              alignment: AlignmentType.CENTER,
+              alignment: AlignmentType.LEFT,
               children: [new TextRun({ text: `× ${periods} ${periods > 1 ? freqPer.pl : freqPer.p}`, size: 14, color: GRAY, font: "Arial" })],
             })] : []),
           ],
         }),
         cell(formatCurrency(item.unit_price, data.currency) + (freqPer ? `/${freqPer.p}` : ""), { align: AlignmentType.RIGHT, width: colWidths[3] }),
-        cell(item.discount_rate ? `−${item.discount_rate}%` : "-", { align: AlignmentType.CENTER, width: colWidths[4] }),
+        cell(item.discount_rate ? `−${item.discount_rate}%` : "-", { width: colWidths[4] }),
         cell(formatCurrency(item.total, data.currency), { align: AlignmentType.RIGHT, bold: true, width: colWidths[5] }),
       ],
     });
@@ -479,39 +481,44 @@ export async function generateInvoiceDocxBlob(data: InvoicePDFData): Promise<Blo
             margins: { top: 120, bottom: 120, left: 120, right: 120 },
             children: [
               new Paragraph({
-                alignment: AlignmentType.RIGHT,
+                tabStops: [{ type: TabStopType.RIGHT, position: TabStopPosition.MAX }],
                 children: [
                   new TextRun({ text: "Sous-total : ", size: 18, font: "Arial" }),
+                  new TextRun({ text: "\t" }),
                   new TextRun({ text: formatCurrency(data.subtotal, data.currency), bold: true, size: 18, font: "Arial" }),
                 ],
               }),
               ...(data.discount_rate > 0 ? [new Paragraph({
-                alignment: AlignmentType.RIGHT,
+                tabStops: [{ type: TabStopType.RIGHT, position: TabStopPosition.MAX }],
                 children: [
                   new TextRun({ text: `Remise globale (${data.discount_rate}%) : `, size: 18, font: "Arial", color: "DC2626" }),
+                  new TextRun({ text: "\t" }),
                   new TextRun({ text: `- ${formatCurrency(data.discount_amount, data.currency)}`, size: 18, font: "Arial", color: "DC2626" }),
                 ],
               })] : []),
               new Paragraph({
-                alignment: AlignmentType.RIGHT,
+                tabStops: [{ type: TabStopType.RIGHT, position: TabStopPosition.MAX }],
                 children: [
                   new TextRun({ text: `TVA (${data.tax_rate}%) : `, size: 18, font: "Arial" }),
+                  new TextRun({ text: "\t" }),
                   new TextRun({ text: formatCurrency(data.tax_amount, data.currency), size: 18, font: "Arial" }),
                 ],
               }),
               ...(data.early_payment_discount_rate && data.early_payment_discount_rate > 0 ? [new Paragraph({
-                alignment: AlignmentType.RIGHT,
+                tabStops: [{ type: TabStopType.RIGHT, position: TabStopPosition.MAX }],
                 children: [
                   new TextRun({ text: `Escompte paiement anticipé (${data.early_payment_discount_rate}%) : `, size: 18, font: "Arial", color: "DC2626" }),
+                  new TextRun({ text: "\t" }),
                   new TextRun({ text: `- ${formatCurrency(data.early_payment_discount_amount ?? 0, data.currency)}`, size: 18, font: "Arial", color: "DC2626" }),
                 ],
               })] : []),
               new Paragraph({
-                alignment: AlignmentType.RIGHT,
+                tabStops: [{ type: TabStopType.RIGHT, position: TabStopPosition.MAX }],
                 spacing: { before: 200 },
                 shading: { fill: CYAN, type: ShadingType.CLEAR, color: "auto" },
                 children: [
                   new TextRun({ text: "NET À PAYER : ", bold: true, size: 24, color: "FFFFFF", font: "Arial" }),
+                  new TextRun({ text: "\t" }),
                   new TextRun({ text: formatCurrency(data.total, data.currency), bold: true, size: 24, color: "FFFFFF", font: "Arial" }),
                 ],
               }),
