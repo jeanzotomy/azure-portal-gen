@@ -20,7 +20,8 @@ import {
  Eye,
 } from"lucide-react";
 import { InvoicePDFTemplate, type InvoicePDFData, type InvoicePaymentMethodEntry } from"@/components/InvoicePDFTemplate";
-import { generateInvoicePDFBlob, sanitizeName } from"@/lib/invoice-generator";
+import { generateInvoicePDFBlob, generateInvoiceDocxBlob, sanitizeName } from"@/lib/invoice-generator";
+import { saveAs } from"file-saver";
 
 interface InvoiceRow {
  id: string;
