@@ -732,12 +732,15 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
               </SelectContent>
             </Select>
           </div>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving} className="w-full sm:w-auto">Annuler</Button>
+          <Button variant="outline" onClick={() => guardedOpenChange(false)} disabled={saving} className="w-full sm:w-auto">Annuler</Button>
           <Button variant="secondary" onClick={() => void handleSave("brouillon")} disabled={saving} className="w-full sm:w-auto">
-            <FileType2 size={14} className="mr-1" /> <span className="truncate">Enregistrer brouillon</span>
+            <FileType2 size={14} className="mr-1" /> <span className="truncate">Brouillon</span>
+          </Button>
+          <Button variant="secondary" onClick={() => void handleSave("proforma")} disabled={saving} className="w-full sm:w-auto bg-amber-500 text-white hover:bg-amber-600">
+            <FileText size={14} className="mr-1" /> <span className="truncate">Proforma</span>
           </Button>
           <Button onClick={() => void handleSave("emise")} disabled={saving} className="w-full sm:w-auto">
-            <FileText size={14} className="mr-1" /> <span className="truncate">{saving ? "Génération..." : editId ? `Mettre à jour & Générer ${outputFormat === "both" ? "PDF + Word" : outputFormat === "pdf" ? "PDF" : "Word"}` : `Émettre & Générer ${outputFormat === "both" ? "PDF + Word" : outputFormat === "pdf" ? "PDF" : "Word"}`}</span>
+            <FileText size={14} className="mr-1" /> <span className="truncate">{saving ? "Génération..." : editId ? `Mettre à jour & Émettre` : `Valider & Émettre`}</span>
           </Button>
         </DialogFooter>
       </DialogContent>
