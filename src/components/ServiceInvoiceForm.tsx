@@ -305,7 +305,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
     } catch { return null; }
   };
 
-  const handleSave = async (status: "brouillon" | "emise") => {
+  const handleSave = async (status: "brouillon" | "proforma" | "emise") => {
     if (!user || !selectedClient) {
       toast({ title: "Client requis", variant: "destructive"
   });
