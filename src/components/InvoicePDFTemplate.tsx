@@ -435,7 +435,7 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
                             marginTop: "4px",
                             fontSize: "10px",
                             display: "-webkit-box",
-                            WebkitLineClamp: goesToAnnex ? 3 : undefined,
+                            WebkitLineClamp: goesToAnnex ? 2 : undefined,
                             WebkitBoxOrient: "vertical",
                             overflow: goesToAnnex ? "hidden" : "visible",
                             textOverflow: "ellipsis",
