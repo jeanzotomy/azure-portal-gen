@@ -353,13 +353,16 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
 
       // Generate documents according to chosen format
       // Ensure the hidden PDF template renders with the real invoice number before capture
+      const isProforma = status === "proforma";
       setPdfInvoiceNumber(inv!.invoice_number ?? "");
+      setPdfIsProforma(isProforma);
       await new Promise((r) => requestAnimationFrame(() => r(null)));
       await new Promise((r) => setTimeout(r, 150));
       const wantPdf = outputFormat === "pdf" || outputFormat === "both";
       const wantDocx = outputFormat === "docx" || outputFormat === "both";
       const pdfBlob = wantPdf && pdfRef.current ? await generateInvoicePDFBlob(pdfRef.current) : null;
-      const docxBlob = wantDocx ? await generateInvoiceDocxBlob(buildPdfData(inv!.invoice_number ?? "")) : null;
+      const docxBlob = wantDocx ? await generateInvoiceDocxBlob(buildPdfData(inv!.invoice_number ?? "", isProforma)) : null;
+      const filePrefix = isProforma ? "Proforma" : "Facture";
       const safeNum = sanitizeName(inv!.invoice_number ?? "facture");
       const safeClient = sanitizeName(selectedClient.client_name);
 
