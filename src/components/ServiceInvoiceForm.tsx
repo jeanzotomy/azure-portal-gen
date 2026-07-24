@@ -106,8 +106,12 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
   const [dirty, setDirty] = useState(false);
   const initializedRef = useRef(false);
   const forceCloseRef = useRef(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewStatus, setPreviewStatus] = useState<"proforma" | "emise">("proforma");
+  const [previewLoading, setPreviewLoading] = useState(false);
 
   const pdfRef = useRef<HTMLDivElement>(null);
+  const previewPdfRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) return;
