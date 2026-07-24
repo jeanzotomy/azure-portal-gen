@@ -22,13 +22,15 @@ interface InvoiceRow {
   due_date: string | null;
   currency: "GNF" | "USD" | "EUR";
   total: number;
-  status: "brouillon" | "emise" | "payee" | "en_retard" | "annulee";
+  status: "brouillon" | "proforma" | "emise" | "payee" | "en_retard" | "annulee";
   sharepoint_url: string | null;
   service_clients?: { client_name: string } | null;
 }
 
 const STATUS_LABELS: Record<InvoiceRow["status"], { label: string; cls: string }> = {
   brouillon: { label: "Brouillon", cls: "bg-muted text-muted-foreground"
+  },
+  proforma: { label: "Proforma", cls: "bg-amber-500/10 text-amber-600"
   },
   emise: { label: "Émise", cls: "bg-blue-500/10 text-blue-600"
   },
@@ -196,6 +198,7 @@ export default function ServiceInvoicesTab() {
           <SelectContent>
             <SelectItem value="all">Tous les statuts</SelectItem>
             <SelectItem value="brouillon">Brouillon</SelectItem>
+            <SelectItem value="proforma">Proforma</SelectItem>
             <SelectItem value="emise">Émise</SelectItem>
             <SelectItem value="payee">Payée</SelectItem>
             <SelectItem value="en_retard">En retard</SelectItem>
@@ -242,6 +245,7 @@ export default function ServiceInvoicesTab() {
                           <SelectTrigger className={`w-[120px] h-7 text-xs ${s.cls} border-0`}><SelectValue /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="brouillon">Brouillon</SelectItem>
+                            <SelectItem value="proforma">Proforma</SelectItem>
                             <SelectItem value="emise">Émise</SelectItem>
                             <SelectItem value="payee">Payée</SelectItem>
                             <SelectItem value="en_retard">En retard</SelectItem>
@@ -304,6 +308,7 @@ export default function ServiceInvoicesTab() {
                       <SelectTrigger className="w-[130px] h-8 text-xs"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="brouillon">Brouillon</SelectItem>
+                        <SelectItem value="proforma">Proforma</SelectItem>
                         <SelectItem value="emise">Émise</SelectItem>
                         <SelectItem value="payee">Payée</SelectItem>
                         <SelectItem value="en_retard">En retard</SelectItem>

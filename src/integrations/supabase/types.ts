@@ -3034,6 +3034,7 @@ export type Database = {
         | "depot"
       service_invoice_status:
         | "brouillon"
+        | "proforma"
         | "emise"
         | "payee"
         | "en_retard"
@@ -3214,6 +3215,7 @@ export const Constants = {
       ],
       service_invoice_status: [
         "brouillon",
+        "proforma",
         "emise",
         "payee",
         "en_retard",

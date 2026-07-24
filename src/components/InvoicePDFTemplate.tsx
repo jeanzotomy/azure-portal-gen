@@ -76,6 +76,7 @@ export interface InvoicePDFData {
   early_payment_discount_amount?: number;
   total: number;
   notes?: string | null;
+  is_proforma?: boolean;
   issuer?: {
     full_name?: string | null;
     role?: string | null;
@@ -133,7 +134,41 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
     return (
       <div ref={ref} style={{ width: "794px", background: "#ffffff"
   }}>
-        <div className="invoice-page" style={pageStyle}>
+        <div className="invoice-page" style={{ ...pageStyle, overflow: "hidden" }}>
+
+        {/* Filigrane PROFORMA */}
+        {data.is_proforma && (
+          <div
+            aria-hidden
+            style={{
+              position: "absolute",
+              inset: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              pointerEvents: "none",
+              zIndex: 0,
+              overflow: "hidden",
+            }}
+          >
+            <div
+              style={{
+                transform: "rotate(-30deg)",
+                fontSize: "110px",
+                fontWeight: 900,
+                color: cyan,
+                opacity: 0.10,
+                whiteSpace: "nowrap",
+                letterSpacing: "6px",
+                userSelect: "none",
+              }}
+            >
+              FACTURE PROFORMA
+            </div>
+          </div>
+        )}
+
+        <div style={{ position: "relative", zIndex: 1 }}>
 
         {/* En-tête */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start"
@@ -162,9 +197,9 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
 
           <div style={{ textAlign: "right"
   }}>
-            <div style={{ fontSize: "32px", fontWeight: 800, color: navy, letterSpacing: "1px"
+            <div style={{ fontSize: data.is_proforma ? "26px" : "32px", fontWeight: 800, color: navy, letterSpacing: "1px"
   }}>
-              FACTURE
+              {data.is_proforma ? "FACTURE PROFORMA" : "FACTURE"}
             </div>
             <div style={{ fontSize: "12px", color: cyan, fontWeight: 600, marginTop: "4px"
   }}>
@@ -545,6 +580,7 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
         >
           Enregistré sous N° GN.TCC.2025.B18495 · Partenaire : Microsoft · Datadog · Google Cloud
           {hasAnnex && <span style={{ float: "right", color: navy, fontWeight: 600 }}>Page 1 / 2</span>}
+        </div>
         </div>
         </div>
         {/* ───────── ANNEXE - Descriptions détaillées ───────── */}

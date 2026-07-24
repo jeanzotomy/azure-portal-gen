@@ -102,6 +102,10 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
   const [outputFormat, setOutputFormat] = useState<"pdf" | "docx" | "both">("both");
   const [issuer, setIssuer] = useState<{ full_name: string | null; role: string | null; signature_url: string | null }>({ full_name: null, role: null, signature_url: null });
   const [pdfInvoiceNumber, setPdfInvoiceNumber] = useState<string>("APERÇU");
+  const [pdfIsProforma, setPdfIsProforma] = useState<boolean>(true);
+  const [dirty, setDirty] = useState(false);
+  const initializedRef = useRef(false);
+  const forceCloseRef = useRef(false);
 
   const pdfRef = useRef<HTMLDivElement>(null);
 
@@ -177,8 +181,17 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
         setNotes(""); setSelectedPaymentIds([]); setPayment({ ...DEFAULT_PAYMENT });
         setItems([{ description: "", quantity: 1, unit: "unité", unit_price: 0, discount_rate: 0, is_recurring: false, periods: 1 }]);
       }
+      // Marquer comme initialisé après un tick pour ignorer les set d'initialisation
+      setDirty(false);
+      requestAnimationFrame(() => { initializedRef.current = true; });
     })();
+    return () => { initializedRef.current = false; };
   }, [open, user, editId]);
+
+  // Détecte toute modification utilisateur → active la garde de fermeture
+  useEffect(() => {
+    if (initializedRef.current) setDirty(true);
+  }, [clientId, assignedUserId, invoiceDate, dueDate, currency, items, discountRate, taxRate, earlyPaymentDiscountRate, notes, payment, selectedPaymentIds]);
 
   const subtotal = items.reduce((s, i) => s + lineTotal(i), 0);
   const discountAmount = subtotal * (discountRate / 100);
@@ -234,7 +247,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
       account_holder: p.account_holder, mobile_number: p.mobile_number, instructions: p.instructions,
     }));
 
-  const buildPdfData = (invoiceNumber: string): InvoicePDFData => ({
+  const buildPdfData = (invoiceNumber: string, isProforma: boolean = pdfIsProforma): InvoicePDFData => ({
     invoice_number: invoiceNumber,
     invoice_date: invoiceDate,
     due_date: dueDate || null,
@@ -272,6 +285,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
     subtotal, discount_rate: discountRate, discount_amount: discountAmount, tax_rate: taxRate, tax_amount: taxAmount,
     early_payment_discount_rate: earlyPaymentDiscountRate, early_payment_discount_amount: earlyPaymentDiscountAmount,
     total, notes: notes || null,
+    is_proforma: isProforma,
     issuer,
   });
 
@@ -291,7 +305,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
     } catch { return null; }
   };
 
-  const handleSave = async (status: "brouillon" | "emise") => {
+  const handleSave = async (status: "brouillon" | "proforma" | "emise") => {
     if (!user || !selectedClient) {
       toast({ title: "Client requis", variant: "destructive"
   });
@@ -339,35 +353,41 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
 
       // Generate documents according to chosen format
       // Ensure the hidden PDF template renders with the real invoice number before capture
+      const isProforma = status === "proforma";
       setPdfInvoiceNumber(inv!.invoice_number ?? "");
+      setPdfIsProforma(isProforma);
       await new Promise((r) => requestAnimationFrame(() => r(null)));
       await new Promise((r) => setTimeout(r, 150));
       const wantPdf = outputFormat === "pdf" || outputFormat === "both";
       const wantDocx = outputFormat === "docx" || outputFormat === "both";
       const pdfBlob = wantPdf && pdfRef.current ? await generateInvoicePDFBlob(pdfRef.current) : null;
-      const docxBlob = wantDocx ? await generateInvoiceDocxBlob(buildPdfData(inv!.invoice_number ?? "")) : null;
+      const docxBlob = wantDocx ? await generateInvoiceDocxBlob(buildPdfData(inv!.invoice_number ?? "", isProforma)) : null;
+      const filePrefix = isProforma ? "Proforma" : "Facture";
       const safeNum = sanitizeName(inv!.invoice_number ?? "facture");
       const safeClient = sanitizeName(selectedClient.client_name);
 
       // Upload to SharePoint
       const updates: import("@/integrations/supabase/types").TablesUpdate<"service_invoices"> = {};
       if (pdfBlob) {
-        const up = await uploadToSharePoint(selectedClient.client_name, `${safeNum}_${safeClient}.pdf`, pdfBlob, "application/pdf");
+        const up = await uploadToSharePoint(selectedClient.client_name, `${filePrefix}_${safeNum}_${safeClient}.pdf`, pdfBlob, "application/pdf");
         if (up) { updates.sharepoint_pdf_id = up.id; updates.sharepoint_url = up.webUrl; updates.pdf_generated_at = new Date().toISOString(); }
       }
       if (docxBlob) {
-        const up2 = await uploadToSharePoint(selectedClient.client_name, `${safeNum}_${safeClient}.docx`, docxBlob, "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+        const up2 = await uploadToSharePoint(selectedClient.client_name, `${filePrefix}_${safeNum}_${safeClient}.docx`, docxBlob, "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
         if (up2) { updates.sharepoint_docx_id = up2.id; updates.docx_generated_at = new Date().toISOString(); if (!updates.sharepoint_url) updates.sharepoint_url = up2.webUrl; }
       }
 
       if (Object.keys(updates).length) await supabase.from("service_invoices").update(updates).eq("id", inv!.id);
 
       // Local download
-      if (pdfBlob) saveAs(pdfBlob, `${safeNum}_${safeClient}.pdf`);
-      if (docxBlob) saveAs(docxBlob, `${safeNum}_${safeClient}.docx`);
+      if (pdfBlob) saveAs(pdfBlob, `${filePrefix}_${safeNum}_${safeClient}.pdf`);
+      if (docxBlob) saveAs(docxBlob, `${filePrefix}_${safeNum}_${safeClient}.docx`);
 
       const formatLabel = outputFormat === "both" ? "PDF + Word" : outputFormat === "pdf" ? "PDF" : "Word";
-      toast({ title: editId ? "Facture mise à jour" : "Facture créée", description: `${inv!.invoice_number} • ${formatLabel} • ${updates.sharepoint_url ? "Stockée dans SharePoint" : "Téléchargée localement"}` });
+      const statusLabel = status === "proforma" ? "Proforma" : status === "emise" ? "Facture émise" : "Brouillon";
+      toast({ title: editId ? `${statusLabel} mise à jour` : `${statusLabel} créée`, description: `${inv!.invoice_number} • ${formatLabel} • ${updates.sharepoint_url ? "Stockée dans SharePoint" : "Téléchargée localement"}` });
+      setDirty(false);
+      forceCloseRef.current = true;
       onSaved();
       onOpenChange(false);
     } catch (e) {
@@ -378,9 +398,25 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
     }
   };
 
+  const guardedOpenChange = (nextOpen: boolean) => {
+    if (nextOpen) { onOpenChange(true); return; }
+    if (forceCloseRef.current || !dirty) {
+      forceCloseRef.current = false;
+      onOpenChange(false);
+      return;
+    }
+    const ok = window.confirm("Des modifications non enregistrées seront perdues. Fermer quand même ?");
+    if (ok) onOpenChange(false);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[calc(100vw-1rem)] sm:w-auto max-w-5xl max-h-[92vh] overflow-y-auto p-3 sm:p-6">
+    <Dialog open={open} onOpenChange={guardedOpenChange}>
+      <DialogContent
+        className="w-[calc(100vw-1rem)] sm:w-auto max-w-5xl max-h-[92vh] overflow-y-auto p-3 sm:p-6"
+        onPointerDownOutside={(e) => { if (dirty) e.preventDefault(); }}
+        onInteractOutside={(e) => { if (dirty) e.preventDefault(); }}
+        onEscapeKeyDown={(e) => { if (dirty) e.preventDefault(); }}
+      >
         <DialogHeader>
           <DialogTitle className="text-base sm:text-lg">{editId ? "Modifier la facture" : "Nouvelle facture"}</DialogTitle>
         </DialogHeader>
@@ -696,12 +732,15 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
               </SelectContent>
             </Select>
           </div>
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving} className="w-full sm:w-auto">Annuler</Button>
+          <Button variant="outline" onClick={() => guardedOpenChange(false)} disabled={saving} className="w-full sm:w-auto">Annuler</Button>
           <Button variant="secondary" onClick={() => void handleSave("brouillon")} disabled={saving} className="w-full sm:w-auto">
-            <FileType2 size={14} className="mr-1" /> <span className="truncate">Enregistrer brouillon</span>
+            <FileType2 size={14} className="mr-1" /> <span className="truncate">Brouillon</span>
+          </Button>
+          <Button variant="secondary" onClick={() => void handleSave("proforma")} disabled={saving} className="w-full sm:w-auto bg-amber-500 text-white hover:bg-amber-600">
+            <FileText size={14} className="mr-1" /> <span className="truncate">Proforma</span>
           </Button>
           <Button onClick={() => void handleSave("emise")} disabled={saving} className="w-full sm:w-auto">
-            <FileText size={14} className="mr-1" /> <span className="truncate">{saving ? "Génération..." : editId ? `Mettre à jour & Générer ${outputFormat === "both" ? "PDF + Word" : outputFormat === "pdf" ? "PDF" : "Word"}` : `Émettre & Générer ${outputFormat === "both" ? "PDF + Word" : outputFormat === "pdf" ? "PDF" : "Word"}`}</span>
+            <FileText size={14} className="mr-1" /> <span className="truncate">{saving ? "Génération..." : editId ? `Mettre à jour & Émettre` : `Valider & Émettre`}</span>
           </Button>
         </DialogFooter>
       </DialogContent>
