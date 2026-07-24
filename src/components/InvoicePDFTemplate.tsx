@@ -156,16 +156,48 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
             <div
               style={{
                 transform: "rotate(-30deg)",
-                fontSize: "110px",
+                fontSize: "180px",
                 fontWeight: 900,
                 color: cyan,
                 opacity: 0.10,
                 whiteSpace: "nowrap",
-                letterSpacing: "6px",
+                letterSpacing: "10px",
                 userSelect: "none",
               }}
             >
-              FACTURE PROFORMA
+              PROFORMA
+            </div>
+          </div>
+        )}
+
+        {/* Filigrane PAYÉ (reçu) */}
+        {data.status === "payee" && (
+          <div
+            aria-hidden
+            style={{
+              position: "absolute",
+              inset: 0,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              pointerEvents: "none",
+              zIndex: 0,
+              overflow: "hidden",
+            }}
+          >
+            <div
+              style={{
+                transform: "rotate(-30deg)",
+                fontSize: "200px",
+                fontWeight: 900,
+                color: "#16A34A",
+                opacity: 0.12,
+                whiteSpace: "nowrap",
+                letterSpacing: "12px",
+                userSelect: "none",
+              }}
+            >
+              PAYÉ
             </div>
           </div>
         )}
