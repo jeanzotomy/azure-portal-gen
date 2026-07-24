@@ -285,6 +285,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
     subtotal, discount_rate: discountRate, discount_amount: discountAmount, tax_rate: taxRate, tax_amount: taxAmount,
     early_payment_discount_rate: earlyPaymentDiscountRate, early_payment_discount_amount: earlyPaymentDiscountAmount,
     total, notes: notes || null,
+    is_proforma: isProforma,
     issuer,
   });
 
