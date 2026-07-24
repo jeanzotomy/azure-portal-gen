@@ -582,6 +582,7 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
           {hasAnnex && <span style={{ float: "right", color: navy, fontWeight: 600 }}>Page 1 / 2</span>}
         </div>
         </div>
+        </div>
         {/* ───────── ANNEXE - Descriptions détaillées ───────── */}
         {hasAnnex && (
           <div className="invoice-page" style={{ ...pageStyle, pageBreakBefore: "always"
