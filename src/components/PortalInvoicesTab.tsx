@@ -20,7 +20,8 @@ import {
  Eye,
 } from"lucide-react";
 import { InvoicePDFTemplate, type InvoicePDFData, type InvoicePaymentMethodEntry } from"@/components/InvoicePDFTemplate";
-import { generateInvoicePDFBlob, sanitizeName } from"@/lib/invoice-generator";
+import { generateInvoicePDFBlob, generateInvoiceDocxBlob, sanitizeName } from"@/lib/invoice-generator";
+import { saveAs } from"file-saver";
 
 interface InvoiceRow {
  id: string;
@@ -314,11 +315,30 @@ export default function PortalInvoicesTab({ user: _user }: { user: SupaUser }) {
  </div>
 
  <div className="flex flex-wrap gap-2">
- <Button onClick={() => void downloadPdf()} disabled={downloading}>
- {downloading ? <Loader2 className="animate-spin mr-1"size={14} /> : <Download size={14} className="mr-1"/>}
- Télécharger le PDF
- </Button>
- {detailRow && STATUS_MAP[detailRow.status]?.state ==="open"&& Number(detailRow.total) > 0 && (
+  <Button onClick={() => void downloadPdf()} disabled={downloading}>
+  {downloading ? <Loader2 className="animate-spin mr-1"size={14} /> : <Download size={14} className="mr-1"/>}
+  Télécharger le PDF
+  </Button>
+  <Button
+    variant="outline"
+    disabled={downloading}
+    onClick={async () => {
+      if (!detail) return;
+      setDownloading(true);
+      try {
+        const blob = await generateInvoiceDocxBlob(detail);
+        const prefix = detailRow?.status === "proforma" ? "Proforma" : detailRow?.status === "payee" ? "Recu" : "Facture";
+        saveAs(blob, `${prefix}_${sanitizeName(detail.invoice_number)}_${sanitizeName(detail.client.client_name)}.docx`);
+      } catch (e) {
+        toast({ title: "Échec du téléchargement Word", description: (e as Error).message, variant: "destructive" });
+      } finally {
+        setDownloading(false);
+      }
+    }}
+  >
+    <Download size={14} className="mr-1"/> Télécharger Word
+  </Button>
+  {detailRow && STATUS_MAP[detailRow.status]?.state ==="open"&& Number(detailRow.total) > 0 && (
  <Button variant="default"onClick={() => detailRow && pay(detailRow)}>
  <CreditCard size={14} className="mr-1"/> Payer en ligne
  </Button>

@@ -9,7 +9,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Plus, Trash2, FileText, FileType2, RefreshCw, CalendarIcon, CreditCard, Building2, Smartphone, Banknote, PiggyBank } from "lucide-react";
+import { Plus, Trash2, FileText, FileType2, RefreshCw, CalendarIcon, CreditCard, Building2, Smartphone, Banknote, PiggyBank, Eye, Download, Loader2 } from "lucide-react";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar } from "@/components/ui/calendar";
 import { format, parseISO } from "date-fns";
@@ -106,8 +106,12 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
   const [dirty, setDirty] = useState(false);
   const initializedRef = useRef(false);
   const forceCloseRef = useRef(false);
+  const [previewOpen, setPreviewOpen] = useState(false);
+  const [previewStatus, setPreviewStatus] = useState<"proforma" | "emise">("proforma");
+  const [previewLoading, setPreviewLoading] = useState(false);
 
   const pdfRef = useRef<HTMLDivElement>(null);
+  const previewPdfRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) return;
@@ -734,6 +738,21 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
             </Select>
           </div>
           <Button variant="outline" onClick={() => guardedOpenChange(false)} disabled={saving} className="w-full sm:w-auto">Annuler</Button>
+          <Button
+            variant="outline"
+            onClick={() => {
+              if (!selectedClient) {
+                toast({ title: "Sélectionnez un client", description: "Choisissez le client pour afficher l'aperçu.", variant: "destructive" });
+                return;
+              }
+              setPreviewStatus("proforma");
+              setPreviewOpen(true);
+            }}
+            disabled={saving}
+            className="w-full sm:w-auto"
+          >
+            <Eye size={14} className="mr-1" /> <span className="truncate">Aperçu</span>
+          </Button>
           <Button variant="secondary" onClick={() => void handleSave("brouillon")} disabled={saving} className="w-full sm:w-auto">
             <FileType2 size={14} className="mr-1" /> <span className="truncate">Brouillon</span>
           </Button>
@@ -745,6 +764,79 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      {/* Aperçu instantané avant génération */}
+      <Dialog open={previewOpen} onOpenChange={setPreviewOpen}>
+        <DialogContent className="max-w-5xl max-h-[92vh] overflow-hidden flex flex-col p-0 gap-0">
+          <DialogHeader className="px-6 py-4 border-b bg-gradient-to-r from-primary to-[#007aa3] text-primary-foreground [&>button]:text-primary-foreground [&>button]:opacity-100">
+            <DialogTitle className="text-primary-foreground flex items-center gap-2 flex-wrap">
+              <Eye size={18} /> Aperçu {previewStatus === "proforma" ? "Proforma" : "Facture définitive"}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex items-center gap-2 flex-wrap px-6 py-3 border-b bg-muted/40">
+            <span className="text-xs font-medium text-muted-foreground">Rendu :</span>
+            <Select value={previewStatus} onValueChange={(v) => setPreviewStatus(v as "proforma" | "emise")}>
+              <SelectTrigger className="h-8 w-[220px] text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent>
+                <SelectItem value="proforma">Proforma (avec filigrane)</SelectItem>
+                <SelectItem value="emise">Facture définitive</SelectItem>
+              </SelectContent>
+            </Select>
+            <div className="ml-auto flex flex-wrap gap-2">
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={previewLoading || !selectedClient}
+                onClick={async () => {
+                  if (!previewPdfRef.current) return;
+                  setPreviewLoading(true);
+                  try {
+                    const blob = await generateInvoicePDFBlob(previewPdfRef.current);
+                    const prefix = previewStatus === "proforma" ? "Apercu_Proforma" : "Apercu_Facture";
+                    saveAs(blob, `${prefix}_${sanitizeName(selectedClient?.client_name ?? "client")}.pdf`);
+                  } catch (e) {
+                    toast({ title: "Échec aperçu PDF", description: (e as Error).message, variant: "destructive" });
+                  } finally {
+                    setPreviewLoading(false);
+                  }
+                }}
+              >
+                {previewLoading ? <Loader2 size={14} className="animate-spin mr-1" /> : <Download size={14} className="mr-1" />}
+                PDF
+              </Button>
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={previewLoading || !selectedClient}
+                onClick={async () => {
+                  setPreviewLoading(true);
+                  try {
+                    const data = buildPdfData("APERÇU", previewStatus === "proforma");
+                    const blob = await generateInvoiceDocxBlob(data);
+                    const prefix = previewStatus === "proforma" ? "Apercu_Proforma" : "Apercu_Facture";
+                    saveAs(blob, `${prefix}_${sanitizeName(selectedClient?.client_name ?? "client")}.docx`);
+                  } catch (e) {
+                    toast({ title: "Échec aperçu Word", description: (e as Error).message, variant: "destructive" });
+                  } finally {
+                    setPreviewLoading(false);
+                  }
+                }}
+              >
+                <FileType2 size={14} className="mr-1" /> Word
+              </Button>
+            </div>
+          </div>
+          <div className="flex-1 overflow-auto bg-muted/30 p-4">
+            {selectedClient ? (
+              <div style={{ transform: "scale(0.85)", transformOrigin: "top center", width: "794px", margin: "0 auto" }}>
+                <InvoicePDFTemplate ref={previewPdfRef} data={buildPdfData("APERÇU", previewStatus === "proforma")} />
+              </div>
+            ) : (
+              <div className="text-center text-muted-foreground py-12">Sélectionnez un client pour afficher l'aperçu.</div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 }
