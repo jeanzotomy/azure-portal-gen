@@ -460,11 +460,9 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
                   <div>{item.quantity}{item.unit && item.unit !== "unité" ? ` ${item.unit}` : ""}</div>
                   {isRecurring && (
                     <div style={{ fontSize: "9px", color: "#6B7280", marginTop: "2px", fontWeight: 600 }}>
-
-[Content truncated: result too large to display completely.]
-
-...
-
+                      × {periods} {freq ? (periods > 1 ? freq.periodPlural : freq.period) : (periods > 1 ? "périodes" : "période")}
+                    </div>
+                  )}
                 </td>
                 <td style={{ padding: "10px 8px", textAlign: "right", verticalAlign: "top"
   }}>
