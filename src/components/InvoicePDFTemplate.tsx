@@ -156,17 +156,18 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
             <div
               style={{
                 transform: "rotate(-30deg)",
-                fontSize: "180px",
+                fontSize: "130px",
                 fontWeight: 900,
                 color: cyan,
                 opacity: 0.10,
                 whiteSpace: "nowrap",
-                letterSpacing: "10px",
+                letterSpacing: "4px",
                 userSelect: "none",
               }}
             >
               PROFORMA
             </div>
+
           </div>
         )}
 
@@ -188,17 +189,18 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
             <div
               style={{
                 transform: "rotate(-30deg)",
-                fontSize: "200px",
+                fontSize: "150px",
                 fontWeight: 900,
                 color: "#16A34A",
                 opacity: 0.12,
                 whiteSpace: "nowrap",
-                letterSpacing: "12px",
+                letterSpacing: "6px",
                 userSelect: "none",
               }}
             >
               PAYÉ
             </div>
+
           </div>
         )}
 
@@ -433,7 +435,7 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
                             marginTop: "4px",
                             fontSize: "10px",
                             display: "-webkit-box",
-                            WebkitLineClamp: goesToAnnex ? 3 : undefined,
+                            WebkitLineClamp: goesToAnnex ? 2 : undefined,
                             WebkitBoxOrient: "vertical",
                             overflow: goesToAnnex ? "hidden" : "visible",
                             textOverflow: "ellipsis",
@@ -494,7 +496,7 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
   }}>
               NOTES & CONDITIONS
             </div>
-            <div style={{ fontSize: "10px", color: "#374151", whiteSpace: "pre-line", lineHeight: 1.5 }}>
+            <div style={{ fontSize: "10px", color: "#374151", whiteSpace: "pre-line", lineHeight: 1.5, textAlign: "left" }}>
               {data.notes && data.notes.trim().length > 0
                 ? data.notes
                 : (() => {
