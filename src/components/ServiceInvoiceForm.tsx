@@ -398,9 +398,25 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
     }
   };
 
+  const guardedOpenChange = (nextOpen: boolean) => {
+    if (nextOpen) { onOpenChange(true); return; }
+    if (forceCloseRef.current || !dirty) {
+      forceCloseRef.current = false;
+      onOpenChange(false);
+      return;
+    }
+    const ok = window.confirm("Des modifications non enregistrées seront perdues. Fermer quand même ?");
+    if (ok) onOpenChange(false);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="w-[calc(100vw-1rem)] sm:w-auto max-w-5xl max-h-[92vh] overflow-y-auto p-3 sm:p-6">
+    <Dialog open={open} onOpenChange={guardedOpenChange}>
+      <DialogContent
+        className="w-[calc(100vw-1rem)] sm:w-auto max-w-5xl max-h-[92vh] overflow-y-auto p-3 sm:p-6"
+        onPointerDownOutside={(e) => { if (dirty) e.preventDefault(); }}
+        onInteractOutside={(e) => { if (dirty) e.preventDefault(); }}
+        onEscapeKeyDown={(e) => { if (dirty) e.preventDefault(); }}
+      >
         <DialogHeader>
           <DialogTitle className="text-base sm:text-lg">{editId ? "Modifier la facture" : "Nouvelle facture"}</DialogTitle>
         </DialogHeader>
