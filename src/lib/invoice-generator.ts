@@ -145,10 +145,11 @@ function buildDynamicNotes(data: InvoicePDFData): string[] {
       ];
     case "proforma":
       return [
-        "• Devis proforma valable 30 jours à compter de la date d'émission.",
-        "• Ce document ne constitue pas une facture définitive et ne vaut pas justificatif comptable.",
-        dueLine,
-        "• TVA applicable selon la réglementation guinéenne en vigueur.",
+        "• Engagement : 12 mois",
+        "• Paiement : annuel",
+        "• Début du service : [date prévue]",
+        "• Cette facture pro forma est émise à titre informatif et ne constitue pas une facture fiscale finale.",
+        "• La facturation finale sera émise après confirmation de la commande et activation des licences.",
       ];
     case "payee":
       return [
