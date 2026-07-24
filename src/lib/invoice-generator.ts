@@ -147,7 +147,7 @@ function buildDynamicNotes(data: InvoicePDFData): string[] {
       return [
         "• Engagement : 12 mois",
         "• Paiement : annuel",
-        "• Début du service : [date prévue]",
+        `• Début du service : ${dueStr ?? "[date prévue]"}`,
         "• Cette facture pro forma est émise à titre informatif et ne constitue pas une facture fiscale finale.",
         "• La facturation finale sera émise après confirmation de la commande et activation des licences.",
       ];
