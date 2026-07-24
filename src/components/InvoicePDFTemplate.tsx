@@ -495,11 +495,59 @@ export const InvoicePDFTemplate = forwardRef<HTMLDivElement, { data: InvoicePDFD
               NOTES & CONDITIONS
             </div>
             <div style={{ fontSize: "10px", color: "#374151", whiteSpace: "pre-line", lineHeight: 1.5 }}>
-              {data.notes ||
-                `• Paiement dû dans les 30 jours suivant la date de facturation.
+              {data.notes && data.notes.trim().length > 0
+                ? data.notes
+                : (() => {
+                    const status = data.status ?? (data.is_proforma ? "proforma" : "emise");
+                    const dueStr = data.due_date ? formatDate(data.due_date) : null;
+                    const days = data.due_date
+                      ? Math.max(
+                          0,
+                          Math.round(
+                            (new Date(data.due_date).getTime() - new Date(data.invoice_date).getTime()) /
+                              86400000,
+                          ),
+                        )
+                      : null;
+                    const delay =
+                      days === null
+                        ? "à réception"
+                        : days <= 0
+                          ? "à réception"
+                          : `${days} jour${days > 1 ? "s" : ""} après émission`;
+                    const dueLine = dueStr
+                      ? `• Paiement dû au plus tard le ${dueStr} (${delay}).`
+                      : `• Paiement ${delay}.`;
+                    switch (status) {
+                      case "brouillon":
+                        return `• Document de travail — non contractuel.
+• Les montants, délais et conditions restent à valider avant émission.
+• Ne constitue ni un devis engageant ni un justificatif comptable.`;
+                      case "proforma":
+                        return `• Devis proforma valable 30 jours à compter de la date d'émission.
+• Ce document ne constitue pas une facture définitive et ne vaut pas justificatif comptable.
+${dueLine}
+• TVA applicable selon la réglementation guinéenne en vigueur.`;
+                      case "payee":
+                        return `• Facture réglée${data.paid_at ? ` le ${formatDate(data.paid_at)}` : ""}.
+• Ce document tient lieu de reçu de paiement.
+• Merci de votre confiance.`;
+                      case "annulee":
+                        return `• Facture annulée — sans valeur comptable.
+• Ce document est conservé à titre d'archive uniquement.`;
+                      case "en_retard":
+                        return `${dueLine}
+• Paiement en retard : des pénalités de 1,5% par mois peuvent s'appliquer.
+• Merci de régulariser dans les meilleurs délais.
+• TVA applicable selon la réglementation guinéenne en vigueur.`;
+                      case "emise":
+                      default:
+                        return `${dueLine}
 • Tout retard de paiement entraînera des pénalités de 1,5% par mois.
-• Les services sont soumis aux CGV disponibles sur www.cloudmature.com.
-• TVA applicable selon la réglementation guinéenne en vigueur.`}
+• Services soumis aux CGV disponibles sur www.cloudmature.com.
+• TVA applicable selon la réglementation guinéenne en vigueur.`;
+                    }
+                  })()}
             </div>
           </div>
           <div style={{ background: "#EAF6FB", padding: "12px"
