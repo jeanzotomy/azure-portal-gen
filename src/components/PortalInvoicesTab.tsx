@@ -40,6 +40,7 @@ type PayState ="paid"|"open"|"failed";
 const STATUS_MAP: Record<string, { label: string; state: PayState; cls: string; Icon: typeof CheckCircle2 }> = {
  payee: { label:"Payée", state:"paid", cls:"bg-emerald-600 text-white", Icon: CheckCircle2 },
  emise: { label:"Ouverte", state:"open", cls:"bg-blue-600 text-white", Icon: Clock },
+ proforma:{ label:"Proforma", state:"failed", cls:"bg-amber-500 text-white", Icon: Clock },
  brouillon:{ label:"Brouillon", state:"open", cls:"bg-muted text-muted-foreground", Icon: Clock },
  en_retard:{ label:"En retard", state:"failed", cls:"bg-destructive text-destructive-foreground", Icon: XCircle },
  annulee: { label:"Annulée", state:"failed", cls:"bg-muted text-muted-foreground line-through", Icon: XCircle },
