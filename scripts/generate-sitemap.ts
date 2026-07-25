@@ -11,17 +11,19 @@ interface SitemapEntry {
   priority?: string;
 }
 
-const today = new Date().toISOString().slice(0, 10);
+// Note: no default lastmod — the sitemap policy forbids using the current
+// build date as a fallback. Only add page-specific timestamps below.
 
 const entries: SitemapEntry[] = [
-  { path: "/", changefreq: "weekly", priority: "1.0", lastmod: today },
-  { path: "/pricing", changefreq: "weekly", priority: "0.9", lastmod: today },
-  { path: "/formations", changefreq: "weekly", priority: "0.9", lastmod: today },
-  { path: "/verify", changefreq: "monthly", priority: "0.7", lastmod: today },
-  { path: "/careers", changefreq: "daily", priority: "0.9", lastmod: today },
-  { path: "/privacy", changefreq: "yearly", priority: "0.3", lastmod: today },
-  { path: "/terms", changefreq: "yearly", priority: "0.3", lastmod: today },
-  { path: "/install", changefreq: "monthly", priority: "0.4", lastmod: today },
+  { path: "/", changefreq: "weekly", priority: "1.0" },
+  { path: "/pricing", changefreq: "weekly", priority: "0.9" },
+  { path: "/formations", changefreq: "weekly", priority: "0.9" },
+  { path: "/formations/classement", changefreq: "weekly", priority: "0.6" },
+  { path: "/verify", changefreq: "monthly", priority: "0.7" },
+  { path: "/careers", changefreq: "daily", priority: "0.9" },
+  { path: "/privacy", changefreq: "yearly", priority: "0.3" },
+  { path: "/terms", changefreq: "yearly", priority: "0.3" },
+  { path: "/install", changefreq: "monthly", priority: "0.4" },
 ];
 
 // Try to fetch published jobs from Supabase to include /careers/:slug entries.
@@ -37,9 +39,9 @@ async function fetchJobs(): Promise<SitemapEntry[]> {
         .replace(/['’`]/g, "").replace(/[^a-z0-9]+/g, "-")
         .replace(/^-+|-+$/g, "").slice(0, 80);
     return rows
-      .map((r) => ({ slug: slugify(r.title || ""), lastmod: (r.updated_at || "").slice(0, 10) || today }))
+      .map((r) => ({ slug: slugify(r.title || ""), lastmod: (r.updated_at || "").slice(0, 10) }))
       .filter((r) => r.slug)
-      .map((r) => ({ path: `/careers/${r.slug}`, changefreq: "weekly" as const, priority: "0.7", lastmod: r.lastmod }));
+      .map((r) => ({ path: `/careers/${r.slug}`, changefreq: "weekly" as const, priority: "0.7", ...(r.lastmod ? { lastmod: r.lastmod } : {}) }));
   } catch {
     return [];
   }
