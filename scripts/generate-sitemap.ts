@@ -39,9 +39,9 @@ async function fetchJobs(): Promise<SitemapEntry[]> {
         .replace(/['’`]/g, "").replace(/[^a-z0-9]+/g, "-")
         .replace(/^-+|-+$/g, "").slice(0, 80);
     return rows
-      .map((r) => ({ slug: slugify(r.title || ""), lastmod: (r.updated_at || "").slice(0, 10) || today }))
+      .map((r) => ({ slug: slugify(r.title || ""), lastmod: (r.updated_at || "").slice(0, 10) }))
       .filter((r) => r.slug)
-      .map((r) => ({ path: `/careers/${r.slug}`, changefreq: "weekly" as const, priority: "0.7", lastmod: r.lastmod }));
+      .map((r) => ({ path: `/careers/${r.slug}`, changefreq: "weekly" as const, priority: "0.7", ...(r.lastmod ? { lastmod: r.lastmod } : {}) }));
   } catch {
     return [];
   }
