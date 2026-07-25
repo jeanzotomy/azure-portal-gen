@@ -59,7 +59,7 @@ export function HeroSection() {
  </span>
  ))}
  </h1>
- <p className="text-lg md:text-xl text-secondary-foreground/70 max-w-2xl mb-8">
+ <p className="text-lg md:text-xl text-secondary-foreground/90 max-w-2xl mb-8">
  {t("hero.description")}
  </p>
  <div className="flex flex-col sm:flex-row flex-wrap gap-3">
