@@ -59,7 +59,7 @@ export function HeroSection() {
  </span>
  ))}
  </h1>
- <p className="text-lg md:text-xl text-secondary-foreground/70 max-w-2xl mb-8">
+ <p className="text-lg md:text-xl text-secondary-foreground/90 max-w-2xl mb-8">
  {t("hero.description")}
  </p>
  <div className="flex flex-col sm:flex-row flex-wrap gap-3">
@@ -102,7 +102,7 @@ export function HeroSection() {
  </div>
  <div>
  <h2 className="font-semibold text-sm text-primary-foreground">{item.title}</h2>
- <p className="text-xs text-secondary-foreground/60">{item.desc}</p>
+ <p className="text-xs text-secondary-foreground/90">{item.desc}</p>
  </div>
  </div>
  ))}
