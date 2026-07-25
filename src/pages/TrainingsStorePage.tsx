@@ -98,10 +98,34 @@ export default function TrainingsStorePage() {
   };
 
 
+  const coursesJsonLd = trainings.length > 0 ? {
+    "@context": "https://schema.org",
+    "@graph": trainings.map((t) => ({
+      "@type": "Course",
+      name: t.title,
+      description: t.description || t.title,
+      provider: { "@type": "Organization", name: "CloudMature", sameAs: "https://cloudmature.com" },
+      ...(t.category ? { about: t.category } : {}),
+      ...(t.price_cents != null && t.currency ? {
+        offers: {
+          "@type": "Offer",
+          price: (t.price_cents / 100).toFixed(2),
+          priceCurrency: t.currency.toUpperCase(),
+          availability: "https://schema.org/InStock",
+          url: "https://cloudmature.com/formations",
+        },
+      } : {}),
+    })),
+  } : null;
+
   return (
     <div className="min-h-screen bg-background">
+      {coursesJsonLd && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(coursesJsonLd) }} />
+      )}
       <PaymentTestModeBanner />
       <Navbar />
+
 
       <main className="container pt-24 pb-16">
         <div className="text-center mb-8">
