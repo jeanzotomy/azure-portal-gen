@@ -131,10 +131,37 @@ export default function CareersPage() {
 
  // Application is now handled on the dedicated job detail page (/careers/:id)
 
- return (
- <div className="min-h-screen flex flex-col">
- <Navbar />
- <main className="flex-1 pt-24 pb-16">
+  const jobsJsonLd = jobs.length > 0 ? {
+    "@context": "https://schema.org",
+    "@graph": jobs.map((job) => ({
+      "@type": "JobPosting",
+      title: job.title,
+      description: job.description,
+      datePosted: job.created_at,
+      validThrough: job.closing_date || undefined,
+      employmentType: job.contract_type,
+      hiringOrganization: {
+        "@type": "Organization",
+        name: "CloudMature",
+        sameAs: "https://cloudmature.com",
+      },
+      jobLocation: {
+        "@type": "Place",
+        address: { "@type": "PostalAddress", addressLocality: job.location, addressCountry: "GN" },
+      },
+      industry: job.sector || undefined,
+      url: `https://cloudmature.com${jobPath(job.id, job.title)}`,
+    })),
+  } : null;
+
+  return (
+    <div className="min-h-screen flex flex-col">
+      {jobsJsonLd && (
+        <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jobsJsonLd) }} />
+      )}
+      <Navbar />
+      <main className="flex-1 pt-24 pb-16">
+
  <div className="container max-w-7xl">
  <div className="text-center mb-10">
  <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary/10 border border-primary/20 mb-4">
