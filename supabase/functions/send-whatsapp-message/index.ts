@@ -60,7 +60,7 @@ Deno.serve(async (req) => {
   const userId = userRes?.user?.id
   if (!userId) return json(401, { error: 'Unauthorized' })
 
-  const roles: Array<'admin' | 'agent' | 'gestionnaire'> = ['admin', 'agent', 'gestionnaire']
+  const roles: Array<'admin' | 'agent' | 'gestionnaire' | 'comptable' | 'hr'> = ['admin', 'agent', 'gestionnaire', 'comptable', 'hr']
   let allowed = false
   for (const r of roles) {
     const { data } = await admin.rpc('has_role', { _user_id: userId, _role: r })
