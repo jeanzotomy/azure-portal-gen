@@ -9,7 +9,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Loader2, Send, MessageCircle, AlertCircle } from "lucide-react";
 import { toast } from "sonner";
-import { sanitizeE164 } from "@/lib/social-channels";
+import { buildWhatsappUrl, sanitizeE164 } from "@/lib/social-channels";
 
 type Props = {
   open: boolean;
@@ -39,6 +39,11 @@ export function SendWhatsAppDialog({
   const clean = sanitizeE164(phone);
   const canSend = clean.length >= 6 && body.trim().length > 0 && !sending;
 
+  const openManualWhatsapp = () => {
+    const url = buildWhatsappUrl(clean, body.trim());
+    if (url) window.open(url, "_blank", "noopener,noreferrer");
+  };
+
   const handleSend = async () => {
     setSending(true);
     try {
@@ -48,6 +53,12 @@ export function SendWhatsAppDialog({
       if (error) {
         const msg = (error as any)?.context?.error || error.message || "Échec de l'envoi";
         throw new Error(msg);
+      }
+      if (data?.ok === false && data?.twilio_code === 63007) {
+        openManualWhatsapp();
+        toast.warning("Le canal WhatsApp Twilio n'est pas encore activé. WhatsApp est ouvert pour un envoi manuel.");
+        onOpenChange(false);
+        return;
       }
       if (data?.error) throw new Error(data.error);
       toast.success(`WhatsApp envoyé à +${clean}`);
