@@ -130,7 +130,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
       // Charger le profil + rôle de l'émetteur
       if (user) {
         const [{ data: prof }, { data: roles }] = await Promise.all([
-          supabase.from("profiles").select("full_name, signature_url").eq("user_id", user.id).maybeSingle(),
+          supabase.from("profiles").select("full_name, signature_url, signature_title").eq("user_id", user.id).maybeSingle(),
           supabase.from("user_roles").select("role").eq("user_id", user.id),
         ]);
         const roleLabels: Record<string, string> = {
@@ -144,9 +144,10 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
         const signedSig = await resolveSignatureUrl(prof?.signature_url);
         setIssuer({
           full_name: prof?.full_name ?? null,
-          role: primary ? (roleLabels[primary] ?? primary) : null,
+          role: (prof as any)?.signature_title || (primary ? (roleLabels[primary] ?? primary) : null),
           signature_url: signedSig,
         });
+
       }
 
       // Charger la facture si édition
