@@ -13,7 +13,7 @@ import { toast } from "sonner";
 import { InvoicePDFTemplate, type InvoicePDFData } from "@/components/InvoicePDFTemplate";
 import { generateInvoicePDFBlob, sanitizeName } from "@/lib/invoice-generator";
 import { loadInvoicePDFData, invoiceFilePrefix } from "@/lib/invoice-pdf-data";
-import { sanitizeE164 } from "@/lib/social-channels";
+import { buildWhatsappUrl, sanitizeE164 } from "@/lib/social-channels";
 
 const LINK_EXPIRY_SECONDS = 60 * 60 * 24 * 30; // 30 jours
 
@@ -27,6 +27,33 @@ interface Props {
 
 const fmtMoney = (n: number, c: string) =>
   `${new Intl.NumberFormat("fr-FR").format(Math.round(Number(n) || 0))} ${c}`;
+
+type WhatsappResponse = {
+  ok?: boolean;
+  error?: string;
+  twilio_code?: number | string | null;
+  reason?: string;
+  fallback?: string;
+};
+
+const readFunctionError = async (error: unknown) => {
+  const fallback = error instanceof Error ? error.message : "Échec de l'appel";
+  const context = (error as { context?: unknown })?.context;
+  if (context && typeof (context as { text?: unknown }).text === "function") {
+    try {
+      const raw = await (context as { text: () => Promise<string> }).text();
+      try {
+        const parsed = JSON.parse(raw) as { error?: string };
+        return parsed.error || raw || fallback;
+      } catch {
+        return raw || fallback;
+      }
+    } catch {
+      return fallback;
+    }
+  }
+  return fallback;
+};
 
 export default function SendInvoiceDialog({ open, onOpenChange, invoiceId, status, onSent }: Props) {
   const [loading, setLoading] = useState(false);
@@ -159,11 +186,21 @@ export default function SendInvoiceDialog({ open, onOpenChange, invoiceId, statu
           body: { to_e164: cleanPhone, body: waBody },
         });
         if (waErr) {
-          const msg = (waErr as { context?: { error?: string } })?.context?.error || waErr.message;
-          throw new Error(msg || "Échec de l'envoi WhatsApp");
+          throw new Error(await readFunctionError(waErr));
         }
-        if ((waRes as { error?: string } | null)?.error) throw new Error((waRes as { error: string }).error);
-        channels.push("whatsapp");
+        const result = (waRes || {}) as WhatsappResponse;
+        if (result.ok === false && result.twilio_code === 63007) {
+          const manualUrl = buildWhatsappUrl(cleanPhone, waBody);
+          if (manualUrl) window.open(manualUrl, "_blank", "noopener,noreferrer");
+          toast.warning(
+            "Le canal WhatsApp Twilio n'est pas encore activé. J'ai ouvert WhatsApp pour un envoi manuel.",
+          );
+          channels.push("whatsapp_manual");
+        } else if (result.error) {
+          throw new Error(result.error);
+        } else {
+          channels.push("whatsapp");
+        }
       }
 
       await supabase
