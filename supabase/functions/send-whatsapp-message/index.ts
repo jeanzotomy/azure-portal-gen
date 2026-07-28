@@ -79,7 +79,13 @@ Deno.serve(async (req) => {
   if (!allowed) return json(403, { error: 'Forbidden' })
 
   // --- Body validation
-  let payload: { to_e164?: string; body?: string; ticket_id?: string | null }
+  let payload: {
+    to_e164?: string
+    body?: string
+    ticket_id?: string | null
+    content_sid?: string | null
+    content_variables?: Record<string, string> | null
+  }
   try { payload = await req.json() } catch { return json(400, { error: 'Invalid JSON' }) }
 
   const to = normalizeE164(payload.to_e164 || '')
@@ -90,12 +96,24 @@ Deno.serve(async (req) => {
   }
   const ticketId = typeof payload.ticket_id === 'string' && payload.ticket_id ? payload.ticket_id : null
 
+  // --- Template approuvé (obligatoire hors fenêtre 24 h)
+  const contentSid = (payload.content_sid || '').trim() || null
+  const contentVariables =
+    payload.content_variables && typeof payload.content_variables === 'object'
+      ? payload.content_variables
+      : null
+
   // --- Twilio send via gateway
   const form = new URLSearchParams({
     To: `whatsapp:+${to}`,
     From: fromSender,
-    Body: body,
   })
+  if (contentSid) {
+    form.set('ContentSid', contentSid)
+    if (contentVariables) form.set('ContentVariables', JSON.stringify(contentVariables))
+  } else {
+    form.set('Body', body)
+  }
 
   const twilioRes = await fetch(`${GATEWAY_URL}/Messages.json`, {
     method: 'POST',
