@@ -6,10 +6,11 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Search, ExternalLink, RefreshCw, Receipt, Trash2, Pencil, CreditCard, CheckCircle2, Clock, FileEdit, Copy } from "lucide-react";
+import { Plus, Search, ExternalLink, RefreshCw, Receipt, Trash2, Pencil, CreditCard, CheckCircle2, Clock, FileEdit, Copy, Send } from "lucide-react";
 import ServiceInvoiceForm from "@/components/ServiceInvoiceForm";
 import InvoiceQuickDownloadButton from "@/components/InvoiceQuickDownloadButton";
 import InvoiceQuickPreviewButton from "@/components/InvoiceQuickPreviewButton";
+import SendInvoiceDialog from "@/components/invoices/SendInvoiceDialog";
 import { useStripeCheckout } from "@/hooks/useStripeCheckout";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { useExchangeRates, type Currency } from "@/hooks/use-exchange-rates";
@@ -57,6 +58,7 @@ export default function ServiceInvoicesTab() {
   const [formOpen, setFormOpen] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
   const [view, setView] = useViewMode("service-invoices", "table");
+  const [sendTarget, setSendTarget] = useState<{ id: string; status: string } | null>(null);
 
   const payInvoice = (id: string) => {
     window.open(`/portal/pay/${id}`, "_blank", "noopener,noreferrer");
@@ -340,6 +342,10 @@ export default function ServiceInvoicesTab() {
                           <InvoiceQuickPreviewButton invoiceId={r.id} status={r.status} />
                           <InvoiceQuickDownloadButton invoiceId={r.id} status={r.status} />
                           <Button size="icon"
+  variant="ghost" onClick={() => setSendTarget({ id: r.id, status: r.status })} title="Envoyer au client (email / WhatsApp)">
+                            <Send size={14} className="text-primary" />
+                          </Button>
+                          <Button size="icon"
   variant="ghost" onClick={() => { setEditId(r.id); setFormOpen(true); }} title="Modifier">
                             <Pencil size={14} className="text-primary" />
                           </Button>
@@ -406,6 +412,10 @@ export default function ServiceInvoicesTab() {
                     <InvoiceQuickPreviewButton invoiceId={r.id} status={r.status} />
                     <InvoiceQuickDownloadButton invoiceId={r.id} status={r.status} />
                     <Button size="icon"
+  variant="ghost" onClick={() => setSendTarget({ id: r.id, status: r.status })} title="Envoyer au client (email / WhatsApp)">
+                      <Send size={14} className="text-primary" />
+                    </Button>
+                    <Button size="icon"
   variant="ghost" onClick={() => { setEditId(r.id); setFormOpen(true); }} title="Modifier la facture">
                       <Pencil size={14} className="text-primary" />
                     </Button>
@@ -422,6 +432,14 @@ export default function ServiceInvoicesTab() {
           })}
         </div>
       )}
+
+      <SendInvoiceDialog
+        open={!!sendTarget}
+        onOpenChange={(v) => { if (!v) setSendTarget(null); }}
+        invoiceId={sendTarget?.id ?? null}
+        status={sendTarget?.status ?? "emise"}
+        onSent={() => void load()}
+      />
 
       <ServiceInvoiceForm open={formOpen} onOpenChange={(v) => { setFormOpen(v); if (!v) setEditId(null); }} editId={editId} onSaved={() => void load()} />
 
