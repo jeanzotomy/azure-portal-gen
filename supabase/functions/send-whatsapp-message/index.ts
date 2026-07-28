@@ -99,7 +99,12 @@ Deno.serve(async (req) => {
 
   const twilioData = await twilioRes.json().catch(() => ({}))
   if (!twilioRes.ok) {
-    const msg = (twilioData && (twilioData.message || twilioData.error)) || `Twilio error ${twilioRes.status}`
+    let msg = (twilioData && (twilioData.message || twilioData.error)) || `Twilio error ${twilioRes.status}`
+    if (twilioData?.code === 63007) {
+      msg =
+        `Le numéro expéditeur WhatsApp (${fromSender}) n'est pas activé comme canal WhatsApp sur ce compte Twilio. ` +
+        `Configurez un expéditeur WhatsApp approuvé (ou le sandbox whatsapp:+14155238886) et renseignez-le dans TWILIO_WHATSAPP_FROM.`
+    }
     console.error('Twilio WhatsApp send failed', twilioRes.status, twilioData)
     return json(502, { error: msg, twilio_code: twilioData?.code ?? null })
   }
