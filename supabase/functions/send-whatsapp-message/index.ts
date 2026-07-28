@@ -129,6 +129,48 @@ Deno.serve(async (req) => {
     return json(502, { error: msg, twilio_code: twilioCode })
   }
 
+  // --- Vérification de la livraison réelle : Twilio accepte (queued) puis peut
+  //     échouer, notamment 63016 (message libre hors fenêtre 24h : un template
+  //     approuvé est requis). On interroge le statut avant de déclarer un succès.
+  const sid = typeof twilioData?.sid === 'string' ? twilioData.sid : null
+  let finalStatus = typeof twilioData?.status === 'string' ? twilioData.status : null
+  let deliveryError: number | null = null
+
+  if (sid) {
+    for (let i = 0; i < 5; i++) {
+      await new Promise((r) => setTimeout(r, 1200))
+      const check = await fetch(`${GATEWAY_URL}/Messages/${sid}.json`, {
+        headers: {
+          'Authorization': `Bearer ${lovableKey}`,
+          'X-Connection-Api-Key': twilioKey,
+        },
+      })
+      if (!check.ok) break
+      const info = await check.json().catch(() => ({})) as Record<string, unknown>
+      finalStatus = typeof info.status === 'string' ? info.status : finalStatus
+      const code = info.error_code
+      if (typeof code === 'number') deliveryError = code
+      if (deliveryError || ['delivered', 'read', 'sent', 'failed', 'undelivered'].includes(String(finalStatus))) break
+    }
+  }
+
+  if (deliveryError || finalStatus === 'undelivered' || finalStatus === 'failed') {
+    const msg = deliveryError === 63016
+      ? `WhatsApp a refusé le message libre : le destinataire (+${to}) ne vous a pas écrit dans les dernières 24 h. ` +
+        `Hors de cette fenêtre, Twilio n'autorise que les modèles (templates) WhatsApp approuvés. ` +
+        `Utilisez un template approuvé ou envoyez le message manuellement.`
+      : `Le message n'a pas été livré (statut ${finalStatus}${deliveryError ? `, code ${deliveryError}` : ''}).`
+    console.error('WhatsApp delivery failed', { sid, finalStatus, deliveryError })
+    return json(200, {
+      ok: false,
+      error: msg,
+      twilio_code: deliveryError,
+      status: finalStatus,
+      reason: deliveryError === 63016 ? 'outside_24h_window' : 'not_delivered',
+      fallback: 'manual_whatsapp_link',
+    })
+  }
+
   // --- Persist as ticket reply if linked
   if (ticketId) {
     const { error: replyErr } = await admin.from('ticket_replies').insert({
@@ -142,8 +184,9 @@ Deno.serve(async (req) => {
 
   return json(200, {
     ok: true,
-    sid: twilioData?.sid ?? null,
-    status: twilioData?.status ?? null,
+    sid,
+    status: finalStatus,
     to: `+${to}`,
   })
 })
+
