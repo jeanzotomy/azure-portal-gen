@@ -6,7 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
-import { Plus, Search, ExternalLink, RefreshCw, Receipt, Trash2, Pencil, CreditCard, CheckCircle2, Clock, FileEdit } from "lucide-react";
+import { Plus, Search, ExternalLink, RefreshCw, Receipt, Trash2, Pencil, CreditCard, CheckCircle2, Clock, FileEdit, Copy } from "lucide-react";
 import ServiceInvoiceForm from "@/components/ServiceInvoiceForm";
 import InvoiceQuickDownloadButton from "@/components/InvoiceQuickDownloadButton";
 import InvoiceQuickPreviewButton from "@/components/InvoiceQuickPreviewButton";
@@ -83,6 +83,74 @@ export default function ServiceInvoicesTab() {
     if (error) toast({ title: "Erreur", description: error.message, variant: "destructive"
   });
     else void load();
+  };
+
+  const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
+
+  const duplicate = async (id: string) => {
+    setDuplicatingId(id);
+    try {
+      const { data: src, error: e1 } = await supabase
+        .from("service_invoices")
+        .select("*")
+        .eq("id", id)
+        .maybeSingle();
+      if (e1 || !src) throw new Error(e1?.message ?? "Facture introuvable");
+
+      const { data: items, error: e2 } = await supabase
+        .from("service_invoice_items")
+        .select("*")
+        .eq("invoice_id", id)
+        .order("position", { ascending: true });
+      if (e2) throw new Error(e2.message);
+
+      const today = new Date().toISOString().slice(0, 10);
+      const {
+        id: _id,
+        invoice_number: _num,
+        created_at: _c,
+        updated_at: _u,
+        paid_at: _p,
+        sharepoint_url: _su,
+        sharepoint_pdf_id: _spdf,
+        sharepoint_docx_id: _sdocx,
+        pdf_generated_at: _pg,
+        docx_generated_at: _dg,
+        ...rest
+      } = src;
+
+      const { data: created, error: e3 } = await supabase
+        .from("service_invoices")
+        .insert({
+          ...rest,
+          created_by: user?.id ?? src.created_by,
+          invoice_number: null,
+          status: "brouillon",
+          invoice_date: today,
+          due_date: null,
+        })
+        .select("id, invoice_number")
+        .single();
+      if (e3 || !created) throw new Error(e3?.message ?? "Création impossible");
+
+      if (items && items.length > 0) {
+        const payload = items.map(({ id: _iid, invoice_id: _inv, created_at: _ic, ...it }) => ({
+          ...it,
+          invoice_id: created.id,
+        }));
+        const { error: e4 } = await supabase.from("service_invoice_items").insert(payload);
+        if (e4) throw new Error(e4.message);
+      }
+
+      toast({ title: "Facture dupliquée", description: `Nouvelle facture ${created.invoice_number ?? ""} créée en brouillon.` });
+      await load();
+      setEditId(created.id);
+      setFormOpen(true);
+    } catch (err) {
+      toast({ title: "Erreur", description: err instanceof Error ? err.message : "Duplication impossible", variant: "destructive" });
+    } finally {
+      setDuplicatingId(null);
+    }
   };
 
   const remove = async (id: string) => {
@@ -276,6 +344,10 @@ export default function ServiceInvoicesTab() {
                             <Pencil size={14} className="text-primary" />
                           </Button>
                           <Button size="icon"
+  variant="ghost" onClick={() => void duplicate(r.id)} disabled={duplicatingId === r.id} title="Dupliquer">
+                            <Copy size={14} className={duplicatingId === r.id ? "animate-pulse text-muted-foreground" : "text-muted-foreground"} />
+                          </Button>
+                          <Button size="icon"
   variant="ghost" onClick={() => void remove(r.id)} title="Supprimer"><Trash2 size={14} className="text-destructive" /></Button>
                         </div>
                       </TableCell>
@@ -336,6 +408,10 @@ export default function ServiceInvoicesTab() {
                     <Button size="icon"
   variant="ghost" onClick={() => { setEditId(r.id); setFormOpen(true); }} title="Modifier la facture">
                       <Pencil size={14} className="text-primary" />
+                    </Button>
+                    <Button size="icon"
+  variant="ghost" onClick={() => void duplicate(r.id)} disabled={duplicatingId === r.id} title="Dupliquer la facture">
+                      <Copy size={14} className={duplicatingId === r.id ? "animate-pulse text-muted-foreground" : "text-muted-foreground"} />
                     </Button>
                     <Button size="icon"
   variant="ghost" onClick={() => void remove(r.id)} title="Supprimer"><Trash2 size={14} className="text-destructive" /></Button>
