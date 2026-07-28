@@ -142,6 +142,7 @@ export default function HrPortalPage() {
       <main className="flex-1 p-3 sm:p-6 overflow-auto">
         {isFormationsRoute ? <Outlet /> : <HrTab onboardingReadOnly activeTab={sub} onTabChange={setSub} />}
       </main>
+      <ProfileSignatureDialog open={signatureOpen} onOpenChange={setSignatureOpen} />
     </div>
   );
 }
