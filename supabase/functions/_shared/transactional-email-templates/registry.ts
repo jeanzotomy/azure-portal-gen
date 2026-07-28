@@ -15,6 +15,7 @@ import { template as applicationAcceptee } from './application-acceptee.tsx'
 import { template as applicationRefusee } from './application-refusee.tsx'
 import { template as directMessage } from './direct-message.tsx'
 import { template as contactOtp } from './contact-otp.tsx'
+import { template as invoiceDelivery } from './invoice-delivery.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'application-en-revue': applicationEnRevue,
@@ -23,4 +24,5 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'application-refusee': applicationRefusee,
   'direct-message': directMessage,
   'contact-otp': contactOtp,
+  'invoice-delivery': invoiceDelivery,
 }
