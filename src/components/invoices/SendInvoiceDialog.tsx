@@ -209,7 +209,11 @@ export default function SendInvoiceDialog({ open, onOpenChange, invoiceId, statu
         .eq("id", invoiceId);
 
       toast.success(
-        channels.length === 2
+        channels.includes("whatsapp_manual") && channels.includes("email")
+          ? "Email envoyé ; WhatsApp ouvert pour envoi manuel"
+          : channels.includes("whatsapp_manual")
+            ? "WhatsApp ouvert pour envoi manuel"
+            : channels.length === 2
           ? "Facture envoyée par email et WhatsApp"
           : channels[0] === "email"
             ? `Facture envoyée à ${email.trim()}`
