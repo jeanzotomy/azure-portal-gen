@@ -344,6 +344,10 @@ export default function ServiceInvoicesTab() {
                             <Pencil size={14} className="text-primary" />
                           </Button>
                           <Button size="icon"
+  variant="ghost" onClick={() => void duplicate(r.id)} disabled={duplicatingId === r.id} title="Dupliquer">
+                            <Copy size={14} className={duplicatingId === r.id ? "animate-pulse text-muted-foreground" : "text-muted-foreground"} />
+                          </Button>
+                          <Button size="icon"
   variant="ghost" onClick={() => void remove(r.id)} title="Supprimer"><Trash2 size={14} className="text-destructive" /></Button>
                         </div>
                       </TableCell>
