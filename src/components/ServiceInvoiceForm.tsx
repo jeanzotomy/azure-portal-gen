@@ -691,10 +691,24 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div>
-            <label className="text-xs font-medium">Notes & conditions</label>
-            <Textarea rows={5} placeholder="Laisser vide pour utiliser le texte par défaut" value={notes} onChange={(e) => setNotes(e.target.value)} />
+          <div className="space-y-3">
+            <div>
+              <label className="text-xs font-medium">Notes &amp; conditions</label>
+              <Textarea rows={5} placeholder="Laisser vide pour utiliser le texte par défaut" value={notes} onChange={(e) => setNotes(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-xs font-medium">Fonction affichée sous votre signature</label>
+              <Input
+                value={issuer.role ?? ""}
+                onChange={(e) => { setIssuer((p) => ({ ...p, role: e.target.value })); setDirty(true); }}
+                placeholder="Ex : Directeur Général"
+              />
+              <p className="text-[11px] text-muted-foreground mt-1">
+                Pré-remplie depuis votre profil. Modifiable pour ce document ; enregistrez-la par défaut dans « Ma signature ».
+              </p>
+            </div>
           </div>
+
           <div className="space-y-2 bg-muted/30 p-3 rounded-md">
             <div className="grid grid-cols-2 gap-2 items-center">
               <label className="text-xs">Remise globale (%)</label>
