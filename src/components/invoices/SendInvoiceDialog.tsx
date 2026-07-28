@@ -189,11 +189,12 @@ export default function SendInvoiceDialog({ open, onOpenChange, invoiceId, statu
           throw new Error(await readFunctionError(waErr));
         }
         const result = (waRes || {}) as WhatsappResponse;
-        if (result.ok === false && result.twilio_code === 63007) {
+        if (result.ok === false && result.fallback === "manual_whatsapp_link") {
           const manualUrl = buildWhatsappUrl(cleanPhone, waBody);
           if (manualUrl) window.open(manualUrl, "_blank", "noopener,noreferrer");
           toast.warning(
-            "Le canal WhatsApp Twilio n'est pas encore activé. J'ai ouvert WhatsApp pour un envoi manuel.",
+            result.error || "Envoi automatique impossible. J'ai ouvert WhatsApp pour un envoi manuel.",
+            { duration: 10000 },
           );
           channels.push("whatsapp_manual");
         } else if (result.error) {
