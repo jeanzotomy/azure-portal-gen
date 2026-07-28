@@ -1852,6 +1852,8 @@ export type Database = {
           payment_details: Json
           payment_method_ids: string[]
           pdf_generated_at: string | null
+          sent_at: string | null
+          sent_channels: string[]
           sharepoint_docx_id: string | null
           sharepoint_pdf_id: string | null
           sharepoint_url: string | null
@@ -1882,6 +1884,8 @@ export type Database = {
           payment_details?: Json
           payment_method_ids?: string[]
           pdf_generated_at?: string | null
+          sent_at?: string | null
+          sent_channels?: string[]
           sharepoint_docx_id?: string | null
           sharepoint_pdf_id?: string | null
           sharepoint_url?: string | null
@@ -1912,6 +1916,8 @@ export type Database = {
           payment_details?: Json
           payment_method_ids?: string[]
           pdf_generated_at?: string | null
+          sent_at?: string | null
+          sent_channels?: string[]
           sharepoint_docx_id?: string | null
           sharepoint_pdf_id?: string | null
           sharepoint_url?: string | null
