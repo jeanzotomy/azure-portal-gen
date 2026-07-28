@@ -6,6 +6,8 @@ import { useToast } from "@/hooks/use-toast";
 import { SignaturePad } from "@/components/SignaturePad";
 import { PenLine, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { resolveSignatureUrl } from "@/lib/signatures";
 
 interface Props {
@@ -25,16 +27,39 @@ export function ProfileSignatureDialog({ open, onOpenChange }: Props) {
   const [currentUrl, setCurrentUrl] = useState<string | null>(null);
   const [hasSignature, setHasSignature] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [title, setTitle] = useState("");
+  const [savedTitle, setSavedTitle] = useState("");
+  const [savingTitle, setSavingTitle] = useState(false);
 
   useEffect(() => {
     if (!open || !user) return;
     void (async () => {
-      const { data } = await supabase.from("profiles").select("signature_url").eq("user_id", user.id).maybeSingle();
+      const { data } = await supabase.from("profiles").select("signature_url, signature_title").eq("user_id", user.id).maybeSingle();
       setHasSignature(!!data?.signature_url);
+      const t = ((data as any)?.signature_title as string | null) ?? "";
+      setTitle(t);
+      setSavedTitle(t);
       const signed = await resolveSignatureUrl(data?.signature_url);
       setCurrentUrl(signed);
     })();
   }, [open, user]);
+
+  const handleSaveTitle = async () => {
+    if (!user) return;
+    setSavingTitle(true);
+    try {
+      const { error } = await (supabase as any).rpc("update_own_signature_title", { _title: title });
+      if (error) throw error;
+      setSavedTitle(title.trim());
+      setTitle(title.trim());
+      toast({ title: "Fonction enregistrée", description: "Elle apparaîtra sous votre signature." });
+    } catch (e) {
+      toast({ title: "Erreur", description: e instanceof Error ? e.message : "Échec", variant: "destructive" });
+    } finally {
+      setSavingTitle(false);
+    }
+  };
+
 
   const handleSave = async (blob: Blob) => {
     if (!user) return;
@@ -95,6 +120,29 @@ export function ProfileSignatureDialog({ open, onOpenChange }: Props) {
         <div className="space-y-3">
 
           <SignaturePad initialImage={currentUrl} onSave={handleSave} saving={saving} />
+
+          <div className="border-t pt-3 space-y-2">
+            <Label htmlFor="signature-title" className="text-xs font-medium">
+              Fonction / titre affiché sous la signature
+            </Label>
+            <div className="flex gap-2">
+              <Input
+                id="signature-title"
+                value={title}
+                maxLength={120}
+                placeholder="Ex : Directeur Général"
+                onChange={(e) => setTitle(e.target.value)}
+              />
+              <Button type="button" onClick={handleSaveTitle} disabled={savingTitle || title.trim() === savedTitle.trim()}>
+                Confirmer
+              </Button>
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Laissez vide pour utiliser automatiquement le libellé de votre rôle. Vous pourrez aussi l'ajuster document par document.
+            </p>
+          </div>
+
+
 
           {hasSignature && (
             <div className="flex items-center justify-between border-t pt-3">

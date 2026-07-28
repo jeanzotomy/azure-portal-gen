@@ -1367,6 +1367,7 @@ export type Database = {
           notification_prefs: Json
           phone: string | null
           plan_tier: string | null
+          signature_title: string | null
           signature_url: string | null
           timezone: string | null
           updated_at: string
@@ -1388,6 +1389,7 @@ export type Database = {
           notification_prefs?: Json
           phone?: string | null
           plan_tier?: string | null
+          signature_title?: string | null
           signature_url?: string | null
           timezone?: string | null
           updated_at?: string
@@ -1409,6 +1411,7 @@ export type Database = {
           notification_prefs?: Json
           phone?: string | null
           plan_tier?: string | null
+          signature_title?: string | null
           signature_url?: string | null
           timezone?: string | null
           updated_at?: string
@@ -2988,6 +2991,10 @@ export type Database = {
             }
             Returns: undefined
           }
+      update_own_signature_title: {
+        Args: { _title: string }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role:

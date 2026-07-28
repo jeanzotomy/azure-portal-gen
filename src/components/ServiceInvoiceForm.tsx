@@ -130,7 +130,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
       // Charger le profil + rôle de l'émetteur
       if (user) {
         const [{ data: prof }, { data: roles }] = await Promise.all([
-          supabase.from("profiles").select("full_name, signature_url").eq("user_id", user.id).maybeSingle(),
+          supabase.from("profiles").select("full_name, signature_url, signature_title").eq("user_id", user.id).maybeSingle(),
           supabase.from("user_roles").select("role").eq("user_id", user.id),
         ]);
         const roleLabels: Record<string, string> = {
@@ -144,9 +144,10 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
         const signedSig = await resolveSignatureUrl(prof?.signature_url);
         setIssuer({
           full_name: prof?.full_name ?? null,
-          role: primary ? (roleLabels[primary] ?? primary) : null,
+          role: (prof as any)?.signature_title || (primary ? (roleLabels[primary] ?? primary) : null),
           signature_url: signedSig,
         });
+
       }
 
       // Charger la facture si édition
@@ -691,10 +692,24 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div>
-            <label className="text-xs font-medium">Notes & conditions</label>
-            <Textarea rows={5} placeholder="Laisser vide pour utiliser le texte par défaut" value={notes} onChange={(e) => setNotes(e.target.value)} />
+          <div className="space-y-3">
+            <div>
+              <label className="text-xs font-medium">Notes &amp; conditions</label>
+              <Textarea rows={5} placeholder="Laisser vide pour utiliser le texte par défaut" value={notes} onChange={(e) => setNotes(e.target.value)} />
+            </div>
+            <div>
+              <label className="text-xs font-medium">Fonction affichée sous votre signature</label>
+              <Input
+                value={issuer.role ?? ""}
+                onChange={(e) => { setIssuer((p) => ({ ...p, role: e.target.value })); setDirty(true); }}
+                placeholder="Ex : Directeur Général"
+              />
+              <p className="text-[11px] text-muted-foreground mt-1">
+                Pré-remplie depuis votre profil. Modifiable pour ce document ; enregistrez-la par défaut dans « Ma signature ».
+              </p>
+            </div>
           </div>
+
           <div className="space-y-2 bg-muted/30 p-3 rounded-md">
             <div className="grid grid-cols-2 gap-2 items-center">
               <label className="text-xs">Remise globale (%)</label>
