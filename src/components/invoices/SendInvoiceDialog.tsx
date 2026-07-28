@@ -183,7 +183,19 @@ export default function SendInvoiceDialog({ open, onOpenChange, invoiceId, statu
           `${message.trim()}\n\n` +
           `Télécharger le PDF :\n${url}`;
         const { data: waRes, error: waErr } = await supabase.functions.invoke("send-whatsapp-message", {
-          body: { to_e164: cleanPhone, body: waBody },
+          body: {
+            to_e164: cleanPhone,
+            body: waBody,
+            // Envoi automatique via le template WhatsApp approuvé (hors fenêtre 24 h).
+            template: "invoice",
+            content_variables: {
+              "1": data.client.contact_person || data.client.client_name,
+              "2": docLabel.toLowerCase(),
+              "3": data.invoice_number,
+              "4": fmtMoney(data.total, data.currency),
+              "5": url,
+            },
+          },
         });
         if (waErr) {
           throw new Error(await readFunctionError(waErr));
