@@ -54,9 +54,11 @@ export function SendWhatsAppDialog({
         const msg = (error as any)?.context?.error || error.message || "Échec de l'envoi";
         throw new Error(msg);
       }
-      if (data?.ok === false && data?.twilio_code === 63007) {
+      if (data?.ok === false && data?.fallback === "manual_whatsapp_link") {
         openManualWhatsapp();
-        toast.warning("Le canal WhatsApp Twilio n'est pas encore activé. WhatsApp est ouvert pour un envoi manuel.");
+        toast.warning(data?.error || "Envoi automatique impossible. WhatsApp est ouvert pour un envoi manuel.", {
+          duration: 10000,
+        });
         onOpenChange(false);
         return;
       }
