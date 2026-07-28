@@ -1,4 +1,4 @@
-// Send a WhatsApp message via Twilio (admin/agent/gestionnaire only).
+// Send a WhatsApp message via Twilio (authorized staff only).
 // Uses the Lovable Twilio connector gateway — no Twilio creds in code.
 
 import { createClient } from 'npm:@supabase/supabase-js@2'
@@ -32,16 +32,26 @@ function normalizeFromSender(raw: string | undefined): string | null {
   return `whatsapp:+${digits}`
 }
 
+function extractTwilioCode(payload: Record<string, unknown>): number | null {
+  const rawCode = payload.code
+  if (typeof rawCode === 'number') return rawCode
+  if (typeof rawCode === 'string' && /^\d+$/.test(rawCode)) return Number(rawCode)
+  return null
+}
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: corsHeaders })
   if (req.method !== 'POST') return json(405, { error: 'Method not allowed' })
 
-  const supabaseUrl = Deno.env.get('SUPABASE_URL')!
-  const supabaseService = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+  const supabaseUrl = Deno.env.get('SUPABASE_URL')
+  const supabaseService = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
   const lovableKey = Deno.env.get('LOVABLE_API_KEY')
   const twilioKey = Deno.env.get('TWILIO_API_KEY')
   const fromRaw = Deno.env.get('TWILIO_WHATSAPP_FROM') || Deno.env.get('TWILIO_FROM_NUMBER')
 
+  if (!supabaseUrl || !supabaseService) {
+    return json(500, { error: 'Backend configuration unavailable' })
+  }
   if (!lovableKey || !twilioKey) {
     return json(500, { error: 'Twilio connector not configured' })
   }
@@ -97,16 +107,26 @@ Deno.serve(async (req) => {
     body: form.toString(),
   })
 
-  const twilioData = await twilioRes.json().catch(() => ({}))
+  const twilioData = await twilioRes.json().catch(() => ({})) as Record<string, unknown>
   if (!twilioRes.ok) {
+    const twilioCode = extractTwilioCode(twilioData)
     let msg = (twilioData && (twilioData.message || twilioData.error)) || `Twilio error ${twilioRes.status}`
-    if (twilioData?.code === 63007) {
+    if (twilioCode === 63007) {
       msg =
         `Le numéro expéditeur WhatsApp (${fromSender}) n'est pas activé comme canal WhatsApp sur ce compte Twilio. ` +
         `Configurez un expéditeur WhatsApp approuvé (ou le sandbox whatsapp:+14155238886) et renseignez-le dans TWILIO_WHATSAPP_FROM.`
     }
     console.error('Twilio WhatsApp send failed', twilioRes.status, twilioData)
-    return json(502, { error: msg, twilio_code: twilioData?.code ?? null })
+    if (twilioCode === 63007) {
+      return json(200, {
+        ok: false,
+        error: msg,
+        twilio_code: twilioCode,
+        reason: 'sender_not_whatsapp_channel',
+        fallback: 'manual_whatsapp_link',
+      })
+    }
+    return json(502, { error: msg, twilio_code: twilioCode })
   }
 
   // --- Persist as ticket reply if linked
