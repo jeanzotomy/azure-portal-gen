@@ -119,6 +119,29 @@ export function ProfileSignatureDialog({ open, onOpenChange }: Props) {
 
           <SignaturePad initialImage={currentUrl} onSave={handleSave} saving={saving} />
 
+          <div className="border-t pt-3 space-y-2">
+            <Label htmlFor="signature-title" className="text-xs font-medium">
+              Fonction / titre affiché sous la signature
+            </Label>
+            <div className="flex gap-2">
+              <Input
+                id="signature-title"
+                value={title}
+                maxLength={120}
+                placeholder="Ex : Directeur Général"
+                onChange={(e) => setTitle(e.target.value)}
+              />
+              <Button type="button" onClick={handleSaveTitle} disabled={savingTitle || title.trim() === savedTitle.trim()}>
+                Confirmer
+              </Button>
+            </div>
+            <p className="text-[11px] text-muted-foreground">
+              Laissez vide pour utiliser automatiquement le libellé de votre rôle. Vous pourrez aussi l'ajuster document par document.
+            </p>
+          </div>
+
+
+
           {hasSignature && (
             <div className="flex items-center justify-between border-t pt-3">
               <span className="text-xs text-muted-foreground">Signature actuelle enregistrée</span>
