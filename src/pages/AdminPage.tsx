@@ -479,6 +479,7 @@ function AdminContent() {
  {gestionnaireTab ==="payment-methods"&& <PaymentMethodsTab />}
  </main>
  </div>
+ <ProfileSignatureDialog open={signatureOpen} onOpenChange={setSignatureOpen} />
  </div>
  );
  }
