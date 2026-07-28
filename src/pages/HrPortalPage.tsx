@@ -9,6 +9,7 @@ import { Briefcase, LogOut, Shield, FileSignature, Users, GraduationCap, BookOpe
 import HrTab from "@/components/HrTab";
 import { PortalInfoBar } from "@/components/PortalInfoBar";
 import cmLogo from "@/assets/cloudmature-logo.png";
+import { ProfileSignatureDialog } from "@/components/ProfileSignatureDialog";
 
 type HrSubTab = "dashboard" | "recruitment" | "contracts" | "onboarding" | "trainings" | "employee-trainings";
 
@@ -29,6 +30,7 @@ export default function HrPortalPage() {
   const navigate = useNavigate();
   const location = useLocation();
   const [sub, setSub] = useState<HrSubTab>("dashboard");
+  const [signatureOpen, setSignatureOpen] = useState(false);
   const formationsMatch = useMatch("/rh/formations/*");
   const isFormationsRoute = !!formationsMatch || location.pathname === "/rh/formations";
 
@@ -64,9 +66,14 @@ export default function HrPortalPage() {
               <Shield size={12} /> Ressources Humaines
             </span>
             <div className="flex items-center gap-2 pl-3 sm:border-l border-border">
-              <div className="w-9 h-9 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-sm font-bold shrink-0">
+              <button
+                type="button"
+                onClick={() => setSignatureOpen(true)}
+                title="Ma signature"
+                className="w-9 h-9 rounded-full gradient-primary flex items-center justify-center text-primary-foreground text-sm font-bold shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+              >
                 {(user.user_metadata?.full_name || user.email || "R").charAt(0).toUpperCase()}
-              </div>
+              </button>
               <span className="hidden lg:block text-sm text-foreground truncate max-w-[140px]">
                 {user.user_metadata?.full_name || user.email}
               </span>
