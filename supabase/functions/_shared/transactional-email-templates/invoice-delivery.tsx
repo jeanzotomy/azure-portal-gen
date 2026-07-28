@@ -100,7 +100,9 @@ const Email = ({
 export const template = {
   component: Email,
   subject: (d: Record<string, any>) =>
-    `${d.documentLabel || 'Facture'} ${d.invoiceNumber || ''} - ${SITE_NAME}`.trim(),
+    (typeof d.subjectOverride === 'string' && d.subjectOverride.trim())
+      ? d.subjectOverride.trim()
+      : `${d.documentLabel || 'Facture'} ${d.invoiceNumber || ''} - ${SITE_NAME}`.trim(),
   displayName: 'Envoi de facture au client',
   previewData: {
     clientName: 'Société Exemple SARL',
