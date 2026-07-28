@@ -25,16 +25,39 @@ export function ProfileSignatureDialog({ open, onOpenChange }: Props) {
   const [currentUrl, setCurrentUrl] = useState<string | null>(null);
   const [hasSignature, setHasSignature] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [title, setTitle] = useState("");
+  const [savedTitle, setSavedTitle] = useState("");
+  const [savingTitle, setSavingTitle] = useState(false);
 
   useEffect(() => {
     if (!open || !user) return;
     void (async () => {
-      const { data } = await supabase.from("profiles").select("signature_url").eq("user_id", user.id).maybeSingle();
+      const { data } = await supabase.from("profiles").select("signature_url, signature_title").eq("user_id", user.id).maybeSingle();
       setHasSignature(!!data?.signature_url);
+      const t = ((data as any)?.signature_title as string | null) ?? "";
+      setTitle(t);
+      setSavedTitle(t);
       const signed = await resolveSignatureUrl(data?.signature_url);
       setCurrentUrl(signed);
     })();
   }, [open, user]);
+
+  const handleSaveTitle = async () => {
+    if (!user) return;
+    setSavingTitle(true);
+    try {
+      const { error } = await (supabase as any).rpc("update_own_signature_title", { _title: title });
+      if (error) throw error;
+      setSavedTitle(title.trim());
+      setTitle(title.trim());
+      toast({ title: "Fonction enregistrée", description: "Elle apparaîtra sous votre signature." });
+    } catch (e) {
+      toast({ title: "Erreur", description: e instanceof Error ? e.message : "Échec", variant: "destructive" });
+    } finally {
+      setSavingTitle(false);
+    }
+  };
+
 
   const handleSave = async (blob: Blob) => {
     if (!user) return;
