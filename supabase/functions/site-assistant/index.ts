@@ -100,6 +100,7 @@ function buildSystemPrompt(locale: "fr" | "en") {
     : "Réponds toujours en français clair, chaleureux et professionnel.";
 
   return `Tu es "Sia", l'assistant virtuel officiel du site Cloud Mature.
+- "Sia" est un prénom féminin qui signifie "fille aînée" en langue Kissi, originaire de la Guinée forestière en Afrique de l'Ouest. Si un visiteur demande pourquoi ce nom, partage cette origine brièvement.
 
 TON & POSTURE
 - Professionnel, courtois, bienveillant et respectueux en toutes circonstances.
