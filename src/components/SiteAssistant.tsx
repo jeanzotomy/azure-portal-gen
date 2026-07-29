@@ -174,38 +174,38 @@ export default function SiteAssistant() {
  const limitReached = userMessageCount >= MAX_USER_QUESTIONS;
  const showSoftCta = userMessageCount >= SOFT_CTA_AT && !limitReached;
 
- const i18n = locale ==="en" ? {
- title:"Maturia - Cloud Mature Assistant",
- subtitle:"Ask anything about our services.",
- placeholder:"Ask about our services, expertise, training…",
- send:"Send",
- open:"Open assistant",
- close:"Close",
- welcome:"Hi! I'm Maturia, the Cloud Mature virtual assistant. I can help you discover our services, expertise (Cloud, DevOps, Data, AI), sectors, methodology and trainings. How can I help?",
- disclaimer:"Scope limited to Cloud Mature. Do not share personal or confidential data.",
- error:"Sorry, something went wrong. Please try again.",
- limitTitle:"Thank you for our exchange.",
- limitBody: `To keep our conversations focused, this assistant is limited to ${MAX_USER_QUESTIONS} questions per session. For a deeper discussion, our team will gladly take over via the contact form.`,
- limitCta:"Go to contact form",
- softCta:"Want a dedicated answer? Leave your contact info — our team will get back to you.",
- softCtaBtn:"Leave my contact info",
- }
- : {
- title:"Maturia - Assistant Cloud Mature",
- subtitle:"Posez vos questions sur nos services.",
- placeholder:"Posez votre question sur nos services, expertises, formations…",
- send:"Envoyer",
- open:"Ouvrir l'assistant",
- close:"Fermer",
- welcome:"Bonjour ! Je suis Maturia, l'assistant virtuel de Cloud Mature. Je peux vous présenter nos services, expertises (Cloud, DevOps, Data, IA), secteurs, méthodologie et formations. Comment puis-je vous aider ?",
- disclaimer:"Périmètre limité à Cloud Mature. Ne partagez pas de données personnelles ou confidentielles.",
- error:"Désolé, une erreur est survenue. Merci de réessayer.",
- limitTitle:"Merci pour cet échange.",
- limitBody: `Pour garder nos conversations ciblées, cet assistant est limité à ${MAX_USER_QUESTIONS} questions par session. Pour aller plus loin, notre équipe se fera un plaisir de prendre le relais via le formulaire de contact.`,
- limitCta:"Accéder au formulaire de contact",
- softCta:"Envie d'une réponse personnalisée ? Laissez-nous vos coordonnées, notre équipe vous recontacte.",
- softCtaBtn:"Laisser mes coordonnées",
- };
+  const i18n = locale ==="en" ? {
+  title:"Sia - Cloud Mature Assistant",
+  subtitle:"Ask anything about our services.",
+  placeholder:"Ask about our services, expertise, training…",
+  send:"Send",
+  open:"Open assistant",
+  close:"Close",
+  welcome:"Hi! I'm Sia, the Cloud Mature virtual assistant. I can help you discover our services, expertise (Cloud, DevOps, Data, AI), sectors, methodology and trainings. How can I help?",
+  disclaimer:"Scope limited to Cloud Mature. Do not share personal or confidential data.",
+  error:"Sorry, something went wrong. Please try again.",
+  limitTitle:"Thank you for our exchange.",
+  limitBody: `To keep our conversations focused, this assistant is limited to ${MAX_USER_QUESTIONS} questions per session. For a deeper discussion, our team will gladly take over via the contact form.`,
+  limitCta:"Go to contact form",
+  softCta:"Want a dedicated answer? Leave your contact info — our team will get back to you.",
+  softCtaBtn:"Leave my contact info",
+  }
+  : {
+  title:"Sia - Assistant Cloud Mature",
+  subtitle:"Posez vos questions sur nos services.",
+  placeholder:"Posez votre question sur nos services, expertises, formations…",
+  send:"Envoyer",
+  open:"Ouvrir l'assistant",
+  close:"Fermer",
+  welcome:"Bonjour ! Je suis Sia, l'assistant virtuel de Cloud Mature. Je peux vous présenter nos services, expertises (Cloud, DevOps, Data, IA), secteurs, méthodologie et formations. Comment puis-je vous aider ?",
+  disclaimer:"Périmètre limité à Cloud Mature. Ne partagez pas de données personnelles ou confidentielles.",
+  error:"Désolé, une erreur est survenue. Merci de réessayer.",
+  limitTitle:"Merci pour cet échange.",
+  limitBody: `Pour garder nos conversations ciblées, cet assistant est limité à ${MAX_USER_QUESTIONS} questions par session. Pour aller plus loin, notre équipe se fera un plaisir de prendre le relais via le formulaire de contact.`,
+  limitCta:"Accéder au formulaire de contact",
+  softCta:"Envie d'une réponse personnalisée ? Laissez-nous vos coordonnées, notre équipe vous recontacte.",
+  softCtaBtn:"Laisser mes coordonnées",
+  };
 
  useEffect(() => {
  if (!open) return;
