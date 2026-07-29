@@ -201,7 +201,12 @@ Deno.serve(async (req) => {
       error: msg,
       twilio_code: deliveryError,
       status: finalStatus,
-      reason: deliveryError === 63016 ? 'outside_24h_window' : 'not_delivered',
+      reason: deliveryError === 63016
+        ? 'outside_24h_window'
+        : deliveryError === 63112
+          ? 'waba_disabled_by_meta'
+          : 'not_delivered',
+
       fallback: 'manual_whatsapp_link',
     })
   }
