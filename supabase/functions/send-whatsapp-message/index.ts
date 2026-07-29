@@ -176,18 +176,37 @@ Deno.serve(async (req) => {
   }
 
   if (deliveryError || finalStatus === 'undelivered' || finalStatus === 'failed') {
-    const msg = deliveryError === 63016
-      ? `WhatsApp a refusé le message libre : le destinataire (+${to}) ne vous a pas écrit dans les dernières 24 h. ` +
+    let msg: string
+    if (deliveryError === 63016) {
+      msg =
+        `WhatsApp a refusé le message libre : le destinataire (+${to}) ne vous a pas écrit dans les dernières 24 h. ` +
         `Hors de cette fenêtre, Twilio n'autorise que les modèles (templates) WhatsApp approuvés. ` +
         `Utilisez un template approuvé ou envoyez le message manuellement.`
-      : `Le message n'a pas été livré (statut ${finalStatus}${deliveryError ? `, code ${deliveryError}` : ''}).`
+    } else if (deliveryError === 63112) {
+      msg =
+        `Meta a désactivé le compte WhatsApp Business associé à l'expéditeur ${fromSender} (code 63112). ` +
+        `Aucun envoi automatique n'est possible tant que ce compte n'est pas rétabli : ouvrez Twilio > Messaging > Senders > WhatsApp senders, ` +
+        `puis Meta Business Manager (Qualité du compte) pour lever la restriction. Le message est ouvert dans WhatsApp pour un envoi manuel.`
+    } else if (deliveryError === 63024 || deliveryError === 63007) {
+      msg =
+        `L'expéditeur ${fromSender} n'est pas un canal WhatsApp valide pour ce destinataire (code ${deliveryError}). ` +
+        `Vérifiez l'expéditeur WhatsApp approuvé dans Twilio, puis renseignez-le dans TWILIO_WHATSAPP_FROM.`
+    } else {
+      msg = `Le message n'a pas été livré (statut ${finalStatus}${deliveryError ? `, code ${deliveryError}` : ''}).`
+    }
+
     console.error('WhatsApp delivery failed', { sid, finalStatus, deliveryError })
     return json(200, {
       ok: false,
       error: msg,
       twilio_code: deliveryError,
       status: finalStatus,
-      reason: deliveryError === 63016 ? 'outside_24h_window' : 'not_delivered',
+      reason: deliveryError === 63016
+        ? 'outside_24h_window'
+        : deliveryError === 63112
+          ? 'waba_disabled_by_meta'
+          : 'not_delivered',
+
       fallback: 'manual_whatsapp_link',
     })
   }
