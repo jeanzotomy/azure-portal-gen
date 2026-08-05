@@ -32,13 +32,15 @@ export function Navbar() {
   ];
 
   const { value: pricingVisible } = useSiteSetting<boolean>("nav.pricing_visible", true);
+  const { value: trainingsVisible } = useSiteSetting<boolean>("nav.trainings_visible", true);
 
   const routeLinks = [
     ...(pricingVisible ? [{ label: locale === "fr" ? "Tarifs" : "Pricing", to: "/pricing"
   }] : []),
-    { label: locale === "fr" ? "Formations" : "Trainings", to: "/formations"
-  },
+    ...(trainingsVisible ? [{ label: locale === "fr" ? "Formations" : "Trainings", to: "/formations"
+  }] : []),
   ];
+
 
 
   const scrollTo = (id: string) => {

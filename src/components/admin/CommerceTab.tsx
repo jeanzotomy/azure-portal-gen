@@ -26,6 +26,9 @@ export default function CommerceTab({ initialSection = "catalog"
   const [section, setSection] = useState<CommerceSection>(initialSection);
   const { value: pricingVisible, update: setPricingVisible, loading: pricingLoading } =
     useSiteSetting<boolean>("nav.pricing_visible", true);
+  const { value: trainingsVisible, update: setTrainingsVisible, loading: trainingsLoading } =
+    useSiteSetting<boolean>("nav.trainings_visible", true);
+
 
   return (
     <div className="space-y-4 p-4 md:p-6">
@@ -97,6 +100,40 @@ export default function CommerceTab({ initialSection = "catalog"
               />
             </CardContent>
           </Card>
+
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                {trainingsVisible ? <Eye className="h-4 w-4 text-primary" /> : <EyeOff className="h-4 w-4 text-muted-foreground" />}
+                Visibilité du menu « Formations »
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex items-center justify-between gap-4">
+              <div className="space-y-1">
+                <Label htmlFor="trainings-visible" className="text-sm font-medium">
+                  Afficher le menu Formations dans la barre de navigation publique
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Réactive ou dépublie le lien « Formations / Trainings » de la navbar du site vitrine (la page <code>/formations</code> reste accessible par URL directe).
+                </p>
+              </div>
+              <Switch
+                id="trainings-visible"
+                checked={trainingsVisible}
+                disabled={trainingsLoading}
+                onCheckedChange={async (checked) => {
+                  try {
+                    await setTrainingsVisible(checked);
+                    toast.success(checked ? "Menu Formations publié" : "Menu Formations dépublié");
+                  } catch (e: any) {
+                    toast.error(e?.message || "Erreur lors de la mise à jour");
+                  }
+                }}
+              />
+            </CardContent>
+          </Card>
+
+
 
           <Card>
             <CardHeader>
