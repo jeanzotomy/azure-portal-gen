@@ -103,6 +103,40 @@ export default function CommerceTab({ initialSection = "catalog"
 
           <Card>
             <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                {trainingsVisible ? <Eye className="h-4 w-4 text-primary" /> : <EyeOff className="h-4 w-4 text-muted-foreground" />}
+                Visibilité du menu « Formations »
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex items-center justify-between gap-4">
+              <div className="space-y-1">
+                <Label htmlFor="trainings-visible" className="text-sm font-medium">
+                  Afficher le menu Formations dans la barre de navigation publique
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Réactive ou dépublie le lien « Formations / Trainings » de la navbar du site vitrine (la page <code>/formations</code> reste accessible par URL directe).
+                </p>
+              </div>
+              <Switch
+                id="trainings-visible"
+                checked={trainingsVisible}
+                disabled={trainingsLoading}
+                onCheckedChange={async (checked) => {
+                  try {
+                    await setTrainingsVisible(checked);
+                    toast.success(checked ? "Menu Formations publié" : "Menu Formations dépublié");
+                  } catch (e: any) {
+                    toast.error(e?.message || "Erreur lors de la mise à jour");
+                  }
+                }}
+              />
+            </CardContent>
+          </Card>
+
+
+
+          <Card>
+            <CardHeader>
               <CardTitle className="text-base">Tarifs SaaS publics</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
