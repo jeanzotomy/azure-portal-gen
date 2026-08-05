@@ -26,6 +26,9 @@ export default function CommerceTab({ initialSection = "catalog"
   const [section, setSection] = useState<CommerceSection>(initialSection);
   const { value: pricingVisible, update: setPricingVisible, loading: pricingLoading } =
     useSiteSetting<boolean>("nav.pricing_visible", true);
+  const { value: trainingsVisible, update: setTrainingsVisible, loading: trainingsLoading } =
+    useSiteSetting<boolean>("nav.trainings_visible", true);
+
 
   return (
     <div className="space-y-4 p-4 md:p-6">
