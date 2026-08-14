@@ -94,10 +94,16 @@
     --accent-foreground: 0 0% 100%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
+    --success: 152 55% 45%;
+    --success-foreground: 0 0% 100%;
+    --banner-from: 215 30% 14%;
+    --banner-via: 215 30% 14%;
+    --banner-to: 215 25% 22%;
     --border: 215 25% 22%;
     --input: 215 25% 22%;
     --ring: 195 100% 45%;
   }
+
 }
 
 @layer base {
