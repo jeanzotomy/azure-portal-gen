@@ -512,7 +512,7 @@ export default function MicrosoftAuditPage() {
                         </Select>
                         <Input
                           autoFocus type="tel" inputMode="tel"
-                          value={asText(answers[question.id]) || `${dial} `}
+                          value={asText(answers[question.id])}
                           onChange={(e) => setValue(question.id, e.target.value)}
                           onKeyDown={(e) => e.key === "Enter" && goNext()}
                           className="h-12 flex-1 text-base"
