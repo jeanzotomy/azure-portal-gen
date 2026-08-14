@@ -151,6 +151,12 @@ const DIAL_OPTIONS = Object.entries(COUNTRY_DIAL_CODES)
 const asArray = (v: string | string[] | undefined) => (Array.isArray(v) ? v : []);
 const asText = (v: string | string[] | undefined) => (typeof v === "string" ? v : "");
 
+/** `datetime-local` reads `min` in local time, so format locally (never via toISOString). */
+const toLocalInputValue = (d: Date) => {
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+};
+
 export default function MicrosoftAuditPage() {
   useSeo({
     title: "Audit gratuit de vos licences Microsoft | Cloud Mature",
