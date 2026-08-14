@@ -46,6 +46,9 @@ const PortalNotificationsPage = lazy(() => import("./pages/portal/PortalNotifica
 const PortalHelpPage = lazy(() => import("./pages/portal/PortalHelpPage.tsx"));
 const PortalSettingsPage = lazy(() => import("./pages/portal/PortalSettingsPage.tsx"));
 const InvoicePaymentPage = lazy(() => import("./pages/portal/InvoicePaymentPage.tsx"));
+const MicrosoftAuditPage = lazy(() => import("./pages/MicrosoftAuditPage.tsx"));
+const CampaignsPage = lazy(() => import("./pages/CampaignsPage.tsx"));
+const CampaignDetailPage = lazy(() => import("./pages/CampaignDetailPage.tsx"));
 
 const ScrollToTopOnNavigate = () => {
   const { pathname } = useLocation();
