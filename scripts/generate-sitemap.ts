@@ -2,7 +2,7 @@
 import { writeFileSync } from "fs";
 import { resolve } from "path";
 
-const BASE_URL = "https://cloudmature.com";
+const BASE_URL = "https://www.cloudmature.com";
 
 interface SitemapEntry {
   path: string;
@@ -24,6 +24,8 @@ const entries: SitemapEntry[] = [
   { path: "/privacy", changefreq: "yearly", priority: "0.3" },
   { path: "/terms", changefreq: "yearly", priority: "0.3" },
   { path: "/install", changefreq: "monthly", priority: "0.4" },
+  { path: "/audit-licences-microsoft", changefreq: "monthly", priority: "0.9" },
+  { path: "/campagnes", changefreq: "weekly", priority: "0.7" },
 ];
 
 // Try to fetch published jobs from Supabase to include /careers/:slug entries.

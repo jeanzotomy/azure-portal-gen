@@ -15,6 +15,8 @@ Allow: /
 Allow: /pricing
 Allow: /formations
 Allow: /verify
+Allow: /audit-licences-microsoft
+Allow: /campagnes
 Disallow: /portal
 Disallow: /admin
 Disallow: /auth
@@ -26,4 +28,4 @@ Disallow: /unsubscribe
 Disallow: /candidature
 Disallow: /checkout
 
-Sitemap: https://cloudmature.com/sitemap.xml
+Sitemap: https://www.cloudmature.com/sitemap.xml

@@ -8,17 +8,17 @@ Le site inclut un portail client sécurisé (facturation, tickets de support, fo
 
 ## Docs
 
-- [Accueil](https://cloudmature.com/): Présentation des services Cloud, DevOps, IA et de la mission de CloudMature.
-- [Carrières](https://cloudmature.com/careers): Offres d'emploi tech ouvertes et candidature spontanée.
-- [Formations](https://cloudmature.com/formations): Catalogue de formations certifiantes (Cloud, DevOps, IA, cybersécurité).
-- [Tarifs](https://cloudmature.com/pricing): Grilles tarifaires des abonnements et services.
-- [Vérification de certificat](https://cloudmature.com/verify): Vérification publique de l'authenticité des certificats de formation CloudMature.
-- [Installation PWA](https://cloudmature.com/install): Instructions pour installer l'application mobile CloudMature (iOS / Android).
-- [Politique de confidentialité](https://cloudmature.com/privacy): Traitement des données personnelles, cookies et conformité RGPD.
-- [Conditions d'utilisation](https://cloudmature.com/terms): Conditions générales d'utilisation du site et des services.
+- [Accueil](https://www.cloudmature.com/): Présentation des services Cloud, DevOps, IA et de la mission de CloudMature.
+- [Carrières](https://www.cloudmature.com/careers): Offres d'emploi tech ouvertes et candidature spontanée.
+- [Formations](https://www.cloudmature.com/formations): Catalogue de formations certifiantes (Cloud, DevOps, IA, cybersécurité).
+- [Tarifs](https://www.cloudmature.com/pricing): Grilles tarifaires des abonnements et services.
+- [Vérification de certificat](https://www.cloudmature.com/verify): Vérification publique de l'authenticité des certificats de formation CloudMature.
+- [Installation PWA](https://www.cloudmature.com/install): Instructions pour installer l'application mobile CloudMature (iOS / Android).
+- [Politique de confidentialité](https://www.cloudmature.com/privacy): Traitement des données personnelles, cookies et conformité RGPD.
+- [Conditions d'utilisation](https://www.cloudmature.com/terms): Conditions générales d'utilisation du site et des services.
 
 ## Optional
 
-- [Suivi de candidature](https://cloudmature.com/candidature): Portail de suivi pour candidats ayant postulé à une offre.
-- [Sitemap XML](https://cloudmature.com/sitemap.xml): Liste exhaustive des URLs publiques indexables.
-- [Robots.txt](https://cloudmature.com/robots.txt): Directives pour les robots d'indexation.
+- [Suivi de candidature](https://www.cloudmature.com/candidature): Portail de suivi pour candidats ayant postulé à une offre.
+- [Sitemap XML](https://www.cloudmature.com/sitemap.xml): Liste exhaustive des URLs publiques indexables.
+- [Robots.txt](https://www.cloudmature.com/robots.txt): Directives pour les robots d'indexation.

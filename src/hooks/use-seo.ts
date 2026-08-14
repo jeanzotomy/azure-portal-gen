@@ -6,7 +6,10 @@ interface SeoOptions {
   path: string; // e.g. "/privacy"
 }
 
-const BASE = "https://cloudmature.com";
+import { PUBLIC_SITE_URL } from "@/lib/site-url";
+
+const BASE = PUBLIC_SITE_URL;
+const OG_IMAGE = `${PUBLIC_SITE_URL}/og-image.jpg?v=4`;
 
 const setMeta = (selector: string, attr: "content" | "href", value: string) => {
   let el = document.head.querySelector(selector) as HTMLMetaElement | HTMLLinkElement | null;
@@ -47,6 +50,10 @@ export function useSeo({ title, description, path }: SeoOptions) {
     setMeta('meta[property="og:description"]', "content", description);
     setMeta('meta[property="og:url"]', "content", url);
     setMeta('meta[property="og:type"]', "content", "website");
+    setMeta('meta[property="og:site_name"]', "content", "Cloud Mature");
+    setMeta('meta[property="og:image"]', "content", OG_IMAGE);
+    setMeta('meta[name="twitter:card"]', "content", "summary_large_image");
+    setMeta('meta[name="twitter:image"]', "content", OG_IMAGE);
     setMeta('meta[name="twitter:title"]', "content", title);
     setMeta('meta[name="twitter:description"]', "content", description);
 

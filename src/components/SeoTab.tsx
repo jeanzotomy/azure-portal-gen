@@ -424,7 +424,7 @@ export default function SeoTab() {
  href={r.page}
  target="_blank" rel="noreferrer"
   className="text-primary hover:underline font-medium" >
- {r.page?.replace("https://cloudmature.com","") ||"/"}
+ {r.page?.replace("https://www.cloudmature.com","") ||"/"}
  </a>
  </td>
  <td className="text-right px-3 py-3 font-semibold text-foreground tabular-nums">{fmt(r.clicks)}</td>

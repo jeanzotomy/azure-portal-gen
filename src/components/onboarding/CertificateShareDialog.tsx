@@ -6,6 +6,7 @@ import { Input } from"@/components/ui/input";
 import { Linkedin, Download, Copy, Check, Share2, Mail, ExternalLink, Twitter } from"lucide-react";
 import { toast } from"sonner";
 import { CertificateBadge, type BadgeData } from"./CertificateBadge";
+import { PUBLIC_SITE_URL } from "@/lib/site-url";
 
 type Props = {
  open: boolean;
@@ -13,7 +14,7 @@ type Props = {
  data: BadgeData;
 };
 
-const APP_URL ="https://cloudmature.com";
+const APP_URL = PUBLIC_SITE_URL;
 
 export function CertificateShareDialog({ open, onOpenChange, data }: Props) {
  const badgeRef = useRef<HTMLDivElement>(null);

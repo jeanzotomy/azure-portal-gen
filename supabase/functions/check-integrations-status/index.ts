@@ -44,6 +44,7 @@ Deno.serve(async (req) => {
     microsoft: has('MICROSOFT_OUTLOOK_API_KEY', 'MICROSOFT_ONEDRIVE_API_KEY', 'AZURE_CLIENT_ID'),
     twilio: has('TWILIO_API_KEY', 'TWILIO_AUTH_TOKEN'),
     google_search_console: has('GOOGLE_SEARCH_CONSOLE_API_KEY'),
+    ai_gateway: has('LOVABLE_API_KEY'),
     lovable_ai: has('LOVABLE_API_KEY'),
     email_domain: true, // Lovable Emails infra is configured at the project level
   }

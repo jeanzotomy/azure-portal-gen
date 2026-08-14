@@ -47,7 +47,7 @@ Deno.serve(async (req) => {
         .maybeSingle();
       const cfg = (data?.config ?? {}) as Record<string, string>;
       const notifyUrl = `${SUPABASE_URL}/functions/v1/cinetpay-webhook`;
-      const returnUrl = `${cfg.return_url_base || "https://cloudmature.com"}/checkout/return?provider=cinetpay`;
+      const returnUrl = `${cfg.return_url_base || "https://www.cloudmature.com"}/checkout/return?provider=cinetpay`;
       return new Response(JSON.stringify({
         enabled: !!data?.enabled,
         environment: data?.environment ?? "sandbox",

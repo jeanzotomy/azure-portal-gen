@@ -31,7 +31,7 @@ const CONNECTOR_DEFS = [
   },
   { id: "google_search_console", label: "Google Search Console", desc: "Données SEO", manageUrl: "https://search.google.com/search-console"
   },
-  { id: "lovable_ai", label: "AI Gateway", desc: "Tuteur IA, analyse de CV", manageUrl: null },
+  { id: "ai_gateway", label: "AI Gateway", desc: "Tuteur IA, analyse de CV", manageUrl: null },
   { id: "email_domain", label: "Emails", desc: "Envoi via notify.cloudmature.com", manageUrl: null },
 ];
 
