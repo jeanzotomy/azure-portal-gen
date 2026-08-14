@@ -106,7 +106,11 @@ const App = () => (
             </Route>
             <Route path="/verify" element={<VerifyCertificatePage />} />
             <Route path="/verify/:code" element={<VerifyCertificatePage />} />
+            <Route path="/audit-licences-microsoft" element={<MicrosoftAuditPage />} />
+            <Route path="/campagnes" element={<CampaignsPage />} />
+            <Route path="/campagnes/:slug" element={<CampaignDetailPage />} />
             <Route path="*" element={<NotFound />} />
+
           </Routes>
         </Suspense>
         <ScrollToTop />
