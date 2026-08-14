@@ -8,6 +8,7 @@ import { Input } from"@/components/ui/input";
 import { CheckCircle2, XCircle, ShieldCheck, Loader2, Calendar, User, GraduationCap, Award, Share2, Search } from"lucide-react";
 import { Badge } from"@/components/ui/badge";
 import { CertificateShareDialog } from"@/components/onboarding/CertificateShareDialog";
+import { PUBLIC_SITE_URL } from "@/lib/site-url";
 
 type Cert = {
  verification_code: string;

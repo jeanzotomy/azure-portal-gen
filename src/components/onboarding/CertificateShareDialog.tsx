@@ -6,6 +6,7 @@ import { Input } from"@/components/ui/input";
 import { Linkedin, Download, Copy, Check, Share2, Mail, ExternalLink, Twitter } from"lucide-react";
 import { toast } from"sonner";
 import { CertificateBadge, type BadgeData } from"./CertificateBadge";
+import { PUBLIC_SITE_URL } from "@/lib/site-url";
 
 type Props = {
  open: boolean;

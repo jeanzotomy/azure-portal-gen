@@ -20,6 +20,7 @@ import {
 } from "./marketing-shared";
 import { cn } from "@/lib/utils";
 import {
+import { publicUrl } from "@/lib/site-url";
   Archive, Copy, ExternalLink, Eye, Link2, Loader2, Megaphone, MoreVertical, Plus, Upload,
 } from "lucide-react";
 

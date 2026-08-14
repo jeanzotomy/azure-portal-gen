@@ -15,6 +15,7 @@ import { Input } from"@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from"@/components/ui/select";
 import { jobPath } from"@/lib/slug";
 import { useSeo } from"@/hooks/use-seo";
+import { publicUrl } from "@/lib/site-url";
 
 interface JobPosting {
  id: string;

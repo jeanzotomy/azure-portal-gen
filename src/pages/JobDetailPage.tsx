@@ -13,6 +13,7 @@ import { useToast } from"@/hooks/use-toast";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from"@/components/ui/dropdown-menu";
 import { extractJobId, jobPath, slugify } from"@/lib/slug";
 import JobDescription from"@/components/JobDescription";
+import { publicUrl } from "@/lib/site-url";
 
 interface JobPosting {
  id: string;
