@@ -645,7 +645,7 @@ export default function MicrosoftAuditPage() {
                 </div>
               )}
             </div>
-          </div>
+          </form>
         )}
 
         {phase === "done" && (
