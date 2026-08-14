@@ -220,6 +220,25 @@ export default function MicrosoftAuditPage() {
 
   useEffect(() => () => { if (advanceTimer.current) window.clearTimeout(advanceTimer.current); }, []);
 
+  // Initialise the phone answer with the dial code so the field is never "visually filled but empty"
+  useEffect(() => {
+    setAnswers((prev) => (typeof prev.phone === "string" && prev.phone
+      ? prev
+      : { ...prev, phone: applyDialCode("", dial) }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Drop answers belonging to branches that are no longer visible
+  useEffect(() => {
+    setAnswers((prev) => {
+      const stale = QUESTIONS.filter((q) => q.visible && !q.visible(prev) && prev[q.id] !== undefined);
+      if (stale.length === 0) return prev;
+      const next = { ...prev };
+      stale.forEach((q) => { delete next[q.id]; });
+      return next;
+    });
+  }, [answers]);
+
   const visibleQuestions = useMemo(
     () => QUESTIONS.filter((q) => !q.visible || q.visible(answers)),
     [answers],
@@ -233,6 +252,7 @@ export default function MicrosoftAuditPage() {
     setAnswers((prev) => ({ ...prev, [id]: value }));
     setError(null);
   }, []);
+
 
   const validate = (q: Question): string | null => {
     const value = answers[q.id];
