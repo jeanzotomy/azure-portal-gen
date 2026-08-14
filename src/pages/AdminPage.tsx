@@ -469,6 +469,7 @@ function AdminContent() {
  {gestionnaireTab ==="projects"&& <AdminProjects assignedCount={assignedProjectsCount} />}
  {gestionnaireTab ==="tickets"&& <AdminTickets />}
  {gestionnaireTab ==="contacts"&& <AdminContacts />}
+ {gestionnaireTab ==="marketing"&& <MarketingTab canDelete={false} />}
  {gestionnaireTab ==="sharepoint"&& <SharePointTab readOnly />}
  {gestionnaireTab ==="hr"&& <HrTab />}
  {gestionnaireTab ==="hr-recruitment"&& <HrTab defaultTab="recruitment"/>}
