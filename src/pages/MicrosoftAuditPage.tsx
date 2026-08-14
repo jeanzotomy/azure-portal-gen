@@ -151,6 +151,12 @@ const DIAL_OPTIONS = Object.entries(COUNTRY_DIAL_CODES)
 const asArray = (v: string | string[] | undefined) => (Array.isArray(v) ? v : []);
 const asText = (v: string | string[] | undefined) => (typeof v === "string" ? v : "");
 
+/** `datetime-local` reads `min` in local time, so format locally (never via toISOString). */
+const toLocalInputValue = (d: Date) => {
+  const p = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}`;
+};
+
 export default function MicrosoftAuditPage() {
   useSeo({
     title: "Audit gratuit de vos licences Microsoft | Cloud Mature",
@@ -220,6 +226,25 @@ export default function MicrosoftAuditPage() {
 
   useEffect(() => () => { if (advanceTimer.current) window.clearTimeout(advanceTimer.current); }, []);
 
+  // Initialise the phone answer with the dial code so the field is never "visually filled but empty"
+  useEffect(() => {
+    setAnswers((prev) => (typeof prev.phone === "string" && prev.phone
+      ? prev
+      : { ...prev, phone: applyDialCode("", dial) }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // Drop answers belonging to branches that are no longer visible
+  useEffect(() => {
+    setAnswers((prev) => {
+      const stale = QUESTIONS.filter((q) => q.visible && !q.visible(prev) && prev[q.id] !== undefined);
+      if (stale.length === 0) return prev;
+      const next = { ...prev };
+      stale.forEach((q) => { delete next[q.id]; });
+      return next;
+    });
+  }, [answers]);
+
   const visibleQuestions = useMemo(
     () => QUESTIONS.filter((q) => !q.visible || q.visible(answers)),
     [answers],
@@ -233,6 +258,7 @@ export default function MicrosoftAuditPage() {
     setAnswers((prev) => ({ ...prev, [id]: value }));
     setError(null);
   }, []);
+
 
   const validate = (q: Question): string | null => {
     const value = answers[q.id];
@@ -331,8 +357,29 @@ export default function MicrosoftAuditPage() {
     const { data, error: fnError } = await supabase.functions.invoke("submit-microsoft-audit", { body: payload });
     setSubmitting(false);
 
-    if (fnError || !(data as { success?: boolean } | null)?.success) {
-      setError("L'envoi a échoué. Vérifiez votre connexion et réessayez, ou écrivez-nous à info@cloudmature.com.");
+    const result = data as { success?: boolean; error?: string; message?: string } | null;
+    if (fnError || !result?.success) {
+      let code = result?.error;
+      let serverMessage = result?.message;
+      const ctx = (fnError as unknown as { context?: unknown } | null)?.context;
+      if (!code && ctx instanceof Response) {
+        try {
+          const body = await ctx.clone().json();
+          code = body?.error;
+          serverMessage = body?.message;
+        } catch { /* ignore */ }
+      }
+      const messages: Record<string, string> = {
+        rate_limited: "Trop de demandes envoyées depuis cette connexion. Réessayez plus tard.",
+        invalid_email: "Adresse e-mail invalide.",
+        consent_required: "Vous devez accepter la collecte de vos informations.",
+        missing_fields: "Certaines réponses obligatoires sont manquantes.",
+        insert_failed: "Une erreur est survenue lors de l'enregistrement. Réessayez ou écrivez-nous à info@cloudmature.com.",
+      };
+      setError(
+        (code && messages[code]) || serverMessage ||
+        "L'envoi a échoué. Vérifiez votre connexion et réessayez, ou écrivez-nous à info@cloudmature.com.",
+      );
       return;
     }
     try { sessionStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
@@ -366,14 +413,20 @@ export default function MicrosoftAuditPage() {
         )}
 
         {phase === "form" && (
-          <div>
+          <form onSubmit={(e) => e.preventDefault()}>
+            {/* Honeypot (invisible to humans), mounted from the very first step */}
+            <input
+              type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true"
+              value={honeypot} onChange={(e) => setHoneypot(e.target.value)}
+              className="pointer-events-none absolute h-0 w-0 opacity-0"
+            />
             {/* Sticky progress */}
             <div className="sticky top-16 z-30 -mx-4 mb-6 border-b border-border bg-background/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6">
               <div className="mb-2 flex items-center justify-between text-xs font-medium text-muted-foreground">
                 <span>
                   {isConsentStep
-                    ? "Consentement"
-                    : `Question ${stepIndex + 1} sur ${visibleQuestions.length}`}
+                    ? `Étape ${totalSteps} sur ${totalSteps} · Consentement`
+                    : `Étape ${stepIndex + 1} sur ${totalSteps}`}
                 </span>
                 <span className="text-primary">{progress} %</span>
               </div>
@@ -432,7 +485,7 @@ export default function MicrosoftAuditPage() {
                     {question.type === "datetime" && (
                       <Input
                         autoFocus type="datetime-local"
-                        min={new Date(Date.now() + 3600_000).toISOString().slice(0, 16)}
+                        min={toLocalInputValue(new Date(Date.now() + 3600_000))}
                         value={asText(answers[question.id])}
                         onChange={(e) => setValue(question.id, e.target.value)}
                         className="h-12 text-base"
@@ -459,7 +512,7 @@ export default function MicrosoftAuditPage() {
                         </Select>
                         <Input
                           autoFocus type="tel" inputMode="tel"
-                          value={asText(answers[question.id]) || `${dial} `}
+                          value={asText(answers[question.id])}
                           onChange={(e) => setValue(question.id, e.target.value)}
                           onKeyDown={(e) => e.key === "Enter" && goNext()}
                           className="h-12 flex-1 text-base"
@@ -556,7 +609,9 @@ export default function MicrosoftAuditPage() {
                         <ArrowLeft className="mr-2 h-4 w-4" /> Retour
                       </Button>
                     )}
-                    {question.type !== "single" && question.type !== "select" && (
+                    {(question.type !== "single" && question.type !== "select"
+                      ? true
+                      : !!asText(answers[question.id])) && (
                       <Button className="h-12 flex-1 text-base sm:flex-none" onClick={goNext}>
                         Suivant <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
@@ -591,12 +646,7 @@ export default function MicrosoftAuditPage() {
                     </Link>
                   </p>
 
-                  {/* Honeypot (invisible to humans) */}
-                  <input
-                    type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true"
-                    value={honeypot} onChange={(e) => setHoneypot(e.target.value)}
-                    className="pointer-events-none absolute h-0 w-0 opacity-0"
-                  />
+
 
                   {error && <p className="mt-4 text-sm font-medium text-destructive">{error}</p>}
 
@@ -619,14 +669,14 @@ export default function MicrosoftAuditPage() {
                 </div>
               )}
             </div>
-          </div>
+          </form>
         )}
 
         {phase === "done" && (
           <div className="mx-auto max-w-2xl space-y-6 text-center">
             <div className="flex justify-center">
-              <span className="flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/10 animate-check-pop">
-                <CheckCircle2 className="h-12 w-12 text-emerald-600" aria-hidden="true" />
+              <span className="flex h-20 w-20 items-center justify-center rounded-full bg-success/10 animate-check-pop">
+                <CheckCircle2 className="h-12 w-12 text-success" aria-hidden="true" />
               </span>
             </div>
             <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
@@ -664,7 +714,7 @@ export default function MicrosoftAuditPage() {
             </div>
 
             <Button asChild size="lg" className="h-12 w-full text-base sm:w-auto">
-              <a href="https://www.cloudmature.com">Visiter Cloud Mature</a>
+              <a href="https://www.cloudmature.com" target="_blank" rel="noreferrer">Visiter Cloud Mature</a>
             </Button>
           </div>
         )}

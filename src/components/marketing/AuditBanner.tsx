@@ -9,26 +9,25 @@ const MicrosoftMark = ({ size = 22 }: { size?: number }) => (
     style={{ width: size, height: size }}
     aria-hidden="true"
   >
-    <span className="rounded-[1px] bg-[hsl(8_86%_55%)]" />
-    <span className="rounded-[1px] bg-[hsl(96_60%_42%)]" />
-    <span className="rounded-[1px] bg-[hsl(200_98%_45%)]" />
-    <span className="rounded-[1px] bg-[hsl(43_96%_52%)]" />
+    <span className="rounded-[1px] bg-ms-red" />
+    <span className="rounded-[1px] bg-ms-green" />
+    <span className="rounded-[1px] bg-ms-blue" />
+    <span className="rounded-[1px] bg-ms-yellow" />
   </span>
 );
 
 const FloatingApp = ({
   label,
-  color,
   className,
-}: { label: string; color: string; className?: string }) => (
+}: { label: string; className?: string }) => (
   <span
     aria-hidden="true"
-    className={`absolute flex h-9 w-9 items-center justify-center rounded-lg text-[11px] font-bold text-white shadow-lg ${className ?? ""}`}
-    style={{ background: color }}
+    className={`absolute flex h-9 w-9 items-center justify-center rounded-lg text-[11px] font-bold text-primary-foreground shadow-lg ${className ?? ""}`}
   >
     {label}
   </span>
 );
+
 
 const benefits = [
   { icon: CalendarClock, label: "Vérification des échéances" },
@@ -40,7 +39,7 @@ export function AuditBanner() {
   return (
     <section
       aria-label="Audit gratuit de vos licences Microsoft"
-      className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-white via-[hsl(200_100%_98%)] to-[hsl(200_90%_94%)] shadow-lg dark:from-card dark:via-card dark:to-secondary"
+      className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-banner-from via-banner-via to-banner-to shadow-lg"
     >
       {/* Cloud watermark */}
       <svg
@@ -54,9 +53,9 @@ export function AuditBanner() {
 
       {/* Floating Microsoft app pictograms */}
       <div className="pointer-events-none absolute right-4 top-4 hidden h-28 w-40 sm:block">
-        <FloatingApp label="W" color="hsl(213 74% 40%)" className="left-0 top-2 animate-float" />
-        <FloatingApp label="X" color="hsl(150 70% 30%)" className="left-14 top-10 animate-float [animation-delay:1s]" />
-        <FloatingApp label="T" color="hsl(250 45% 50%)" className="left-28 top-0 animate-float [animation-delay:2s]" />
+        <FloatingApp label="W" className="left-0 top-2 bg-ms-word animate-float" />
+        <FloatingApp label="X" className="left-14 top-10 bg-ms-excel animate-float [animation-delay:1s]" />
+        <FloatingApp label="T" className="left-28 top-0 bg-ms-teams animate-float [animation-delay:2s]" />
       </div>
 
       <div className="relative grid gap-6 p-5 sm:p-8 lg:grid-cols-[1.15fr_0.85fr] lg:gap-8">
