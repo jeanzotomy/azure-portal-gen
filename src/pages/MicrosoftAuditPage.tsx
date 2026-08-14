@@ -646,12 +646,7 @@ export default function MicrosoftAuditPage() {
                     </Link>
                   </p>
 
-                  {/* Honeypot (invisible to humans) */}
-                  <input
-                    type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true"
-                    value={honeypot} onChange={(e) => setHoneypot(e.target.value)}
-                    className="pointer-events-none absolute h-0 w-0 opacity-0"
-                  />
+
 
                   {error && <p className="mt-4 text-sm font-medium text-destructive">{error}</p>}
 
