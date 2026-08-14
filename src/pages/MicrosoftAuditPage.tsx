@@ -353,7 +353,16 @@ export default function MicrosoftAuditPage() {
 
     const result = data as { success?: boolean; error?: string; message?: string } | null;
     if (fnError || !result?.success) {
-      const code = result?.error ?? (fnError as { context?: { error?: string } } | null)?.context?.error;
+      let code = result?.error;
+      let serverMessage = result?.message;
+      const ctx = (fnError as unknown as { context?: unknown } | null)?.context;
+      if (!code && ctx instanceof Response) {
+        try {
+          const body = await ctx.clone().json();
+          code = body?.error;
+          serverMessage = body?.message;
+        } catch { /* ignore */ }
+      }
       const messages: Record<string, string> = {
         rate_limited: "Trop de demandes envoyées depuis cette connexion. Réessayez plus tard.",
         invalid_email: "Adresse e-mail invalide.",
@@ -362,7 +371,7 @@ export default function MicrosoftAuditPage() {
         insert_failed: "Une erreur est survenue lors de l'enregistrement. Réessayez ou écrivez-nous à info@cloudmature.com.",
       };
       setError(
-        (code && messages[code]) || result?.message ||
+        (code && messages[code]) || serverMessage ||
         "L'envoi a échoué. Vérifiez votre connexion et réessayez, ou écrivez-nous à info@cloudmature.com.",
       );
       return;
