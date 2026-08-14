@@ -719,7 +719,7 @@ export default function MicrosoftAuditPage() {
             </div>
 
             <Button asChild size="lg" className="h-12 w-full text-base sm:w-auto">
-              <a href="https://www.cloudmature.com">Visiter Cloud Mature</a>
+              <a href="https://www.cloudmature.com" target="_blank" rel="noreferrer">Visiter Cloud Mature</a>
             </Button>
           </div>
         )}
