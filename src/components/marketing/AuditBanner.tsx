@@ -39,7 +39,7 @@ export function AuditBanner() {
   return (
     <section
       aria-label="Audit gratuit de vos licences Microsoft"
-      className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-white via-[hsl(200_100%_98%)] to-[hsl(200_90%_94%)] shadow-lg dark:from-card dark:via-card dark:to-secondary"
+      className="relative overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-banner-from via-banner-via to-banner-to shadow-lg"
     >
       {/* Cloud watermark */}
       <svg
