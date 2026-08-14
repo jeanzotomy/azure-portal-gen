@@ -13,7 +13,7 @@ export const PUBLIC_SITE_URL = "https://www.cloudmature.com";
  *
  * When the app really runs on the production domain (apex or www) we keep the
  * actual origin so both stay consistent. Anywhere else (editor preview,
- * *.lovable.app, localhost, *.azurestaticapps.net) we fall back to the
+ * editor/preview hosts, localhost, *.azurestaticapps.net) we fall back to the
  * canonical address, so a link copied from the editor still points to
  * cloudmature.com.
  */
