@@ -697,6 +697,12 @@ function AdminContent() {
  <span>Vérif. certificats</span>
  </SidebarMenuButton>
  </SidebarMenuItem>
+ <SidebarMenuItem>
+ <SidebarMenuButton onClick={() => setTab("marketing")} isActive={tab ==="marketing"} tooltip="Marketing"className="gap-3">
+ <Megaphone size={18} />
+ <span>Marketing</span>
+ </SidebarMenuButton>
+ </SidebarMenuItem>
  </SidebarMenu>
  </SidebarGroupContent>
  </SidebarGroup>
