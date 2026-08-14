@@ -9,6 +9,7 @@ import { MicrosoftSection } from "@/components/MicrosoftSection";
 import { IndustriesSection } from "@/components/IndustriesSection";
 
 import { WhyUsSection } from "@/components/WhyUsSection";
+import { NewsSection } from "@/components/NewsSection";
 import { ContactSection } from "@/components/ContactSection";
 import { Footer } from "@/components/Footer";
 import { useSeo } from "@/hooks/use-seo";
@@ -41,6 +42,8 @@ const Index = () => {
 
     <IndustriesSection />
     <WhyUsSection />
+    <NewsSection />
+
     <ContactSection />
     <Footer />
   </div>

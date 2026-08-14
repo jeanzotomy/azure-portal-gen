@@ -55,14 +55,16 @@ import { CertificateVerifyDashboard } from"@/components/admin/CertificateVerifyD
 import PartnersManager from"@/components/admin/PartnersManager";
 import { Handshake } from"lucide-react";
 
+import { Megaphone } from "lucide-react";
 import CommerceTab from"@/components/admin/CommerceTab";
+import MarketingTab from"@/components/marketing/MarketingTab";
 import SendWhatsAppDialog from"@/components/admin/SendWhatsAppDialog";
 
 import { getDialCode, applyDialCode } from"@/lib/country-dial-codes";
 
-type AdminTab ="dashboard"|"projects"|"tickets"|"users"|"contacts"|"sharepoint"|"seo"|"integrations"|"security"|"partners"|"verify-certificates"|"service-clients"|"service-catalog"|"service-invoices"|"payment-methods"|"commerce"|"hr"|"hr-recruitment"|"hr-contracts"|"hr-onboarding"|"hr-trainings"|"hr-employee-trainings";
-type AgentTab ="dashboard"|"tickets"|"contacts";
-type GestionnaireTab ="dashboard"|"projects"|"sharepoint"|"tickets"|"contacts"|"hr"|"hr-recruitment"|"hr-contracts"|"hr-onboarding"|"hr-trainings"|"service-clients"|"service-catalog"|"service-invoices"|"payment-methods";
+type AdminTab ="dashboard"|"projects"|"tickets"|"users"|"contacts"|"sharepoint"|"seo"|"integrations"|"security"|"partners"|"verify-certificates"|"service-clients"|"service-catalog"|"service-invoices"|"payment-methods"|"commerce"|"hr"|"hr-recruitment"|"hr-contracts"|"hr-onboarding"|"hr-trainings"|"hr-employee-trainings"|"marketing";
+type AgentTab ="dashboard"|"tickets"|"contacts"|"marketing";
+type GestionnaireTab ="marketing"|"dashboard"|"projects"|"sharepoint"|"tickets"|"contacts"|"hr"|"hr-recruitment"|"hr-contracts"|"hr-onboarding"|"hr-trainings"|"service-clients"|"service-catalog"|"service-invoices"|"payment-methods";
 
 function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser; collapsed: boolean; handleLogout: () => void }) {
  const [tab, setTab] = useState<"projects"|"sharepoint"|"service-clients"|"service-catalog"|"service-invoices"|"payment-methods">("projects");
@@ -286,6 +288,7 @@ function AdminContent() {
  { id:"sharepoint", icon: HardDrive, label:"SharePoint"},
  { id:"tickets", icon: LifeBuoy, label: t("admin.tickets") },
  { id:"contacts", icon: MessageSquare, label: t("admin.contacts") },
+ { id:"marketing", icon: Megaphone, label:"Marketing"},
  ];
 
  const gestionnaireServicesGroup: { id: GestionnaireTab; icon: typeof LayoutDashboard; label: string }[] = [
@@ -467,6 +470,7 @@ function AdminContent() {
  {gestionnaireTab ==="projects"&& <AdminProjects assignedCount={assignedProjectsCount} />}
  {gestionnaireTab ==="tickets"&& <AdminTickets />}
  {gestionnaireTab ==="contacts"&& <AdminContacts />}
+ {gestionnaireTab ==="marketing"&& <MarketingTab canDelete={false} />}
  {gestionnaireTab ==="sharepoint"&& <SharePointTab readOnly />}
  {gestionnaireTab ==="hr"&& <HrTab />}
  {gestionnaireTab ==="hr-recruitment"&& <HrTab defaultTab="recruitment"/>}
@@ -489,6 +493,7 @@ function AdminContent() {
  { id:"dashboard", icon: LayoutDashboard, label: t("portal.dashboard") },
  { id:"tickets", icon: LifeBuoy, label: t("admin.tickets") },
  { id:"contacts", icon: MessageSquare, label: t("admin.contacts") },
+ { id:"marketing", icon: Megaphone, label:"Marketing"},
  ];
 
  return (
@@ -565,6 +570,7 @@ function AdminContent() {
  {agentTab ==="dashboard"&& <AgentDashboard user={user} />}
  {agentTab ==="tickets"&& <AdminTickets />}
  {agentTab ==="contacts"&& <AdminContacts />}
+ {agentTab ==="marketing"&& <MarketingTab canDelete={false} />}
  </main>
  </div>
  </div>
@@ -617,6 +623,7 @@ function AdminContent() {
  { id:"tickets", icon: LifeBuoy, label: t("admin.tickets") },
  { id:"contacts", icon: MessageSquare, label: t("admin.contacts") },
  { id:"verify-certificates", icon: ShieldCheck, label:"Vérif. certificats"},
+ { id:"marketing", icon: Megaphone, label:"Marketing"},
  ];
 
 
@@ -690,6 +697,12 @@ function AdminContent() {
  <SidebarMenuButton onClick={() => setTab("verify-certificates")} isActive={tab ==="verify-certificates"} tooltip="Vérif. certificats"className="gap-3">
  <ShieldCheck size={18} />
  <span>Vérif. certificats</span>
+ </SidebarMenuButton>
+ </SidebarMenuItem>
+ <SidebarMenuItem>
+ <SidebarMenuButton onClick={() => setTab("marketing")} isActive={tab ==="marketing"} tooltip="Marketing"className="gap-3">
+ <Megaphone size={18} />
+ <span>Marketing</span>
  </SidebarMenuButton>
  </SidebarMenuItem>
  </SidebarMenu>
@@ -868,6 +881,7 @@ function AdminContent() {
  </Tabs>
  )}
  {tab ==="verify-certificates"&& <CertificateVerifyDashboard />}
+ {tab ==="marketing"&& <MarketingTab canDelete={true} />}
  {tab ==="commerce"&& <CommerceTab />}
  {tab ==="service-clients"&& <CommerceTab initialSection="clients"/>}
  {tab ==="service-catalog"&& <CommerceTab initialSection="catalog"/>}

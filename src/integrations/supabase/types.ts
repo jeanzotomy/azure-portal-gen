@@ -149,6 +149,54 @@ export type Database = {
         }
         Relationships: []
       }
+      campaign_events: {
+        Row: {
+          campaign_id: string | null
+          created_at: string
+          id: string
+          lead_id: string | null
+          source: string | null
+          type: string
+          user_agent: string | null
+          utm: Json | null
+        }
+        Insert: {
+          campaign_id?: string | null
+          created_at?: string
+          id?: string
+          lead_id?: string | null
+          source?: string | null
+          type: string
+          user_agent?: string | null
+          utm?: Json | null
+        }
+        Update: {
+          campaign_id?: string | null
+          created_at?: string
+          id?: string
+          lead_id?: string | null
+          source?: string | null
+          type?: string
+          user_agent?: string | null
+          utm?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "campaign_events_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_campaigns"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "campaign_events_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       candidate_badges: {
         Row: {
           badge_code: string
@@ -750,6 +798,59 @@ export type Database = {
         }
         Relationships: []
       }
+      lead_activities: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          lead_id: string
+          type: Database["public"]["Enums"]["lead_activity_type"]
+          user_id: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          lead_id: string
+          type?: Database["public"]["Enums"]["lead_activity_type"]
+          user_id?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          lead_id?: string
+          type?: Database["public"]["Enums"]["lead_activity_type"]
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lead_activities_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      lead_submission_attempts: {
+        Row: {
+          created_at: string
+          id: number
+          ip: string
+        }
+        Insert: {
+          created_at?: string
+          id?: number
+          ip: string
+        }
+        Update: {
+          created_at?: string
+          id?: number
+          ip?: string
+        }
+        Relationships: []
+      }
       learner_follows: {
         Row: {
           created_at: string
@@ -855,6 +956,233 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      marketing_campaigns: {
+        Row: {
+          channels: string[]
+          content: string | null
+          cover_image_url: string | null
+          created_at: string
+          created_by: string | null
+          cta_label: string | null
+          cta_url: string | null
+          end_date: string | null
+          id: string
+          planned_budget: number | null
+          short_description: string | null
+          slug: string
+          start_date: string | null
+          status: Database["public"]["Enums"]["marketing_campaign_status"]
+          target_audience: string | null
+          title: string
+          type: Database["public"]["Enums"]["marketing_campaign_type"]
+          updated_at: string
+        }
+        Insert: {
+          channels?: string[]
+          content?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          cta_label?: string | null
+          cta_url?: string | null
+          end_date?: string | null
+          id?: string
+          planned_budget?: number | null
+          short_description?: string | null
+          slug: string
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["marketing_campaign_status"]
+          target_audience?: string | null
+          title: string
+          type?: Database["public"]["Enums"]["marketing_campaign_type"]
+          updated_at?: string
+        }
+        Update: {
+          channels?: string[]
+          content?: string | null
+          cover_image_url?: string | null
+          created_at?: string
+          created_by?: string | null
+          cta_label?: string | null
+          cta_url?: string | null
+          end_date?: string | null
+          id?: string
+          planned_budget?: number | null
+          short_description?: string | null
+          slug?: string
+          start_date?: string | null
+          status?: Database["public"]["Enums"]["marketing_campaign_status"]
+          target_audience?: string | null
+          title?: string
+          type?: Database["public"]["Enums"]["marketing_campaign_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      marketing_leads: {
+        Row: {
+          additional_info: string | null
+          assigned_to: string | null
+          campaign_id: string | null
+          city: string | null
+          company_name: string
+          consent_given: boolean
+          consent_ip: string | null
+          consent_text: string | null
+          consent_timestamp: string | null
+          contact_timing: string | null
+          created_at: string
+          email: string
+          employee_count_range: string | null
+          full_name: string
+          has_current_provider: string | null
+          id: string
+          job_title: string | null
+          lost_reason: string | null
+          main_needs: string[]
+          microsoft_products: string[]
+          next_action_at: string | null
+          phone: string | null
+          preferred_contact_method: string | null
+          preferred_datetime: string | null
+          priority: Database["public"]["Enums"]["marketing_lead_priority"]
+          renewal_timeline: string | null
+          score: number
+          score_breakdown: Json
+          sector: string | null
+          source: string
+          status: Database["public"]["Enums"]["marketing_lead_status"]
+          updated_at: string
+          users_to_cover: string | null
+          uses_microsoft: string | null
+          utm_campaign: string | null
+          utm_medium: string | null
+          utm_source: string | null
+        }
+        Insert: {
+          additional_info?: string | null
+          assigned_to?: string | null
+          campaign_id?: string | null
+          city?: string | null
+          company_name: string
+          consent_given?: boolean
+          consent_ip?: string | null
+          consent_text?: string | null
+          consent_timestamp?: string | null
+          contact_timing?: string | null
+          created_at?: string
+          email: string
+          employee_count_range?: string | null
+          full_name: string
+          has_current_provider?: string | null
+          id?: string
+          job_title?: string | null
+          lost_reason?: string | null
+          main_needs?: string[]
+          microsoft_products?: string[]
+          next_action_at?: string | null
+          phone?: string | null
+          preferred_contact_method?: string | null
+          preferred_datetime?: string | null
+          priority?: Database["public"]["Enums"]["marketing_lead_priority"]
+          renewal_timeline?: string | null
+          score?: number
+          score_breakdown?: Json
+          sector?: string | null
+          source?: string
+          status?: Database["public"]["Enums"]["marketing_lead_status"]
+          updated_at?: string
+          users_to_cover?: string | null
+          uses_microsoft?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Update: {
+          additional_info?: string | null
+          assigned_to?: string | null
+          campaign_id?: string | null
+          city?: string | null
+          company_name?: string
+          consent_given?: boolean
+          consent_ip?: string | null
+          consent_text?: string | null
+          consent_timestamp?: string | null
+          contact_timing?: string | null
+          created_at?: string
+          email?: string
+          employee_count_range?: string | null
+          full_name?: string
+          has_current_provider?: string | null
+          id?: string
+          job_title?: string | null
+          lost_reason?: string | null
+          main_needs?: string[]
+          microsoft_products?: string[]
+          next_action_at?: string | null
+          phone?: string | null
+          preferred_contact_method?: string | null
+          preferred_datetime?: string | null
+          priority?: Database["public"]["Enums"]["marketing_lead_priority"]
+          renewal_timeline?: string | null
+          score?: number
+          score_breakdown?: Json
+          sector?: string | null
+          source?: string
+          status?: Database["public"]["Enums"]["marketing_lead_status"]
+          updated_at?: string
+          users_to_cover?: string | null
+          uses_microsoft?: string | null
+          utm_campaign?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_leads_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketing_settings: {
+        Row: {
+          auto_confirmation_enabled: boolean
+          consent_text: string
+          id: number
+          notification_email: string
+          sales_user_ids: string[]
+          score_qualified_threshold: number
+          score_urgent_threshold: number
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          auto_confirmation_enabled?: boolean
+          consent_text?: string
+          id?: number
+          notification_email?: string
+          sales_user_ids?: string[]
+          score_qualified_threshold?: number
+          score_urgent_threshold?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          auto_confirmation_enabled?: boolean
+          consent_text?: string
+          id?: number
+          notification_email?: string
+          sales_user_ids?: string[]
+          score_qualified_threshold?: number
+          score_urgent_threshold?: number
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
       }
       mfa_verifications: {
         Row: {
@@ -2802,6 +3130,8 @@ export type Database = {
         Args: { _client_id: string; _user_id: string }
         Returns: boolean
       }
+      is_marketing_manager: { Args: { _user_id: string }; Returns: boolean }
+      is_marketing_member: { Args: { _user_id: string }; Returns: boolean }
       list_employee_assignable_users: {
         Args: never
         Returns: {
@@ -3024,6 +3354,33 @@ export type Database = {
       invoice_status: "en_attente" | "validee" | "non_conforme"
       invoice_type: "facture" | "recu"
       job_status: "brouillon" | "publiee" | "fermee"
+      lead_activity_type:
+        | "note"
+        | "appel"
+        | "email"
+        | "whatsapp"
+        | "rendez_vous"
+        | "changement_statut"
+      marketing_campaign_status:
+        | "brouillon"
+        | "planifiee"
+        | "publiee"
+        | "terminee"
+        | "archivee"
+      marketing_campaign_type:
+        | "annonce"
+        | "promotion"
+        | "evenement"
+        | "formulaire_qualification"
+      marketing_lead_priority: "urgent" | "qualifie" | "a_entretenir"
+      marketing_lead_status:
+        | "nouveau"
+        | "contacte"
+        | "qualifie"
+        | "devis_envoye"
+        | "gagne"
+        | "perdu"
+        | "sans_suite"
       onboarding_doc_type:
         | "cni"
         | "rib"
@@ -3202,6 +3559,37 @@ export const Constants = {
       invoice_status: ["en_attente", "validee", "non_conforme"],
       invoice_type: ["facture", "recu"],
       job_status: ["brouillon", "publiee", "fermee"],
+      lead_activity_type: [
+        "note",
+        "appel",
+        "email",
+        "whatsapp",
+        "rendez_vous",
+        "changement_statut",
+      ],
+      marketing_campaign_status: [
+        "brouillon",
+        "planifiee",
+        "publiee",
+        "terminee",
+        "archivee",
+      ],
+      marketing_campaign_type: [
+        "annonce",
+        "promotion",
+        "evenement",
+        "formulaire_qualification",
+      ],
+      marketing_lead_priority: ["urgent", "qualifie", "a_entretenir"],
+      marketing_lead_status: [
+        "nouveau",
+        "contacte",
+        "qualifie",
+        "devis_envoye",
+        "gagne",
+        "perdu",
+        "sans_suite",
+      ],
       onboarding_doc_type: [
         "cni",
         "rib",
