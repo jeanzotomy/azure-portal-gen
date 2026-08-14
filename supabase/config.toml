@@ -41,3 +41,5 @@ project_id = "zwzazxebufydnaxezngx"
     verify_jwt = false
   [functions.contact-email-otp]
     verify_jwt = false
+  [functions.submit-microsoft-audit]
+    verify_jwt = false
