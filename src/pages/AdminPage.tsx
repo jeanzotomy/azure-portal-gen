@@ -55,6 +55,7 @@ import { CertificateVerifyDashboard } from"@/components/admin/CertificateVerifyD
 import PartnersManager from"@/components/admin/PartnersManager";
 import { Handshake } from"lucide-react";
 
+import { Megaphone } from "lucide-react";
 import CommerceTab from"@/components/admin/CommerceTab";
 import MarketingTab from"@/components/marketing/MarketingTab";
 import SendWhatsAppDialog from"@/components/admin/SendWhatsAppDialog";
