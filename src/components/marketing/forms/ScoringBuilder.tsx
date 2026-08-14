@@ -39,6 +39,7 @@ export function ScoringBuilder({
   onRulesChange, onThresholdsChange,
 }: Props) {
   const [answers, setAnswers] = useState<Answers>({});
+  const [dial, setDial] = useState("+224");
   const answerable = fields.filter((f) => isAnswerable(f.type));
 
   const asRows = useMemo(
@@ -244,6 +245,8 @@ export function ScoringBuilder({
                 field={f as unknown as MarketingFormField}
                 value={answers[f.field_key]}
                 onChange={(v: AnswerValue) => setAnswers((a) => ({ ...a, [f.field_key]: v }))}
+                dial={dial}
+                onDialChange={setDial}
               />
             ))}
           </div>
