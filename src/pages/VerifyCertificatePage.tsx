@@ -18,7 +18,7 @@ type Cert = {
  expires_at: string | null;
 };
 
-const APP_URL ="https://cloudmature.com";
+const APP_URL = PUBLIC_SITE_URL;
 
 export default function VerifyCertificatePage() {
  const { code } = useParams();

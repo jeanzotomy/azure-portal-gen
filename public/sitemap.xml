@@ -1,47 +1,47 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://cloudmature.com/</loc>
+    <loc>https://www.cloudmature.com/</loc>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://cloudmature.com/pricing</loc>
+    <loc>https://www.cloudmature.com/pricing</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://cloudmature.com/formations</loc>
+    <loc>https://www.cloudmature.com/formations</loc>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://cloudmature.com/formations/classement</loc>
+    <loc>https://www.cloudmature.com/formations/classement</loc>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://cloudmature.com/verify</loc>
+    <loc>https://www.cloudmature.com/verify</loc>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://cloudmature.com/careers</loc>
+    <loc>https://www.cloudmature.com/careers</loc>
     <changefreq>daily</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://cloudmature.com/privacy</loc>
+    <loc>https://www.cloudmature.com/privacy</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://cloudmature.com/terms</loc>
+    <loc>https://www.cloudmature.com/terms</loc>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://cloudmature.com/install</loc>
+    <loc>https://www.cloudmature.com/install</loc>
     <changefreq>monthly</changefreq>
     <priority>0.4</priority>
   </url>

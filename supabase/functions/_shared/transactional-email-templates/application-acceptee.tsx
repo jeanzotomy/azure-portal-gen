@@ -54,7 +54,7 @@ export const template = {
   previewData: {
     candidateName: 'Mamadou Diallo',
     jobTitle: 'Ingénieur Cloud DevOps',
-    activationUrl: 'https://cloudmature.com/auth?welcome=1',
+    activationUrl: 'https://www.cloudmature.com/auth?welcome=1',
   },
 } satisfies TemplateEntry
 

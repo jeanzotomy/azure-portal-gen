@@ -10,7 +10,7 @@ import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
 const SUPABASE_URL = Deno.env.get("SUPABASE_URL")!;
 const SUPABASE_ANON_KEY = Deno.env.get("SUPABASE_ANON_KEY")!;
 
-const SITE_URL = "https://cloudmature.com";
+const SITE_URL = "https://www.cloudmature.com";
 const DEFAULT_IMAGE = `${SITE_URL}/og-image.jpg`;
 
 const corsHeaders = {

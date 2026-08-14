@@ -163,7 +163,7 @@ export function CampaignsManager({ canDelete }: Props) {
   };
 
   const copyLink = (c: Campaign) => {
-    void navigator.clipboard.writeText(`${window.location.origin}/campagnes/${c.slug}`);
+    void navigator.clipboard.writeText(publicUrl(`/campagnes/${c.slug}`));
     toast.success("Lien copié");
   };
 
@@ -284,7 +284,7 @@ export function CampaignsManager({ canDelete }: Props) {
               <Input value={draft.slug} onChange={(e) => setDraft((p) => ({ ...p, slug: slugify(e.target.value) }))} />
               {previewUrl && (
                 <p className="text-xs text-muted-foreground">
-                  {window.location.origin}{previewUrl}
+                  {publicUrl(previewUrl)}
                 </p>
               )}
             </div>

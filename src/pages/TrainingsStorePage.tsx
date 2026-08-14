@@ -104,7 +104,7 @@ export default function TrainingsStorePage() {
       "@type": "Course",
       name: t.title,
       description: t.description || t.title,
-      provider: { "@type": "Organization", name: "CloudMature", sameAs: "https://cloudmature.com" },
+      provider: { "@type": "Organization", name: "CloudMature", sameAs: "https://www.cloudmature.com" },
       ...(t.category ? { about: t.category } : {}),
       ...(t.price_cents != null && t.currency ? {
         offers: {
@@ -112,7 +112,7 @@ export default function TrainingsStorePage() {
           price: (t.price_cents / 100).toFixed(2),
           priceCurrency: t.currency.toUpperCase(),
           availability: "https://schema.org/InStock",
-          url: "https://cloudmature.com/formations",
+          url: "https://www.cloudmature.com/formations",
         },
       } : {}),
     })),

@@ -74,9 +74,8 @@ Deno.serve(async (req) => {
     const score = assigned.quiz_score ?? null;
 
     const code = existing?.verification_code || randomCode();
-    const origin = new URL(req.url).origin.replace(".supabase.co", ".lovable.app");
-    // Better: use the app's public URL via env; fallback to request origin
-    const APP_URL = Deno.env.get("APP_PUBLIC_URL") || "https://cloudmature.com";
+    // Always use the canonical public site: never derive a technical host.
+    const APP_URL = "https://www.cloudmature.com";
     const verifyUrl = `${APP_URL}/verify/${code}`;
 
     // Build QR

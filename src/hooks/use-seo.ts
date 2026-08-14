@@ -6,7 +6,9 @@ interface SeoOptions {
   path: string; // e.g. "/privacy"
 }
 
-const BASE = "https://cloudmature.com";
+import { PUBLIC_SITE_URL } from "@/lib/site-url";
+
+const BASE = PUBLIC_SITE_URL;
 
 const setMeta = (selector: string, attr: "content" | "href", value: string) => {
   let el = document.head.querySelector(selector) as HTMLMetaElement | HTMLLinkElement | null;

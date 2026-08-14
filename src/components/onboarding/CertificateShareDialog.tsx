@@ -13,7 +13,7 @@ type Props = {
  data: BadgeData;
 };
 
-const APP_URL ="https://cloudmature.com";
+const APP_URL = PUBLIC_SITE_URL;
 
 export function CertificateShareDialog({ open, onOpenChange, data }: Props) {
  const badgeRef = useRef<HTMLDivElement>(null);

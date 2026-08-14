@@ -12,7 +12,7 @@ const corsHeaders = {
 
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL')!
 const SERVICE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
-const SITE_URL = 'https://cloudmature.com'
+const SITE_URL = 'https://www.cloudmature.com'
 const RATE_LIMIT = 5
 const RATE_WINDOW_MS = 60 * 60 * 1000
 

@@ -51,8 +51,8 @@ const setMeta = (selector: string, attr:"content"|"href", value: string) => {
 const DEFAULT_META = {
  title:"CloudMature | Cloud · DevOps · IA - Conakry, Guinée",
  description:"Cloud Mature - Entreprise de technologies spécialisée en Cloud (Azure, AWS, GCP), DevOps et Intelligence Artificielle. Conakry, Guinée.",
- url:"https://cloudmature.com/",
- image:"https://cloudmature.com/og-image.jpg",
+ url:"https://www.cloudmature.com/",
+ image:"https://www.cloudmature.com/og-image.jpg",
 };
 
 export default function JobDetailPage() {
@@ -127,7 +127,7 @@ export default function JobDetailPage() {
  .join("");
  const fallbackTitle = `${pretty} | CloudMature`;
  const fallbackDesc = `Offre d'emploi chez CloudMature : ${pretty}. Postulez en ligne, sans inscription.`;
- const fallbackUrl = `https://cloudmature.com/careers/${slug}`;
+ const fallbackUrl = publicUrl(`/careers/${slug}`);
 
  document.title = fallbackTitle;
  setMeta('meta[name="description"]',"content", fallbackDesc);
@@ -145,7 +145,7 @@ export default function JobDetailPage() {
  useEffect(() => {
  if (!job) return;
  const path = jobPath(job.id, job.title);
- const url = `https://cloudmature.com${path}`;
+ const url = publicUrl(path);
  const title = `${job.title} - ${job.contract_type} · ${job.location} | CloudMature`;
  const desc = (job.description ||"")
  .replace(/\s+/g,"")
@@ -177,7 +177,7 @@ export default function JobDetailPage() {
  hiringOrganization: {
 "@type":"Organization",
  name:"CloudMature",
- sameAs:"https://cloudmature.com",
+ sameAs:"https://www.cloudmature.com",
  },
  jobLocation: {
 "@type":"Place",
@@ -212,7 +212,7 @@ export default function JobDetailPage() {
  };
  }, [job]);
 
- const shareUrl = job ? `${window.location.origin}${jobPath(job.id, job.title)}` :"";
+ const shareUrl = job ? publicUrl(jobPath(job.id, job.title)) :"";
  // Bots get per-job OG tags via the edge function; humans are redirected
  // back to the SPA. We use this URL when sharing externally so previews
  // show the offer's title/description instead of the site default.

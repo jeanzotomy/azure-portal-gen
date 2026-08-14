@@ -5,7 +5,7 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 }
 
-const SITE_URL = 'https://cloudmature.com'
+const SITE_URL = 'https://www.cloudmature.com'
 const SITE_NAME = 'CloudMature'
 const LOGO_URL = 'https://zwzazxebufydnaxezngx.supabase.co/storage/v1/object/public/email-assets/cloudmature-logo.png'
 const FROM_ADDRESS = 'rh@cloudmature.com'

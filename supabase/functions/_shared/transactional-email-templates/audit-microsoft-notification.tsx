@@ -119,7 +119,7 @@ export const template = {
     score: 100,
     priorityLabel: 'Urgent',
     isUrgent: true,
-    leadUrl: 'https://cloudmature.com/admin?tab=marketing-leads',
+    leadUrl: 'https://www.cloudmature.com/admin?tab=marketing-leads',
     fields: [
       { label: 'Secteur', value: 'Mines et sous-traitance minière' },
       { label: 'Ville', value: 'Boké' },

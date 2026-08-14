@@ -89,7 +89,7 @@ export default function CareersPage() {
  const toggleExpand = (id: string) => setExpanded((p) => ({ ...p, [id]: !p[id] }));
 
  const buildShareUrl = (job: JobPosting) =>
- `${window.location.origin}${jobPath(job.id, job.title)}`;
+ publicUrl(jobPath(job.id, job.title));
 
  const buildShareText = (job: JobPosting) =>
  `Offre d'emploi chez Cloud Mature : ${job.title} (${job.contract_type}) - ${job.location}`;
@@ -143,14 +143,14 @@ export default function CareersPage() {
       hiringOrganization: {
         "@type": "Organization",
         name: "CloudMature",
-        sameAs: "https://cloudmature.com",
+        sameAs: "https://www.cloudmature.com",
       },
       jobLocation: {
         "@type": "Place",
         address: { "@type": "PostalAddress", addressLocality: job.location, addressCountry: "GN" },
       },
       industry: job.sector || undefined,
-      url: `https://cloudmature.com${jobPath(job.id, job.title)}`,
+      url: publicUrl(jobPath(job.id, job.title)),
     })),
   } : null;
 

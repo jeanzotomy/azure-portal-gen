@@ -26,4 +26,4 @@ Disallow: /unsubscribe
 Disallow: /candidature
 Disallow: /checkout
 
-Sitemap: https://cloudmature.com/sitemap.xml
+Sitemap: https://www.cloudmature.com/sitemap.xml

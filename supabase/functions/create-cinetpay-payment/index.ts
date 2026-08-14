@@ -113,7 +113,7 @@ Deno.serve(async (req) => {
 
     const notifyUrl = `${SUPABASE_URL}/functions/v1/cinetpay-webhook`;
     const returnUrl = body.returnUrl
-      ?? `${req.headers.get("origin") ?? "https://cloudmature.com"}/checkout/return?provider=cinetpay&transaction_id=${tx.transaction_id}`;
+      ?? `${req.headers.get("origin") ?? "https://www.cloudmature.com"}/checkout/return?provider=cinetpay&transaction_id=${tx.transaction_id}`;
 
     const result = await initPayment(creds, {
       transactionId: tx.transaction_id,
