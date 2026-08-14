@@ -46,7 +46,7 @@ const PortalNotificationsPage = lazy(() => import("./pages/portal/PortalNotifica
 const PortalHelpPage = lazy(() => import("./pages/portal/PortalHelpPage.tsx"));
 const PortalSettingsPage = lazy(() => import("./pages/portal/PortalSettingsPage.tsx"));
 const InvoicePaymentPage = lazy(() => import("./pages/portal/InvoicePaymentPage.tsx"));
-const MicrosoftAuditPage = lazy(() => import("./pages/MicrosoftAuditPage.tsx"));
+const PublicFormPage = lazy(() => import("./pages/PublicFormPage.tsx"));
 const CampaignsPage = lazy(() => import("./pages/CampaignsPage.tsx"));
 const CampaignDetailPage = lazy(() => import("./pages/CampaignDetailPage.tsx"));
 
@@ -106,7 +106,8 @@ const App = () => (
             </Route>
             <Route path="/verify" element={<VerifyCertificatePage />} />
             <Route path="/verify/:code" element={<VerifyCertificatePage />} />
-            <Route path="/audit-licences-microsoft" element={<MicrosoftAuditPage />} />
+            <Route path="/audit-licences-microsoft" element={<PublicFormPage slug="audit-licences-microsoft" />} />
+            <Route path="/f/:slug" element={<PublicFormPage />} />
             <Route path="/campagnes" element={<CampaignsPage />} />
             <Route path="/campagnes/:slug" element={<CampaignDetailPage />} />
             <Route path="*" element={<NotFound />} />
