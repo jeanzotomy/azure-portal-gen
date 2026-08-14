@@ -351,8 +351,20 @@ export default function MicrosoftAuditPage() {
     const { data, error: fnError } = await supabase.functions.invoke("submit-microsoft-audit", { body: payload });
     setSubmitting(false);
 
-    if (fnError || !(data as { success?: boolean } | null)?.success) {
-      setError("L'envoi a échoué. Vérifiez votre connexion et réessayez, ou écrivez-nous à info@cloudmature.com.");
+    const result = data as { success?: boolean; error?: string; message?: string } | null;
+    if (fnError || !result?.success) {
+      const code = result?.error ?? (fnError as { context?: { error?: string } } | null)?.context?.error;
+      const messages: Record<string, string> = {
+        rate_limited: "Trop de demandes envoyées depuis cette connexion. Réessayez plus tard.",
+        invalid_email: "Adresse e-mail invalide.",
+        consent_required: "Vous devez accepter la collecte de vos informations.",
+        missing_fields: "Certaines réponses obligatoires sont manquantes.",
+        insert_failed: "Une erreur est survenue lors de l'enregistrement. Réessayez ou écrivez-nous à info@cloudmature.com.",
+      };
+      setError(
+        (code && messages[code]) || result?.message ||
+        "L'envoi a échoué. Vérifiez votre connexion et réessayez, ou écrivez-nous à info@cloudmature.com.",
+      );
       return;
     }
     try { sessionStorage.removeItem(STORAGE_KEY); } catch { /* ignore */ }
