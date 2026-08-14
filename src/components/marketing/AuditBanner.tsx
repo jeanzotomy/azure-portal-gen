@@ -9,26 +9,25 @@ const MicrosoftMark = ({ size = 22 }: { size?: number }) => (
     style={{ width: size, height: size }}
     aria-hidden="true"
   >
-    <span className="rounded-[1px] bg-[hsl(8_86%_55%)]" />
-    <span className="rounded-[1px] bg-[hsl(96_60%_42%)]" />
-    <span className="rounded-[1px] bg-[hsl(200_98%_45%)]" />
-    <span className="rounded-[1px] bg-[hsl(43_96%_52%)]" />
+    <span className="rounded-[1px] bg-ms-red" />
+    <span className="rounded-[1px] bg-ms-green" />
+    <span className="rounded-[1px] bg-ms-blue" />
+    <span className="rounded-[1px] bg-ms-yellow" />
   </span>
 );
 
 const FloatingApp = ({
   label,
-  color,
   className,
-}: { label: string; color: string; className?: string }) => (
+}: { label: string; className?: string }) => (
   <span
     aria-hidden="true"
-    className={`absolute flex h-9 w-9 items-center justify-center rounded-lg text-[11px] font-bold text-white shadow-lg ${className ?? ""}`}
-    style={{ background: color }}
+    className={`absolute flex h-9 w-9 items-center justify-center rounded-lg text-[11px] font-bold text-primary-foreground shadow-lg ${className ?? ""}`}
   >
     {label}
   </span>
 );
+
 
 const benefits = [
   { icon: CalendarClock, label: "Vérification des échéances" },
