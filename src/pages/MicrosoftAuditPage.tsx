@@ -386,14 +386,20 @@ export default function MicrosoftAuditPage() {
         )}
 
         {phase === "form" && (
-          <div>
+          <form onSubmit={(e) => e.preventDefault()}>
+            {/* Honeypot (invisible to humans), mounted from the very first step */}
+            <input
+              type="text" name="website" tabIndex={-1} autoComplete="off" aria-hidden="true"
+              value={honeypot} onChange={(e) => setHoneypot(e.target.value)}
+              className="pointer-events-none absolute h-0 w-0 opacity-0"
+            />
             {/* Sticky progress */}
             <div className="sticky top-16 z-30 -mx-4 mb-6 border-b border-border bg-background/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6">
               <div className="mb-2 flex items-center justify-between text-xs font-medium text-muted-foreground">
                 <span>
                   {isConsentStep
-                    ? "Consentement"
-                    : `Question ${stepIndex + 1} sur ${visibleQuestions.length}`}
+                    ? `Étape ${totalSteps} sur ${totalSteps} · Consentement`
+                    : `Étape ${stepIndex + 1} sur ${totalSteps}`}
                 </span>
                 <span className="text-primary">{progress} %</span>
               </div>
