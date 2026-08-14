@@ -53,9 +53,9 @@ export function AuditBanner() {
 
       {/* Floating Microsoft app pictograms */}
       <div className="pointer-events-none absolute right-4 top-4 hidden h-28 w-40 sm:block">
-        <FloatingApp label="W" color="hsl(213 74% 40%)" className="left-0 top-2 animate-float" />
-        <FloatingApp label="X" color="hsl(150 70% 30%)" className="left-14 top-10 animate-float [animation-delay:1s]" />
-        <FloatingApp label="T" color="hsl(250 45% 50%)" className="left-28 top-0 animate-float [animation-delay:2s]" />
+        <FloatingApp label="W" className="left-0 top-2 bg-ms-word animate-float" />
+        <FloatingApp label="X" className="left-14 top-10 bg-ms-excel animate-float [animation-delay:1s]" />
+        <FloatingApp label="T" className="left-28 top-0 bg-ms-teams animate-float [animation-delay:2s]" />
       </div>
 
       <div className="relative grid gap-6 p-5 sm:p-8 lg:grid-cols-[1.15fr_0.85fr] lg:gap-8">
