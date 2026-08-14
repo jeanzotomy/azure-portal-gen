@@ -31,6 +31,22 @@
     --warning: 38 92% 50%;
     --warning-foreground: 38 92% 20%;
 
+    --success: 152 62% 40%;
+    --success-foreground: 0 0% 100%;
+
+    /* Microsoft brand mark + app tiles (marketing banner) */
+    --ms-red: 8 86% 55%;
+    --ms-green: 96 60% 42%;
+    --ms-blue: 200 98% 45%;
+    --ms-yellow: 43 96% 52%;
+    --ms-word: 213 74% 40%;
+    --ms-excel: 150 70% 30%;
+    --ms-teams: 250 45% 50%;
+    --banner-from: 0 0% 100%;
+    --banner-via: 200 100% 98%;
+    --banner-to: 200 90% 94%;
+
+
     --border: 220 15% 88%;
     --input: 220 15% 88%;
     --ring: 195 100% 30%;
