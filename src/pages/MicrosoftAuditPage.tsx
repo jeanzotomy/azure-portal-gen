@@ -485,7 +485,7 @@ export default function MicrosoftAuditPage() {
                     {question.type === "datetime" && (
                       <Input
                         autoFocus type="datetime-local"
-                        min={new Date(Date.now() + 3600_000).toISOString().slice(0, 16)}
+                        min={toLocalInputValue(new Date(Date.now() + 3600_000))}
                         value={asText(answers[question.id])}
                         onChange={(e) => setValue(question.id, e.target.value)}
                         className="h-12 text-base"
