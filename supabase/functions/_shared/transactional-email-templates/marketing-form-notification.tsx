@@ -11,6 +11,8 @@ const LOGO_URL = 'https://zwzazxebufydnaxezngx.supabase.co/storage/v1/object/pub
 interface Field { label: string; value: string }
 
 interface Props {
+  formTitle?: string
+  isReturning?: boolean
   companyName?: string
   fullName?: string
   email?: string
@@ -25,6 +27,7 @@ interface Props {
 }
 
 const Email = ({
+  formTitle = 'Formulaire', isReturning = false,
   companyName = '', fullName = '', email = '', phone = '',
   score = 0, priorityLabel = '', isUrgent = false, leadUrl = '',
   fields = [], scoreBreakdown = [],
@@ -32,7 +35,7 @@ const Email = ({
   <Html lang="fr" dir="ltr">
     <Head />
     <Preview>
-      {isUrgent ? 'PROSPECT PRIORITAIRE - ' : ''}Nouveau prospect audit Microsoft : {companyName}
+      {isUrgent ? 'PROSPECT PRIORITAIRE - ' : ''}{formTitle} : {companyName}
     </Preview>
     <Body style={main}>
       <Container style={container}>
@@ -41,7 +44,7 @@ const Email = ({
         {isUrgent ? (
           <Section style={urgentBox}>
             <Text style={urgentText}>
-              Nouveau prospect prioritaire : renouvellement Microsoft prévu dans moins de six mois.
+              Nouveau prospect prioritaire — à rappeler en priorité.
             </Text>
             <Text style={urgentMeta}>
               {companyName} — score {score} — {fullName}
@@ -50,7 +53,17 @@ const Email = ({
           </Section>
         ) : null}
 
-        <Heading style={h1}>Nouveau prospect : {companyName}</Heading>
+        <Heading style={h1}>
+          {isReturning ? 'Nouvelle soumission' : 'Nouveau prospect'} : {companyName}
+        </Heading>
+
+        <Section style={card}>
+          <Text style={cardLabel}>Formulaire</Text>
+          <Text style={row}>{formTitle}</Text>
+          {isReturning ? (
+            <Text style={row}>Ce contact existait déjà : la soumission a été rattachée à sa fiche.</Text>
+          ) : null}
+        </Section>
 
         <Section style={card}>
           <Text style={cardLabel}>Score et priorité</Text>
@@ -109,9 +122,10 @@ export const template = {
   subject: (d: Record<string, any>) =>
     d.isUrgent
       ? `PROSPECT PRIORITAIRE — ${d.companyName || 'Nouveau prospect'} (score ${d.score ?? 0})`
-      : `Nouveau prospect audit Microsoft — ${d.companyName || ''} (score ${d.score ?? 0})`,
-  displayName: 'Audit Microsoft - notification interne',
+      : `${d.formTitle || 'Nouveau prospect'} — ${d.companyName || ''} (score ${d.score ?? 0})`,
+  displayName: 'Formulaire marketing - notification interne',
   previewData: {
+    formTitle: 'Audit gratuit de vos licences Microsoft',
     companyName: 'Société Minière de Boké',
     fullName: 'Mamadou Alpha Diallo',
     email: 'm.diallo@example.gn',

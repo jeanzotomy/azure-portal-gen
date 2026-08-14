@@ -1020,6 +1020,306 @@ export type Database = {
         }
         Relationships: []
       }
+      marketing_form_fields: {
+        Row: {
+          created_at: string
+          default_value: string | null
+          field_key: string
+          form_id: string
+          help_text: string | null
+          id: string
+          label: string
+          maps_to: string | null
+          max_selections: number | null
+          max_value: number | null
+          min_value: number | null
+          options: Json
+          placeholder: string | null
+          position: number
+          regex_validation: string | null
+          required: boolean
+          section: string | null
+          type: string
+          updated_at: string
+          visible_when: Json | null
+        }
+        Insert: {
+          created_at?: string
+          default_value?: string | null
+          field_key: string
+          form_id: string
+          help_text?: string | null
+          id?: string
+          label: string
+          maps_to?: string | null
+          max_selections?: number | null
+          max_value?: number | null
+          min_value?: number | null
+          options?: Json
+          placeholder?: string | null
+          position?: number
+          regex_validation?: string | null
+          required?: boolean
+          section?: string | null
+          type: string
+          updated_at?: string
+          visible_when?: Json | null
+        }
+        Update: {
+          created_at?: string
+          default_value?: string | null
+          field_key?: string
+          form_id?: string
+          help_text?: string | null
+          id?: string
+          label?: string
+          maps_to?: string | null
+          max_selections?: number | null
+          max_value?: number | null
+          min_value?: number | null
+          options?: Json
+          placeholder?: string | null
+          position?: number
+          regex_validation?: string | null
+          required?: boolean
+          section?: string | null
+          type?: string
+          updated_at?: string
+          visible_when?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_form_fields_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_forms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketing_form_scoring_rules: {
+        Row: {
+          created_at: string
+          field_key: string
+          form_id: string
+          id: string
+          label: string
+          operator: string
+          points: number
+          position: number
+          updated_at: string
+          value: Json
+        }
+        Insert: {
+          created_at?: string
+          field_key: string
+          form_id: string
+          id?: string
+          label: string
+          operator: string
+          points?: number
+          position?: number
+          updated_at?: string
+          value?: Json
+        }
+        Update: {
+          created_at?: string
+          field_key?: string
+          form_id?: string
+          id?: string
+          label?: string
+          operator?: string
+          points?: number
+          position?: number
+          updated_at?: string
+          value?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_form_scoring_rules_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_forms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketing_form_submissions: {
+        Row: {
+          answers: Json
+          completed: boolean
+          created_at: string
+          form_id: string
+          id: string
+          ip: string | null
+          lead_id: string | null
+          priority:
+            | Database["public"]["Enums"]["marketing_lead_priority"]
+            | null
+          score: number
+          started_at: string
+          submitted_at: string | null
+          updated_at: string
+          user_agent: string | null
+          utm: Json
+        }
+        Insert: {
+          answers?: Json
+          completed?: boolean
+          created_at?: string
+          form_id: string
+          id?: string
+          ip?: string | null
+          lead_id?: string | null
+          priority?:
+            | Database["public"]["Enums"]["marketing_lead_priority"]
+            | null
+          score?: number
+          started_at?: string
+          submitted_at?: string | null
+          updated_at?: string
+          user_agent?: string | null
+          utm?: Json
+        }
+        Update: {
+          answers?: Json
+          completed?: boolean
+          created_at?: string
+          form_id?: string
+          id?: string
+          ip?: string | null
+          lead_id?: string | null
+          priority?:
+            | Database["public"]["Enums"]["marketing_lead_priority"]
+            | null
+          score?: number
+          started_at?: string
+          submitted_at?: string | null
+          updated_at?: string
+          user_agent?: string | null
+          utm?: Json
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_form_submissions_form_id_fkey"
+            columns: ["form_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_forms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "marketing_form_submissions_lead_id_fkey"
+            columns: ["lead_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_leads"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      marketing_forms: {
+        Row: {
+          auto_confirmation_enabled: boolean
+          banner_image_url: string | null
+          banner_variant: string
+          campaign_id: string | null
+          closes_at: string | null
+          confirmation_button_label: string | null
+          confirmation_redirect_url: string | null
+          confirmation_text: string | null
+          confirmation_title: string
+          consent_required: boolean
+          consent_text: string | null
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          internal_name: string | null
+          intro_text: string | null
+          layout: string
+          max_submissions: number | null
+          notification_email: string | null
+          score_qualified_threshold: number
+          score_urgent_threshold: number
+          show_progress: boolean
+          slug: string
+          start_button_label: string
+          status: string
+          submit_label: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          auto_confirmation_enabled?: boolean
+          banner_image_url?: string | null
+          banner_variant?: string
+          campaign_id?: string | null
+          closes_at?: string | null
+          confirmation_button_label?: string | null
+          confirmation_redirect_url?: string | null
+          confirmation_text?: string | null
+          confirmation_title?: string
+          consent_required?: boolean
+          consent_text?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          internal_name?: string | null
+          intro_text?: string | null
+          layout?: string
+          max_submissions?: number | null
+          notification_email?: string | null
+          score_qualified_threshold?: number
+          score_urgent_threshold?: number
+          show_progress?: boolean
+          slug: string
+          start_button_label?: string
+          status?: string
+          submit_label?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          auto_confirmation_enabled?: boolean
+          banner_image_url?: string | null
+          banner_variant?: string
+          campaign_id?: string | null
+          closes_at?: string | null
+          confirmation_button_label?: string | null
+          confirmation_redirect_url?: string | null
+          confirmation_text?: string | null
+          confirmation_title?: string
+          consent_required?: boolean
+          consent_text?: string | null
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          internal_name?: string | null
+          intro_text?: string | null
+          layout?: string
+          max_submissions?: number | null
+          notification_email?: string | null
+          score_qualified_threshold?: number
+          score_urgent_threshold?: number
+          show_progress?: boolean
+          slug?: string
+          start_button_label?: string
+          status?: string
+          submit_label?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "marketing_forms_campaign_id_fkey"
+            columns: ["campaign_id"]
+            isOneToOne: false
+            referencedRelation: "marketing_campaigns"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       marketing_leads: {
         Row: {
           additional_info: string | null

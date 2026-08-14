@@ -16,8 +16,8 @@ import { template as applicationRefusee } from './application-refusee.tsx'
 import { template as directMessage } from './direct-message.tsx'
 import { template as contactOtp } from './contact-otp.tsx'
 import { template as invoiceDelivery } from './invoice-delivery.tsx'
-import { template as auditMicrosoftConfirmation } from './audit-microsoft-confirmation.tsx'
-import { template as auditMicrosoftNotification } from './audit-microsoft-notification.tsx'
+import { template as marketingFormConfirmation } from './marketing-form-confirmation.tsx'
+import { template as marketingFormNotification } from './marketing-form-notification.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
   'application-en-revue': applicationEnRevue,
@@ -27,6 +27,6 @@ export const TEMPLATES: Record<string, TemplateEntry> = {
   'direct-message': directMessage,
   'contact-otp': contactOtp,
   'invoice-delivery': invoiceDelivery,
-  'audit-microsoft-confirmation': auditMicrosoftConfirmation,
-  'audit-microsoft-notification': auditMicrosoftNotification,
+  'marketing-form-confirmation': marketingFormConfirmation,
+  'marketing-form-notification': marketingFormNotification,
 }
