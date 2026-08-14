@@ -609,7 +609,9 @@ export default function MicrosoftAuditPage() {
                         <ArrowLeft className="mr-2 h-4 w-4" /> Retour
                       </Button>
                     )}
-                    {question.type !== "single" && question.type !== "select" && (
+                    {(question.type !== "single" && question.type !== "select"
+                      ? true
+                      : !!asText(answers[question.id])) && (
                       <Button className="h-12 flex-1 text-base sm:flex-none" onClick={goNext}>
                         Suivant <ArrowRight className="ml-2 h-4 w-4" />
                       </Button>
