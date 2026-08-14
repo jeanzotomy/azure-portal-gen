@@ -680,8 +680,8 @@ export default function MicrosoftAuditPage() {
         {phase === "done" && (
           <div className="mx-auto max-w-2xl space-y-6 text-center">
             <div className="flex justify-center">
-              <span className="flex h-20 w-20 items-center justify-center rounded-full bg-emerald-500/10 animate-check-pop">
-                <CheckCircle2 className="h-12 w-12 text-emerald-600" aria-hidden="true" />
+              <span className="flex h-20 w-20 items-center justify-center rounded-full bg-success/10 animate-check-pop">
+                <CheckCircle2 className="h-12 w-12 text-success" aria-hidden="true" />
               </span>
             </div>
             <h1 className="text-2xl font-bold text-foreground sm:text-3xl">
