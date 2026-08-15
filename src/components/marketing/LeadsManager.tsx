@@ -210,6 +210,7 @@ export function LeadsManager({ canDelete }: Props) {
               </TabsList>
             </Tabs>
             <Button variant="outline" onClick={doExport}><Download className="mr-2 h-4 w-4" /> Export CSV</Button>
+            <Button variant="outline" onClick={doShare}><Share2 className="mr-2 h-4 w-4" /> Partager</Button>
             <Button onClick={() => setCreateOpen(true)}><Plus className="mr-2 h-4 w-4" /> Nouveau prospect</Button>
           </div>
 
