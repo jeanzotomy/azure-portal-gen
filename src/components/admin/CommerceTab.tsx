@@ -134,6 +134,37 @@ export default function CommerceTab({ initialSection = "catalog"
               />
             </CardContent>
           </Card>
+          <Card>
+            <CardHeader>
+              <CardTitle className="text-base flex items-center gap-2">
+                {offersVisible ? <Eye className="h-4 w-4 text-primary" /> : <EyeOff className="h-4 w-4 text-muted-foreground" />}
+                Visibilité du menu « Nos Offres »
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex items-center justify-between gap-4">
+              <div className="space-y-1">
+                <Label htmlFor="offers-visible" className="text-sm font-medium">
+                  Afficher le menu Nos Offres (campagnes de prospection publiées)
+                </Label>
+                <p className="text-xs text-muted-foreground">
+                  Publie le lien « Nos Offres / Our Offers » vers la page <code>/campagnes</code>, qui liste les campagnes marketing au statut « publiée » (annonces, promotions, événements, formulaires d'audit).
+                </p>
+              </div>
+              <Switch
+                id="offers-visible"
+                checked={offersVisible}
+                disabled={offersLoading}
+                onCheckedChange={async (checked) => {
+                  try {
+                    await setOffersVisible(checked);
+                    toast.success(checked ? "Menu Nos Offres publié" : "Menu Nos Offres dépublié");
+                  } catch (e: any) {
+                    toast.error(e?.message || "Erreur lors de la mise à jour");
+                  }
+                }}
+              />
+            </CardContent>
+          </Card>
 
 
 
