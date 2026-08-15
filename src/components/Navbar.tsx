@@ -33,8 +33,10 @@ export function Navbar() {
 
   const { value: pricingVisible } = useSiteSetting<boolean>("nav.pricing_visible", true);
   const { value: trainingsVisible } = useSiteSetting<boolean>("nav.trainings_visible", true);
+  const { value: offersVisible } = useSiteSetting<boolean>("nav.offers_visible", true);
 
   const routeLinks = [
+    ...(offersVisible ? [{ label: locale === "fr" ? "Nos Offres" : "Our Offers", to: "/campagnes" }] : []),
     ...(pricingVisible ? [{ label: locale === "fr" ? "Tarifs" : "Pricing", to: "/pricing"
   }] : []),
     ...(trainingsVisible ? [{ label: locale === "fr" ? "Formations" : "Trainings", to: "/formations"
