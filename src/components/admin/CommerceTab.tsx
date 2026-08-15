@@ -28,6 +28,8 @@ export default function CommerceTab({ initialSection = "catalog"
     useSiteSetting<boolean>("nav.pricing_visible", true);
   const { value: trainingsVisible, update: setTrainingsVisible, loading: trainingsLoading } =
     useSiteSetting<boolean>("nav.trainings_visible", true);
+  const { value: offersVisible, update: setOffersVisible, loading: offersLoading } =
+    useSiteSetting<boolean>("nav.offers_visible", true);
 
 
   return (
