@@ -20,7 +20,7 @@ import {
 import { exportCsv } from "@/lib/csv-export";
 import { cn } from "@/lib/utils";
 import {
-  AlertTriangle, CalendarClock, Download, KanbanSquare, Plus, Search, Table2, TrendingUp, Users,
+  AlertTriangle, CalendarClock, Download, KanbanSquare, Plus, Search, Share2, Table2, TrendingUp, Users,
 } from "lucide-react";
 
 const ALL = "all";
