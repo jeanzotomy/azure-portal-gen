@@ -1,0 +1,1 @@
+UPDATE public.profiles SET phone = '+15193004240' WHERE user_id IN ('0fd0ae71-0e43-4ab4-8dce-9b0f3a3cfc11','868d408f-654c-48ff-8b25-b83395e042e1');
