@@ -20,7 +20,7 @@ import {
 import { exportCsv } from "@/lib/csv-export";
 import { cn } from "@/lib/utils";
 import {
-  AlertTriangle, CalendarClock, Download, KanbanSquare, Plus, Search, Table2, TrendingUp, Users,
+  AlertTriangle, CalendarClock, Download, KanbanSquare, Plus, Search, Share2, Table2, TrendingUp, Users,
 } from "lucide-react";
 
 const ALL = "all";
@@ -141,6 +141,31 @@ export function LeadsManager({ canDelete }: Props) {
     })));
   };
 
+  const doShare = async () => {
+    const list = filtered.slice(0, 20);
+    const lines = list.map(
+      (l) =>
+        `• ${l.company_name} — ${l.full_name} (${l.email}${l.phone ? `, ${l.phone}` : ""}) · ${priorityMeta(l.priority).label} · ${statusLabel(l.status)} · score ${l.score}`,
+    );
+    const text = [
+      `Prospects Cloud Mature (${filtered.length} résultat${filtered.length > 1 ? "s" : ""})`,
+      ...lines,
+      filtered.length > list.length ? `… et ${filtered.length - list.length} autre(s).` : "",
+    ].filter(Boolean).join("\n");
+
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: "Prospects Cloud Mature", text });
+        return;
+      }
+      await navigator.clipboard.writeText(text);
+      toast.success("Liste des prospects copiée dans le presse-papiers");
+    } catch (e) {
+      if ((e as Error)?.name === "AbortError") return;
+      toast.error("Partage impossible sur cet appareil");
+    }
+  };
+
   const KPI = ({ icon: Icon, label, value, tone }: { icon: typeof Users; label: string; value: string | number; tone?: string }) => (
     <Card>
       <CardContent className="flex items-center gap-3 p-4">
@@ -185,6 +210,7 @@ export function LeadsManager({ canDelete }: Props) {
               </TabsList>
             </Tabs>
             <Button variant="outline" onClick={doExport}><Download className="mr-2 h-4 w-4" /> Export CSV</Button>
+            <Button variant="outline" onClick={doShare}><Share2 className="mr-2 h-4 w-4" /> Partager</Button>
             <Button onClick={() => setCreateOpen(true)}><Plus className="mr-2 h-4 w-4" /> Nouveau prospect</Button>
           </div>
 
