@@ -20,6 +20,9 @@ const FALLBACK: RatesPayload = {
   rates: { USD: 1, EUR: 0.92, GNF: 8600 },
 };
 
+// Marge maison appliquée sur les conversions vers le GNF (taux du jour × 1,085)
+export const GNF_MARKUP = 1.085;
+
 /** Hook qui récupère les taux de change USD->{USD,EUR,GNF} via edge function. */
 export function useExchangeRates() {
   const [rates, setRates] = useState<RatesPayload | null>(cache?.data ?? null);
@@ -60,6 +63,8 @@ export function useExchangeRates() {
   /**
    * Convertit un montant d'une devise vers une autre.
    * Tous les taux sont exprimés en base USD.
+   * Toute conversion vers le GNF applique le taux maison :
+   * taux du jour × GNF_MARKUP (marge de 8,5 % sur nos factures).
    */
   const convert = useCallback(
     (amount: number, from: Currency, to: Currency): number => {
@@ -69,7 +74,8 @@ export function useExchangeRates() {
       const usdRateTo = r[to];
       if (!usdRateFrom || !usdRateTo) return amount;
       const inUsd = amount / usdRateFrom;
-      return inUsd * usdRateTo;
+      const result = inUsd * usdRateTo;
+      return to === "GNF" ? result * GNF_MARKUP : result;
     },
     [rates]
   );
