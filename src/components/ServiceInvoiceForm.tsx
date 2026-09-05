@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 import { InvoicePDFTemplate, type InvoicePDFData, type InvoicePaymentMethodEntry } from "@/components/InvoicePDFTemplate";
 import { generateInvoicePDFBlob, generateInvoiceDocxBlob, sanitizeName } from "@/lib/invoice-generator";
 import { saveAs } from "file-saver";
-import { useExchangeRates, type Currency } from "@/hooks/use-exchange-rates";
+import { useExchangeRates, GNF_MARKUP, type Currency } from "@/hooks/use-exchange-rates";
 
 interface SClient { id: string; client_name: string; nif: string | null; rccm: string | null; address_line: string | null; city: string | null; country: string | null; phone: string | null; email: string | null; contact_person: string | null; }
 interface CatItem { id: string; name: string; description: string | null; default_unit_price: number; default_currency: Currency; default_unit: string; active: boolean; }
@@ -511,11 +511,11 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
         {/* Bandeau taux de change */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs bg-muted/40 border rounded-md px-3 py-2">
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1 min-w-0">
-            <span className="font-semibold">Taux de change (live) :</span>
+            <span className="font-semibold">Taux appliqué (live × {GNF_MARKUP}) :</span>
             {rates?.rates ? (
               <>
-                <span>1 USD ≈ {new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(rates.rates.GNF ?? 0)} GNF</span>
-                <span>1 EUR ≈ {new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(((rates.rates.GNF ?? 0) / (rates.rates.EUR ?? 1)))} GNF</span>
+                <span>1 USD ≈ {new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format((rates.rates.GNF ?? 0) * GNF_MARKUP)} GNF</span>
+                <span>1 EUR ≈ {new Intl.NumberFormat("fr-FR", { maximumFractionDigits: 0 }).format(((rates.rates.GNF ?? 0) / (rates.rates.EUR ?? 1)) * GNF_MARKUP)} GNF</span>
                 <span className="hidden md:inline text-muted-foreground">· Conversion auto à chaque changement de devise</span>
               </>
             ) : (
