@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from"react";
-import { useNavigate, Link, useSearchParams, Outlet, useMatch } from"react-router-dom";
+import { useNavigate, Link, useSearchParams, Outlet, useMatch, useLocation } from"react-router-dom";
 import { supabase } from"@/integrations/supabase/client";
 import { Button } from"@/components/ui/button";
 import { useConfirm } from"@/components/ui/confirm-dialog";
@@ -78,6 +78,10 @@ function PortalContent() {
  const { t, locale } = useTranslation();
  const formationsMatch = useMatch("/portal/formations/*");
  const isFormationsRoute = !!formationsMatch;
+ const { pathname } = useLocation();
+ // Toute sous-route de /portal (formations, subscription, notifications, aide, parametres)
+ // doit rendre l'<Outlet /> au lieu du contenu par onglets.
+ const isPortalSubRoute = isFormationsRoute || (pathname.startsWith("/portal/") && pathname !== "/portal/");
 
  // Auth/MFA/blocked checks are handled upstream by <AuthGuard>. We can rely on `user` being non-null.
 
@@ -155,11 +159,11 @@ function PortalContent() {
  if (item.id ==="my-trainings") {
  navigate("/portal/formations");
  } else {
- if (isFormationsRoute) navigate("/portal");
+ if (isPortalSubRoute) navigate("/portal");
  setTab(item.id);
  }
  }}
- isActive={item.id ==="my-trainings"? isFormationsRoute : (tab === item.id && !isFormationsRoute)}
+ isActive={item.id ==="my-trainings"? isFormationsRoute : (tab === item.id && !isPortalSubRoute)}
  tooltip={item.label}
  className="gap-3" >
  <item.icon size={18} />
@@ -191,7 +195,7 @@ function PortalContent() {
  <div className="flex items-center gap-3">
  <SidebarTrigger />
  <h2 className="text-sm font-semibold text-card-foreground hidden sm:block">
- {isFormationsRoute ?"Mes formations": navItems.find(n => n.id === tab)?.label}
+ {isFormationsRoute ?"Mes formations": isPortalSubRoute ? null : navItems.find(n => n.id === tab)?.label}
  </h2>
  </div>
  <div className="flex items-center gap-2">
@@ -222,7 +226,7 @@ function PortalContent() {
  </AlertDescription>
  </Alert>
  )}
- {isFormationsRoute ? (
+ {isPortalSubRoute ? (
  <Outlet />
  ) : (
  <>
