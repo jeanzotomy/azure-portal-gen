@@ -195,7 +195,7 @@ function PortalContent() {
  <div className="flex items-center gap-3">
  <SidebarTrigger />
  <h2 className="text-sm font-semibold text-card-foreground hidden sm:block">
- {isFormationsRoute ?"Mes formations": navItems.find(n => n.id === tab)?.label}
+ {isFormationsRoute ?"Mes formations": isPortalSubRoute ? null : navItems.find(n => n.id === tab)?.label}
  </h2>
  </div>
  <div className="flex items-center gap-2">
@@ -226,7 +226,7 @@ function PortalContent() {
  </AlertDescription>
  </Alert>
  )}
- {isFormationsRoute ? (
+ {isPortalSubRoute ? (
  <Outlet />
  ) : (
  <>
