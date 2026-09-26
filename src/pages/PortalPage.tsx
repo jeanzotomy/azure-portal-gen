@@ -159,11 +159,11 @@ function PortalContent() {
  if (item.id ==="my-trainings") {
  navigate("/portal/formations");
  } else {
- if (isFormationsRoute) navigate("/portal");
+ if (isPortalSubRoute) navigate("/portal");
  setTab(item.id);
  }
  }}
- isActive={item.id ==="my-trainings"? isFormationsRoute : (tab === item.id && !isFormationsRoute)}
+ isActive={item.id ==="my-trainings"? isFormationsRoute : (tab === item.id && !isPortalSubRoute)}
  tooltip={item.label}
  className="gap-3" >
  <item.icon size={18} />
