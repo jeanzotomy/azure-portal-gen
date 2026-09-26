@@ -79,12 +79,23 @@ export default function AuthPage() {
     }
   };
 
+  // After OAuth redirect back to /auth, continue to MFA once the session is hydrated
+  useEffect(() => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_IN" && session) navigate("/mfa", { replace: true });
+    });
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session && window.location.hash.includes("access_token")) navigate("/mfa", { replace: true });
+    });
+    return () => subscription.unsubscribe();
+  }, [navigate]);
+
   const handleGoogleLogin = async () => {
     const result = await oauthClient.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin + "/mfa",
+      redirect_uri: `${window.location.origin}/auth`,
     });
     if (result.error) {
-      toast({ title: t("auth.error"), description: String(result.error), variant: "destructive"
+      toast({ title: t("auth.error"), description: result.error.message ?? String(result.error), variant: "destructive"
   });
       return;
     }
