@@ -156,7 +156,7 @@ const EMPTY_JOB_FORM: JobFormState = {
 };
 // Le nombre de candidats recherchés reste un entier de 1 à 999 :
 // une saisie vide ou invalide retombe sur 1, jamais sur 0.
-const parseCandidatesSought = (v: string): number => {
+export const parseCandidatesSought = (v: string): number => {
  const n = Math.floor(Number(v));
  return Number.isFinite(n) && n >= 1 ? Math.min(n, 999) : 1;
 };
