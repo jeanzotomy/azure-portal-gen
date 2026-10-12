@@ -66,6 +66,28 @@ type AdminTab ="dashboard"|"projects"|"tickets"|"users"|"contacts"|"sharepoint"|
 type AgentTab ="dashboard"|"tickets"|"contacts"|"marketing";
 type GestionnaireTab ="marketing"|"dashboard"|"projects"|"sharepoint"|"tickets"|"contacts"|"hr"|"hr-recruitment"|"hr-contracts"|"hr-onboarding"|"hr-trainings"|"service-clients"|"service-catalog"|"service-invoices"|"payment-methods";
 
+const ADMIN_TABS: readonly AdminTab[] = ["dashboard","projects","tickets","users","contacts","sharepoint","seo","integrations","security","partners","verify-certificates","service-clients","service-catalog","service-invoices","payment-methods","commerce","hr","hr-recruitment","hr-contracts","hr-onboarding","hr-trainings","hr-employee-trainings","marketing"];
+const AGENT_TABS: readonly AgentTab[] = ["dashboard","tickets","contacts","marketing"];
+const GESTIONNAIRE_TABS: readonly GestionnaireTab[] = ["marketing","dashboard","projects","sharepoint","tickets","contacts","hr","hr-recruitment","hr-contracts","hr-onboarding","hr-trainings","service-clients","service-catalog","service-invoices","payment-methods"];
+
+// Onglet actif stocké dans l'URL : un rechargement ou une mise en veille de
+// l'onglet par le navigateur restaure la page en cours au lieu de revenir
+// à la vue d'ensemble.
+function useUrlTab<T extends string>(param: string, valid: readonly T[], fallback: T): [T, (t: T) => void] {
+  const [searchParams, setSearchParams] = useSearchParams();
+  const raw = searchParams.get(param);
+  const value: T = valid.includes(raw as T) ? (raw as T) : fallback;
+  const setValue = (t: T) => {
+    setSearchParams((prev) => {
+      const p = new URLSearchParams(prev);
+      if (t === fallback) p.delete(param);
+      else p.set(param, t);
+      return p;
+    }, { replace: true });
+  };
+  return [value, setValue];
+}
+
 function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser; collapsed: boolean; handleLogout: () => void }) {
  const [tab, setTab] = useState<"projects"|"sharepoint"|"service-clients"|"service-catalog"|"service-invoices"|"payment-methods">("projects");
  const [signatureOpen, setSignatureOpen] = useState(false);
