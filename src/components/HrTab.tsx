@@ -355,7 +355,7 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
 
  const openNew = () => {
  setEditing(null);
- setForm({ title:"", department:"", location:"", contract_type:"CDI", description:"", closing_date:"", status:"brouillon", sector:"", start_date:"", salary_range:"", contract_duration:"", renewable: false });
+ setForm(EMPTY_JOB_FORM);
  setAiPrompt("");
  setAiAction(null);
  setDialogOpen(true);
