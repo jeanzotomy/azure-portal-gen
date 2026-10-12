@@ -1,3 +1,4 @@
+import { createPortal } from "react-dom";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { Home, FolderKanban, Briefcase, User } from "lucide-react";
 import { useAuthSession } from "@/hooks/use-auth-session";
@@ -65,11 +66,20 @@ export function MobileBottomNav() {
     }
   };
 
-  return (
+  // Rendue directement dans <body> : aucun conteneur parent (animation, transformation)
+  // ne peut l'entraîner pendant le défilement.
+  if (typeof document === "undefined") return null;
+
+  return createPortal(
     <nav
       className="md:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-border/40 bg-background shadow-[0_-8px_24px_-8px_rgba(0,0,0,0.18)]"
-      style={{ paddingBottom: "env(safe-area-inset-bottom)"
-  }}
+      style={{
+        paddingBottom: "env(safe-area-inset-bottom)",
+        // Calque graphique dédié : évite le tremblement sur iPhone pendant le défilement
+        transform: "translate3d(0,0,0)",
+        WebkitTransform: "translate3d(0,0,0)",
+        backfaceVisibility: "hidden",
+      }}
       aria-label="Navigation mobile"
     >
       <ul className="grid grid-cols-4 px-2 pt-2 pb-3">
@@ -111,6 +121,7 @@ export function MobileBottomNav() {
           );
         })}
       </ul>
-    </nav>
+    </nav>,
+    document.body
   );
 }
