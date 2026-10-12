@@ -67,7 +67,7 @@ export function MobileBottomNav() {
 
   return (
     <nav
-      className="md:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-border/40 bg-background/90 backdrop-blur-xl shadow-[0_-8px_24px_-8px_rgba(0,0,0,0.18)]"
+      className="md:hidden fixed bottom-0 left-0 right-0 z-40 border-t border-border/40 bg-background shadow-[0_-8px_24px_-8px_rgba(0,0,0,0.18)]"
       style={{ paddingBottom: "env(safe-area-inset-bottom)"
   }}
       aria-label="Navigation mobile"
