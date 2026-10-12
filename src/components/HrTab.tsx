@@ -137,6 +137,30 @@ interface Sector {
 
 type HrMainTab ="dashboard"|"recruitment"|"contracts"|"trainings"|"onboarding"|"employee-trainings";
 
+// Brouillon de la fenêtre « Nouvelle/Modifier offre » : sauvegardé en continu
+// dans sessionStorage pour survivre à un rechargement ou une mise en veille
+// de l'onglet par le navigateur (travail en cours jamais perdu).
+const JOB_DRAFT_KEY = "hr_job_dialog_draft";
+type JobFormState = {
+ title: string; department: string; location: string; contract_type: ContractType;
+ description: string; closing_date: string; status: JobStatus; sector: string;
+ start_date: string; salary_range: string; contract_duration: string; renewable: boolean;
+};
+type JobDraft = { open: boolean; editing: JobPosting | null; form: JobFormState; aiPrompt: string };
+const EMPTY_JOB_FORM: JobFormState = {
+ title:"", department:"", location:"", contract_type:"CDI", description:"",
+ closing_date:"", status:"brouillon", sector:"", start_date:"",
+ salary_range:"", contract_duration:"", renewable: false,
+};
+const readJobDraft = (): JobDraft | null => {
+ try {
+ const raw = sessionStorage.getItem(JOB_DRAFT_KEY);
+ if (!raw) return null;
+ const d = JSON.parse(raw);
+ return d && d.open ? d : null;
+ } catch { return null; }
+};
+
 export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTab, onTabChange }: { onboardingReadOnly?: boolean; defaultTab?: HrMainTab; activeTab?: HrMainTab; onTabChange?: (t: HrMainTab) => void } = {}) {
  const { user } = useAuthSession();
  const { isAdmin } = useUserRoles();
@@ -147,8 +171,8 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
  const [departments, setDepartments] = useState<Department[]>([]);
  const [sectors, setSectors] = useState<Sector[]>([]);
  const [loading, setLoading] = useState(true);
- const [dialogOpen, setDialogOpen] = useState(false);
- const [editing, setEditing] = useState<JobPosting | null>(null);
+ const [dialogOpen, setDialogOpen] = useState(() => !!readJobDraft());
+ const [editing, setEditing] = useState<JobPosting | null>(() => readJobDraft()?.editing ?? null);
  const [deptDialogOpen, setDeptDialogOpen] = useState(false);
  const [newDeptName, setNewDeptName] = useState("");
  const [newDeptDesc, setNewDeptDesc] = useState("");
@@ -170,22 +194,21 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
  const [appView, setAppView] = useState<"list"|"kanban">("kanban");
  const [detailId, setDetailId] = useState<string | null>(null);
  // AI assistant (job creation form)
- const [aiPrompt, setAiPrompt] = useState("");
+ const [aiPrompt, setAiPrompt] = useState(() => readJobDraft()?.aiPrompt ??"");
  const [aiAction, setAiAction] = useState<null |"generate"|"improve"|"shorten"|"translate_en">(null);
- const [form, setForm] = useState({
- title:"",
- department:"",
- location:"",
- contract_type:"CDI"as ContractType,
- description:"",
- closing_date:"",
- status:"brouillon"as JobStatus,
- sector:"",
- start_date:"",
- salary_range:"",
- contract_duration:"",
- renewable: false,
- });
+ const [form, setForm] = useState<JobFormState>(() => readJobDraft()?.form ?? EMPTY_JOB_FORM);
+
+ // Sauvegarde continue du brouillon tant que la fenêtre est ouverte ;
+ // effacée dès qu'elle se ferme (annulation ou enregistrement).
+ useEffect(() => {
+ try {
+ if (dialogOpen) {
+ sessionStorage.setItem(JOB_DRAFT_KEY, JSON.stringify({ open: true, editing, form, aiPrompt } satisfies JobDraft));
+ } else {
+ sessionStorage.removeItem(JOB_DRAFT_KEY);
+ }
+ } catch { /* stockage indisponible : ignorer */ }
+ }, [dialogOpen, editing, form, aiPrompt]);
 
  const load = async () => {
  setLoading(true);
@@ -332,7 +355,7 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
 
  const openNew = () => {
  setEditing(null);
- setForm({ title:"", department:"", location:"", contract_type:"CDI", description:"", closing_date:"", status:"brouillon", sector:"", start_date:"", salary_range:"", contract_duration:"", renewable: false });
+ setForm(EMPTY_JOB_FORM);
  setAiPrompt("");
  setAiAction(null);
  setDialogOpen(true);
