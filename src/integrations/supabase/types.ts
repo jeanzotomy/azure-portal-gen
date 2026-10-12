@@ -698,6 +698,7 @@ export type Database = {
       }
       job_postings: {
         Row: {
+          candidates_sought: number
           closing_date: string | null
           contract_duration: string | null
           contract_type: Database["public"]["Enums"]["contract_type"]
@@ -716,6 +717,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          candidates_sought?: number
           closing_date?: string | null
           contract_duration?: string | null
           contract_type?: Database["public"]["Enums"]["contract_type"]
@@ -734,6 +736,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          candidates_sought?: number
           closing_date?: string | null
           contract_duration?: string | null
           contract_type?: Database["public"]["Enums"]["contract_type"]
@@ -3365,6 +3368,7 @@ export type Database = {
       get_job_by_slug: {
         Args: { _slug: string }
         Returns: {
+          candidates_sought: number
           closing_date: string | null
           contract_duration: string | null
           contract_type: Database["public"]["Enums"]["contract_type"]

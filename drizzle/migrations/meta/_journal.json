@@ -1,0 +1,13 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1791787073435,
+      "tag": "0000_add_candidates_sought_to_job_postings",
+      "breakpoints": true
+    }
+  ]
+}
