@@ -110,6 +110,10 @@
   * {
     @apply border-border;
   }
+  html {
+    /* Le rebond élastique en fin de défilement ne doit pas entraîner la barre fixe */
+    overscroll-behavior-y: none;
+  }
   body {
     @apply bg-background text-foreground font-sans;
     font-family: 'Inter', sans-serif;
