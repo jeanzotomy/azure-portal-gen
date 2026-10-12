@@ -31,7 +31,7 @@ const entries: SitemapEntry[] = [
 // Try to fetch published jobs from Supabase to include /careers/:slug entries.
 async function fetchJobs(): Promise<SitemapEntry[]> {
   try {
-    const url = "https://zwzazxebufydnaxezngx.supabase.co/rest/v1/job_postings?select=title,updated_at&status=eq.published";
+    const url = "https://zwzazxebufydnaxezngx.supabase.co/rest/v1/job_postings?select=title,updated_at&status=eq.publiee";
     const anon = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inp3emF6eGVidWZ5ZG5heGV6bmd4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3Mjc1NjMsImV4cCI6MjA5MTMwMzU2M30.wL1NrlAeer5XEIHB2LQJj0gL4O7Ou4mdpRnPDcpX3_g";
     const res = await fetch(url, { headers: { apikey: anon, Authorization: `Bearer ${anon}` } });
     if (!res.ok) return [];

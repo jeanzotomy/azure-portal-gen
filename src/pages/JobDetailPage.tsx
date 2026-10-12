@@ -214,12 +214,11 @@ export default function JobDetailPage() {
  }, [job]);
 
  const shareUrl = job ? publicUrl(jobPath(job.id, job.title)) :"";
- // Bots get per-job OG tags via the edge function; humans are redirected
- // back to the SPA. We use this URL when sharing externally so previews
- // show the offer's title/description instead of the site default.
- const socialShareUrl = job
- ? `https://zwzazxebufydnaxezngx.supabase.co/functions/v1/job-share?slug=${slugify(job.title)}`
- :"";
+ // Le lien partagé est l'adresse publique de l'offre, sur cloudmature.com.
+ // Chaque offre reçoit sa propre page HTML à la publication (script
+ // scripts/generate-offer-pages.ts), donc les robots de WhatsApp, LinkedIn,
+ // Facebook et des messageries lisent le titre de l'offre elle-même.
+ const socialShareUrl = shareUrl;
  const shareText = job
  ? `Offre d'emploi chez Cloud Mature : ${job.title} (${job.contract_type}) - ${job.location}`
  :"";
