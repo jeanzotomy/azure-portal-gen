@@ -211,7 +211,14 @@ export function CampaignsManager({ canDelete }: Props) {
                         <Badge className={cn("border-0", st?.className)}>{st?.label}</Badge>
                         <Badge variant="outline">{CAMPAIGN_TYPES.find((t) => t.value === c.type)?.label}</Badge>
                       </div>
-                      <h3 className="truncate font-bold text-foreground">{c.title}</h3>
+                      <button
+                        type="button"
+                        className="block w-full truncate text-left font-bold text-foreground underline-offset-4 transition-colors hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
+                        title="Modifier la campagne"
+                        onClick={() => openEdit(c)}
+                      >
+                        {c.title}
+                      </button>
                       <p className="text-xs text-muted-foreground">
                         {formatDate(c.start_date)} → {formatDate(c.end_date)}
                       </p>
