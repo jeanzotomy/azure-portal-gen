@@ -141,6 +141,11 @@ type HrMainTab ="dashboard"|"recruitment"|"contracts"|"trainings"|"onboarding"|"
 // dans sessionStorage pour survivre à un rechargement ou une mise en veille
 // de l'onglet par le navigateur (travail en cours jamais perdu).
 const JOB_DRAFT_KEY = "hr_job_dialog_draft";
+type JobFormState = {
+ title: string; department: string; location: string; contract_type: ContractType;
+ description: string; closing_date: string; status: JobStatus; sector: string;
+ start_date: string; salary_range: string; contract_duration: string; renewable: boolean;
+};
 type JobDraft = { open: boolean; editing: JobPosting | null; form: JobFormState; aiPrompt: string };
 const EMPTY_JOB_FORM: JobFormState = {
  title:"", department:"", location:"", contract_type:"CDI", description:"",
@@ -189,22 +194,21 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
  const [appView, setAppView] = useState<"list"|"kanban">("kanban");
  const [detailId, setDetailId] = useState<string | null>(null);
  // AI assistant (job creation form)
- const [aiPrompt, setAiPrompt] = useState("");
+ const [aiPrompt, setAiPrompt] = useState(() => readJobDraft()?.aiPrompt ??"");
  const [aiAction, setAiAction] = useState<null |"generate"|"improve"|"shorten"|"translate_en">(null);
- const [form, setForm] = useState({
- title:"",
- department:"",
- location:"",
- contract_type:"CDI"as ContractType,
- description:"",
- closing_date:"",
- status:"brouillon"as JobStatus,
- sector:"",
- start_date:"",
- salary_range:"",
- contract_duration:"",
- renewable: false,
- });
+ const [form, setForm] = useState<JobFormState>(() => readJobDraft()?.form ?? EMPTY_JOB_FORM);
+
+ // Sauvegarde continue du brouillon tant que la fenêtre est ouverte ;
+ // effacée dès qu'elle se ferme (annulation ou enregistrement).
+ useEffect(() => {
+ try {
+ if (dialogOpen) {
+ sessionStorage.setItem(JOB_DRAFT_KEY, JSON.stringify({ open: true, editing, form, aiPrompt } satisfies JobDraft));
+ } else {
+ sessionStorage.removeItem(JOB_DRAFT_KEY);
+ }
+ } catch { /* stockage indisponible : ignorer */ }
+ }, [dialogOpen, editing, form, aiPrompt]);
 
  const load = async () => {
  setLoading(true);
