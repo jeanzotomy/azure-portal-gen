@@ -25,12 +25,16 @@ export default function MarketingTab({ canDelete, initialSection = "leads" }: Pr
       <Tabs value={section} onValueChange={(v) => setSection(v as typeof section)}>
         <TabsList className="inline-flex h-auto w-fit max-w-full flex-wrap">
           <TabsTrigger value="campaigns" className="gap-1.5"><Megaphone className="h-3.5 w-3.5" /> Campagnes</TabsTrigger>
+          <TabsTrigger value="forms" className="gap-1.5"><ClipboardList className="h-3.5 w-3.5" /> Formulaires</TabsTrigger>
           <TabsTrigger value="leads" className="gap-1.5"><Users className="h-3.5 w-3.5" /> Prospects</TabsTrigger>
           <TabsTrigger value="settings" className="gap-1.5"><Settings className="h-3.5 w-3.5" /> Paramètres</TabsTrigger>
         </TabsList>
 
         <TabsContent value="campaigns" className="mt-4">
           <CampaignsManager canDelete={canDelete} />
+        </TabsContent>
+        <TabsContent value="forms" className="mt-4">
+          <FormsManager canDelete={canDelete} />
         </TabsContent>
         <TabsContent value="leads" className="mt-4">
           <LeadsManager canDelete={canDelete} />
