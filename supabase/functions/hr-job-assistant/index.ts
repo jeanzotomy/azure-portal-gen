@@ -22,6 +22,7 @@ interface Body {
     contract_duration?: string;
     start_date?: string;
     salary_range?: string;
+    candidates_sought?: number;
     description?: string;
   };
   instructions?: string;
@@ -60,6 +61,7 @@ function buildUserPrompt(body: Body): string {
     c.contract_type && `Type de contrat: ${c.contract_type}${c.contract_duration ? ` (${c.contract_duration})` : ""}`,
     c.start_date && `Prise de poste: ${c.start_date}`,
     c.salary_range && `Rémunération: ${c.salary_range}`,
+    c.candidates_sought ? `Candidats recherchés: ${c.candidates_sought}` : "",
   ].filter(Boolean).join("\n");
 
   const current = c.description?.trim() || "";

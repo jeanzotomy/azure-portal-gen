@@ -72,6 +72,7 @@ interface JobPosting {
  salary_range: string | null;
  contract_duration: string | null;
  renewable: boolean;
+ candidates_sought: number;
  created_at: string;
 }
 
@@ -145,12 +146,19 @@ type JobFormState = {
  title: string; department: string; location: string; contract_type: ContractType;
  description: string; closing_date: string; status: JobStatus; sector: string;
  start_date: string; salary_range: string; contract_duration: string; renewable: boolean;
+ candidates_sought: string;
 };
 type JobDraft = { open: boolean; editing: JobPosting | null; form: JobFormState; aiPrompt: string };
 const EMPTY_JOB_FORM: JobFormState = {
  title:"", department:"", location:"", contract_type:"CDI", description:"",
  closing_date:"", status:"brouillon", sector:"", start_date:"",
- salary_range:"", contract_duration:"", renewable: false,
+ salary_range:"", contract_duration:"", renewable: false, candidates_sought:"1",
+};
+// Le nombre de candidats recherchés reste un entier de 1 à 999 :
+// une saisie vide ou invalide retombe sur 1, jamais sur 0.
+const parseCandidatesSought = (v: string): number => {
+ const n = Math.floor(Number(v));
+ return Number.isFinite(n) && n >= 1 ? Math.min(n, 999) : 1;
 };
 const readJobDraft = (): JobDraft | null => {
  try {
@@ -196,7 +204,12 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
  // AI assistant (job creation form)
  const [aiPrompt, setAiPrompt] = useState(() => readJobDraft()?.aiPrompt ??"");
  const [aiAction, setAiAction] = useState<null |"generate"|"improve"|"shorten"|"translate_en">(null);
- const [form, setForm] = useState<JobFormState>(() => readJobDraft()?.form ?? EMPTY_JOB_FORM);
+  const [form, setForm] = useState<JobFormState>(() => {
+  const d = readJobDraft();
+  if (!d) return EMPTY_JOB_FORM;
+  // Brouillon antérieur au champ « candidats recherchés » : valeur par défaut.
+  return { ...EMPTY_JOB_FORM, ...d.form, candidates_sought: String(parseCandidatesSought(d.form?.candidates_sought ?? "1")) };
+  });
 
  // Sauvegarde continue du brouillon tant que la fenêtre est ouverte ;
  // effacée dès qu'elle se ferme (annulation ou enregistrement).
@@ -380,8 +393,9 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
  contract_type: form.contract_type,
  contract_duration: form.contract_duration,
  start_date: form.start_date,
- salary_range: form.salary_range,
- description: form.description,
+  salary_range: form.salary_range,
+  candidates_sought: parseCandidatesSought(form.candidates_sought),
+  description: form.description,
  },
  },
  });
@@ -418,8 +432,9 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
  start_date: job.start_date ||"",
  salary_range: job.salary_range ||"",
  contract_duration: job.contract_duration ||"",
- renewable: job.renewable || false,
- });
+  renewable: job.renewable || false,
+  candidates_sought: String(job.candidates_sought ?? 1),
+  });
  setDialogOpen(true);
  };
 
@@ -441,8 +456,9 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
  start_date: form.start_date.trim() || null,
  salary_range: form.salary_range.trim() || null,
  contract_duration: form.contract_type ==="CDD"? (form.contract_duration.trim() || null) : null,
- renewable: form.contract_type ==="CDD"? form.renewable : false,
- };
+  renewable: form.contract_type ==="CDD"? form.renewable : false,
+  candidates_sought: parseCandidatesSought(form.candidates_sought),
+  };
  const res = editing
  ? await supabase.from("job_postings").update(payload).eq("id", editing.id)
  : await supabase.from("job_postings").insert({ ...payload, created_by: user.id });
@@ -760,7 +776,8 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
  </div>
  <div className="text-xs text-muted-foreground mt-1 flex items-center gap-3 flex-wrap">
  <span className="flex items-center gap-1"><MapPin size={12} /> {job.location}</span>
- {job.department && <span>{job.department}</span>}
+  {job.department && <span>{job.department}</span>}
+  <span className="flex items-center gap-1"><Users size={12} /> {job.candidates_sought ?? 1} candidat{(job.candidates_sought ?? 1) > 1 ?"s":""} recherché{(job.candidates_sought ?? 1) > 1 ?"s":""}</span>
  {job.closing_date && <span className="flex items-center gap-1"><Calendar size={12} /> Clôture {format(new Date(job.closing_date),"dd/MM/yyyy")}</span>}
  </div>
  <p className="text-sm mt-2 line-clamp-2 text-muted-foreground">{job.description}</p>
@@ -1011,10 +1028,21 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
  <Input
  id="job-location" value={form.location}
  onChange={(e) => setForm({ ...form, location: e.target.value })}
- placeholder="Ex: Conakry / Remote" />
- </div>
- </div>
- </FormSection>
+  placeholder="Ex: Conakry / Remote" />
+  </div>
+  </div>
+  <div className="space-y-2">
+  <Label htmlFor="job-candidates">Nombre de candidats recherchés</Label>
+  <Input
+  id="job-candidates"
+   type="number" min={1} max={999} step={1} inputMode="numeric"
+  value={form.candidates_sought}
+  onChange={(e) => setForm({ ...form, candidates_sought: e.target.value })}
+  onBlur={(e) => setForm({ ...form, candidates_sought: String(parseCandidatesSought(e.target.value)) })}
+  placeholder="Ex: 2" />
+  <p className="text-xs text-muted-foreground">Combien de personnes ce poste doit-il pourvoir ?</p>
+  </div>
+  </FormSection>
 
  <FormSection
  icon={<Calendar size={16} />}
