@@ -224,9 +224,9 @@ function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser
 
 function AdminContent() {
  const { user, ready } = useAuthSession();
- const [tab, setTab] = useState<AdminTab>("dashboard");
- const [agentTab, setAgentTab] = useState<AgentTab>("dashboard");
- const [gestionnaireTab, setGestionnaireTab] = useState<GestionnaireTab>("dashboard");
+  const [tab, setTab] = useUrlTab<AdminTab>("tab", ADMIN_TABS, "dashboard");
+  const [agentTab, setAgentTab] = useUrlTab<AgentTab>("atab", AGENT_TABS, "dashboard");
+  const [gestionnaireTab, setGestionnaireTab] = useUrlTab<GestionnaireTab>("gtab", GESTIONNAIRE_TABS, "dashboard");
  const { isAdmin, isAgent, isComptable, isGestionnaire, loading: rolesLoading } = useUserRoles();
  const { mfaVerified, timedOut: mfaTimedOut } = useMfaCheck();
  const navigate = useNavigate();
