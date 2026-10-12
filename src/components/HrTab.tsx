@@ -137,6 +137,25 @@ interface Sector {
 
 type HrMainTab ="dashboard"|"recruitment"|"contracts"|"trainings"|"onboarding"|"employee-trainings";
 
+// Brouillon de la fenêtre « Nouvelle/Modifier offre » : sauvegardé en continu
+// dans sessionStorage pour survivre à un rechargement ou une mise en veille
+// de l'onglet par le navigateur (travail en cours jamais perdu).
+const JOB_DRAFT_KEY = "hr_job_dialog_draft";
+type JobDraft = { open: boolean; editing: JobPosting | null; form: JobFormState; aiPrompt: string };
+const EMPTY_JOB_FORM: JobFormState = {
+ title:"", department:"", location:"", contract_type:"CDI", description:"",
+ closing_date:"", status:"brouillon", sector:"", start_date:"",
+ salary_range:"", contract_duration:"", renewable: false,
+};
+const readJobDraft = (): JobDraft | null => {
+ try {
+ const raw = sessionStorage.getItem(JOB_DRAFT_KEY);
+ if (!raw) return null;
+ const d = JSON.parse(raw);
+ return d && d.open ? d : null;
+ } catch { return null; }
+};
+
 export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTab, onTabChange }: { onboardingReadOnly?: boolean; defaultTab?: HrMainTab; activeTab?: HrMainTab; onTabChange?: (t: HrMainTab) => void } = {}) {
  const { user } = useAuthSession();
  const { isAdmin } = useUserRoles();
@@ -147,8 +166,8 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
  const [departments, setDepartments] = useState<Department[]>([]);
  const [sectors, setSectors] = useState<Sector[]>([]);
  const [loading, setLoading] = useState(true);
- const [dialogOpen, setDialogOpen] = useState(false);
- const [editing, setEditing] = useState<JobPosting | null>(null);
+ const [dialogOpen, setDialogOpen] = useState(() => !!readJobDraft());
+ const [editing, setEditing] = useState<JobPosting | null>(() => readJobDraft()?.editing ?? null);
  const [deptDialogOpen, setDeptDialogOpen] = useState(false);
  const [newDeptName, setNewDeptName] = useState("");
  const [newDeptDesc, setNewDeptDesc] = useState("");
