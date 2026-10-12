@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, Outlet, useMatch, useLocation } from "react-router-dom";
+import { useNavigate, Outlet, useMatch, useLocation, useSearchParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { useUserRoles } from "@/hooks/use-admin";
@@ -29,7 +29,18 @@ export default function HrPortalPage() {
   const { isHr, loading } = useUserRoles();
   const navigate = useNavigate();
   const location = useLocation();
-  const [sub, setSub] = useState<HrSubTab>("dashboard");
+  const [searchParams, setSearchParams] = useSearchParams();
+  const rawSub = searchParams.get("tab");
+  const HR_TABS: readonly HrSubTab[] = ["dashboard", "recruitment", "contracts", "onboarding", "trainings", "employee-trainings"];
+  const sub: HrSubTab = HR_TABS.includes(rawSub as HrSubTab) ? (rawSub as HrSubTab) : "dashboard";
+  const setSub = (t: HrSubTab) => {
+    setSearchParams((prev) => {
+      const p = new URLSearchParams(prev);
+      if (t === "dashboard") p.delete("tab");
+      else p.set("tab", t);
+      return p;
+    }, { replace: true });
+  };
   const [signatureOpen, setSignatureOpen] = useState(false);
   const formationsMatch = useMatch("/rh/formations/*");
   const isFormationsRoute = !!formationsMatch || location.pathname === "/rh/formations";
