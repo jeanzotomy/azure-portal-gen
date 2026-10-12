@@ -125,7 +125,7 @@ function jobPostingJsonLd(o: Offer, url: string): string {
 function buildPage(gabarit: string, o: Offer): { path: string; html: string } {
   const slug = slugify(o.title);
   const url = `${BASE_URL}/careers/${slug}`;
-  const title = `${o.title} - ${o.contract_type} · ${o.location} | Cloud Mature`;
+  const title = `${o.title} - ${o.contract_type} · ${o.location} | CloudMature`;
   const cleaned = (o.description || "").replace(/\s+/g, " ").trim();
   const description = cleaned
     ? cleaned.slice(0, 200) + (cleaned.length > 200 ? "…" : "")
