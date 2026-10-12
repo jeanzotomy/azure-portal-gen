@@ -712,7 +712,16 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
  <div className="flex items-start justify-between gap-3 flex-wrap">
  <div className="flex-1 min-w-0">
  <div className="flex items-center gap-2 flex-wrap">
- <h3 className="font-semibold">{job.title}</h3>
+ <h3 className="font-semibold min-w-0 max-w-full">
+ <button
+ type="button"
+ className="block max-w-full truncate text-left text-foreground underline-offset-4 transition-colors hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
+ title="Modifier l'offre"
+ onClick={() => openEdit(job)}
+ >
+ {job.title}
+ </button>
+ </h3>
  <Select value={job.status} onValueChange={(v) => updateJobStatus(job.id, v as JobStatus)}>
  <SelectTrigger className={`h-7 w-auto gap-1 px-2 text-xs border-0 ${STATUS_COLORS[job.status]}`}>
  <SelectValue />
