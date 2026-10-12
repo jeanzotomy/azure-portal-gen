@@ -89,7 +89,7 @@ function useUrlTab<T extends string>(param: string, valid: readonly T[], fallbac
 }
 
 function ComptableViewInline({ user, collapsed, handleLogout }: { user: SupaUser; collapsed: boolean; handleLogout: () => void }) {
- const [tab, setTab] = useState<"projects"|"sharepoint"|"service-clients"|"service-catalog"|"service-invoices"|"payment-methods">("projects");
+ const [tab, setTab] = useUrlTab<"projects"|"sharepoint"|"service-clients"|"service-catalog"|"service-invoices"|"payment-methods">("ctab", ["projects","sharepoint","service-clients","service-catalog","service-invoices","payment-methods"], "projects");
  const [signatureOpen, setSignatureOpen] = useState(false);
  const navigate = useNavigate();
  const { t } = useTranslation();
