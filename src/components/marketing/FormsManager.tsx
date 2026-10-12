@@ -238,7 +238,14 @@ export function FormsManager({ canDelete }: Props) {
                   <div className="flex items-start justify-between gap-2">
                     <div className="min-w-0">
                       <Badge className={cn("mb-1 border-0", st?.className)}>{st?.label ?? f.status}</Badge>
-                      <h3 className="truncate font-bold text-foreground">{f.title}</h3>
+                      <button
+                        type="button"
+                        className="block w-full truncate text-left font-bold text-foreground underline-offset-4 transition-colors hover:text-primary hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1"
+                        title="Modifier le formulaire"
+                        onClick={() => void openEdit(f)}
+                      >
+                        {f.title}
+                      </button>
                       <p className="truncate text-xs text-muted-foreground">/f/{f.slug}</p>
                     </div>
                     <DropdownMenu>
