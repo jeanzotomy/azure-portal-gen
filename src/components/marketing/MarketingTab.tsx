@@ -1,14 +1,15 @@
 import { useState } from "react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { CampaignsManager } from "./CampaignsManager";
+import { FormsManager } from "./FormsManager";
 import { LeadsManager } from "./LeadsManager";
 import { MarketingSettingsCard } from "./MarketingSettingsCard";
-import { Megaphone, Settings, Users } from "lucide-react";
+import { ClipboardList, Megaphone, Settings, Users } from "lucide-react";
 
 interface Props {
   /** `agent` peut consulter et faire avancer, mais pas supprimer. */
   canDelete: boolean;
-  initialSection?: "campaigns" | "leads" | "settings";
+  initialSection?: "campaigns" | "forms" | "leads" | "settings";
 }
 
 export default function MarketingTab({ canDelete, initialSection = "leads" }: Props) {
