@@ -56,7 +56,8 @@ export default function HrJobFormPage() {
   const location = useLocation();
   const { user } = useAuthSession();
   // Retour vers l'espace d'origine : console admin ou portail RH.
-  const backTo = location.pathname.startsWith("/admin") ? "/admin?gtab=hr-recruitment" : "/rh?tab=recruitment";
+  // Admin : onglet "tab", Gestionnaire : onglet "gtab" — les deux sont posés, chaque vue lit le sien.
+  const backTo = location.pathname.startsWith("/admin") ? "/admin?tab=hr-recruitment&gtab=hr-recruitment" : "/rh?tab=recruitment";
 
   const [departments, setDepartments] = useState<Department[]>([]);
   const [sectors, setSectors] = useState<Sector[]>([]);
