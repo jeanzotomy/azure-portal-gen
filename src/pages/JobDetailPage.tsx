@@ -218,7 +218,10 @@ export default function JobDetailPage() {
  // Chaque offre reçoit sa propre page HTML à la publication (script
  // scripts/generate-offer-pages.ts), donc les robots de WhatsApp, LinkedIn,
  // Facebook et des messageries lisent le titre de l'offre elle-même.
- const socialShareUrl = shareUrl;
+ // Lien envoyé aux réseaux : /partage?slug=… redirige (staticwebapp.config.json)
+ // vers la fiche de partage lue en direct, donc une offre publiée après la
+ // dernière publication du site montre quand même son propre titre.
+ const socialShareUrl = job ? publicUrl(`/partage?slug=${encodeURIComponent(slugify(job.title))}`) :"";
  const shareText = job
  ? `Offre d'emploi chez Cloud Mature : ${job.title} (${job.contract_type}) - ${job.location}`
  :"";
@@ -238,7 +241,7 @@ export default function JobDetailPage() {
 
  const copyLink = async () => {
  try {
- await navigator.clipboard.writeText(socialShareUrl);
+ await navigator.clipboard.writeText(shareUrl);
  toast({ title:"Lien copié", description:"Le lien de partage est dans le presse-papier."});
  } catch {
  toast({ title:"Erreur", description:"Impossible de copier le lien.", variant:"destructive"});
