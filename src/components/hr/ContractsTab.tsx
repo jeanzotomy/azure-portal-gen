@@ -112,6 +112,7 @@ export default function ContractsTab({ readOnly = false }: { readOnly?: boolean 
  job_start_date: job?.start_date || null,
  accepted_at: p.created_at,
  contract: contractByProc.get(p.id) as any || null,
+ history: historyByProc.get(p.id) || [],
  };
  }));
  setLoading(false);
