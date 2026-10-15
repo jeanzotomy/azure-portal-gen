@@ -1,3 +1,4 @@
+import { isInternalCall } from '../_shared/internal-auth.ts'
 // Edge function: analyze-cv
 // Downloads a candidate's CV from storage, extracts text, and asks Lovable AI
 // (Gemini 2.5 Flash) for a structured analysis (score, summary, skills, etc.)
@@ -94,7 +95,7 @@ Deno.serve(async (req) => {
       status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   }
-  if (token !== SERVICE_ROLE) {
+  if (token !== SERVICE_ROLE && !(await isInternalCall(req))) {
     const caller = createClient(SUPABASE_URL, Deno.env.get("SUPABASE_ANON_KEY")!, {
       global: { headers: { Authorization: `Bearer ${token}` } },
     });

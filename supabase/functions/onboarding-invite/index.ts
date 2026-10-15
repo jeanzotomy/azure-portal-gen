@@ -1,3 +1,4 @@
+import { isInternalCall } from '../_shared/internal-auth.ts'
 import { createClient } from 'npm:@supabase/supabase-js@2'
 
 const corsHeaders = {
@@ -59,7 +60,7 @@ Deno.serve(async (req) => {
     if (!token) {
       return new Response(JSON.stringify({ error: 'Unauthorized' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
     }
-    if (token !== serviceKey) {
+    if (token !== serviceKey && !(await isInternalCall(req))) {
       const caller = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: `Bearer ${token}` } } })
       const { data: u } = await caller.auth.getUser()
       if (!u?.user) {
