@@ -220,9 +220,10 @@ export default function OnboardingTab({ user }: { user: SupaUser }) {
  const { error: upErr } = await supabase.storage.from("onboarding-files").upload(path, blob);
  if (upErr) throw upErr;
  const { data: { publicUrl } } = supabase.storage.from("onboarding-files").getPublicUrl(path);
- const { error } = await supabase.from("onboarding_contracts").update({
- signature_url: publicUrl, signed_at: new Date().toISOString(),
- }).eq("id", contract.id);
+ // Server sets the signing time; a signed contract can no longer be changed.
+ const { error } = await supabase.rpc("sign_onboarding_contract", {
+ _contract_id: contract.id, _signature_url: publicUrl,
+ });
  if (error) throw error;
  const contractStep = steps.find(s => s.step_key ==="contract");
  if (contractStep) await updateStepStatus(contractStep.id,"en_revision");

@@ -28,6 +28,7 @@ interface Row {
  job_start_date?: string | null;
  accepted_at: string;
  contract: { id: string; contract_file_path: string; contract_file_name: string; signed_at: string | null } | null;
+ history: { id: string; contract_file_path: string; signed_at: string | null }[];
 }
 
 interface FormState {
@@ -82,11 +83,17 @@ export default function ContractsTab({ readOnly = false }: { readOnly?: boolean 
  const jobIds = Array.from(new Set(procs.map(p => p.job_id).filter(Boolean) as string[]));
 
  const [{ data: contracts }, { data: jobs }] = await Promise.all([
- supabase.from("onboarding_contracts").select("id, process_id, contract_file_path, contract_file_name, signed_at").in("process_id", procIds),
+ supabase.from("onboarding_contracts").select("id, process_id, contract_file_path, contract_file_name, signed_at, uploaded_at").in("process_id", procIds).order("uploaded_at", { ascending: true }),
  jobIds.length ? supabase.from("job_postings").select("id, title, contract_type, location, salary_range, contract_duration, start_date").in("id", jobIds) : Promise.resolve({ data: [] as any }),
  ]);
 
+ // Ordered oldest → newest: the latest version wins, older ones are kept as history.
  const contractByProc = new Map((contracts || []).map(c => [c.process_id, c]));
+ const historyByProc = new Map<string, any[]>();
+ (contracts || []).forEach(c => {
+ const latest = contractByProc.get(c.process_id);
+ if (latest && latest.id !== c.id) historyByProc.set(c.process_id, [...(historyByProc.get(c.process_id) || []), c]);
+ });
  const jobById = new Map<string, any>((jobs || []).map((j: any) => [j.id, j]));
 
  setRows(procs.map(p => {
@@ -262,6 +269,16 @@ export default function ContractsTab({ readOnly = false }: { readOnly?: boolean 
  <Button size="sm"variant="outline"onClick={() => download(r.contract!.contract_file_path)}>
  <Download className="h-4 w-4 mr-1"/>Télécharger
  </Button>
+ )}
+ {r.history.length > 0 && (
+ <div className="w-full text-right text-xs text-muted-foreground">
+ Versions précédentes :{" "}
+ {r.history.map((h, i) => (
+ <button key={h.id} type="button" className="underline hover:text-foreground ml-1" onClick={() => download(h.contract_file_path)}>
+ v{i + 1}{h.signed_at ? " (signée)" : ""}
+ </button>
+ ))}
+ </div>
  )}
  {!readOnly && !r.contract && (
  <>
