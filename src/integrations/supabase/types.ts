@@ -3335,6 +3335,7 @@ export type Database = {
         Args: { _training_id: string; _user_id: string }
         Returns: boolean
       }
+      check_internal_secret: { Args: { _secret: string }; Returns: boolean }
       create_onboarding_for_application: {
         Args: { _application_id: string }
         Returns: string
@@ -3430,6 +3431,7 @@ export type Database = {
         }
         Returns: boolean
       }
+      internal_call: { Args: { _body: Json; _fn: string }; Returns: undefined }
       is_client_for_assigned_invoice: {
         Args: { _client_id: string; _user_id: string }
         Returns: boolean
@@ -3544,6 +3546,10 @@ export type Database = {
           tags: string[]
           title: string
         }[]
+      }
+      sign_onboarding_contract: {
+        Args: { _contract_id: string; _signature_url: string }
+        Returns: string
       }
       slugify_text: { Args: { input: string }; Returns: string }
       submit_job_application: {
