@@ -229,7 +229,7 @@ export default function HrJobFormPage() {
     return (
       <div className="max-w-3xl mx-auto py-16 text-center space-y-4">
         <p className="text-muted-foreground">Cette offre est introuvable.</p>
-        <Button variant="outline" onClick={() => navigate("/rh?tab=recruitment")}><ArrowLeft size={14} /> Retour aux offres</Button>
+        <Button variant="outline" onClick={() => navigate(backTo)}><ArrowLeft size={14} /> Retour aux offres</Button>
       </div>
     );
   }
