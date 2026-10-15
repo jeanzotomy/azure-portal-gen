@@ -53,7 +53,10 @@ export default function HrJobFormPage() {
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuthSession();
+  // Retour vers l'espace d'origine : console admin ou portail RH.
+  const backTo = location.pathname.startsWith("/admin") ? "/admin?gtab=hr-recruitment" : "/rh?tab=recruitment";
 
   const [departments, setDepartments] = useState<Department[]>([]);
   const [sectors, setSectors] = useState<Sector[]>([]);
