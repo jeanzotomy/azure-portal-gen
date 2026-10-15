@@ -30,7 +30,6 @@ import ContractsTab from"./hr/ContractsTab";
 import TrainingsTab from"./hr/TrainingsTab";
 import HrDashboardTab from"./hr/HrDashboardTab";
 import CandidatesKanban from"./hr/CandidatesKanban";
-import CandidateDetailDrawer from"./hr/CandidateDetailDrawer";
 import { exportCsv } from"@/lib/csv-export";
 // Réexporté pour le test existant (src/test/candidates-sought.test.ts).
 export { parseCandidatesSought } from"@/lib/job-form";
@@ -152,7 +151,7 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
  const [appStatusFilter, setAppStatusFilter] = useState<string>("all");
  const [appJobFilter, setAppJobFilter] = useState<string>("all");
  const [appView, setAppView] = useState<"list"|"kanban">("kanban");
- const [detailId, setDetailId] = useState<string | null>(null);
+ const setDetailId = (appId: string) => navigate(`${offerBasePath.replace(/\/offres$/, "")}/candidatures/${appId}`);
  const load = async () => {
  setLoading(true);
  const [jobsRes, appsRes, deptsRes, sectorsRes] = await Promise.all([
@@ -1015,12 +1014,6 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
 
  {confirmDialog}
 
- <CandidateDetailDrawer
- applicationId={detailId}
- onOpenChange={(v) => { if (!v) setDetailId(null); }}
- onUpdated={load}
- onChangeStatus={(id, status) => updateAppStatus(id, status)}
- />
  </div>
  );
 }

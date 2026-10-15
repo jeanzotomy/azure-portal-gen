@@ -34,6 +34,7 @@ const EMPTY_JOB_FORM: JobFormState = {
 };
 
 import { parseCandidatesSought, sanitizeAiText } from "@/lib/job-form";
+import JobApplicationsStats from "@/components/hr/JobApplicationsStats";
 
 // Brouillon sauvegardé en continu : survit à un rechargement ou une mise en
 // veille de l'onglet. Clé distincte par offre pour ne pas mélanger les brouillons.
@@ -258,6 +259,8 @@ export default function HrJobFormPage() {
           </Button>
         </div>
       </div>
+
+      {isEdit && id && <JobApplicationsStats jobId={id} sought={parseCandidatesSought(form.candidates_sought) ?? 1} />}
 
       <FormSection icon={<FileText size={16} />} title="Informations générales" description="Titre, localisation et type de contrat.">
         <div className="space-y-2">

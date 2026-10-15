@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Mail, RefreshCw, Search, Inbox } from "lucide-react";
 import { format } from "date-fns";
+import { Link, useLocation } from "react-router-dom";
 import SendDirectEmailDialog from "@/components/admin/SendDirectEmailDialog";
 
 type AppStatus = "nouvelle" | "en_revue" | "entretien" | "acceptee" | "refusee";
@@ -38,6 +39,7 @@ export default function HrApplicationsList() {
   const [status, setStatus] = useState("all");
   const [job, setJob] = useState("all");
   const [target, setTarget] = useState<Row | null>(null);
+  const base = useLocation().pathname.startsWith("/admin") ? "/admin" : "/rh";
 
   const load = async () => {
     setLoading(true);
@@ -127,7 +129,7 @@ export default function HrApplicationsList() {
                 {filtered.map((r) => (
                   <tr key={r.id} className="border-t">
                     <td className="p-3">
-                      <div className="font-medium">{r.full_name}</div>
+                      <Link to={`${base}/candidatures/${r.id}`} className="font-medium hover:underline text-primary">{r.full_name}</Link>
                       <div className="text-xs text-muted-foreground">{r.email}</div>
                     </td>
                     <td className="p-3">{jobs[r.job_id] || "Offre supprimée"}</td>

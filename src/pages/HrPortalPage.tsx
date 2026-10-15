@@ -46,7 +46,9 @@ export default function HrPortalPage() {
   const [signatureOpen, setSignatureOpen] = useState(false);
   const formationsMatch = useMatch("/rh/formations/*");
   const isFormationsRoute = !!formationsMatch || location.pathname === "/rh/formations";
-  const isJobFormRoute = !!useMatch("/rh/offres/*");
+  const isOfferRoute = !!useMatch("/rh/offres/*");
+  const isCandidateRoute = !!useMatch("/rh/candidatures/*");
+  const isJobFormRoute = isOfferRoute || isCandidateRoute;
   const isChildRoute = isFormationsRoute || isJobFormRoute;
 
   useEffect(() => {
