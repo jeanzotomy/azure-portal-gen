@@ -496,11 +496,11 @@ function AdminContent() {
  {gestionnaireTab ==="contacts"&& <AdminContacts />}
  {gestionnaireTab ==="marketing"&& <MarketingTab canDelete={false} />}
  {gestionnaireTab ==="sharepoint"&& <SharePointTab readOnly />}
- {gestionnaireTab ==="hr"&& <HrTab />}
- {gestionnaireTab ==="hr-recruitment"&& <HrTab defaultTab="recruitment"/>}
- {gestionnaireTab ==="hr-contracts"&& <HrTab defaultTab="contracts"/>}
- {gestionnaireTab ==="hr-onboarding"&& <HrTab defaultTab="onboarding"/>}
- {gestionnaireTab ==="hr-trainings"&& <HrTab defaultTab="trainings"/>}
+ {gestionnaireTab ==="hr"&& <HrTab offerBasePath="/admin/offres" />}
+ {gestionnaireTab ==="hr-recruitment"&& <HrTab defaultTab="recruitment" offerBasePath="/admin/offres"/>}
+ {gestionnaireTab ==="hr-contracts"&& <HrTab defaultTab="contracts" offerBasePath="/admin/offres"/>}
+ {gestionnaireTab ==="hr-onboarding"&& <HrTab defaultTab="onboarding" offerBasePath="/admin/offres"/>}
+ {gestionnaireTab ==="hr-trainings"&& <HrTab defaultTab="trainings" offerBasePath="/admin/offres"/>}
  {gestionnaireTab ==="service-clients"&& <ServiceClientsTab />}
  {gestionnaireTab ==="service-catalog"&& <ServiceCatalogTab />}
  {gestionnaireTab ==="service-invoices"&& <ServiceInvoicesTab />}
