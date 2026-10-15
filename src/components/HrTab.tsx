@@ -890,26 +890,32 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
  {appView ==="list"&& filteredApps.map((app) => {
  const job = jobs.find((j) => j.id === app.job_id);
  return (
- <Card key={app.id}>
- <CardContent className="p-4 space-y-2">
- <div className="flex items-start justify-between gap-3 flex-wrap">
+ <Card key={app.id} className="transition-shadow hover:shadow-md">
+ <CardContent className="p-4 space-y-3">
+ <div className="flex items-start gap-3">
+ <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary font-semibold">
+ {app.full_name.trim().charAt(0).toUpperCase()}
+ </div>
  <div className="flex-1 min-w-0">
  <div className="flex items-center gap-2 flex-wrap">
- <h3 className="font-semibold">{app.full_name}</h3>
+ <button type="button" onClick={() => setDetailId(app.id)} className="font-semibold capitalize text-left hover:underline focus-visible:underline outline-none">
+ {app.full_name}
+ </button>
  <Badge className={APP_STATUS_COLORS[app.status]}>{APP_STATUS_LABELS[app.status]}</Badge>
  </div>
- <p className="text-xs text-muted-foreground mt-0.5">
- Pour : <span className="font-medium">{job?.title ||"Offre supprimée"}</span> · {format(new Date(app.created_at),"dd/MM/yyyy HH:mm")}
+ <p className="text-xs text-muted-foreground mt-0.5 flex items-center gap-1 flex-wrap">
+ <Briefcase size={12} /> <span className="font-medium text-foreground/80">{job?.title || "Offre supprimée"}</span>
+ <span aria-hidden>·</span> {format(new Date(app.created_at), "dd/MM/yyyy HH:mm")}
  </p>
- <div className="text-sm mt-2 grid sm:grid-cols-2 gap-x-4 gap-y-1">
- <span>📧 {app.email}</span>
- {app.phone && <span>📞 {app.phone}</span>}
- {app.linkedin_url && <a href={app.linkedin_url} target="_blank"rel="noreferrer"className="text-primary hover:underline truncate">🔗 LinkedIn</a>}
- {app.portfolio_url && <a href={app.portfolio_url} target="_blank"rel="noreferrer"className="text-primary hover:underline truncate">🌐 Portfolio</a>}
+ <div className="text-sm mt-2 flex flex-wrap gap-x-5 gap-y-1 text-foreground/85">
+ <a href={`mailto:${app.email}`} className="inline-flex items-center gap-1.5 hover:text-primary"><Mail size={13} className="text-muted-foreground" />{app.email}</a>
+ {app.phone && <a href={`tel:${app.phone}`} className="inline-flex items-center gap-1.5 hover:text-primary tabular-nums">📞 {app.phone}</a>}
+ {app.linkedin_url && <a href={app.linkedin_url} target="_blank" rel="noreferrer" className="text-primary hover:underline">LinkedIn</a>}
+ {app.portfolio_url && <a href={app.portfolio_url} target="_blank" rel="noreferrer" className="text-primary hover:underline">Portfolio</a>}
  </div>
  </div>
  <Select value={app.status} onValueChange={(v) => updateAppStatus(app.id, v as AppStatus)}>
- <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
+ <SelectTrigger className="w-36 shrink-0" aria-label="Changer la réponse"><SelectValue /></SelectTrigger>
  <SelectContent>
  {(Object.keys(APP_STATUS_LABELS) as AppStatus[]).map((s) => (
  <SelectItem key={s} value={s}>{APP_STATUS_LABELS[s]}</SelectItem>
@@ -917,38 +923,33 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
  </SelectContent>
  </Select>
  </div>
- {(() => {
- const spUrl = extractSharePointUrl(app.notes);
- return (
- <div className="flex gap-2 flex-wrap pt-2 border-t">
- <Button variant="default"size="sm"onClick={() => setDetailId(app.id)}>
- <Eye size={14} className="mr-1"/> Détails
- </Button>
- <Button variant="outline"size="sm"onClick={() => downloadFile(app.cv_path)}><FileText size={14} /> CV</Button>
- {app.cover_letter_path && (
- <Button variant="outline"size="sm"onClick={() => downloadFile(app.cover_letter_path!)}><Download size={14} /> Lettre de motivation</Button>
+ {(app.ai_analyzed_at || app.ai_status === "processing" || app.ai_status === "error") && (
+ <AiAnalysisBlock app={app} />
  )}
- <Button variant="outline"size="sm"onClick={() => handleOpenSharePointFolder(app)}>
- <FolderOpen size={14} /> Ouvrir dossier SharePoint
+ <div className="flex gap-2 flex-wrap items-center pt-3 border-t">
+ <Button size="sm" onClick={() => setDetailId(app.id)}>
+ <Eye size={14} className="mr-1" /> Détails
+ </Button>
+ <Button variant="outline" size="sm" onClick={() => downloadFile(app.cv_path)}><FileText size={14} /> CV</Button>
+ {app.cover_letter_path && (
+ <Button variant="outline" size="sm" onClick={() => downloadFile(app.cover_letter_path!)}><Download size={14} /> Lettre</Button>
+ )}
+ <Button variant="ghost" size="sm" onClick={() => handleOpenSharePointFolder(app)}>
+ <FolderOpen size={14} /> SharePoint
  </Button>
  <Button
- variant="outline" size="sm" onClick={() => analyzeCv(app)}
- disabled={analyzingIds.has(app.id) || app.ai_status ==="processing"}
+ variant="ghost" size="sm" onClick={() => analyzeCv(app)}
+ disabled={analyzingIds.has(app.id) || app.ai_status === "processing"}
  >
- {analyzingIds.has(app.id) || app.ai_status ==="processing" ? <><Loader2 size={14} className="animate-spin"/> Analyse…</>
- : <><Sparkles size={14} /> {app.ai_analyzed_at ?"Réanalyser CV":"Analyser CV"}</>}
+ {analyzingIds.has(app.id) || app.ai_status === "processing" ? <><Loader2 size={14} className="animate-spin" /> Analyse…</>
+ : <><Sparkles size={14} /> {app.ai_analyzed_at ? "Réanalyser" : "Analyser le CV"}</>}
  </Button>
  {isAdmin && (
- <Button variant="destructive"size="sm"onClick={() => handleDeleteSharePointFolder(app)}>
- <FolderX size={14} /> Supprimer dossier
+ <Button variant="ghost" size="sm" className="ml-auto text-destructive hover:bg-destructive/10 hover:text-destructive" onClick={() => handleDeleteSharePointFolder(app)}>
+ <FolderX size={14} /> Supprimer le dossier
  </Button>
  )}
  </div>
- );
- })()}
- {(app.ai_analyzed_at || app.ai_status ==="processing"|| app.ai_status ==="error") && (
- <AiAnalysisBlock app={app} />
- )}
  </CardContent>
  </Card>
  );
@@ -1439,58 +1440,76 @@ function AiAnalysisBlock({ app }: { app: JobApplication }) {
  if (!app.ai_analyzed_at) return null;
  const reco = app.ai_recommendation ? RECO_LABELS[app.ai_recommendation] : null;
  const RecoIcon = reco?.icon || Sparkles;
+ const strengths = Array.isArray(app.ai_strengths) ? app.ai_strengths : [];
+ const weaknesses = Array.isArray(app.ai_weaknesses) ? app.ai_weaknesses : [];
+ const skills = Array.isArray(app.ai_skills) ? app.ai_skills : [];
+ const gauge = (label: string, value: number | null | undefined) => {
+ if (typeof value !== "number") return null;
+ const tone = value >= 70 ? "bg-emerald-500" : value >= 40 ? "bg-amber-500" : "bg-destructive";
  return (
- <div className="mt-3 p-4 rounded-lg border bg-primary space-y-3">
- <div className="flex items-center justify-between gap-2 flex-wrap">
- <div className="flex items-center gap-2 text-sm font-semibold">
- <Sparkles size={14} className="text-primary"/> Analyse IA du CV
+ <div className="min-w-[120px] flex-1">
+ <div className="flex items-baseline justify-between text-xs">
+ <span className="text-muted-foreground">{label}</span>
+ <span className="font-semibold tabular-nums text-foreground">{value}%</span>
  </div>
- <div className="flex items-center gap-2 flex-wrap">
- {typeof app.ai_match_percentage ==="number"&& (
- <Badge variant="outline"className="gap-1">
- <TrendingUp size={11} /> Match : {app.ai_match_percentage}%
- </Badge>
- )}
- {typeof app.ai_score ==="number"&& (
- <Badge variant="outline">Score CV : {app.ai_score}/100</Badge>
- )}
+ <div className="mt-1 h-1.5 rounded-full bg-muted overflow-hidden">
+ <div className={`h-full rounded-full ${tone}`} style={{ width: `${Math.max(2, Math.min(100, value))}%` }} />
+ </div>
+ </div>
+ );
+ };
+ return (
+ <details className="group mt-1 rounded-lg border bg-muted/30 open:bg-card" open={false}>
+ <summary className="list-none cursor-pointer select-none p-3 flex items-center gap-3 flex-wrap [&::-webkit-details-marker]:hidden">
+ <span className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
+ <Sparkles size={14} className="text-primary" /> Analyse IA
+ </span>
  {reco && (
- <Badge className={reco.cls +"border gap-1"}>
+ <Badge variant="outline" className={reco.cls + " border gap-1"}>
  <RecoIcon size={11} /> {reco.label}
  </Badge>
  )}
+ <div className="flex flex-1 gap-4 min-w-[240px]">
+ {gauge("Adéquation au poste", app.ai_match_percentage)}
+ {gauge("Qualité du CV", app.ai_score)}
  </div>
- </div>
- {app.ai_summary && <p className="text-sm leading-relaxed">{app.ai_summary}</p>}
- {Array.isArray(app.ai_skills) && app.ai_skills.length > 0 && (
- <div className="flex flex-wrap gap-1">
- {app.ai_skills.map((s, i) => (
- <Badge key={i} variant="secondary"className="text-[10px] font-normal">{s}</Badge>
+ <span className="text-xs text-primary font-medium group-open:hidden">Voir le détail</span>
+ <span className="text-xs text-primary font-medium hidden group-open:inline">Masquer</span>
+ </summary>
+ <div className="px-3 pb-3 space-y-3 border-t pt-3">
+ {app.ai_summary && <p className="text-sm leading-relaxed text-foreground">{app.ai_summary}</p>}
+ {skills.length > 0 && (
+ <div className="flex flex-wrap gap-1.5">
+ {skills.map((s, i) => (
+ <Badge key={i} variant="secondary" className="text-[11px] font-normal">{s}</Badge>
  ))}
  </div>
  )}
+ {(strengths.length > 0 || weaknesses.length > 0) && (
  <div className="grid sm:grid-cols-2 gap-3">
- {Array.isArray(app.ai_strengths) && app.ai_strengths.length > 0 && (
- <div>
- <div className="text-xs font-semibold text-emerald-700 mb-1 flex items-center gap-1"><ThumbsUp size={11} /> Points forts</div>
- <ul className="text-xs space-y-0.5 list-disc list-inside text-foreground/80">
- {app.ai_strengths.map((s, i) => <li key={i}>{s}</li>)}
+ {strengths.length > 0 && (
+ <div className="rounded-md border border-emerald-500/20 bg-emerald-500/5 p-3">
+ <div className="text-xs font-semibold text-emerald-700 mb-1.5 flex items-center gap-1"><ThumbsUp size={12} /> Points forts</div>
+ <ul className="text-[13px] space-y-1 list-disc pl-4 text-foreground/85">
+ {strengths.map((s, i) => <li key={i}>{s}</li>)}
  </ul>
  </div>
  )}
- {Array.isArray(app.ai_weaknesses) && app.ai_weaknesses.length > 0 && (
- <div>
- <div className="text-xs font-semibold text-amber-700 mb-1 flex items-center gap-1"><AlertCircle size={11} /> Points d'attention</div>
- <ul className="text-xs space-y-0.5 list-disc list-inside text-foreground/80">
- {app.ai_weaknesses.map((s, i) => <li key={i}>{s}</li>)}
+ {weaknesses.length > 0 && (
+ <div className="rounded-md border border-amber-500/20 bg-amber-500/5 p-3">
+ <div className="text-xs font-semibold text-amber-700 mb-1.5 flex items-center gap-1"><AlertCircle size={12} /> Points d'attention</div>
+ <ul className="text-[13px] space-y-1 list-disc pl-4 text-foreground/85">
+ {weaknesses.map((s, i) => <li key={i}>{s}</li>)}
  </ul>
  </div>
  )}
  </div>
- {app.ai_analyzed_at && (
- <p className="text-[10px] text-muted-foreground">Analysé le {format(new Date(app.ai_analyzed_at),"dd/MM/yyyy HH:mm")}</p>
  )}
+ <p className="text-[11px] text-muted-foreground">
+ Analysé le {format(new Date(app.ai_analyzed_at), "dd/MM/yyyy HH:mm")} · aide à la décision, à valider par un humain
+ </p>
  </div>
+ </details>
  );
 }
 
