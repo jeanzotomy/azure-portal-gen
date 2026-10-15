@@ -138,36 +138,8 @@ interface Sector {
 
 type HrMainTab ="dashboard"|"recruitment"|"contracts"|"trainings"|"onboarding"|"employee-trainings";
 
-// Brouillon de la fenêtre « Nouvelle/Modifier offre » : sauvegardé en continu
-// dans sessionStorage pour survivre à un rechargement ou une mise en veille
-// de l'onglet par le navigateur (travail en cours jamais perdu).
-const JOB_DRAFT_KEY = "hr_job_dialog_draft";
-type JobFormState = {
- title: string; department: string; location: string; contract_type: ContractType;
- description: string; closing_date: string; status: JobStatus; sector: string;
- start_date: string; salary_range: string; contract_duration: string; renewable: boolean;
- candidates_sought: string;
-};
-type JobDraft = { open: boolean; editing: JobPosting | null; form: JobFormState; aiPrompt: string };
-const EMPTY_JOB_FORM: JobFormState = {
- title:"", department:"", location:"", contract_type:"CDI", description:"",
- closing_date:"", status:"brouillon", sector:"", start_date:"",
- salary_range:"", contract_duration:"", renewable: false, candidates_sought:"1",
-};
-// Le nombre de candidats recherchés reste un entier de 1 à 999 :
-// une saisie vide ou invalide retombe sur 1, jamais sur 0.
-export const parseCandidatesSought = (v: string): number => {
- const n = Math.floor(Number(v));
- return Number.isFinite(n) && n >= 1 ? Math.min(n, 999) : 1;
-};
-const readJobDraft = (): JobDraft | null => {
- try {
- const raw = sessionStorage.getItem(JOB_DRAFT_KEY);
- if (!raw) return null;
- const d = JSON.parse(raw);
- return d && d.open ? d : null;
- } catch { return null; }
-};
+// La création/modification d'offre se fait sur une page dédiée
+// (/rh/offres/nouvelle, /rh/offres/:id) : voir src/pages/hr/HrJobFormPage.tsx.
 
 export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTab, onTabChange }: { onboardingReadOnly?: boolean; defaultTab?: HrMainTab; activeTab?: HrMainTab; onTabChange?: (t: HrMainTab) => void } = {}) {
  const { user } = useAuthSession();
