@@ -179,8 +179,7 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
  const [departments, setDepartments] = useState<Department[]>([]);
  const [sectors, setSectors] = useState<Sector[]>([]);
  const [loading, setLoading] = useState(true);
- const [dialogOpen, setDialogOpen] = useState(() => !!readJobDraft());
- const [editing, setEditing] = useState<JobPosting | null>(() => readJobDraft()?.editing ?? null);
+ const navigate = useNavigate();
  const [deptDialogOpen, setDeptDialogOpen] = useState(false);
  const [newDeptName, setNewDeptName] = useState("");
  const [newDeptDesc, setNewDeptDesc] = useState("");
