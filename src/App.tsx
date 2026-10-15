@@ -29,6 +29,7 @@ const UnsubscribePage = lazy(() => import("./pages/UnsubscribePage.tsx"));
 const ApplicationTrackingPage = lazy(() => import("./pages/ApplicationTrackingPage.tsx"));
 const OnboardingPage = lazy(() => import("./pages/OnboardingPage.tsx"));
 const HrPortalPage = lazy(() => import("./pages/HrPortalPage.tsx"));
+const HrJobFormPage = lazy(() => import("./pages/hr/HrJobFormPage.tsx"));
 const VerifyCertificatePage = lazy(() => import("./pages/VerifyCertificatePage.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 const EmployeeTrainingAssignmentPage = lazy(() => import("./pages/admin/EmployeeTrainingAssignmentPage.tsx"));
@@ -100,6 +101,8 @@ const App = () => (
             <Route path="/candidature" element={<ApplicationTrackingPage />} />
             <Route path="/onboarding" element={<AuthGuard><OnboardingPage /></AuthGuard>} />
             <Route path="/rh" element={<AuthGuard requireRoles={["hr"]} fallbackRoute="/portal"><HrPortalPage /></AuthGuard>}>
+              <Route path="offres/nouvelle" element={<HrJobFormPage />} />
+              <Route path="offres/:id" element={<HrJobFormPage />} />
               <Route path="formations" element={<EmployeeTrainingManager />} />
               <Route path="formations/assignations/:userId" element={<EmployeeTrainingAssignmentPage basePath="/rh" parentLabel="RH" />} />
               <Route path="formations/groupes" element={<TrainingGroupsManagerPage basePath="/rh" parentLabel="RH" />} />
