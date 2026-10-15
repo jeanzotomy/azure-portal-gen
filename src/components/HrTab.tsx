@@ -200,28 +200,6 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
  const [appJobFilter, setAppJobFilter] = useState<string>("all");
  const [appView, setAppView] = useState<"list"|"kanban">("kanban");
  const [detailId, setDetailId] = useState<string | null>(null);
- // AI assistant (job creation form)
- const [aiPrompt, setAiPrompt] = useState(() => readJobDraft()?.aiPrompt ??"");
- const [aiAction, setAiAction] = useState<null |"generate"|"improve"|"shorten"|"translate_en">(null);
-  const [form, setForm] = useState<JobFormState>(() => {
-  const d = readJobDraft();
-  if (!d) return EMPTY_JOB_FORM;
-  // Brouillon antérieur au champ « candidats recherchés » : valeur par défaut.
-  return { ...EMPTY_JOB_FORM, ...d.form, candidates_sought: String(parseCandidatesSought(d.form?.candidates_sought ?? "1")) };
-  });
-
- // Sauvegarde continue du brouillon tant que la fenêtre est ouverte ;
- // effacée dès qu'elle se ferme (annulation ou enregistrement).
- useEffect(() => {
- try {
- if (dialogOpen) {
- sessionStorage.setItem(JOB_DRAFT_KEY, JSON.stringify({ open: true, editing, form, aiPrompt } satisfies JobDraft));
- } else {
- sessionStorage.removeItem(JOB_DRAFT_KEY);
- }
- } catch { /* stockage indisponible : ignorer */ }
- }, [dialogOpen, editing, form, aiPrompt]);
-
  const load = async () => {
  setLoading(true);
  const [jobsRes, appsRes, deptsRes, sectorsRes] = await Promise.all([
@@ -369,85 +347,8 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
  navigate("/rh/offres/nouvelle");
  };
 
- const runJobAssistant = async (action:"generate"|"improve"|"shorten"|"translate_en") => {
- if (action !=="generate"&& !form.description.trim()) {
- toast({ title:"Description vide", description:"Rédigez ou générez d'abord une description.", variant:"destructive"});
- return;
- }
- setAiAction(action);
- try {
- const { data, error } = await supabase.functions.invoke("hr-job-assistant", {
- body: {
- action,
- instructions: aiPrompt.trim() || undefined,
- context: {
- title: form.title,
- department: form.department,
- sector: form.sector,
- location: form.location,
- contract_type: form.contract_type,
- contract_duration: form.contract_duration,
- start_date: form.start_date,
-  salary_range: form.salary_range,
-  candidates_sought: parseCandidatesSought(form.candidates_sought),
-  description: form.description,
- },
- },
- });
- if (error) throw new Error(error.message);
- const res = (data as any)?.result;
- if (!res?.description) throw new Error("Réponse IA vide");
- const cleaned = sanitizeAiText(res.description);
- const cleanedTitle = res.title_suggestion ? sanitizeAiText(res.title_suggestion).replace(/\n+/g,"").trim() :"";
- setForm((f) => ({
- ...f,
- description: cleaned,
- title: !f.title.trim() && cleanedTitle ? cleanedTitle : f.title,
- }));
- toast({ title:"✓ Description mise à jour par l'IA"});
- } catch (e) {
- toast({ title:"IA indisponible", description: (e as Error).message, variant:"destructive"});
- } finally {
- setAiAction(null);
- }
- };
-
-
  const openEdit = (job: JobPosting) => {
  navigate(`/rh/offres/${job.id}`);
- };
-
- const handleSave = async () => {
- if (!user) return;
- if (!form.title.trim() || !form.location.trim() || !form.description.trim()) {
- toast({ title:"Champs requis", description:"Titre, lieu et description sont obligatoires.", variant:"destructive"});
- return;
- }
- const payload = {
- title: form.title.trim(),
- department: form.department.trim() || null,
- location: form.location.trim(),
- contract_type: form.contract_type,
- description: form.description.trim(),
- closing_date: form.closing_date || null,
- status: form.status,
- sector: form.sector.trim() || null,
- start_date: form.start_date.trim() || null,
- salary_range: form.salary_range.trim() || null,
- contract_duration: form.contract_type ==="CDD"? (form.contract_duration.trim() || null) : null,
-  renewable: form.contract_type ==="CDD"? form.renewable : false,
-  candidates_sought: parseCandidatesSought(form.candidates_sought),
-  };
- const res = editing
- ? await supabase.from("job_postings").update(payload).eq("id", editing.id)
- : await supabase.from("job_postings").insert({ ...payload, created_by: user.id });
- if (res.error) {
- toast({ title:"Erreur", description: res.error.message, variant:"destructive"});
- return;
- }
- toast({ title: editing ?"Offre modifiée":"Offre créée"});
- setDialogOpen(false);
- load();
  };
 
  const handleDelete = (id: string) => {
