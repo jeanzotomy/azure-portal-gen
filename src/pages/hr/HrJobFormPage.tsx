@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { Button } from "@/components/ui/button";
@@ -190,12 +190,12 @@ export default function HrJobFormPage() {
     }
     try { sessionStorage.removeItem(draftKey(id)); } catch { /* ignorer */ }
     toast({ title: isEdit ? "Offre modifiée" : "Offre créée" });
-    navigate("/rh?tab=recruitment");
+    navigate(backTo);
   };
 
   const handleCancel = () => {
     try { sessionStorage.removeItem(draftKey(id)); } catch { /* ignorer */ }
-    navigate("/rh?tab=recruitment");
+    navigate(backTo);
   };
 
   const handleAddDepartment = async () => {
