@@ -171,7 +171,29 @@ Deno.serve(async (req) => {
       status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
     })
   }
+  // Public "created" confirmation: allowed for the candidate right after submission,
+  // only for a fresh application (< 15 min) that has not yet received its confirmation.
+  let publicCreated = false
   if (token !== serviceKey) {
+    let peek: any = null
+    try { peek = await req.clone().json() } catch { /* ignore */ }
+    if (peek?.event === 'created' && (peek.application_id || peek.applicationId)) {
+      const admin = createClient(supabaseUrl, serviceKey)
+      const id = peek.application_id || peek.applicationId
+      const { data: a } = await admin.from('job_applications').select('id, created_at').eq('id', id).maybeSingle()
+      const fresh = a && Date.now() - new Date(a.created_at).getTime() < 15 * 60 * 1000
+      if (fresh) {
+        const { data: logs } = await admin.from('email_send_log').select('id')
+          .eq('template_name', 'application-received').eq('status', 'sent')
+          .contains('metadata', { application_id: id }).limit(1)
+        if (logs && logs.length > 0) {
+          return new Response(JSON.stringify({ skipped: true, reason: 'already_sent' }), { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+        }
+        publicCreated = true
+      }
+    }
+  }
+  if (token !== serviceKey && !publicCreated) {
     const caller = createClient(supabaseUrl, anonKey, { global: { headers: { Authorization: `Bearer ${token}` } } })
     const { data: u } = await caller.auth.getUser()
     if (!u?.user) {

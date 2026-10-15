@@ -297,6 +297,12 @@ export function JobApplicationDialog({ open, onOpenChange, jobId, jobTitle }: Pr
  onOpenChange(false);
  return;
  }
+ if (row?.id) {
+ // Confirmation email to the candidate (server dedupes with the DB trigger)
+ supabase.functions.invoke("notify-application-status", {
+ body: { application_id: row.id, event: "created" },
+ }).catch((e) => console.warn("Confirmation email failed:", e));
+ }
  toast({
  title:"✓ Candidature envoyée",
  description: trackId
