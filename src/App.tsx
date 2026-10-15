@@ -88,6 +88,8 @@ const App = () => (
             <Route path="/install" element={<InstallPage />} />
             <Route path="/admin" element={<AuthGuard requireRoles={["admin","agent","comptable","gestionnaire"]} fallbackRoute="/portal"><AdminPage /></AuthGuard>}>
               <Route path="formations" element={<EmployeeTrainingManager />} />
+              <Route path="offres/nouvelle" element={<HrJobFormPage />} />
+              <Route path="offres/:id" element={<HrJobFormPage />} />
               <Route path="formations/assignations/:userId" element={<EmployeeTrainingAssignmentPage basePath="/admin" parentLabel="Admin" />} />
               <Route path="formations/groupes" element={<TrainingGroupsManagerPage basePath="/admin" parentLabel="Admin" />} />
               <Route path="users/:userId" element={<UserDetailPage />} />

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthSession } from "@/hooks/use-auth-session";
 import { Button } from "@/components/ui/button";
@@ -53,7 +53,10 @@ export default function HrJobFormPage() {
   const { id } = useParams<{ id: string }>();
   const isEdit = !!id;
   const navigate = useNavigate();
+  const location = useLocation();
   const { user } = useAuthSession();
+  // Retour vers l'espace d'origine : console admin ou portail RH.
+  const backTo = location.pathname.startsWith("/admin") ? "/admin?gtab=hr-recruitment" : "/rh?tab=recruitment";
 
   const [departments, setDepartments] = useState<Department[]>([]);
   const [sectors, setSectors] = useState<Sector[]>([]);
@@ -187,12 +190,12 @@ export default function HrJobFormPage() {
     }
     try { sessionStorage.removeItem(draftKey(id)); } catch { /* ignorer */ }
     toast({ title: isEdit ? "Offre modifiée" : "Offre créée" });
-    navigate("/rh?tab=recruitment");
+    navigate(backTo);
   };
 
   const handleCancel = () => {
     try { sessionStorage.removeItem(draftKey(id)); } catch { /* ignorer */ }
-    navigate("/rh?tab=recruitment");
+    navigate(backTo);
   };
 
   const handleAddDepartment = async () => {
@@ -226,7 +229,7 @@ export default function HrJobFormPage() {
     return (
       <div className="max-w-3xl mx-auto py-16 text-center space-y-4">
         <p className="text-muted-foreground">Cette offre est introuvable.</p>
-        <Button variant="outline" onClick={() => navigate("/rh?tab=recruitment")}><ArrowLeft size={14} /> Retour aux offres</Button>
+        <Button variant="outline" onClick={() => navigate(backTo)}><ArrowLeft size={14} /> Retour aux offres</Button>
       </div>
     );
   }

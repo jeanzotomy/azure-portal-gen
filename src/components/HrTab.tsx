@@ -122,7 +122,7 @@ type HrMainTab ="dashboard"|"recruitment"|"contracts"|"trainings"|"onboarding"|"
 // La création/modification d'offre se fait sur une page dédiée
 // (/rh/offres/nouvelle, /rh/offres/:id) : voir src/pages/hr/HrJobFormPage.tsx.
 
-export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTab, onTabChange }: { onboardingReadOnly?: boolean; defaultTab?: HrMainTab; activeTab?: HrMainTab; onTabChange?: (t: HrMainTab) => void } = {}) {
+export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTab, onTabChange, offerBasePath = "/rh/offres" }: { onboardingReadOnly?: boolean; defaultTab?: HrMainTab; activeTab?: HrMainTab; onTabChange?: (t: HrMainTab) => void; offerBasePath?: string } = {}) {
  const { user } = useAuthSession();
  const { isAdmin } = useUserRoles();
  // toast is provided by the sonner adapter declared at module scope.
@@ -297,11 +297,11 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
  };
 
  const openNew = () => {
- navigate("/rh/offres/nouvelle");
+ navigate(`${offerBasePath}/nouvelle`);
  };
 
  const openEdit = (job: JobPosting) => {
- navigate(`/rh/offres/${job.id}`);
+ navigate(`${offerBasePath}/${job.id}`);
  };
 
  const handleDelete = (id: string) => {
