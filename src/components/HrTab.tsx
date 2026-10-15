@@ -367,11 +367,7 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
  };
 
  const openNew = () => {
- setEditing(null);
- setForm(EMPTY_JOB_FORM);
- setAiPrompt("");
- setAiAction(null);
- setDialogOpen(true);
+ navigate("/rh/offres/nouvelle");
  };
 
  const runJobAssistant = async (action:"generate"|"improve"|"shorten"|"translate_en") => {
