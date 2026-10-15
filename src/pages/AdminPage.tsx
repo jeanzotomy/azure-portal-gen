@@ -242,8 +242,10 @@ function AdminContent() {
   const { t } = useTranslation();
   const formationsMatch = useMatch("/admin/formations/*");
   const userDetailMatch = useMatch("/admin/users/:userId");
+  const jobFormMatch = useMatch("/admin/offres/*");
   const isFormationsRoute = !!formationsMatch;
   const isUserDetailRoute = !!userDetailMatch;
+  const isJobFormRoute = !!jobFormMatch;
 
   // Auto-open services submenu when a services tab is active. Must run before any early return to keep hook order stable.
   const ADMIN_SERVICES_TABS: AdminTab[] = ["service-clients","service-catalog","service-invoices","payment-methods"];
@@ -874,7 +876,7 @@ function AdminContent() {
  <PortalInfoBar />
 
  <main className="flex-1 p-3 sm:p-6 pb-[calc(80px+env(safe-area-inset-bottom))] md:pb-6 overflow-auto">
- {isFormationsRoute || isUserDetailRoute ? (
+ {isFormationsRoute || isUserDetailRoute || isJobFormRoute ? (
  <Outlet />
  ) : (
  <>
