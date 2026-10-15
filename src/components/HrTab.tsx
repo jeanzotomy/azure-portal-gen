@@ -415,23 +415,7 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
 
 
  const openEdit = (job: JobPosting) => {
- setEditing(job);
- setForm({
- title: job.title,
- department: job.department ||"",
- location: job.location,
- contract_type: job.contract_type,
- description: job.description,
- closing_date: job.closing_date ||"",
- status: job.status,
- sector: job.sector ||"",
- start_date: job.start_date ||"",
- salary_range: job.salary_range ||"",
- contract_duration: job.contract_duration ||"",
-  renewable: job.renewable || false,
-  candidates_sought: String(job.candidates_sought ?? 1),
-  });
- setDialogOpen(true);
+ navigate(`/rh/offres/${job.id}`);
  };
 
  const handleSave = async () => {
