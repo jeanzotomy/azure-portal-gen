@@ -950,9 +950,6 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
  </Button>
  )}
  </div>
- {(app.ai_analyzed_at || app.ai_status ==="processing"|| app.ai_status ==="error") && (
- <AiAnalysisBlock app={app} />
- )}
  </CardContent>
  </Card>
  );
