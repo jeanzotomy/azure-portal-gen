@@ -8,6 +8,13 @@
       "when": 1791787073435,
       "tag": "0000_add_candidates_sought_to_job_postings",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1792029040795,
+      "tag": "0001_recruitment_internal_secret_and_locks",
+      "breakpoints": true
     }
   ]
 }
