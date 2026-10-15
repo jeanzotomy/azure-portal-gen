@@ -15,10 +15,17 @@ describe("lien de partage d'une offre d'emploi", () => {
     expect(url).toBe("https://www.cloudmature.com/careers/stagiaires-agents-commerciaux-3");
   });
 
+  it("redirige /partage vers la fiche lue en direct", () => {
+    const cfg = JSON.parse(readFileSync(resolve(__dirname, "../../staticwebapp.config.json"), "utf8"));
+    const r = cfg.routes.find((x: { route: string }) => x.route === "/partage");
+    expect(r.redirect).toMatch(/functions\/v1\/job-share$/);
+  });
+
   it("n'utilise plus l'adresse technique du backend dans la page d'offre", () => {
     const src = readFileSync(resolve(__dirname, "../pages/JobDetailPage.tsx"), "utf8");
     expect(src).not.toContain("supabase.co");
     expect(src).not.toMatch(/functions\/v1/);
     expect(src).toContain("publicUrl(");
+    expect(src).toContain("/partage?slug=");
   });
 });
