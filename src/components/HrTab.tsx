@@ -965,12 +965,6 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
  <DialogTitle className="flex items-center gap-2"><Building2 size={18} /> Gérer les départements</DialogTitle>
  <DialogDescription>Créez, renommez ou supprimez les départements proposés dans les offres.</DialogDescription>
  </DialogHeader>
- <Dialog open={deptDialogOpen} onOpenChange={setDeptDialogOpen}>
- <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto w-[95vw] sm:w-auto">
- <DialogHeader>
- <DialogTitle className="flex items-center gap-2"><Building2 size={18} /> Gérer les départements</DialogTitle>
- <DialogDescription>Créez, renommez ou supprimez les départements proposés dans les offres.</DialogDescription>
- </DialogHeader>
  <div className="space-y-5 pt-1">
  <FormSection
  icon={<Plus size={16} />}
