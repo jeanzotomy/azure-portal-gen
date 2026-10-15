@@ -959,15 +959,12 @@ export default function HrTab({ onboardingReadOnly = false, defaultTab, activeTa
  </TabsContent>
  </Tabs>
 
- <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
- <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto w-[95vw] sm:w-auto">
+ <Dialog open={deptDialogOpen} onOpenChange={setDeptDialogOpen}>
+ <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto w-[95vw] sm:w-auto">
  <DialogHeader>
- <DialogTitle className="flex items-center gap-2">
- <Briefcase size={18} />
- {editing ?"Modifier l'offre":"Nouvelle offre d'emploi"}
- </DialogTitle>
- <DialogDescription>
- {editing ?"Mettez à jour les informations de l'offre publiée.":"Renseignez le poste, le contrat et la description publique."}
+ <DialogTitle className="flex items-center gap-2"><Building2 size={18} /> Gérer les départements</DialogTitle>
+ <DialogDescription>Créez, renommez ou supprimez les départements proposés dans les offres.</DialogDescription>
+ </DialogHeader>
  </DialogDescription>
  </DialogHeader>
  <div className="space-y-5 max-h-[60vh] overflow-y-auto pr-1 pt-1">
