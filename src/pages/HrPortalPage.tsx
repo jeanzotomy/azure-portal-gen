@@ -5,13 +5,14 @@ import { useAuthSession } from "@/hooks/use-auth-session";
 import { useUserRoles } from "@/hooks/use-admin";
 import { clearSmsMfaVerified } from "@/hooks/use-mfa";
 import { Button } from "@/components/ui/button";
-import { Briefcase, LogOut, Shield, FileSignature, Users, GraduationCap, BookOpenCheck, LayoutDashboard } from "lucide-react";
+import { Briefcase, LogOut, Shield, FileSignature, Users, GraduationCap, BookOpenCheck, LayoutDashboard, Inbox } from "lucide-react";
 import HrTab from "@/components/HrTab";
+import HrApplicationsList from "@/components/hr/HrApplicationsList";
 import { PortalInfoBar } from "@/components/PortalInfoBar";
 import cmLogo from "@/assets/cloudmature-logo.png";
 import { ProfileSignatureDialog } from "@/components/ProfileSignatureDialog";
 
-type HrSubTab = "dashboard" | "recruitment" | "contracts" | "onboarding" | "trainings" | "employee-trainings";
+type HrSubTab = "dashboard" | "recruitment" | "contracts" | "onboarding" | "trainings" | "employee-trainings" | "applications";
 
 const RH_SUBS: { id: HrSubTab; label: string; icon: typeof Briefcase }[] = [
   { id: "dashboard", label: "Vue d'ensemble", icon: LayoutDashboard },
@@ -22,6 +23,7 @@ const RH_SUBS: { id: HrSubTab; label: string; icon: typeof Briefcase }[] = [
 
 const RECRUITMENT_SUBS: { id: HrSubTab; label: string; icon: typeof Briefcase }[] = [
   { id: "recruitment", label: "Recrutement", icon: Briefcase },
+  { id: "applications", label: "Candidatures", icon: Inbox },
 ];
 
 export default function HrPortalPage() {
@@ -31,7 +33,7 @@ export default function HrPortalPage() {
   const location = useLocation();
   const [searchParams, setSearchParams] = useSearchParams();
   const rawSub = searchParams.get("tab");
-  const HR_TABS: readonly HrSubTab[] = ["dashboard", "recruitment", "contracts", "onboarding", "trainings", "employee-trainings"];
+  const HR_TABS: readonly HrSubTab[] = ["dashboard", "recruitment", "contracts", "onboarding", "trainings", "employee-trainings", "applications"];
   const sub: HrSubTab = HR_TABS.includes(rawSub as HrSubTab) ? (rawSub as HrSubTab) : "dashboard";
   const setSub = (t: HrSubTab) => {
     setSearchParams((prev) => {
@@ -151,7 +153,7 @@ export default function HrPortalPage() {
         </div>
       </nav>
       <main className="flex-1 p-3 sm:p-6 overflow-auto">
-        {isFormationsRoute ? <Outlet /> : <HrTab onboardingReadOnly activeTab={sub} onTabChange={setSub} />}
+        {isFormationsRoute ? <Outlet /> : sub === "applications" ? <HrApplicationsList /> : <HrTab onboardingReadOnly activeTab={sub} onTabChange={setSub} />}
       </main>
       <ProfileSignatureDialog open={signatureOpen} onOpenChange={setSignatureOpen} />
     </div>
