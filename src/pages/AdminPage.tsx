@@ -243,9 +243,10 @@ function AdminContent() {
   const formationsMatch = useMatch("/admin/formations/*");
   const userDetailMatch = useMatch("/admin/users/:userId");
   const jobFormMatch = useMatch("/admin/offres/*");
+  const candidateMatch = useMatch("/admin/candidatures/*");
   const isFormationsRoute = !!formationsMatch;
   const isUserDetailRoute = !!userDetailMatch;
-  const isJobFormRoute = !!jobFormMatch;
+  const isJobFormRoute = !!jobFormMatch || !!candidateMatch;
 
   // Auto-open services submenu when a services tab is active. Must run before any early return to keep hook order stable.
   const ADMIN_SERVICES_TABS: AdminTab[] = ["service-clients","service-catalog","service-invoices","payment-methods"];

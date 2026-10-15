@@ -30,6 +30,7 @@ const ApplicationTrackingPage = lazy(() => import("./pages/ApplicationTrackingPa
 const OnboardingPage = lazy(() => import("./pages/OnboardingPage.tsx"));
 const HrPortalPage = lazy(() => import("./pages/HrPortalPage.tsx"));
 const HrJobFormPage = lazy(() => import("./pages/hr/HrJobFormPage.tsx"));
+const CandidateDetailPage = lazy(() => import("./pages/hr/CandidateDetailPage.tsx"));
 const VerifyCertificatePage = lazy(() => import("./pages/VerifyCertificatePage.tsx"));
 const NotFound = lazy(() => import("./pages/NotFound.tsx"));
 const EmployeeTrainingAssignmentPage = lazy(() => import("./pages/admin/EmployeeTrainingAssignmentPage.tsx"));
@@ -90,6 +91,7 @@ const App = () => (
               <Route path="formations" element={<EmployeeTrainingManager />} />
               <Route path="offres/nouvelle" element={<HrJobFormPage />} />
               <Route path="offres/:id" element={<HrJobFormPage />} />
+              <Route path="candidatures/:id" element={<CandidateDetailPage />} />
               <Route path="formations/assignations/:userId" element={<EmployeeTrainingAssignmentPage basePath="/admin" parentLabel="Admin" />} />
               <Route path="formations/groupes" element={<TrainingGroupsManagerPage basePath="/admin" parentLabel="Admin" />} />
               <Route path="users/:userId" element={<UserDetailPage />} />
@@ -105,6 +107,7 @@ const App = () => (
             <Route path="/rh" element={<AuthGuard requireRoles={["hr"]} fallbackRoute="/portal"><HrPortalPage /></AuthGuard>}>
               <Route path="offres/nouvelle" element={<HrJobFormPage />} />
               <Route path="offres/:id" element={<HrJobFormPage />} />
+              <Route path="candidatures/:id" element={<CandidateDetailPage />} />
               <Route path="formations" element={<EmployeeTrainingManager />} />
               <Route path="formations/assignations/:userId" element={<EmployeeTrainingAssignmentPage basePath="/rh" parentLabel="RH" />} />
               <Route path="formations/groupes" element={<TrainingGroupsManagerPage basePath="/rh" parentLabel="RH" />} />
