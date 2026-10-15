@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from"react";
+import { useNavigate } from"react-router-dom";
 import { supabase } from"@/integrations/supabase/client";
 import { useAuthSession } from"@/hooks/use-auth-session";
 import { useUserRoles } from"@/hooks/use-admin";
@@ -31,6 +32,8 @@ import HrDashboardTab from"./hr/HrDashboardTab";
 import CandidatesKanban from"./hr/CandidatesKanban";
 import CandidateDetailDrawer from"./hr/CandidateDetailDrawer";
 import { exportCsv } from"@/lib/csv-export";
+// Réexporté pour le test existant (src/test/candidates-sought.test.ts).
+export { parseCandidatesSought } from"@/lib/job-form";
 
 type JobStatus ="brouillon"|"publiee"|"fermee";
 type ContractType ="CDI"|"CDD"|"Stage"|"Freelance"|"Alternance";

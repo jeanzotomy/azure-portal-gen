@@ -33,11 +33,7 @@ const EMPTY_JOB_FORM: JobFormState = {
   salary_range: "", contract_duration: "", renewable: false, candidates_sought: "1",
 };
 
-// Le nombre de candidats recherchés reste un entier de 1 à 999.
-const parseCandidatesSought = (v: string): number => {
-  const n = Math.floor(Number(v));
-  return Number.isFinite(n) && n >= 1 ? Math.min(n, 999) : 1;
-};
+import { parseCandidatesSought, sanitizeAiText } from "@/lib/job-form";
 
 // Brouillon sauvegardé en continu : survit à un rechargement ou une mise en
 // veille de l'onglet. Clé distincte par offre pour ne pas mélanger les brouillons.
@@ -49,18 +45,6 @@ const readDraft = (id: string | undefined): JobDraft | null => {
     return raw ? JSON.parse(raw) : null;
   } catch { return null; }
 };
-
-function sanitizeAiText(input: string): string {
-  if (!input) return "";
-  let s = input.replace(/\r\n/g, "\n");
-  s = s.replace(/\*{1,3}([^*\n]+?)\*{1,3}/g, "$1");
-  s = s.replace(/\*+/g, "");
-  s = s.replace(/^\s{0,3}#{1,6}\s+/gm, "");
-  s = s.replace(/^\s*[•·–-]\s+/gm, "-");
-  s = s.replace(/\n{3,}/g, "\n\n");
-  s = s.split("\n").map((l) => l.replace(/\s+$/g, "")).join("\n");
-  return s.trim();
-}
 
 interface Department { id: string; name: string }
 interface Sector { id: string; name: string }
