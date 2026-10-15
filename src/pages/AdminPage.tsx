@@ -490,6 +490,7 @@ function AdminContent() {
  </header>
  <PortalInfoBar />
  <main className="flex-1 p-3 sm:p-6 pb-[calc(80px+env(safe-area-inset-bottom))] md:pb-6 overflow-auto">
+ {isJobFormRoute ? <Outlet /> : <>
  {gestionnaireTab ==="dashboard"&& <AdminDashboard />}
  {gestionnaireTab ==="projects"&& <AdminProjects assignedCount={assignedProjectsCount} />}
  {gestionnaireTab ==="tickets"&& <AdminTickets />}
@@ -505,6 +506,7 @@ function AdminContent() {
  {gestionnaireTab ==="service-catalog"&& <ServiceCatalogTab />}
  {gestionnaireTab ==="service-invoices"&& <ServiceInvoicesTab />}
  {gestionnaireTab ==="payment-methods"&& <PaymentMethodsTab />}
+ </>}
  </main>
  </div>
  <ProfileSignatureDialog open={signatureOpen} onOpenChange={setSignatureOpen} />
@@ -932,6 +934,7 @@ function AdminContent() {
  <HrTab
  activeTab={hrTabMap[tab]}
  onTabChange={(t) => setTab(reverseMap[t])}
+ offerBasePath="/admin/offres"
  />
  );
  })()}
