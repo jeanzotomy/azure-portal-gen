@@ -52,4 +52,15 @@ describe("chargement d'une offre existante", () => {
     await waitFor(() => expect(screen.getByLabelText(/Titre du poste/)).toHaveValue("Titre en cours"));
     expect(mocks.load).not.toHaveBeenCalled();
   });
+
+  it("ignore le brouillon vide laissé par l'ancien comportement", async () => {
+    sessionStorage.setItem(key, JSON.stringify({ form: {
+      title: "", department: "", location: "", contract_type: "CDI", description: "",
+      closing_date: "", status: "brouillon", sector: "", start_date: "",
+      salary_range: "", contract_duration: "", renewable: false, candidates_sought: "1",
+    }, aiPrompt: "" }));
+    open();
+    await waitFor(() => expect(screen.getByLabelText(/Titre du poste/)).toHaveValue(job.title));
+    expect(mocks.load).toHaveBeenCalledOnce();
+  });
 });

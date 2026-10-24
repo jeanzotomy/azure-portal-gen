@@ -43,7 +43,12 @@ type JobDraft = { form: JobFormState; aiPrompt: string };
 const readDraft = (id: string | undefined): JobDraft | null => {
   try {
     const raw = sessionStorage.getItem(draftKey(id));
-    return raw ? JSON.parse(raw) : null;
+    const draft: JobDraft | null = raw ? JSON.parse(raw) : null;
+    // Ignorer les brouillons vides créés avant le chargement par l'ancien comportement.
+    if (id && draft && !draft.aiPrompt && Object.entries(EMPTY_JOB_FORM).every(
+      ([key, value]) => draft.form?.[key as keyof JobFormState] === value,
+    )) return null;
+    return draft;
   } catch { return null; }
 };
 
@@ -80,10 +85,12 @@ export default function HrJobFormPage() {
 
   // Sauvegarde continue du brouillon.
   useEffect(() => {
+    // Ne jamais transformer le formulaire initial en brouillon avant la lecture de l'offre.
+    if (loading || notFound) return;
     try {
       sessionStorage.setItem(draftKey(id), JSON.stringify({ form, aiPrompt } satisfies JobDraft));
     } catch { /* stockage indisponible : ignorer */ }
-  }, [id, form, aiPrompt]);
+  }, [id, form, aiPrompt, loading, notFound]);
 
   useEffect(() => {
     (async () => {
