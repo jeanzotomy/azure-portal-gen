@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, type InputHTMLAttributes } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,6 +25,25 @@ const STATUSES: Record<string, string> = { brouillon: "Brouillon", envoyee: "Env
 
 export const formatGnf = (n: number) => `${Math.round(n || 0).toLocaleString("fr-FR").replace(/\s/g, " ")} GNF`;
 export const milestonesTotal = (m: ProposalMilestone[]) => m.reduce((s, x) => s + (Number(x.percent) || 0), 0);
+
+/** Saisie monétaire : jamais de montant négatif, jamais de valeur non numérique. */
+export const toNonNegative = (raw: unknown) => {
+  const n = Number(raw);
+  return Number.isFinite(n) && n > 0 ? n : 0;
+};
+
+/** Champ numérique qui refuse le signe moins à la frappe, à la molette et au collage. */
+const NonNegativeInput = ({ value, onChange, ...props }: { value: number; onChange: (n: number) => void } & InputHTMLAttributes<HTMLInputElement>) => (
+  <Input
+    type="number"
+    min={0}
+    onKeyDown={(x) => { if (["-", "+", "e", "E"].includes(x.key)) x.preventDefault(); }}
+    onDrop={(x) => x.preventDefault()}
+    value={value === 0 ? "" : value}
+    onChange={(x) => onChange(toNonNegative(x.target.value))}
+    {...props}
+  />
+);
 
 const MILESTONE_PRESETS: { label: string; milestones: ProposalMilestone[] }[] = [
   { label: "50 / 50", milestones: [{ label: "À la signature", percent: 50 }, { label: "À la livraison", percent: 50 }] },
@@ -267,6 +286,8 @@ export default function ProposalsTab() {
     if (!editing) return;
     if (!editing.client_name.trim()) return toast.error("Indiquez le nom du client");
     if (milestonesTotal(editing.milestones) !== 100) return toast.error("Les jalons de paiement doivent totaliser 100 %");
+    if (editing.options.some((o) => o.price_min < 0 || o.price_max < 0) || editing.milestones.some((m) => m.percent < 0))
+      return toast.error("Les montants et les pourcentages ne peuvent pas être négatifs");
     setSaving(true);
     const { id, created_at, ...payload } = editing;
     const { data: u } = await supabase.auth.getUser();
@@ -427,7 +448,7 @@ export default function ProposalsTab() {
             {e.milestones.map((m, i) => (
               <div key={i} className="flex gap-2">
                 <Input value={m.label} onChange={(x) => set({ milestones: e.milestones.map((y, j) => j === i ? { ...y, label: x.target.value } : y) })} />
-                <Input type="number" className="w-24" value={m.percent} onChange={(x) => set({ milestones: e.milestones.map((y, j) => j === i ? { ...y, percent: Number(x.target.value) } : y) })} />
+                <NonNegativeInput type="number" className="w-24" value={m.percent} onChange={(n) => set({ milestones: e.milestones.map((y, j) => j === i ? { ...y, percent: n } : y) })} />
                 <Button size="icon" variant="ghost" onClick={() => set({ milestones: e.milestones.filter((_, j) => j !== i) })}><Trash2 className="h-4 w-4" /></Button>
               </div>
             ))}
@@ -445,8 +466,8 @@ export default function ProposalsTab() {
               <Input value={o.name} onChange={(x) => setOpt(i, { name: x.target.value })} />
               <Input placeholder="Objectif" value={o.objective} onChange={(x) => setOpt(i, { objective: x.target.value })} />
               <div className="grid grid-cols-2 gap-2">
-                <Input type="number" placeholder="Prix min GNF" value={o.price_min} onChange={(x) => setOpt(i, { price_min: Number(x.target.value) })} />
-                <Input type="number" placeholder="Prix max GNF" value={o.price_max} onChange={(x) => setOpt(i, { price_max: Number(x.target.value) })} />
+                <NonNegativeInput placeholder="Prix min GNF" value={o.price_min} onChange={(n) => setOpt(i, { price_min: n })} />
+                <NonNegativeInput placeholder="Prix max GNF" value={o.price_max} onChange={(n) => setOpt(i, { price_max: n })} />
               </div>
               <DelayPicker value={o.delay} onChange={(v) => setOpt(i, { delay: v })} />
               <div className="flex gap-2">

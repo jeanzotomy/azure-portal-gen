@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { milestonesTotal, websiteTemplate, formatGnf } from "@/components/admin/ProposalsTab";
+import { milestonesTotal, websiteTemplate, formatGnf, toNonNegative } from "@/components/admin/ProposalsTab";
 
 describe("propositions commerciales", () => {
   it("le modèle site web propose 40/30/30 = 100 %", () => {
@@ -13,5 +13,13 @@ describe("propositions commerciales", () => {
   });
   it("formate les montants en GNF sans décimale", () => {
     expect(formatGnf(35000000)).toBe("35\u202F000\u202F000\u202FGNF");
+  });
+  it("refuse les montants négatifs à la saisie", () => {
+    expect(toNonNegative("-500")).toBe(0);
+    expect(toNonNegative(-500)).toBe(0);
+    expect(toNonNegative("")).toBe(0);
+    expect(toNonNegative(null)).toBe(0);
+    expect(toNonNegative("1200000")).toBe(1200000);
+    expect(toNonNegative("0")).toBe(0);
   });
 });
