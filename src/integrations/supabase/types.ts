@@ -341,6 +341,60 @@ export type Database = {
         }
         Relationships: []
       }
+      commercial_proposals: {
+        Row: {
+          accepted_option: number | null
+          client_contact: string | null
+          client_email: string | null
+          client_name: string
+          created_at: string
+          created_by: string | null
+          features: Json
+          id: string
+          milestones: Json
+          options: Json
+          status: string
+          summary: string | null
+          title: string
+          updated_at: string
+          valid_until: string | null
+        }
+        Insert: {
+          accepted_option?: number | null
+          client_contact?: string | null
+          client_email?: string | null
+          client_name?: string
+          created_at?: string
+          created_by?: string | null
+          features?: Json
+          id?: string
+          milestones?: Json
+          options?: Json
+          status?: string
+          summary?: string | null
+          title?: string
+          updated_at?: string
+          valid_until?: string | null
+        }
+        Update: {
+          accepted_option?: number | null
+          client_contact?: string | null
+          client_email?: string | null
+          client_name?: string
+          created_at?: string
+          created_by?: string | null
+          features?: Json
+          id?: string
+          milestones?: Json
+          options?: Json
+          status?: string
+          summary?: string | null
+          title?: string
+          updated_at?: string
+          valid_until?: string | null
+        }
+        Relationships: []
+      }
       contact_email_otps: {
         Row: {
           attempts: number

@@ -6,6 +6,7 @@ import { Badge } from "@/components/ui/badge";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Briefcase, BookOpen, Receipt, CreditCard, Tag, Plug, ExternalLink, AlertCircle, Eye, EyeOff } from "lucide-react";
+import ProposalsTab from "@/components/admin/ProposalsTab";
 import ServiceClientsTab from "@/components/ServiceClientsTab";
 import ServiceCatalogTab from "@/components/ServiceCatalogTab";
 import ServiceInvoicesTab from "@/components/ServiceInvoicesTab";
@@ -19,7 +20,7 @@ interface CommerceTabProps {
   initialSection?: CommerceSection;
 }
 
-export type CommerceSection = "clients" | "catalog" | "invoices" | "methods" | "pricing" | "providers";
+export type CommerceSection = "proposals" | "clients" | "catalog" | "invoices" | "methods" | "pricing" | "providers";
 
 export default function CommerceTab({ initialSection = "catalog"
   }: CommerceTabProps) {
@@ -45,6 +46,8 @@ export default function CommerceTab({ initialSection = "catalog"
 
       <Tabs value={section} onValueChange={(v) => setSection(v as CommerceSection)} className="w-full">
         <TabsList className="inline-flex flex-wrap h-auto w-fit max-w-full">
+          <TabsTrigger value="proposals"
+  className="gap-1.5"><Receipt className="h-3.5 w-3.5" /> Propositions</TabsTrigger>
           <TabsTrigger value="catalog"
   className="gap-1.5"><BookOpen className="h-3.5 w-3.5" /> Catalogue</TabsTrigger>
           <TabsTrigger value="clients"
@@ -59,6 +62,8 @@ export default function CommerceTab({ initialSection = "catalog"
   className="gap-1.5"><Plug className="h-3.5 w-3.5" /> Providers</TabsTrigger>
         </TabsList>
 
+        <TabsContent value="proposals"
+  className="mt-4"><ProposalsTab /></TabsContent>
         <TabsContent value="clients"
   className="mt-4"><ServiceClientsTab /></TabsContent>
         <TabsContent value="catalog"

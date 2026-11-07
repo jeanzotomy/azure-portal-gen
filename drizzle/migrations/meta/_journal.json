@@ -15,6 +15,13 @@
       "when": 1792029040795,
       "tag": "0001_recruitment_internal_secret_and_locks",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1794047465021,
+      "tag": "0002_commercial_proposals",
+      "breakpoints": true
     }
   ]
 }
