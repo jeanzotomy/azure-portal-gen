@@ -29,6 +29,7 @@ const UnsubscribePage = lazy(() => import("./pages/UnsubscribePage.tsx"));
 const ApplicationTrackingPage = lazy(() => import("./pages/ApplicationTrackingPage.tsx"));
 const OnboardingPage = lazy(() => import("./pages/OnboardingPage.tsx"));
 const HrPortalPage = lazy(() => import("./pages/HrPortalPage.tsx"));
+const CommercialPortalPage = lazy(() => import("./pages/CommercialPortalPage.tsx"));
 const HrJobFormPage = lazy(() => import("./pages/hr/HrJobFormPage.tsx"));
 const CandidateDetailPage = lazy(() => import("./pages/hr/CandidateDetailPage.tsx"));
 const VerifyCertificatePage = lazy(() => import("./pages/VerifyCertificatePage.tsx"));
@@ -112,6 +113,7 @@ const App = () => (
               <Route path="formations/assignations/:userId" element={<EmployeeTrainingAssignmentPage basePath="/rh" parentLabel="RH" />} />
               <Route path="formations/groupes" element={<TrainingGroupsManagerPage basePath="/rh" parentLabel="RH" />} />
             </Route>
+            <Route path="/commercial" element={<AuthGuard requireRoles={["commercial","admin"]} fallbackRoute="/portal"><CommercialPortalPage /></AuthGuard>} />
             <Route path="/verify" element={<VerifyCertificatePage />} />
             <Route path="/verify/:code" element={<VerifyCertificatePage />} />
             <Route path="/audit-licences-microsoft" element={<PublicFormPage slug="audit-licences-microsoft" />} />

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuthSession } from "@/hooks/use-auth-session";
 
-export type AppRole = "admin" | "agent" | "client" | "comptable" | "gestionnaire" | "hr" | "onboarding";
+export type AppRole = "admin" | "agent" | "client" | "comptable" | "gestionnaire" | "hr" | "onboarding" | "commercial";
 
 const roleCache = new Map<string, AppRole[]>();
 
@@ -85,8 +85,9 @@ export function useUserRoles() {
   const isGestionnaire = roles.includes("gestionnaire");
   const isHr = roles.includes("hr");
   const isOnboarding = roles.includes("onboarding");
+  const isCommercial = roles.includes("commercial");
 
-  return { roles, isAdmin, isAgent, isComptable, isGestionnaire, isHr, isOnboarding, loading: !ready || loading };
+  return { roles, isAdmin, isAgent, isComptable, isGestionnaire, isHr, isOnboarding, isCommercial, loading: !ready || loading };
 }
 
 /** @deprecated Use useUserRoles instead */

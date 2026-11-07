@@ -27,15 +27,7 @@ interface ProfileRow {
   updated_at?: string | null;
 }
 
-const ROLE_LABELS: Record<string, string> = {
-  admin: "Administrateur",
-  agent: "Agent",
-  comptable: "Comptable",
-  gestionnaire: "Gestionnaire",
-  hr: "Ressources humaines",
-  onboarding: "Onboarding",
-  client: "Client",
-};
+import { ROLE_LABELS } from "@/lib/roles";
 
 export default function UserDetailPage() {
   const { userId = ""

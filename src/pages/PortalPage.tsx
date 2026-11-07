@@ -71,7 +71,7 @@ function PortalContent() {
  const [profileIncomplete, setProfileIncomplete] = useState(false);
  const [daysLeft, setDaysLeft] = useState<number | null>(null);
  const navigate = useNavigate();
- const { isAdmin, isAgent, isComptable, isGestionnaire, isOnboarding } = useUserRoles();
+ const { isAdmin, isAgent, isComptable, isGestionnaire, isOnboarding, isCommercial } = useUserRoles();
  const { mfaVerified, timedOut: mfaTimedOut } = useMfaCheck();
  const { state } = useSidebar();
  const collapsed = state ==="collapsed";
@@ -176,10 +176,10 @@ function PortalContent() {
  </SidebarGroup>
 
  <div className="mt-auto p-3 border-t border-sidebar-border space-y-1">
- {(isAdmin || isAgent || isComptable || isGestionnaire) && (
- <SidebarMenuButton onClick={() => navigate("/admin")} tooltip={isAdmin ? t("portal.admin") : isGestionnaire ?"Espace Gestionnaire": isComptable ?"Espace Comptable": t("portal.agentSpace")} className="gap-3 text-primary">
+ {(isAdmin || isAgent || isComptable || isGestionnaire || isCommercial) && (
+  <SidebarMenuButton onClick={() => navigate(isCommercial && !isAdmin && !isAgent && !isComptable && !isGestionnaire ?"/commercial":"/admin")} tooltip={isAdmin ? t("portal.admin") : isGestionnaire ?"Espace Gestionnaire": isComptable ?"Espace Comptable": isCommercial ?"Espace Commercial": t("portal.agentSpace")} className="gap-3 text-primary">
  <Shield size={18} />
- <span>{isAdmin ? t("portal.admin") : isGestionnaire ?"Espace Gestionnaire": isComptable ?"Espace Comptable": t("portal.agentSpace")}</span>
+ <span>{isAdmin ? t("portal.admin") : isGestionnaire ?"Espace Gestionnaire": isComptable ?"Espace Comptable": isCommercial ?"Espace Commercial": t("portal.agentSpace")}</span>
  </SidebarMenuButton>
  )}
  <SidebarMenuButton onClick={handleLogout} tooltip={t("portal.logout")} className="text-destructive hover:text-destructive gap-3">
@@ -199,9 +199,9 @@ function PortalContent() {
  </h2>
  </div>
  <div className="flex items-center gap-2">
- {(isAdmin || isAgent || isComptable || isGestionnaire) && (
- <span className="text-xs bg-primary/10 text-primary px-2.5 py-1 rounded-full font-medium flex items-center gap-1 cursor-pointer hover:bg-primary/20 transition-colors"onClick={() => navigate("/admin")}>
- <Shield size={12} /> {isAdmin ?"Admin": isGestionnaire ?"Gestionnaire": isComptable ?"Comptable":"Agent"}
+ {(isAdmin || isAgent || isComptable || isGestionnaire || isCommercial) && (
+ <span className="text-xs bg-primary/10 text-primary px-2.5 py-1 rounded-full font-medium flex items-center gap-1 cursor-pointer hover:bg-primary/20 transition-colors"onClick={() => navigate(isCommercial && !isAdmin && !isAgent && !isComptable && !isGestionnaire ?"/commercial":"/admin")}>
+ <Shield size={12} /> {isAdmin ?"Admin": isGestionnaire ?"Gestionnaire": isComptable ?"Comptable": isCommercial ?"Commercial":"Agent"}
  </span>
  )}
  <NotificationBell role="client"onNavigate={(target) => setTab(target as Tab)} />

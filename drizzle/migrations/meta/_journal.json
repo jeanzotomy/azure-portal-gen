@@ -22,6 +22,20 @@
       "when": 1794047465021,
       "tag": "0002_commercial_proposals",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1794049162327,
+      "tag": "0003_add_commercial_role",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1794049175501,
+      "tag": "0004_commercial_role_permissions",
+      "breakpoints": true
     }
   ]
 }

@@ -3,6 +3,7 @@ import adminLogo from"@/assets/cloudmature-logo.png";
 import { useNavigate, Link, useSearchParams, Outlet, useMatch } from"react-router-dom";
 import { supabase } from"@/integrations/supabase/client";
 import { useUserRoles } from"@/hooks/use-admin";
+import { INVITABLE_ROLES, ROLE_LABELS } from"@/lib/roles";
 import { useMfaCheck, clearSmsMfaVerified } from"@/hooks/use-mfa";
 import { useAuthSession } from"@/hooks/use-auth-session";
 import { useTranslation } from"@/i18n/LanguageContext";
@@ -3624,12 +3625,9 @@ function AdminUsers() {
  <SelectValue />
  </SelectTrigger>
  <SelectContent>
- <SelectItem value="client">Client</SelectItem>
- <SelectItem value="comptable">Comptable</SelectItem>
- <SelectItem value="gestionnaire">Gestionnaire</SelectItem>
- <SelectItem value="agent">Agent</SelectItem>
- <SelectItem value="hr">RH</SelectItem>
- <SelectItem value="admin">Admin</SelectItem>
+ {INVITABLE_ROLES.map((r) => (
+ <SelectItem key={r} value={r}>{ROLE_LABELS[r] || r}</SelectItem>
+ ))}
  </SelectContent>
  </Select>
  </div>
@@ -3650,7 +3648,7 @@ function AdminUsers() {
  <code className="text-xs text-muted-foreground block">email,nom,role</code>
  <code className="text-xs text-muted-foreground block">jean@exemple.com,Jean Dupont,client</code>
  <code className="text-xs text-muted-foreground block">marie@exemple.com,Marie Martin,agent</code>
- <p className="text-xs text-muted-foreground mt-2">Rôles : client, comptable, gestionnaire, agent, hr, admin</p>
+ <p className="text-xs text-muted-foreground mt-2">Rôles : client, commercial, comptable, gestionnaire, agent, hr, admin</p>
  </div>
 
  <label className="cursor-pointer">
