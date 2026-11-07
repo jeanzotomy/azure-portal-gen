@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Check, Copy, FileText, Minus, Plus, Printer, Save, Trash2, ArrowLeft, Sparkles, Search, ChevronLeft, ChevronRight, Download, Mail } from "lucide-react";
+import { Check, Copy, FileText, Minus, Plus, Printer, Save, Trash2, ArrowLeft, ArrowRight, Sparkles, Search, ChevronLeft, ChevronRight, Download, Mail } from "lucide-react";
 import { toast } from "sonner";
 import { useFormDraft } from "@/lib/form-draft";
 import { calculateProposalTax, isValidProposalTax } from "@/lib/proposal-tax";
@@ -31,6 +31,20 @@ const STATUSES: Record<string, string> = { brouillon: "Brouillon", envoyee: "Env
 
 export const formatGnf = (n: number) => `${Math.round(n || 0).toLocaleString("fr-FR").replace(/\s/g, " ")} GNF`;
 export const milestonesTotal = (m: ProposalMilestone[]) => m.reduce((s, x) => s + (Number(x.percent) || 0), 0);
+
+/** Une colonne se déplace avec toutes ses valeurs et sa sélection client. */
+export function reorderProposalOption(p: Proposal, from: number, to: number): Proposal {
+  if (!Number.isInteger(from) || !Number.isInteger(to) || from < 0 || to < 0 || from >= p.options.length || to >= p.options.length || from === to) return p;
+  const order = p.options.map((_, i) => i);
+  const [moved] = order.splice(from, 1);
+  order.splice(to, 0, moved);
+  return {
+    ...p,
+    options: order.map((i) => p.options[i]),
+    features: p.features.map((f) => ({ ...f, values: order.map((i) => f.values[i] ?? "non") })),
+    accepted_option: p.accepted_option === null ? null : order.indexOf(p.accepted_option),
+  };
+}
 
 /** Saisie monétaire : jamais de montant négatif, jamais de valeur non numérique. */
 export const toNonNegative = (raw: unknown) => {
@@ -555,6 +569,13 @@ export default function ProposalsTab() {
         <CardContent className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
           {e.options.map((o, i) => (
             <div key={i} className="space-y-2 rounded-lg border p-3">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-medium text-muted-foreground">{i + 1} / {e.options.length}</span>
+                <div className="flex gap-1">
+                  <Button type="button" size="icon" variant="ghost" title="Déplacer avant" aria-label={`Déplacer l’option ${i + 1} avant`} disabled={i === 0} onClick={() => setEditing(reorderProposalOption(e, i, i - 1))}><ArrowLeft className="h-4 w-4" /></Button>
+                  <Button type="button" size="icon" variant="ghost" title="Déplacer après" aria-label={`Déplacer l’option ${i + 1} après`} disabled={i === e.options.length - 1} onClick={() => setEditing(reorderProposalOption(e, i, i + 1))}><ArrowRight className="h-4 w-4" /></Button>
+                </div>
+              </div>
               <Input value={o.name} onChange={(x) => setOpt(i, { name: x.target.value })} />
               <Input placeholder="Objectif" value={o.objective} onChange={(x) => setOpt(i, { objective: x.target.value })} />
               <div className="grid grid-cols-2 gap-2">
