@@ -50,6 +50,18 @@ export const FEATURE_LIBRARY: { label: string; v: [FeatureValue, FeatureValue] }
   { label: "Hébergement, sécurité et sauvegardes", v: ["inclus", "inclus"] },
   { label: "Maintenance et support", v: ["option", "option"] },
   { label: "Formation des équipes", v: ["option", "inclus"] },
+  // Fonctionnalités propres aux applications métier
+  { label: "Gestion des utilisateurs et des rôles (droits par profil)", v: ["inclus", "inclus"] },
+  { label: "Formulaires métier avec contrôles de saisie", v: ["inclus", "inclus"] },
+  { label: "Tableaux de bord et indicateurs de suivi", v: ["inclus", "inclus"] },
+  { label: "Notifications internes et alertes automatiques", v: ["option", "inclus"] },
+  { label: "Circuit d'approbation (validation en cascade)", v: ["non", "inclus"] },
+  { label: "Génération automatique de documents (PDF)", v: ["option", "inclus"] },
+  { label: "Intégration avec vos logiciels (ERP, comptabilité…)", v: ["non", "option"] },
+  { label: "Mode hors-ligne (zones à faible connexion)", v: ["non", "option"] },
+  { label: "Journal d'audit des actions", v: ["option", "inclus"] },
+  { label: "Application mobile (Android / iOS)", v: ["option", "option"] },
+  { label: "API ouverte pour vos partenaires", v: ["non", "option"] },
 ];
 
 const f2 = (label: string, a: FeatureValue, b: FeatureValue): ProposalFeature => ({ label, values: [a, b] });
@@ -132,8 +144,38 @@ export function auditTemplate(): Proposal {
   };
 }
 
+export function businessAppTemplate(): Proposal {
+  return {
+    title: "Application métier & automatisation des processus", client_name: "", client_contact: "", client_email: "",
+    summary: "Deux niveaux d'ambition : une application qui digitalise un processus clé, ou une plateforme qui automatise et relie plusieurs processus métier.",
+    options: [
+      { name: "Option 1 — Application métier", objective: "Digitaliser un processus clé (demandes, suivi, validation)", price_min: 0, price_max: 0, delay: "8 à 10 semaines" },
+      { name: "Option 2 — Plateforme intégrée & automatisée", objective: "Relier plusieurs processus, réduire les ressaisies et les délais", price_min: 0, price_max: 0, delay: "2 à 3 mois" },
+    ],
+    features: fromLibrary([
+      "Gestion des utilisateurs et des rôles (droits par profil)",
+      "Formulaires métier avec contrôles de saisie",
+      "Tableaux de bord et indicateurs de suivi",
+      "Notifications internes et alertes automatiques",
+      "Circuit d'approbation (validation en cascade)",
+      "Génération automatique de documents (PDF)",
+      "Intégration avec vos logiciels (ERP, comptabilité…)",
+      "Mode hors-ligne (zones à faible connexion)",
+      "Journal d'audit des actions",
+      "Application mobile (Android / iOS)",
+      "API ouverte pour vos partenaires",
+      "Hébergement, sécurité et sauvegardes",
+      "Maintenance et support",
+      "Formation des équipes",
+    ]),
+    milestones: [{ label: "À la signature", percent: 40 }, { label: "Recette de la maquette fonctionnelle", percent: 30 }, { label: "Mise en production et formation", percent: 30 }],
+    status: "brouillon", accepted_option: null, valid_until: null,
+  };
+}
+
 export const TEMPLATES: { key: string; label: string; build: () => Proposal }[] = [
   { key: "site", label: "Site web", build: websiteTemplate },
+  { key: "metier", label: "Application métier", build: businessAppTemplate },
   { key: "cloud", label: "Migration cloud", build: cloudTemplate },
   { key: "formation", label: "Formation", build: trainingTemplate },
   { key: "audit", label: "Audit licences Microsoft", build: auditTemplate },
