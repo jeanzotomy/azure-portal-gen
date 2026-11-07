@@ -1,7 +1,14 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import { readFileSync } from "node:fs";
 import { filterProposals, paginateProposals } from "@/lib/proposal-list";
 import { proposalDocumentRows, generateProposalPdf, generateProposalWord } from "@/lib/proposal-documents";
 import { websiteTemplate } from "@/components/admin/ProposalsTab";
+
+vi.mock("@/lib/document-brand", async (importOriginal) => {
+  const original = await importOriginal<typeof import("@/lib/document-brand")>();
+  const base64 = readFileSync("src/assets/cloudmature-logo.png").toString("base64");
+  return { ...original, loadDocumentBrand: async () => ({ dataUrl: `data:image/png;base64,${base64}`, bytes: Uint8Array.from(atob(base64), (c) => c.charCodeAt(0)), colors: { primary: "007aa3", ink: "0B1F33", muted: "526171", surface: "EAF6FB", border: "D7E3EA", paper: "FFFFFF" } }) };
+});
 
 describe("recherche des propositions", () => {
   const rows = Array.from({ length: 13 }, (_, i) => ({ ...websiteTemplate(), client_name: i === 0 ? "Société LMS" : `Client ${i}`, status: i === 0 ? "acceptee" : "brouillon" }));

@@ -16,6 +16,14 @@
     --primary: 195 100% 30%;
     --primary-foreground: 0 0% 100%;
 
+    /* Papier commercial : couleurs fixes, indépendantes du thème de l'écran. */
+    --document-primary: #007aa3;
+    --document-ink: #0B1F33;
+    --document-muted: #526171;
+    --document-surface: #EAF6FB;
+    --document-border: #D7E3EA;
+    --document-paper: #FFFFFF;
+
     --secondary: 215 30% 15%;
     --secondary-foreground: 0 0% 100%;
 

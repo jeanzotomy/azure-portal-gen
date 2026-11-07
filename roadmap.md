@@ -1,4 +1,5 @@
 # Propositions commerciales
+- [x] Harmoniser l’aperçu et les exports PDF/Word avec le logo et les coordonnées des factures ; 12 tests réussis, téléchargements depuis l’offre réelle et contrôles visuels PDF/Word et mobile. Format Word paysage et débordement mobile corrigés.
 - [x] Ajouter acquisition et transfert de domaine, hébergement et migration.
 - [x] Permettre la sélection de services actifs du catalogue.
 - [x] Calculer une taxe facultative par option et afficher HT / taxe / TTC sur le document.

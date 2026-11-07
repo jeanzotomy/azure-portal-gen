@@ -15,6 +15,7 @@ import { filterProposals, paginateProposals } from "@/lib/proposal-list";
 import { generateProposalPdf, generateProposalWord, proposalFilename, blobToBase64 } from "@/lib/proposal-documents";
 import { saveAs } from "file-saver";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
+import { documentBrand as brand } from "@/lib/document-brand";
 
 export type FeatureValue = "inclus" | "non" | "option";
 export interface ProposalOption { name: string; objective: string; price_min: number; price_max: number; delay: string; tax_rate?: number; }
@@ -631,32 +632,44 @@ export default function ProposalsTab() {
       </Card>
 
       {/* Aperçu imprimable */}
-      <Card className="print:shadow-none print:border-0">
+      <Card className="min-w-0 max-w-[calc(100vw-2rem)] sm:max-w-none print:shadow-none print:border-0">
         <CardContent className="p-6 space-y-5">
-          <div className="flex justify-between items-start gap-4">
-            <div>
-              <p className="text-sm font-semibold text-primary">CloudMature</p>
-              <h2 className="text-xl font-bold">{e.title}</h2>
-              <p className="text-sm">Pour : <strong>{e.client_name || "—"}</strong>{e.client_contact ? ` · ${e.client_contact}` : ""}</p>
+          <div className="flex flex-col sm:flex-row justify-between items-start gap-5 border-b-2 border-primary pb-5">
+            <div className="space-y-3 min-w-0">
+              <div className="flex items-center gap-3">
+                <img src={brand.logo} alt="CloudMature" className="h-14 w-14 object-contain shrink-0" />
+                <div><p className="text-xl font-bold">{brand.name}</p><p className="text-xs text-primary">{brand.tagline}</p></div>
+              </div>
+              <div className="text-xs text-muted-foreground space-y-1">
+                <p>{brand.address}</p><p>{brand.city}</p>
+                <p className="text-primary">{brand.email}</p><p>{brand.phone}</p><p className="text-primary">{brand.website}</p>
+              </div>
             </div>
-            <div className="text-right text-xs text-muted-foreground">
+            <div className="sm:text-right text-xs text-muted-foreground space-y-1">
+              <p className="text-base font-bold text-foreground">PROPOSITION COMMERCIALE</p>
               <p>Date : {new Date(e.created_at || Date.now()).toLocaleDateString("fr-FR")}</p>
               {e.valid_until && <p>Valable jusqu'au {new Date(e.valid_until).toLocaleDateString("fr-FR")}</p>}
             </div>
+          </div>
+          <h2 className="text-xl font-bold break-words">{e.title}</h2>
+          <div className="bg-primary/5 border-l-4 border-primary p-3 text-sm">
+            <p className="text-xs font-semibold text-primary mb-1">PRÉPARÉ POUR</p>
+            <p><strong>{e.client_name || "—"}</strong>{e.client_contact ? ` · ${e.client_contact}` : ""}</p>
+            {e.client_email && <p className="text-xs text-muted-foreground break-all">{e.client_email}</p>}
           </div>
           {e.summary && <p className="text-sm">{e.summary}</p>}
           <div className="overflow-x-auto">
             <table className="w-full text-sm border-collapse">
               <thead>
-                <tr className="border-b">
+                <tr className="border-b bg-primary text-primary-foreground">
                   <th className="text-left p-2">Fonctionnalité</th>
-                  {e.options.map((o, i) => <th key={i} className={`p-2 text-center ${e.accepted_option === i ? "bg-primary/10" : ""}`}>{o.name}</th>)}
+                  {e.options.map((o, i) => <th key={i} className="p-2 text-center">{o.name}{e.accepted_option === i ? " (retenue)" : ""}</th>)}
                 </tr>
               </thead>
               <tbody>
                 <tr className="border-b"><td className="p-2 text-muted-foreground">Objectif</td>{e.options.map((o, i) => <td key={i} className="p-2 text-center">{o.objective || "—"}</td>)}</tr>
                 {e.features.map((f, i) => (
-                  <tr key={i} className="border-b"><td className="p-2">{f.label}</td>{f.values.map((v, k) => <td key={k} className="p-2 text-center"><ValueCell v={v} /></td>)}</tr>
+                  <tr key={i} className="border-b even:bg-muted/40"><td className="p-2">{f.label}</td>{f.values.map((v, k) => <td key={k} className="p-2 text-center"><ValueCell v={v} /></td>)}</tr>
                 ))}
                 <tr className="border-b"><td className="p-2 font-medium">Délai</td>{e.options.map((o, i) => <td key={i} className="p-2 text-center">{o.delay || "—"}</td>)}</tr>
                 <tr><td className="p-2 font-medium">Budget HT</td>{e.options.map((o, i) => (
@@ -665,7 +678,7 @@ export default function ProposalsTab() {
                 <tr className="border-b"><td className="p-2 font-medium">Taxe</td>{e.options.map((o, i) => (
                   <td key={i} className="p-2 text-center tabular-nums">{o.tax_rate === undefined ? "Non appliquée" : `${o.tax_rate} % · ${formatGnf(calculateProposalTax(o.price_min, o.tax_rate).tax)}${o.price_max > o.price_min ? ` – ${formatGnf(calculateProposalTax(o.price_max, o.tax_rate).tax)}` : ""}`}</td>
                 ))}</tr>
-                <tr><td className="p-2 font-medium">Budget TTC</td>{e.options.map((o, i) => (
+                <tr className="bg-primary/10"><td className="p-2 font-semibold">Budget TTC</td>{e.options.map((o, i) => (
                   <td key={i} className="p-2 text-center font-semibold tabular-nums">{formatGnf(calculateProposalTax(o.price_min, o.tax_rate).total)}{o.price_max > o.price_min ? ` – ${formatGnf(calculateProposalTax(o.price_max, o.tax_rate).total)}` : ""}</td>
                 ))}</tr>
               </tbody>
@@ -678,6 +691,7 @@ export default function ProposalsTab() {
             </div>
           )}
           <p className="text-xs text-muted-foreground">Montants indicatifs, ajustés après cadrage détaillé. Bon pour accord : ____________________</p>
+          <p className="border-t pt-3 text-xs text-muted-foreground flex flex-wrap gap-x-3 gap-y-1"><span>{brand.email}</span><span>{brand.phone}</span><span>{brand.website}</span></p>
         </CardContent>
       </Card>
     </div>
