@@ -18,8 +18,10 @@ import { template as contactOtp } from './contact-otp.tsx'
 import { template as invoiceDelivery } from './invoice-delivery.tsx'
 import { template as marketingFormConfirmation } from './marketing-form-confirmation.tsx'
 import { template as marketingFormNotification } from './marketing-form-notification.tsx'
+import { template as proposalDelivery } from './proposal-delivery.tsx'
 
 export const TEMPLATES: Record<string, TemplateEntry> = {
+  'proposal-delivery': proposalDelivery,
   'application-en-revue': applicationEnRevue,
   'application-entretien': applicationEntretien,
   'application-acceptee': applicationAcceptee,

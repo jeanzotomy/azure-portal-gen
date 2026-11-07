@@ -2,3 +2,4 @@
 - Store optional proposal tax rates inside each option's existing JSON payload and derive HT/tax/TTC totals rather than persisting computed amounts, preserving compatibility with older proposals.
 - Catalogue features are selected from active service_catalog records and saved as proposal snapshots; selecting a feature never silently changes a budget or purchases a service.
 - Invoice and customer drafts use the shared form-draft hook with user/document-scoped keys; invoice draft capture starts only after initialization and restores its currency without converting saved line prices again.
+- Proposal PDF/Word exports share document rows and tax calculations; proposal emails use the single email sender, validate sales roles and stored recipient server-side, and expose only seven-day signed links from a private bucket with no browser storage access.

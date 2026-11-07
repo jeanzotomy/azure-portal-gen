@@ -54,8 +54,10 @@ Deno.serve(async (req) => {
   let idempotencyKey: string
   let messageId: string
   let templateData: Record<string, any> = {}
+  let proposalRequest: Record<string, any> = {}
   try {
     const body = await req.json()
+    proposalRequest = body
     templateName = body.templateName || body.template_name
     recipientEmail = body.recipientEmail || body.recipient_email
     messageId = crypto.randomUUID()
@@ -102,7 +104,39 @@ Deno.serve(async (req) => {
   // Resolve effective recipient: template-level `to` takes precedence over
   // the caller-provided recipientEmail. This allows notification templates
   // to always send to a fixed address (e.g., site owner from env var).
-  const effectiveRecipient = template.to || recipientEmail
+  let effectiveRecipient = template.to || recipientEmail
+
+  // This template is a single requested proposal, never a campaign or anonymous send.
+  if (templateName === 'proposal-delivery') {
+    const admin = createClient(supabaseUrl, supabaseServiceKey)
+    const token = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '')
+    const { data: auth, error: authError } = await admin.auth.getUser(token)
+    if (authError || !auth.user) return new Response(JSON.stringify({ error: 'Connexion requise' }), { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    const { data: roles, error: roleError } = await admin.from('user_roles').select('role').eq('user_id', auth.user.id)
+    if (roleError || !roles?.some((r) => ['admin', 'gestionnaire', 'agent', 'commercial'].includes(r.role))) return new Response(JSON.stringify({ error: 'Accès interdit' }), { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    if (proposalRequest.expectedByClient !== true) return new Response(JSON.stringify({ error: 'La proposition doit être attendue par le client' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    const { data: proposal, error: proposalError } = await admin.from('commercial_proposals').select('id, title, client_name, client_email').eq('id', proposalRequest.proposalId).maybeSingle()
+    if (proposalError || !proposal || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(proposal.client_email || '')) return new Response(JSON.stringify({ error: 'Proposition ou adresse client invalide' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    const files = proposalRequest.documents
+    if (!Array.isArray(files) || files.length !== 2 || new Set(files.map((f) => f.extension)).size !== 2) return new Response(JSON.stringify({ error: 'PDF et Word requis' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+    const links: Record<string, string> = {}
+    for (const file of files) {
+      if (!['pdf', 'docx'].includes(file.extension) || typeof file.base64 !== 'string' || file.base64.length > 7000000) return new Response(JSON.stringify({ error: 'Document invalide ou trop volumineux' }), { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } })
+      let bytes: Uint8Array
+      try { bytes = Uint8Array.from(atob(file.base64), (c) => c.charCodeAt(0)) } catch { return new Response(JSON.stringify({ error: 'Document invalide' }), { status: 400, headers: corsHeaders }) }
+      const valid = file.extension === 'pdf' ? new TextDecoder().decode(bytes.slice(0, 5)) === '%PDF-' : bytes[0] === 80 && bytes[1] === 75
+      if (!valid || bytes.length > 5 * 1024 * 1024) return new Response(JSON.stringify({ error: 'Format de document invalide' }), { status: 400, headers: corsHeaders })
+      const path = `${proposal.id}/${crypto.randomUUID()}/proposition.${file.extension}`
+      const { error: uploadError } = await admin.storage.from('proposal-documents').upload(path, bytes, { contentType: file.extension === 'pdf' ? 'application/pdf' : 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' })
+      if (uploadError) return new Response(JSON.stringify({ error: 'Stockage des documents impossible' }), { status: 500, headers: corsHeaders })
+      const { data: link, error: linkError } = await admin.storage.from('proposal-documents').createSignedUrl(path, 7 * 24 * 3600)
+      if (linkError || !link) return new Response(JSON.stringify({ error: 'Lien de téléchargement indisponible' }), { status: 500, headers: corsHeaders })
+      links[file.extension] = link.signedUrl
+    }
+    effectiveRecipient = proposal.client_email
+    templateData = { title: proposal.title, clientName: proposal.client_name, message: typeof proposalRequest.message === 'string' ? proposalRequest.message.slice(0, 3000) : '', pdfUrl: links.pdf, wordUrl: links.docx }
+    idempotencyKey = `proposal-delivery:${proposal.id}:${String(proposalRequest.idempotencyKey || messageId).slice(0, 100)}`
+  }
 
   if (!effectiveRecipient) {
     return new Response(

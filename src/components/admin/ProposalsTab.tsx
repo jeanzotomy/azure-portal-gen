@@ -7,10 +7,14 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Check, Copy, FileText, Minus, Plus, Printer, Save, Trash2, ArrowLeft, Sparkles } from "lucide-react";
+import { Check, Copy, FileText, Minus, Plus, Printer, Save, Trash2, ArrowLeft, Sparkles, Search, ChevronLeft, ChevronRight, Download, Mail } from "lucide-react";
 import { toast } from "sonner";
 import { useFormDraft } from "@/lib/form-draft";
 import { calculateProposalTax, isValidProposalTax } from "@/lib/proposal-tax";
+import { filterProposals, paginateProposals } from "@/lib/proposal-list";
+import { generateProposalPdf, generateProposalWord, proposalFilename, blobToBase64 } from "@/lib/proposal-documents";
+import { saveAs } from "file-saver";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 
 export type FeatureValue = "inclus" | "non" | "option";
 export interface ProposalOption { name: string; objective: string; price_min: number; price_max: number; delay: string; tax_rate?: number; }
@@ -272,6 +276,18 @@ export default function ProposalsTab() {
   const [editing, setEditing] = useState<Proposal | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState(6);
+  const [exporting, setExporting] = useState(false);
+  const [emailOpen, setEmailOpen] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [expectedByClient, setExpectedByClient] = useState(false);
+  const [emailMessage, setEmailMessage] = useState("Bonjour,\n\nVoici la proposition préparée pour votre demande. Nous restons disponibles pour en discuter.\n\nBien cordialement,\nL’équipe CloudMature");
+  const [sendKey, setSendKey] = useState("");
+  const filtered = filterProposals(list, search, statusFilter);
+  const pagination = paginateProposals(filtered, page, pageSize);
 
   // Brouillon sauvegardé en continu : survit à une fermeture de fenêtre, un
   // rechargement forcé ou une déconnexion automatique. Clé distincte par proposition.
@@ -296,14 +312,16 @@ export default function ProposalsTab() {
       });
   }, []);
 
-  const save = async () => {
+  const save = async (): Promise<Proposal | undefined> => {
     if (!editing) return;
-    if (!editing.client_name.trim()) return toast.error("Indiquez le nom du client");
-    if (milestonesTotal(editing.milestones) !== 100) return toast.error("Les jalons de paiement doivent totaliser 100 %");
-    if (editing.options.some((o) => o.price_min < 0 || o.price_max < 0) || editing.milestones.some((m) => m.percent < 0))
-      return toast.error("Les montants et les pourcentages ne peuvent pas être négatifs");
-    if (editing.options.some((o) => !isValidProposalTax(o.tax_rate)))
-      return toast.error("Le taux de taxe doit être compris entre 0 et 100 %");
+    if (!editing.client_name.trim()) { toast.error("Indiquez le nom du client"); return; }
+    if (milestonesTotal(editing.milestones) !== 100) { toast.error("Les jalons de paiement doivent totaliser 100 %"); return; }
+    if (editing.options.some((o) => o.price_min < 0 || o.price_max < 0) || editing.milestones.some((m) => m.percent < 0)) {
+      toast.error("Les montants et les pourcentages ne peuvent pas être négatifs"); return;
+    }
+    if (editing.options.some((o) => !isValidProposalTax(o.tax_rate))) {
+      toast.error("Le taux de taxe doit être compris entre 0 et 100 %"); return;
+    }
     setSaving(true);
     const { id, created_at, ...payload } = editing;
     const { data: u } = await supabase.auth.getUser();
@@ -311,11 +329,37 @@ export default function ProposalsTab() {
       ? await db.from("commercial_proposals").update(payload).eq("id", id).select().single()
       : await db.from("commercial_proposals").insert({ ...payload, created_by: u.user?.id }).select().single();
     setSaving(false);
-    if (res.error) return toast.error("Enregistrement impossible");
+    if (res.error) { toast.error("Enregistrement impossible"); return; }
     toast.success("Proposition enregistrée");
     draft.clear(); // enregistré en base : le brouillon local n'a plus lieu d'exister
     setEditing(res.data as Proposal);
     load();
+    return res.data as Proposal;
+  };
+
+  const exportDocument = async (p: Proposal, type: "pdf" | "docx") => {
+    setExporting(true);
+    try { saveAs(await (type === "pdf" ? generateProposalPdf(p) : generateProposalWord(p)), proposalFilename(p, type)); }
+    catch { toast.error("Génération du document impossible"); }
+    finally { setExporting(false); }
+  };
+
+  const sendProposal = async () => {
+    if (!editing || !expectedByClient || sending) return;
+    setSending(true);
+    try {
+      const saved = await save();
+      if (!saved?.id) return;
+      const [pdf, word] = await Promise.all([generateProposalPdf(saved), generateProposalWord(saved)]);
+      const { data, error } = await supabase.functions.invoke("send-transactional-email", { body: {
+        templateName: "proposal-delivery", proposalId: saved.id, expectedByClient, message: emailMessage, idempotencyKey: sendKey,
+        documents: [{ extension: "pdf", base64: await blobToBase64(pdf) }, { extension: "docx", base64: await blobToBase64(word) }],
+      } });
+      if (error || !data?.success) throw new Error(data?.reason === "email_suppressed" ? "Ce destinataire ne peut pas recevoir ces emails." : "Envoi impossible. Vérifiez le service email et réessayez.");
+      toast.success("Email placé dans la file d’envoi");
+      setEmailOpen(false);
+    } catch (error) { toast.error(error instanceof Error ? error.message : "Envoi impossible"); }
+    finally { setSending(false); }
   };
 
   const remove = async (p: Proposal) => {
@@ -342,11 +386,16 @@ export default function ProposalsTab() {
             </Select>
           </div>
         </div>
-        {loading ? <p className="text-sm text-muted-foreground">Chargement…</p> : list.length === 0 ? (
-          <Card><CardContent className="py-10 text-center text-muted-foreground">Aucune proposition pour l'instant. Commencez avec un modèle.</CardContent></Card>
+        <div className="flex flex-wrap items-center gap-3">
+          <div className="relative flex-1 min-w-48"><Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" /><Input className="pl-9" aria-label="Rechercher une proposition" placeholder="Client, titre, contact ou email…" value={search} onChange={(event) => { setSearch(event.target.value); setPage(1); }} /></div>
+          <Select value={statusFilter} onValueChange={(value) => { setStatusFilter(value); setPage(1); }}><SelectTrigger className="w-44" aria-label="Filtrer par statut"><SelectValue /></SelectTrigger><SelectContent><SelectItem value="all">Tous les statuts</SelectItem>{Object.entries(STATUSES).map(([value, label]) => <SelectItem key={value} value={value}>{label}</SelectItem>)}</SelectContent></Select>
+          <Select value={String(pageSize)} onValueChange={(value) => { setPageSize(Number(value)); setPage(1); }}><SelectTrigger className="w-36" aria-label="Propositions par page"><SelectValue /></SelectTrigger><SelectContent>{[6, 12, 24].map((size) => <SelectItem key={size} value={String(size)}>{size} par page</SelectItem>)}</SelectContent></Select>
+        </div>
+        {loading ? <p className="text-sm text-muted-foreground">Chargement…</p> : filtered.length === 0 ? (
+          <Card><CardContent className="py-10 text-center text-muted-foreground">{list.length ? "Aucune proposition correspondant aux filtres." : "Aucune proposition pour l'instant."}</CardContent></Card>
         ) : (
           <div className="grid gap-3 md:grid-cols-2">
-            {list.map((p) => (
+            {pagination.rows.map((p) => (
               <Card key={p.id}>
                 <CardContent className="p-4 space-y-2">
                   <div className="flex justify-between gap-2">
@@ -365,6 +414,10 @@ export default function ProposalsTab() {
             ))}
           </div>
         )}
+        <nav aria-label="Pagination des propositions" className="flex flex-wrap items-center justify-between gap-3">
+          <span className="text-sm text-muted-foreground">{pagination.total} proposition(s) · Page {pagination.page} sur {pagination.pages}</span>
+          <div className="flex gap-2"><Button size="icon" variant="outline" aria-label="Page précédente" disabled={pagination.page <= 1} onClick={() => setPage(pagination.page - 1)}><ChevronLeft className="h-4 w-4" /></Button><Button size="icon" variant="outline" aria-label="Page suivante" disabled={pagination.page >= pagination.pages} onClick={() => setPage(pagination.page + 1)}><ChevronRight className="h-4 w-4" /></Button></div>
+        </nav>
       </div>
     );
   }
@@ -416,15 +469,28 @@ export default function ProposalsTab() {
           <SelectTrigger className="w-48"><Sparkles className="h-4 w-4 mr-1" /><SelectValue placeholder="Appliquer un modèle" /></SelectTrigger>
           <SelectContent>{TEMPLATES.map((t) => <SelectItem key={t.key} value={t.key}>{t.label}</SelectItem>)}</SelectContent>
         </Select>
-        <div className="ml-auto flex gap-2">
+        <div className="ml-auto flex flex-wrap gap-2">
           <Select value={e.status} onValueChange={(v) => set({ status: v })}>
             <SelectTrigger className="w-36"><SelectValue /></SelectTrigger>
             <SelectContent>{Object.entries(STATUSES).map(([k, l]) => <SelectItem key={k} value={k}>{l}</SelectItem>)}</SelectContent>
           </Select>
-          <Button variant="outline" onClick={() => window.print()}><Printer className="h-4 w-4 mr-1" />Imprimer / PDF</Button>
+          <Button variant="outline" onClick={() => window.print()}><Printer className="h-4 w-4 mr-1" />Imprimer</Button>
+          <Button variant="outline" disabled={exporting} onClick={() => exportDocument(e, "pdf")}><Download className="h-4 w-4 mr-1" />PDF</Button>
+          <Button variant="outline" disabled={exporting} onClick={() => exportDocument(e, "docx")}><Download className="h-4 w-4 mr-1" />Word</Button>
+          <Button variant="outline" disabled={saving || sending} onClick={() => { setExpectedByClient(false); setSendKey(crypto.randomUUID()); setEmailOpen(true); }}><Mail className="h-4 w-4 mr-1" />Envoyer par email</Button>
           <Button onClick={save} disabled={saving}><Save className="h-4 w-4 mr-1" />{saving ? "…" : "Enregistrer"}</Button>
         </div>
       </div>
+
+      <Dialog open={emailOpen} onOpenChange={(open) => { if (!sending) setEmailOpen(open); }}>
+        <DialogContent><DialogHeader><DialogTitle>Envoyer la proposition</DialogTitle></DialogHeader>
+          <label className="text-sm">Destinataire<Input type="email" value={e.client_email || ""} onChange={(event) => set({ client_email: event.target.value })} placeholder="Email du client" /></label>
+          <label className="text-sm">Message<Textarea rows={6} value={emailMessage} onChange={(event) => setEmailMessage(event.target.value)} maxLength={3000} /></label>
+          <p className="text-sm text-muted-foreground">PDF et Word accessibles par liens privés valables 7 jours. La proposition sera enregistrée avant l’envoi.</p>
+          <label className="flex items-start gap-2 text-sm"><Checkbox checked={expectedByClient} onCheckedChange={(value) => setExpectedByClient(value === true)} />Le client attend cette proposition à la suite de sa demande.</label>
+          <DialogFooter><Button variant="outline" disabled={sending} onClick={() => setEmailOpen(false)}>Annuler</Button><Button disabled={sending || !expectedByClient || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e.client_email || "")} onClick={sendProposal}><Mail className="h-4 w-4 mr-1" />{sending ? "Envoi…" : "Confirmer l’envoi"}</Button></DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {draft.pendingDraft && (
         <div className="flex flex-wrap items-center gap-3 rounded-lg border border-warning/40 bg-card p-3 print:hidden">
