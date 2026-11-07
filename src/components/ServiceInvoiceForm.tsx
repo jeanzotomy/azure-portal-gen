@@ -19,6 +19,8 @@ import { InvoicePDFTemplate, type InvoicePDFData, type InvoicePaymentMethodEntry
 import { generateInvoicePDFBlob, generateInvoiceDocxBlob, sanitizeName } from "@/lib/invoice-generator";
 import { saveAs } from "file-saver";
 import { useExchangeRates, GNF_MARKUP, type Currency } from "@/hooks/use-exchange-rates";
+import { useFormDraft } from "@/lib/form-draft";
+import { FormDraftRecovery } from "@/components/FormDraftRecovery";
 
 interface SClient { id: string; client_name: string; nif: string | null; rccm: string | null; address_line: string | null; city: string | null; country: string | null; phone: string | null; email: string | null; contact_person: string | null; }
 interface CatItem { id: string; name: string; description: string | null; default_unit_price: number; default_currency: Currency; default_unit: string; active: boolean; }
@@ -78,6 +80,12 @@ const PM_TYPE_LABELS: Record<PMRow["type"], string> = {
   virement: "Virement", mobile_money: "Mobile Money", especes: "Espèces", cheque: "Chèque", depot: "Dépôt", autre: "Autre",
 };
 
+interface InvoiceDraft {
+  clientId: string; assignedUserId: string; invoiceDate: string; dueDate: string; currency: Currency;
+  payment: typeof DEFAULT_PAYMENT; items: LineItem[]; discountRate: number; earlyPaymentDiscountRate: number;
+  taxRate: number; notes: string; selectedPaymentIds: string[]; outputFormat: "pdf" | "docx" | "both"; issuerRole: string | null;
+}
+
 export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId }: { open: boolean; onOpenChange: (v: boolean) => void; onSaved: () => void; editId?: string | null; }) {
   const { user } = useAuthSession();
   const { toast } = useToast();
@@ -109,12 +117,29 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
   const [previewOpen, setPreviewOpen] = useState(false);
   const [previewStatus, setPreviewStatus] = useState<"proforma" | "emise">("proforma");
   const [previewLoading, setPreviewLoading] = useState(false);
+  const [formReady, setFormReady] = useState(false);
+  const draftValue: InvoiceDraft = { clientId, assignedUserId, invoiceDate, dueDate, currency, payment, items, discountRate, earlyPaymentDiscountRate, taxRate, notes, selectedPaymentIds, outputFormat, issuerRole: issuer.role };
+  const draft = useFormDraft(`invoice:${user?.id ?? "signed-out"}:${editId ?? "new"}`, draftValue, () => false, open && formReady && !!user);
+
+  const restoreInvoiceDraft = (value: InvoiceDraft) => {
+    // Les prix restaurés sont déjà dans cette devise : ne pas les convertir à nouveau.
+    prevCurrencyRef.current = value.currency;
+    setClientId(value.clientId); setAssignedUserId(value.assignedUserId);
+    setInvoiceDate(value.invoiceDate); setDueDate(value.dueDate); setCurrency(value.currency);
+    setPayment(value.payment); setItems(value.items); setDiscountRate(value.discountRate);
+    setEarlyPaymentDiscountRate(value.earlyPaymentDiscountRate); setTaxRate(value.taxRate);
+    setNotes(value.notes); setSelectedPaymentIds(value.selectedPaymentIds); setOutputFormat(value.outputFormat);
+    setIssuer((current) => ({ ...current, role: value.issuerRole }));
+    setDirty(true);
+  };
 
   const pdfRef = useRef<HTMLDivElement>(null);
   const previewPdfRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (!open) return;
+    let cancelled = false;
+    setFormReady(false);
     void (async () => {
       const [{ data: cls }, { data: cat }, { data: pms }, { data: usrs }] = await Promise.all([
         supabase.from("service_clients").select("*").order("client_name"),
@@ -122,6 +147,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
         supabase.from("payment_methods").select("*").eq("active", true).order("position", { ascending: true }),
         (supabase as any).rpc("list_employee_assignable_users"),
       ]);
+      if (cancelled) return;
       setClients(cls ?? []);
       setCatalog(cat ?? []);
       setPaymentMethods((pms ?? []) as PMRow[]);
@@ -142,6 +168,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
         const primary = priority.find((r) => userRoles.includes(r)) ?? userRoles[0] ?? null;
         const { resolveSignatureUrl } = await import("@/lib/signatures");
         const signedSig = await resolveSignatureUrl(prof?.signature_url);
+        if (cancelled) return;
         setIssuer({
           full_name: prof?.full_name ?? null,
           role: (prof as any)?.signature_title || (primary ? (roleLabels[primary] ?? primary) : null),
@@ -154,6 +181,11 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
       if (editId) {
         const { data: inv } = await supabase.from("service_invoices").select("*").eq("id", editId).maybeSingle();
         const { data: its } = await supabase.from("service_invoice_items").select("*").eq("invoice_id", editId).order("position");
+        if (cancelled) return;
+        if (!inv) {
+          toast({ title: "Facture indisponible", description: "Impossible de charger cette facture. Réessayez en rouvrant le formulaire.", variant: "destructive" });
+          return;
+        }
         if (inv) {
           setClientId(inv.client_id);
           setAssignedUserId((inv as any).assigned_user_id ?? "");
@@ -184,13 +216,16 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
         setClientId(""); setAssignedUserId(""); setInvoiceDate(new Date().toISOString().slice(0, 10)); setDueDate("");
         setCurrency("GNF"); setDiscountRate(0); setTaxRate(18); setEarlyPaymentDiscountRate(0);
         setNotes(""); setSelectedPaymentIds([]); setPayment({ ...DEFAULT_PAYMENT });
+        setOutputFormat("both");
+        prevCurrencyRef.current = "GNF";
         setItems([{ description: "", quantity: 1, unit: "unité", unit_price: 0, discount_rate: 0, is_recurring: false, periods: 1 }]);
       }
       // Marquer comme initialisé après un tick pour ignorer les set d'initialisation
       setDirty(false);
-      requestAnimationFrame(() => { initializedRef.current = true; });
+      setFormReady(true);
+      requestAnimationFrame(() => { if (!cancelled) initializedRef.current = true; });
     })();
-    return () => { initializedRef.current = false; };
+    return () => { cancelled = true; initializedRef.current = false; setFormReady(false); };
   }, [open, user, editId]);
 
   // Détecte toute modification utilisateur → active la garde de fermeture
@@ -355,7 +390,8 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
         billing_frequency: it.is_recurring ? (it.billing_frequency ?? null) : null,
         periods: it.is_recurring ? Math.max(1, it.periods || 1) : 1,
       }));
-      await supabase.from("service_invoice_items").insert(itemsPayload);
+      const { error: itemsError } = await supabase.from("service_invoice_items").insert(itemsPayload);
+      if (itemsError) throw new Error(itemsError.message);
 
       // Generate documents according to chosen format
       // Ensure the hidden PDF template renders with the real invoice number before capture
@@ -393,6 +429,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
       const statusLabel = status === "proforma" ? "Proforma" : status === "emise" ? "Facture émise" : "Brouillon";
       toast({ title: editId ? `${statusLabel} mise à jour` : `${statusLabel} créée`, description: `${inv!.invoice_number} • ${formatLabel} • ${updates.sharepoint_url ? "Stockée dans SharePoint" : "Téléchargée localement"}` });
       setDirty(false);
+      draft.clear();
       forceCloseRef.current = true;
       onSaved();
       onOpenChange(false);
@@ -411,7 +448,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
       onOpenChange(false);
       return;
     }
-    const ok = window.confirm("Des modifications non enregistrées seront perdues. Fermer quand même ?");
+    const ok = window.confirm("Votre saisie est conservée en brouillon sur cet appareil. Fermer le formulaire ?");
     if (ok) onOpenChange(false);
   };
 
@@ -426,6 +463,10 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
         <DialogHeader>
           <DialogTitle className="text-base sm:text-lg">{editId ? "Modifier la facture" : "Nouvelle facture"}</DialogTitle>
         </DialogHeader>
+
+        {formReady && <FormDraftRecovery draft={draft} onRestore={restoreInvoiceDraft} />}
+        {!formReady && <p role="status" className="text-sm text-muted-foreground">Chargement de la facture…</p>}
+        <fieldset disabled={!formReady || saving} className="contents">
 
         <div className="grid grid-cols-12 gap-3">
           <div className="col-span-12 md:col-span-6">
@@ -778,6 +819,7 @@ export default function ServiceInvoiceForm({ open, onOpenChange, onSaved, editId
             <FileText size={14} className="mr-1" /> <span className="truncate">{saving ? "Génération..." : editId ? `Mettre à jour & Émettre` : `Valider & Émettre`}</span>
           </Button>
         </DialogFooter>
+        </fieldset>
       </DialogContent>
 
       {/* Aperçu instantané avant génération */}

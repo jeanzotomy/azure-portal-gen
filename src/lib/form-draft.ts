@@ -58,7 +58,7 @@ export interface FormDraftControls<T> {
 }
 
 /**
- * Sauvegarde `value` en continu (debounce 500 ms) sous `key`, dès qu'elle
+ * Sauvegarde `value` en continu sous `key`, dès qu'elle
  * s'écarte de l'état initial, et propose la reprise d'un brouillon antérieur.
  */
 export function useFormDraft<T>(
@@ -90,12 +90,9 @@ export function useFormDraft<T>(
 
   useEffect(() => {
     if (!enabled) return;
-    const timer = setTimeout(() => {
-      if (isEmpty(value)) return; // ne jamais écraser un brouillon par un état vide
-      if (JSON.stringify(value) === pristineRef.current) return; // pas encore modifié
-      saveDraft(key, value);
-    }, 500);
-    return () => clearTimeout(timer);
+    if (isEmpty(value)) return; // ne jamais écraser un brouillon par un état vide
+    if (JSON.stringify(value) === pristineRef.current) return; // pas encore modifié
+    saveDraft(key, value); // pas de délai : fermer aussitôt ne perd pas la dernière saisie
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key, value, enabled]);
 
@@ -112,6 +109,7 @@ export function useFormDraft<T>(
     },
     clear: () => {
       clearDraft(key);
+      pristineRef.current = JSON.stringify(valueRef.current);
       setPendingDraft(null);
     },
   };

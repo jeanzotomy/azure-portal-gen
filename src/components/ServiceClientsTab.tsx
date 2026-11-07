@@ -12,6 +12,8 @@ import { Label } from "@/components/ui/label";
 import { getDialCode, applyDialCode } from "@/lib/country-dial-codes";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { ViewModeToggle, useViewMode } from "@/components/ui/view-mode-toggle";
+import { useFormDraft } from "@/lib/form-draft";
+import { FormDraftRecovery } from "@/components/FormDraftRecovery";
 
 interface ServiceClient {
   id: string;
@@ -52,6 +54,7 @@ export default function ServiceClientsTab() {
   const [form, setForm] = useState<Partial<ServiceClient>>(empty);
   const [saving, setSaving] = useState(false);
   const [view, setView] = useViewMode("service-clients", "table");
+  const draft = useFormDraft(`client:${user?.id ?? "signed-out"}:${editing?.id ?? "new"}`, form, () => false, dialogOpen && !!user);
 
   const load = async () => {
     setLoading(true);
@@ -114,12 +117,13 @@ export default function ServiceClientsTab() {
       } else {
         toast({ title: "Client modifié"
   });
+        draft.clear();
         setDialogOpen(false);
         void load();
       }
     } else {
       const { error } = await supabase.from("service_clients").insert({
-        client_name: form.client_name!,
+        client_name: form.client_name,
         contact_person: form.contact_person || null,
         nif: form.nif || null,
         rccm: form.rccm || null,
@@ -137,6 +141,7 @@ export default function ServiceClientsTab() {
       } else {
         toast({ title: "Client ajouté"
   });
+        draft.clear();
         setDialogOpen(false);
         void load();
       }
@@ -277,6 +282,8 @@ export default function ServiceClientsTab() {
               {editing ? "Mettez à jour les informations du client." : "Renseignez les informations pour facturer ce client."}
             </p>
           </DialogHeader>
+
+          <FormDraftRecovery draft={draft} onRestore={setForm} />
 
           <div className="space-y-4 sm:space-y-6">
             <section className="space-y-3">
