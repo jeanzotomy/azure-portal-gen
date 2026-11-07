@@ -42,7 +42,7 @@ const draftKey = (id: string | undefined) => `hr_job_page_draft_${id ?? "new"}`;
 type JobDraft = { form: JobFormState; aiPrompt: string };
 const readDraft = (id: string | undefined): JobDraft | null => {
   try {
-    const raw = sessionStorage.getItem(draftKey(id));
+    const raw = localStorage.getItem(draftKey(id));
     const draft: JobDraft | null = raw ? JSON.parse(raw) : null;
     // Ignorer les brouillons vides créés avant le chargement par l'ancien comportement.
     if (id && draft && !draft.aiPrompt && Object.entries(EMPTY_JOB_FORM).every(
@@ -88,7 +88,7 @@ export default function HrJobFormPage() {
     // Ne jamais transformer le formulaire initial en brouillon avant la lecture de l'offre.
     if (loading || notFound) return;
     try {
-      sessionStorage.setItem(draftKey(id), JSON.stringify({ form, aiPrompt } satisfies JobDraft));
+      localStorage.setItem(draftKey(id), JSON.stringify({ form, aiPrompt } satisfies JobDraft));
     } catch { /* stockage indisponible : ignorer */ }
   }, [id, form, aiPrompt, loading, notFound]);
 
@@ -197,13 +197,13 @@ export default function HrJobFormPage() {
       toast({ title: "Erreur", description: res.error.message, variant: "destructive" });
       return;
     }
-    try { sessionStorage.removeItem(draftKey(id)); } catch { /* ignorer */ }
+    try { localStorage.removeItem(draftKey(id)); } catch { /* ignorer */ }
     toast({ title: isEdit ? "Offre modifiée" : "Offre créée" });
     navigate(backTo);
   };
 
   const handleCancel = () => {
-    try { sessionStorage.removeItem(draftKey(id)); } catch { /* ignorer */ }
+    try { localStorage.removeItem(draftKey(id)); } catch { /* ignorer */ }
     navigate(backTo);
   };
 

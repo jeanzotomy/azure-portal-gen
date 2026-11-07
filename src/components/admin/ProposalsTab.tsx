@@ -9,6 +9,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Check, Copy, FileText, Minus, Plus, Printer, Save, Trash2, ArrowLeft, Sparkles } from "lucide-react";
 import { toast } from "sonner";
+import { useFormDraft } from "@/lib/form-draft";
 
 export type FeatureValue = "inclus" | "non" | "option";
 export interface ProposalOption { name: string; objective: string; price_min: number; price_max: number; delay: string; }
@@ -188,6 +189,13 @@ const emptyProposal = (): Proposal => ({
   status: "brouillon", accepted_option: null, valid_until: null,
 });
 
+/** Une proposition est « vide » tant que ni client, ni résumé, ni option, ni fonctionnalité n'a été renseigné. */
+export const isEmptyProposal = (p: Proposal): boolean =>
+  !p.client_name.trim() &&
+  !(p.summary || "").trim() &&
+  p.features.length === 0 &&
+  p.options.every((o) => !o.objective.trim() && !o.delay.trim() && !o.price_min && !o.price_max);
+
 const db = supabase as any;
 
 function ValueCell({ v }: { v: FeatureValue }) {
@@ -237,6 +245,11 @@ export default function ProposalsTab() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
+  // Brouillon sauvegardé en continu : survit à une fermeture de fenêtre, un
+  // rechargement forcé ou une déconnexion automatique. Clé distincte par proposition.
+  const draftKey = editing ? `proposal:${editing.id ?? "new"}` : "proposal:none";
+  const draft = useFormDraft<Proposal>(draftKey, editing ?? emptyProposal(), isEmptyProposal, !!editing);
+
   const load = async () => {
     setLoading(true);
     const { data, error } = await db.from("commercial_proposals").select("*").order("created_at", { ascending: false });
@@ -263,6 +276,7 @@ export default function ProposalsTab() {
     setSaving(false);
     if (res.error) return toast.error("Enregistrement impossible");
     toast.success("Proposition enregistrée");
+    draft.clear(); // enregistré en base : le brouillon local n'a plus lieu d'exister
     setEditing(res.data as Proposal);
     load();
   };
@@ -365,6 +379,16 @@ export default function ProposalsTab() {
           <Button onClick={save} disabled={saving}><Save className="h-4 w-4 mr-1" />{saving ? "…" : "Enregistrer"}</Button>
         </div>
       </div>
+
+      {draft.pendingDraft && (
+        <div className="flex flex-wrap items-center gap-3 rounded-lg border border-warning/40 bg-card p-3 print:hidden">
+          <p className="flex-1 text-sm">
+            Un brouillon non enregistré du {new Date(draft.pendingDraft.savedAt).toLocaleString("fr-FR")} a été retrouvé.
+          </p>
+          <Button size="sm" variant="outline" onClick={() => { const v = draft.restore(); if (v) setEditing(v); }}>Reprendre le brouillon</Button>
+          <Button size="sm" variant="ghost" onClick={draft.discard}>Ignorer</Button>
+        </div>
+      )}
 
       <div className="grid gap-4 lg:grid-cols-2 print:hidden">
         <Card>

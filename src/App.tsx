@@ -6,6 +6,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index.tsx";
 import { AuthGuard } from "./components/AuthGuard";
+import { IdleSessionWarning } from "./components/IdleSessionWarning";
 import { ScrollToTop } from "./components/ScrollToTop";
 import { MobileBottomNav } from "./components/MobileBottomNav";
 import SiteAssistant from "./components/SiteAssistant";
@@ -66,6 +67,7 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <IdleSessionWarning />
       <BrowserRouter>
         <ScrollToTopOnNavigate />
         <Suspense fallback={null}>

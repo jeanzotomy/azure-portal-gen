@@ -38,19 +38,26 @@ const showUpdateOverlay = () => {
       <div style="margin:0 auto 16px;width:48px;height:48px;border-radius:50%;border:3px solid rgba(255,255,255,0.2);border-top-color:#00c2ff;animation:cm-spin 0.9s linear infinite;"></div>
       <h2 style="margin:0 0 8px;font-size:18px;font-weight:600;">Mise à jour en cours</h2>
       <p style="margin:0 0 4px;font-size:14px;opacity:0.9;line-height:1.5;">Une nouvelle version de l'application est disponible.</p>
-      <p style="margin:0;font-size:13px;opacity:0.7;">La page va se recharger automatiquement…</p>
+      <p style="margin:0 0 16px;font-size:13px;opacity:0.7;">Votre saisie en cours est sauvegardée : rechargez quand vous le souhaitez.</p>
+      <div style="display:flex;gap:10px;justify-content:center;">
+        <button id="__chunk_reload_now__" style="background:#00c2ff;border:none;color:#06202f;font-weight:600;padding:10px 18px;border-radius:10px;cursor:pointer;">Recharger maintenant</button>
+        <button id="__chunk_reload_later__" style="background:transparent;border:1px solid rgba(255,255,255,0.4);color:#fff;padding:10px 18px;border-radius:10px;cursor:pointer;">Plus tard</button>
+      </div>
     </div>
     <style>@keyframes cm-spin{to{transform:rotate(360deg)}}</style>
   `;
   document.body.appendChild(overlay);
+  overlay.querySelector("#__chunk_reload_now__")?.addEventListener("click", () => window.location.reload());
+  overlay.querySelector("#__chunk_reload_later__")?.addEventListener("click", () => overlay.remove());
 };
 
 const handleChunkError = (msg: string) => {
   if (!isChunkLoadError(msg)) return;
+  // Coupure réseau passagère (mobile, changement d'application) : ne rien imposer.
+  if (!navigator.onLine) return;
   if (sessionStorage.getItem(CHUNK_RELOAD_KEY)) return;
   sessionStorage.setItem(CHUNK_RELOAD_KEY, "1");
   showUpdateOverlay();
-  setTimeout(() => window.location.reload(), 1200);
 };
 
 window.addEventListener("error", (e) => handleChunkError(e?.message ?? ""));

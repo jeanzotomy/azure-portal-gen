@@ -22,7 +22,7 @@ const open = (base = "admin") => render(
 );
 
 beforeEach(() => {
-  sessionStorage.clear();
+  localStorage.clear();
   vi.clearAllMocks();
   mocks.load.mockResolvedValue({ data: job, error: null });
   mocks.update.mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) });
@@ -35,7 +35,7 @@ afterEach(cleanup);
 describe("chargement d'une offre existante", () => {
   it.each(["admin", "rh"])("charge les données avant le brouillon dans %s et conserve les champs à l'enregistrement", async (base) => {
     open(base);
-    expect(sessionStorage.getItem(key)).toBeNull();
+    expect(localStorage.getItem(key)).toBeNull();
     await waitFor(() => expect(screen.getByLabelText(/Titre du poste/)).toHaveValue(job.title));
     expect(screen.getByLabelText(/Description/, { selector: "textarea" })).toHaveValue(job.description);
     fireEvent.change(screen.getByLabelText("Date de clôture"), { target: { value: "2026-12-15" } });
@@ -47,14 +47,14 @@ describe("chargement d'une offre existante", () => {
   });
 
   it("restaure les modifications non enregistrées", async () => {
-    sessionStorage.setItem(key, JSON.stringify({ form: { ...job, title: "Titre en cours", candidates_sought: "3" }, aiPrompt: "Ton concis" }));
+    localStorage.setItem(key, JSON.stringify({ form: { ...job, title: "Titre en cours", candidates_sought: "3" }, aiPrompt: "Ton concis" }));
     open();
     await waitFor(() => expect(screen.getByLabelText(/Titre du poste/)).toHaveValue("Titre en cours"));
     expect(mocks.load).not.toHaveBeenCalled();
   });
 
   it("ignore le brouillon vide laissé par l'ancien comportement", async () => {
-    sessionStorage.setItem(key, JSON.stringify({ form: {
+    localStorage.setItem(key, JSON.stringify({ form: {
       title: "", department: "", location: "", contract_type: "CDI", description: "",
       closing_date: "", status: "brouillon", sector: "", start_date: "",
       salary_range: "", contract_duration: "", renewable: false, candidates_sought: "1",
