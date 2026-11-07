@@ -1,0 +1,2 @@
+GRANT SELECT ON public.service_catalog TO authenticated;
+CREATE POLICY "Sales staff read active catalog" ON public.service_catalog FOR SELECT TO authenticated USING (active = true AND (public.has_role(auth.uid(), 'commercial'::public.app_role) OR public.has_role(auth.uid(), 'agent'::public.app_role)));

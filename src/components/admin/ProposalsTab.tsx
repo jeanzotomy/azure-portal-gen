@@ -10,10 +10,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Check, Copy, FileText, Minus, Plus, Printer, Save, Trash2, ArrowLeft, Sparkles } from "lucide-react";
 import { toast } from "sonner";
 import { useFormDraft } from "@/lib/form-draft";
+import { calculateProposalTax, isValidProposalTax } from "@/lib/proposal-tax";
 
 export type FeatureValue = "inclus" | "non" | "option";
-export interface ProposalOption { name: string; objective: string; price_min: number; price_max: number; delay: string; }
-export interface ProposalFeature { label: string; values: FeatureValue[]; }
+export interface ProposalOption { name: string; objective: string; price_min: number; price_max: number; delay: string; tax_rate?: number; }
+export interface ProposalFeature { label: string; values: FeatureValue[]; service_id?: string; }
 export interface ProposalMilestone { label: string; percent: number; }
 export interface Proposal {
   id?: string; title: string; client_name: string; client_contact: string | null; client_email: string | null;
@@ -82,6 +83,10 @@ export const FEATURE_LIBRARY: { label: string; v: [FeatureValue, FeatureValue] }
   { label: "Journal d'audit des actions", v: ["option", "inclus"] },
   { label: "Application mobile (Android / iOS)", v: ["option", "option"] },
   { label: "API ouverte pour vos partenaires", v: ["non", "option"] },
+  { label: "Acquisition d’un nom de domaine", v: ["option", "option"] },
+  { label: "Transfert d’un nom de domaine existant", v: ["option", "option"] },
+  { label: "Souscription d’un hébergement", v: ["option", "option"] },
+  { label: "Migration d’un hébergement existant", v: ["option", "option"] },
 ];
 
 const f2 = (label: string, a: FeatureValue, b: FeatureValue): ProposalFeature => ({ label, values: [a, b] });
@@ -256,10 +261,14 @@ function DelayPicker({ value, onChange }: { value: string; onChange: (v: string)
 }
 
 interface ClientRow { id: string; client_name: string; contact_person: string | null; email: string | null; }
+interface CatalogRow { id: string; name: string; description: string | null; is_subscription: boolean; }
 
 export default function ProposalsTab() {
   const [list, setList] = useState<Proposal[]>([]);
   const [clients, setClients] = useState<ClientRow[]>([]);
+  const [catalog, setCatalog] = useState<CatalogRow[]>([]);
+  const [catalogState, setCatalogState] = useState<"loading" | "ready" | "error">("loading");
+  const [catalogSearch, setCatalogSearch] = useState("");
   const [editing, setEditing] = useState<Proposal | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -280,6 +289,11 @@ export default function ProposalsTab() {
     load();
     db.from("service_clients").select("id, client_name, contact_person, email").order("client_name")
       .then(({ data }: { data: ClientRow[] | null }) => setClients(data || []));
+    db.from("service_catalog").select("id, name, description, is_subscription").eq("active", true).order("display_order").order("name")
+      .then(({ data, error }: { data: CatalogRow[] | null; error: unknown }) => {
+        setCatalog(data || []);
+        setCatalogState(error ? "error" : "ready");
+      });
   }, []);
 
   const save = async () => {
@@ -288,6 +302,8 @@ export default function ProposalsTab() {
     if (milestonesTotal(editing.milestones) !== 100) return toast.error("Les jalons de paiement doivent totaliser 100 %");
     if (editing.options.some((o) => o.price_min < 0 || o.price_max < 0) || editing.milestones.some((m) => m.percent < 0))
       return toast.error("Les montants et les pourcentages ne peuvent pas être négatifs");
+    if (editing.options.some((o) => !isValidProposalTax(o.tax_rate)))
+      return toast.error("Le taux de taxe doit être compris entre 0 et 100 %");
     setSaving(true);
     const { id, created_at, ...payload } = editing;
     const { data: u } = await supabase.auth.getUser();
@@ -320,7 +336,7 @@ export default function ProposalsTab() {
           <p className="text-sm text-muted-foreground">Préparez des offres comparatives à plusieurs options, prêtes à imprimer ou envoyer en PDF.</p>
           <div className="flex gap-2">
             <Button variant="outline" onClick={() => setEditing(emptyProposal())}><Plus className="h-4 w-4 mr-1" />Vierge</Button>
-            <Select onValueChange={(k) => setEditing(TEMPLATES.find((t) => t.key === k)!.build())}>
+            <Select onValueChange={(k) => { const template = TEMPLATES.find((t) => t.key === k); if (template) setEditing(template.build()); }}>
               <SelectTrigger className="w-56"><Sparkles className="h-4 w-4 mr-1" /><SelectValue placeholder="Partir d'un modèle…" /></SelectTrigger>
               <SelectContent>{TEMPLATES.map((t) => <SelectItem key={t.key} value={t.key}>{t.label}</SelectItem>)}</SelectContent>
             </Select>
@@ -380,6 +396,15 @@ export default function ProposalsTab() {
       set({ features: [...e.features, { label, values: e.options.map((_, i) => base[Math.min(i, 1)]) }] });
     } else {
       set({ features: e.features.filter((f) => f.label !== label) });
+    }
+  };
+
+  const toggleCatalogService = (service: CatalogRow, checked: boolean) => {
+    if (checked) {
+      if (e.features.some((f) => f.service_id === service.id || f.label === service.name)) return;
+      set({ features: [...e.features, { label: service.name, service_id: service.id, values: e.options.map(() => "option" as FeatureValue) }] });
+    } else {
+      set({ features: e.features.filter((f) => f.service_id !== service.id && f.label !== service.name) });
     }
   };
 
@@ -466,9 +491,20 @@ export default function ProposalsTab() {
               <Input value={o.name} onChange={(x) => setOpt(i, { name: x.target.value })} />
               <Input placeholder="Objectif" value={o.objective} onChange={(x) => setOpt(i, { objective: x.target.value })} />
               <div className="grid grid-cols-2 gap-2">
-                <NonNegativeInput placeholder="Prix min GNF" value={o.price_min} onChange={(n) => setOpt(i, { price_min: n })} />
-                <NonNegativeInput placeholder="Prix max GNF" value={o.price_max} onChange={(n) => setOpt(i, { price_max: n })} />
+                <NonNegativeInput aria-label={`Prix minimum HT option ${i + 1}`} placeholder="Prix min HT GNF" value={o.price_min} onChange={(n) => setOpt(i, { price_min: n })} />
+                <NonNegativeInput aria-label={`Prix maximum HT option ${i + 1}`} placeholder="Prix max HT GNF" value={o.price_max} onChange={(n) => setOpt(i, { price_max: n })} />
               </div>
+              <label className="flex items-center gap-2 text-sm">
+                <Checkbox aria-label={`Appliquer une taxe option ${i + 1}`} checked={o.tax_rate !== undefined} onCheckedChange={(checked) => setOpt(i, { tax_rate: checked === true ? 0 : undefined })} />
+                Appliquer une taxe
+              </label>
+              {o.tax_rate !== undefined && (
+                <div className="space-y-2">
+                  <label className="text-sm" htmlFor={`tax-${i}`}>Taux de taxe (%)</label>
+                  <NonNegativeInput id={`tax-${i}`} max={100} step="0.01" placeholder="Taux à confirmer" value={o.tax_rate} onChange={(n) => setOpt(i, { tax_rate: Math.min(100, n) })} />
+                  <p className="text-sm tabular-nums font-medium">TTC : {formatGnf(calculateProposalTax(o.price_min, o.tax_rate).total)}{o.price_max > o.price_min ? ` – ${formatGnf(calculateProposalTax(o.price_max, o.tax_rate).total)}` : ""}</p>
+                </div>
+              )}
               <DelayPicker value={o.delay} onChange={(v) => setOpt(i, { delay: v })} />
               <div className="flex gap-2">
                 <Button size="sm" variant={e.accepted_option === i ? "default" : "outline"} onClick={() => set({ accepted_option: e.accepted_option === i ? null : i, status: e.accepted_option === i ? e.status : "acceptee" })}>
@@ -496,6 +532,23 @@ export default function ProposalsTab() {
                   </label>
                 );
               })}
+            </div>
+          </details>
+          <details className="rounded-lg border p-3">
+            <summary className="text-sm font-medium cursor-pointer">Services du catalogue</summary>
+            <div className="mt-3 space-y-3">
+              <Input aria-label="Rechercher un service" placeholder="Rechercher un service…" value={catalogSearch} onChange={(x) => setCatalogSearch(x.target.value)} />
+              {catalogState === "loading" ? <p className="text-sm text-muted-foreground">Chargement du catalogue…</p> : catalogState === "error" ? <p className="text-sm text-destructive">Catalogue indisponible. Réessayez en rouvrant la page.</p> : (
+                <div className="grid gap-3 md:grid-cols-2 max-h-72 overflow-y-auto">
+                  {catalog.filter((s) => `${s.name} ${s.description || ""}`.toLocaleLowerCase("fr").includes(catalogSearch.toLocaleLowerCase("fr"))).map((s) => (
+                    <label key={s.id} className="flex items-start gap-2 text-sm cursor-pointer">
+                      <Checkbox className="mt-0.5" checked={e.features.some((f) => f.service_id === s.id || f.label === s.name)} onCheckedChange={(c) => toggleCatalogService(s, c === true)} />
+                      <span><span className="font-medium">{s.name}</span>{s.is_subscription && <Badge variant="secondary" className="ml-2">Abonnement</Badge>}{s.description && <span className="block text-xs text-muted-foreground line-clamp-2">{s.description}</span>}</span>
+                    </label>
+                  ))}
+                  {!catalog.some((s) => `${s.name} ${s.description || ""}`.toLocaleLowerCase("fr").includes(catalogSearch.toLocaleLowerCase("fr"))) && <p className="text-sm text-muted-foreground">{catalog.length ? "Aucun service correspondant." : "Aucun service actif dans le catalogue."}</p>}
+                </div>
+              )}
             </div>
           </details>
           {e.features.map((f, i) => (
@@ -540,8 +593,14 @@ export default function ProposalsTab() {
                   <tr key={i} className="border-b"><td className="p-2">{f.label}</td>{f.values.map((v, k) => <td key={k} className="p-2 text-center"><ValueCell v={v} /></td>)}</tr>
                 ))}
                 <tr className="border-b"><td className="p-2 font-medium">Délai</td>{e.options.map((o, i) => <td key={i} className="p-2 text-center">{o.delay || "—"}</td>)}</tr>
-                <tr><td className="p-2 font-medium">Budget</td>{e.options.map((o, i) => (
+                <tr><td className="p-2 font-medium">Budget HT</td>{e.options.map((o, i) => (
                   <td key={i} className="p-2 text-center font-semibold tabular-nums">{o.price_max > o.price_min ? `${formatGnf(o.price_min)} – ${formatGnf(o.price_max)}` : formatGnf(o.price_min)}</td>
+                ))}</tr>
+                <tr className="border-b"><td className="p-2 font-medium">Taxe</td>{e.options.map((o, i) => (
+                  <td key={i} className="p-2 text-center tabular-nums">{o.tax_rate === undefined ? "Non appliquée" : `${o.tax_rate} % · ${formatGnf(calculateProposalTax(o.price_min, o.tax_rate).tax)}${o.price_max > o.price_min ? ` – ${formatGnf(calculateProposalTax(o.price_max, o.tax_rate).tax)}` : ""}`}</td>
+                ))}</tr>
+                <tr><td className="p-2 font-medium">Budget TTC</td>{e.options.map((o, i) => (
+                  <td key={i} className="p-2 text-center font-semibold tabular-nums">{formatGnf(calculateProposalTax(o.price_min, o.tax_rate).total)}{o.price_max > o.price_min ? ` – ${formatGnf(calculateProposalTax(o.price_max, o.tax_rate).total)}` : ""}</td>
                 ))}</tr>
               </tbody>
             </table>
